@@ -1,0 +1,26 @@
+{
+	"name": "lets-flex",
+	"version": "1.0.0",
+	"description": "",
+	"homepage": "https://github.com/lucaspasseri/lets-flex#readme",
+	"bugs": {
+		"url": "https://github.com/lucaspasseri/lets-flex/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lucaspasseri/lets-flex.git"
+	},
+	"license": "ISC",
+	"author": "",
+	"type": "module",
+	"main": "app.js",
+	"scripts": {
+		"start": "node app.js",
+		"dev": "node --env-file-if-exists=.env --watch app.js",
+		"seed": "node --env-file-if-exists=.env db/populatedb.js"
+	},
+	"dependencies": {
+		"express": "^5.2.1",
+		"pg": "^8.20.0"
+	}
+}
