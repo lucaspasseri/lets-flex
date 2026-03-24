@@ -1,7 +1,8 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import pool from "./db/pool.js";
+
+import { getAllMovementPatterns } from "./db/movement_patterns/index.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,15 +14,9 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 app.get("/", async (_req, res) => {
-	const { rows: movements } = await pool.query(
-		"SELECT * FROM movement_patterns",
-	);
-	const { rows: goals } = await pool.query("SELECT * FROM goals");
-	const { rows: step_types } = await pool.query(
-		"SELECT * FROM movement_patterns",
-	);
+	const movements = await getAllMovementPatterns();
 
-	res.render("index", { movements, goals, step_types });
+	res.render("index", { movements });
 });
 
 app.use((err, req, res, next) => {
