@@ -2,7 +2,7 @@ CREATE TABLE "users" (
   "id" integer PRIMARY KEY,
   "name" varchar,
   "date_of_birth" date,
-  "anamnese" text
+  "anamnesis" text
 );
 
 CREATE TABLE "goals" (

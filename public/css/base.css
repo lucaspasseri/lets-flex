@@ -1,0 +1,34 @@
+:root {
+	--color-bg: #0b0c10;
+	--color-surface: #16181d;
+
+	--color-primary: #e63946;
+	--color-primary-hover: #c1121f;
+
+	--color-accent: #2ec4b6;
+
+	--color-text: #e5e7eb;
+	--color-text-muted: #6b7280;
+
+	--color-border: #2a2d34;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	min-height: 100vh;
+	height: fit-content;
+	display: flex;
+}
+
+body {
+	background-color: var(--color-bg);
+}
+
+ul {
+	list-style: none;
+}

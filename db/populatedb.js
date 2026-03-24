@@ -17,10 +17,10 @@ DROP TABLE IF EXISTS "exercises" CASCADE;
 DROP TABLE IF EXISTS "movement_patterns" CASCADE;
 
 CREATE TABLE "users" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "name" varchar,
   "date_of_birth" date,
-  "anamnese" text
+  "anamnesis" text
 );
 
 CREATE TABLE "goals" (

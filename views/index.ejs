@@ -1,23 +1,23 @@
 <% 
-	 const allDataArr = movements;
+	 const allDataArr = data?.movements;
 %>
+
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
-	</head>
+	<%- include('partials/head'); %>
 	<body>
-		<% if(allDataArr?.length === 0) { %>
-			<p>(Empty)</p>
-		<% } else { %>
-			<li>
-				<% allDataArr.forEach( item => { %>
-					<p><%= item?.name %></p>
-				<% }) %>
-			</ul>
-		<%  }%>
+<%- include('partials/userForm'); %>
+		<main>	
+			<% if(data?.movements?.length === 0) { %>
+				<p>(Empty)</p>
+			<% } else { %>
+				<ul>
+					<% data.movements.forEach( item => { %>
+						<li>	<p><%= item?.name %></p></li>
+					<% }) %>
+				</ul>
+			<% } %>
+		</main>
 	</body>
 </html>

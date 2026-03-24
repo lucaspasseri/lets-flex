@@ -1,8 +1,8 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-
-import { getAllMovementPatterns } from "./db/movement_patterns/index.js";
+import indexRouter from "./routes/index.js";
+import usersRouter from "./routes/users.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,16 +12,16 @@ const port = process.env.PORT || 3000;
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
 
-app.get("/", async (_req, res) => {
-	const movements = await getAllMovementPatterns();
+app.use(express.static("public"));
 
-	res.render("index", { movements });
-});
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
 
-app.use((err, req, res, next) => {
-	console.error(err.stack); // Log the error for debugging
-	res.status(500).send("Something broke!"); // Send a generic response
+app.use((err, _req, res, _next) => {
+	console.error(err.stack);
+	res.status(500).send("Something broke!");
 });
 
 app.listen(port, () => {

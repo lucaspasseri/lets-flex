@@ -1,0 +1,8 @@
+<form class="user-form" action="/users" method="POST">
+
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name" } }); %>
+	<%- include('olaInput', { data: { label: "Date of Birth", type: "date", name: "dob" } }); %>
+	<%- include('olaInput', { data: { label: "Anamnesis", type: "text", name: "anamnesis" } }); %>
+
+	<button type="submit">Submit</button>
+</form>
