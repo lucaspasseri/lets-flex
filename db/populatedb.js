@@ -30,42 +30,45 @@ CREATE TABLE "goals" (
 
 CREATE TABLE "programs" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "user_id" integer NOT NULL,
+  "user_id" integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   "goal_id" integer,
   "name" varchar,
   "start_date" date DEFAULT CURRENT_DATE
 );
 
-CREATE TABLE "cycles" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "program_id" integer NOT NULL,
-  "name" varchar,
-  "cycle_order" integer
+CREATE TABLE cycles (
+  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  program_id INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  cycle_order INTEGER NOT NULL,
+  UNIQUE (program_id, cycle_order)
 );
 
 CREATE TABLE "sessions" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "cycle_id" integer NOT NULL,
+  "cycle_id" INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
   "name" varchar,
-  "session_order" integer,
-  "notes" text
+  "notes" text,
+	"session_order" integer NOT NULL,
+	UNIQUE (cycle_id, session_order)
 );
 
 CREATE TABLE "session_steps" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "session_id" integer NOT NULL,
+  "session_id" integer NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
   "step_type_id" integer NOT NULL,
   "exercise_variant_id" integer,
-  "step_order" integer,
   "sets" integer,
   "reps" integer,
   "load_value" float,
-  "load_unit" varchar
+  "load_unit" varchar,
+	"step_order" integer NOT NULL,
+	UNIQUE (session_id, step_order)
 );
 
 CREATE TABLE "workout_step_logs" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "session_step_id" integer NOT NULL,
+  "session_step_id" integer NOT NULL REFERENCES session_steps(id) ON DELETE CASCADE,
   "performed_at" timestamp,
   "sets" integer,
   "reps" integer,

@@ -1,6 +1,8 @@
 <% 
 	const userArr = data?.userArr; 
 	const programArr = data?.programArr; 
+	const cycleArr = data?.cycleArr;
+	const cycleOrderArr = data?.cycleOrderArr;
 %>
 
 <!doctype html>
@@ -10,12 +12,26 @@
 
 		<main>		
 			<div class="crud-container"	>
-				<%- include('partials/userForm'); %>
-				<%- include('partials/listFromArray', { data: { list: userArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+				<h1>Users</h1>
+				<div>
+					<%- include('partials/userForm'); %>
+					<%- include('partials/listFromArray', { data: { list: userArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+				</div>
 			</div>
 			<div class="crud-container">
-				<%- include('partials/programForm'); %>
-					<%- include('partials/listFromArray', { data: { list: programArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+				<h1>Programs</h1>
+				<div>
+					<%- include('partials/programForm'); %>
+					<%- include('partials/listFromArray', { data: { list: programArr, listItem: (item) => `<li>${item.user_name} + ${item.goal_name} -> ${item.name}</li>` } }); %>
+				</div>
+			</div>
+
+			<div class="crud-container">
+				<h1>cycles</h1>
+				<div>
+					<%- include('partials/cycleForm'); %>
+					<%- include('partials/listFromArray', { data: { list: cycleArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+				</div>
 			</div>
 		</main>
 	</body>

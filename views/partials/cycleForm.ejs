@@ -1,0 +1,18 @@
+<%
+const programArr = data?.programArr || [];
+const cycleArr = data?.cycleArr || [];
+const cycleOrderArr = data?.cycleOrderArr || [];
+
+console.log({programArr, cycleArr, cycleOrderArr});
+%>
+
+<form class="forms" action="/cycles" method="POST">
+
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
+
+	<%- include("select", { data: { label: "Program", name: "programId", options: programArr } }); %>
+
+	<%- include("select", { data: { label: "Cycle order", name: "cycleOrder", options: cycleOrderArr } }); %>
+
+	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>

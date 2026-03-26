@@ -3,7 +3,7 @@ const userArr = data?.userArr || [];
 const goalArr = data?.goalArr || [];
 %>
 
-<form class="user-form" action="/programs" method="POST">
+<form class="forms" action="/programs" method="POST">
 
 	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
 
