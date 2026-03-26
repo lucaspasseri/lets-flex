@@ -1,10 +1,14 @@
 <%
   const labelArr = Array.from(data?.label || "");
+	const inputId = `${data?.context || ''}_${data?.name || ''}`;
+	const autocomplete = data?.autocomplete || "off";
+	const type = data?.type || "text";
+	const required = data?.required ? "required" : "";
 %>
 
-<div class="form-control">
-  <input placeholder=" " type="<%= data?.type || 'text' %>" name="<%= data?.name || '' %>"/>
-  <label>
+<div class="input-control">
+  <input id="<%= inputId %>" placeholder=" " type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>/>
+  <label for="<%= inputId %>">
     <% labelArr.forEach((letter, index) => { %>
       <span style="--delay: <%= index * 50 %>ms;"><%= letter %></span>
     <% }) %>

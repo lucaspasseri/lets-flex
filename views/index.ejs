@@ -1,23 +1,22 @@
 <% 
-	 const allDataArr = data?.movements;
+	const userArr = data?.userArr; 
+	const programArr = data?.programArr; 
 %>
-
 
 <!doctype html>
 <html lang="en">
 	<%- include('partials/head'); %>
 	<body>
-<%- include('partials/userForm'); %>
-		<main>	
-			<% if(data?.movements?.length === 0) { %>
-				<p>(Empty)</p>
-			<% } else { %>
-				<ul>
-					<% data.movements.forEach( item => { %>
-						<li>	<p><%= item?.name %></p></li>
-					<% }) %>
-				</ul>
-			<% } %>
+
+		<main>		
+			<div class="crud-container"	>
+				<%- include('partials/userForm'); %>
+				<%- include('partials/listFromArray', { data: { list: userArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+			</div>
+			<div class="crud-container">
+				<%- include('partials/programForm'); %>
+					<%- include('partials/listFromArray', { data: { list: programArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+			</div>
 		</main>
 	</body>
 </html>

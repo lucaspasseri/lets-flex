@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
+import programsRouter from "./routes/programs.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +19,7 @@ app.use(express.static("public"));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/programs", programsRouter);
 
 app.use((err, _req, res, _next) => {
 	console.error(err.stack);

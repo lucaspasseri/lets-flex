@@ -1,0 +1,16 @@
+<%
+	const arr = data?.list || [];
+	const listItem = data?.listItem || ((item) => `<li>${item.id}</li>`);
+%>	
+
+<div class="list-from-array">
+		<% if(arr.length === 0) { %>
+				<p>(Empty)</p>
+			<% } else { %>
+				<ul>
+					<% arr.forEach( item => { %>
+						<%- listItem(item) %>
+					<% }) %>
+				</ul>
+			<% } %>
+</div>

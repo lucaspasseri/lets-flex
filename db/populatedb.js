@@ -29,22 +29,22 @@ CREATE TABLE "goals" (
 );
 
 CREATE TABLE "programs" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "user_id" integer NOT NULL,
   "goal_id" integer,
   "name" varchar,
-  "start_date" date
+  "start_date" date DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE "cycles" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "program_id" integer NOT NULL,
   "name" varchar,
   "cycle_order" integer
 );
 
 CREATE TABLE "sessions" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "cycle_id" integer NOT NULL,
   "name" varchar,
   "session_order" integer,
@@ -52,7 +52,7 @@ CREATE TABLE "sessions" (
 );
 
 CREATE TABLE "session_steps" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "session_id" integer NOT NULL,
   "step_type_id" integer NOT NULL,
   "exercise_variant_id" integer,
@@ -64,7 +64,7 @@ CREATE TABLE "session_steps" (
 );
 
 CREATE TABLE "workout_step_logs" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "session_step_id" integer NOT NULL,
   "performed_at" timestamp,
   "sets" integer,
@@ -79,7 +79,7 @@ CREATE TABLE "step_types" (
 );
 
 CREATE TABLE "exercise_variants" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "exercise_id" integer NOT NULL,
   "equipment_id" integer,
   "setup_description" text,
@@ -88,13 +88,13 @@ CREATE TABLE "exercise_variants" (
 );
 
 CREATE TABLE "equipments" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "name" varchar,
   "category" varchar
 );
 
 CREATE TABLE "exercises" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "name" varchar,
   "movement_pattern_id" integer
 );
@@ -106,14 +106,14 @@ CREATE TABLE "movement_patterns" (
 );
 
 CREATE TABLE "exercises_muscles" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "exercise_id" integer NOT NULL,
   "muscle_id" integer NOT NULL,
   "role" varchar
 );
 
 CREATE TABLE "muscles" (
-  "id" integer PRIMARY KEY,
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "common_name" varchar,
   "scientific_name" varchar,
   "body_region" varchar,

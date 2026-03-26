@@ -32,3 +32,18 @@ body {
 ul {
 	list-style: none;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	-webkit-box-shadow: 0 0 0 1000px #111 inset !important;
+	-webkit-text-fill-color: #fff !important;
+	caret-color: #fff;
+}
+
+.crud-container {
+	display: flex;
+	gap: 2rem;
+	padding: 2rem;
+}

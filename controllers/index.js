@@ -1,9 +1,15 @@
-import * as movementsPatternsDb from "../db/movement_patterns/index.js";
+import * as usersDb from "../db/users/index.js";
+import * as programsDb from "../db/programs/index.js";
+import * as goalsDb from "../db/goals/index.js";
 
 async function getIndex(_req, res) {
-	const movements = await movementsPatternsDb.getAllMovementPatterns();
+	const userArr = await usersDb.getAllUsers();
+	const programArr = await programsDb.getAllPrograms();
+	const goalArr = await goalsDb.getAllGoals();
 
-	res.render("index", { data: { movements, title: "Let's Flex!" } });
+	res.render("index", {
+		data: { title: "Let's Flex!", userArr, programArr, goalArr },
+	});
 }
 
 export { getIndex };
