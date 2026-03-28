@@ -8,8 +8,8 @@ async function getIndex(_req, res) {
 	const userArr = await usersDb.getAllUsers();
 	const goalArr = await goalsDb.getAllGoals();
 	const programArrWithoutIds = await programsDb.getAllProgramsWithoutIds();
-	const cycleArr = await cyclesDb.getAllCycles();
-	const cycleOrderArr = range(1, cycleArr.length + 2);
+	const cycleArr = await cyclesDb.getAllCyclesWithoutIds();
+	// const cycleOrderArr = range(1, cycleArr.length + 2);
 
 	// console.log({
 	// 	userArr,
@@ -19,6 +19,8 @@ async function getIndex(_req, res) {
 	// 	cycleOrderArr,
 	// });
 
+	console.log({ cycleArr });
+
 	res.render("index", {
 		data: {
 			title: "Let's Flex!",
@@ -26,7 +28,6 @@ async function getIndex(_req, res) {
 			programArr: programArrWithoutIds,
 			goalArr,
 			cycleArr,
-			cycleOrderArr,
 		},
 	});
 }

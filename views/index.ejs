@@ -2,7 +2,6 @@
 	const userArr = data?.userArr; 
 	const programArr = data?.programArr; 
 	const cycleArr = data?.cycleArr;
-	const cycleOrderArr = data?.cycleOrderArr;
 %>
 
 <!doctype html>
@@ -29,8 +28,8 @@
 			<div class="crud-container">
 				<h1>cycles</h1>
 				<div>
-					<%- include('partials/cycleForm'); %>
-					<%- include('partials/listFromArray', { data: { list: cycleArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
+					<%- include('partials/cycleForm' ); %>
+					<%- include('partials/listFromArray', { data: { list: cycleArr, listItem: (item) => `<li>${item.program_name} - ${item.cycle_name} (${item.cycle_order})</li>` } }); %>
 				</div>
 			</div>
 		</main>

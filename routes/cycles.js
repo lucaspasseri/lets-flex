@@ -1,11 +1,9 @@
 import express from "express";
-import { addNewCycle } from "../controllers/cycles.js";
+import { addNewCycle, getCyclesByProgramId } from "../controllers/cycles.js";
 
 const router = express.Router();
 
-router.get("/", (req, res) => {
-	res.send("Cycles page");
-});
+router.get("/:programId", getCyclesByProgramId);
 
 router.post("/", addNewCycle);
 

@@ -6,6 +6,14 @@ async function getAllCycles() {
 	return cycles;
 }
 
+async function getAllCyclesWithoutIds() {
+	const { rows: cycles } = await pool.query(
+		"SELECT programs.name AS program_name, cycles.name AS cycle_name, cycles.cycle_order AS cycle_order FROM cycles JOIN programs ON cycles.program_id = programs.id",
+	);
+
+	return cycles;
+}
+
 async function postNewCycle(name, programId, cycleOrder) {
 	const { rows: existProgram } = await pool.query(
 		"SELECT * FROM programs WHERE id = $1",
@@ -59,4 +67,18 @@ async function postNewCycle(name, programId, cycleOrder) {
 	}
 }
 
-export { getAllCycles, postNewCycle };
+async function getCyclesByProgramId(programId) {
+	const { rows: cycles } = await pool.query(
+		"SELECT * FROM cycles WHERE program_id = $1 ORDER BY cycle_order",
+		[programId],
+	);
+
+	return cycles;
+}
+
+export {
+	getAllCycles,
+	getAllCyclesWithoutIds,
+	postNewCycle,
+	getCyclesByProgramId,
+};

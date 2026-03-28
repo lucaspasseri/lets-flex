@@ -1,16 +1,69 @@
 <%
 const programArr = data?.programArr || [];
 const cycleArr = data?.cycleArr || [];
-const cycleOrderArr = data?.cycleOrderArr || [];
 %>
 
 <form class="forms" action="/cycles" method="POST">
 
 	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
 
-	<%- include("select", { data: { label: "Program", name: "programId", options: programArr } }); %>
+	<div class="select">
+	<label for="programSelect">Program</label>
 
-	<%- include("select", { data: { label: "Cycle order", name: "cycleOrder", options: cycleOrderArr } }); %>
+	<select id="programSelect" name="programId" required>
+		<option value="" selected hidden>Select an option...</option>
+
+		<% programArr.forEach(option => { %>
+			<option value="<%= option.id ?? option %>">
+				<%= option.name ?? option %>
+			</option>
+		<% }); %>
+	</select>
+</div>
+
+		<div class="select">
+	<label for="cycleOrderSelect">Cycle Order</label>
+
+	<select id="cycleOrderSelect" name="cycleOrder" required>
+		<option value="" selected hidden>Select an option...</option>
+	</select>
+</div>
 
 	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
 </form>
+
+<script>
+	const programSelect = document.getElementById("programSelect");
+	const cycleSelect = document.getElementById("cycleOrderSelect");
+
+	programSelect.addEventListener("change", async () => {
+  const programId = programSelect.value;
+
+  cycleSelect.innerHTML = '<option value="">Loading...</option>';
+
+  if (!programId) return;
+
+  try {
+    const res = await fetch(`/cycles/${programId}`);
+    const cycles = await res.json();
+
+		cycles.push({ cycle_order: cycles.length + 1 });
+
+    cycleSelect.innerHTML = '<option value="">Select cycle</option>';
+
+    cycles.forEach(cycle => {
+      const option = document.createElement("option");
+      option.value = cycle.cycle_order;
+      option.textContent = cycle.cycle_order;
+      cycleSelect.appendChild(option);
+    });
+
+  } catch (err) {
+    console.error(err);
+    cycleSelect.innerHTML = '<option value="">Error loading cycles</option>';
+  }
+});
+
+
+
+</script>
