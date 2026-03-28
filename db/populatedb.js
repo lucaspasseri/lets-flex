@@ -42,6 +42,7 @@ CREATE TABLE cycles (
   name TEXT NOT NULL,
   cycle_order INTEGER NOT NULL,
   UNIQUE (program_id, cycle_order)
+	DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE "sessions" (

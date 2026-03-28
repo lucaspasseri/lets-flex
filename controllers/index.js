@@ -11,13 +11,13 @@ async function getIndex(_req, res) {
 	const cycleArr = await cyclesDb.getAllCycles();
 	const cycleOrderArr = range(1, cycleArr.length + 2);
 
-	console.log({
-		userArr,
-		goalArr,
-		programArrWithoutIds,
-		cycleArr,
-		cycleOrderArr,
-	});
+	// console.log({
+	// 	userArr,
+	// 	goalArr,
+	// 	programArrWithoutIds,
+	// 	cycleArr,
+	// 	cycleOrderArr,
+	// });
 
 	res.render("index", {
 		data: {

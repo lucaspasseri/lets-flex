@@ -7,10 +7,56 @@ async function getAllCycles() {
 }
 
 async function postNewCycle(name, programId, cycleOrder) {
-	await pool.query(
-		"INSERT INTO cycles (name, program_id, cycle_order) VALUES ($1, $2, $3)",
-		[name, programId, cycleOrder],
+	const { rows: existProgram } = await pool.query(
+		"SELECT * FROM programs WHERE id = $1",
+		[programId],
 	);
+
+	if (existProgram.length === 0) {
+		throw new Error(`Program with ID ${programId} was not found`);
+	}
+
+	const { rows: howManyCycles } = await pool.query(
+		"SELECT COUNT(*) FROM cycles WHERE program_id = $1",
+		[programId],
+	);
+
+	const numberOfCycles = Number(howManyCycles[0].count);
+
+	if (Number(cycleOrder) > numberOfCycles + 1) {
+		throw new Error(`Cycle order must be at most ${numberOfCycles + 1}`);
+	}
+
+	if (Number(cycleOrder) === numberOfCycles + 1) {
+		await pool.query(
+			"INSERT INTO cycles (name, program_id, cycle_order) VALUES ($1, $2, $3)",
+			[name, programId, Number(cycleOrder)],
+		);
+		return;
+	}
+
+	const client = await pool.connect();
+	try {
+		await client.query("BEGIN");
+
+		await client.query(
+			"UPDATE cycles SET cycle_order = cycle_order + 1 WHERE program_id = $1 AND cycle_order >= $2",
+			[programId, Number(cycleOrder)],
+		);
+
+		await client.query(
+			"INSERT INTO cycles (name, program_id, cycle_order) VALUES ($1, $2, $3)",
+			[name, programId, Number(cycleOrder)],
+		);
+
+		await client.query("COMMIT");
+	} catch (err) {
+		console.log({ err });
+		await client.query("ROLLBACK");
+		throw new Error("Failed to begin transaction");
+	} finally {
+		client.release();
+	}
 }
 
 export { getAllCycles, postNewCycle };
