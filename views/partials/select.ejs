@@ -3,17 +3,21 @@ const optionsArr = data?.options || [];
 const label = data?.label || "Select option"; 
 const name = data?.name || "select-option"; 
 const id = data?.id || name;
+const required = data?.required ? "required" : "";
+const disabled = data?.disabled ? "disabled" : "";
+const getOptionLabel = data?.getOptionLabel || ((option) => option.name ?? option);
+const getOptionValue = data?.getOptionValue || ((option) => option.id ?? option);
 %>
 
 <div class="select">
 	<label for="<%= id %>"><%= label %></label>
 
-	<select id="<%= id %>" name="<%= name %>" required>
+	<select id="<%= id %>" name="<%= name %>" <%= required %> <%= disabled %> >
 		<option value="" selected hidden>Select an option...</option>
 
 		<% optionsArr.forEach(option => { %>
-			<option value="<%= option.id ?? option %>">
-				<%= option.name ?? option %>
+			<option value="<%= getOptionValue(option) %>">
+				<%= getOptionLabel(option) %>
 			</option>
 		<% }); %>
 	</select>

@@ -27,6 +27,9 @@ html {
 
 body {
 	background-color: var(--color-bg);
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
 }
 
 ul {
@@ -44,11 +47,18 @@ input:-webkit-autofill:active {
 
 .crud-container {
 	display: flex;
-	flex-direction: column;
 	gap: 2rem;
 	padding: 2rem;
+	width: fit-content;
+	height: fit-content;
+
+	h1 {
+		color: var(--color-text);
+	}
+
 	> div {
 		display: flex;
 		gap: 2em;
+		width: fit-content;
 	}
 }

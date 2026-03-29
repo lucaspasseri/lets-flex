@@ -5,6 +5,7 @@ import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
 import programsRouter from "./routes/programs.js";
 import cyclesRouter from "./routes/cycles.js";
+import sessionRouter from "./routes/sessions.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +23,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/programs", programsRouter);
 app.use("/cycles", cyclesRouter);
+app.use("/sessions", sessionRouter);
 
 app.use((err, _req, res, _next) => {
 	console.error(err.stack);

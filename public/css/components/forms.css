@@ -5,4 +5,5 @@
 	padding: 2em;
 	gap: 2em;
 	border: 2px solid var(--color-text);
+	height: fit-content;
 }

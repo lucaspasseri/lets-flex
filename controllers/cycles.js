@@ -9,12 +9,9 @@ async function addNewCycle(req, res) {
 }
 
 async function getCyclesByProgramId(req, res) {
-	console.log(1);
 	const { programId } = req.params;
-	console.log({ programId });
 
 	const cycles = await cyclesDb.getCyclesByProgramId(programId);
-	console.log({ cycles });
 
 	res.json(cycles);
 }

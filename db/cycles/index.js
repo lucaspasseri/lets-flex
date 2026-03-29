@@ -8,7 +8,7 @@ async function getAllCycles() {
 
 async function getAllCyclesWithoutIds() {
 	const { rows: cycles } = await pool.query(
-		"SELECT programs.name AS program_name, cycles.name AS cycle_name, cycles.cycle_order AS cycle_order FROM cycles JOIN programs ON cycles.program_id = programs.id",
+		"SELECT cycles.id, programs.name AS program_name, cycles.name AS cycle_name, cycles.cycle_order AS cycle_order FROM cycles JOIN programs ON cycles.program_id = programs.id",
 	);
 
 	return cycles;

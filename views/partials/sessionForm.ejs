@@ -1,0 +1,52 @@
+<%
+const cycleArr = data?.cycleArr || [];
+%>
+
+<form class="forms" action="/sessions" method="POST">
+
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
+	<%- include("select", { data: { id: "cycleSelect", label: "Cycle", name: "cycleId", required: true, options: cycleArr,
+	getOptionLabel: (cycle) => cycle.cycle_name, getOptionValue: (cycle) => cycle.id } }); %>
+
+
+	<%- include("select", { data: { id: "sessionOrderSelect", label: "Session Order", name: "sessionOrder", required: true, disabled: true, options: [], 
+	getOptionLabel: (cycle) => cycle.name, getOptionValue: (cycle) => cycle.id} }); %>
+	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>
+
+<script>
+	const cycleSelect = document.getElementById("cycleSelect");
+	const sessionOrderSelect = document.getElementById("sessionOrderSelect");
+
+	cycleSelect.addEventListener("change", async () => {
+		console.log(1)
+		sessionOrderSelect.disabled = true;
+		const cycleId = cycleSelect.value;
+
+		sessionOrderSelect.innerHTML = '<option value="">Loading...</option>';
+		sessionOrderSelect.disabled = false;
+
+		if (!cycleId) return;
+
+		try {
+			const res = await fetch(`/sessions/${cycleId}`);
+			const sessions = await res.json();
+
+			sessions.push({ session_order: sessions.length + 1 });
+
+			sessionOrderSelect.innerHTML = '<option value="">Select cycle</option>';
+
+			sessions.forEach(session => {
+				const option = document.createElement("option");
+				option.value = session.session_order;
+				option.textContent = session.session_order;
+				sessionOrderSelect.appendChild(option);
+			});
+
+		} catch (err) {
+			console.error(err);
+			sessionOrderSelect.innerHTML = '<option value="">Error loading cycles</option>';
+		}
+	});
+
+</script>

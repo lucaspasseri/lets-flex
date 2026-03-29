@@ -1,69 +1,49 @@
 <%
 const programArr = data?.programArr || [];
-const cycleArr = data?.cycleArr || [];
 %>
 
 <form class="forms" action="/cycles" method="POST">
 
 	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
+	<%- include("select", { data: { id: "programSelect", label: "Program", name: "programId", required: true, options: programArr } }); %>
 
-	<div class="select">
-	<label for="programSelect">Program</label>
 
-	<select id="programSelect" name="programId" required>
-		<option value="" selected hidden>Select an option...</option>
-
-		<% programArr.forEach(option => { %>
-			<option value="<%= option.id ?? option %>">
-				<%= option.name ?? option %>
-			</option>
-		<% }); %>
-	</select>
-</div>
-
-		<div class="select">
-	<label for="cycleOrderSelect">Cycle Order</label>
-
-	<select id="cycleOrderSelect" name="cycleOrder" required>
-		<option value="" selected hidden>Select an option...</option>
-	</select>
-</div>
-
+	<%- include("select", { data: { id: "cycleOrderSelect", label: "Cycle Order", name: "cycleOrder", required: true, disabled: true, options: [],  } }); %>
 	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
 </form>
 
 <script>
 	const programSelect = document.getElementById("programSelect");
-	const cycleSelect = document.getElementById("cycleOrderSelect");
+	const cycleOrderSelect = document.getElementById("cycleOrderSelect");
 
 	programSelect.addEventListener("change", async () => {
-  const programId = programSelect.value;
+		cycleOrderSelect.disabled = true;
+		const programId = programSelect.value;
 
-  cycleSelect.innerHTML = '<option value="">Loading...</option>';
+		cycleOrderSelect.innerHTML = '<option value="">Loading...</option>';
+		cycleOrderSelect.disabled = false;
 
-  if (!programId) return;
+		if (!programId) return;
 
-  try {
-    const res = await fetch(`/cycles/${programId}`);
-    const cycles = await res.json();
+		try {
+			const res = await fetch(`/cycles/${programId}`);
+			const cycles = await res.json();
 
-		cycles.push({ cycle_order: cycles.length + 1 });
+			cycles.push({ cycle_order: cycles.length + 1 });
 
-    cycleSelect.innerHTML = '<option value="">Select cycle</option>';
+			cycleOrderSelect.innerHTML = '<option value="">Select cycle</option>';
 
-    cycles.forEach(cycle => {
-      const option = document.createElement("option");
-      option.value = cycle.cycle_order;
-      option.textContent = cycle.cycle_order;
-      cycleSelect.appendChild(option);
-    });
+			cycles.forEach(cycle => {
+				const option = document.createElement("option");
+				option.value = cycle.cycle_order;
+				option.textContent = cycle.cycle_order;
+				cycleOrderSelect.appendChild(option);
+			});
 
-  } catch (err) {
-    console.error(err);
-    cycleSelect.innerHTML = '<option value="">Error loading cycles</option>';
-  }
-});
-
-
+		} catch (err) {
+			console.error(err);
+			cycleOrderSelect.innerHTML = '<option value="">Error loading cycles</option>';
+		}
+	});
 
 </script>

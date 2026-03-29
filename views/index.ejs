@@ -2,6 +2,7 @@
 	const userArr = data?.userArr; 
 	const programArr = data?.programArr; 
 	const cycleArr = data?.cycleArr;
+	const sessionArr = data?.sessionArr;
 %>
 
 <!doctype html>
@@ -9,7 +10,7 @@
 	<%- include('partials/head'); %>
 	<body>
 
-		<main>		
+	
 			<div class="crud-container"	>
 				<h1>Users</h1>
 				<div>
@@ -26,12 +27,20 @@
 			</div>
 
 			<div class="crud-container">
-				<h1>cycles</h1>
+				<h1><Cap></Cap>Cycles</h1>
 				<div>
 					<%- include('partials/cycleForm' ); %>
 					<%- include('partials/listFromArray', { data: { list: cycleArr, listItem: (item) => `<li>${item.program_name} - ${item.cycle_name} (${item.cycle_order})</li>` } }); %>
 				</div>
 			</div>
-		</main>
+
+				<div class="crud-container">
+				<h1>Sessions</h1>
+				<div>
+					<%- include('partials/sessionForm' ); %>
+					<%- include('partials/listFromArray', { data: { list: sessionArr, listItem: (item) => `<li>${item.cycle_name} - ${item.session_name} (${item.session_order})</li>` } }); %>
+				</div>
+			</div>
+
 	</body>
 </html>
