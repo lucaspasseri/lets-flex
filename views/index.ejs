@@ -3,6 +3,8 @@
 	const programArr = data?.programArr; 
 	const cycleArr = data?.cycleArr;
 	const sessionArr = data?.sessionArr;
+	const sessionStepArr = data?.sessionStepArr;
+	const stepTypeArr = data?.stepTypeArr;
 %>
 
 <!doctype html>
@@ -39,6 +41,14 @@
 				<div>
 					<%- include('partials/sessionForm' ); %>
 					<%- include('partials/listFromArray', { data: { list: sessionArr, listItem: (item) => `<li>${item.cycle_name} - ${item.session_name} (${item.session_order})</li>` } }); %>
+				</div>
+			</div>
+
+				<div class="crud-container">
+				<h1>Sessions steps</h1>
+				<div>
+					<%- include('partials/sessionStepForm' ); %>
+					<%- include('partials/listFromArray', { data: { list: sessionStepArr, listItem: (item) => `<li>${item.session_name} - ${item.name} - ${item.step_type_name} (${item.step_order})</li>` } }); %>
 				</div>
 			</div>
 

@@ -3,6 +3,8 @@ import * as programsDb from "../db/programs/index.js";
 import * as goalsDb from "../db/goals/index.js";
 import * as cyclesDb from "../db/cycles/index.js";
 import * as sessionsDb from "../db/sessions/index.js";
+import * as sessionStepsDb from "../db/session_steps/index.js";
+import * as stepTypesDb from "../db/step_types/index.js";
 
 async function getIndex(_req, res) {
 	const userArr = await usersDb.getAllUsers();
@@ -10,6 +12,8 @@ async function getIndex(_req, res) {
 	const programArrWithoutIds = await programsDb.getAllProgramsWithoutIds();
 	const cycleArr = await cyclesDb.getAllCyclesWithoutIds();
 	const sessionArr = await sessionsDb.getAllSessionsWithOutIds();
+	const sessionStepArr = await sessionStepsDb.getAllSessionStepsWithJoins();
+	const stepTypeArr = await stepTypesDb.getAllStepTypes();
 
 	res.render("index", {
 		data: {
@@ -19,6 +23,8 @@ async function getIndex(_req, res) {
 			goalArr,
 			cycleArr,
 			sessionArr,
+			sessionStepArr,
+			stepTypeArr,
 		},
 	});
 }

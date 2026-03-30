@@ -1,0 +1,60 @@
+<%
+const sessionArr = data?.sessionArr || [];
+const stepTypeArr = data?.stepTypeArr || [];
+%>
+
+<form class="forms" action="/session_steps" method="POST">
+
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
+
+	<%- include("select", { data: { id: "stepTypeSelect", label: "Step Type", name: "stepTypeId", required: true, options: stepTypeArr,
+	getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id } }); %>
+
+	<%- include("select", { data: { id: "sessionSelect", label: "Session", name: "sessionId", required: true, options: sessionArr,
+	getOptionLabel: (session) => session.session_name, getOptionValue: (session) => session.id } }); %>
+
+
+	<%- include("select", { data: { id: "stepOrderSelect", label: "Step Order", name: "stepOrder", required: true, options: [],
+	getOptionLabel: (stepOrder) => stepOrder, getOptionValue: (stepOrder) => stepOrder } }); %>
+
+	<%- include("select", { data: { id: "exerciseVariantSelect", label: "Exercise Variant", name: "exerciseVariantId", disabled: true, options: [],
+	getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id } }); %>
+
+	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>
+
+<script>
+	const sessionSelect = document.getElementById("sessionSelect");
+	const stepOrderSelect = document.getElementById("stepOrderSelect");
+
+	sessionSelect.addEventListener("change", async () => {
+		stepOrderSelect.disabled = true;
+		const sessionId = sessionSelect.value;
+
+		stepOrderSelect.innerHTML = '<option value="">Loading...</option>';
+		stepOrderSelect.disabled = false;
+
+		if (!sessionId) return;
+
+		try {
+			const res = await fetch(`/session_steps/${sessionId}`);
+			const sessionSteps = await res.json();
+
+			sessionSteps.push({ step_order: sessionSteps.length + 1 });
+
+			stepOrderSelect.innerHTML = '<option value="">Select step</option>';
+
+			sessionSteps.forEach(step => {
+				const option = document.createElement("option");
+				option.value = step.step_order;
+				option.textContent = step.step_order;
+				stepOrderSelect.appendChild(option);
+			});
+
+		} catch (err) {
+			console.error(err);
+			stepOrderSelect.innerHTML = '<option value="">Error loading steps</option>';
+		}
+	});
+
+</script>

@@ -52,6 +52,7 @@ CREATE TABLE "sessions" (
   "notes" text,
 	"session_order" integer NOT NULL,
 	UNIQUE (cycle_id, session_order)
+	DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE "session_steps" (
@@ -59,12 +60,14 @@ CREATE TABLE "session_steps" (
   "session_id" integer NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
   "step_type_id" integer NOT NULL,
   "exercise_variant_id" integer,
+	"name" varchar,
   "sets" integer,
   "reps" integer,
   "load_value" float,
   "load_unit" varchar,
 	"step_order" integer NOT NULL,
 	UNIQUE (session_id, step_order)
+	DEFERRABLE INITIALLY IMMEDIATE
 );
 
 CREATE TABLE "workout_step_logs" (

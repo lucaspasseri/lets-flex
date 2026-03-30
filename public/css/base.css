@@ -47,10 +47,11 @@ input:-webkit-autofill:active {
 
 .crud-container {
 	display: flex;
-	gap: 2rem;
+	gap: 2em;
 	padding: 2rem;
 	width: fit-content;
 	height: fit-content;
+	flex-direction: column;
 
 	h1 {
 		color: var(--color-text);

@@ -7,7 +7,7 @@ async function getAllSessions() {
 
 async function getSessionByCycleId(cycleId) {
 	const { rows } = await pool.query(
-		"SELECT * FROM sessions WHERE cycle_id = $1",
+		"SELECT * FROM sessions WHERE cycle_id = $1 ORDER BY session_order",
 		[cycleId],
 	);
 	return rows;
