@@ -1,0 +1,17 @@
+<%
+const exerciseArr = data?.exerciseArr || [];
+const equipmentArr = data?.equipmentArr || [];
+%>
+
+<form class="forms" action="/exercise_variants" method="POST">
+
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", required: true } }); %>
+
+	<%- include("select", { data: { id: "exerciseSelectOnExerciseVariants", label: "Exercise", name: "exerciseId", required: true, options: exerciseArr,
+	getOptionLabel: (exercise) => exercise.name, getOptionValue: (exercise) => exercise.id } }); %>
+
+	<%- include("select", { data: { id: "equipmentsSelect", label: "Equipment", name: "equipmentId", options: equipmentArr,
+	getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id } }); %>
+
+	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>

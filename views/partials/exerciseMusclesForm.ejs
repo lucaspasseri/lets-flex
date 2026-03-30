@@ -7,7 +7,7 @@ const muscleArr = data?.muscleArr || [];
 
 	<%- include('olaInput', { data: { label: "Role", type: "text", name: "role", required: true } }); %>
 
-	<%- include("select", { data: { id: "exerciseSelect", label: "Exercise", name: "exerciseId", required: true, options: exerciseArr,
+	<%- include("select", { data: { id: "exerciseSelectOnExerciseMuscles", label: "Exercise", name: "exerciseId", required: true, options: exerciseArr,
 	getOptionLabel: (exercise) => exercise.name, getOptionValue: (exercise) => exercise.id } }); %>
 
 	<%- include("select", { data: { id: "muscleSelect", label: "Muscle", name: "muscleId", required: true, options: muscleArr,

@@ -9,6 +9,7 @@ import sessionRouter from "./routes/sessions.js";
 import sessionStepsRouter from "./routes/session_steps.js";
 import exercisesRouter from "./routes/exercises.js";
 import exerciseMusclesRouter from "./routes/exercise_muscles.js";
+import exerciseVariantsRouter from "./routes/exercise_variants.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,7 @@ app.use("/sessions", sessionRouter);
 app.use("/session_steps", sessionStepsRouter);
 app.use("/exercises", exercisesRouter);
 app.use("/exercise_muscles", exerciseMusclesRouter);
+app.use("/exercise_variants", exerciseVariantsRouter);
 
 app.use((err, _req, res, _next) => {
 	console.error(err.stack);

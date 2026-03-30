@@ -9,6 +9,8 @@ import * as exercisesDb from "../db/exercises/index.js";
 import * as movementPatternsDb from "../db/movement_patterns/index.js";
 import * as musclesDb from "../db/muscles/index.js";
 import * as exerciseMusclesDb from "../db/exercise_muscles/index.js";
+import * as equipmentsDb from "../db/equipments/index.js";
+import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
 
 async function getIndex(_req, res) {
 	const userArr = await usersDb.getAllUsers();
@@ -23,6 +25,11 @@ async function getIndex(_req, res) {
 	const muscleArr = await musclesDb.getAllMuscles();
 	const exerciseMuscleArr =
 		await exerciseMusclesDb.getAllExerciseMusclesWithJoins();
+	const equipmentArr = await equipmentsDb.getAllEquipments();
+	const exerciseVariantArr =
+		await exerciseVariantsDb.getAllExerciseVariantsWithJoins();
+
+	console.log(exerciseVariantArr);
 
 	res.render("index", {
 		data: {
@@ -38,6 +45,8 @@ async function getIndex(_req, res) {
 			movementPatternArr,
 			muscleArr,
 			exerciseMuscleArr,
+			equipmentArr,
+			exerciseVariantArr,
 		},
 	});
 }

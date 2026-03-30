@@ -9,6 +9,8 @@
 	const movementPatternArr = data?.movementPatternArr;
 	const exerciseMuscleArr = data?.exerciseMuscleArr;
 	const muscleArr = data?.muscleArr;
+	const equipmentArr = data?.equipmentArr;
+	const exerciseVariantArr = data?.exerciseVariantArr;
 %>
 
 <!doctype html>
@@ -69,6 +71,14 @@
 				<div>
 					<%- include('partials/exerciseMusclesForm' ); %>
 					<%- include('partials/listFromArray', { data: { list: exerciseMuscleArr, listItem: (item) => `<li>${item.exercise_name} - ${item.muscle_common_name} (${item.role})</li>` } }); %>
+				</div>
+			</div>
+
+			<div class="crud-container">
+				<h1>Exercise variants</h1>
+				<div>
+					<%- include('partials/exerciseVariantsForm' ); %>
+					<%- include('partials/listFromArray', { data: { list: exerciseVariantArr, listItem: (item) => `<li>${item.name} (${item.exercise_name} - ${item.equipment_name})</li>` } }); %>
 				</div>
 			</div>
 

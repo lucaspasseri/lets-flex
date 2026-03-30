@@ -89,6 +89,7 @@ CREATE TABLE "exercise_variants" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "exercise_id" integer NOT NULL,
   "equipment_id" integer,
+	"name" varchar,
   "setup_description" text,
   "environment" varchar,
   "notes" text
@@ -224,6 +225,36 @@ VALUES
 	-- Calves
 	('Calves', 'Gastrocnemius', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gastrocnemius'),
 	('Soleus', 'Soleus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Soleus');
+
+	INSERT INTO equipments (name, category) VALUES
+  ('Barbell', 'free_weight'),
+  ('Dumbbell', 'free_weight'),
+  ('Kettlebell', 'free_weight'),
+
+  ('Smith Machine', 'machine'),
+  ('Cable Machine', 'machine'),
+  ('Leg Press Machine', 'machine'),
+  ('Chest Press Machine', 'machine'),
+  ('Lat Pulldown Machine', 'machine'),
+
+  ('Pull-up Bar', 'bodyweight'),
+  ('Dip Bar', 'bodyweight'),
+
+  ('Resistance Band', 'accessory'),
+  ('Suspension Trainer (TRX)', 'accessory'),
+  ('Ab Wheel', 'accessory'),
+  ('Medicine Ball', 'accessory'),
+
+  ('Treadmill', 'cardio'),
+  ('Stationary Bike', 'cardio'),
+  ('Elliptical Trainer', 'cardio'),
+  ('Rowing Machine', 'cardio'),
+
+  ('Flat Bench', 'support'),
+  ('Incline Bench', 'support'),
+  ('Decline Bench', 'support'),
+  ('Squat Rack', 'support'),
+  ('Power Rack', 'support');
 `;
 
 async function main() {
