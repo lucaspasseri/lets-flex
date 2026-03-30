@@ -1,0 +1,147 @@
+:root {
+	--pink: #ff4fd8;
+	--blue: #5fd8ff;
+	--white-pink: #ffe7fb;
+	--white-blue: #e8fbff;
+}
+
+.svg-container {
+	margin: 0;
+	display: grid;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	place-items: center;
+	border-radius: 100%;
+	background:
+		radial-gradient(
+			circle at center,
+			rgba(95, 216, 255, 0.08),
+			transparent 28%
+		),
+		radial-gradient(circle at center, rgba(255, 79, 216, 0.08), transparent 42%);
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.logo-svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.frame-path {
+	fill: rgba(255, 255, 255, 0.02);
+	stroke: url(#frameGradient);
+	stroke-width: 6;
+	filter: drop-shadow(0 0 6px rgba(255, 79, 216, 0.55))
+		drop-shadow(0 0 10px rgba(95, 216, 255, 0.45));
+	stroke-dasharray: 1600;
+	stroke-dashoffset: 1600;
+	animation:
+		draw-frame 2.4s ease forwards,
+		frame-flicker 6s 2.4s infinite;
+}
+
+.lets-text {
+	font-family: "Brush Script MT", "Segoe Script", cursive;
+	font-size: 90px;
+	font-weight: 700;
+	fill: var(--white-pink);
+	text-shadow:
+		0 0 4px #fff,
+		0 0 10px var(--pink),
+		0 0 22px rgba(255, 79, 216, 0.9),
+		0 0 44px rgba(255, 79, 216, 0.45);
+	transform: rotate(-16deg);
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: neon-flicker 6s 0.8s infinite;
+}
+
+.flex-text {
+	font-family: "Trebuchet MS", "Arial Black", Arial, sans-serif;
+	font-size: 140px;
+	font-weight: 900;
+	letter-spacing: 4px;
+	text-transform: uppercase;
+	fill: var(--white-blue);
+	text-shadow:
+		0 0 4px #fff,
+		0 0 10px var(--blue),
+		0 0 22px rgba(95, 216, 255, 0.9),
+		0 0 44px rgba(95, 216, 255, 0.45);
+	animation: neon-flicker 6s 1s infinite;
+	transform: rotate(-1deg);
+}
+
+.accent-line {
+	fill: none;
+	stroke: url(#accentGradient);
+	stroke-width: 12;
+	stroke-linecap: round;
+	filter: drop-shadow(0 0 6px rgba(255, 79, 216, 0.8))
+		drop-shadow(0 0 12px rgba(95, 216, 255, 0.7));
+	stroke-dasharray: 500;
+	stroke-dashoffset: 500;
+	animation:
+		draw-accent 1.2s ease 1.9s forwards,
+		neon-flicker 6s 3s infinite;
+}
+
+.soft-glow {
+	fill: url(#glowGradient);
+	opacity: 0.22;
+	filter: blur(18px);
+}
+
+@keyframes draw-frame {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+@keyframes draw-accent {
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+@keyframes neon-flicker {
+	0%,
+	18%,
+	22%,
+	24%,
+	56%,
+	100% {
+		opacity: 1;
+	}
+	20% {
+		opacity: 0.92;
+	}
+	21% {
+		opacity: 0.98;
+	}
+	58% {
+		opacity: 0.95;
+	}
+}
+
+@keyframes frame-flicker {
+	0%,
+	18%,
+	22%,
+	24%,
+	56%,
+	100% {
+		opacity: 0.95;
+	}
+	20% {
+		opacity: 0.82;
+	}
+	21% {
+		opacity: 0.92;
+	}
+	58% {
+		opacity: 0.88;
+	}
+}

@@ -1,0 +1,21 @@
+.header {
+	width: 100%;
+	height: fit-content;
+	padding: 1em;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 0.2em solid var(--color-border);
+}
+
+.logoContainer {
+	height: 100px;
+	width: 100px;
+}
+
+.avatar {
+	height: 50px;
+	width: 50px;
+	border-radius: 50%;
+	background-color: var(--color-text);
+}
