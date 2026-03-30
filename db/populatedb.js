@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS "goals" CASCADE;
 DROP TABLE IF EXISTS "step_types" CASCADE;
 DROP TABLE IF EXISTS "exercise_variants" CASCADE;
 DROP TABLE IF EXISTS "equipments" CASCADE;
-DROP TABLE IF EXISTS "exercises_muscles" CASCADE;
+DROP TABLE IF EXISTS "exercise_muscles" CASCADE;
 DROP TABLE IF EXISTS "muscles" CASCADE;
 DROP TABLE IF EXISTS "exercises" CASCADE;
 DROP TABLE IF EXISTS "movement_patterns" CASCADE;
@@ -112,7 +112,7 @@ CREATE TABLE "movement_patterns" (
   "notes" text
 );
 
-CREATE TABLE "exercises_muscles" (
+CREATE TABLE "exercise_muscles" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "exercise_id" integer NOT NULL,
   "muscle_id" integer NOT NULL,
@@ -149,9 +149,9 @@ ALTER TABLE "exercise_variants" ADD FOREIGN KEY ("equipment_id") REFERENCES "equ
 
 ALTER TABLE "exercises" ADD FOREIGN KEY ("movement_pattern_id") REFERENCES "movement_patterns" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "exercises_muscles" ADD FOREIGN KEY ("exercise_id") REFERENCES "exercises" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "exercise_muscles" ADD FOREIGN KEY ("exercise_id") REFERENCES "exercises" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "exercises_muscles" ADD FOREIGN KEY ("muscle_id") REFERENCES "muscles" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "exercise_muscles" ADD FOREIGN KEY ("muscle_id") REFERENCES "muscles" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 
 INSERT INTO "step_types" ("name")
@@ -183,6 +183,47 @@ VALUES
   ('mobility'),
   ('rehabilitation'),
   ('general_fitness');
+
+	INSERT INTO muscles (common_name, scientific_name, body_region, reference_url) VALUES
+	-- Chest
+	('Chest', 'Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+	('Upper Chest', 'Clavicular Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+	('Lower Chest', 'Sternal Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+
+	-- Back
+	('Upper Back', 'Trapezius', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Trapezius'),
+	('Lats', 'Latissimus Dorsi', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Latissimus_dorsi'),
+	('Mid Back', 'Rhomboids', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Rhomboid_muscles'),
+	('Lower Back', 'Erector Spinae', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Erector_spinae'),
+
+	-- Shoulders
+	('Front Delts', 'Anterior Deltoid', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+	('Side Delts', 'Lateral Deltoid', 'Upper Body - Lateral', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+	('Rear Delts', 'Posterior Deltoid', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+
+	-- Arms
+	('Biceps', 'Biceps Brachii', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Biceps'),
+	('Triceps', 'Triceps Brachii', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Triceps'),
+	('Forearms', 'Forearm Flexors and Extensors', 'Upper Body - Distal', 'https://en.wikipedia.org/wiki/Forearm'),
+
+	-- Core
+	('Abs', 'Rectus Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Rectus_abdominis'),
+	('Obliques', 'External Obliques', 'Core - Lateral', 'https://en.wikipedia.org/wiki/Abdominal_oblique_muscles'),
+	('Deep Core', 'Transverse Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Transverse_abdominal_muscle'),
+
+	-- Glutes
+	('Glutes', 'Gluteus Maximus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gluteus_maximus'),
+	('Glute Med', 'Gluteus Medius', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Gluteus_medius'),
+
+	-- Legs
+	('Quads', 'Quadriceps', 'Lower Body - Anterior', 'https://en.wikipedia.org/wiki/Quadriceps'),
+	('Hamstrings', 'Hamstrings', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Hamstring'),
+	('Adductors', 'Hip Adductors', 'Lower Body - Medial', 'https://en.wikipedia.org/wiki/Adductor_muscles_of_the_hip'),
+	('Abductors', 'Hip Abductors', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Hip_abductor'),
+
+	-- Calves
+	('Calves', 'Gastrocnemius', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gastrocnemius'),
+	('Soleus', 'Soleus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Soleus');
 `;
 
 async function main() {

@@ -1,0 +1,17 @@
+<%
+const exerciseArr = data?.exerciseArr || [];
+const muscleArr = data?.muscleArr || [];
+%>
+
+<form class="forms" action="/exercise_muscles" method="POST">
+
+	<%- include('olaInput', { data: { label: "Role", type: "text", name: "role", required: true } }); %>
+
+	<%- include("select", { data: { id: "exerciseSelect", label: "Exercise", name: "exerciseId", required: true, options: exerciseArr,
+	getOptionLabel: (exercise) => exercise.name, getOptionValue: (exercise) => exercise.id } }); %>
+
+	<%- include("select", { data: { id: "muscleSelect", label: "Muscle", name: "muscleId", required: true, options: muscleArr,
+	getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => muscle.id } }); %>
+
+	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>
