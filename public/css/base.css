@@ -59,6 +59,7 @@ input:-webkit-autofill:active {
 
 	> div {
 		display: flex;
+		flex-direction: column;
 		gap: 2em;
 		width: fit-content;
 	}

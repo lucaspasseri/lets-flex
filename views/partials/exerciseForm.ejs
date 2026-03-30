@@ -1,0 +1,13 @@
+<%
+const movementPatternArr = data?.movementPatternArr || [];
+%>
+
+<form class="forms" action="/exercises" method="POST">
+
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", autocomplete: "name", required: true } }); %>
+
+	<%- include("select", { data: { id: "movementPatternSelect", label: "Movement Pattern", name: "movementPatternId", required: true, options: movementPatternArr,
+	getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id } }); %>
+
+	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>

@@ -5,6 +5,8 @@ import * as cyclesDb from "../db/cycles/index.js";
 import * as sessionsDb from "../db/sessions/index.js";
 import * as sessionStepsDb from "../db/session_steps/index.js";
 import * as stepTypesDb from "../db/step_types/index.js";
+import * as exercisesDb from "../db/exercises/index.js";
+import * as movementPatternsDb from "../db/movement_patterns/index.js";
 
 async function getIndex(_req, res) {
 	const userArr = await usersDb.getAllUsers();
@@ -14,6 +16,8 @@ async function getIndex(_req, res) {
 	const sessionArr = await sessionsDb.getAllSessionsWithOutIds();
 	const sessionStepArr = await sessionStepsDb.getAllSessionStepsWithJoins();
 	const stepTypeArr = await stepTypesDb.getAllStepTypes();
+	const exerciseArr = await exercisesDb.getAllExercises();
+	const movementPatternArr = await movementPatternsDb.getAllMovementPatterns();
 
 	res.render("index", {
 		data: {
@@ -25,6 +29,8 @@ async function getIndex(_req, res) {
 			sessionArr,
 			sessionStepArr,
 			stepTypeArr,
+			exerciseArr,
+			movementPatternArr,
 		},
 	});
 }

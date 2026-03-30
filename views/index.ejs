@@ -5,6 +5,8 @@
 	const sessionArr = data?.sessionArr;
 	const sessionStepArr = data?.sessionStepArr;
 	const stepTypeArr = data?.stepTypeArr;
+	const exerciseArr = data?.exerciseArr;
+	const movementPatternArr = data?.movementPatternArr;
 %>
 
 <!doctype html>
@@ -36,7 +38,7 @@
 				</div>
 			</div>
 
-				<div class="crud-container">
+			<div class="crud-container">
 				<h1>Sessions</h1>
 				<div>
 					<%- include('partials/sessionForm' ); %>
@@ -44,11 +46,19 @@
 				</div>
 			</div>
 
-				<div class="crud-container">
+			<div class="crud-container">
 				<h1>Sessions steps</h1>
 				<div>
 					<%- include('partials/sessionStepForm' ); %>
 					<%- include('partials/listFromArray', { data: { list: sessionStepArr, listItem: (item) => `<li>${item.session_name} - ${item.name} - ${item.step_type_name} (${item.step_order})</li>` } }); %>
+				</div>
+			</div>
+
+			<div class="crud-container">
+				<h1>Exercises</h1>
+				<div>
+					<%- include('partials/exerciseForm' ); %>
+					<%- include('partials/listFromArray', { data: { list: exerciseArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
 				</div>
 			</div>
 
