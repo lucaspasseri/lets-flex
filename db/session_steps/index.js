@@ -1,3 +1,4 @@
+import toNullableNumber from "../../utils/toNullableNumber.js";
 import pool from "../pool.js";
 
 async function getAllSessionSteps() {
@@ -7,9 +8,11 @@ async function getAllSessionSteps() {
 
 async function getAllSessionStepsWithJoins() {
 	const { rows: sessionSteps } = await pool.query(
-		`SELECT session_steps.*, sessions.name AS session_name, step_types.name AS step_type_name 
+		`SELECT session_steps.*, sessions.name AS session_name, step_types.name AS step_type_name, exercise_variants.name AS exercise_variant_name 
 		FROM session_steps JOIN sessions ON session_steps.session_id = sessions.id 
-		JOIN step_types ON session_steps.step_type_id = step_types.id`,
+		JOIN step_types ON session_steps.step_type_id = step_types.id
+		JOIN exercise_variants ON session_steps.exercise_variant_id = exercise_variants.id
+		`,
 	);
 
 	return sessionSteps;
@@ -23,7 +26,13 @@ async function getSessionStepsBySessionId(sessionId) {
 	return rows;
 }
 
-async function postNewSessionStep(sessionId, stepTypeId, stepOrder, name) {
+async function postNewSessionStep(
+	sessionId,
+	stepTypeId,
+	stepOrder,
+	name,
+	exerciseVariantId,
+) {
 	const { rows: existSession } = await pool.query(
 		"SELECT COUNT(*) FROM sessions WHERE id = $1",
 		[sessionId],
@@ -46,8 +55,14 @@ async function postNewSessionStep(sessionId, stepTypeId, stepOrder, name) {
 
 	if (Number(stepOrder) === numberOfSteps + 1) {
 		await pool.query(
-			"INSERT INTO session_steps (session_id, step_type_id, step_order, name) VALUES ($1, $2, $3, $4)",
-			[sessionId, stepTypeId, Number(stepOrder), name],
+			"INSERT INTO session_steps (session_id, step_type_id, step_order, name, exercise_variant_id) VALUES ($1, $2, $3, $4, $5)",
+			[
+				sessionId,
+				stepTypeId,
+				Number(stepOrder),
+				name,
+				toNullableNumber(exerciseVariantId),
+			],
 		);
 		return;
 	}
@@ -62,8 +77,14 @@ async function postNewSessionStep(sessionId, stepTypeId, stepOrder, name) {
 		);
 
 		await client.query(
-			"INSERT INTO session_steps (session_id, step_type_id, step_order, name) VALUES ($1, $2, $3, $4)",
-			[sessionId, stepTypeId, Number(stepOrder), name],
+			"INSERT INTO session_steps (session_id, step_type_id, step_order, name, exercise_variant_id) VALUES ($1, $2, $3, $4, $5)",
+			[
+				sessionId,
+				stepTypeId,
+				Number(stepOrder),
+				name,
+				toNullableNumber(exerciseVariantId),
+			],
 		);
 
 		await client.query("COMMIT");

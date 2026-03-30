@@ -1,6 +1,7 @@
 <%
 const sessionArr = data?.sessionArr || [];
 const stepTypeArr = data?.stepTypeArr || [];
+const exerciseVariantArr = data?.exerciseVariantArr || [];
 %>
 
 <form class="forms" action="/session_steps" method="POST">
@@ -17,7 +18,7 @@ const stepTypeArr = data?.stepTypeArr || [];
 	<%- include("select", { data: { id: "stepOrderSelect", label: "Step Order", name: "stepOrder", required: true, options: [],
 	getOptionLabel: (stepOrder) => stepOrder, getOptionValue: (stepOrder) => stepOrder } }); %>
 
-	<%- include("select", { data: { id: "exerciseVariantSelect", label: "Exercise Variant", name: "exerciseVariantId", disabled: true, options: [],
+	<%- include("select", { data: { id: "exerciseVariantSelect", label: "Exercise Variant", name: "exerciseVariantId", required: true, options: exerciseVariantArr,
 	getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id } }); %>
 
 	<%- include("simpleButton", { data: { text: "Submit", type: "submit" } }); %>

@@ -54,7 +54,7 @@
 				<h1>Sessions steps</h1>
 				<div>
 					<%- include('partials/sessionStepForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: sessionStepArr, listItem: (item) => `<li>${item.session_name} - ${item.name} - ${item.step_type_name} (${item.step_order})</li>` } }); %>
+					<%- include('partials/listFromArray', { data: { list: sessionStepArr, listItem: (item) => `<li>${item.session_name} - ${item.name} - ${item.step_type_name} - ${item.exercise_variant_name} (${item.step_order})</li>` } }); %>
 				</div>
 			</div>
 

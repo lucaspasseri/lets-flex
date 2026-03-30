@@ -29,8 +29,6 @@ async function getIndex(_req, res) {
 	const exerciseVariantArr =
 		await exerciseVariantsDb.getAllExerciseVariantsWithJoins();
 
-	console.log(exerciseVariantArr);
-
 	res.render("index", {
 		data: {
 			title: "Let's Flex!",

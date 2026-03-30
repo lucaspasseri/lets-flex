@@ -10,13 +10,15 @@ async function getSessionStepsById(req, res) {
 }
 
 async function addNewSessionStep(req, res) {
-	const { name, sessionId, stepTypeId, stepOrder } = req.body;
+	const { name, sessionId, stepTypeId, stepOrder, exerciseVariantId } =
+		req.body;
 
 	await sessionStepsDb.postNewSessionStep(
 		sessionId,
 		stepTypeId,
 		stepOrder,
 		name,
+		exerciseVariantId,
 	);
 
 	res.redirect("/");
