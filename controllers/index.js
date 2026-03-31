@@ -45,6 +45,7 @@ async function getIndex(_req, res) {
 			exerciseMuscleArr,
 			equipmentArr,
 			exerciseVariantArr,
+			path: "/",
 		},
 	});
 }

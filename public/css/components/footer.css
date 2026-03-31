@@ -1,0 +1,35 @@
+.footer {
+	border-top: 0.2em solid var(--color-border);
+	background-color: var(--color-surface);
+	padding: 2em 1em;
+	width: 100%;
+	height: fit-content;
+	margin-top: auto;
+	box-shadow: var(--box-shadow-footer);
+	view-transition-name: bottom-nav;
+
+	nav {
+		display: flex;
+		width: 100%;
+		justify-content: center;
+	}
+
+	ul {
+		display: flex;
+		width: 400px;
+		justify-content: space-between;
+
+		li {
+			a {
+				color: var(--color-text);
+				text-decoration: none;
+				font-weight: 500;
+				transition: color 0.3s;
+
+				&:hover {
+					color: var(--color-primary);
+				}
+			}
+		}
+	}
+}

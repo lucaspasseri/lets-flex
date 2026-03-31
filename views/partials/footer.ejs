@@ -1,0 +1,19 @@
+<% const path = data?.path; %>
+
+<footer class="footer">
+	<nav class="footer-nav">
+		<ul>
+			<li class="<%= path === '/' ? 'footer-tab-indicator' : '' %>">
+				<a href="/">Dashboard</a>
+			</li>
+
+			<li class="<%= path === '/programs' ? 'footer-tab-indicator' : '' %>">
+				<a href="/programs">Programs</a>
+			</li>
+
+			<li class="<%= path === '/profile' ? 'footer-tab-indicator' : '' %>">
+				<a href="/profile">Profile</a>
+			</li>
+		</ul>
+	</nav>
+</footer>
