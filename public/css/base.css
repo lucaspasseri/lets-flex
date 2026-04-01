@@ -61,7 +61,7 @@ input:-webkit-autofill:active {
 
 main {
 	color: var(--color-text);
-	padding: 1em;
+	padding: 3em 1em 1em;
 	view-transition-name: page-content;
 }
 

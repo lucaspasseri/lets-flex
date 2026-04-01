@@ -1,0 +1,13 @@
+.profile {
+	> div {
+		h1 {
+			margin-bottom: 0.5em;
+		}
+
+		p {
+			color: var(--color-text-muted);
+		}
+
+		margin-bottom: 4em;
+	}
+}

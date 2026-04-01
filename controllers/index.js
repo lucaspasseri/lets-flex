@@ -29,6 +29,11 @@ async function getIndex(_req, res) {
 	const exerciseVariantArr =
 		await exerciseVariantsDb.getAllExerciseVariantsWithJoins();
 
+	if (userArr.length === 0) {
+		res.redirect("/profile");
+		return;
+	}
+
 	res.render("index", {
 		data: {
 			title: "Let's Flex!",
