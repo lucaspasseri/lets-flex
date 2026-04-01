@@ -3,16 +3,40 @@
 <footer class="footer">
 	<nav class="footer-nav">
 		<ul>
-			<li class="<%= path === '/' ? 'footer-tab-indicator' : '' %>">
-				<a href="/">Dashboard</a>
+			<li>
+				<a href="/">
+					<span class="<%= path === '/' ? 'footer-label' : '' %>"
+						>Dashboard</span
+					>
+					<span
+						class="<%= path === '/' ? 'footer-indicator' : '' %>"
+						aria-hidden="true"
+					></span>
+				</a>
 			</li>
 
-			<li class="<%= path === '/programs' ? 'footer-tab-indicator' : '' %>">
-				<a href="/programs">Programs</a>
+			<li>
+				<a href="/programs">
+					<span class="<%= path === '/programs' ? 'footer-label' : '' %>"
+						>Programs</span
+					>
+					<span
+						class="<%= path === '/programs' ? 'footer-indicator' : '' %>"
+						aria-hidden="true"
+					></span>
+				</a>
 			</li>
 
-			<li class="<%= path === '/profile' ? 'footer-tab-indicator' : '' %>">
-				<a href="/profile">Profile</a>
+			<li>
+				<a href="/profile">
+					<span class="<%= path === '/profile' ? 'footer-label' : '' %>"
+						>Profile</span
+					>
+					<span
+						class="<%= path === '/profile' ? 'footer-indicator' : '' %>"
+						aria-hidden="true"
+					></span>
+				</a>
 			</li>
 		</ul>
 	</nav>

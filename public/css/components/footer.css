@@ -6,13 +6,6 @@
 	height: fit-content;
 	margin-top: auto;
 	box-shadow: var(--box-shadow-footer);
-	view-transition-name: bottom-nav;
-
-	nav {
-		display: flex;
-		width: 100%;
-		justify-content: center;
-	}
 
 	ul {
 		display: flex;
