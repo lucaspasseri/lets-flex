@@ -1,6 +1,11 @@
+<%
+console.log({currentUser})
+%>
+
 <header class="header">
 	<div class="logoContainer"><%- include('logo'); %></div>
 	<div>
 		<div class="avatar"></div>
+		<div class="avatar-name"><%= currentUser === null ? "(empty)" : currentUser.name %></div>
 	</div>
 </header>

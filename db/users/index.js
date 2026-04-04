@@ -13,4 +13,24 @@ async function postNewUser(name, dob, anamnesis) {
 	);
 }
 
-export { getAllUsers, postNewUser };
+async function verifyUserExistence(userId) {
+	const { rows: userExistence } = await pool.query(
+		"SELECT COUNT(*) FROM users WHERE id = $1",
+		[Number(userId)],
+	);
+
+	return userExistence.length > 0;
+}
+
+async function getUserById(userId) {
+	const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [
+		Number(userId),
+	]);
+
+	console.log({ rows });
+	const currentUser = rows[0];
+
+	return currentUser;
+}
+
+export { getAllUsers, postNewUser, verifyUserExistence, getUserById };

@@ -1,15 +1,9 @@
 import { Router } from "express";
+import { getCurrentUser } from "../middlewares/getCurrentUser.js";
+import { renderProfilePage } from "../controllers/profile.js";
 
 const router = Router();
 
-// controller?
-router.get("/", (_req, res) => {
-	res.render("profile", {
-		data: {
-			title: "Let's Flex!",
-			path: "/profile",
-		},
-	});
-});
+router.get("/", getCurrentUser, renderProfilePage);
 
 export default router;

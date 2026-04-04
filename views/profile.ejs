@@ -1,6 +1,10 @@
+<%
+console.log(1)
+const userArr = data?.userArr || [];
+console.log({userArr})
+%>
+<%
 
-
-		<%
 const getMainContent = () => {
 	return `
 			<main class="profile">
@@ -8,12 +12,13 @@ const getMainContent = () => {
 					<h1>ATHLETE<br>INITIALIZATION</h1>
 					<p>Enter precise baseline metric to calibrate the performance engine. Accuracy is required for optimal load calculation and volume prescription.</p>
 				</div>
-				${include("partialsOld/userForm")}
+				${include("partials/setUserForm")}
+				${include("partialsOld/newUserForm")}
 			</main>
 		`
-}
+	}
 %>
 
-<%- include('partials/pageShell',
-{slots: {
-		main: getMainContent(), }}) %>
+<%- 
+include('partials/pageShell', {slots: { main: getMainContent() }}) 
+%>

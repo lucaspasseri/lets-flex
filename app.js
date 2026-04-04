@@ -11,6 +11,7 @@ import exercisesRouter from "./routes/exercises.js";
 import exerciseMusclesRouter from "./routes/exercise_muscles.js";
 import exerciseVariantsRouter from "./routes/exercise_variants.js";
 import profileRouter from "./routes/profile.js";
+import session from "express-session";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,8 +21,15 @@ const port = process.env.PORT || 3000;
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.urlencoded({ extended: true }));
 
+app.use(
+	session({
+		secret: "your-secret-key",
+		resave: false,
+		saveUninitialized: false,
+	}),
+);
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.use("/", indexRouter);

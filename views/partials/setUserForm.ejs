@@ -1,0 +1,9 @@
+<%
+const userArr = data?.userArr || [];
+%>
+
+<form class="forms" action="/users/set-user" method="POST">
+	<%- include("../partialsOld/select", { data: { label: "user", name: "userId", options: userArr, required: true } })	%>
+
+	<%- include("../partialsOld/simpleButton", { data: { text: "Submit", type: "submit" } }); %>
+</form>
