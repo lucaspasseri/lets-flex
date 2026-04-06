@@ -1,11 +1,11 @@
-<%
-console.log({currentUser})
-%>
+<% const username = locals?.currentUser ? currentUser.name : "Guest" %>
 
 <header class="header">
 	<div class="logoContainer"><%- include('logo'); %></div>
 	<div>
 		<div class="avatar"></div>
-		<div class="avatar-name"><%= currentUser === null ? "(empty)" : currentUser.name %></div>
+		<div class="avatar-name">
+			<p><%= username %></p>
+		</div>
 	</div>
 </header>

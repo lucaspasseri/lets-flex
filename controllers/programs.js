@@ -10,10 +10,7 @@ async function addNewProgram(req, res) {
 
 async function renderProgramsPage(req, res) {
 	res.render("programs", {
-		data: {
-			title: "Let's Flex!",
-			path: "/programs",
-		},
+		title: "Let's Flex!",
 	});
 }
 

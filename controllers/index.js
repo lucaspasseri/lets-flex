@@ -35,23 +35,20 @@ async function getIndex(_req, res) {
 	}
 
 	res.render("index", {
-		data: {
-			title: "Let's Flex!",
-			userArr,
-			programArr: programArrWithoutIds,
-			goalArr,
-			cycleArr,
-			sessionArr,
-			sessionStepArr,
-			stepTypeArr,
-			exerciseArr,
-			movementPatternArr,
-			muscleArr,
-			exerciseMuscleArr,
-			equipmentArr,
-			exerciseVariantArr,
-			path: "/",
-		},
+		title: "Let's Flex!",
+		userArr,
+		programArr: programArrWithoutIds,
+		goalArr,
+		cycleArr,
+		sessionArr,
+		sessionStepArr,
+		stepTypeArr,
+		exerciseArr,
+		movementPatternArr,
+		muscleArr,
+		exerciseMuscleArr,
+		equipmentArr,
+		exerciseVariantArr,
 	});
 }
 

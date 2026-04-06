@@ -27,7 +27,6 @@ async function getUserById(userId) {
 		Number(userId),
 	]);
 
-	console.log({ rows });
 	const currentUser = rows[0];
 
 	return currentUser;

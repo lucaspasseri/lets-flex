@@ -1,4 +1,5 @@
 .header {
+	position: fixed;
 	width: 100%;
 	height: fit-content;
 	padding: 1em;
@@ -8,6 +9,9 @@
 	border-bottom: 0.2em solid var(--color-border);
 	background-color: var(--color-surface);
 	box-shadow: var(--box-shadow-header);
+	z-index: 2;
+	top: 0;
+	left: 0;
 }
 
 .logoContainer {
@@ -20,8 +24,12 @@
 	width: 50px;
 	border-radius: 12px;
 	background-color: var(--color-text);
+	margin-left: auto;
 }
 
 .avatar-name {
 	color: var(--color-text);
+	margin-top: 0.2em;
+	display: flex;
+	justify-content: flex-end;
 }

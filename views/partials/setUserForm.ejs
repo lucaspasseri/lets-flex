@@ -1,5 +1,5 @@
 <%
-const userArr = data?.userArr || [];
+const {userArr = []} = locals;
 %>
 
 <form class="forms" action="/users/set-user" method="POST">

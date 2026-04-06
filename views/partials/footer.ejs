@@ -1,43 +1,34 @@
-<% const path = data?.path; %>
+<%
+const currentUrl = locals?.url || ""; 
+const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/profile", label: "Profile"}]
+
+const setLabel = (tab) => {
+	const active = tab.href === currentUrl ? "isActive" : "";
+	return `footer-label ${active}`
+}
+
+const setIndicator = (tab) => {
+	const active = tab.href === currentUrl ? "isActive" : "";
+	return `footer-indicator ${active}`
+}
+%>
 
 <footer class="footer">
 	<nav class="footer-nav">
 		<ul>
-			<li>
-				<a href="/">
-					<span class="<%= path === '/' ? 'footer-label' : '' %>"
-						>Dashboard</span
+			<% tabs.forEach(tab => { %>
+				<li>
+					<a href="<%= tab.href %>">
+					<span class="<%= setLabel(tab) %>"
+						><%= tab.label %></span
 					>
 					<span
-						class="<%= path === '/' ? 'footer-indicator' : '' %>"
+						class="<%= setIndicator(tab) %>"
 						aria-hidden="true"
 					></span>
 				</a>
-			</li>
-
-			<li>
-				<a href="/programs">
-					<span class="<%= path === '/programs' ? 'footer-label' : '' %>"
-						>Programs</span
-					>
-					<span
-						class="<%= path === '/programs' ? 'footer-indicator' : '' %>"
-						aria-hidden="true"
-					></span>
-				</a>
-			</li>
-
-			<li>
-				<a href="/profile">
-					<span class="<%= path === '/profile' ? 'footer-label' : '' %>"
-						>Profile</span
-					>
-					<span
-						class="<%= path === '/profile' ? 'footer-indicator' : '' %>"
-						aria-hidden="true"
-					></span>
-				</a>
-			</li>
+				</li>
+			<% }) %>
 		</ul>
 	</nav>
 </footer>
