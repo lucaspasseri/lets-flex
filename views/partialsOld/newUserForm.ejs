@@ -2,7 +2,7 @@
 
 	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "userForm", autocomplete: "name", required: true } }); %>
 	<%- include('olaInput', { data: { label: "Date of Birth", type: "date", name: "dob", context: "userForm", autocomplete: "bday" } }); %>
-	<%- include('olaInput', { data: { label: "Anamnesis", type: "text", name: "anamnesis", context: "userForm", autocomplete: "off" } }); %>
+	<%- include('olaInput', { data: { label: "Anamnesis", type: "text", name: "anamnesis", context: "userForm" } }); %>
 
 	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>

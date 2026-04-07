@@ -1,18 +1,11 @@
-<%
-const getMainContent = () => {
-	return `
-			<main class="profile">
-				<div>
-					<h1>ATHLETE<br>INITIALIZATION</h1>
-					<p>Enter precise baseline metric to calibrate the performance engine. Accuracy is required for optimal load calculation and volume prescription.</p>
-				</div>
-				${include("partials/setUserForm")}
-				${include("partialsOld/newUserForm")}
-			</main>
-		`
-	}
-%>
-
-<%- 
-include('partials/pageShell', {slots: { main: getMainContent() }}) 
-%>
+<main class="main profile">
+	<div>
+		<h1>ATHLETE<br />INITIALIZATION</h1>
+		<p>
+			Enter precise baseline metric to calibrate the performance engine.
+			Accuracy is required for optimal load calculation and volume prescription.
+		</p>
+	</div>
+	<%- include("partials/setUserForm") %> <%-
+	include("partialsOld/newUserForm")%>
+</main>

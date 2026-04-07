@@ -7,6 +7,14 @@ async function getAllUsers() {
 }
 
 async function postNewUser(name, dob, anamnesis) {
+	if (dob === "") {
+		await pool.query("INSERT INTO users (name, anamnesis) VALUES ($1, $2)", [
+			name,
+			anamnesis,
+		]);
+
+		return;
+	}
 	await pool.query(
 		"INSERT INTO users (name, date_of_birth, anamnesis) VALUES ($1, $2, $3)",
 		[name, dob, anamnesis],

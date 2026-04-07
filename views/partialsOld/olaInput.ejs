@@ -4,10 +4,15 @@
 	const autocomplete = data?.autocomplete || "off";
 	const type = data?.type || "text";
 	const required = data?.required ? "required" : "";
+	const min = data?.min ? data.min : "";
+	const max = data?.max ? data.max : "";
+	const step = data?.step ? data.step : "";
 %>
 
 <div class="input-control">
-  <input id="<%= inputId %>" placeholder=" " type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>/>
+  <input id="<%= inputId %>" placeholder=" " type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
+		min="<%= min %>" max="<%= max %>" step="<%= step %>"
+	/>
   <label for="<%= inputId %>">
     <% labelArr.forEach((letter, index) => { %>
       <span style="--delay: <%= index * 50 %>ms;"><%= letter %></span>

@@ -20,8 +20,10 @@
 		"seed": "node --env-file-if-exists=.env db/populatedb.js"
 	},
 	"dependencies": {
+		"date-fns": "^4.1.0",
 		"ejs": "^5.0.1",
 		"express": "^5.2.1",
+		"express-ejs-layouts": "^2.5.1",
 		"express-session": "^1.19.0",
 		"pg": "^8.20.0"
 	}

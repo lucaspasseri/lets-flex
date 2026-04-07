@@ -14,11 +14,41 @@ async function getAllProgramsWithoutIds() {
 	return programs;
 }
 
-async function postNewProgram(name, userId, goalId) {
+async function postNewProgram(
+	name,
+	userId,
+	goalId,
+	startDate,
+	numberOfCycles,
+	cycleSize,
+) {
+	if (startDate === "") {
+		await pool.query(
+			"INSERT INTO programs (name, user_id, goal_id, number_of_cycles, cycle_size) VALUES ($1, $2, $3, $4, $5)",
+			[name, userId, goalId, numberOfCycles, cycleSize],
+		);
+
+		return;
+	}
+
 	await pool.query(
-		"INSERT INTO programs (name, user_id, goal_id) VALUES ($1, $2, $3)",
-		[name, userId, goalId],
+		"INSERT INTO programs (name, user_id, goal_id, start_date, number_of_cycles, cycle_size) VALUES ($1, $2, $3, $4, $5, $6)",
+		[name, userId, goalId, startDate, numberOfCycles, cycleSize],
 	);
 }
 
-export { getAllPrograms, postNewProgram, getAllProgramsWithoutIds };
+async function getProgramsByUserId(userId) {
+	const { rows: programs } = await pool.query(
+		"SELECT * FROM programs WHERE user_id = $1",
+		[userId],
+	);
+
+	return programs;
+}
+
+export {
+	getAllPrograms,
+	postNewProgram,
+	getAllProgramsWithoutIds,
+	getProgramsByUserId,
+};

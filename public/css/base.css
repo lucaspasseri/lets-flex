@@ -93,7 +93,7 @@ nav {
 
 ::view-transition-old(bottom-nav),
 ::view-transition-new(bottom-nav) {
-	animation-duration: 180ms;
+	animation-duration: 380ms;
 }
 
 @keyframes fade-out {

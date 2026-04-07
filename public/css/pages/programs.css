@@ -1,0 +1,36 @@
+.main.programs {
+	border: 2px solid red;
+
+	h1 {
+		margin-bottom: 1em;
+	}
+}
+
+.preview {
+	border: 2px solid purple;
+	display: grid;
+	grid-template-columns: repeat(9, 5em);
+	justify-content: center;
+	align-items: center;
+	justify-items: center;
+}
+
+.cycleBox {
+	border: 1px solid orange;
+	height: 3em;
+	width: 0.4em;
+}
+
+.dayBox {
+	border: 1px solid green;
+	height: 2em;
+	width: 2em;
+}
+
+.startingDay {
+	background-color: blue;
+}
+
+.lastDay {
+	background-color: hotpink;
+}
