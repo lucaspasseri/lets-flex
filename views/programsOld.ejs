@@ -1,0 +1,47 @@
+<%
+const currUserProgram = locals?.currUserProgram || null;
+const numberOfCycles = currUserProgram?.number_of_cycles || 0;
+const cycleSize = currUserProgram?.cycle_size || 0;
+console.log({currUserProgram, numberOfCycles, cycleSize})
+
+const weekSize = 7;
+const weekSizeArr = range(weekSize);
+
+
+const numberOfWeeks = currUserProgram ?  Math.ceil((numberOfCycles * cycleSize) / weekSize) + 2 : 0;
+const numberOfWeeksArr = range(numberOfWeeks);
+
+console.log({weekSizeArr, numberOfWeeksArr})
+
+let count = -7;
+
+const startDate = currUserProgram?.start_date;
+console.log({startDate})
+
+const lastDay = numberOfCycles * cycleSize - 1;
+console.log({lastDay})
+%>
+
+
+<main class="main programs">
+	<h1>Programs</h1>
+	
+	<% if(currUserProgram) { %>
+			<h2>ACTIVE PROGRAM:</h2>
+	<% } else { %>
+		<h2>Create your first program:</h2>
+		<%- include("partials/newProgramForm") %>
+	<% } %>
+
+	<div class="preview">
+		<% numberOfWeeksArr.forEach((week,weekIndex) => { %>
+			<div class="cycleBox"></div>
+			<% weekSizeArr.forEach((day,dayIndex) => { %>
+				<div class="dayBox <%= count === 0 ? 'startingDay' : '' %> <%= count === lastDay ? 'lastDay' : '' %> "><%= `${formatDate(addDays(startDate, count), "dd/MM")}` %></div>
+			<% count +=1; %>
+ 			<% }) %>
+			<div class="cycleBox"></div>
+		<%}) %>
+	
+	</div>
+</main>

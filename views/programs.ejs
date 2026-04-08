@@ -1,47 +1,61 @@
-<%
-const currUserProgram = locals?.currUserProgram || null;
-const numberOfCycles = currUserProgram?.number_of_cycles || 0;
-const cycleSize = currUserProgram?.cycle_size || 0;
-console.log({currUserProgram, numberOfCycles, cycleSize})
-
-const weekSize = 7;
-const weekSizeArr = range(weekSize);
-
-
-const numberOfWeeks = currUserProgram ?  Math.ceil((numberOfCycles * cycleSize) / weekSize) + 2 : 0;
-const numberOfWeeksArr = range(numberOfWeeks);
-
-console.log({weekSizeArr, numberOfWeeksArr})
-
-let count = -7;
-
-const startDate = currUserProgram?.start_date;
-console.log({startDate})
-
-const lastDay = numberOfCycles * cycleSize - 1;
-console.log({lastDay})
+<% 
+const programArr = [{name: "p1"}, {name: "p2"}, {name: "p3"}];
 %>
 
-
 <main class="main programs">
-	<h1>Programs</h1>
-	
-	<% if(currUserProgram) { %>
-			<h2>ACTIVE PROGRAM:</h2>
-	<% } else { %>
-		<h2>Create your first program:</h2>
-		<%- include("partials/newProgramForm") %>
-	<% } %>
+	<h1>CHOOSE THE ACTIVE PROGRAM</h1>
 
-	<div class="preview">
-		<% numberOfWeeksArr.forEach((week,weekIndex) => { %>
-			<div class="cycleBox"></div>
-			<% weekSizeArr.forEach((day,dayIndex) => { %>
-				<div class="dayBox <%= count === 0 ? 'startingDay' : '' %> <%= count === lastDay ? 'lastDay' : '' %> "><%= `${formatDate(addDays(startDate, count), "dd/MM")}` %></div>
-			<% count +=1; %>
- 			<% }) %>
-			<div class="cycleBox"></div>
-		<%}) %>
-	
+	<div class="program-line">
+		<ul>
+			<% programArr.forEach(program => { %>
+				<li>
+					<div class="program-card">
+						<p><%= program.name %></p>
+					</div>
+				</li>
+			<% }) %>
+		</ul>
+		<div class="create-program-modal program-card">
+			<button
+				type="button"
+				class="button"
+				data-modal-open="createProgramModal"
+			>
+				<span>+</span>
+			</button>
+		</div>
 	</div>
 </main>
+
+
+<%- contentFor("overlays") %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: "createProgramModal",
+		title: "Create program",
+		description: "Fill in the program information below.",
+		content: `
+			<form action="/programs" method="POST" class="modal-form">
+				<div class="form-row">
+					<label for="programName">Name</label>
+					<input id="programName" name="name" type="text" required />
+				</div>
+
+				<div class="form-row">
+					<label for="programStartDate">Start date</label>
+					<input id="programStartDate" name="start_date" type="date" required />
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="button button-secondary" data-modal-close>
+						Cancel
+					</button>
+					<button type="submit" class="button">
+						Save
+					</button>
+				</div>
+			</form>
+		`
+	}
+}) %>

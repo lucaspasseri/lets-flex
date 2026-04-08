@@ -1,0 +1,83 @@
+body.has-open-modal {
+	overflow: hidden;
+}
+
+.modal[hidden] {
+	display: none;
+}
+
+.modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+}
+
+.modal-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgb(0 0 0 / 0.6);
+}
+
+.modal-dialog {
+	position: relative;
+	z-index: 1;
+	width: min(100%, 32rem);
+	max-height: calc(100vh - 2rem);
+	overflow: auto;
+	background: var(--color-surface, #16181d);
+	color: var(--color-text, #e5e7eb);
+	border: 1px solid var(--color-border, #2a2d34);
+	border-radius: 1rem;
+	padding: 1rem;
+	box-shadow: 0 1.25rem 3rem rgb(0 0 0 / 0.35);
+}
+
+.modal-header,
+.modal-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.modal-header {
+	margin-bottom: 1rem;
+}
+
+.modal-body {
+	display: grid;
+	gap: 1rem;
+}
+
+.modal-footer {
+	margin-top: 1rem;
+	justify-content: flex-end;
+}
+
+.modal-title {
+	margin: 0;
+	font-size: 1.25rem;
+}
+
+.modal-description {
+	margin: 0;
+	color: var(--color-text-muted, #9ca3af);
+}
+
+.modal-close {
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+
+.modal-form,
+.form-row {
+	display: grid;
+	gap: 0.75rem;
+}

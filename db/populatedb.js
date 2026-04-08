@@ -33,9 +33,7 @@ CREATE TABLE "programs" (
   "user_id" integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   "goal_id" integer,
   "name" varchar,
-  "start_date" date DEFAULT CURRENT_DATE,
-	"number_of_cycles" integer DEFAULT 1,
-	"cycle_size" integer DEFAULT 1
+  "start_date" date DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE cycles (
