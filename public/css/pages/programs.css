@@ -35,28 +35,31 @@
 	background-color: hotpink;
 }
 
-.program-line {
+.line {
 	width: 100%;
 	display: flex;
 	border: 1px solid blue;
 	padding: 0 1em;
+	min-width: 320px;
+	overflow-x: auto;
 
 	ul {
 		display: flex;
 		gap: 1em;
+		padding-right: 1em;
 	}
 }
 
-.program-card {
-	width: 8em;
-	height: 8em;
+.card {
+	min-width: 8em;
+	min-height: 8em;
 	border: 1px solid red;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 }
 
-.create-program-modal {
+.button-container {
 	margin-left: auto;
 
 	button {

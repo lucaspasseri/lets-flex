@@ -1,30 +1,10 @@
 <% 
-const programArr = [{name: "p1"}, {name: "p2"}, {name: "p3"}];
+const programArr = locals?.currUserProgram || [];
+const modalId = "createProgramModal";
 %>
 
 <main class="main programs">
-	<h1>CHOOSE THE ACTIVE PROGRAM</h1>
-
-	<div class="program-line">
-		<ul>
-			<% programArr.forEach(program => { %>
-				<li>
-					<div class="program-card">
-						<p><%= program.name %></p>
-					</div>
-				</li>
-			<% }) %>
-		</ul>
-		<div class="create-program-modal program-card">
-			<button
-				type="button"
-				class="button"
-				data-modal-open="createProgramModal"
-			>
-				<span>+</span>
-			</button>
-		</div>
-	</div>
+	<%- include("partials/basicLine", {line: {title: "CHOOSE THE ACTIVE PROGRAM", arr: programArr, modalId }}) %>
 </main>
 
 
@@ -32,30 +12,9 @@ const programArr = [{name: "p1"}, {name: "p2"}, {name: "p3"}];
 
 <%- include("partials/basicModal", {
 	modal: {
-		id: "createProgramModal",
+		id: modalId,
 		title: "Create program",
 		description: "Fill in the program information below.",
-		content: `
-			<form action="/programs" method="POST" class="modal-form">
-				<div class="form-row">
-					<label for="programName">Name</label>
-					<input id="programName" name="name" type="text" required />
-				</div>
-
-				<div class="form-row">
-					<label for="programStartDate">Start date</label>
-					<input id="programStartDate" name="start_date" type="date" required />
-				</div>
-
-				<div class="modal-footer">
-					<button type="button" class="button button-secondary" data-modal-close>
-						Cancel
-					</button>
-					<button type="submit" class="button">
-						Save
-					</button>
-				</div>
-			</form>
-		`
+		renderContent: () => include("partials/newProgramForm")
 	}
 }) %>

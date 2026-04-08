@@ -5,31 +5,17 @@ async function addNewProgram(req, res) {
 	const { name, userId, goalId, startDate, numberOfCycles, cycleSize } =
 		req.body;
 
-	console.log({ name, userId, goalId, numberOfCycles, cycleSize });
-
-	await programsDb.postNewProgram(
-		name,
-		userId,
-		goalId,
-		startDate,
-		numberOfCycles,
-		cycleSize,
-	);
+	await programsDb.postNewProgram(name, userId, goalId, startDate);
 
 	res.redirect("/");
 }
 
 async function renderProgramsPage(_req, res) {
-	console.log({ curr: res.locals.currentUser });
-
 	const currUserProgram =
 		res.locals.currentUser &&
-		(await programsDb.getProgramsByUserId(res.locals.currentUser.id))[0];
-
-	console.log({ currUserProgram });
+		(await programsDb.getProgramsByUserId(res.locals.currentUser.id));
 
 	const goalArr = await goalsDb.getAllGoals();
-	console.log({ l: res.locals });
 
 	res.render("programs", {
 		title: "Let's Flex!",

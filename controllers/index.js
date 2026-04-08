@@ -29,9 +29,7 @@ async function getIndex(_req, res) {
 	// const exerciseVariantArr =
 	// 	await exerciseVariantsDb.getAllExerciseVariantsWithJoins();
 
-	const userData = res.locals;
-
-	console.log({ userData });
+	// const userData = res.locals;
 
 	// if (userArr.length === 0 || res.locals.currentUser === null) {
 	// 	res.redirect("/profile");

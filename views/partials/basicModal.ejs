@@ -3,7 +3,7 @@ const modal = locals?.modal || {};
 const id = modal.id || "modal";
 const title = modal.title || "Modal";
 const description = modal.description || "";
-const content = modal.content || "";
+const content = modal.renderContent || "";
 const confirmText = modal.confirmText || "";
 const cancelText = modal.cancelText || "Cancel";
 const formAction = modal.formAction || "";
@@ -47,7 +47,7 @@ const formMethod = modal.formMethod || "POST";
 				</p>
 			<% } %>
 
-			<%- content %>
+			<%- content() %>
 		</div>
 
 		<% if (confirmText) { %>
