@@ -30,6 +30,15 @@ async function postNewProgram(name, userId, goalId, startDate) {
 	);
 }
 
+async function getProgramById(programId) {
+	const { rows: programs } = await pool.query(
+		"SELECT * FROM programs WHERE id = $1",
+		[programId],
+	);
+
+	return programs?.[0];
+}
+
 async function getProgramsByUserId(userId) {
 	const { rows: programs } = await pool.query(
 		"SELECT * FROM programs WHERE user_id = $1",
@@ -39,9 +48,20 @@ async function getProgramsByUserId(userId) {
 	return programs;
 }
 
+async function verifyProgramExistence(programId) {
+	const { rows: programExistence } = await pool.query(
+		"SELECT COUNT(*) FROM programs WHERE id = $1",
+		[Number(programId)],
+	);
+
+	return programExistence.length > 0;
+}
+
 export {
 	getAllPrograms,
 	postNewProgram,
 	getAllProgramsWithoutIds,
+	getProgramById,
 	getProgramsByUserId,
+	verifyProgramExistence,
 };

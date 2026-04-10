@@ -13,6 +13,7 @@ import exerciseVariantsRouter from "./routes/exercise_variants.js";
 import profileRouter from "./routes/profile.js";
 import session from "express-session";
 import expressEjsLayouts from "express-ejs-layouts";
+import appStateRouter from "./routes/app_state.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +36,7 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(express.json());
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -46,6 +48,7 @@ app.use("/exercises", exercisesRouter);
 app.use("/exercise_muscles", exerciseMusclesRouter);
 app.use("/exercise_variants", exerciseVariantsRouter);
 app.use("/profile", profileRouter);
+app.use("/app_state", appStateRouter);
 
 app.use((err, _req, res, _next) => {
 	console.error(err.stack);

@@ -1,30 +1,67 @@
 <%
-const title = line?.title || "";
 const arr = line?.arr || [];
 const modalId = line?.modalId || "0";
+const currentItemId = line?.currentItemId || "";
+const path = line?.path || "";
+const payloadName = line?.payloadName || "";
+const destination = line?.destination || "";
 %>
 
-<div>
-	<h1><%= title %></h1>
-
-	<div class="line">
-		<ul>
-			<% arr.forEach(item => { %>
-				<li>
-					<div class="card">
-						<p><%= item.name %></p>
-					</div>
-				</li>
-			<% }) %>
-		</ul>
-		<div class="button-container card">
-			<button
-				type="button"
-				class="button"
-				data-modal-open="<%= modalId %>"
-			>
-				<span>+</span>
-			</button>
-		</div>
+<div class="basic-line" data-path="<%= path %>" data-payload-name="<%= payloadName %>" data-destination="<% destination %>">
+	<ul>
+		<% arr.forEach(item => { %>
+			<li data-item-id="<%= item.id %>" class="line-card">
+				<div>
+					<p><%= item.name %></p>
+				</div>
+				<button class="selectItemButton">
+					<% if(currentItemId === item.id){ %>
+						Active
+					<% } else { %>
+						Set active
+					<% } %>
+				</button>
+			</li>
+		<% }) %>
+	</ul>
+	<div class="line-button-container line-card">
+		<button
+			type="button"
+			class="button"
+			data-modal-open="<%= modalId %>"
+		>
+			<span>+</span>
+		</button>
 	</div>
 </div>
+
+
+<script>
+	document.addEventListener("click", async (e) => {
+		const button = e.target.closest(".selectItemButton");
+		if (!button) return;
+
+		const basicLine = button.closest(".basic-line");
+		const path = basicLine?.dataset.path;
+		const payloadName = basicLine?.dataset.payloadName;
+		const destination = basicLine?.dataset.destination;
+		if (!path) return;
+
+		const li = button.closest("[data-item-id]");
+		if (!li) return;
+
+		const itemId = li.dataset.itemId;
+
+		const res = await fetch(path, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ [`${payloadName}`]: itemId }),
+		});
+
+		if(!res.ok) return;
+
+		window.location.href = destination;
+	});
+</script>

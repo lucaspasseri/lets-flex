@@ -1,18 +1,25 @@
 <% 
 const userArr = locals?.userArr || [];
 const modalId = "createUserModal";
+const path = "/app_state/set_current_user";
+const destination = "/profile";
+const payloadName ="userId";
 %>
 
 <main class="main profile">
-	<!-- <div>
-		<h1>ATHLETE<br />INITIALIZATION</h1>
-		<p>
-			Enter precise baseline metric to calibrate the performance engine.
-			Accuracy is required for optimal load calculation and volume prescription.
-		</p>
-	</div> -->
-	<%- include("partials/basicLine", {line: {title: "CHOOSE THE ACTIVE USER", arr: userArr, modalId }}) %>
-	<%- include("partials/setUserForm" ) %>
+	<% if( userArr.length === 0){ %>
+		<div>
+			<h1>ATHLETE<br />INITIALIZATION</h1>
+			<p>
+				Enter precise baseline metric to calibrate the performance engine.
+				Accuracy is required for optimal load calculation and volume prescription.
+			</p>
+	</div>
+	<% } else { %>
+		<h1>CHOOSE THE ACTIVE USER</h1>
+	<% } %>
+
+	<%- include("partials/basicLine", {line: { arr: userArr, modalId, currentItemId: locals?.currUserId, path, payloadName, destination }}) %>
 </main>
 
 <%- contentFor("overlays") %>

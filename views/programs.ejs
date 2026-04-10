@@ -1,10 +1,24 @@
 <% 
-const programArr = locals?.currUserProgram || [];
+const programArr = locals?.currUserProgramArr || [];
 const modalId = "createProgramModal";
+const path = "/app_state/set_current_program";
+const destination = "/profile";
+const payloadName = "programId";
 %>
 
 <main class="main programs">
-	<%- include("partials/basicLine", {line: {title: "CHOOSE THE ACTIVE PROGRAM", arr: programArr, modalId }}) %>
+	<% if( programArr.length === 0){ %>
+		<div>
+			<h1>PROGRAM<br />ESSENTIALS</h1>
+			<p>
+			Initialize your elite performance protocol by defining the high-level architecture of this training block.
+			</p>
+	</div>
+	<% } else { %>
+		<h1>CHOOSE THE ACTIVE PROGRAM</h1>
+	<% } %>
+
+	<%- include("partials/basicLine", {line: { arr: programArr, modalId, path, currentItemId: locals?.currProgramId, payloadName, destination }}) %>
 </main>
 
 

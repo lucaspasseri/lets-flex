@@ -40,8 +40,6 @@ async function getIndex(_req, res) {
 	// 	Number(res.locals.currentUser.id),
 	// );
 
-	// console.log({ currUserPrograms });
-
 	res.render("index", {
 		title: "Let's Flex!",
 		userArr,
