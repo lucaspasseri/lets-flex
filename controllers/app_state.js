@@ -41,15 +41,8 @@ async function setCurrentProgram(req, res) {
 }
 
 async function setCurrentCycle(req, res) {
-	console.log({ b: req.body });
-
 	const { cycleId } = req.body;
-
-	console.log({ cycleId });
-
 	const cycleExist = await cyclesDb.verifyCycleExistence(Number(cycleId));
-
-	console.log({ cycleExist });
 
 	if (!cycleExist) {
 		return res.status(404).send("Program not found");
@@ -64,4 +57,26 @@ async function setCurrentCycle(req, res) {
 	res.send(200);
 }
 
-export { setCurrentUser, setCurrentProgram, setCurrentCycle };
+async function setCurrentSession(req, res) {
+	const { sessionId } = req.body;
+	const sessionExist = await cyclesDb.verifyCycleExistence(Number(sessionId));
+
+	if (!sessionExist) {
+		return res.status(404).send("Program not found");
+	}
+
+	if (req.session?.state) {
+		req.session.state = { ...req.session.state, sessionId };
+		return res.send(200);
+	}
+
+	req.session.state = { sessionId };
+	res.send(200);
+}
+
+export {
+	setCurrentUser,
+	setCurrentProgram,
+	setCurrentCycle,
+	setCurrentSession,
+};
