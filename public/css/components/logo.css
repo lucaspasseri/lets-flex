@@ -38,7 +38,7 @@
 	stroke-dasharray: 1600;
 	stroke-dashoffset: 1600;
 	animation:
-		draw-frame 2.4s ease forwards,
+		draw-frame 0.8s ease forwards,
 		frame-flicker 6s 2.4s infinite;
 }
 
@@ -84,7 +84,7 @@
 	stroke-dasharray: 500;
 	stroke-dashoffset: 500;
 	animation:
-		draw-accent 0.8s ease 1.4s forwards,
+		draw-accent 0.4s ease 0.8s forwards,
 		neon-flicker 6s 3s infinite;
 }
 

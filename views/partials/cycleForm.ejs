@@ -1,0 +1,16 @@
+<%
+const currProgramId = locals?.currProgramId || 0;
+let cycleArr = locals?.cycleArr || [];
+cycleArr.push({cycle_order: cycleArr.length + 1});
+%>
+
+<form class="forms" action="/cycles" method="POST">
+
+	<input hidden type="text" name="programId" value="<%= currProgramId %>" />
+	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "cycleForm", autocomplete: "name", required: true } }); %>
+	<%- include("../partialsOld/select", { data: { id: "cycleOrderSelect", label: "Cycle Order", name: "cycleOrder", required: true, 
+	options: cycleArr, getOptionLabel: (cycle) => cycle.cycle_order, getOptionValue: (cycle) => cycle.cycle_order  } }); %>
+
+	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+</form>
+

@@ -76,9 +76,19 @@ async function getCyclesByProgramId(programId) {
 	return cycles;
 }
 
+async function verifyCycleExistence(cycleId) {
+	const { rows: cycleExistence } = await pool.query(
+		"SELECT COUNT(*) FROM cycles WHERE id = $1",
+		[Number(cycleId)],
+	);
+
+	return cycleExistence.length > 0;
+}
+
 export {
 	getAllCycles,
 	getAllCyclesWithoutIds,
 	postNewCycle,
 	getCyclesByProgramId,
+	verifyCycleExistence,
 };

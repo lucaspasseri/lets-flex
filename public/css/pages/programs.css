@@ -1,4 +1,8 @@
 .main.programs {
+	h2,
+	h3 {
+		margin-top: 2em;
+	}
 }
 /* 
 .preview {

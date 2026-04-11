@@ -5,6 +5,9 @@ const currentItemId = line?.currentItemId || "";
 const path = line?.path || "";
 const payloadName = line?.payloadName || "";
 const destination = line?.destination || "";
+
+console.log({arr})
+console.log({currentItemId})
 %>
 
 <div class="basic-line" data-path="<%= path %>" data-payload-name="<%= payloadName %>" data-destination="<% destination %>">

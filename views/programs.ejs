@@ -1,9 +1,17 @@
 <% 
-const programArr = locals?.currUserProgramArr || [];
+const programArr = locals?.programArr || [];
 const modalId = "createProgramModal";
 const path = "/app_state/set_current_program";
 const destination = "/profile";
 const payloadName = "programId";
+
+const cycleArr = locals?.cycleArr || [];
+const cycleModalId = "createCycleModal";
+const setCyclePath = "/app_state/set_current_cycle";
+const setCycleDestination = "/programs";
+const setCyclePayloadName = "cycleId";
+
+console.log({locals})
 %>
 
 <main class="main programs">
@@ -19,6 +27,16 @@ const payloadName = "programId";
 	<% } %>
 
 	<%- include("partials/basicLine", {line: { arr: programArr, modalId, path, currentItemId: locals?.currProgramId, payloadName, destination }}) %>
+
+	<% if(locals?.currProgramId) { %>
+		<h2>Cycles</h2>
+
+		<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: cycleModalId, path: setCyclePath, currentItemId: locals?.currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination }}) %>
+	<%} %>
+
+	<% if(locals?.currCycleId) { %>
+		<h3>Sessions</h3>
+	<%} %>
 </main>
 
 
@@ -30,5 +48,14 @@ const payloadName = "programId";
 		title: "Create program",
 		description: "Fill in the program information below.",
 		renderContent: () => include("partials/newProgramForm")
+	}
+}) %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: cycleModalId,
+		title: "Create cycle",
+		description: "Fill in the cycle information below.",
+		renderContent: () => include("partials/cycleForm")
 	}
 }) %>

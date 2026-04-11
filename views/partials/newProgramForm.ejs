@@ -6,7 +6,7 @@ const currUser = locals?.currentUser || {id:0, name: "Guest"}
 <form class="forms" action="/programs" method="POST">
 
 	<input hidden type="text" name="userId" value="<%= currUser.id %>" />
-	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "userForm", autocomplete: "name", required: true } }); %>
+	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "programForm", autocomplete: "name", required: true } }); %>
 	<%- include('../partialsOld/select', { data: { label: "Goals", name: "goalId", options: goalArr, required: true } })	%>
 	<%- include('../partialsOld/olaInput', { data: { label: "Start date", type: "date", name: "startDate", context: "userForm" } }); %>
 
