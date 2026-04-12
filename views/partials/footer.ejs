@@ -1,6 +1,6 @@
 <%
 const currentUrl = locals?.url || ""; 
-const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/profile", label: "Profile"}]
+const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/library", label: "Library"}, {href: "/profile", label: "Profile"}];
 
 const setLabel = (tab) => {
 	const active = tab.href === currentUrl ? "isActive" : "";

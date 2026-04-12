@@ -46,6 +46,14 @@ const setSessionPayloadName = "sessionId";
 		<%- include("partials/basicLine", {line: { arr:sessionArr , modalId: createSessionModalId, path: setSessionPath,
 			currentItemId: locals?.currSessionId, payloadName: setSessionPayloadName, destination: setSessionDestination }}) %>
 	<% } %>
+
+	<% if(locals?.currSessionId) { %>
+		<h4>Steps</h4>
+
+		<div>
+			
+		</div>
+	<% } %>
 </main>
 
 
