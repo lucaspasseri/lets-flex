@@ -47,7 +47,7 @@ const formMethod = modal.formMethod || "POST";
 				</p>
 			<% } %>
 
-			<%- content() %>
+			<%- content && content() %>
 		</div>
 
 		<% if (confirmText) { %>

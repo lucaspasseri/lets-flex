@@ -1,4 +1,52 @@
+<% 
+const exerciseArr = locals?.exerciseArr || [];
+const createExerciseModalId = "createExerciseModal";
+%>
+
 <main class="main library">
-	<h1>Library</h1>
-	<div></div>
+	<h1>
+		MOVEMENT<br />
+		LIBRARY
+	</h1>
+	<div class="title-mark"></div>
+	<div>
+		<input
+			class="search-exercise"
+			type="search"
+			placeholder="SEARCH EXERCISES..."
+		/>
+	</div>
+	<div class="exercise-list-container">
+		<% if( exerciseArr.length == 0){ %>
+			<h2> BUILD YOUR<br />ARSENAL</h2>
+			<div class="empty-paragraph-container">
+				<p>Your library is empty. Search out database of 500+ professional movements or add your own custom variations.</p>
+			</div>
+	
+		<% } else { %>
+			<ul>
+				<% exerciseArr.forEach(exercise => { %>
+					<li>
+						Oi!
+					</li>
+				<% }) %>
+			</ul>
+		<% } %>
+
+	</div>
+	<div class="custom-exercise-button-container">
+		<button type="button" data-modal-open="<%= createExerciseModalId %>">ADD CUSTOM EXERCISE +</button>
+	</div>
 </main>
+
+<%- contentFor("overlays") %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createExerciseModalId,
+		title: "Create exercise",
+		description: "Fill in the exercise information below.",
+		renderContent: () => {}
+	}
+}) 
+%>

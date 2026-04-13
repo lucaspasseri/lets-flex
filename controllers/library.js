@@ -1,5 +1,7 @@
 async function renderLibraryPage(req, res) {
-	res.render("library");
+	res.render("library", {
+		title: "Let's Flex!",
+	});
 }
 
 export { renderLibraryPage };
