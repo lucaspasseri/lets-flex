@@ -1,0 +1,73 @@
+<%
+const movementPatternArr = locals?.movementPatternArr || [];
+const equipmentArr = locals?.equipmentArr || [];
+
+const muscleArr = locals?.muscleArr || [];
+const muscleRoleArr = locals?.muscleRoleArr || [];
+%>
+
+<form class="forms" action="/exercise_cluster" method="POST">
+	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
+	<%- include("../partialsOld/select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
+	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id  } }); %>
+	<%- include("../partialsOld/select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
+	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id  } }); %>
+
+	<div>
+		<%- include("../partialsOld/select", { data: { id: "muscleIdSelect", label: "Performing muscle", name: "muscleId",
+		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => JSON.stringify(muscle) } }); %>	
+
+		<%- include("../partialsOld/select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", name: "muscleRoleId",
+		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => JSON.stringify(muscle_role) } }); %>	
+
+		<button type="button" id="addMusclePerformingRoleButton" >Add to the performing muscle list</button>
+	</div>
+
+		<ul id="musclePerformingList">
+		</ul>
+	
+
+	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+</form>
+
+<script>
+	const addMusclePerformingRoleButton = document.getElementById("addMusclePerformingRoleButton");
+	const list = document.getElementById("musclePerformingList");
+
+	const muscleSelect = document.getElementById("muscleIdSelect");
+	const muscleRoleSelect = document.getElementById("muscleRoleIdSelect");
+
+	addMusclePerformingRoleButton.addEventListener("click", () => {
+		const {id: muscleId, common_name: muscleName} = JSON.parse(muscleSelect.value);
+		const {id: muscleRoleId, name: muscleRoleName} = JSON.parse(muscleRoleSelect.value);
+
+		const prepareNewItem = (newItem) => {
+			const inputsArr = [
+				{label: "Muscle (Common name):", name: "muscleId", value: muscleId},
+				{label:"Muscle performing role:", name: "muscleRoleId", value: muscleRoleId}
+			];
+
+			inputsArr.forEach(input => {
+				const container = document.createElement("div");
+
+				const label = document.createElement("label");
+				label.value = input.label;
+
+				const newInput = document.createElement("input")
+				newInput.type = "text";
+				newInput.name = input.name;
+				newInput.value = input.value;
+
+				container.append(label, newInput);
+
+				newItem.appendChild(container);
+			})
+		};
+
+
+		const newItem = document.createElement("li");
+		prepareNewItem(newItem);
+		
+		list.appendChild(newItem);
+	})
+</script>

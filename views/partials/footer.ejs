@@ -2,8 +2,6 @@
 const currentUrl = locals?.url || ""; 
 const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/library", label: "Library"}, {href: "/profile", label: "Profile"}];
 
-console.log({currentUrl});
-
 const setLabel = (tab) => {
 	const active = tab.href === currentUrl ? "isActive" : "";
 	return `footer-label ${active}`

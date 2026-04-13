@@ -9,12 +9,13 @@ DROP TABLE IF EXISTS "programs" CASCADE;
 DROP TABLE IF EXISTS "users" CASCADE;
 DROP TABLE IF EXISTS "goals" CASCADE;
 DROP TABLE IF EXISTS "step_types" CASCADE;
-DROP TABLE IF EXISTS "exercise_variants" CASCADE;
 DROP TABLE IF EXISTS "equipments" CASCADE;
-DROP TABLE IF EXISTS "exercise_muscles" CASCADE;
-DROP TABLE IF EXISTS "muscles" CASCADE;
+DROP TABLE IF EXISTS "exercise_variants" CASCADE;
 DROP TABLE IF EXISTS "exercises" CASCADE;
 DROP TABLE IF EXISTS "movement_patterns" CASCADE;
+DROP TABLE IF EXISTS "exercise_muscles" CASCADE;
+DROP TABLE IF EXISTS "muscles" CASCADE;
+DROP TABLE IF EXISTS "muscle_roles" CASCADE;
 
 CREATE TABLE "users" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -113,13 +114,6 @@ CREATE TABLE "movement_patterns" (
   "notes" text
 );
 
-CREATE TABLE "exercise_muscles" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "exercise_id" integer NOT NULL,
-  "muscle_id" integer NOT NULL,
-  "role" varchar
-);
-
 CREATE TABLE "muscles" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "common_name" varchar,
@@ -127,6 +121,24 @@ CREATE TABLE "muscles" (
   "body_region" varchar,
   "reference_url" varchar
 );
+
+CREATE TABLE "muscle_roles" (
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  "name" varchar UNIQUE NOT NULL,
+  "description" text
+);
+
+CREATE TABLE "exercise_muscles" (
+  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  "exercise_id" integer NOT NULL,
+  "muscle_id" integer NOT NULL,
+  "muscle_role_id" integer NOT NULL,
+  
+  FOREIGN KEY ("exercise_id") REFERENCES "exercises"(id) ON DELETE CASCADE,
+  FOREIGN KEY ("muscle_id") REFERENCES "muscles"(id) ON DELETE CASCADE,
+  FOREIGN KEY ("muscle_role_id") REFERENCES "muscle_roles"(id)
+);
+
 
 ALTER TABLE "programs" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
@@ -255,6 +267,15 @@ VALUES
   ('Decline Bench', 'support'),
   ('Squat Rack', 'support'),
   ('Power Rack', 'support');
+
+	INSERT INTO "muscle_roles" ("name", "description") VALUES
+  ('prime_mover', 'Primary muscle responsible for producing the movement (agonist)'),
+  ('synergist', 'Assists the prime mover in performing the movement'),
+  ('stabilizer', 'Stabilizes a joint or body segment during movement'),
+  ('antagonist', 'Opposes the action of the prime mover'),
+  ('fixator', 'Stabilizes the origin of the prime mover'),
+  ('dynamic_stabilizer', 'Provides stability while also contributing to movement'),
+  ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
 `;
 
 async function main() {
