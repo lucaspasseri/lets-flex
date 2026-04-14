@@ -1,6 +1,8 @@
 <% 
-const exerciseArr = locals?.exerciseArr || [];
+const exerciseArr = locals?.exerciseVariantArr || [];
 const createExerciseModalId = "createExerciseModal";
+
+console.log({exerciseArr});
 %>
 
 <main class="main library">
@@ -27,7 +29,7 @@ const createExerciseModalId = "createExerciseModal";
 			<ul>
 				<% exerciseArr.forEach(exercise => { %>
 					<li>
-						Oi!
+						<%= exercise.name %>
 					</li>
 				<% }) %>
 			</ul>

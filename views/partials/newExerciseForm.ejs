@@ -1,7 +1,6 @@
 <%
 const movementPatternArr = locals?.movementPatternArr || [];
 const equipmentArr = locals?.equipmentArr || [];
-
 const muscleArr = locals?.muscleArr || [];
 const muscleRoleArr = locals?.muscleRoleArr || [];
 %>
@@ -14,60 +13,59 @@ const muscleRoleArr = locals?.muscleRoleArr || [];
 	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id  } }); %>
 
 	<div>
-		<%- include("../partialsOld/select", { data: { id: "muscleIdSelect", label: "Performing muscle", name: "muscleId",
-		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => JSON.stringify(muscle) } }); %>	
+		<%- include("../partialsOld/select", { data: { id: "muscleIdSelect", label: "Performing muscle",
+		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => muscle.id } }); %>	
 
-		<%- include("../partialsOld/select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", name: "muscleRoleId",
-		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => JSON.stringify(muscle_role) } }); %>	
+		<%- include("../partialsOld/select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
+		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => muscle_role.id } }); %>	
 
 		<button type="button" id="addMusclePerformingRoleButton" >Add to the performing muscle list</button>
 	</div>
 
-		<ul id="musclePerformingList">
-		</ul>
-	
+	<ul id="musclePerformingList"></ul>
 
 	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 
 <script>
-	const addMusclePerformingRoleButton = document.getElementById("addMusclePerformingRoleButton");
+	const addButton = document.getElementById("addMusclePerformingRoleButton");
 	const list = document.getElementById("musclePerformingList");
 
 	const muscleSelect = document.getElementById("muscleIdSelect");
 	const muscleRoleSelect = document.getElementById("muscleRoleIdSelect");
 
-	addMusclePerformingRoleButton.addEventListener("click", () => {
-		const {id: muscleId, common_name: muscleName} = JSON.parse(muscleSelect.value);
-		const {id: muscleRoleId, name: muscleRoleName} = JSON.parse(muscleRoleSelect.value);
+	addButton.addEventListener("click", () => {
+		const index = Array.from(list.querySelectorAll("li")).length;
 
-		const prepareNewItem = (newItem) => {
-			const inputsArr = [
-				{label: "Muscle (Common name):", name: "muscleId", value: muscleId},
-				{label:"Muscle performing role:", name: "muscleRoleId", value: muscleRoleId}
-			];
+		const muscleId = muscleSelect.value;
+		const muscleName = muscleSelect.options[muscleSelect.selectedIndex].text;
 
-			inputsArr.forEach(input => {
-				const container = document.createElement("div");
+		const muscleRoleId = muscleRoleSelect.value;
+		const muscleRoleName = muscleRoleSelect.options[muscleRoleSelect.selectedIndex].text;
 
-				const label = document.createElement("label");
-				label.value = input.label;
+		if (!muscleId || !muscleRoleId) return;
 
-				const newInput = document.createElement("input")
-				newInput.type = "text";
-				newInput.name = input.name;
-				newInput.value = input.value;
+		const item = document.createElement("li");
 
-				container.append(label, newInput);
+		const summary = document.createElement("p");
+		summary.textContent = `${muscleName} — ${muscleRoleName}`;
 
-				newItem.appendChild(container);
-			})
-		};
+		const muscleInput = document.createElement("input");
+		muscleInput.type = "hidden";
+		muscleInput.name = `muscleGroup[${index}][muscleId]`;
+		muscleInput.value = muscleId;
 
+		const roleInput = document.createElement("input");
+		roleInput.type = "hidden";
+		roleInput.name = `muscleGroup[${index}][muscleRoleId]`;
+		roleInput.value = muscleRoleId;
 
-		const newItem = document.createElement("li");
-		prepareNewItem(newItem);
-		
-		list.appendChild(newItem);
-	})
+		const removeButton = document.createElement("button");
+		removeButton.type = "button";
+		removeButton.textContent = "Remove";
+		removeButton.addEventListener("click", () => item.remove());
+
+		item.append(summary, muscleInput, roleInput, removeButton);
+		list.appendChild(item);
+	});
 </script>

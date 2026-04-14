@@ -1,11 +1,16 @@
+import * as exerciseCluster from "../db/exercise_cluster/index.js";
+
 async function addNewExerciseCluster(req, res) {
-	console.log(1);
+	const { name, movementPatternId, equipmentId, muscleGroup } = req.body;
 
-	const { body } = req;
+	await exerciseCluster.addNewExerciseCluster(
+		name,
+		movementPatternId,
+		equipmentId,
+		muscleGroup,
+	);
 
-	console.log({ body });
-
-	res.send(200);
+	res.redirect("/library");
 }
 
 export { addNewExerciseCluster };
