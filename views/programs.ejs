@@ -16,6 +16,8 @@ const createSessionModalId = "createSessionModal";
 const setSessionPath = "/app_state/set_current_session";
 const setSessionDestination = "/programs";
 const setSessionPayloadName = "sessionId";
+
+const stepsArr = locals?.stepArr || [];
 %>
 
 <main class="main programs">
@@ -51,7 +53,17 @@ const setSessionPayloadName = "sessionId";
 		<h4>Steps</h4>
 
 		<div>
-			
+			<% if(stepArr.length > 0 ) { %>
+				<ul>
+					<% stepArr.forEach(step => { %>
+						<li> <%= step.exercise_variant_name %></li>
+					<% }) %>
+				</ul>
+			<% } %>
+		</div>
+
+		<div>
+			<%- include("partials/stepForm") %>
 		</div>
 	<% } %>
 </main>

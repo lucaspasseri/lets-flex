@@ -5,7 +5,7 @@ async function addNewCycle(req, res) {
 
 	await cyclesDb.postNewCycle(name, programId, cycleOrder);
 
-	res.redirect("/");
+	res.redirect("/programs");
 }
 
 async function getCyclesByProgramId(req, res) {

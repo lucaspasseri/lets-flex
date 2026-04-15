@@ -5,7 +5,7 @@ async function addNewUser(req, res) {
 
 	await usersDb.postNewUser(name, dob, anamnesis);
 
-	res.redirect("/");
+	res.redirect("/profile");
 }
 
 export { addNewUser };

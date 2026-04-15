@@ -1,8 +1,6 @@
 <% 
 const exerciseArr = locals?.exerciseVariantArr || [];
 const createExerciseModalId = "createExerciseModal";
-
-console.log({exerciseArr});
 %>
 
 <main class="main library">
@@ -48,7 +46,7 @@ console.log({exerciseArr});
 		id: createExerciseModalId,
 		title: "Create exercise",
 		description: "Fill in the exercise information below.",
-		renderContent: () => include("partials/newExerciseForm")
+		renderContent: () => include("partials/exerciseClusterForm")
 	}
 }) 
 %>

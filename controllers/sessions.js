@@ -12,7 +12,7 @@ async function addNewSession(req, res) {
 
 	await sessionsDb.postNewSession(name, cycleId, sessionOrder);
 
-	res.redirect("/");
+	res.redirect("/programs");
 }
 
 export { getSessionByCycleId, addNewSession };

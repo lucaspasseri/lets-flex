@@ -10,18 +10,43 @@ async function getSessionStepsById(req, res) {
 }
 
 async function addNewSessionStep(req, res) {
-	const { name, sessionId, stepTypeId, stepOrder, exerciseVariantId } =
-		req.body;
-
-	await sessionStepsDb.postNewSessionStep(
+	const {
+		name,
 		sessionId,
 		stepTypeId,
 		stepOrder,
-		name,
 		exerciseVariantId,
+		sets,
+		reps,
+		loadValue,
+		loadUnit,
+	} = req.body;
+
+	console.log({
+		name,
+		sessionId,
+		stepTypeId,
+		exerciseVariantId,
+		stepOrder,
+		sets,
+		reps,
+		loadValue,
+		loadUnit,
+	});
+
+	await sessionStepsDb.postNewSessionStep(
+		name,
+		sessionId,
+		stepTypeId,
+		exerciseVariantId,
+		stepOrder,
+		sets,
+		reps,
+		loadValue,
+		loadUnit,
 	);
 
-	res.redirect("/");
+	res.redirect("/programs");
 }
 
 export { getSessionStepsById, addNewSessionStep };

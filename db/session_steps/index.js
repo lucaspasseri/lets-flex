@@ -27,11 +27,11 @@ async function getSessionStepsBySessionId(sessionId) {
 }
 
 async function postNewSessionStep(
+	name,
 	sessionId,
 	stepTypeId,
-	stepOrder,
-	name,
 	exerciseVariantId,
+	stepOrder,
 ) {
 	const { rows: existSession } = await pool.query(
 		"SELECT COUNT(*) FROM sessions WHERE id = $1",
@@ -57,8 +57,8 @@ async function postNewSessionStep(
 		await pool.query(
 			"INSERT INTO session_steps (session_id, step_type_id, step_order, name, exercise_variant_id) VALUES ($1, $2, $3, $4, $5)",
 			[
-				sessionId,
-				stepTypeId,
+				toNullableNumber(sessionId),
+				toNullableNumber(stepTypeId),
 				Number(stepOrder),
 				name,
 				toNullableNumber(exerciseVariantId),
@@ -73,13 +73,13 @@ async function postNewSessionStep(
 
 		await client.query(
 			"UPDATE session_steps SET step_order = step_order + 1 WHERE session_id = $1 AND step_order >= $2",
-			[sessionId, Number(stepOrder)],
+			[toNullableNumber(sessionId), Number(stepOrder)],
 		);
 
 		await client.query(
 			"INSERT INTO session_steps (session_id, step_type_id, step_order, name, exercise_variant_id) VALUES ($1, $2, $3, $4, $5)",
 			[
-				sessionId,
+				toNullableNumber(sessionId),
 				stepTypeId,
 				Number(stepOrder),
 				name,
