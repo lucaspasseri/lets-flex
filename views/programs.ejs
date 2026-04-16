@@ -5,69 +5,50 @@ const setProgramPath = "/app_state/set_current_program";
 const setProgramDestination = "/profile";
 const setProgramPayloadName = "programId";
 
-const cycleArr = locals?.cycleArr || [];
-const createCycleModalId = "createCycleModal";
-const setCyclePath = "/app_state/set_current_cycle";
-const setCycleDestination = "/programs";
-const setCyclePayloadName = "cycleId";
+console.log({locals})
 
-const sessionArr = locals?.sessionArr || [];
-const createSessionModalId = "createSessionModal";
-const setSessionPath = "/app_state/set_current_session";
-const setSessionDestination = "/programs";
-const setSessionPayloadName = "sessionId";
+const today = new Date();
+const today2 = formatDate(today, "dd/MM/yyyy");
+const numberOfDays = getDaysInMonth(today);
 
-const stepsArr = locals?.stepArr || [];
+console.log({today, today2, numberOfDays})
+
+const before15Days = subDays(today, 15);
+const after15Days = addDays(today, 15);
+
+const isSameMonthBefore = isSameMonth(today, before15Days);
+const isSameMonthAfter = isSameMonth(today, after15Days);
+
+console.log({b: formatDate(before15Days, "dd/MM/yyyy"), a: formatDate(after15Days, "dd/MM/yyyy"), isSameMonthBefore, isSameMonthAfter})
+
+const currProgram = locals?.currentProgram;
+
+const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
+const fStartDate = formatDate(startDate, "dd/MM/yyyy");
+
+console.log({startDate, fStartDate});
+
+const renderDays = range(30);
+console.log({renderDays});
 %>
 
 <main class="main programs">
-	<% if( programArr.length === 0){ %>
-		<div>
-			<h1>PROGRAM<br />ESSENTIALS</h1>
-			<p>
-			Initialize your elite performance protocol by defining the high-level architecture of this training block.
-			</p>
-	</div>
-	<% } else { %>
-		<h1>CHOOSE THE ACTIVE PROGRAM</h1>
-	<% } %>
-
-	<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
+	<div>
+		<h1>Programs</h1>
+		<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
 		currentItemId: locals?.currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination}}) %>
+	</div>
 
-	<% if(locals?.currProgramId) { %>
-		<h2>Cycles</h2>
-
-		<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: createCycleModalId, path: setCyclePath,
-			currentItemId: locals?.currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination }}) %>
-	<% } %>
-
-	<% if(locals?.currCycleId) { %>
-		<h3>Sessions</h3>
-
-		<%- include("partials/basicLine", {line: { arr:sessionArr , modalId: createSessionModalId, path: setSessionPath,
-			currentItemId: locals?.currSessionId, payloadName: setSessionPayloadName, destination: setSessionDestination }}) %>
-	<% } %>
-
-	<% if(locals?.currSessionId) { %>
-		<h4>Steps</h4>
-
-		<div>
-			<% if(stepArr.length > 0 ) { %>
-				<ul>
-					<% stepArr.forEach(step => { %>
-						<li> <%= step.exercise_variant_name %></li>
-					<% }) %>
-				</ul>
-			<% } %>
-		</div>
-
-		<div>
-			<%- include("partials/stepForm") %>
-		</div>
-	<% } %>
+	<div class="basic-calendar"> 
+		<ul class="list">
+			<% renderDays.forEach( (day) => { %>
+				<li class="item"> 
+					<%= formatDate(addDays(startDate, day), "dd/MM/yyyy") %>
+				</li>
+			<% }) %>
+		</ul>
+	</div>
 </main>
-
 
 <%- contentFor("overlays") %>
 
@@ -77,23 +58,5 @@ const stepsArr = locals?.stepArr || [];
 		title: "Create program",
 		description: "Fill in the program information below.",
 		renderContent: () => include("partials/newProgramForm")
-	}
-}) %>
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: createCycleModalId,
-		title: "Create cycle",
-		description: "Fill in the cycle information below.",
-		renderContent: () => include("partials/cycleForm")
-	}
-}) %>
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: createSessionModalId,
-		title: "Create session",
-		description: "Fill in the session information below.",
-		renderContent: () => include("partials/sessionForm")
 	}
 }) %>

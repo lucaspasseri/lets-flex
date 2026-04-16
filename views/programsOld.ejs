@@ -1,42 +1,99 @@
-<%
-const currUserProgram = locals?.currUserProgram || null;
-const numberOfCycles = currUserProgram?.number_of_cycles || 0;
-const cycleSize = currUserProgram?.cycle_size || 0;
+<% 
+const programArr = locals?.programArr || [];
+const createProgramModalId = "createProgramModal";
+const setProgramPath = "/app_state/set_current_program";
+const setProgramDestination = "/profile";
+const setProgramPayloadName = "programId";
 
-const weekSize = 7;
-const weekSizeArr = range(weekSize);
+const cycleArr = locals?.cycleArr || [];
+const createCycleModalId = "createCycleModal";
+const setCyclePath = "/app_state/set_current_cycle";
+const setCycleDestination = "/programs";
+const setCyclePayloadName = "cycleId";
 
+const sessionArr = locals?.sessionArr || [];
+const createSessionModalId = "createSessionModal";
+const setSessionPath = "/app_state/set_current_session";
+const setSessionDestination = "/programs";
+const setSessionPayloadName = "sessionId";
 
-const numberOfWeeks = currUserProgram ?  Math.ceil((numberOfCycles * cycleSize) / weekSize) + 2 : 0;
-const numberOfWeeksArr = range(numberOfWeeks);
-
-let count = -7;
-
-const startDate = currUserProgram?.start_date;
-
-const lastDay = numberOfCycles * cycleSize - 1;
+const stepsArr = locals?.stepArr || [];
 %>
 
-
 <main class="main programs">
-	<h1>Programs</h1>
-	
-	<% if(currUserProgram) { %>
-			<h2>ACTIVE PROGRAM:</h2>
+	<% if( programArr.length === 0){ %>
+		<div>
+			<h1>PROGRAM<br />ESSENTIALS</h1>
+			<p>
+			Initialize your elite performance protocol by defining the high-level architecture of this training block.
+			</p>
+	</div>
 	<% } else { %>
-		<h2>Create your first program:</h2>
-		<%- include("partials/newProgramForm") %>
+		<h1>CHOOSE THE ACTIVE PROGRAM</h1>
 	<% } %>
 
-	<div class="preview">
-		<% numberOfWeeksArr.forEach((week,weekIndex) => { %>
-			<div class="cycleBox"></div>
-			<% weekSizeArr.forEach((day,dayIndex) => { %>
-				<div class="dayBox <%= count === 0 ? 'startingDay' : '' %> <%= count === lastDay ? 'lastDay' : '' %> "><%= `${formatDate(addDays(startDate, count), "dd/MM")}` %></div>
-			<% count +=1; %>
- 			<% }) %>
-			<div class="cycleBox"></div>
-		<%}) %>
-	
-	</div>
+	<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
+		currentItemId: locals?.currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination}}) %>
+
+	<% if(locals?.currProgramId) { %>
+		<h2>Cycles</h2>
+
+		<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: createCycleModalId, path: setCyclePath,
+			currentItemId: locals?.currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination }}) %>
+	<% } %>
+
+	<% if(locals?.currCycleId) { %>
+		<h3>Sessions</h3>
+
+		<%- include("partials/basicLine", {line: { arr:sessionArr , modalId: createSessionModalId, path: setSessionPath,
+			currentItemId: locals?.currSessionId, payloadName: setSessionPayloadName, destination: setSessionDestination }}) %>
+	<% } %>
+
+	<% if(locals?.currSessionId) { %>
+		<h4>Steps</h4>
+
+		<div>
+			<% if(stepArr.length > 0 ) { %>
+				<ul>
+					<% stepArr.forEach(step => { %>
+						<li> <%= step.exercise_variant_name %></li>
+					<% }) %>
+				</ul>
+			<% } %>
+		</div>
+
+		<div>
+			<%- include("partials/stepForm") %>
+		</div>
+	<% } %>
 </main>
+
+
+<%- contentFor("overlays") %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createProgramModalId,
+		title: "Create program",
+		description: "Fill in the program information below.",
+		renderContent: () => include("partials/newProgramForm")
+	}
+}) %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createCycleModalId,
+		title: "Create cycle",
+		description: "Fill in the cycle information below.",
+		renderContent: () => include("partials/cycleForm")
+	}
+}) %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createSessionModalId,
+		title: "Create session",
+		description: "Fill in the session information below.",
+		renderContent: () => include("partials/sessionForm")
+	}
+}) %>

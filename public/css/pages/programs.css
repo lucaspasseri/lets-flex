@@ -5,32 +5,22 @@
 		margin-top: 2em;
 	}
 }
-/* 
-.preview {
+
+.basic-calendar {
 	border: 2px solid purple;
+}
+
+.basic-calendar > .list {
+	border: 1px solid orange;
 	display: grid;
-	grid-template-columns: repeat(9, 5em);
+	grid-template-columns: repeat(7, 6em);
 	justify-content: center;
 	align-items: center;
 	justify-items: center;
 }
 
-.cycleBox {
-	border: 1px solid orange;
-	height: 3em;
-	width: 0.4em;
-}
-
-.dayBox {
+.basic-calendar > .list > .item {
 	border: 1px solid green;
-	height: 2em;
-	width: 2em;
+	height: 5em;
+	width: 5em;
 }
-
-.startingDay {
-	background-color: blue;
-}
-
-.lastDay {
-	background-color: hotpink;
-} */
