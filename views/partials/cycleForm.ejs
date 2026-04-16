@@ -8,6 +8,7 @@ cycleArr.push({cycle_order: cycleArr.length + 1});
 
 	<input hidden type="text" name="programId" value="<%= currProgramId %>" />
 	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "cycleForm", autocomplete: "name", required: true } }); %>
+	<%- include('../partialsOld/olaInput', { data: { label: "Size (days)", type: "number", name: "cycleSize", context: "cycleForm" } }); %>
 	<%- include("../partialsOld/select", { data: { id: "cycleOrderSelect", label: "Cycle Order", name: "cycleOrder", required: true, 
 	options: cycleArr, getOptionLabel: (cycle) => cycle.cycle_order, getOptionValue: (cycle) => cycle.cycle_order  } }); %>
 

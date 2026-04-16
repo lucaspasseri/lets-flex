@@ -1,9 +1,8 @@
 import * as cyclesDb from "../db/cycles/index.js";
+import setActiveCycleAfterCreation from "../services/setActiveCycleAfterCreation.js";
 
 async function addNewCycle(req, res) {
-	const { name, programId, cycleOrder } = req.body;
-
-	await cyclesDb.postNewCycle(name, programId, cycleOrder);
+	await setActiveCycleAfterCreation(req);
 
 	res.redirect("/programs");
 }

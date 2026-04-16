@@ -14,7 +14,7 @@ async function getAllCyclesWithoutIds() {
 	return cycles;
 }
 
-async function postNewCycle(name, programId, cycleOrder) {
+async function postNewCycle(programId, name, cycleSize, cycleOrder) {
 	const { rows: existProgram } = await pool.query(
 		"SELECT * FROM programs WHERE id = $1",
 		[programId],
@@ -36,14 +36,16 @@ async function postNewCycle(name, programId, cycleOrder) {
 	}
 
 	if (Number(cycleOrder) === numberOfCycles + 1) {
-		await pool.query(
-			"INSERT INTO cycles (name, program_id, cycle_order) VALUES ($1, $2, $3)",
-			[name, programId, Number(cycleOrder)],
+		const { rows } = await pool.query(
+			"INSERT INTO cycles (name, program_id, cycle_size, cycle_order) VALUES ($1, $2, $3, $4) RETURNING id",
+			[name, programId, Number(cycleSize), Number(cycleOrder)],
 		);
-		return;
+		return rows[0].id;
 	}
 
 	const client = await pool.connect();
+
+	let cycleId;
 	try {
 		await client.query("BEGIN");
 
@@ -52,11 +54,11 @@ async function postNewCycle(name, programId, cycleOrder) {
 			[programId, Number(cycleOrder)],
 		);
 
-		await client.query(
-			"INSERT INTO cycles (name, program_id, cycle_order) VALUES ($1, $2, $3)",
-			[name, programId, Number(cycleOrder)],
+		const { rows } = await client.query(
+			"INSERT INTO cycles (name, program_id, cycle_size, cycle_order) VALUES ($1, $2, $3, $4) RETURNING id",
+			[name, programId, Number(cycleSize), Number(cycleOrder)],
 		);
-
+		cycleId = rows[0].id;
 		await client.query("COMMIT");
 	} catch (err) {
 		console.log({ err });
@@ -64,6 +66,7 @@ async function postNewCycle(name, programId, cycleOrder) {
 		throw new Error("Failed to begin transaction");
 	} finally {
 		client.release();
+		return cycleId;
 	}
 }
 

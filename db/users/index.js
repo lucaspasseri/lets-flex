@@ -8,17 +8,19 @@ async function getAllUsers() {
 
 async function postNewUser(name, dob, anamnesis) {
 	if (dob === "") {
-		await pool.query("INSERT INTO users (name, anamnesis) VALUES ($1, $2)", [
-			name,
-			anamnesis,
-		]);
+		const { rows } = await pool.query(
+			"INSERT INTO users (name, anamnesis) VALUES ($1, $2) RETURNING id",
+			[name, anamnesis],
+		);
 
-		return;
+		return rows[0].id;
 	}
-	await pool.query(
-		"INSERT INTO users (name, date_of_birth, anamnesis) VALUES ($1, $2, $3)",
+	const { rows } = await pool.query(
+		"INSERT INTO users (name, date_of_birth, anamnesis) VALUES ($1, $2, $3) RETURNING id",
 		[name, dob, anamnesis],
 	);
+
+	return rows[0].id;
 }
 
 async function verifyUserExistence(userId) {

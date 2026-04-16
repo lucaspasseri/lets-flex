@@ -5,13 +5,19 @@ const setProgramPath = "/app_state/set_current_program";
 const setProgramDestination = "/profile";
 const setProgramPayloadName = "programId";
 
-console.log({locals})
+const cycleArr = locals?.cycleArr || [];
+const createCycleModalId = "createCycleModal";
+const setCyclePath = "/app_state/set_current_cycle";
+const setCycleDestination = "/programs";
+const setCyclePayloadName = "cycleId";
+
+<!-- console.log({locals}) -->
 
 const today = new Date();
 const today2 = formatDate(today, "dd/MM/yyyy");
 const numberOfDays = getDaysInMonth(today);
 
-console.log({today, today2, numberOfDays})
+<!-- console.log({today, today2, numberOfDays}) -->
 
 const before15Days = subDays(today, 15);
 const after15Days = addDays(today, 15);
@@ -19,24 +25,34 @@ const after15Days = addDays(today, 15);
 const isSameMonthBefore = isSameMonth(today, before15Days);
 const isSameMonthAfter = isSameMonth(today, after15Days);
 
-console.log({b: formatDate(before15Days, "dd/MM/yyyy"), a: formatDate(after15Days, "dd/MM/yyyy"), isSameMonthBefore, isSameMonthAfter})
+<!-- console.log({b: formatDate(before15Days, "dd/MM/yyyy"), a: formatDate(after15Days, "dd/MM/yyyy"), isSameMonthBefore, isSameMonthAfter}) -->
 
 const currProgram = locals?.currentProgram;
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 const fStartDate = formatDate(startDate, "dd/MM/yyyy");
 
-console.log({startDate, fStartDate});
+<!-- console.log({startDate, fStartDate}); -->
 
 const renderDays = range(30);
-console.log({renderDays});
+<!-- console.log({renderDays}); -->
 %>
 
 <main class="main programs">
 	<div>
-		<h1>Programs</h1>
-		<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
-		currentItemId: locals?.currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination}}) %>
+		<% if(locals?.currentUser?.id){ %>
+			<h1>Programs</h1>
+			<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
+			currentItemId: locals?.currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination}}) %>
+		<% } %>
+
+		<% if(locals?.currProgramId) { %>
+			<div>
+				<h2>Cycles</h2>
+				<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: createCycleModalId, path: setCyclePath,
+				currentItemId: locals?.currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination }}) %>
+			</div>
+		<% } %>
 	</div>
 
 	<div class="basic-calendar"> 
@@ -58,5 +74,14 @@ console.log({renderDays});
 		title: "Create program",
 		description: "Fill in the program information below.",
 		renderContent: () => include("partials/newProgramForm")
+	}
+}) %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createCycleModalId,
+		title: "Create cycle",
+		description: "Fill in the cycle information below.",
+		renderContent: () => include("partials/cycleForm")
 	}
 }) %>

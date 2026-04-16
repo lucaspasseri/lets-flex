@@ -5,11 +5,10 @@ import * as sessionsDb from "../db/sessions/index.js";
 import * as stepTypesDb from "../db/step_types/index.js";
 import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
 import * as sessionStepsDb from "../db/session_steps/index.js";
+import setActiveProgramAfterCreation from "../services/setActiveProgramAfterCreation.js";
 
 async function addNewProgram(req, res) {
-	const { name, userId, goalId, startDate } = req.body;
-
-	await programsDb.postNewProgram(name, userId, goalId, startDate);
+	await setActiveProgramAfterCreation(req);
 
 	res.redirect("/programs");
 }

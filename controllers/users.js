@@ -1,9 +1,7 @@
-import * as usersDb from "../db/users/index.js";
+import setActiveUserAfterCreation from "../services/setActiveUserAfterCreation.js";
 
 async function addNewUser(req, res) {
-	const { name, dob, anamnesis } = req.body;
-
-	await usersDb.postNewUser(name, dob, anamnesis);
+	await setActiveUserAfterCreation(req);
 
 	res.redirect("/profile");
 }
