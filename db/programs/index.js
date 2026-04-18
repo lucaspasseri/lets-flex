@@ -1,5 +1,11 @@
 import pool from "../pool.js";
 
+async function getAll(db) {
+	const { rows: programs } = await db.query("SELECT * FROM programs");
+
+	return programs;
+}
+
 async function getAllPrograms() {
 	const { rows: programs } = await pool.query("SELECT * FROM programs");
 
@@ -32,8 +38,8 @@ async function postNewProgram(name, userId, goalId, startDate) {
 	return rows[0].id;
 }
 
-async function getProgramById(programId) {
-	const { rows: programs } = await pool.query(
+async function getProgramById(db, { programId }) {
+	const { rows: programs } = await db.query(
 		"SELECT * FROM programs WHERE id = $1",
 		[programId],
 	);
@@ -41,8 +47,8 @@ async function getProgramById(programId) {
 	return programs?.[0];
 }
 
-async function getProgramsByUserId(userId) {
-	const { rows: programs } = await pool.query(
+async function getProgramsByUserId(db, { userId }) {
+	const { rows: programs } = await db.query(
 		"SELECT * FROM programs WHERE user_id = $1",
 		[userId],
 	);
@@ -66,4 +72,5 @@ export {
 	getProgramById,
 	getProgramsByUserId,
 	verifyProgramExistence,
+	getAll,
 };

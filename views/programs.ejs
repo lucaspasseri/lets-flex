@@ -11,13 +11,13 @@ const setCyclePath = "/app_state/set_current_cycle";
 const setCycleDestination = "/programs";
 const setCyclePayloadName = "cycleId";
 
+const sessionArr = locals?.sessionArr || [];
+
 <!-- console.log({locals}) -->
 
 const today = new Date();
 const today2 = formatDate(today, "dd/MM/yyyy");
 const numberOfDays = getDaysInMonth(today);
-
-<!-- console.log({today, today2, numberOfDays}) -->
 
 const before15Days = subDays(today, 15);
 const after15Days = addDays(today, 15);
@@ -25,45 +25,89 @@ const after15Days = addDays(today, 15);
 const isSameMonthBefore = isSameMonth(today, before15Days);
 const isSameMonthAfter = isSameMonth(today, after15Days);
 
-<!-- console.log({b: formatDate(before15Days, "dd/MM/yyyy"), a: formatDate(after15Days, "dd/MM/yyyy"), isSameMonthBefore, isSameMonthAfter}) -->
-
 const currProgram = locals?.currentProgram;
+
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 const fStartDate = formatDate(startDate, "dd/MM/yyyy");
 
-<!-- console.log({startDate, fStartDate}); -->
 
-const renderDays = range(30);
-<!-- console.log({renderDays}); -->
+
+const currCycleId = locals?.currCycleId || null;
+
+<!-- console.log({currCycleId, cycleArr, sessionArr}); -->
+
+
+const classes = cycleArr.reduce((acc, curr, index) => {
+	const {id, cycle_order, cycle_size} = curr;
+
+	const isCycleSelected = id === currCycleId;
+
+	let counter = 0;
+	while(counter < cycle_size){
+		if(counter === 0 && index === 0){
+			acc[`${counter}`] = ` startDate${ isCycleSelected ? ' cycle-selected' : ' cycle-not-selected'}`
+		} else {
+			acc[`${Object.keys(acc).length}`] = `${ isCycleSelected ? ' cycle-selected' : ' cycle-not-selected'}`
+		}
+		counter+=1;
+	}
+	return acc;
+
+},{});
+
+
+const dayArr = range(31).map(day=> {
+	const date = formatDate(addDays(startDate, day), "dd/MM/yyyy");
+	const className = classes[`${day}`] || ' no-cycle';
+
+
+	return {
+		id: day, 
+		date,
+		className,
+	}
+});
+
+
+<!-- console.log({dayArr}); -->
 %>
 
 <main class="main programs">
 	<div>
 		<% if(locals?.currentUser?.id){ %>
-			<h1>Programs</h1>
+			<h1>CHOOSE THE ACTIVE PROGRAM</h1>
 			<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
 			currentItemId: locals?.currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination}}) %>
-		<% } %>
-
-		<% if(locals?.currProgramId) { %>
-			<div>
+			<% if(locals?.currProgramId) { %>
 				<h2>Cycles</h2>
 				<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: createCycleModalId, path: setCyclePath,
 				currentItemId: locals?.currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination }}) %>
-			</div>
+			<% } %>
 		<% } %>
 	</div>
 
 	<div class="basic-calendar"> 
 		<ul class="list">
-			<% renderDays.forEach( (day) => { %>
-				<li class="item"> 
-					<%= formatDate(addDays(startDate, day), "dd/MM/yyyy") %>
+			<% dayArr.forEach( (day) => { %>
+				<li class="item<%= day.className %>"> 
+					<%= day.date %>
 				</li>
 			<% }) %>
 		</ul>
 	</div>
+
+		<% if(locals?.sessionArr.length > 0){ %>
+			<div>
+				<ul>
+					<% sessionArr.forEach(session => { %>
+						<li>
+							<p><%= session.name %></p>
+						</li>
+					<% }) %>
+				</ul>
+			</div>
+		<% } %>
 </main>
 
 <%- contentFor("overlays") %>

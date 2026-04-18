@@ -2,25 +2,72 @@
 	h2,
 	h3,
 	h4 {
-		margin-top: 2em;
+		margin-top: 1em;
 	}
 }
 
 .basic-calendar {
 	border: 2px solid purple;
+	margin-top: 2em;
 }
 
 .basic-calendar > .list {
 	border: 1px solid orange;
 	display: grid;
-	grid-template-columns: repeat(7, 6em);
+	grid-template-columns: repeat(7, 5em);
+	grid-template-rows: repeat(5, 5em);
 	justify-content: center;
 	align-items: center;
 	justify-items: center;
 }
 
 .basic-calendar > .list > .item {
-	border: 1px solid green;
+	font-size: 0.8em;
 	height: 5em;
 	width: 5em;
+	border-radius: 4px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
+
+.cycle-selected {
+	background-color: var(--color-stitch);
+	color: var(--color-stitch-text);
+}
+
+.cycle-not-selected {
+	background-color: var(--color-stitch-secondary);
+	color: var(--color-text-muted);
+}
+
+.no-cycle {
+	border: 0.4em dashed var(--color-stitch-secondary);
+	background-color: transparent;
+	color: var(--color-text);
+}
+
+/* .cycle-1 {
+	background-color: cadetblue;
+}
+
+.cycle-2 {
+	background-color: antiquewhite;
+}
+
+.cycle-3 {
+	background-color: aquamarine;
+}
+
+.cycle-4 {
+	background-color: burlywood;
+}
+
+.cycle-5 {
+	background-color: rgb(83, 156, 219);
+}
+
+.cycle-6 {
+	background-color: aliceblue;
+} */

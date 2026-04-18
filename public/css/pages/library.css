@@ -8,7 +8,7 @@
 	margin-top: 0.4em;
 	width: 2.8em;
 	height: 0.23em;
-	background-color: var(--color-secondary);
+	background-color: var(--color-stitch);
 }
 
 .search-exercise {
@@ -16,7 +16,7 @@
 	background-color: transparent;
 	color: var(--color-text);
 	padding: 1em 0.8em;
-	border: 0.2px var(--color-secondary) solid;
+	border: 0.2px var(--color-stitch) solid;
 	width: 100%;
 	max-width: 500px;
 
@@ -40,5 +40,5 @@
 .empty-paragraph-container {
 	color: var(--color-text-muted);
 	padding: 0.2em 1em;
-	border-left: 0.16em solid var(--color-secondary);
+	border-left: 0.16em solid var(--color-stitch);
 }

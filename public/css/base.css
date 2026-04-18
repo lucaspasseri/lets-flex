@@ -4,7 +4,10 @@
 
 	--color-primary: #e63946;
 	--color-primary-hover: #c1121f;
-	--color-secondary: #ffb4ac;
+
+	--color-stitch: #ffb4ac;
+	--color-stitch-secondary: #1c1c1c;
+	--color-stitch-text: #670505;
 
 	--color-accent: #2ec4b6;
 
@@ -37,6 +40,7 @@ html {
 	height: fit-content;
 	display: flex;
 	height: 100%;
+	background-color: var(--color-bg);
 }
 
 body {

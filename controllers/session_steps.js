@@ -22,18 +22,6 @@ async function addNewSessionStep(req, res) {
 		loadUnit,
 	} = req.body;
 
-	console.log({
-		name,
-		sessionId,
-		stepTypeId,
-		exerciseVariantId,
-		stepOrder,
-		sets,
-		reps,
-		loadValue,
-		loadUnit,
-	});
-
 	await sessionStepsDb.postNewSessionStep(
 		name,
 		sessionId,

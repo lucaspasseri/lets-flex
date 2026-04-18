@@ -1,16 +1,23 @@
 import * as cyclesDb from "../db/cycles/index.js";
-import setActiveCycleAfterCreation from "../services/setActiveCycleAfterCreation.js";
+import addCycleWithSessions from "../services/addCycleWithSessions.js";
+import pool from "../db/pool.js";
 
 async function addNewCycle(req, res) {
-	await setActiveCycleAfterCreation(req);
+	try {
+		const cycleId = await addCycleWithSessions(req.body);
 
-	res.redirect("/programs");
+		req.session.state = { ...req.session.state, cycleId };
+	} catch (err) {
+		console.log(err);
+	}
+
+	await res.redirect("/programs");
 }
 
 async function getCyclesByProgramId(req, res) {
 	const { programId } = req.params;
 
-	const cycles = await cyclesDb.getCyclesByProgramId(programId);
+	const cycles = await cyclesDb.getCyclesByProgramId(pool, { programId });
 
 	res.json(cycles);
 }

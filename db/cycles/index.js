@@ -1,4 +1,5 @@
 import pool from "../pool.js";
+import toNullableNumber from "../../utils/toNullableNumber.js";
 
 async function getAllCycles() {
 	const { rows: cycles } = await pool.query("SELECT * FROM cycles");
@@ -12,6 +13,21 @@ async function getAllCyclesWithoutIds() {
 	);
 
 	return cycles;
+}
+
+async function getAll(db) {
+	const { rows: cycles } = await db.query("SELECT * FROM cycles");
+
+	return cycles;
+}
+
+async function insertCycle(db, { programId, name, cycleSize, cycleOrder }) {
+	const { rows } = await db.query(
+		"INSERT INTO cycles (name, program_id, cycle_size, cycle_order) VALUES ($1, $2, $3, $4) RETURNING *",
+		[name, programId, cycleSize, cycleOrder],
+	);
+
+	return rows[0];
 }
 
 async function postNewCycle(programId, name, cycleSize, cycleOrder) {
@@ -38,7 +54,12 @@ async function postNewCycle(programId, name, cycleSize, cycleOrder) {
 	if (Number(cycleOrder) === numberOfCycles + 1) {
 		const { rows } = await pool.query(
 			"INSERT INTO cycles (name, program_id, cycle_size, cycle_order) VALUES ($1, $2, $3, $4) RETURNING id",
-			[name, programId, Number(cycleSize), Number(cycleOrder)],
+			[
+				name,
+				programId,
+				toNullableNumber(cycleSize),
+				toNullableNumber(cycleOrder),
+			],
 		);
 		return rows[0].id;
 	}
@@ -51,12 +72,17 @@ async function postNewCycle(programId, name, cycleSize, cycleOrder) {
 
 		await client.query(
 			"UPDATE cycles SET cycle_order = cycle_order + 1 WHERE program_id = $1 AND cycle_order >= $2",
-			[programId, Number(cycleOrder)],
+			[programId, toNullableNumber(cycleOrder)],
 		);
 
 		const { rows } = await client.query(
 			"INSERT INTO cycles (name, program_id, cycle_size, cycle_order) VALUES ($1, $2, $3, $4) RETURNING id",
-			[name, programId, Number(cycleSize), Number(cycleOrder)],
+			[
+				name,
+				programId,
+				toNullableNumber(cycleSize),
+				toNullableNumber(cycleOrder),
+			],
 		);
 		cycleId = rows[0].id;
 		await client.query("COMMIT");
@@ -70,8 +96,8 @@ async function postNewCycle(programId, name, cycleSize, cycleOrder) {
 	}
 }
 
-async function getCyclesByProgramId(programId) {
-	const { rows: cycles } = await pool.query(
+async function getCyclesByProgramId(db, { programId }) {
+	const { rows: cycles } = await db.query(
 		"SELECT * FROM cycles WHERE program_id = $1 ORDER BY cycle_order",
 		[programId],
 	);
@@ -88,10 +114,20 @@ async function verifyCycleExistence(cycleId) {
 	return cycleExistence.length > 0;
 }
 
+async function updateCycleOrder(db, { programId, cycleOrder }) {
+	await db.query(
+		"UPDATE cycles SET cycle_order = cycle_order + 1 WHERE program_id = $1 AND cycle_order >= $2",
+		[programId, cycleOrder],
+	);
+}
+
 export {
 	getAllCycles,
 	getAllCyclesWithoutIds,
 	postNewCycle,
 	getCyclesByProgramId,
 	verifyCycleExistence,
+	insertCycle,
+	getAll,
+	updateCycleOrder,
 };

@@ -12,8 +12,8 @@ async function setActiveCycleAfterCreation(req) {
 		);
 
 		req.session.state = { ...req.session.state, cycleId };
-	} catch (e) {
-		console.log(e);
+	} catch (err) {
+		console.log(err);
 	}
 }
 

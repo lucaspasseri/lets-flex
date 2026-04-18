@@ -6,6 +6,7 @@ import * as stepTypesDb from "../db/step_types/index.js";
 import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
 import * as sessionStepsDb from "../db/session_steps/index.js";
 import setActiveProgramAfterCreation from "../services/setActiveProgramAfterCreation.js";
+import pool from "../db/pool.js";
 
 async function addNewProgram(req, res) {
 	await setActiveProgramAfterCreation(req);
@@ -22,11 +23,17 @@ async function renderProgramsPage(req, res) {
 
 	const programArr =
 		res.locals.currentUser &&
-		(await programsDb.getProgramsByUserId(res.locals.currentUser.id));
+		(await programsDb.getProgramsByUserId(pool, {
+			userId: res.locals.currentUser.id,
+		}));
 
-	const cycleArr = await cyclesDb.getCyclesByProgramId(currProgramId);
+	const cycleArr = await cyclesDb.getCyclesByProgramId(pool, {
+		programId: currProgramId,
+	});
 
-	const sessionArr = await sessionsDb.getSessionByCycleId(currCycleId);
+	const sessionArr = await sessionsDb.getSessionByCycleId(pool, {
+		cycleId: currCycleId,
+	});
 
 	const stepTypeArr = await stepTypesDb.getAllStepTypes();
 	const exerciseVariantArr = await exerciseVariantsDb.getAllExerciseVariants();

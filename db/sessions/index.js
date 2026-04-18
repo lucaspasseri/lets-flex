@@ -5,7 +5,7 @@ async function getAllSessions() {
 	return rows;
 }
 
-async function getSessionByCycleId(cycleId) {
+async function getSessionByCycleId(db, { cycleId }) {
 	const { rows } = await pool.query(
 		"SELECT * FROM sessions WHERE cycle_id = $1 ORDER BY session_order",
 		[cycleId],
@@ -19,6 +19,14 @@ async function getAllSessionsWithOutIds() {
 	);
 
 	return sessions;
+}
+async function insertSession(db, { cycleId, name, sessionOrder }) {
+	const { rows } = await db.query(
+		"INSERT INTO sessions (name, cycle_id, session_order) VALUES ($1, $2, $3) RETURNING *",
+		[name, cycleId, sessionOrder],
+	);
+
+	return rows[0];
 }
 
 async function postNewSession(name, cycleId, sessionOrder) {
@@ -78,4 +86,5 @@ export {
 	getSessionByCycleId,
 	getAllSessionsWithOutIds,
 	postNewSession,
+	insertSession,
 };

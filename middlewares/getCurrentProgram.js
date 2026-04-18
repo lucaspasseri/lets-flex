@@ -1,4 +1,5 @@
 import * as programsDb from "../db/programs/index.js";
+import pool from "../db/pool.js";
 
 const getCurrentProgram = async (req, res, next) => {
 	try {
@@ -9,7 +10,9 @@ const getCurrentProgram = async (req, res, next) => {
 			return next();
 		}
 
-		const currentProgram = await programsDb.getProgramById(Number(programId));
+		const currentProgram = await programsDb.getProgramById(pool, {
+			programId: Number(programId),
+		});
 
 		res.locals.currentProgram = currentProgram;
 		next();
