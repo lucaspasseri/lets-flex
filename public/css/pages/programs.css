@@ -21,7 +21,7 @@
 	justify-items: center;
 }
 
-.basic-calendar > .list > .item {
+.basic-calendar > .list > .day-item {
 	font-size: 0.8em;
 	height: 5em;
 	width: 5em;
@@ -30,6 +30,17 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+
+	button {
+		background-color: transparent;
+		border: 0;
+		height: 100%;
+		width: 100%;
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
 }
 
 .cycle-selected {
