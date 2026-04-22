@@ -1,13 +1,10 @@
 <% 
-const currUserId = locals?.currUserId || null;
+const dataId= "profilePageBasicLine"
 const userArr = locals?.userArr || [];
-const entity = "user";
-const loggedUserPath = "/profile/user/";
 const modalId = "createUserModal";
-const basicLineId = "profilePageUserBasicLine";
-
-console.log({locals});
-console.log({currUserId});
+const path = "/app_state/set_current_user";
+const destination = "/profile";
+const payloadName ="userId";
 %>
 
 <main class="main profile">
@@ -23,7 +20,7 @@ console.log({currUserId});
 		<h1>CHOOSE THE ACTIVE USER</h1>
 	<% } %>
 
-	<%- include("partials/newBasicLine", {line: {basicLineId, entity, arr: userArr, modalId, currentItemId: currUserId, path: loggedUserPath }}) %>
+	<%- include("partials/basicLine", {line: { arr: userArr, modalId, currentItemId: locals?.currUserId, path, payloadName, destination, dataId }}) %>
 </main>
 
 <%- contentFor("overlays") %>

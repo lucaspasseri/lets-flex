@@ -41,7 +41,7 @@
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-	animation-duration: 120ms;
+	animation-duration: 100ms;
 }
 
 ::view-transition-group(root) {
@@ -94,10 +94,6 @@ main {
 footer.footer {
 	view-transition-name: footer;
 }
-::view-transition-old(footer),
-::view-transition-new(footer) {
-	animation-duration: 0s;
-}
 
 .footer-indicator {
 	display: block;
@@ -117,7 +113,7 @@ footer.footer {
 }
 
 .main.profile {
-	.basic-line[data-id="profilePageBasicLine"] {
+	.basic-line[data-id="profilePageUserBasicLine"] {
 		/* view-transition-name: profile-page-basic-line; */
 		.selectItemButton.selected {
 			view-transition-name: profile-page-basic-line-item-selected;
@@ -142,8 +138,8 @@ footer.footer {
 		}
 	}
 }
-
-/* @keyframes fade-out {
+/* 
+@keyframes fade-out {
 	from {
 		opacity: 1;
 		transform: translateX(0);

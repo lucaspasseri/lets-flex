@@ -10,4 +10,16 @@ async function renderProfilePage(_req, res) {
 	});
 }
 
-export { renderProfilePage };
+async function renderProfilePageByUserId(req, res) {
+	const { userId } = req.params;
+
+	const userArr = await userDb.getAllUsers();
+
+	res.render("profile", {
+		title: "Let's Flex!",
+		userArr,
+		currUserId: userId || null,
+	});
+}
+
+export { renderProfilePage, renderProfilePageByUserId };
