@@ -5,6 +5,7 @@ const currentItemId = line?.currentItemId || "";
 const path = line?.path || "";
 const payloadName = line?.payloadName || "";
 const destination = line?.destination || "";
+const dataId = line?.dataId || "";
 
 const getClass = (itemId) => {
 	if(itemId === currentItemId) { 
@@ -15,7 +16,7 @@ const getClass = (itemId) => {
 };
 %>
 
-<div class="basic-line" data-path="<%= path %>" data-payload-name="<%= payloadName %>" data-destination="<% destination %>">
+<div class="basic-line" data-path="<%= path %>" data-payload-name="<%= payloadName %>" data-destination="<%= destination %>" data-id="<%= dataId %>" >
 	<ul>
 		<% arr.forEach((item,index) => { %>
 			<li data-item-id="<%= item.id %>" class="line-card">
@@ -47,29 +48,44 @@ const getClass = (itemId) => {
 <script>
 	document.addEventListener("click", async (e) => {
 		const button = e.target.closest(".selectItemButton");
-		if (!button) return;
+		if (!button || button.disabled) return;
 
 		const basicLine = button.closest(".basic-line");
 		const path = basicLine?.dataset.path;
 		const payloadName = basicLine?.dataset.payloadName;
 		const destination = basicLine?.dataset.destination;
-		if (!path) return;
+
+		if (!path || !payloadName || !destination) return;
 
 		const li = button.closest("[data-item-id]");
+
 		if (!li) return;
 
 		const itemId = li.dataset.itemId;
+		if (!itemId) return;
 
-		const res = await fetch(path, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ [`${payloadName}`]: itemId }),
-		});
+		button.disabled = true;
 
-		if(!res.ok) return;
+		try {
+			const res = await fetch(path, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ [payloadName]: itemId }),
+			});
 
-		window.location.href = destination;
+			if (!res.ok) {
+				const message = await res.text();
+				console.error(message);
+				button.disabled = false;
+				return;
+			}
+
+			window.location.assign(destination);
+		} catch (err) {
+			console.error(err);
+			button.disabled = false;
+		}
 	});
 </script>

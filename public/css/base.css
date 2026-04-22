@@ -1,3 +1,7 @@
+@view-transition {
+	navigation: auto;
+}
+
 :root {
 	--color-bg: #0b0c10;
 	--color-surface: #16181d;
@@ -35,16 +39,27 @@
 	padding: 0;
 }
 
-html {
-	min-height: 100vh;
-	height: fit-content;
-	display: flex;
-	height: 100%;
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 120ms;
+}
+
+::view-transition-group(root) {
+	overflow: clip;
+}
+
+html,
+body {
 	background-color: var(--color-bg);
 }
 
+html {
+	min-height: 100vh;
+	display: flex;
+	height: 100%;
+}
+
 body {
-	background-color: var(--color-bg);
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -66,13 +81,8 @@ input:-webkit-autofill:active {
 	caret-color: #fff;
 }
 
-@view-transition {
-	navigation: auto;
-}
-
 main {
 	color: var(--color-text);
-	view-transition-name: page-content;
 	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
 	overflow-y: auto;
 	padding: 4em 0;
@@ -81,27 +91,59 @@ main {
 	padding: var(--header-spacing) 1em var(--footer-spacing);
 }
 
-nav {
-	view-transition-name: bottom-nav;
-	display: flex;
+footer.footer {
+	view-transition-name: footer;
+}
+::view-transition-old(footer),
+::view-transition-new(footer) {
+	animation-duration: 0s;
+}
+
+.footer-indicator {
+	display: block;
+	height: 0.1em;
 	width: 100%;
-	justify-content: center;
+	border-radius: 50%;
 }
 
-::view-transition-old(page-content) {
-	animation: 180ms ease-out both fade-out;
+.footer-indicator.isActive {
+	view-transition-name: active-tab-indicator;
+	background-color: var(--color-primary);
 }
 
-::view-transition-new(page-content) {
-	animation: 220ms ease-out both fade-in;
+::view-transition-old(active-tab-indicator),
+::view-transition-new(active-tab-indicator) {
+	animation-duration: 160ms;
 }
 
-::view-transition-old(bottom-nav),
-::view-transition-new(bottom-nav) {
-	animation-duration: 220ms;
+.main.profile {
+	.basic-line[data-id="profilePageBasicLine"] {
+		/* view-transition-name: profile-page-basic-line; */
+		.selectItemButton.selected {
+			view-transition-name: profile-page-basic-line-item-selected;
+		}
+	}
 }
 
-@keyframes fade-out {
+.main.programs {
+	.basic-line[data-id="programsBasicLine"] {
+		/* view-transition-name: profile-page-basic-line; */
+		.selectItemButton.selected {
+			view-transition-name: programs-basic-line-item-selected;
+		}
+	}
+}
+
+.main.programs {
+	.basic-line[data-id="cyclesBasicLine"] {
+		/* view-transition-name: profile-page-basic-line; */
+		.selectItemButton.selected {
+			view-transition-name: cycles-basic-line-item-selected;
+		}
+	}
+}
+
+/* @keyframes fade-out {
 	from {
 		opacity: 1;
 		transform: translateX(0);
@@ -121,12 +163,4 @@ nav {
 		opacity: 1;
 		transform: translateX(0);
 	}
-}
-
-.footer-label.isActive {
-	border-bottom: 0.1em solid var(--color-primary);
-}
-
-.footer-indicator.isActive {
-	view-transition-name: active-tab-indicator;
-}
+} */

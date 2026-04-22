@@ -1,4 +1,5 @@
 <% 
+const dataId= "profilePageBasicLine"
 const userArr = locals?.userArr || [];
 const modalId = "createUserModal";
 const path = "/app_state/set_current_user";
@@ -19,7 +20,7 @@ const payloadName ="userId";
 		<h1>CHOOSE THE ACTIVE USER</h1>
 	<% } %>
 
-	<%- include("partials/basicLine", {line: { arr: userArr, modalId, currentItemId: locals?.currUserId, path, payloadName, destination }}) %>
+	<%- include("partials/basicLine", {line: { arr: userArr, modalId, currentItemId: locals?.currUserId, path, payloadName, destination, dataId }}) %>
 </main>
 
 <%- contentFor("overlays") %>

@@ -2,7 +2,7 @@
 const programArr = locals?.programArr || [];
 const createProgramModalId = "createProgramModal";
 const setProgramPath = "/app_state/set_current_program";
-const setProgramDestination = "/profile";
+const setProgramDestination = "/programs";
 const setProgramPayloadName = "programId";
 
 const cycleArr = locals?.cycleArr || [];
@@ -18,6 +18,7 @@ const currProgram = locals?.currentProgram || {};
 const currProgramId = locals?.currProgramId || null;
 const currCycleId = locals?.currCycleId || null;
 const currSessionId = locals?.currSessionId || null;
+
 
 console.log({currProgram});
 
@@ -86,11 +87,11 @@ console.log({dayArr});
 		<% if(currUserId){ %>
 			<h1>CHOOSE THE ACTIVE PROGRAM</h1>
 			<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
-			currentItemId: currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination}}) %>
+			currentItemId: currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination, dataId: "programsBasicLine"}}) %>
 			<% if(currProgramId) { %>
 				<h2>Cycles</h2>
 				<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: createCycleModalId, path: setCyclePath,
-				currentItemId: currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination }}) %>
+				currentItemId: currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination, dataId: "cyclesBasicLine" }}) %>
 			<% } %>
 		<% } %>
 	</div>

@@ -4,11 +4,13 @@
 	min-width: 320px;
 	overflow-x: auto;
 	margin-top: 1em;
+	background-color: var(--color-bg);
 
 	ul {
 		display: flex;
 		gap: 1em;
 		padding-right: 1em;
+		background-color: var(--color-bg);
 	}
 
 	li {

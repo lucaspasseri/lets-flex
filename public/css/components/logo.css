@@ -37,9 +37,9 @@
 		drop-shadow(0 0 10px rgba(95, 216, 255, 0.45));
 	stroke-dasharray: 1600;
 	stroke-dashoffset: 1600;
-	animation:
+	/* animation:
 		draw-frame 0.8s ease forwards,
-		frame-flicker 6s 2.4s infinite;
+		frame-flicker 6s 2.4s infinite; */
 }
 
 .lets-text {
@@ -83,9 +83,9 @@
 		drop-shadow(0 0 12px rgba(95, 216, 255, 0.7));
 	stroke-dasharray: 500;
 	stroke-dashoffset: 500;
-	animation:
+	/* animation:
 		draw-accent 0.4s ease 0.8s forwards,
-		neon-flicker 6s 3s infinite;
+		neon-flicker 6s 3s infinite; */
 }
 
 .soft-glow {
