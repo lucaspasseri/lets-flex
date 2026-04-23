@@ -5,8 +5,6 @@ const getCurrentUserByParams = async (req, res, next) => {
 		let userId = null;
 		userId = req.params?.userId || null;
 
-		console.log({ userId });
-
 		if (!userId) {
 			userId = (req.session?.state && req.session.state?.userId) || null;
 		}

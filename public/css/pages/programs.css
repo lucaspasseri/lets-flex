@@ -59,26 +59,18 @@
 	color: var(--color-text);
 }
 
-/* .cycle-1 {
-	background-color: cadetblue;
+.line-card.scroll-target-flash {
+	animation: basic-line-target-flash 700ms ease;
 }
 
-.cycle-2 {
-	background-color: antiquewhite;
+@keyframes basic-line-target-flash {
+	0% {
+		transform: scale(0.985);
+	}
+	40% {
+		transform: scale(1.01);
+	}
+	100% {
+		transform: scale(1);
+	}
 }
-
-.cycle-3 {
-	background-color: aquamarine;
-}
-
-.cycle-4 {
-	background-color: burlywood;
-}
-
-.cycle-5 {
-	background-color: rgb(83, 156, 219);
-}
-
-.cycle-6 {
-	background-color: aliceblue;
-} */

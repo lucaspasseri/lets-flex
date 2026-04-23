@@ -96,6 +96,15 @@ async function postNewCycle(programId, name, cycleSize, cycleOrder) {
 	}
 }
 
+async function getCycleById(db, { cycleId }) {
+	const { rows: cycles } = await db.query(
+		"SELECT * FROM cycles WHERE id = $1 ORDER BY cycle_order",
+		[cycleId],
+	);
+
+	return cycles;
+}
+
 async function getCyclesByProgramId(db, { programId }) {
 	const { rows: cycles } = await db.query(
 		"SELECT * FROM cycles WHERE program_id = $1 ORDER BY cycle_order",
@@ -130,4 +139,5 @@ export {
 	insertCycle,
 	getAll,
 	updateCycleOrder,
+	getCycleById,
 };

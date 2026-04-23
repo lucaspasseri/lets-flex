@@ -1,23 +1,25 @@
 <% 
+const programBasicLineId = "programsPageProgramBasicLine";
+const programBasicLineEntity = "program";
 const programArr = locals?.programArr || [];
 const createProgramModalId = "createProgramModal";
-const setProgramPath = "/app_state/set_current_program";
-const setProgramDestination = "/programs";
-const setProgramPayloadName = "programId";
+const currProgramId = locals?.currProgramId || null;
+const chosenProgramPath = "/programs/";
 
+const cycleBasicLineId = "cyclesPageCycleBasicLine";
+const cycleBasicLineEntity = "cycle";
 const cycleArr = locals?.cycleArr || [];
 const createCycleModalId = "createCycleModal";
-const setCyclePath = "/app_state/set_current_cycle";
-const setCycleDestination = "/programs";
-const setCyclePayloadName = "cycleId";
+const currCycleId = locals?.currCycleId || null;
+const chosenCyclePath = `/programs/${currProgramId}/cycles/`;
+
 
 const sessionArr = locals?.sessionArr || [];
 
 const currUserId = locals?.currentUser?.id || null;
 const currProgram = locals?.currentProgram || {};
-const currProgramId = locals?.currProgramId || null;
-const currCycleId = locals?.currCycleId || null;
 const currSessionId = locals?.currSessionId || null;
+const currDayId = locals?.currDayId || null;
 
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
@@ -74,6 +76,12 @@ const dayArr = range(31).map(day=> {
 	}
 });
 
+const getHref = (dayId) => {
+	const path = `/programs/${currProgramId}/cycles/${currCycleId}/day/${dayId}`;
+
+	return path;
+}
+
 <!-- console.log({dayArr}); -->
 
 %>
@@ -82,17 +90,33 @@ const dayArr = range(31).map(day=> {
 	<div>
 		<% if(currUserId){ %>
 			<h1>CHOOSE THE ACTIVE PROGRAM</h1>
-			<%- include("partials/basicLine", {line: { arr: programArr, modalId: createProgramModalId, path: setProgramPath, 
-			currentItemId: currProgramId, payloadName: setProgramPayloadName, destination: setProgramDestination, dataId: "programsBasicLine"}}) %>
+				<%- include("partials/newBasicLine", {line: { basicLineId: programBasicLineId, entity: programBasicLineEntity, arr: programArr, modalId: createProgramModalId, currentItemId: currProgramId, path: chosenProgramPath }}) %>
 			<% if(currProgramId) { %>
 				<h2>Cycles</h2>
-				<%- include("partials/basicLine", {line: { arr:cycleArr , modalId: createCycleModalId, path: setCyclePath,
-				currentItemId: currCycleId, payloadName: setCyclePayloadName, destination: setCycleDestination, dataId: "cyclesBasicLine" }}) %>
+				<%- include("partials/newBasicLine", {line: { basicLineId: cycleBasicLineId, entity: cycleBasicLineEntity, arr: cycleArr, modalId: createCycleModalId, currentItemId: currCycleId, path: chosenCyclePath }}) %>
 			<% } %>
 		<% } %>
 	</div>
 
 	<div class="basic-calendar"> 
+		<ul class="list">
+			<% dayArr.forEach((day) => { %>
+				<li class="day-item <%= day.className %>"> 
+					<% if(day.hasCycleSelected) { %>
+						<a data-calendar-session-button="dayId: <%= day.date %>" href="<%= getHref(day.id) %>">
+							<%= day.date %>
+						</a>
+					<% } else { %>
+						<p >
+							<%= day.date %>
+						</p>
+					<% } %>
+				</li>
+			<% }) %>
+		</ul>
+	</div>
+
+	<!-- <div class="basic-calendar"> 
 		<ul class="list">
 			<% dayArr.forEach((day) => { %>
 				<li class="day-item <%= day.className %>"> 
@@ -108,7 +132,7 @@ const dayArr = range(31).map(day=> {
 				</li>
 			<% }) %>
 		</ul>
-	</div>
+	</div> -->
 
 	<% if(sessionArr.length > 0){ %>
 		<div>
@@ -122,13 +146,14 @@ const dayArr = range(31).map(day=> {
 		</div>
 	<% } %>
 
-	<% if(currSessionId) { %>
+	<% if(currDayId) { %>
 
-		<h3>SESSION SELECTED</h3>
-
+		<h3>DAY SELECTED</h3>
+		<p><%= dayArr[currDayId].date %></p>
 	<% } %>
 
 </main>
+
 
 <script>
 	document.addEventListener("click", async(e) => {
@@ -157,28 +182,6 @@ const dayArr = range(31).map(day=> {
 	})
 
 </script>
-
-
-
-	<!-- document.addEventListener("click", async (e) => {
-		const button = e.target.closest(".selectItemButton");
-		if (!button) return;
-
-		const basicLine = button.closest(".basic-line");
-		const path = basicLine?.dataset.path;
-		const payloadName = basicLine?.dataset.payloadName;
-		const destination = basicLine?.dataset.destination;
-		if (!path) return;
-
-		const li = button.closest("[data-item-id]"); -->
-
-
-	<!-- function handleOpenClick(event) {
-		const openButton = event.target.closest("[data-modal-open]"); -->
-
-
-
-
 
 <%- contentFor("overlays") %>
 

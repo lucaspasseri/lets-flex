@@ -18,6 +18,7 @@ async function renderProgramsPage(req, res) {
 	const currProgramId = req.session.state?.programId || null;
 	const currCycleId = req.session.state?.cycleId || null;
 	const currSessionId = req.session.state?.sessionId || null;
+	const currDayId = req.session.state?.dayId || null;
 
 	const goalArr = await goalsDb.getAllGoals();
 
@@ -51,6 +52,7 @@ async function renderProgramsPage(req, res) {
 		stepTypeArr,
 		exerciseVariantArr,
 		stepArr,
+		currDayId,
 	});
 }
 

@@ -7,25 +7,32 @@ const basicLineId = line?.basicLineId || "";
 const modalId = line?.modalId || "0";
 
 const getClass = (itemId) => {
-	if(itemId === currentItemId) { 
-		return 'line-card-button selectItemButton selected';
+	if (itemId === currentItemId) {
+		return "line-card-button selectItemButton selected";
 	}
 
-	return 'line-card-button selectItemButton not-selected';
+	return "line-card-button selectItemButton not-selected";
 };
 %>
 
-<div class="basic-line" data-id="<%= basicLineId %>" >
+<div class="basic-line" data-id="<%= basicLineId %>">
 	<ul>
-		<% arr.forEach((item,index) => { %>
-			<li data-item-id="<%= item.id %>" class="line-card">
-				<a class="<%= getClass(item.id)  %>" href="<%= `${path}${item.id}` %>">
-					<p><%= `P${index+1}` %></p>
+		<% arr.forEach((item, index) => { %>
+			<li
+				id="<%= `${basicLineId}-item-${item.id}` %>"
+				data-item-id="<%= item.id %>"
+				class="line-card"
+			>
+				<a
+					class="<%= getClass(item.id) %>"
+					href="<%= `${path}${item.id}` %>"
+				>
+					<p><%= `P${index + 1}` %></p>
 					<div>
 						<p><%= item.name %></p>
-							<% if(currentItemId === item.id){ %>
-								<p>ACTIVE <%= entity.toUpperCase() %></p>
-							<% } %>		
+						<% if (currentItemId === item.id) { %>
+							<p>ACTIVE <%= entity.toUpperCase() %></p>
+						<% } %>
 					</div>
 				</a>
 			</li>
