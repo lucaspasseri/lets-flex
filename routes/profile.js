@@ -9,7 +9,12 @@ import { getCurrentUserByParams } from "../middlewares/getCurrentUserByParams.js
 
 const router = Router();
 
-router.get("/", getUrlAndPath, getCurrentUserByParams, renderProfilePage);
+router.get(
+	"/",
+	getUrlAndPath,
+	getCurrentUserByParams,
+	renderProfilePageByUserId,
+);
 router.get(
 	"/user/:userId",
 	getUrlAndPath,

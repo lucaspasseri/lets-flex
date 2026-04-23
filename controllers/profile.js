@@ -18,7 +18,8 @@ async function renderProfilePageByUserId(req, res) {
 	res.render("profile", {
 		title: "Let's Flex!",
 		userArr,
-		currUserId: userId || null,
+		currUserId:
+			userId || res.locals?.currentUser ? res.locals.currentUser.id : null,
 	});
 }
 

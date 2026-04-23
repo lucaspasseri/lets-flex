@@ -20,10 +20,6 @@ const currCycleId = locals?.currCycleId || null;
 const currSessionId = locals?.currSessionId || null;
 
 
-console.log({currProgram});
-
-console.log({currProgramId, currCycleId, currSessionId});
-
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
 function isDayInACycle(dayIndex, cycleArr){
@@ -78,7 +74,7 @@ const dayArr = range(31).map(day=> {
 	}
 });
 
-console.log({dayArr});
+<!-- console.log({dayArr}); -->
 
 %>
 

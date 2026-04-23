@@ -15,6 +15,15 @@ router.get(
 	getHelpers,
 	renderProgramsPage,
 );
+
+router.get(
+	"/:programId",
+	getUrlAndPath,
+	getCurrentUser,
+	getCurrentProgram,
+	getHelpers,
+	renderProgramsPage,
+);
 router.post("/", addNewProgram);
 
 export default router;
