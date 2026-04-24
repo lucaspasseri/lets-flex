@@ -82,6 +82,12 @@ const getHref = (dayId) => {
 	return path;
 }
 
+const getHref2 = (dayId) => {
+	const path = `/programs/day/${dayId}`;
+
+	return path;
+}
+
 <!-- console.log({dayArr}); -->
 
 %>
@@ -103,7 +109,7 @@ const getHref = (dayId) => {
 			<% dayArr.forEach((day) => { %>
 				<li class="day-item <%= day.className %>"> 
 					<% if(day.hasCycleSelected) { %>
-						<a data-calendar-session-button="dayId: <%= day.date %>" href="<%= getHref(day.id) %>">
+						<a data-calendar-session-button="dayId: <%= day.date %>" href="<%= getHref2(day.id) %>">
 							<%= day.date %>
 						</a>
 					<% } else { %>

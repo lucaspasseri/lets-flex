@@ -2,9 +2,18 @@
 const currentUrl = locals?.url || ""; 
 const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/library", label: "Library"}, {href: "/profile", label: "Profile"}];
 
+
 const setIndicator = (tab) => {
-	const active = tab.href === currentUrl ? "isActive" : "";
-	return `footer-indicator ${active}`
+	if(tab.href === "/"){
+		if(currentUrl === "/"){
+			return "footer-indicator isActive";		
+		}
+		
+		return "footer-indicator";	
+	}
+
+	const active = currentUrl.includes(tab.href) ? "isActive" : "";
+	return `footer-indicator ${active}`;
 }
 %>
 

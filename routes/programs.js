@@ -1,5 +1,9 @@
 import express from "express";
-import { addNewProgram, renderProgramsPage } from "../controllers/programs.js";
+import {
+	addNewProgram,
+	renderProgramsPage,
+	renderDayPage,
+} from "../controllers/programs.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
 import { getCurrentUser } from "../middlewares/getCurrentUser.js";
 import { getCurrentProgram } from "../middlewares/getCurrentProgram.js";
@@ -47,6 +51,17 @@ router.get(
 	getCurrentDayByParams,
 	getHelpers,
 	renderProgramsPage,
+);
+
+router.get(
+	"/day/:dayId",
+	getUrlAndPath,
+	getCurrentUser,
+	getCurrentProgramByParams,
+	getCurrentCycleByParams,
+	getCurrentDayByParams,
+	getHelpers,
+	renderDayPage,
 );
 router.post("/", addNewProgram);
 
