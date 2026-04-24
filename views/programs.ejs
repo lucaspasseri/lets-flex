@@ -107,9 +107,9 @@ const getHref2 = (dayId) => {
 	<div class="basic-calendar"> 
 		<ul class="list">
 			<% dayArr.forEach((day) => { %>
-				<li class="day-item <%= day.className %>"> 
+				<li class="day-item <%= day.className %>" data-calendar-day-id="<%= day.id %>"> 
 					<% if(day.hasCycleSelected) { %>
-						<a data-calendar-session-button="dayId: <%= day.date %>" href="<%= getHref2(day.id) %>">
+						<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref2(day.id) %>">
 							<%= day.date %>
 						</a>
 					<% } else { %>

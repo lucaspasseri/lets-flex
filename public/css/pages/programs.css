@@ -43,6 +43,10 @@
 	}
 }
 
+.basic-calendar > .list > .day-item[data-calendar-day-id="6"] {
+	view-transition-name: day6;
+}
+
 .cycle-selected {
 	background-color: var(--color-stitch);
 	color: var(--color-stitch-text);
