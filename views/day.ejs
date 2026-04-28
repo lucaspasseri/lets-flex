@@ -1,13 +1,12 @@
-<% const dayId = locals?.dayId || null %>
+<% const dayId = locals?.dayId || null; const backUrl = locals?.backUrl || "";
+%>
 
-<div>
+<div class="day-component">
 	<h1>DAY <%= dayId %></h1>
-
-	<div class="basic-calendar">
-		<ul class="list">
-			<li class="day-item cycle-selected" data-calendar-day-id="<%= dayId %>">
-				<a>Day</a>
-			</li>
-		</ul>
+	<a href="<%= backUrl %>">Go back</a>
+	<div class="session-component" data-calendar-day-id="<%= dayId %>">
+		<div class="container session-selected">
+			<p>Day</p>
+		</div>
 	</div>
 </div>

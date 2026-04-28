@@ -107,38 +107,22 @@ const getHref2 = (dayId) => {
 	<div class="basic-calendar"> 
 		<ul class="list">
 			<% dayArr.forEach((day) => { %>
-				<li class="day-item <%= day.className %>" data-calendar-day-id="<%= day.id %>"> 
-					<% if(day.hasCycleSelected) { %>
-						<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref2(day.id) %>">
-							<%= day.date %>
-						</a>
-					<% } else { %>
-						<p >
-							<%= day.date %>
-						</p>
-					<% } %>
+				<li class="session-component <%= day.className %>" data-calendar-day-id="<%= day.id %>"> 
+					<div class="container">
+						<% if(day.hasCycleSelected) { %>
+							<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref2(day.id) %>">
+								<p>	<%= day.date %></p>
+							</a>
+						<% } else { %>
+							<p >
+								<%= day.date %>
+							</p>
+						<% } %>
+					</div>
 				</li>
 			<% }) %>
 		</ul>
 	</div>
-
-	<!-- <div class="basic-calendar"> 
-		<ul class="list">
-			<% dayArr.forEach((day) => { %>
-				<li class="day-item <%= day.className %>"> 
-					<% if(day.hasCycleSelected) { %>
-						<button data-calendar-session-button="dayId: <%= day.date %>">
-							<%= day.date %>
-						</button>
-					<% } else { %>
-						<p >
-							<%= day.date %>
-						</p>
-					<% } %>
-				</li>
-			<% }) %>
-		</ul>
-	</div> -->
 
 	<% if(sessionArr.length > 0){ %>
 		<div>

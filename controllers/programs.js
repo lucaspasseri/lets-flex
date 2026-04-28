@@ -59,8 +59,6 @@ async function renderProgramsPage(req, res) {
 async function renderDayPage(req, res) {
 	const { dayId } = req.params;
 
-	console.log({ dayId });
-
 	res.render("day", {
 		title: "Let's Flex!",
 		dayId,

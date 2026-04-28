@@ -14,40 +14,17 @@
 .basic-calendar > .list {
 	border: 1px solid orange;
 	display: grid;
-	grid-template-columns: repeat(7, 5em);
-	grid-template-rows: repeat(5, 5em);
+	grid-template-columns: repeat(7, 6em);
+	grid-template-rows: repeat(5, 6em);
+	gap: 1em;
+	padding: 1em;
 	justify-content: center;
 	align-items: center;
 	justify-items: center;
 }
 
-.basic-calendar > .list > .day-item {
-	font-size: 0.8em;
-	height: 5em;
-	width: 5em;
-	border-radius: 4px;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	button {
-		background-color: transparent;
-		border: 0;
-		height: 100%;
-		width: 100%;
-
-		&:hover {
-			cursor: pointer;
-		}
-	}
-}
-
-.basic-calendar > .list > .day-item[data-calendar-day-id="6"] {
-	view-transition-name: day6;
-}
-
-.cycle-selected {
+.cycle-selected,
+.session-selected {
 	background-color: var(--color-stitch);
 	color: var(--color-stitch-text);
 }
@@ -76,5 +53,145 @@
 	}
 	100% {
 		transform: scale(1);
+	}
+}
+
+.day-component {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	color: white;
+
+	& > a {
+		color: inherit;
+	}
+}
+
+.session-component {
+	view-transition-name: session-component;
+	display: flex;
+	flex: 1;
+	height: 100%;
+	font-size: 1.2em;
+	border-radius: 4px;
+
+	& .container {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		color: white;
+
+		& a {
+			display: flex;
+			text-decoration: none;
+			height: 100%;
+			width: 100%;
+			text-align: center;
+			align-items: center;
+			justify-content: center;
+
+			&:visited,
+			&:link {
+				color: inherit;
+			}
+		}
+	}
+
+	&[data-calendar-day-id="0"] {
+		view-transition-name: session-component-0;
+	}
+	&[data-calendar-day-id="1"] {
+		view-transition-name: session-component-1;
+	}
+	&[data-calendar-day-id="2"] {
+		view-transition-name: session-component-2;
+	}
+	&[data-calendar-day-id="3"] {
+		view-transition-name: session-component-3;
+	}
+	&[data-calendar-day-id="4"] {
+		view-transition-name: session-component-4;
+	}
+	&[data-calendar-day-id="5"] {
+		view-transition-name: session-component-5;
+	}
+	&[data-calendar-day-id="6"] {
+		view-transition-name: session-component-6;
+	}
+	&[data-calendar-day-id="7"] {
+		view-transition-name: session-component-7;
+	}
+	&[data-calendar-day-id="8"] {
+		view-transition-name: session-component-8;
+	}
+	&[data-calendar-day-id="9"] {
+		view-transition-name: session-component-9;
+	}
+	&[data-calendar-day-id="10"] {
+		view-transition-name: session-component-10;
+	}
+	&[data-calendar-day-id="11"] {
+		view-transition-name: session-component-11;
+	}
+	&[data-calendar-day-id="12"] {
+		view-transition-name: session-component-12;
+	}
+	&[data-calendar-day-id="13"] {
+		view-transition-name: session-component-13;
+	}
+	&[data-calendar-day-id="14"] {
+		view-transition-name: session-component-14;
+	}
+	&[data-calendar-day-id="15"] {
+		view-transition-name: session-component-15;
+	}
+	&[data-calendar-day-id="16"] {
+		view-transition-name: session-component-16;
+	}
+	&[data-calendar-day-id="17"] {
+		view-transition-name: session-component-17;
+	}
+	&[data-calendar-day-id="18"] {
+		view-transition-name: session-component-18;
+	}
+	&[data-calendar-day-id="19"] {
+		view-transition-name: session-component-19;
+	}
+	&[data-calendar-day-id="20"] {
+		view-transition-name: session-component-20;
+	}
+	&[data-calendar-day-id="21"] {
+		view-transition-name: session-component-21;
+	}
+	&[data-calendar-day-id="22"] {
+		view-transition-name: session-component-22;
+	}
+	&[data-calendar-day-id="23"] {
+		view-transition-name: session-component-23;
+	}
+	&[data-calendar-day-id="24"] {
+		view-transition-name: session-component-24;
+	}
+	&[data-calendar-day-id="25"] {
+		view-transition-name: session-component-25;
+	}
+	&[data-calendar-day-id="26"] {
+		view-transition-name: session-component-26;
+	}
+	&[data-calendar-day-id="27"] {
+		view-transition-name: session-component-27;
+	}
+	&[data-calendar-day-id="28"] {
+		view-transition-name: session-component-28;
+	}
+	&[data-calendar-day-id="29"] {
+		view-transition-name: session-component-29;
+	}
+	&[data-calendar-day-id="30"] {
+		view-transition-name: session-component-30;
+	}
+	&[data-calendar-day-id="31"] {
+		view-transition-name: session-component-31;
 	}
 }

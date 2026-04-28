@@ -3,6 +3,7 @@ import pool from "../db/pool.js";
 
 const getCurrentProgramByParams = async (req, res, next) => {
 	const client = await pool.connect();
+
 	try {
 		let programId = null;
 		programId = req.params?.programId || null;
