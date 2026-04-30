@@ -6,10 +6,13 @@ const getCurrentProgramByParams = async (req, res, next) => {
 
 	try {
 		let programId = null;
-		programId = req.params?.programId || null;
+		programId = (req.params?.programId && Number(req.params.programId)) || null;
 
 		if (!programId) {
-			programId = (req.session?.state && req.session.state?.programId) || null;
+			programId =
+				(req.session?.state?.programId &&
+					Number(req.session.state.programId)) ||
+				null;
 		}
 
 		if (!programId) {

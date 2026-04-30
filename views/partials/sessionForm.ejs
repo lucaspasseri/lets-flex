@@ -1,12 +1,12 @@
 <%
-const currCycleId = locals?.currCycleId || 0;
+const currDayId = typeof locals?.currDayId === "number" ? locals.currDayId : null;
 const sessionArr = locals?.sessionArr || [];
 sessionArr.push({session_order: sessionArr.length + 1});
 %>
 
 <form class="forms" action="/sessions" method="POST">
 
-	<input hidden type="text" name="cycleId" value="<%= currCycleId %>" />
+	<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
 	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "sessionForm", autocomplete: "name", required: true } }); %>
 	<%- include("../partialsOld/select", { data: { id: "sessionOrderSelect", label: "Session Order", name: "sessionOrder", required: true, 
 	options: sessionArr, getOptionLabel: (session) => session.session_order, getOptionValue: (session) => session.session_order  } }); %>

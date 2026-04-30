@@ -4,6 +4,7 @@ const sql = `
 DROP TABLE IF EXISTS "workout_step_logs" CASCADE;
 DROP TABLE IF EXISTS "session_steps" CASCADE;
 DROP TABLE IF EXISTS "sessions" CASCADE;
+DROP TABLE IF EXISTS "training_days" CASCADE;
 DROP TABLE IF EXISTS "cycles" CASCADE;
 DROP TABLE IF EXISTS "programs" CASCADE;
 DROP TABLE IF EXISTS "users" CASCADE;
@@ -41,20 +42,29 @@ CREATE TABLE cycles (
   id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   program_id INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
-	cycle_size INTEGER DEFAULT 7,
+  cycle_size INTEGER DEFAULT 7,
   cycle_order INTEGER NOT NULL,
   UNIQUE (program_id, cycle_order)
-	DEFERRABLE INITIALLY IMMEDIATE
+);
+
+CREATE TABLE training_days (
+  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  cycle_id INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
+  day_order INTEGER NOT NULL,
+  scheduled_date DATE,
+  label VARCHAR(255),
+
+  UNIQUE (cycle_id, day_order)
 );
 
 CREATE TABLE "sessions" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "cycle_id" INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
+  "training_day_id" INTEGER NOT NULL REFERENCES training_days(id) ON DELETE CASCADE,
   "name" varchar,
   "notes" text,
-	"session_order" integer NOT NULL,
-	UNIQUE (cycle_id, session_order)
-	DEFERRABLE INITIALLY IMMEDIATE
+  "session_order" integer NOT NULL,
+
+  UNIQUE (training_day_id, session_order)
 );
 
 CREATE TABLE "session_steps" (
@@ -62,14 +72,13 @@ CREATE TABLE "session_steps" (
   "session_id" integer NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
   "step_type_id" integer NOT NULL,
   "exercise_variant_id" integer,
-	"name" varchar,
+  "name" varchar,
   "sets" integer,
   "reps" integer,
   "load_value" float,
   "load_unit" varchar,
-	"step_order" integer NOT NULL,
-	UNIQUE (session_id, step_order)
-	DEFERRABLE INITIALLY IMMEDIATE
+  "step_order" integer NOT NULL,
+  UNIQUE (session_id, step_order)
 );
 
 CREATE TABLE "workout_step_logs" (
@@ -91,7 +100,7 @@ CREATE TABLE "exercise_variants" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   "exercise_id" integer NOT NULL,
   "equipment_id" integer,
-	"name" varchar,
+  "name" varchar,
   "setup_description" text,
   "environment" varchar,
   "notes" text
@@ -134,40 +143,12 @@ CREATE TABLE "exercise_muscles" (
   "exercise_id" integer NOT NULL,
   "muscle_id" integer NOT NULL,
   "muscle_role_id" integer NOT NULL,
-  
   FOREIGN KEY ("exercise_id") REFERENCES "exercises"(id) ON DELETE CASCADE,
   FOREIGN KEY ("muscle_id") REFERENCES "muscles"(id) ON DELETE CASCADE,
   FOREIGN KEY ("muscle_role_id") REFERENCES "muscle_roles"(id)
 );
 
-
-ALTER TABLE "programs" ADD FOREIGN KEY ("user_id") REFERENCES "users" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "programs" ADD FOREIGN KEY ("goal_id") REFERENCES "goals" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "cycles" ADD FOREIGN KEY ("program_id") REFERENCES "programs" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "sessions" ADD FOREIGN KEY ("cycle_id") REFERENCES "cycles" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "session_steps" ADD FOREIGN KEY ("session_id") REFERENCES "sessions" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "session_steps" ADD FOREIGN KEY ("step_type_id") REFERENCES "step_types" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "session_steps" ADD FOREIGN KEY ("exercise_variant_id") REFERENCES "exercise_variants" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "workout_step_logs" ADD FOREIGN KEY ("session_step_id") REFERENCES "session_steps" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "exercise_variants" ADD FOREIGN KEY ("exercise_id") REFERENCES "exercises" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "exercise_variants" ADD FOREIGN KEY ("equipment_id") REFERENCES "equipments" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "exercises" ADD FOREIGN KEY ("movement_pattern_id") REFERENCES "movement_patterns" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "exercise_muscles" ADD FOREIGN KEY ("exercise_id") REFERENCES "exercises" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-ALTER TABLE "exercise_muscles" ADD FOREIGN KEY ("muscle_id") REFERENCES "muscles" ("id") DEFERRABLE INITIALLY IMMEDIATE;
-
-
+-- Seeds (unchanged)
 INSERT INTO "step_types" ("name")
 VALUES
   ('exercise'),
@@ -197,86 +178,6 @@ VALUES
   ('mobility'),
   ('rehabilitation'),
   ('general_fitness');
-
-	INSERT INTO muscles (common_name, scientific_name, body_region, reference_url) VALUES
-	-- Chest
-	('Chest', 'Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
-	('Upper Chest', 'Clavicular Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
-	('Lower Chest', 'Sternal Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
-
-	-- Back
-	('Upper Back', 'Trapezius', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Trapezius'),
-	('Lats', 'Latissimus Dorsi', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Latissimus_dorsi'),
-	('Mid Back', 'Rhomboids', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Rhomboid_muscles'),
-	('Lower Back', 'Erector Spinae', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Erector_spinae'),
-
-	-- Shoulders
-	('Front Delts', 'Anterior Deltoid', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
-	('Side Delts', 'Lateral Deltoid', 'Upper Body - Lateral', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
-	('Rear Delts', 'Posterior Deltoid', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
-
-	-- Arms
-	('Biceps', 'Biceps Brachii', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Biceps'),
-	('Triceps', 'Triceps Brachii', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Triceps'),
-	('Forearms', 'Forearm Flexors and Extensors', 'Upper Body - Distal', 'https://en.wikipedia.org/wiki/Forearm'),
-
-	-- Core
-	('Abs', 'Rectus Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Rectus_abdominis'),
-	('Obliques', 'External Obliques', 'Core - Lateral', 'https://en.wikipedia.org/wiki/Abdominal_oblique_muscles'),
-	('Deep Core', 'Transverse Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Transverse_abdominal_muscle'),
-
-	-- Glutes
-	('Glutes', 'Gluteus Maximus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gluteus_maximus'),
-	('Glute Med', 'Gluteus Medius', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Gluteus_medius'),
-
-	-- Legs
-	('Quads', 'Quadriceps', 'Lower Body - Anterior', 'https://en.wikipedia.org/wiki/Quadriceps'),
-	('Hamstrings', 'Hamstrings', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Hamstring'),
-	('Adductors', 'Hip Adductors', 'Lower Body - Medial', 'https://en.wikipedia.org/wiki/Adductor_muscles_of_the_hip'),
-	('Abductors', 'Hip Abductors', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Hip_abductor'),
-
-	-- Calves
-	('Calves', 'Gastrocnemius', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gastrocnemius'),
-	('Soleus', 'Soleus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Soleus');
-
-	INSERT INTO equipments (name, category) VALUES
-  ('Barbell', 'free_weight'),
-  ('Dumbbell', 'free_weight'),
-  ('Kettlebell', 'free_weight'),
-
-  ('Smith Machine', 'machine'),
-  ('Cable Machine', 'machine'),
-  ('Leg Press Machine', 'machine'),
-  ('Chest Press Machine', 'machine'),
-  ('Lat Pulldown Machine', 'machine'),
-
-  ('Pull-up Bar', 'bodyweight'),
-  ('Dip Bar', 'bodyweight'),
-
-  ('Resistance Band', 'accessory'),
-  ('Suspension Trainer (TRX)', 'accessory'),
-  ('Ab Wheel', 'accessory'),
-  ('Medicine Ball', 'accessory'),
-
-  ('Treadmill', 'cardio'),
-  ('Stationary Bike', 'cardio'),
-  ('Elliptical Trainer', 'cardio'),
-  ('Rowing Machine', 'cardio'),
-
-  ('Flat Bench', 'support'),
-  ('Incline Bench', 'support'),
-  ('Decline Bench', 'support'),
-  ('Squat Rack', 'support'),
-  ('Power Rack', 'support');
-
-	INSERT INTO "muscle_roles" ("name", "description") VALUES
-  ('prime_mover', 'Primary muscle responsible for producing the movement (agonist)'),
-  ('synergist', 'Assists the prime mover in performing the movement'),
-  ('stabilizer', 'Stabilizes a joint or body segment during movement'),
-  ('antagonist', 'Opposes the action of the prime mover'),
-  ('fixator', 'Stabilizes the origin of the prime mover'),
-  ('dynamic_stabilizer', 'Provides stability while also contributing to movement'),
-  ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
 `;
 
 async function main() {

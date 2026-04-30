@@ -11,6 +11,8 @@ import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getCurrentProgramByParams } from "../middlewares/getCurrentProgramByParams.js";
 import { getCurrentCycleByParams } from "../middlewares/getCurrentCycleByParams.js";
 import { getCurrentDayByParams } from "../middlewares/getCurrentDayByParams.js";
+import { getScheduleDate } from "../middlewares/getScheduleDate.js";
+import { getCurrentSessionByParams } from "../middlewares/getCurrentSessionByParams.js";
 
 const router = express.Router();
 
@@ -61,6 +63,20 @@ router.get(
 	getCurrentCycleByParams,
 	getCurrentDayByParams,
 	getHelpers,
+	getScheduleDate,
+	renderDayPage,
+);
+
+router.get(
+	"/day/:dayId/sessions/:sessionId",
+	getUrlAndPath,
+	getCurrentUser,
+	getCurrentProgramByParams,
+	getCurrentCycleByParams,
+	getCurrentDayByParams,
+	getCurrentSessionByParams,
+	getHelpers,
+	getScheduleDate,
 	renderDayPage,
 );
 router.post("/", addNewProgram);

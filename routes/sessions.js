@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { getSessionByCycleId, addNewSession } from "../controllers/sessions.js";
+import {
+	getSessionByTrainingDayId,
+	addNewSession,
+} from "../controllers/sessions.js";
 
 const router = Router();
 
-router.get("/:cycleId", getSessionByCycleId);
+router.get("/:dayId", getSessionByTrainingDayId);
 
 router.post("/", addNewSession);
 

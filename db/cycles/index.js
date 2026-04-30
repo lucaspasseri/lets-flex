@@ -102,7 +102,7 @@ async function getCycleById(db, { cycleId }) {
 		[cycleId],
 	);
 
-	return cycles;
+	return cycles?.[0];
 }
 
 async function getCyclesByProgramId(db, { programId }) {

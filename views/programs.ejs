@@ -42,7 +42,7 @@ function isDayInACycle(dayIndex, cycleArr){
 function getDayClass(dayIndex, cycleArr, currCycleId){
 	let className = "";
 
-	if(dayIndex === 0){
+	if(dayIndex === 1){
 		className += "startDate ";
 	}
 
@@ -63,10 +63,11 @@ function getDayClass(dayIndex, cycleArr, currCycleId){
 }
 
 
-const dayArr = range(31).map(day=> {
-	const date = formatDate(addDays(startDate, day), "dd/MM/yyyy");
+const dayArr = range(1,32).map(day=> {
+	const date = formatDate(addDays(startDate, day - 1 ), "dd/MM/yyyy");
 	const className = getDayClass(day, cycleArr, currCycleId);
-	const hasCycleSelected = currCycleId === isDayInACycle(day, cycleArr);
+
+	const hasCycleSelected = currCycleId === isDayInACycle(day, cycleArr) && currCycleId !== null;
 
 	return {
 		id: day, 
@@ -76,19 +77,13 @@ const dayArr = range(31).map(day=> {
 	}
 });
 
+
+
 const getHref = (dayId) => {
-	const path = `/programs/${currProgramId}/cycles/${currCycleId}/day/${dayId}`;
-
-	return path;
-}
-
-const getHref2 = (dayId) => {
 	const path = `/programs/day/${dayId}`;
 
 	return path;
 }
-
-<!-- console.log({dayArr}); -->
 
 %>
 
@@ -109,8 +104,8 @@ const getHref2 = (dayId) => {
 			<% dayArr.forEach((day) => { %>
 				<li class="session-component <%= day.className %>" data-calendar-day-id="<%= day.id %>"> 
 					<div class="container">
-						<% if(day.hasCycleSelected) { %>
-							<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref2(day.id) %>">
+						<% if(day?.hasCycleSelected) { %>
+							<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref(day.id) %>">
 								<p>	<%= day.date %></p>
 							</a>
 						<% } else { %>
@@ -143,35 +138,6 @@ const getHref2 = (dayId) => {
 	<% } %>
 
 </main>
-
-
-<script>
-	document.addEventListener("click", async(e) => {
-		const dayButton = event.target.closest("[data-calendar-session-button]");
-
-		if(!dayButton) return;
-
-		console.log({session: dayButton?.dataset.calendarSessionButton});
-
-		// const path = "/app_state/set_current_session";
-		// const destination = "/programs";
-
-		// const itemId = li.dataset.itemId || null;
-
-		// const res = await fetch(path, {
-		// 	method: "POST",
-		// 	headers: {
-		// 		"Content-Type": "application/json",
-		// 	},
-		// 	body: JSON.stringify({ sessionId: itemId }),
-		// });
-
-		// if(!res.ok) return;
-
-		// window.location.href = destination;
-	})
-
-</script>
 
 <%- contentFor("overlays") %>
 

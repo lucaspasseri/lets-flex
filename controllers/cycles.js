@@ -1,10 +1,10 @@
 import * as cyclesDb from "../db/cycles/index.js";
-import addCycleWithSessions from "../services/addCycleWithSessions.js";
 import pool from "../db/pool.js";
+import addCycleWithDays from "../services/addCycleWithDays.js";
 
 async function addNewCycle(req, res) {
 	try {
-		const cycleId = await addCycleWithSessions(req.body);
+		const cycleId = await addCycleWithDays(req.body);
 
 		req.session.state = { ...req.session.state, cycleId };
 	} catch (err) {

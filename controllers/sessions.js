@@ -1,18 +1,18 @@
 import * as sessionsDb from "../db/sessions/index.js";
 
-async function getSessionByCycleId(req, res) {
-	const { cycleId } = req.params;
-	const sessions = await sessionsDb.getSessionByCycleId(cycleId);
+async function getSessionByTrainingDayId(req, res) {
+	const { dayId } = req.params;
+	const sessions = await sessionsDb.getSessionByTrainingDayId(dayId);
 
 	res.json(sessions);
 }
 
 async function addNewSession(req, res) {
-	const { name, cycleId, sessionOrder } = req.body;
+	const { name = "", trainingDayId, sessionOrder } = req.body;
 
-	await sessionsDb.postNewSession(name, cycleId, sessionOrder);
+	await sessionsDb.postNewSession(name, trainingDayId, sessionOrder);
 
-	res.redirect("/programs");
+	res.redirect("/programs/day/" + trainingDayId);
 }
 
-export { getSessionByCycleId, addNewSession };
+export { getSessionByTrainingDayId, addNewSession };

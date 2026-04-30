@@ -5,10 +5,12 @@ async function getAllSessions() {
 	return rows;
 }
 
-async function getSessionByCycleId(db, { cycleId }) {
+async function getSessionByTrainingDayId(db, { trainingDayId }) {
+	if (trainingDayId === null) return [];
+
 	const { rows } = await pool.query(
-		"SELECT * FROM sessions WHERE cycle_id = $1 ORDER BY session_order",
-		[cycleId],
+		"SELECT * FROM sessions WHERE training_day_id = $1 ORDER BY session_order",
+		[trainingDayId],
 	);
 	return rows;
 }
@@ -29,53 +31,68 @@ async function insertSession(db, { cycleId, name, sessionOrder }) {
 	return rows[0];
 }
 
-async function postNewSession(name, cycleId, sessionOrder) {
-	const { rows: existCycle } = await pool.query(
-		"SELECT COUNT(*) FROM cycles WHERE id = $1",
-		[cycleId],
-	);
-
-	if (existCycle.length === 0) {
-		throw new Error(`Cycle with ID ${cycleId} was not found`);
-	}
-
-	const { rows: howManySessions } = await pool.query(
-		"SELECT COUNT(*) FROM sessions WHERE cycle_id = $1",
-		[cycleId],
-	);
-
-	const numberOfSessions = Number(howManySessions[0].count);
-
-	if (Number(sessionOrder) > numberOfSessions + 1) {
-		throw new Error(`Session order must be at most ${numberOfSessions + 1}`);
-	}
-
-	if (Number(sessionOrder) === numberOfSessions + 1) {
-		await pool.query(
-			"INSERT INTO sessions (name, cycle_id, session_order) VALUES ($1, $2, $3)",
-			[name, cycleId, Number(sessionOrder)],
-		);
-		return;
-	}
-
+async function postNewSession(name, trainingDayId, sessionOrder) {
 	const client = await pool.connect();
+
+	const numericTrainingDayId = Number(trainingDayId);
+	const numericSessionOrder = Number(sessionOrder);
+
 	try {
 		await client.query("BEGIN");
 
-		await client.query(
-			"UPDATE sessions SET session_order = session_order + 1 WHERE cycle_id = $1 AND session_order >= $2",
-			[cycleId, Number(sessionOrder)],
+		const { rows: trainingDays } = await client.query(
+			"SELECT id FROM training_days WHERE id = $1",
+			[numericTrainingDayId],
 		);
+
+		if (trainingDays.length === 0) {
+			throw new Error(
+				`Training day with ID ${numericTrainingDayId} was not found`,
+			);
+		}
+
+		const { rows: sessionCountRows } = await client.query(
+			"SELECT COUNT(*) FROM sessions WHERE training_day_id = $1",
+			[numericTrainingDayId],
+		);
+
+		const numberOfSessions = Number(sessionCountRows[0].count);
+
+		if (
+			!Number.isInteger(numericSessionOrder) ||
+			numericSessionOrder < 1 ||
+			numericSessionOrder > numberOfSessions + 1
+		) {
+			throw new Error(
+				`Session order must be between 1 and ${numberOfSessions + 1}`,
+			);
+		}
+
 		await client.query(
-			"INSERT INTO sessions (name, cycle_id, session_order) VALUES ($1, $2, $3)",
-			[name, cycleId, Number(sessionOrder)],
+			`
+			UPDATE sessions
+			SET session_order = session_order + 1
+			WHERE training_day_id = $1
+			  AND session_order >= $2
+			`,
+			[numericTrainingDayId, numericSessionOrder],
+		);
+
+		const { rows } = await client.query(
+			`
+			INSERT INTO sessions (name, training_day_id, session_order)
+			VALUES ($1, $2, $3)
+			RETURNING *
+			`,
+			[name, numericTrainingDayId, numericSessionOrder],
 		);
 
 		await client.query("COMMIT");
+
+		return rows[0];
 	} catch (err) {
-		console.log({ err });
 		await client.query("ROLLBACK");
-		throw new Error("Failed to begin transaction");
+		throw err;
 	} finally {
 		client.release();
 	}
@@ -83,7 +100,7 @@ async function postNewSession(name, cycleId, sessionOrder) {
 
 export {
 	getAllSessions,
-	getSessionByCycleId,
+	getSessionByTrainingDayId,
 	getAllSessionsWithOutIds,
 	postNewSession,
 	insertSession,

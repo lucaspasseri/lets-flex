@@ -1,12 +1,39 @@
-<% const dayId = locals?.dayId || null; const backUrl = locals?.backUrl || "";
+<%
+const currCycleId = locals?.currCycleId || null; 
+const currDayId = locals?.currDayId || null;
+const backUrl = locals?.backUrl || "";
+const scheduleDate = locals?.scheduleDate || null;
+const formattedScheduleDate = scheduleDate ? locals.formatDate(scheduleDate, "dd/MM/yyyy") : "No date";
+
+const sessionBasicLineId = "cyclesPageCycleBasicLine";
+const sessionBasicLineEntity = "session";
+const sessionArr = locals?.sessionArr || [];
+const createSessionModalId = "createSessionModal";
+const currSessionId = locals?.currSessionId || null;
+const chosenSessionPath = `/programs/day/${currDayId}/sessions/`;
+
+console.log({currSessionId});
 %>
 
 <div class="day-component">
-	<h1>DAY <%= dayId %></h1>
+	<h1>DAY <%= formattedScheduleDate %></h1>
 	<a href="<%= backUrl %>">Go back</a>
-	<div class="session-component" data-calendar-day-id="<%= dayId %>">
+	<div class="session-component" data-calendar-day-id="<%= currDayId %>">
 		<div class="container session-selected">
 			<p>Day</p>
+				<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
 		</div>
 	</div>
 </div>
+
+
+<%- contentFor("overlays") %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createSessionModalId,
+		title: "Create session",
+		description: "Fill in the session information below.",
+		renderContent: () => include("partials/sessionForm")
+	}
+}) %>
