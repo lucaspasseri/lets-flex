@@ -42,10 +42,6 @@ async function renderProgramsPage(req, res) {
 		programId: currProgramId,
 	});
 
-	const stepTypeArr = await stepTypesDb.getAllStepTypes();
-	const exerciseVariantArr = await exerciseVariantsDb.getAllExerciseVariants();
-	const stepArr = await sessionStepsDb.getAllSessionStepsWithJoins();
-
 	res.render("programs", {
 		title: "Let's Flex!",
 		goalArr,
@@ -54,9 +50,6 @@ async function renderProgramsPage(req, res) {
 		currProgramId: currProgramId,
 		currCycleId: currCycleId,
 		currSessionId: currSessionId,
-		stepTypeArr,
-		exerciseVariantArr,
-		stepArr,
 		currDayId,
 	});
 }
@@ -69,21 +62,27 @@ async function renderDayPage(req, res) {
 		(req.session.state?.sessionId && Number(req.session.state.sessionId)) ||
 		null;
 
-	console.log({ currDayId });
-
 	const sessionArr =
 		currDayId &&
 		(await sessionsDb.getSessionByTrainingDayId(pool, {
 			trainingDayId: currDayId,
 		}));
 
-	console.log({ currSessionId });
+	const stepTypeArr = await stepTypesDb.getAllStepTypes();
+	const exerciseVariantArr = await exerciseVariantsDb.getAllExerciseVariants();
+
+	const sessionStepArr =
+		currSessionId &&
+		(await sessionStepsDb.getSessionStepsBySessionId(currSessionId));
 
 	res.render("day", {
 		title: "Let's Flex!",
 		currDayId,
 		sessionArr,
 		currSessionId,
+		stepTypeArr,
+		exerciseVariantArr,
+		sessionStepArr,
 	});
 }
 

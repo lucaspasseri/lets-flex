@@ -148,7 +148,6 @@ CREATE TABLE "exercise_muscles" (
   FOREIGN KEY ("muscle_role_id") REFERENCES "muscle_roles"(id)
 );
 
--- Seeds (unchanged)
 INSERT INTO "step_types" ("name")
 VALUES
   ('exercise'),
@@ -178,6 +177,86 @@ VALUES
   ('mobility'),
   ('rehabilitation'),
   ('general_fitness');
+
+	INSERT INTO muscles (common_name, scientific_name, body_region, reference_url) VALUES
+	-- Chest
+	('Chest', 'Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+	('Upper Chest', 'Clavicular Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+	('Lower Chest', 'Sternal Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+
+	-- Back
+	('Upper Back', 'Trapezius', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Trapezius'),
+	('Lats', 'Latissimus Dorsi', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Latissimus_dorsi'),
+	('Mid Back', 'Rhomboids', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Rhomboid_muscles'),
+	('Lower Back', 'Erector Spinae', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Erector_spinae'),
+
+	-- Shoulders
+	('Front Delts', 'Anterior Deltoid', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+	('Side Delts', 'Lateral Deltoid', 'Upper Body - Lateral', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+	('Rear Delts', 'Posterior Deltoid', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+
+	-- Arms
+	('Biceps', 'Biceps Brachii', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Biceps'),
+	('Triceps', 'Triceps Brachii', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Triceps'),
+	('Forearms', 'Forearm Flexors and Extensors', 'Upper Body - Distal', 'https://en.wikipedia.org/wiki/Forearm'),
+
+	-- Core
+	('Abs', 'Rectus Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Rectus_abdominis'),
+	('Obliques', 'External Obliques', 'Core - Lateral', 'https://en.wikipedia.org/wiki/Abdominal_oblique_muscles'),
+	('Deep Core', 'Transverse Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Transverse_abdominal_muscle'),
+
+	-- Glutes
+	('Glutes', 'Gluteus Maximus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gluteus_maximus'),
+	('Glute Med', 'Gluteus Medius', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Gluteus_medius'),
+
+	-- Legs
+	('Quads', 'Quadriceps', 'Lower Body - Anterior', 'https://en.wikipedia.org/wiki/Quadriceps'),
+	('Hamstrings', 'Hamstrings', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Hamstring'),
+	('Adductors', 'Hip Adductors', 'Lower Body - Medial', 'https://en.wikipedia.org/wiki/Adductor_muscles_of_the_hip'),
+	('Abductors', 'Hip Abductors', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Hip_abductor'),
+
+	-- Calves
+	('Calves', 'Gastrocnemius', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gastrocnemius'),
+	('Soleus', 'Soleus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Soleus');
+
+	INSERT INTO equipments (name, category) VALUES
+  ('Barbell', 'free_weight'),
+  ('Dumbbell', 'free_weight'),
+  ('Kettlebell', 'free_weight'),
+
+  ('Smith Machine', 'machine'),
+  ('Cable Machine', 'machine'),
+  ('Leg Press Machine', 'machine'),
+  ('Chest Press Machine', 'machine'),
+  ('Lat Pulldown Machine', 'machine'),
+
+  ('Pull-up Bar', 'bodyweight'),
+  ('Dip Bar', 'bodyweight'),
+
+  ('Resistance Band', 'accessory'),
+  ('Suspension Trainer (TRX)', 'accessory'),
+  ('Ab Wheel', 'accessory'),
+  ('Medicine Ball', 'accessory'),
+
+  ('Treadmill', 'cardio'),
+  ('Stationary Bike', 'cardio'),
+  ('Elliptical Trainer', 'cardio'),
+  ('Rowing Machine', 'cardio'),
+
+  ('Flat Bench', 'support'),
+  ('Incline Bench', 'support'),
+  ('Decline Bench', 'support'),
+  ('Squat Rack', 'support'),
+  ('Power Rack', 'support');
+
+	INSERT INTO "muscle_roles" ("name", "description") VALUES
+  ('prime_mover', 'Primary muscle responsible for producing the movement (agonist)'),
+  ('synergist', 'Assists the prime mover in performing the movement'),
+  ('stabilizer', 'Stabilizes a joint or body segment during movement'),
+  ('antagonist', 'Opposes the action of the prime mover'),
+  ('fixator', 'Stabilizes the origin of the prime mover'),
+  ('dynamic_stabilizer', 'Provides stability while also contributing to movement'),
+  ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
 `;
 
 async function main() {

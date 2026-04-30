@@ -32,59 +32,102 @@ async function postNewSessionStep(
 	stepTypeId,
 	exerciseVariantId,
 	stepOrder,
+	sets,
+	reps,
+	loadValue,
+	loadUnit,
 ) {
-	const { rows: existSession } = await pool.query(
-		"SELECT COUNT(*) FROM sessions WHERE id = $1",
-		[sessionId],
-	);
+	const numericSessionId = toNullableNumber(sessionId);
+	const numericStepTypeId = toNullableNumber(stepTypeId);
+	const numericExerciseVariantId = toNullableNumber(exerciseVariantId);
+	const numericStepOrder = Number(stepOrder);
 
-	if (existSession.length === 0) {
-		throw new Error(`Session with ID ${sessionId} was not found`);
-	}
-
-	const { rows: howManySteps } = await pool.query(
-		"SELECT COUNT(*) FROM session_steps WHERE session_id = $1",
-		[sessionId],
-	);
-
-	const numberOfSteps = Number(howManySteps[0].count);
-
-	if (Number(stepOrder) > numberOfSteps + 1) {
-		throw new Error(`Step order must be at most ${numberOfSteps + 1}`);
-	}
-
-	if (Number(stepOrder) === numberOfSteps + 1) {
-		await pool.query(
-			"INSERT INTO session_steps (session_id, step_type_id, step_order, name, exercise_variant_id) VALUES ($1, $2, $3, $4, $5)",
-			[
-				toNullableNumber(sessionId),
-				toNullableNumber(stepTypeId),
-				Number(stepOrder),
-				name,
-				toNullableNumber(exerciseVariantId),
-			],
-		);
-		return;
-	}
+	const numericSets = toNullableNumber(sets);
+	const numericReps = toNullableNumber(reps);
+	const numericLoadValue = toNullableNumber(loadValue);
 
 	const client = await pool.connect();
+
 	try {
 		await client.query("BEGIN");
 
+		const { rows: existSession } = await client.query(
+			"SELECT id FROM sessions WHERE id = $1",
+			[numericSessionId],
+		);
+
+		if (existSession.length === 0) {
+			throw new Error(`Session with ID ${sessionId} was not found`);
+		}
+
 		await client.query(
-			"UPDATE session_steps SET step_order = step_order + 1 WHERE session_id = $1 AND step_order >= $2",
-			[toNullableNumber(sessionId), Number(stepOrder)],
+			"SELECT id FROM session_steps WHERE session_id = $1 FOR UPDATE",
+			[numericSessionId],
+		);
+
+		const { rows: howManySteps } = await client.query(
+			"SELECT COUNT(*) FROM session_steps WHERE session_id = $1",
+			[numericSessionId],
+		);
+
+		const numberOfSteps = Number(howManySteps[0].count);
+
+		if (numericStepOrder > numberOfSteps + 1) {
+			throw new Error(`Step order must be at most ${numberOfSteps + 1}`);
+		}
+
+		if (numericStepOrder < 1 || !Number.isInteger(numericStepOrder)) {
+			throw new Error("Step order must be a positive integer");
+		}
+
+		// Move affected rows far away first to avoid unique constraint collisions
+		await client.query(
+			`
+			UPDATE session_steps
+			SET step_order = step_order + 1000
+			WHERE session_id = $1
+			AND step_order >= $2
+			`,
+			[numericSessionId, numericStepOrder],
 		);
 
 		await client.query(
-			"INSERT INTO session_steps (session_id, step_type_id, step_order, name, exercise_variant_id) VALUES ($1, $2, $3, $4, $5)",
-			[
-				toNullableNumber(sessionId),
-				stepTypeId,
-				Number(stepOrder),
+			`
+			INSERT INTO session_steps (
+				session_id,
+				step_type_id,
+				exercise_variant_id,
+				step_order,
 				name,
-				toNullableNumber(exerciseVariantId),
+				sets,
+				reps,
+				load_value,
+				load_unit
+			)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			`,
+			[
+				numericSessionId,
+				numericStepTypeId,
+				numericExerciseVariantId,
+				numericStepOrder,
+				name,
+				numericSets,
+				numericReps,
+				numericLoadValue,
+				loadUnit || null,
 			],
+		);
+
+		// Bring shifted rows back to the correct order
+		await client.query(
+			`
+			UPDATE session_steps
+			SET step_order = step_order - 999
+			WHERE session_id = $1
+			AND step_order >= $2
+			`,
+			[numericSessionId, numericStepOrder + 1000],
 		);
 
 		await client.query("COMMIT");

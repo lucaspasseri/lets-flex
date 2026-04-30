@@ -1,4 +1,5 @@
 import * as sessionStepsDb from "../db/session_steps/index.js";
+import toNullableNumber from "../utils/toNullableNumber.js";
 
 async function getSessionStepsById(req, res) {
 	const { sessionId } = req.params;
@@ -34,7 +35,10 @@ async function addNewSessionStep(req, res) {
 		loadUnit,
 	);
 
-	res.redirect("/programs");
+	const currDayId =
+		req.session?.state?.dayId && toNullableNumber(req.session.state.dayId);
+
+	res.redirect(`/programs/day/${currDayId}/sessions/${sessionId}`);
 }
 
 export { getSessionStepsById, addNewSessionStep };

@@ -2,9 +2,11 @@
 const currentItemId = line?.currentItemId ? Number(line?.currentItemId) : null;
 const arr = line?.arr || [];
 const entity = line?.entity || "";
+const entityFirstLetterUppercase = entity.charAt(0).toUpperCase();
 const path = line?.path || "";
 const basicLineId = line?.basicLineId || "";
 const modalId = line?.modalId || "0";
+
 
 const getClass = (itemId) => {
 	if (itemId === currentItemId) {
@@ -27,7 +29,7 @@ const getClass = (itemId) => {
 					class="<%= getClass(item.id) %>"
 					href="<%= `${path}${item.id}` %>"
 				>
-					<p><%= `P${index + 1}` %></p>
+					<p><%= `${entityFirstLetterUppercase}${index + 1}` %></p>
 					<div>
 						<p><%= item.name %></p>
 						<% if (currentItemId === item.id) { %>

@@ -136,6 +136,15 @@ footer.footer {
 		}
 	}
 }
+
+.main.day {
+	.basic-line[data-id="dayPageSessionBasicLine"] {
+		.selectItemButton.selected {
+			view-transition-name: sessions-basic-line-item-selected;
+		}
+	}
+}
+
 /* 
 @keyframes fade-out {
 	from {

@@ -23,10 +23,14 @@
 	justify-items: center;
 }
 
-.cycle-selected,
-.session-selected {
-	background-color: var(--color-stitch);
+.day-selected {
 	color: var(--color-stitch-text);
+	border: 0.3em solid var(--color-stitch);
+}
+
+.session-selected {
+	color: var(--color-stitch-text);
+	border: 0.8em solid var(--color-stitch);
 }
 
 .cycle-not-selected {
@@ -53,17 +57,6 @@
 	}
 	100% {
 		transform: scale(1);
-	}
-}
-
-.day-component {
-	display: flex;
-	flex-direction: column;
-	height: 100%;
-	color: white;
-
-	& > a {
-		color: inherit;
 	}
 }
 

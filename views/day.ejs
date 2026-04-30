@@ -5,27 +5,52 @@ const backUrl = locals?.backUrl || "";
 const scheduleDate = locals?.scheduleDate || null;
 const formattedScheduleDate = scheduleDate ? locals.formatDate(scheduleDate, "dd/MM/yyyy") : "No date";
 
-const sessionBasicLineId = "cyclesPageCycleBasicLine";
+const sessionBasicLineId = "dayPageSessionBasicLine";
 const sessionBasicLineEntity = "session";
 const sessionArr = locals?.sessionArr || [];
 const createSessionModalId = "createSessionModal";
 const currSessionId = locals?.currSessionId || null;
 const chosenSessionPath = `/programs/day/${currDayId}/sessions/`;
 
-console.log({currSessionId});
-%>
 
-<div class="day-component">
+const createSessionStepModalId = "createSessionStepModal";
+const sessionStepArr = locals?.sessionStepArr || [];
+%>
+<main class="main day">
 	<h1>DAY <%= formattedScheduleDate %></h1>
 	<a href="<%= backUrl %>">Go back</a>
 	<div class="session-component" data-calendar-day-id="<%= currDayId %>">
 		<div class="container session-selected">
-			<p>Day</p>
-				<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
+			<% if( sessionArr.length === 0){ %>
+					<div>
+						<h1>SESSION<br />INITIALIZATION</h1>
+						<p>
+							Enter precise baseline metric to calibrate the performance engine.
+							Accuracy is required for optimal load calculation and volume prescription.
+						</p>
+				</div>
+			<% } else { %>
+				<h1>CHOOSE THE ACTIVE SESSION</h1>
+			<% } %>
+			<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
+
+			<div class="session-step-container">
+				<h3>Exercises (session steps)</h3>
+				<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
+				<% if (sessionStepArr.length > 0) { %>
+					<ul>
+						<% sessionStepArr.forEach(step => { %>
+							<li>
+								<p><%= `(${step.id}) - ${step.name} ` %></p>
+							</li>
+						<% }) %>
+					</ul>
+				<% } %>	
+			 </div>
+			</div>
 		</div>
 	</div>
-</div>
-
+</main>
 
 <%- contentFor("overlays") %>
 
@@ -35,5 +60,14 @@ console.log({currSessionId});
 		title: "Create session",
 		description: "Fill in the session information below.",
 		renderContent: () => include("partials/sessionForm")
+	}
+}) %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createSessionStepModalId,
+		title: "Create session step",
+		description: "Fill in the step information below.",
+		renderContent: () => include("partials/stepForm")
 	}
 }) %>

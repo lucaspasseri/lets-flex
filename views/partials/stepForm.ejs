@@ -3,8 +3,8 @@ const currSessionId = locals?.currSessionId || 0;
 const stepTypeArr = locals?.stepTypeArr || [];
 const exerciseVariantArr = locals?.exerciseVariantArr || [];
 
-const stepArr = locals?.stepArr || [];
-stepArr.push({step_order: stepArr.length +1});
+const sessionStepArr = locals?.sessionStepArr || [];
+sessionStepArr.push({step_order: sessionStepArr.length +1});
 
 const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb", fullName: "Pounds"}];
 %>
@@ -12,6 +12,9 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 <form class="forms" action="/session_steps" method="POST">
 
 	<input hidden type="text" name="sessionId" value="<%= currSessionId %>" />
+
+	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "stepForm" } }); %>
+
 	<%- include("../partialsOld/select", { data: { id: "stepTypeSelect", label: "Step type", name: "stepTypeId", required: true, 
 	options: stepTypeArr, getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id  } }); %>
 
@@ -19,8 +22,8 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 	options: exerciseVariantArr, getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id  } }); %>
 
 
-	<%- include('../partialsOld/olaInput', { data: { label: "# of Sets", type: "text", name: "sets", context: "stepForm" } }); %>
-	<%- include('../partialsOld/olaInput', { data: { label: "# of Reps", type: "text", name: "reps", context: "stepForm" } }); %>
+	<%- include('../partialsOld/olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "stepForm" } }); %>
+	<%- include('../partialsOld/olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "stepForm" } }); %>
 
 	
 	<%- include('../partialsOld/olaInput', { data: { label: "Load", type: "number", name: "loadValue", context: "stepForm" } }); %>
@@ -30,7 +33,7 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 
 
 	<%- include("../partialsOld/select", { data: { id: "stepOrderSelect", label: "Step order", name: "stepOrder", required: true, 
-	options: stepArr, getOptionLabel: (step) => step.step_order, getOptionValue: (step) => step.step_order  } }); %>
+	options: sessionStepArr, getOptionLabel: (step) => step.step_order, getOptionValue: (step) => step.step_order  } }); %>
 
 	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
