@@ -7,17 +7,6 @@ async function insertTrainingDay(db, { cycleId, dayOrder, label }) {
 	return rows[0];
 }
 
-async function getTrainingDaysByCycleId(db, { cycleId }) {
-	if (cycleId === null) return [];
-
-	const { rows } = await db.query(
-		"SELECT * FROM training_days WHERE cycle_id = $1 ORDER BY day_order",
-		[cycleId],
-	);
-
-	return rows;
-}
-
 async function getTrainingDayById(db, { trainingDayId }) {
 	const { rows } = await db.query("SELECT * FROM training_days WHERE id = $1", [
 		trainingDayId,
@@ -30,4 +19,15 @@ async function getTrainingDayById(db, { trainingDayId }) {
 	return rows[0];
 }
 
-export { insertTrainingDay, getTrainingDaysByCycleId, getTrainingDayById };
+async function getTrainingDaysByCycleId(db, { cycleId }) {
+	if (cycleId === null) return [];
+
+	const { rows } = await db.query(
+		"SELECT * FROM training_days WHERE cycle_id = $1 ORDER BY day_order",
+		[cycleId],
+	);
+
+	return rows;
+}
+
+export { insertTrainingDay, getTrainingDayById, getTrainingDaysByCycleId };

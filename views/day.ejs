@@ -1,4 +1,5 @@
 <%
+const currProgram = locals?.currentProgram || {};
 const currCycleId = locals?.currCycleId || null; 
 const currDayId = locals?.currDayId || null;
 const backUrl = locals?.backUrl || "";
@@ -15,10 +16,47 @@ const chosenSessionPath = `/programs/day/${currDayId}/sessions/`;
 
 const createSessionStepModalId = "createSessionStepModal";
 const sessionStepArr = locals?.sessionStepArr || [];
+const trainingDayArr = locals?.trainingDayArr || [];
+
+console.log({trainingDayArr});
+
+const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
+
+console.log({ startDate });
+
+const getScheduleDate = (index) => {
+	const date = formatDate(addDays(startDate, index ), "dd/MM/yyyy");
+	return date;
+}
+
 %>
 <main class="main day">
+	
 	<h1>DAY <%= formattedScheduleDate %></h1>
 	<a href="<%= backUrl %>">Go back</a>
+
+
+	<% if(trainingDayArr.length > 0){ %>
+		<nav>
+			<ul>
+				<% trainingDayArr.forEach((trainingDay,index) => { %>
+					<li>
+						<div>
+							<p><%= getScheduleDate(index) %></p>
+						</div>
+					</li>
+				<% }) %>
+			</ul>
+		</nav>
+	<% } %>
+
+
+	<nav>
+		<ul>
+			<li><a href="/programs/cycle/<%= currCycleId %>/edit">Edit cycle</a></li>
+			<li><a href="/programs/day/<%= currDayId %>/edit">Edit day</a></li>
+		</ul>
+	</nav>
 	<div class="session-component" data-calendar-day-id="<%= currDayId %>">
 		<div class="container session-selected">
 			<% if( sessionArr.length === 0){ %>

@@ -24,60 +24,43 @@ const currDayId = locals?.currDayId || null;
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
-function isDayInACycle(dayIndex, cycleArr){
-	let lastCycleIndex = 0;
-	for(let i =0; i < cycleArr.length; i++){
-		const {id, cycle_size} = cycleArr[i];
+const trainingDayArr = locals?.trainingDayArr || [];
 
-		if(dayIndex <= lastCycleIndex + cycle_size){
-			return id;
+	const getClassName = (index, trainingDay, currCycleId) => {
+		let className = "";
+
+		if(index === 0){
+			className += "startDate ";
 		}
 
-		lastCycleIndex += cycle_size;
-	}
+		if(trainingDay.cycle_id === null){
+			className += "no-cycle";
+			return className;
+		}
 
-	return null;
-}	;
+		if(trainingDay.cycle_id === currCycleId){
+			className += "day-selected";
+			return className;
+		}
 
-function getDayClass(dayIndex, cycleArr, currCycleId){
-	let className = "";
-
-	if(dayIndex === 1){
-		className += "startDate ";
-	}
-
-	const dayCycle = isDayInACycle(dayIndex, cycleArr);
-
-	if(dayCycle === null){
-		className += "no-cycle";
+		className += "cycle-not-selected";
 		return className;
 	}
 
-	if(dayCycle === currCycleId){
-		className += "day-selected";
-		return className;
-	}
 
-	className += "cycle-not-selected";
-	return className;
-}
-
-
-const dayArr = range(1,32).map(day=> {
-	const date = formatDate(addDays(startDate, day - 1 ), "dd/MM/yyyy");
-	const className = getDayClass(day, cycleArr, currCycleId);
-
-	const hasCycleSelected = currCycleId === isDayInACycle(day, cycleArr) && currCycleId !== null;
+const dayArr = trainingDayArr.map((trainingDay, index) => {
+	const hasCycleSelected = currCycleId === trainingDay.cycle_id && currCycleId !== null;
+	const date = formatDate(addDays(startDate, index ), "dd/MM/yyyy");
+	const className = getClassName(index, trainingDay, currCycleId);
 
 	return {
-		id: day, 
-		date,
+		id: index,
+		trainingDayId: trainingDay.training_day_id,
 		hasCycleSelected,
+		date, 
 		className,
 	}
 });
-
-
 
 const getHref = (dayId) => {
 	const path = `/programs/day/${dayId}`;
@@ -102,10 +85,10 @@ const getHref = (dayId) => {
 	<div class="basic-calendar"> 
 		<ul class="list">
 			<% dayArr.forEach((day) => { %>
-				<li class="session-component <%= day.className %>" data-calendar-day-id="<%= day.id %>"> 
+				<li class="session-component <%= day.className %>" data-calendar-day-id="<%= day.trainingDayId %>"> 
 					<div class="container">
 						<% if(day?.hasCycleSelected) { %>
-							<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref(day.id) %>">
+							<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref(day.trainingDayId) %>">
 								<p>	<%= day.date %></p>
 							</a>
 						<% } else { %>
@@ -118,25 +101,6 @@ const getHref = (dayId) => {
 			<% }) %>
 		</ul>
 	</div>
-
-	<% if(sessionArr.length > 0){ %>
-		<div>
-			<ul>
-				<% sessionArr.forEach(session => { %>
-					<li>
-						<p><%= session.name %></p>
-					</li>
-				<% }) %>
-			</ul>
-		</div>
-	<% } %>
-
-	<% if(currDayId) { %>
-
-		<h3>DAY SELECTED</h3>
-		<p><%= dayArr[currDayId].date %></p>
-	<% } %>
-
 </main>
 
 <%- contentFor("overlays") %>

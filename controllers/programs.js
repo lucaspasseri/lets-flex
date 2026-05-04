@@ -11,6 +11,7 @@ import setActiveProgramAfterCreation from "../services/setActiveProgramAfterCrea
 import pool from "../db/pool.js";
 import { da } from "date-fns/locale";
 import toNullableNumber from "../utils/toNullableNumber.js";
+import getTrainingDaysByProgramId from "../services/getTrainingDaysByProgramId.js";
 
 async function addNewProgram(req, res) {
 	await setActiveProgramAfterCreation(req);
@@ -42,11 +43,18 @@ async function renderProgramsPage(req, res) {
 		programId: currProgramId,
 	});
 
+	const trainingDayArr =
+		currProgramId &&
+		(await getTrainingDaysByProgramId(pool, {
+			programId: currProgramId,
+		}));
+
 	res.render("programs", {
 		title: "Let's Flex!",
 		goalArr,
 		programArr,
 		cycleArr,
+		trainingDayArr,
 		currProgramId: currProgramId,
 		currCycleId: currCycleId,
 		currSessionId: currSessionId,
@@ -55,6 +63,9 @@ async function renderProgramsPage(req, res) {
 }
 
 async function renderDayPage(req, res) {
+	const currProgramId =
+		(req.session.state?.programId && Number(req.session.state.programId)) ||
+		null;
 	const currDayId =
 		req.session?.state?.dayId && toNullableNumber(req.session.state.dayId);
 
@@ -75,10 +86,17 @@ async function renderDayPage(req, res) {
 		currSessionId &&
 		(await sessionStepsDb.getSessionStepsBySessionId(currSessionId));
 
+	const trainingDayArr =
+		currProgramId &&
+		(await getTrainingDaysByProgramId(pool, {
+			programId: currProgramId,
+		}));
+
 	res.render("day", {
 		title: "Let's Flex!",
 		currDayId,
 		sessionArr,
+		trainingDayArr,
 		currSessionId,
 		stepTypeArr,
 		exerciseVariantArr,
