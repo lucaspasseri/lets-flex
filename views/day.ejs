@@ -28,6 +28,7 @@ const getNavLinkHref = (trainingDay) => {
 	return `/programs/day/${trainingDay.training_day_id}`;
 }
 
+const currSession = sessionArr.find(session => session.id === currSessionId) || {};
 %>
 <main class="main day">
 	<% if(trainingDayArr.length > 0){ %>
@@ -48,34 +49,40 @@ const getNavLinkHref = (trainingDay) => {
 
 	<div class="session-selection-container">
 		<% if( sessionArr.length === 0){ %>
-					<div>
-						<h1>SESSION<br />INITIALIZATION</h1>
-						<p>
-							Enter precise baseline metric to calibrate the performance engine.
-							Accuracy is required for optimal load calculation and volume prescription.
-						</p>
-				</div>
-			<% } else { %>
+			<div>
+				<h1>SESSION<br />INITIALIZATION</h1>
+				<p>
+					Enter precise baseline metric to calibrate the performance engine.
+					Accuracy is required for optimal load calculation and volume prescription.
+				</p>
+			</div>
+		<% } else { %>
 				<h2>CHOOSE THE ACTIVE SESSION</h2>
-			<% } %>
-			<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
-	</div>
-
-
-	<div class="session-step-container">
-		<h3>Exercises (session steps)</h3>
-		<% if(currSessionId && sessionStepArr.length !== 0){ %>
-			<ul>
-				<% sessionStepArr.forEach(step => { %>
-					<li>
-						<p><%= `(${step.id}) - ${step.name} ` %></p>
-					</li>
-				<% }) %>
-			</ul>
 		<% } %>
-		<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
-		</div>
+		<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
 	</div>
+
+
+	<% if(currSessionId){ %>
+		<div class="session-step-container">
+			<div>
+				<span>SESSION <%= currSession.name %></span>
+				<h3>Exercises (session steps)</h3>
+			</div>
+			<% if(currSessionId && sessionStepArr.length !== 0){ %>
+				<ul>
+					<% sessionStepArr.forEach(step => { %>
+						<li>
+							<div class="session-step-item">
+									<p><%= `(${step.id}) - ${step.name} ` %></p>
+							</div>
+						</li>
+					<% }) %>
+				</ul>
+			<% } %>
+			<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
+		</div>
+	<% } %>
 </main>
 
 <script>
