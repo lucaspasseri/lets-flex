@@ -31,7 +31,6 @@ const getScheduleDate = async (req, res, next) => {
 
 	const startDate = res.locals?.currentProgram?.start_date || null;
 	const scheduleDate = addDays(startDate, distance);
-	console.log({ startDate, scheduleDate });
 
 	res.locals.scheduleDate = scheduleDate;
 

@@ -8,12 +8,8 @@
 		color: inherit;
 	}
 
-	& > .session-component {
-		& .container {
-			justify-content: flex-start;
-			align-items: flex-start;
-			padding: 1em;
-		}
+	& > .training-day-item {
+		height: fit-content;
 	}
 
 	.basic-line[data-id="dayPageSessionBasicLine"] {
@@ -32,13 +28,6 @@
 	}
 }
 
-.session-step-container {
-	border: 1px solid red;
-	flex: 1;
-	width: 100%;
-	margin-top: 1em;
-}
-
 .day-rail-wrapper {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
@@ -53,8 +42,6 @@
 	scroll-snap-type: x mandatory;
 	scroll-behavior: smooth;
 	padding: 1rem;
-
-	/* optional: hide scrollbar */
 	scrollbar-width: none;
 }
 
@@ -89,4 +76,26 @@
 	width: 2.5rem;
 	height: 2.5rem;
 	border-radius: 999px;
+}
+
+.session-step-container {
+	flex: 1;
+	width: 100%;
+	margin-top: 1em;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	button {
+		margin-top: 1em;
+		background-color: transparent;
+		padding: 1.4em;
+		color: var(--color-text);
+		border: 0.4em dashed var(--color-stitch-secondary);
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
 }

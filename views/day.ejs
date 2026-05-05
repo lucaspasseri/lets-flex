@@ -17,11 +17,7 @@ const createSessionStepModalId = "createSessionStepModal";
 const sessionStepArr = locals?.sessionStepArr || [];
 const trainingDayArr = locals?.trainingDayArr || [];
 
-console.log({trainingDayArr});
-
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
-
-console.log({ startDate });
 
 const getScheduleDate = (index) => {
 	const date = formatDate(addDays(startDate, index ), "dd/MM/yyyy");
@@ -46,13 +42,12 @@ const getNavLinkHref = (trainingDay) => {
 		</nav>
 	<% } %>
 
-	<div class="current-day-container">
+	<div class="current-day-container training-day-item session-selected" data-calendar-day-id="<%= currDayId %>">
 		<h1><%= formattedScheduleDate %></h1>
 	</div>
 
-	<div class="session-component" data-calendar-day-id="<%= currDayId %>">
-		<div class="container session-selected">
-			<% if( sessionArr.length === 0){ %>
+	<div class="session-selection-container">
+		<% if( sessionArr.length === 0){ %>
 					<div>
 						<h1>SESSION<br />INITIALIZATION</h1>
 						<p>
@@ -64,21 +59,21 @@ const getNavLinkHref = (trainingDay) => {
 				<h2>CHOOSE THE ACTIVE SESSION</h2>
 			<% } %>
 			<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
+	</div>
 
-			<div class="session-step-container">
-				<h3>Exercises (session steps)</h3>
-				<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
-				<% if (sessionStepArr.length > 0) { %>
-					<ul>
-						<% sessionStepArr.forEach(step => { %>
-							<li>
-								<p><%= `(${step.id}) - ${step.name} ` %></p>
-							</li>
-						<% }) %>
-					</ul>
-				<% } %>	
-			 </div>
-			</div>
+
+	<div class="session-step-container">
+		<h3>Exercises (session steps)</h3>
+		<% if(currSessionId && sessionStepArr.length !== 0){ %>
+			<ul>
+				<% sessionStepArr.forEach(step => { %>
+					<li>
+						<p><%= `(${step.id}) - ${step.name} ` %></p>
+					</li>
+				<% }) %>
+			</ul>
+		<% } %>
+		<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
 		</div>
 	</div>
 </main>

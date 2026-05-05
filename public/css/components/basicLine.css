@@ -1,10 +1,10 @@
 .basic-line {
-	width: 100%;
 	display: flex;
-	min-width: 320px;
-	overflow-x: auto;
 	margin-top: 1em;
 	background-color: var(--color-bg);
+	overflow-x: auto;
+	width: 100%;
+	min-width: 300px;
 
 	ul {
 		display: flex;

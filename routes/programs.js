@@ -62,6 +62,7 @@ router.get(
 	getCurrentProgramByParams,
 	getCurrentCycleByParams,
 	getCurrentDayByParams,
+	getCurrentSessionByParams,
 	getHelpers,
 	getScheduleDate,
 	renderDayPage,
