@@ -13,7 +13,6 @@ const createSessionModalId = "createSessionModal";
 const currSessionId = locals?.currSessionId || null;
 const chosenSessionPath = `/programs/day/${currDayId}/sessions/`;
 
-
 const createSessionStepModalId = "createSessionStepModal";
 const sessionStepArr = locals?.sessionStepArr || [];
 const trainingDayArr = locals?.trainingDayArr || [];
@@ -29,34 +28,28 @@ const getScheduleDate = (index) => {
 	return date;
 }
 
+const getNavLinkHref = (trainingDay) => {
+	return `/programs/day/${trainingDay.training_day_id}`;
+}
+
 %>
 <main class="main day">
-	
-	<h1>DAY <%= formattedScheduleDate %></h1>
-	<a href="<%= backUrl %>">Go back</a>
-
-
 	<% if(trainingDayArr.length > 0){ %>
-		<nav>
-			<ul>
+		<nav class="day-rail-wrapper">
+			<button class="day-arrow" data-scroll-left>‹</button>
+			<ul class="day-rail" id="dayRail">
 				<% trainingDayArr.forEach((trainingDay,index) => { %>
-					<li>
-						<div>
-							<p><%= getScheduleDate(index) %></p>
-						</div>
-					</li>
+					<li><a href="<%= getNavLinkHref(trainingDay) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduleDate(index) %></a></li>
 				<% }) %>
 			</ul>
+			<button class="day-arrow" data-scroll-right>›</button>
 		</nav>
 	<% } %>
 
+	<div class="current-day-container">
+		<h1><%= formattedScheduleDate %></h1>
+	</div>
 
-	<nav>
-		<ul>
-			<li><a href="/programs/cycle/<%= currCycleId %>/edit">Edit cycle</a></li>
-			<li><a href="/programs/day/<%= currDayId %>/edit">Edit day</a></li>
-		</ul>
-	</nav>
 	<div class="session-component" data-calendar-day-id="<%= currDayId %>">
 		<div class="container session-selected">
 			<% if( sessionArr.length === 0){ %>
@@ -68,7 +61,7 @@ const getScheduleDate = (index) => {
 						</p>
 				</div>
 			<% } else { %>
-				<h1>CHOOSE THE ACTIVE SESSION</h1>
+				<h2>CHOOSE THE ACTIVE SESSION</h2>
 			<% } %>
 			<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
 
@@ -89,6 +82,25 @@ const getScheduleDate = (index) => {
 		</div>
 	</div>
 </main>
+
+<script>
+	const rail = document.getElementById("dayRail");
+	const activeDay = rail?.querySelector(".day-card.active");
+
+	activeDay?.scrollIntoView({
+		behavior: "instant",
+		inline: "center",
+		block: "nearest",
+	});
+
+	document.querySelector("[data-scroll-left]")?.addEventListener("click", () => {
+		rail.scrollBy({ left: -240, behavior: "smooth" });
+	});
+
+	document.querySelector("[data-scroll-right]")?.addEventListener("click", () => {
+		rail.scrollBy({ left: 240, behavior: "smooth" });
+	});
+</script>
 
 <%- contentFor("overlays") %>
 

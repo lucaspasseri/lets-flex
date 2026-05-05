@@ -24,9 +24,69 @@
 	}
 }
 
+.current-day-container {
+	text-align: center;
+
+	h1 {
+		font-size: 3.5em;
+	}
+}
+
 .session-step-container {
 	border: 1px solid red;
 	flex: 1;
 	width: 100%;
 	margin-top: 1em;
+}
+
+.day-rail-wrapper {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.day-rail {
+	display: flex;
+	gap: 0.75rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth;
+	padding: 1rem;
+
+	/* optional: hide scrollbar */
+	scrollbar-width: none;
+}
+
+.day-rail::-webkit-scrollbar {
+	display: none;
+}
+
+.day-rail li {
+	list-style: none;
+	flex: 0 0 auto;
+	scroll-snap-align: center;
+}
+
+.day-card {
+	display: block;
+	min-width: 90px;
+	padding: 1rem;
+	border: 1px solid var(--color-text);
+	border-radius: 0.75rem;
+	text-align: center;
+	text-decoration: none;
+	color: inherit;
+}
+
+.day-card.active {
+	background: var(--color-text);
+	color: var(--color-bg);
+	view-transition-name: active-day-card;
+}
+
+.day-arrow {
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 999px;
 }
