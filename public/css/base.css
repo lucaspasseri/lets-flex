@@ -167,3 +167,36 @@ footer.footer {
 		transform: translateX(0);
 	}
 } */
+
+@media screen and (width < 818px) {
+	.basic-calendar > .list {
+		font-size: 0.8em;
+	}
+	.basic-line {
+		font-size: 0.9em;
+	}
+
+	.main-header {
+		font-size: 0.9em;
+	}
+}
+
+@media screen and (width < 665px) {
+	.basic-calendar > .list {
+		font-size: 0.5em;
+	}
+
+	.basic-line {
+		font-size: 0.7em;
+	}
+
+	.main-header {
+		font-size: 0.7em;
+	}
+}
+
+@media screen and (width < 435px) {
+	.basic-calendar > .list {
+		font-size: 0.36em;
+	}
+}

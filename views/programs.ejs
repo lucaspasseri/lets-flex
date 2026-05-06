@@ -71,7 +71,7 @@ const getHref = (dayId) => {
 %>
 
 <main class="main programs">
-	<div>
+	<div class="main-header">
 		<% if(currUserId){ %>
 			<h1>CHOOSE THE ACTIVE PROGRAM</h1>
 				<%- include("partials/newBasicLine", {line: { basicLineId: programBasicLineId, entity: programBasicLineEntity, arr: programArr, modalId: createProgramModalId, currentItemId: currProgramId, path: chosenProgramPath }}) %>

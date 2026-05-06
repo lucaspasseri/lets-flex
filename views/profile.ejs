@@ -9,17 +9,19 @@ const basicLineId = "profilePageUserBasicLine";
 %>
 
 <main class="main profile">
-	<% if( userArr.length === 0){ %>
-		<div>
-			<h1>ATHLETE<br />INITIALIZATION</h1>
-			<p>
-				Enter precise baseline metric to calibrate the performance engine.
-				Accuracy is required for optimal load calculation and volume prescription.
-			</p>
+	<div class="main-header">
+		<% if( userArr.length === 0){ %>
+			<div>
+				<h1>ATHLETE<br />INITIALIZATION</h1>
+				<p>
+					Enter precise baseline metric to calibrate the performance engine.
+					Accuracy is required for optimal load calculation and volume prescription.
+				</p>
+			</div>
+		<% } else { %>
+			<h1>CHOOSE THE ACTIVE USER</h1>
+		<% } %>
 	</div>
-	<% } else { %>
-		<h1>CHOOSE THE ACTIVE USER</h1>
-	<% } %>
 
 	<%- include("partials/newBasicLine", {line: {basicLineId, entity, arr: userArr, modalId, currentItemId: currUserId, path: loggedUserPath }}) %>
 </main>
