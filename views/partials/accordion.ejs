@@ -1,7 +1,6 @@
 <% 
 const contentArr = locals?.contentArr || []; 
-
-console.log({contentArr});
+const renderContent = locals?.renderContent || function(content) { return `<p>${content.name}</p>` };
 %>
 
 
@@ -13,7 +12,7 @@ console.log({contentArr});
 			<div class="accordion-item">
 				<input type="radio" id="section<%= content.id %>" name="accordion" />
 				<label for="section<%= content.id %>" class="accordion-header">
-					<label class="accordion-title"><%= content.name %></label>
+					<span class="accordion-title"><%= content?.step_order || "" %>: <%= content?.name || "" %></span>
 					<div class="accordion-icon">
 						<svg
 							viewBox="0 0 16 16"
@@ -30,7 +29,7 @@ console.log({contentArr});
 					</div>
 				</label>
 				<div class="content">
-					<p>This is the content for <%= content.name %>.</p>
+					<%- renderContent(content) %>
 				</div>
 			</div>
 		<% }) %>

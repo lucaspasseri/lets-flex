@@ -29,8 +29,21 @@ const getNavLinkHref = (trainingDay) => {
 }
 
 const currSession = sessionArr.find(session => session.id === currSessionId) || {};
+
+const renderContent = (content) => {
+	return `
+	<div class="session-step-accordion-content">
+		<p><strong>Step order:</strong> ${content.step_order}</p>
+		<p><strong>Name:</strong> ${content.name}</p>
+		<p><strong>Description:</strong> ${content?.description}</p>
+		<p><strong>Sets:</strong> ${content.sets}</p>
+		<p><strong>Reps:</strong> ${content.reps}</p>
+		<p><strong>Load:</strong> ${content.load_value} ${content.load_unit}</p>
+	</div>
+	`;
+}
 %>
-<main class="main day">
+<ma${content.load_unit}in class="main day">
 	<% if(trainingDayArr.length > 0){ %>
 		<nav class="day-rail-wrapper">
 			<button class="day-arrow" data-scroll-left>‹</button>
@@ -66,12 +79,12 @@ const currSession = sessionArr.find(session => session.id === currSessionId) || 
 	<% if(currSessionId){ %>
 		<div class="session-step-container">
 			<div>
-				<span>SESSION <%= currSession.name %></span>
-				<h3>Exercises (session steps)</h3>
+				<span>SESSION <%= currSession.session_order %>: <%= currSession.name %></span>
+				<h3>Exercises</h3>
 			</div>
 			<% if(currSessionId && sessionStepArr.length !== 0){ %>
 				<ul>
-					<%- include("partials/accordion", { contentArr: sessionStepArr }) %>
+					<%- include("partials/accordion", { contentArr: sessionStepArr, renderContent: renderContent }) %>
 				</ul>
 			<% } %>
 			<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
