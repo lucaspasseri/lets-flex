@@ -71,13 +71,7 @@ const currSession = sessionArr.find(session => session.id === currSessionId) || 
 			</div>
 			<% if(currSessionId && sessionStepArr.length !== 0){ %>
 				<ul>
-					<% sessionStepArr.forEach(step => { %>
-						<li>
-							<div class="session-step-item">
-									<p><%= `(${step.id}) - ${step.name} ` %></p>
-							</div>
-						</li>
-					<% }) %>
+					<%- include("partials/accordion", { contentArr: sessionStepArr }) %>
 				</ul>
 			<% } %>
 			<button type="button"class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
