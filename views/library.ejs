@@ -36,10 +36,12 @@ const createExerciseModalId = "createExerciseModal";
 			</div>
 	
 		<% } else { %>
-			<ul>
+			<ul class="exercise-list">
 				<% exerciseArr.forEach(exercise => { %>
 					<li>
-						<%= exercise.name %>
+						<div class="exercise-card">
+							<%= exercise.name %>
+						</div>
 					</li>
 				<% }) %>
 			</ul>
@@ -47,7 +49,7 @@ const createExerciseModalId = "createExerciseModal";
 
 	</div>
 	<div class="custom-exercise-button-container">
-		<button type="button" data-modal-open="<%= createExerciseModalId %>">ADD CUSTOM EXERCISE +</button>
+		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD EXERCISE</button>
 	</div>
 </main>
 

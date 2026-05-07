@@ -35,7 +35,7 @@
 }
 
 .no-cycle {
-	border: 0.4em dashed var(--color-stitch-secondary);
+	border: 0.36em dashed var(--color-stitch-secondary);
 	background-color: transparent;
 	color: var(--color-text);
 }

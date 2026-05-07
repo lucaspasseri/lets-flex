@@ -2,6 +2,7 @@
 	padding: 1em 0;
 	display: flex;
 	flex-direction: column;
+	gap: 2em;
 }
 
 .main.library .main-header {
@@ -17,8 +18,6 @@
 }
 
 .main.library .title-container {
-	border: 1px solid purple;
-
 	p {
 		color: var(--color-text-muted);
 		font-size: 0.9em;
@@ -27,7 +26,6 @@
 
 .main.library .total-results {
 	margin-left: auto;
-	border: 1px solid orange;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
@@ -62,7 +60,6 @@
 	display: flex;
 	flex-direction: column;
 	flex: 1;
-	justify-content: center;
 
 	h2 {
 		font-size: 2em;
@@ -74,4 +71,32 @@
 	color: var(--color-text-muted);
 	padding: 0.2em 1em;
 	border-left: 0.16em solid var(--color-stitch);
+}
+
+.exercise-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+}
+
+.exercise-card {
+	width: 100%;
+	height: fit-content;
+	padding: 1em;
+	border-radius: 6px;
+	background: var(--color-stitch-secondary);
+}
+
+.custom-exercise-button-container {
+	button {
+		width: 100%;
+		background-color: transparent;
+		padding: 1.4em;
+		color: var(--color-text);
+		border: 0.36em dashed var(--color-stitch-secondary);
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
 }

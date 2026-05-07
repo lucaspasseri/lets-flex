@@ -109,7 +109,7 @@
 		background-color: transparent;
 		padding: 1.4em;
 		color: var(--color-text);
-		border: 0.4em dashed var(--color-border);
+		border: 0.36em dashed var(--color-border);
 
 		&:hover {
 			cursor: pointer;
