@@ -4,11 +4,6 @@ const createExerciseModalId = "createExerciseModal";
 %>
 
 <main class="main library">
-	<h1>
-		MOVEMENT<br />
-		LIBRARY
-	</h1>
-	<div class="title-mark"></div>
 	<div>
 		<input
 			class="search-exercise"
@@ -16,6 +11,23 @@ const createExerciseModalId = "createExerciseModal";
 			placeholder="SEARCH EXERCISES..."
 		/>
 	</div>
+
+
+		<div class="main-header">
+		<% if( exerciseArr.length > 0){ %>
+			<div class="title-mark"></div>
+			<div class="title-container">
+				<h1> MOVEMENT LIBRARY </h1>
+				<p>FOUNDATIONAL MECHANICS & TECHNICAL INDEX</p>
+			</div>
+			<div class="total-results"><span>
+				<%= exerciseArr.length %>
+			</span>
+		  	<p>TOTAL </br> RESULTS</p>
+		</div>
+		<% } %>
+	</div>
+	
 	<div class="exercise-list-container">
 		<% if( exerciseArr.length == 0){ %>
 			<h2> BUILD YOUR<br />ARSENAL</h2>
