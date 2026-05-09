@@ -203,6 +203,12 @@ footer.footer {
 	}
 }
 
+@media screen and (width < 500px) {
+	.week-day-item {
+		font-size: 0.7em;
+	}
+}
+
 @media screen and (width < 435px) {
 	.basic-calendar > .list {
 		font-size: 0.36em;

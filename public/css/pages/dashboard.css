@@ -25,6 +25,7 @@
 	}
 
 	.current-week-container {
+		margin-top: 0.8em;
 		display: flex;
 		justify-content: center;
 
@@ -130,6 +131,7 @@
 		gap: 0.6em;
 
 		.icon {
+			min-width: 24px;
 			width: 24px;
 			height: 24px;
 			fill: var(--color-stitch-text);
@@ -140,4 +142,59 @@
 			letter-spacing: 0.1em;
 		}
 	}
+}
+
+.date-session-container {
+	margin-top: 3em;
+}
+
+.date-session-container .current-day-container {
+	display: flex;
+	justify-content: center;
+}
+
+.date-session-container .current-day {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	padding: 1.4em 0.4em;
+	border-radius: 8px;
+	border: 0.16em solid var(--color-stitch);
+	width: fit-content;
+	background-color: var(--color-stitch-secondary);
+
+	& span:first-of-type {
+		font-size: 2em;
+		color: var(--color-stitch);
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	& span:nth-of-type(2) {
+		font-size: 0.7em;
+		letter-spacing: 0.1em;
+		color: var(--color-stitch);
+	}
+}
+
+.date-session-container .cycle-list-container {
+	margin-top: 1em;
+	ul {
+		display: flex;
+		justify-content: center;
+		gap: 0.8em;
+	}
+}
+
+.date-session-container .cycle-list-item {
+	padding: 0.6em 1em;
+	border-radius: 6px;
+	background-color: var(--color-stitch-secondary);
+	border: 0.1em solid var(--color-border);
+}
+
+.date-session-container .cycle-list-item.active {
+	border: 0.1em solid var(--color-stitch);
+	color: var(--color-stitch);
 }

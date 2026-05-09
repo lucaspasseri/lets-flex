@@ -6,6 +6,9 @@ const currDay = new Date();
 const formattedCurrDay =formatDate(currDay, "MMM dd, yyyy");
 
 const currWeek = [addDays(currDay, -3), addDays(currDay, -2), addDays(currDay, -1), currDay, addDays(currDay, 1), addDays(currDay, 2), addDays(currDay, 3)];
+
+const cycleArr = locals.cycleArr || [];
+const activeCycleId = locals.activeCycleId || [];
 %>
 
 
@@ -60,4 +63,32 @@ const currWeek = [addDays(currDay, -3), addDays(currDay, -2), addDays(currDay, -
 			<h1><%= currProgram.name %></h1>
 		</div>
 	<% } %>
+
+	<% if (currProgramId) { %>
+		<div class="date-session-container">
+			<div class="current-day-container">
+				<div class="current-day">
+					<span><%= formatDate(currDay, "dd / MM") %></span>
+					<span><%= formatDate(currDay, "EEEE").toUpperCase() %></span>
+				</div>
+			</div>
+
+			<% if (cycleArr.length > 0) { %>
+				<div class="cycle-list-container">
+					<ul>
+						<% cycleArr.forEach(cycle => { %>
+							<li class="cycle-list-item <%= cycle.id === activeCycleId ? 'active' : ''  %>">
+								<span>
+									<%= cycle.name.substring(0,2) %>
+								</span>
+							</li>
+						<% }) %>
+					</ul>
+				</div>
+			<% } %>
+
+		</div>
+	<% } %>
+
+
 </main>
