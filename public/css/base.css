@@ -17,7 +17,7 @@
 
 	--color-text: #e5e7eb;
 	--color-text-muted: #6b7280;
-
+	--color-text-dark: rgb(60, 63, 70);
 	--color-border: #2a2d34;
 
 	--box-shadow-header:
@@ -179,6 +179,10 @@ footer.footer {
 	.main-header {
 		font-size: 0.9em;
 	}
+
+	.main .current-day-container {
+		font-size: 0.9em;
+	}
 }
 
 @media screen and (width < 665px) {
@@ -191,6 +195,10 @@ footer.footer {
 	}
 
 	.main-header {
+		font-size: 0.7em;
+	}
+
+	.main .current-day-container {
 		font-size: 0.7em;
 	}
 }

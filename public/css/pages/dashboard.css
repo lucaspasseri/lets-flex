@@ -1,5 +1,143 @@
-.main.dashboard {
+.main.dashboard .main-header {
+	p {
+		color: var(--color-stitch);
+		font-size: 0.8em;
+		letter-spacing: 0.2em;
+	}
+
 	h1 {
-		margin-bottom: 1em;
+		letter-spacing: 0.15em;
+	}
+}
+
+.main.dashboard .sync-status {
+	margin-top: 2.6em;
+
+	.title-container {
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.title {
+		color: var(--color-text-muted);
+		font-size: 0.8em;
+		letter-spacing: 0.2em;
+	}
+
+	.current-week-container {
+		display: flex;
+		justify-content: center;
+
+		ul {
+			display: flex;
+			gap: 0.8em;
+		}
+	}
+
+	.week-day-item {
+		background-color: var(--color-stitch-secondary);
+		padding: 1em;
+		color: var(--color-text);
+		display: flex;
+		flex-direction: column;
+		gap: 0.25em;
+		align-items: center;
+		border-radius: 6px;
+
+		> span:first-of-type {
+			font-size: 0.7em;
+			color: var(--color-text-muted);
+		}
+
+		> span:nth-of-type(2) {
+			font-size: 1.2em;
+			letter-spacing: 0.1em;
+		}
+
+		&.active {
+			border-bottom: 0.2em solid var(--color-stitch);
+
+			> span {
+				color: var(--color-stitch);
+			}
+		}
+	}
+}
+
+.active-program-container {
+	padding: 1.4em;
+	border-left: 0.2em solid var(--color-stitch);
+	border-radius: 4px;
+	background-color: var(--color-stitch-secondary);
+
+	p {
+		font-size: 0.6em;
+		letter-spacing: 0.2em;
+		color: var(--color-stitch);
+		margin-bottom: 0.3em;
+	}
+
+	h1 {
+		font-size: 1.5em;
+		color: var(--color-text);
+		font-weight: 500;
+	}
+}
+
+.no-active-program-container {
+	display: flex;
+	justify-content: center;
+	margin-top: 2.6em;
+
+	.content {
+		background-color: var(--color-stitch-secondary);
+		padding: 2em;
+		display: flex;
+		flex-direction: column;
+		gap: 1.2em;
+	}
+
+	.image-container {
+		background-color: var(--color-text-muted);
+		border-radius: 4px;
+		padding: 1em 0.7em;
+		width: fit-content;
+	}
+
+	h2 {
+		font-size: 1.4em;
+		color: var(--color-text);
+		letter-spacing: 0.06em;
+	}
+
+	p {
+		color: var(--color-text-muted);
+		max-width: 400px;
+		font-size: 1.1em;
+	}
+
+	a {
+		padding: 0.8em 1.4em;
+		background-color: var(--color-stitch);
+		color: var(--color-stitch-text);
+		border-radius: 4px;
+		font-size: 0.8em;
+		text-decoration: none;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+		display: flex;
+		align-items: center;
+		gap: 0.6em;
+
+		.icon {
+			width: 24px;
+			height: 24px;
+			fill: var(--color-stitch-text);
+		}
+
+		p {
+			color: var(--color-stitch-text);
+			letter-spacing: 0.1em;
+		}
 	}
 }
