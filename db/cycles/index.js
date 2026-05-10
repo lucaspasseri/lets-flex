@@ -107,7 +107,7 @@ async function getCycleById(db, { cycleId }) {
 
 async function getCyclesByProgramId(db, { programId }) {
 	const { rows: cycles } = await db.query(
-		"SELECT * FROM cycles WHERE program_id = $1 ORDER BY cycle_order",
+		"SELECT * FROM cycles WHERE program_id = $1 ORDER BY cycle_order ASC",
 		[programId],
 	);
 
@@ -125,7 +125,22 @@ async function verifyCycleExistence(cycleId) {
 
 async function updateCycleOrder(db, { programId, cycleOrder }) {
 	await db.query(
-		"UPDATE cycles SET cycle_order = cycle_order + 1 WHERE program_id = $1 AND cycle_order >= $2",
+		`
+			UPDATE cycles
+			SET cycle_order = cycle_order + 1000
+			WHERE program_id = $1
+				AND cycle_order >= $2
+		`,
+		[programId, cycleOrder],
+	);
+
+	await db.query(
+		`
+			UPDATE cycles
+			SET cycle_order = cycle_order - 999
+			WHERE program_id = $1
+				AND cycle_order >= $2 + 1000
+		`,
 		[programId, cycleOrder],
 	);
 }

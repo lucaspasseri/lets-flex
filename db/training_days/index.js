@@ -1,7 +1,10 @@
-async function insertTrainingDay(db, { cycleId, dayOrder, label }) {
+async function insertTrainingDay(
+	db,
+	{ cycleId, dayOrder, label, scheduledDate },
+) {
 	const { rows } = await db.query(
-		"INSERT INTO training_days ( cycle_id, day_order, label) VALUES ($1, $2, $3) RETURNING *",
-		[cycleId, dayOrder, label],
+		"INSERT INTO training_days ( cycle_id, day_order, label, scheduled_date) VALUES ($1, $2, $3, $4) RETURNING *",
+		[cycleId, dayOrder, label, scheduledDate],
 	);
 
 	return rows[0];
@@ -30,4 +33,26 @@ async function getTrainingDaysByCycleId(db, { cycleId }) {
 	return rows;
 }
 
-export { insertTrainingDay, getTrainingDayById, getTrainingDaysByCycleId };
+async function shiftScheduledDatesFromCycleOrder(
+	db,
+	{ programId, cycleOrder, amountOfDays },
+) {
+	await db.query(
+		`
+			UPDATE training_days td
+			SET scheduled_date = td.scheduled_date + ($3::int * INTERVAL '1 day')
+			FROM cycles c
+			WHERE td.cycle_id = c.id
+				AND c.program_id = $1
+				AND c.cycle_order > $2
+		`,
+		[programId, cycleOrder, amountOfDays],
+	);
+}
+
+export {
+	insertTrainingDay,
+	getTrainingDayById,
+	getTrainingDaysByCycleId,
+	shiftScheduledDatesFromCycleOrder,
+};

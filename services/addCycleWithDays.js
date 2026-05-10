@@ -3,7 +3,7 @@ import * as cyclesDb from "../db/cycles/index.js";
 import * as programsDb from "../db/programs/index.js";
 import * as trainingDaysDb from "../db/training_days/index.js";
 import toNullableNumber from "../utils/toNullableNumber.js";
-import range from "../utils/range.js";
+import { addDays } from "date-fns";
 
 async function addCycleWithDays({ programId, name, cycleSize, cycleOrder }) {
 	const client = await pool.connect();
@@ -18,6 +18,7 @@ async function addCycleWithDays({ programId, name, cycleSize, cycleOrder }) {
 		}
 
 		const cycles = await cyclesDb.getCyclesByProgramId(client, { programId });
+
 		const numericCycleOrder = toNullableNumber(cycleOrder);
 		const numericCycleSize = toNullableNumber(cycleSize);
 
@@ -32,17 +33,40 @@ async function addCycleWithDays({ programId, name, cycleSize, cycleOrder }) {
 			);
 		}
 
+		if (
+			numericCycleSize === null ||
+			!Number.isInteger(numericCycleSize) ||
+			numericCycleSize < 1
+		) {
+			throw new Error("Cycle size must be a positive integer");
+		}
+
+		const daysBeforeNewCycle = cycles
+			.filter(cycle => cycle.cycle_order < numericCycleOrder)
+			.reduce((sum, cycle) => sum + Number(cycle.cycle_size), 0);
+
+		const currCycleBaseScheduledDate = addDays(
+			program.start_date,
+			daysBeforeNewCycle,
+		);
+
 		if (numericCycleOrder <= cycles.length) {
 			await cyclesDb.updateCycleOrder(client, {
 				programId,
 				cycleOrder: numericCycleOrder,
+			});
+
+			await trainingDaysDb.shiftScheduledDatesFromCycleOrder(client, {
+				programId,
+				cycleOrder: numericCycleOrder,
+				amountOfDays: numericCycleSize,
 			});
 		}
 
 		const cycle = await cyclesDb.insertCycle(client, {
 			programId,
 			name,
-			cycleSize,
+			cycleSize: numericCycleSize,
 			cycleOrder: numericCycleOrder,
 		});
 
@@ -51,10 +75,12 @@ async function addCycleWithDays({ programId, name, cycleSize, cycleOrder }) {
 				cycleId: cycle.id,
 				dayOrder: index + 1,
 				label: `Day ${index + 1}`,
+				scheduledDate: addDays(currCycleBaseScheduledDate, index),
 			});
 		}
 
 		await client.query("COMMIT");
+
 		return cycle.id;
 	} catch (err) {
 		await client.query("ROLLBACK");
