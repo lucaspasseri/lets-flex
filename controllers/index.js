@@ -41,6 +41,11 @@ async function getIndex(req, res) {
 	// 	Number(res.locals.currentUser.id),
 	// );
 
+	const daysDifference =
+		(req.session.state?.daysDifference &&
+			Number(req.session.state.daysDifference)) ||
+		null;
+
 	const currProgramId =
 		(req.session.state?.programId && Number(req.session.state.programId)) ||
 		null;
@@ -54,8 +59,13 @@ async function getIndex(req, res) {
 
 	const currDay = new Date();
 
-	const getActiveCycleId = (startDate, currDay, cycleArr) => {
-		if (res.locals.differenceInCalendarDays(currDay, startDate) < 0) {
+	const getActiveCycleId = (startDate, currDay, daysDifference, cycleArr) => {
+		const relativeDay =
+			daysDifference !== null
+				? res.locals.addDays(currDay, daysDifference)
+				: currDay;
+
+		if (res.locals.differenceInCalendarDays(relativeDay, startDate) < 0) {
 			return null;
 		}
 
@@ -66,7 +76,7 @@ async function getIndex(req, res) {
 			if (
 				res.locals.differenceInCalendarDays(
 					res.locals.addDays(lastDate, cycle_size),
-					currDay,
+					relativeDay,
 				) > 0
 			) {
 				return id;
@@ -85,14 +95,19 @@ async function getIndex(req, res) {
 		currProgramStartDate !== null ||
 		cycleArr.length > 0
 	) {
-		activeCycleId = getActiveCycleId(currProgramStartDate, currDay, cycleArr);
+		activeCycleId = getActiveCycleId(
+			currProgramStartDate,
+			currDay,
+			daysDifference,
+			cycleArr,
+		);
 	}
 
 	res.render("index", {
 		title: "Let's Flex!",
 		cycleArr,
-
 		activeCycleId,
+		daysDifference,
 	});
 }
 

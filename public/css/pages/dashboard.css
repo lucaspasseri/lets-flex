@@ -151,6 +151,8 @@
 .date-session-container .current-day-container {
 	display: flex;
 	justify-content: center;
+	align-items: center;
+	gap: 1em;
 }
 
 .date-session-container .current-day {
@@ -175,6 +177,27 @@
 		font-size: 0.7em;
 		letter-spacing: 0.1em;
 		color: var(--color-stitch);
+	}
+}
+
+.date-session-container .previousDayArrow,
+.nextDayArrow {
+	border: none;
+	padding: 0.4em 0.8em;
+	border-radius: 6px;
+	color: var(--color-text-muted);
+	&:link,
+	&:visited {
+		background-color: var(--color-stitch-text);
+
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+	}
+
+	&:hover,
+	&:active {
+		background-color: var(--color-stitch);
 	}
 }
 

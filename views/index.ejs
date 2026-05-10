@@ -3,9 +3,10 @@ const currProgramId = locals.currentProgram ? locals.currentProgram.id : null;
 const currProgram = locals.currentProgram || null;
 
 const currDay = new Date();
-const formattedCurrDay =formatDate(currDay, "MMM dd, yyyy");
+const activeDay = daysDifference === null ? currDay : addDays(currDay,daysDifference);
+const formattedActiveDay =formatDate(activeDay, "MMM dd, yyyy");
 
-const currWeek = [addDays(currDay, -3), addDays(currDay, -2), addDays(currDay, -1), currDay, addDays(currDay, 1), addDays(currDay, 2), addDays(currDay, 3)];
+const currWeek = [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
 
 const cycleArr = locals.cycleArr || [];
 const activeCycleId = locals.activeCycleId || [];
@@ -24,7 +25,7 @@ const activeCycleId = locals.activeCycleId || [];
 		<div class="sync-status">
 			<div class="title-container">
 				<p class="title">TEMPORAL SYNC</p>
-				<p><%= formattedCurrDay %></p>
+				<p><%= formattedActiveDay %></p>
 			</div>
 			<div class="current-week-container">
 				<ul>
@@ -66,11 +67,14 @@ const activeCycleId = locals.activeCycleId || [];
 
 	<% if (currProgramId) { %>
 		<div class="date-session-container">
+			
 			<div class="current-day-container">
+				<a href="<%= `/differenceInCalendarDays/${daysDifference -1}` %>" class="previousDayArrow" ><</a>
 				<div class="current-day">
-					<span><%= formatDate(currDay, "dd / MM") %></span>
-					<span><%= formatDate(currDay, "EEEE").toUpperCase() %></span>
+					<span><%= formatDate(activeDay, "dd / MM") %></span>
+					<span><%= formatDate(activeDay, "EEEE").toUpperCase() %></span>
 				</div>
+				<a href="<%= `/differenceInCalendarDays/${daysDifference +1}` %>"class="nextDayArrow" >></a>
 			</div>
 
 			<% if (cycleArr.length > 0) { %>
