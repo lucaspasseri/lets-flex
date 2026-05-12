@@ -9,7 +9,6 @@ import * as sessionStepsDb from "../db/session_steps/index.js";
 import setActiveProgramAfterCreation from "../services/setActiveProgramAfterCreation.js";
 
 import pool from "../db/pool.js";
-import { da } from "date-fns/locale";
 import toNullableNumber from "../utils/toNullableNumber.js";
 import getTrainingDaysByProgramId from "../services/getTrainingDaysByProgramId.js";
 

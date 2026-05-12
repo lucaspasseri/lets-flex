@@ -273,7 +273,18 @@
 
 .date-session-container .week-day.active {
 	background-color: var(--color-stitch);
+
 	color: var(--color-stitch-secondary);
 	font-weight: 700;
-	box-shadow: 0 1.25rem 3rem rgb(0 0 0 / 0.35);
+}
+
+.active-session-container .change-active-session-container {
+	margin-top: 2.2em;
+	border: 1px solid red;
+	ul {
+		display: flex;
+		gap: 1em;
+		margin: 0 auto;
+		width: fit-content;
+	}
 }

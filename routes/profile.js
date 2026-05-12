@@ -1,25 +1,19 @@
 import { Router } from "express";
-import { getCurrentUser } from "../middlewares/getCurrentUser.js";
-import {
-	renderProfilePage,
-	renderProfilePageByUserId,
-} from "../controllers/profile.js";
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { getCurrentUserByParams } from "../middlewares/getCurrentUserByParams.js";
+import { getSessionState } from "../middlewares/getSessionState.js";
+import { getProfilePageParams } from "../middlewares/getProfilePageParams.js";
+import { getCurrentUserFromParams } from "../middlewares/getCurrentUserFromParams.js";
+import { renderProfilePage } from "../controllers/profile.js";
 
 const router = Router();
 
 router.get(
 	"/",
 	getUrlAndPath,
-	getCurrentUserByParams,
-	renderProfilePageByUserId,
-);
-router.get(
-	"/user/:userId",
-	getUrlAndPath,
-	getCurrentUserByParams,
-	renderProfilePageByUserId,
+	getSessionState,
+	getProfilePageParams,
+	getCurrentUserFromParams,
+	renderProfilePage,
 );
 
 export default router;

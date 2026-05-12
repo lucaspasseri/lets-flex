@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { renderLibraryPage } from "../controllers/library.js";
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { getCurrentUser } from "../middlewares/getCurrentUser.js";
+import { getCurrentUserFromParams } from "../middlewares/getCurrentUserFromParams.js";
 
 const router = new Router();
 
-router.get("/", getUrlAndPath, getCurrentUser, renderLibraryPage);
+router.get("/", getUrlAndPath, getCurrentUserFromParams, renderLibraryPage);
 
 export default router;

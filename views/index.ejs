@@ -23,6 +23,14 @@ const multiSessionLabel = (sessionArrLength, sessionLabel) => {
 	
 		return `${sessionLabel}${additionalLabel}`;
 }
+
+const activeDaySessionArr = filterSessionsByDay(sessionArr, activeDay);
+
+
+
+const currUrl = locals?.url || "";
+const currPath = locals?.path || "";
+console.log({currUrl, path});
 %>
 
 
@@ -127,6 +135,34 @@ const multiSessionLabel = (sessionArrLength, sessionLabel) => {
 					</ul>
 				</div>
 			<% } %>
+
+			<div class="active-session-container">
+				<% if (activeDaySessionArr.length === 0) { %>
+					<h2> RESTING / NO-SESSION DAY</h2>
+
+				<% } else if (activeDaySessionArr.length === 1) { %>
+					<div class="day-session-container">
+						<h3><%= activeDaySessionArr[0].session_name %></h3>
+					</div>
+
+				<% } else { %>
+					<div>
+						<div class="change-active-session-container">
+							<ul>
+								<% activeDaySessionArr.forEach(session => { %>
+									<li>
+										<a href="<%= `${currUrl}/activeSession/${session.session_id}` %>">[<%= session.session_name %>]</a>
+									</li>
+								<% }) %>
+							</ul>
+						</div>
+
+						<div class="day-session-container">
+							<h3><%= activeDaySessionArr[0].session_name %></h3>
+						</div>
+					</div>
+				<% } %>
+			</div>
 
 		</div>
 	<% } %>

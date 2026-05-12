@@ -1,11 +1,10 @@
 <% 
-const currUserId = locals?.currUserId || null;
-const userArr = locals?.userArr || [];
+const currUserId = locals.sessionState.userId ?? null;
+const userArr = locals.data.userArr ?? [];
 const entity = "user";
-const loggedUserPath = "/profile/user/";
+const loggedUserPath = "/profile/?userId=";
 const modalId = "createUserModal";
 const basicLineId = "profilePageUserBasicLine";
-
 %>
 
 <main class="main profile">

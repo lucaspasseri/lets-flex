@@ -5,7 +5,7 @@ import {
 	renderDayPage,
 } from "../controllers/programs.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
-import { getCurrentUser } from "../middlewares/getCurrentUser.js";
+import { getCurrentUserFromParams } from "../middlewares/getCurrentUserFromParams.js";
 import { getCurrentProgram } from "../middlewares/getCurrentProgram.js";
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getCurrentProgramByParams } from "../middlewares/getCurrentProgramByParams.js";
@@ -19,7 +19,7 @@ const router = express.Router();
 router.get(
 	"/",
 	getUrlAndPath,
-	getCurrentUser,
+	getCurrentUserFromParams,
 	getCurrentProgram,
 	getHelpers,
 	renderProgramsPage,
@@ -28,7 +28,7 @@ router.get(
 router.get(
 	"/:programId",
 	getUrlAndPath,
-	getCurrentUser,
+	getCurrentUserFromParams,
 	getCurrentProgramByParams,
 	getHelpers,
 	renderProgramsPage,
@@ -37,7 +37,7 @@ router.get(
 router.get(
 	"/:programId/cycles/:cycleId",
 	getUrlAndPath,
-	getCurrentUser,
+	getCurrentUserFromParams,
 	getCurrentProgramByParams,
 	getCurrentCycleByParams,
 	getHelpers,
@@ -47,7 +47,7 @@ router.get(
 router.get(
 	"/:programId/cycles/:cycleId/day/:dayId",
 	getUrlAndPath,
-	getCurrentUser,
+	getCurrentUserFromParams,
 	getCurrentProgramByParams,
 	getCurrentCycleByParams,
 	getCurrentDayByParams,
@@ -58,7 +58,7 @@ router.get(
 router.get(
 	"/day/:dayId",
 	getUrlAndPath,
-	getCurrentUser,
+	getCurrentUserFromParams,
 	getCurrentProgramByParams,
 	getCurrentCycleByParams,
 	getCurrentDayByParams,
@@ -71,7 +71,7 @@ router.get(
 router.get(
 	"/day/:dayId/sessions/:sessionId",
 	getUrlAndPath,
-	getCurrentUser,
+	getCurrentUserFromParams,
 	getCurrentProgramByParams,
 	getCurrentCycleByParams,
 	getCurrentDayByParams,
