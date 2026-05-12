@@ -183,6 +183,10 @@ footer.footer {
 	.main .current-day-container {
 		font-size: 0.9em;
 	}
+
+	.date-session-container .training-day-list-container {
+		font-size: 0.9em;
+	}
 }
 
 @media screen and (width < 665px) {
@@ -201,16 +205,28 @@ footer.footer {
 	.main .current-day-container {
 		font-size: 0.7em;
 	}
+
+	.date-session-container .training-day-list-container {
+		font-size: 0.7em;
+	}
 }
 
 @media screen and (width < 500px) {
 	.week-day-item {
 		font-size: 0.7em;
 	}
+
+	.date-session-container .training-day-list-container {
+		font-size: 0.5em;
+	}
 }
 
 @media screen and (width < 435px) {
 	.basic-calendar > .list {
 		font-size: 0.36em;
+	}
+
+	.date-session-container .training-day-list-container {
+		font-size: 0.4em;
 	}
 }

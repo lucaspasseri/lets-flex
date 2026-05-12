@@ -3,13 +3,26 @@ const currProgramId = locals.currentProgram ? locals.currentProgram.id : null;
 const currProgram = locals.currentProgram || null;
 
 const currDay = new Date();
-const activeDay = daysDifference === null ? currDay : addDays(currDay,daysDifference);
+const activeDay = daysDifference === null ? currDay : addDays(currDay, daysDifference);
 const formattedActiveDay =formatDate(activeDay, "MMM dd, yyyy");
 
 const currWeek = [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
 
 const cycleArr = locals.cycleArr || [];
 const activeCycleId = locals.activeCycleId || [];
+const sessionArr = locals.sessionArr || [];
+
+
+const filterSessionsByDay = (sessionArr, day) => {
+	return sessionArr.filter(session => isSameDay(session.scheduled_date, day));
+}
+
+const multiSessionLabel = (sessionArrLength, sessionLabel) => {
+		const moreSessionSymbol = "*"; 
+		const additionalLabel = moreSessionSymbol.repeat(sessionArrLength -1);
+	
+		return `${sessionLabel}${additionalLabel}`;
+}
 %>
 
 
@@ -67,15 +80,6 @@ const activeCycleId = locals.activeCycleId || [];
 
 	<% if (currProgramId) { %>
 		<div class="date-session-container">
-			
-			<div class="current-day-container">
-				<a href="<%= `/differenceInCalendarDays/${daysDifference -1}` %>" class="previousDayArrow" ><</a>
-				<div class="current-day">
-					<span><%= formatDate(activeDay, "dd / MM") %></span>
-					<span><%= formatDate(activeDay, "EEEE").toUpperCase() %></span>
-				</div>
-				<a href="<%= `/differenceInCalendarDays/${daysDifference +1}` %>"class="nextDayArrow" >></a>
-			</div>
 
 			<% if (cycleArr.length > 0) { %>
 				<div class="cycle-list-container">
@@ -90,10 +94,37 @@ const activeCycleId = locals.activeCycleId || [];
 					</ul>
 				</div>
 			<% } %>
+			
+			<div class="current-day-container">
+				<a href="<%= `/differenceInCalendarDays/${daysDifference -1}` %>" class="previousDayArrow" ><</a>
+				<div class="current-day">
+					<span><%= formatDate(activeDay, "dd / MM") %></span>
+					<span><%= formatDate(activeDay, "EEEE").toUpperCase() %></span>
+				</div>
+				<a href="<%= `/differenceInCalendarDays/${daysDifference +1}` %>"class="nextDayArrow" >></a>
+			</div>
 
-			<% if (cycleArr.length > 0) { %>
+			<% if (sessionArr.length > 0) { %>
 				<div class="training-day-list-container">
-					<ul></ul>
+					<ul>
+						<% currWeek.forEach( (day, index) => { %>
+							<li class="<%= index === 3 ? 'active' : '' %>">
+								<span><%= formatDate(day, "EEE") %></span>
+								<div class="week-day <%= index === 3 ? 'active' : '' %>">
+									<% const filteredSessionArr = filterSessionsByDay(sessionArr, day); %>
+									<% if(filteredSessionArr.length === 0) { %>
+										<p>REST</p>
+
+									<% } else if(filteredSessionArr.length === 1) { %>
+										<p><%= filteredSessionArr[0].session_name.substring(0,4) %></p>
+
+									<% } else { %>
+										<p><%= multiSessionLabel(filteredSessionArr.length, filteredSessionArr[0].session_name.substring(0,5)) %></p>
+									<% } %>
+								</div>
+							</li>
+						<% }) %>
+					</ul>
 				</div>
 			<% } %>
 

@@ -202,7 +202,7 @@
 }
 
 .date-session-container .cycle-list-container {
-	margin-top: 1em;
+	margin-bottom: 1em;
 	ul {
 		display: flex;
 		justify-content: center;
@@ -223,7 +223,57 @@
 }
 
 .date-session-container .training-day-list-container {
-	margin-top: 2em;
+	margin-top: 0.6em;
 	padding: 0.6em 1em;
+
+	ul {
+		display: flex;
+		gap: 1em;
+		width: fit-content;
+		margin: 0 auto;
+	}
+
+	li {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+
+		span {
+			font-size: 1.2em;
+			letter-spacing: 0.1em;
+			margin-bottom: 0.2em;
+		}
+
+		&.active {
+			font-size: 1.15em;
+
+			span {
+				color: var(--color-stitch);
+				font-weight: 700;
+				margin-bottom: 0.2em;
+			}
+		}
+	}
+}
+
+.date-session-container .week-day {
+	width: 5em;
+	height: 4.2em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	border: 0.1em solid var(--color-border);
+	background-color: var(--color-stitch-secondary);
+
+	p {
+		font-size: 1.2em;
+	}
+}
+
+.date-session-container .week-day.active {
+	background-color: var(--color-stitch);
+	color: var(--color-stitch-secondary);
+	font-weight: 700;
+	box-shadow: 0 1.25rem 3rem rgb(0 0 0 / 0.35);
 }

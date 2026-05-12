@@ -1,5 +1,6 @@
 import * as cyclesDb from "../db/cycles/index.js";
 import pool from "../db/pool.js";
+import getSessionsByProgramIdAndScheduleDate from "../services/getSessionsByProgramIdAndScheduleDate.js";
 
 // import * as programsDb from "../db/programs/index.js";
 // import * as goalsDb from "../db/goals/index.js";
@@ -103,11 +104,19 @@ async function getIndex(req, res) {
 		);
 	}
 
+	const sessionArr = await getSessionsByProgramIdAndScheduleDate(pool, {
+		programId: currProgramId,
+		currDay,
+		startDate: currProgramStartDate,
+		daysDifference,
+	});
+
 	res.render("index", {
 		title: "Let's Flex!",
 		cycleArr,
 		activeCycleId,
 		daysDifference,
+		sessionArr,
 	});
 }
 
