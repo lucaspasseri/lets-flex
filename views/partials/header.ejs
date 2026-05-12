@@ -1,4 +1,4 @@
-<% const username = locals?.currentUser ? currentUser.name : "Guest" %>
+<% const username = locals.appState?.currentUser?.name ?? "Guest" %>
 
 <header class="header">
 	<div class="logoContainer"><%- include('logo'); %></div>

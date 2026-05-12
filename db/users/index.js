@@ -32,14 +32,12 @@ async function verifyUserExistence(userId) {
 	return userExistence.length > 0;
 }
 
-async function getUserById(userId) {
-	const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [
-		Number(userId),
+async function getUserById(db, { userId }) {
+	const { rows: users } = await db.query("SELECT * FROM users WHERE id = $1", [
+		userId,
 	]);
 
-	const currentUser = rows[0];
-
-	return currentUser;
+	return users?.[0];
 }
 
 export { getAllUsers, postNewUser, verifyUserExistence, getUserById };
