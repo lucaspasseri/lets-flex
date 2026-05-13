@@ -1,7 +1,10 @@
 <%
-const currProgram = locals?.currentProgram || {};
-const currCycleId = locals?.currCycleId || null; 
-const currDayId = locals?.currDayId || null;
+const currProgram = locals.appState?.currentProgram ?? {};
+const currCycleId = locals.sessionState?.cycleId || null; 
+const currSessionId = locals.sessionState?.sessionId || null;
+const currDayId = locals.sessionState?.dayId || null;
+
+
 const backUrl = locals?.backUrl || "";
 const scheduleDate = locals?.scheduleDate || null;
 const formattedScheduleDate = scheduleDate ? locals.formatDate(scheduleDate, "dd/MM/yyyy") : "No date";
@@ -10,8 +13,8 @@ const sessionBasicLineId = "dayPageSessionBasicLine";
 const sessionBasicLineEntity = "session";
 const sessionArr = locals?.sessionArr || [];
 const createSessionModalId = "createSessionModal";
-const currSessionId = locals?.currSessionId || null;
-const chosenSessionPath = `/programs/day/${currDayId}/sessions/`;
+
+const chosenSessionPath = `/programs/day/${currDayId}?sessionId=`;
 
 const createSessionStepModalId = "createSessionStepModal";
 const sessionStepArr = locals?.sessionStepArr || [];

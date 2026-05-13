@@ -4,6 +4,7 @@ const makeCurrentEntity =
 		try {
 			res.locals.appState ??= {};
 			res.locals.sessionState ??= {};
+			res.locals[pageParamsKey] ??= {};
 
 			const candidateId =
 				res.locals?.[pageParamsKey]?.[paramKey] ??

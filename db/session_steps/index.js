@@ -18,12 +18,13 @@ async function getAllSessionStepsWithJoins() {
 	return sessionSteps;
 }
 
-async function getSessionStepsBySessionId(sessionId) {
-	const { rows } = await pool.query(
+async function getSessionStepsBySessionId(db, { sessionId }) {
+	const { rows: sessionSteps } = await db.query(
 		"SELECT * FROM session_steps WHERE session_id = $1 ORDER BY step_order",
 		[sessionId],
 	);
-	return rows;
+
+	return sessionSteps;
 }
 
 async function postNewSessionStep(

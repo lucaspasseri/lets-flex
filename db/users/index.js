@@ -6,23 +6,6 @@ async function getAllUsers() {
 	return users;
 }
 
-async function postNewUser(name, dob, anamnesis) {
-	if (dob === "") {
-		const { rows } = await pool.query(
-			"INSERT INTO users (name, anamnesis) VALUES ($1, $2) RETURNING id",
-			[name, anamnesis],
-		);
-
-		return rows[0].id;
-	}
-	const { rows } = await pool.query(
-		"INSERT INTO users (name, date_of_birth, anamnesis) VALUES ($1, $2, $3) RETURNING id",
-		[name, dob, anamnesis],
-	);
-
-	return rows[0].id;
-}
-
 async function verifyUserExistence(userId) {
 	const { rows: userExistence } = await pool.query(
 		"SELECT COUNT(*) FROM users WHERE id = $1",
@@ -38,6 +21,23 @@ async function getUserById(db, { userId }) {
 	]);
 
 	return users?.[0];
+}
+
+async function postNewUser(db, { name, dob, anamnesis }) {
+	if (dob === "") {
+		const { rows } = await pool.query(
+			"INSERT INTO users (name, anamnesis) VALUES ($1, $2) RETURNING id",
+			[name, anamnesis],
+		);
+
+		return rows[0].id;
+	}
+	const { rows } = await pool.query(
+		"INSERT INTO users (name, date_of_birth, anamnesis) VALUES ($1, $2, $3) RETURNING id",
+		[name, dob, anamnesis],
+	);
+
+	return rows[0].id;
 }
 
 export { getAllUsers, postNewUser, verifyUserExistence, getUserById };

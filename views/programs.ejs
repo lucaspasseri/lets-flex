@@ -1,26 +1,28 @@
 <% 
+
+const currUserId = locals.sessionState?.userId ?? null;
+const currProgramId = locals.sessionState?.programId ?? null;
+const currCycleId = locals.sessionState?.cycleId ?? null;
+const currSessionId = locals.sessionState?.sessionId ?? null;
+const currDayId = locals.sessionState?.dayId ?? null;
+
+const currProgram = locals.appState?.currentProgram ?? {};
+
+
 const programBasicLineId = "programsPageProgramBasicLine";
 const programBasicLineEntity = "program";
 const programArr = locals?.programArr || [];
 const createProgramModalId = "createProgramModal";
-const currProgramId = locals?.currProgramId || null;
 const chosenProgramPath = "/programs/";
 
 const cycleBasicLineId = "cyclesPageCycleBasicLine";
 const cycleBasicLineEntity = "cycle";
 const cycleArr = locals?.cycleArr || [];
 const createCycleModalId = "createCycleModal";
-const currCycleId = locals?.currCycleId || null;
-const chosenCyclePath = `/programs/${currProgramId}/cycles/`;
+const chosenCyclePath = `/programs/${currProgramId}?cycleId=`;
 
 
 const sessionArr = locals?.sessionArr || [];
-
-const currUserId = locals?.currentUser?.id || null;
-const currProgram = locals?.currentProgram || {};
-const currSessionId = locals?.currSessionId || null;
-const currDayId = locals?.currDayId || null;
-
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 

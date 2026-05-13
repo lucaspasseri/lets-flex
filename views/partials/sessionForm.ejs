@@ -1,5 +1,5 @@
 <%
-const currDayId = typeof locals?.currDayId === "number" ? locals.currDayId : null;
+const currDayId = locals.sessionState?.dayId || null;
 const sessionArr = locals?.sessionArr || [];
 sessionArr.push({session_order: sessionArr.length + 1});
 %>

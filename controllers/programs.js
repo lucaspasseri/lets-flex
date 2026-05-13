@@ -19,34 +19,27 @@ async function addNewProgram(req, res) {
 }
 
 async function renderProgramsPage(req, res) {
-	const currProgramId =
-		(req.session.state?.programId && Number(req.session.state.programId)) ||
-		null;
-	const currCycleId =
-		(req.session.state?.cycleId && Number(req.session.state.cycleId)) || null;
-	const currSessionId =
-		(req.session.state?.sessionId && Number(req.session.state.sessionId)) ||
-		null;
-	const currDayId =
-		(req.session.state?.dayId && Number(req.session.state.dayId)) || null;
+	res.locals.page = { ...res.locals.page, title: "Let's Flex!" };
 
-	const goalArr = await goalsDb.getAllGoals();
+	const { userId, programId } = res.locals.sessionState;
 
 	const programArr =
-		res.locals.currentUser &&
+		userId &&
 		(await programsDb.getProgramsByUserId(pool, {
-			userId: res.locals.currentUser.id,
+			userId,
 		}));
 
 	const cycleArr = await cyclesDb.getCyclesByProgramId(pool, {
-		programId: currProgramId,
+		programId,
 	});
 
 	const trainingDayArr =
-		currProgramId &&
+		programId &&
 		(await getTrainingDaysByProgramId(pool, {
-			programId: currProgramId,
+			programId,
 		}));
+
+	const goalArr = await goalsDb.getAllGoals();
 
 	res.render("programs", {
 		title: "Let's Flex!",
@@ -54,49 +47,39 @@ async function renderProgramsPage(req, res) {
 		programArr,
 		cycleArr,
 		trainingDayArr,
-		currProgramId: currProgramId,
-		currCycleId: currCycleId,
-		currSessionId: currSessionId,
-		currDayId,
 	});
 }
 
 async function renderDayPage(req, res) {
-	const currProgramId =
-		(req.session.state?.programId && Number(req.session.state.programId)) ||
-		null;
-	const currDayId =
-		req.session?.state?.dayId && toNullableNumber(req.session.state.dayId);
+	res.locals.page = { ...res.locals.page, title: "Let's Flex!" };
 
-	const currSessionId =
-		(req.session.state?.sessionId && Number(req.session.state.sessionId)) ||
-		null;
+	const { programId, dayId, sessionId } = res.locals.sessionState;
+
+	console.log({ programId, dayId, sessionId });
 
 	const sessionArr =
-		currDayId &&
+		dayId &&
 		(await sessionsDb.getSessionByTrainingDayId(pool, {
-			trainingDayId: currDayId,
+			trainingDayId: dayId,
 		}));
 
 	const stepTypeArr = await stepTypesDb.getAllStepTypes();
 	const exerciseVariantArr = await exerciseVariantsDb.getAllExerciseVariants();
 
 	const sessionStepArr =
-		currSessionId &&
-		(await sessionStepsDb.getSessionStepsBySessionId(currSessionId));
+		sessionId &&
+		(await sessionStepsDb.getSessionStepsBySessionId(pool, { sessionId }));
 
 	const trainingDayArr =
-		currProgramId &&
+		programId &&
 		(await getTrainingDaysByProgramId(pool, {
-			programId: currProgramId,
+			programId,
 		}));
 
 	res.render("day", {
 		title: "Let's Flex!",
-		currDayId,
 		sessionArr,
 		trainingDayArr,
-		currSessionId,
 		stepTypeArr,
 		exerciseVariantArr,
 		sessionStepArr,
@@ -104,3 +87,33 @@ async function renderDayPage(req, res) {
 }
 
 export { addNewProgram, renderProgramsPage, renderDayPage };
+
+// const goalArr = await goalsDb.getAllGoals();
+
+// 	const programArr =
+// 		res.locals.currentUser &&
+// 		(await programsDb.getProgramsByUserId(pool, {
+// 			userId: res.locals.currentUser.id,
+// 		}));
+
+// 	const cycleArr = await cyclesDb.getCyclesByProgramId(pool, {
+// 		programId: currProgramId,
+// 	});
+
+// 	const trainingDayArr =
+// 		currProgramId &&
+// 		(await getTrainingDaysByProgramId(pool, {
+// 			programId: currProgramId,
+// 		}));
+
+// 	res.render("programs", {
+// 		title: "Let's Flex!",
+// 		goalArr,
+// 		programArr,
+// 		cycleArr,
+// 		trainingDayArr,
+// 		currProgramId: currProgramId,
+// 		currCycleId: currCycleId,
+// 		currSessionId: currSessionId,
+// 		currDayId,
+// 	});
