@@ -11,14 +11,18 @@ async function renderLibraryPage(_req, res) {
 	const muscleRoleArr = await muscleRolesDb.getAllMuscleRoles();
 	const exerciseVariantArr = await exerciseVariantsDb.getAllExerciseVariants();
 
-	res.render("library", {
-		title: "Let's Flex!",
+	res.locals.data = {
+		...res.locals.data,
 		equipmentArr,
 		movementPatternArr,
 		muscleArr,
 		muscleRoleArr,
 		exerciseVariantArr,
-	});
+	};
+
+	res.locals.page.title = "Let's Flex!";
+
+	res.render("library");
 }
 
 export { renderLibraryPage };

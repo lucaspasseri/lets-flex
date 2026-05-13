@@ -1,8 +1,8 @@
 <%
-const movementPatternArr = locals?.movementPatternArr || [];
-const equipmentArr = locals?.equipmentArr || [];
-const muscleArr = locals?.muscleArr || [];
-const muscleRoleArr = locals?.muscleRoleArr || [];
+const movementPatternArr = locals.data?.movementPatternArr ?? [];
+const equipmentArr = locals.data?.equipmentArr ?? [];
+const muscleArr = locals.data?.muscleArr ?? [];
+const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 %>
 
 <form class="forms" action="/exercise_cluster" method="POST">

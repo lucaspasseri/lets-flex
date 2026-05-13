@@ -11,7 +11,7 @@ import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getCurrentProgramByParams } from "../middlewares/getCurrentProgramByParams.js";
 import { getCurrentCycleByParams } from "../middlewares/getCurrentCycleByParams.js";
 import { getCurrentDayByParams } from "../middlewares/getCurrentDayByParams.js";
-import { getScheduleDate } from "../middlewares/getScheduleDate.js";
+import { getScheduledDate } from "../middlewares/getScheduledDate.js";
 import { getCurrentSessionByParams } from "../middlewares/getCurrentSessionByParams.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
 import { makeCurrentEntity } from "../middlewares/makeCurrentEntity.js";
@@ -25,6 +25,8 @@ import { getDayPageParams } from "../middlewares/getDayPageParams.js";
 import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
 
 const router = express.Router();
+
+router.post("/", addNewProgram);
 
 router.get(
 	"/",
@@ -69,10 +71,6 @@ router.get(
 		appStateKey: "currentCycle",
 		getById: cycleId => cyclesDb.getCycleById(pool, { cycleId }),
 	}),
-	(req, res, next) => {
-		console.log({ l: res.locals });
-		next();
-	},
 	renderProgramsPage,
 );
 
@@ -115,93 +113,8 @@ router.get(
 		sessionKey: "sessionId",
 		transform: Number,
 	}),
-	(req, res, next) => {
-		console.log({ l: res.locals });
-		next();
-	},
-	getScheduleDate,
+	getScheduledDate,
 	renderDayPage,
 );
-
-// router.get(
-// 	"/:programId/cycles/:cycleId",
-// 	getUrlAndPath,
-// 	getHelpers,
-// 	getSessionState,
-// 	makeCurrentEntity({
-// 		pageParamsKey: "programsPageParams",
-// 		paramKey: "userId",
-// 		sessionKey: "userId",
-// 		appStateKey: "currentUser",
-// 		getById: userId => usersDb.getUserById(pool, { userId }),
-// 	}),
-// 	getCurrentProgramByParams,
-// 	getCurrentCycleByParams,
-
-// 	renderProgramsPage,
-// );
-
-// router.get(
-// 	"/:programId/cycles/:cycleId/day/:dayId",
-// 	getUrlAndPath,
-// 	getHelpers,
-// 	getSessionState,
-// 	makeCurrentEntity({
-// 		pageParamsKey: "programsPageParams",
-// 		paramKey: "userId",
-// 		sessionKey: "userId",
-// 		appStateKey: "currentUser",
-// 		getById: userId => usersDb.getUserById(pool, { userId }),
-// 	}),
-// 	getCurrentProgramByParams,
-// 	getCurrentCycleByParams,
-// 	getCurrentDayByParams,
-
-// 	renderProgramsPage,
-// );
-
-// router.get(
-// 	"/day/:dayId",
-// 	getUrlAndPath,
-// 	getHelpers,
-// 	getSessionState,
-// 	makeCurrentEntity({
-// 		pageParamsKey: "programsPageParams",
-// 		paramKey: "userId",
-// 		sessionKey: "userId",
-// 		appStateKey: "currentUser",
-// 		getById: userId => usersDb.getUserById(pool, { userId }),
-// 	}),
-// 	getCurrentProgramByParams,
-// 	getCurrentCycleByParams,
-// 	getCurrentDayByParams,
-// 	getCurrentSessionByParams,
-
-// 	getScheduleDate,
-// 	renderDayPage,
-// );
-
-// router.get(
-// 	"/day/:dayId/sessions/:sessionId",
-// 	getUrlAndPath,
-// 	getHelpers,
-// 	getSessionState,
-// 	makeCurrentEntity({
-// 		pageParamsKey: "programsPageParams",
-// 		paramKey: "userId",
-// 		sessionKey: "userId",
-// 		appStateKey: "currentUser",
-// 		getById: userId => usersDb.getUserById(pool, { userId }),
-// 	}),
-// 	getCurrentProgramByParams,
-// 	getCurrentCycleByParams,
-// 	getCurrentDayByParams,
-// 	getCurrentSessionByParams,
-
-// 	getScheduleDate,
-// 	renderDayPage,
-// );
-
-router.post("/", addNewProgram);
 
 export default router;

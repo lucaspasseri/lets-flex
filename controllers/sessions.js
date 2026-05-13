@@ -10,9 +10,13 @@ async function getSessionByTrainingDayId(req, res) {
 async function addNewSession(req, res) {
 	const { name = "", trainingDayId, sessionOrder } = req.body;
 
-	await sessionsDb.postNewSession(name, trainingDayId, sessionOrder);
+	const session = await sessionsDb.postNewSession(
+		name,
+		trainingDayId,
+		sessionOrder,
+	);
 
-	res.redirect("/programs/day/" + trainingDayId);
+	res.redirect(`/programs/day/${trainingDayId}?sessionId=${session.id}`);
 }
 
 export { getSessionByTrainingDayId, addNewSession };

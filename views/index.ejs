@@ -1,20 +1,24 @@
 <%
-const currProgramId = locals.currentProgram ? locals.currentProgram.id : null;
-const currProgram = locals.currentProgram || null;
+const {addDays, formatDate, isSameDay} = locals.helpers;
+
+const currProgramId = locals.sessionState?.programId ?? null;
+const currSessionId = locals.sessionState?.sessionId ?? null;
+const daysDifference = locals.sessionState?.daysDifference ?? null;
+const activeCycleId = locals.sessionState?.activeCycleId ?? null;
+
+const currProgram = locals.appState?.currentProgram ?? {};
+
+const cycleArr = locals.data?.cycleArr ?? [];
+const sessionArr = locals.data?.sessionArr ?? [];
 
 const currDay = new Date();
-const activeDay = daysDifference === null ? currDay : addDays(currDay, daysDifference);
-const formattedActiveDay =formatDate(activeDay, "MMM dd, yyyy");
+const activeDay = daysDifference === null ? currDay : addDays && addDays(currDay, daysDifference);
+const formattedActiveDay =formatDate && formatDate(activeDay, "MMM dd, yyyy");
 
-const currWeek = [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
-
-const cycleArr = locals.cycleArr || [];
-const activeCycleId = locals.activeCycleId || [];
-const sessionArr = locals.sessionArr || [];
-
+const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
 
 const filterSessionsByDay = (sessionArr, day) => {
-	return sessionArr.filter(session => isSameDay(session.scheduled_date, day));
+	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
 }
 
 const multiSessionLabel = (sessionArrLength, sessionLabel) => {
@@ -26,11 +30,8 @@ const multiSessionLabel = (sessionArrLength, sessionLabel) => {
 
 const activeDaySessionArr = filterSessionsByDay(sessionArr, activeDay);
 
-
-
-const currUrl = locals?.url || "";
-const currPath = locals?.path || "";
-console.log({currUrl, path});
+const currUrl = locals.page?.url ?? "";
+const currPath = locals.page?.path ?? "";
 %>
 
 
@@ -104,12 +105,12 @@ console.log({currUrl, path});
 			<% } %>
 			
 			<div class="current-day-container">
-				<a href="<%= `/differenceInCalendarDays/${daysDifference -1}` %>" class="previousDayArrow" ><</a>
+				<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><</a>
 				<div class="current-day">
 					<span><%= formatDate(activeDay, "dd / MM") %></span>
 					<span><%= formatDate(activeDay, "EEEE").toUpperCase() %></span>
 				</div>
-				<a href="<%= `/differenceInCalendarDays/${daysDifference +1}` %>"class="nextDayArrow" >></a>
+				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" >></a>
 			</div>
 
 			<% if (sessionArr.length > 0) { %>
@@ -151,14 +152,20 @@ console.log({currUrl, path});
 							<ul>
 								<% activeDaySessionArr.forEach(session => { %>
 									<li>
-										<a href="<%= `${currUrl}/activeSession/${session.session_id}` %>">[<%= session.session_name %>]</a>
+										<a href="<%= `/?sessionId=${session.session_id}` %>">[<%= session.session_name %>]</a>
 									</li>
 								<% }) %>
 							</ul>
 						</div>
 
 						<div class="day-session-container">
-							<h3><%= activeDaySessionArr[0].session_name %></h3>
+							<h3>
+								<%= 
+									currSessionId ? 
+										activeDaySessionArr.find(session => session.session_id === currSessionId)?.session_name : 
+										activeDaySessionArr[0].session_name 
+								%>
+							</h3>
 						</div>
 					</div>
 				<% } %>

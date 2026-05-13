@@ -1,9 +1,9 @@
 <%
-const currSessionId = locals?.currSessionId || 0;
-const stepTypeArr = locals?.stepTypeArr || [];
-const exerciseVariantArr = locals?.exerciseVariantArr || [];
+const currSessionId = locals.sessionState?.sessionId || null;
+const stepTypeArr = locals.data?.stepTypeArr ?? [];
+const exerciseVariantArr = locals.data?.exerciseVariantArr ?? [];
 
-const sessionStepArr = locals?.sessionStepArr || [];
+const sessionStepArr = locals.data?.sessionStepArr ?? [];
 sessionStepArr.push({step_order: sessionStepArr.length +1});
 
 const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb", fullName: "Pounds"}];

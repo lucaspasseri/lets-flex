@@ -1,4 +1,5 @@
 <% 
+const {formatDate, addDays} = locals.helpers;
 
 const currUserId = locals.sessionState?.userId ?? null;
 const currProgramId = locals.sessionState?.programId ?? null;
@@ -8,51 +9,47 @@ const currDayId = locals.sessionState?.dayId ?? null;
 
 const currProgram = locals.appState?.currentProgram ?? {};
 
+const programArr = locals.data?.programArr ?? [];
+const cycleArr = locals.data?.cycleArr ?? [];
+const sessionArr = locals.data?.sessionArr ?? [];
+const trainingDayArr = locals.data?.trainingDayArr ?? [];
 
 const programBasicLineId = "programsPageProgramBasicLine";
 const programBasicLineEntity = "program";
-const programArr = locals?.programArr || [];
 const createProgramModalId = "createProgramModal";
 const chosenProgramPath = "/programs/";
 
 const cycleBasicLineId = "cyclesPageCycleBasicLine";
 const cycleBasicLineEntity = "cycle";
-const cycleArr = locals?.cycleArr || [];
 const createCycleModalId = "createCycleModal";
 const chosenCyclePath = `/programs/${currProgramId}?cycleId=`;
 
-
-const sessionArr = locals?.sessionArr || [];
-
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
-const trainingDayArr = locals?.trainingDayArr || [];
+const getClassName = (index, trainingDay, currCycleId) => {
+	let className = "";
 
-	const getClassName = (index, trainingDay, currCycleId) => {
-		let className = "";
+	if(index === 0){
+		className += "startDate ";
+	}
 
-		if(index === 0){
-			className += "startDate ";
-		}
-
-		if(trainingDay.cycle_id === null){
-			className += "no-cycle";
-			return className;
-		}
-
-		if(trainingDay.cycle_id === currCycleId){
-			className += "day-selected";
-			return className;
-		}
-
-		className += "cycle-not-selected";
+	if(trainingDay.cycle_id === null){
+		className += "no-cycle";
 		return className;
 	}
 
+	if(trainingDay.cycle_id === currCycleId){
+		className += "day-selected";
+		return className;
+	}
+
+	className += "cycle-not-selected";
+	return className;
+}
 
 const dayArr = trainingDayArr.map((trainingDay, index) => {
 	const hasCycleSelected = currCycleId === trainingDay.cycle_id && currCycleId !== null;
-	const date = formatDate(addDays(startDate, index ), "dd/MM/yyyy");
+	const date =formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM/yyyy");
 	const className = getClassName(index, trainingDay, currCycleId);
 
 	return {
@@ -66,10 +63,8 @@ const dayArr = trainingDayArr.map((trainingDay, index) => {
 
 const getHref = (dayId) => {
 	const path = `/programs/day/${dayId}`;
-
 	return path;
 }
-
 %>
 
 <main class="main programs">

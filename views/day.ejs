@@ -1,29 +1,32 @@
 <%
-const currProgram = locals.appState?.currentProgram ?? {};
+const { formatDate, addDays } = locals.helpers;
+
+const backUrl = locals.page?.backUrl ?? "";
+
 const currCycleId = locals.sessionState?.cycleId || null; 
 const currSessionId = locals.sessionState?.sessionId || null;
 const currDayId = locals.sessionState?.dayId || null;
 
+const currProgram = locals.appState?.currentProgram ?? {};
+const scheduledDate = locals.appState?.scheduledDate ?? null;
 
-const backUrl = locals?.backUrl || "";
-const scheduleDate = locals?.scheduleDate || null;
-const formattedScheduleDate = scheduleDate ? locals.formatDate(scheduleDate, "dd/MM/yyyy") : "No date";
+const sessionArr = locals.data?.sessionArr ?? [];
+const trainingDayArr = locals.data?.trainingDayArr ?? [];
+const sessionStepArr = locals.data?.sessionStepArr ?? [];
+
+const formattedScheduledDate = scheduledDate ? (formatDate && formatDate(scheduledDate, "dd/MM/yyyy")) : "No date";
 
 const sessionBasicLineId = "dayPageSessionBasicLine";
 const sessionBasicLineEntity = "session";
-const sessionArr = locals?.sessionArr || [];
 const createSessionModalId = "createSessionModal";
-
 const chosenSessionPath = `/programs/day/${currDayId}?sessionId=`;
-
 const createSessionStepModalId = "createSessionStepModal";
-const sessionStepArr = locals?.sessionStepArr || [];
-const trainingDayArr = locals?.trainingDayArr || [];
+
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
-const getScheduleDate = (index) => {
-	const date = formatDate(addDays(startDate, index ), "dd/MM/yyyy");
+const getScheduledDate = (index) => {
+	const date = formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM/yyyy");
 	return date;
 }
 
@@ -52,7 +55,7 @@ const renderContent = (content) => {
 			<button class="day-arrow" data-scroll-left>‹</button>
 			<ul class="day-rail" id="dayRail">
 				<% trainingDayArr.forEach((trainingDay,index) => { %>
-					<li><a href="<%= getNavLinkHref(trainingDay) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduleDate(index) %></a></li>
+					<li><a href="<%= getNavLinkHref(trainingDay) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduledDate(index) %></a></li>
 				<% }) %>
 			</ul>
 			<button class="day-arrow" data-scroll-right>›</button>
@@ -60,7 +63,7 @@ const renderContent = (content) => {
 	<% } %>
 
 	<div class="current-day-container training-day-item session-selected" data-calendar-day-id="<%= currDayId %>">
-		<h1><%= formattedScheduleDate %></h1>
+		<h1><%= formattedScheduledDate %></h1>
 	</div>
 
 	<div class="session-selection-container">

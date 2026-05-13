@@ -1,72 +1,49 @@
 import * as cyclesDb from "../db/cycles/index.js";
 import pool from "../db/pool.js";
 import getSessionsByProgramIdAndScheduleDate from "../services/getSessionsByProgramIdAndScheduleDate.js";
-
-// import * as programsDb from "../db/programs/index.js";
-// import * as goalsDb from "../db/goals/index.js";
-
-// import * as sessionsDb from "../db/sessions/index.js";
-// import * as sessionStepsDb from "../db/session_steps/index.js";
-// import * as stepTypesDb from "../db/step_types/index.js";
-// import * as exercisesDb from "../db/exercises/index.js";
-// import * as movementPatternsDb from "../db/movement_patterns/index.js";
-// import * as musclesDb from "../db/muscles/index.js";
-// import * as exerciseMusclesDb from "../db/exercise_muscles/index.js";
-// import * as equipmentsDb from "../db/equipments/index.js";
-// import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
+import { addDays, differenceInCalendarDays } from "date-fns";
 
 async function getIndex(req, res) {
-	// const goalArr = await goalsDb.getAllGoals();
-	// const programArrWithoutIds = await programsDb.getAllProgramsWithoutIds();
-	// const cycleArr = await cyclesDb.getAllCyclesWithoutIds();
-	// const sessionArr = await sessionsDb.getAllSessionsWithOutIds();
-	// const sessionStepArr = await sessionStepsDb.getAllSessionStepsWithJoins();
-	// const stepTypeArr = await stepTypesDb.getAllStepTypes();
-	// const exerciseArr = await exercisesDb.getAllExercises();
-	// const movementPatternArr = await movementPatternsDb.getAllMovementPatterns();
-	// const muscleArr = await musclesDb.getAllMuscles();
-	// const exerciseMuscleArr =
-	// 	await exerciseMusclesDb.getAllExerciseMusclesWithJoins();
-	// const equipmentArr = await equipmentsDb.getAllEquipments();
-	// const exerciseVariantArr =
-	// 	await exerciseVariantsDb.getAllExerciseVariantsWithJoins();
+	console.log({ l: res.locals });
 
-	// const userData = res.locals;
+	const { programId, daysDifference, sessionId } = res.locals.sessionState;
+	const { currentProgram } = res.locals.appState;
 
-	// if (userArr.length === 0 || res.locals.currentUser === null) {
-	// 	res.redirect("/profile");
-	// 	return;
-	// }
-
-	// const currUserPrograms = await programsDb.getProgramsByUserId(
-	// 	Number(res.locals.currentUser.id),
-	// );
-
-	const daysDifference =
-		(req.session.state?.daysDifference &&
-			Number(req.session.state.daysDifference)) ||
-		null;
-
-	const currProgramId =
-		(req.session.state?.programId && Number(req.session.state.programId)) ||
-		null;
-
-	const cycleArr = await cyclesDb.getCyclesByProgramId(pool, {
-		programId: currProgramId,
-	});
-
-	const currProgramStartDate =
-		res.locals?.currentProgram && res.locals.currentProgram.start_date;
+	const cycleArr =
+		(programId &&
+			(await cyclesDb.getCyclesByProgramId(pool, {
+				programId,
+			}))) ??
+		[];
 
 	const currDay = new Date();
 
+	const currProgramStartDate =
+		(currentProgram && currentProgram?.start_date) ?? null;
+
+	const sessionArr =
+		(programId &&
+			currProgramStartDate &&
+			daysDifference !== null &&
+			(await getSessionsByProgramIdAndScheduleDate(pool, {
+				programId,
+				currDay,
+				startDate: currProgramStartDate,
+				daysDifference,
+			}))) ||
+		[];
+
+	res.locals.data = {
+		...res.locals.data,
+		cycleArr,
+		sessionArr,
+	};
+
 	const getActiveCycleId = (startDate, currDay, daysDifference, cycleArr) => {
 		const relativeDay =
-			daysDifference !== null
-				? res.locals.addDays(currDay, daysDifference)
-				: currDay;
+			daysDifference !== 0 ? addDays(currDay, daysDifference) : currDay;
 
-		if (res.locals.differenceInCalendarDays(relativeDay, startDate) < 0) {
+		if (differenceInCalendarDays(relativeDay, startDate) < 0) {
 			return null;
 		}
 
@@ -75,15 +52,12 @@ async function getIndex(req, res) {
 			const { id, cycle_size } = cycleArr[i];
 
 			if (
-				res.locals.differenceInCalendarDays(
-					res.locals.addDays(lastDate, cycle_size),
-					relativeDay,
-				) > 0
+				differenceInCalendarDays(addDays(lastDate, cycle_size), relativeDay) > 0
 			) {
 				return id;
 			}
 
-			lastDate = res.locals.addDays(lastDate, cycle_size);
+			lastDate = addDays(lastDate, cycle_size);
 		}
 
 		return null;
@@ -92,7 +66,7 @@ async function getIndex(req, res) {
 	let activeCycleId;
 
 	if (
-		currProgramId !== null ||
+		daysDifference !== undefined ||
 		currProgramStartDate !== null ||
 		cycleArr.length > 0
 	) {
@@ -104,20 +78,10 @@ async function getIndex(req, res) {
 		);
 	}
 
-	const sessionArr = await getSessionsByProgramIdAndScheduleDate(pool, {
-		programId: currProgramId,
-		currDay,
-		startDate: currProgramStartDate,
-		daysDifference,
-	});
+	res.locals.sessionState.activeCycleId = activeCycleId;
 
-	res.render("index", {
-		title: "Let's Flex!",
-		cycleArr,
-		activeCycleId,
-		daysDifference,
-		sessionArr,
-	});
+	res.locals.page.title = "Let's Flex!";
+	res.render("index");
 }
 
 export { getIndex };

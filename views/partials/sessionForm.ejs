@@ -1,6 +1,6 @@
 <%
-const currDayId = locals.sessionState?.dayId || null;
-const sessionArr = locals?.sessionArr || [];
+const currDayId = locals.sessionState?.dayId ?? null;
+const sessionArr = locals.data?.sessionArr ?? [];
 sessionArr.push({session_order: sessionArr.length + 1});
 %>
 
