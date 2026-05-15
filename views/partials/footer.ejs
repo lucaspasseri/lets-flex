@@ -2,7 +2,6 @@
 const currentUrl = locals?.page?.url ?? ""; 
 const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/library", label: "Library"}, {href: "/profile", label: "Profile"}];
 
-
 const setIndicator = (tab) => {
 	if(tab.href === "/"){
 		if(currentUrl === "/"){

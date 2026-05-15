@@ -3,9 +3,7 @@ import pool from "../db/pool.js";
 import getSessionsByProgramIdAndScheduleDate from "../services/getSessionsByProgramIdAndScheduleDate.js";
 import { addDays, differenceInCalendarDays } from "date-fns";
 
-async function getIndex(req, res) {
-	console.log({ l: res.locals });
-
+async function renderDashboardPage(req, res) {
 	const { programId, daysDifference, sessionId } = res.locals.sessionState;
 	const { currentProgram } = res.locals.appState;
 
@@ -84,4 +82,4 @@ async function getIndex(req, res) {
 	res.render("index");
 }
 
-export { getIndex };
+export { renderDashboardPage };
