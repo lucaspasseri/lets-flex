@@ -1,6 +1,7 @@
 <%
 const {addDays, formatDate, isSameDay} = locals.helpers;
 
+const currUserId = locals.sessionState?.userId ?? null;
 const currProgramId = locals.sessionState?.programId ?? null;
 const currSessionId = locals.sessionState?.sessionId ?? null;
 const daysDifference = locals.sessionState?.daysDifference ?? null;
@@ -32,6 +33,9 @@ const activeDaySessionArr = filterSessionsByDay(sessionArr, activeDay);
 
 const currUrl = locals.page?.url ?? "";
 const currPath = locals.page?.path ?? "";
+
+console.log({sessionArr});
+console.log([currDay, activeDay]);
 %>
 
 
@@ -58,6 +62,24 @@ const currPath = locals.page?.path ?? "";
 						</li>
 					<% }) %>
 				</ul>
+			</div>
+		</div>
+	<% } %>
+
+	<% if (!currUserId) { %>
+		<div class="no-active-program-container">
+			<div class="content">
+				<div class="image-container">
+					<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
+				</div>
+				<h2>NO ACTIVE USER</h2>
+				<p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p>
+				<a href="/profile">
+					<svg class="icon">
+						<use href="../plus.svg"></use>
+					</svg>
+					<p>CREATE YOUR USER PROFILE</p>
+				</a>
 			</div>
 		</div>
 	<% } %>

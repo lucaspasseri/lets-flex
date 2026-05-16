@@ -19,7 +19,7 @@ const formattedScheduledDate = scheduledDate ? (formatDate && formatDate(schedul
 const sessionBasicLineId = "dayPageSessionBasicLine";
 const sessionBasicLineEntity = "session";
 const createSessionModalId = "createSessionModal";
-const chosenSessionPath = `/programs/day/${currDayId}?sessionId=`;
+const chosenSessionPath = `/programs/day?dayId=${currDayId}&sessionId=`;
 const createSessionStepModalId = "createSessionStepModal";
 
 
@@ -31,7 +31,7 @@ const getScheduledDate = (index) => {
 }
 
 const getNavLinkHref = (trainingDay) => {
-	return `/programs/day/${trainingDay.training_day_id}`;
+	return `/programs/day?dayId=${trainingDay.training_day_id}`;
 }
 
 const currSession = sessionArr.find(session => session.id === currSessionId) || {};
@@ -82,7 +82,7 @@ const renderContent = (content) => {
 	</div>
 
 
-	<% if(currSessionId){ %>
+	<% if(sessionArr.length > 0){ %>
 		<div class="session-step-container">
 			<div>
 				<span>SESSION <%= currSession.session_order %>: <%= currSession.name %></span>

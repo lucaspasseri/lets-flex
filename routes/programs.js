@@ -23,6 +23,8 @@ import * as sessionsDb from "../db/sessions/index.js";
 import { getProgramsPageParams } from "../middlewares/getProgramsPageParams.js";
 import { getDayPageParams } from "../middlewares/getDayPageParams.js";
 import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
+import { loadProgramsPageData } from "../middlewares/loadProgramsPageData.js";
+import { loadDayPageData } from "../middlewares/loadDayPageData.js";
 
 const router = express.Router();
 
@@ -30,22 +32,6 @@ router.post("/", addNewProgram);
 
 router.get(
 	"/",
-	getUrlAndPath,
-	getHelpers,
-	getSessionState,
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "userId",
-		sessionKey: "userId",
-		appStateKey: "currentUser",
-		getById: userId => usersDb.getUserById(pool, { userId }),
-	}),
-
-	renderProgramsPage,
-);
-
-router.get(
-	"/:programId",
 	getUrlAndPath,
 	getHelpers,
 	getSessionState,
@@ -71,11 +57,12 @@ router.get(
 		appStateKey: "currentCycle",
 		getById: cycleId => cyclesDb.getCycleById(pool, { cycleId }),
 	}),
+	loadProgramsPageData,
 	renderProgramsPage,
 );
 
 router.get(
-	"/day/:dayId",
+	"/day",
 	getUrlAndPath,
 	getHelpers,
 	getSessionState,
@@ -114,6 +101,7 @@ router.get(
 		transform: Number,
 	}),
 	getScheduledDate,
+	loadDayPageData,
 	renderDayPage,
 );
 

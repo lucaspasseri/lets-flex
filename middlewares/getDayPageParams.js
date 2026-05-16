@@ -1,6 +1,5 @@
 const getDayPageParams = async (req, res, next) => {
-	const { dayId } = req.params;
-	const { sessionId } = req.query;
+	const { dayId, sessionId } = req.query;
 
 	res.locals.dayPageParams ??= {};
 

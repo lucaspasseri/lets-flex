@@ -17,12 +17,12 @@ const trainingDayArr = locals.data?.trainingDayArr ?? [];
 const programBasicLineId = "programsPageProgramBasicLine";
 const programBasicLineEntity = "program";
 const createProgramModalId = "createProgramModal";
-const chosenProgramPath = "/programs/";
+const chosenProgramPath = "/programs?programId=";
 
 const cycleBasicLineId = "cyclesPageCycleBasicLine";
 const cycleBasicLineEntity = "cycle";
 const createCycleModalId = "createCycleModal";
-const chosenCyclePath = `/programs/${currProgramId}?cycleId=`;
+const chosenCyclePath = `/programs?programId=${currProgramId}&cycleId=`;
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
@@ -51,6 +51,7 @@ const dayArr = trainingDayArr.map((trainingDay, index) => {
 	const hasCycleSelected = currCycleId === trainingDay.cycle_id && currCycleId !== null;
 	const date =formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM/yyyy");
 	const className = getClassName(index, trainingDay, currCycleId);
+	const href = `/programs/day?dayId=${trainingDay.training_day_id}`;
 
 	return {
 		id: index,
@@ -58,13 +59,9 @@ const dayArr = trainingDayArr.map((trainingDay, index) => {
 		hasCycleSelected,
 		date, 
 		className,
+		href
 	}
 });
-
-const getHref = (dayId) => {
-	const path = `/programs/day/${dayId}`;
-	return path;
-}
 %>
 
 <main class="main programs">
@@ -85,7 +82,7 @@ const getHref = (dayId) => {
 				<li class="training-day-item <%= day.className %>" data-calendar-day-id="<%= day.trainingDayId %>"> 
 					<div class="container">
 						<% if(day?.hasCycleSelected) { %>
-							<a data-calendar-day-date="<%= day.date %>"  href="<%= getHref(day.trainingDayId) %>">
+							<a data-calendar-day-date="<%= day.date %>"  href="<%= day.href %>">
 								<p>	<%= day.date %></p>
 							</a>
 						<% } else { %>

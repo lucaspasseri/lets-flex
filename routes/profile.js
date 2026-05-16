@@ -7,6 +7,7 @@ import { renderProfilePage } from "../controllers/profile.js";
 import { makeCurrentEntity } from "../middlewares/makeCurrentEntity.js";
 import * as usersDb from "../db/users/index.js";
 import pool from "../db/pool.js";
+import { loadProfilePageData } from "../middlewares/loadProfilePageData.js";
 
 const router = Router();
 
@@ -22,6 +23,7 @@ router.get(
 		appStateKey: "currentUser",
 		getById: userId => usersDb.getUserById(pool, { userId }),
 	}),
+	loadProfilePageData,
 	renderProfilePage,
 );
 

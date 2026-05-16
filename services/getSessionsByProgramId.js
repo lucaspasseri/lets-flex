@@ -1,10 +1,5 @@
-import { addDays } from "date-fns";
-
-async function getSessionsByProgramIdAndScheduleDate(
-	db,
-	{ programId, currDay, startDate, daysDifference },
-) {
-	if (programId === null || currDay === null) return [];
+async function getSessionsByProgramId(db, { programId }) {
+	if (programId === null) return [];
 
 	const { rows } = await db.query(
 		`
@@ -32,8 +27,6 @@ JOIN cycles AS c
 	ON t.cycle_id = c.id
 
 WHERE c.program_id = $1
-	AND t.scheduled_date >= $2
-	AND t.scheduled_date < $3
 
 ORDER BY
 	t.scheduled_date,
@@ -41,10 +34,10 @@ ORDER BY
 	t.day_order,
 	s.session_order
 	`,
-		[programId, addDays(currDay, -3), addDays(currDay, 4)],
+		[programId],
 	);
 
 	return rows;
 }
 
-export default getSessionsByProgramIdAndScheduleDate;
+export default getSessionsByProgramId;

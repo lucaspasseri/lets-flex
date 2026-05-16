@@ -13,6 +13,8 @@ import * as usersDb from "../db/users/index.js";
 import * as programsDb from "../db/programs/index.js";
 import { getDashboardPageParams } from "../middlewares/getDashboardPageParams.js";
 import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
+import { loadDashboardPageData } from "../middlewares/loadDashboardPageData.js";
+import { setActiveCycle } from "../middlewares/setActiveCycle.js";
 
 const router = Router();
 
@@ -48,6 +50,8 @@ router.get(
 		sessionKey: "sessionId",
 		transform: Number,
 	}),
+	loadDashboardPageData,
+	setActiveCycle,
 	renderDashboardPage,
 );
 
