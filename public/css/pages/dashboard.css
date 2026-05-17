@@ -150,18 +150,18 @@
 	}
 }
 
-.date-session-container {
+.date-section {
 	margin-top: 3em;
 }
 
-.date-session-container .current-day-container {
+.date-section .current-day-container {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	gap: 1em;
 }
 
-.date-session-container .current-day {
+.date-section .current-day {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -186,7 +186,7 @@
 	}
 }
 
-.date-session-container .previousDayArrow,
+.date-section .previousDayArrow,
 .nextDayArrow {
 	border: none;
 	padding: 0.4em 0.8em;
@@ -207,7 +207,7 @@
 	}
 }
 
-.date-session-container .cycle-list-container {
+.date-section .cycle-list-container {
 	margin-bottom: 1em;
 	ul {
 		display: flex;
@@ -216,19 +216,19 @@
 	}
 }
 
-.date-session-container .cycle-list-item {
+.date-section .cycle-list-item {
 	padding: 0.6em 1em;
 	border-radius: 6px;
 	background-color: var(--color-stitch-secondary);
 	border: 0.1em solid var(--color-border);
 }
 
-.date-session-container .cycle-list-item.active {
+.date-section .cycle-list-item.active {
 	border: 0.1em solid var(--color-stitch);
 	color: var(--color-stitch);
 }
 
-.date-session-container .training-day-list-container {
+.date-section .training-day-list-container {
 	margin-top: 0.6em;
 	padding: 0.6em 1em;
 
@@ -263,7 +263,7 @@
 	}
 }
 
-.date-session-container .week-day {
+.date-section .week-day {
 	width: 5em;
 	height: 4.2em;
 	display: flex;
@@ -278,13 +278,13 @@
 	}
 }
 
-.date-session-container .week-day.active {
+.date-section .week-day.active {
 	background-color: var(--color-stitch);
 	color: var(--color-stitch-secondary);
 	font-weight: 700;
 }
 
-.date-session-container .change-active-session-container {
+.date-section .change-active-session-container {
 	margin-top: 2.2em;
 	ul {
 		display: flex;
@@ -294,7 +294,7 @@
 	}
 }
 
-.date-session-container .multiple-session-container {
+.date-section .multiple-session-container {
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -314,14 +314,50 @@
 	}
 }
 
-.active-session-container {
+.sessions-section {
 	margin-top: 1.2em;
 	display: flex;
 	flex: 1;
 	background-color: var(--color-stitch-secondary);
+	border-radius: 6px;
 }
 
-.active-session-container.no-session {
+.sessions-section.no-session {
 	justify-content: center;
 	align-items: center;
+}
+
+.sessions-section .sessions-container {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.sessions-section .session-container {
+	background-color: var(--color-border);
+	padding: 1em;
+	height: 100%;
+	border-radius: 4px;
+}
+
+.sessions-section .change-active-session-container {
+	padding: 1em;
+	ul {
+		display: flex;
+		justify-content: center;
+		gap: 1.2em;
+	}
+
+	li {
+		width: 2em;
+		height: 2em;
+		display: flex;
+
+		a {
+			background-color: var(--color-stitch-text);
+			border-radius: 6px;
+			width: 100%;
+			box-shadow: var(--box-shadow-header);
+		}
+	}
 }

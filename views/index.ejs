@@ -1,4 +1,6 @@
 <%
+const currUrl = locals.page?.url ?? "";
+const currPath = locals.page?.path ?? "";
 const {addDays, formatDate, isSameDay} = locals.helpers;
 
 const currUserId = locals.sessionState?.userId ?? null;
@@ -22,17 +24,9 @@ const filterSessionsByDay = (sessionArr, day) => {
 	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
 }
 
-const multiSessionLabel = (sessionArrLength, sessionLabel) => {
-		const moreSessionSymbol = "*"; 
-		const additionalLabel = moreSessionSymbol.repeat(sessionArrLength -1);
-	
-		return `${sessionLabel}${additionalLabel}`;
-}
-
 const activeDaySessionArr = filterSessionsByDay(sessionArr, activeDay);
 
-const currUrl = locals.page?.url ?? "";
-const currPath = locals.page?.path ?? "";
+console.log({locals});
 %>
 
 
@@ -107,7 +101,7 @@ const currPath = locals.page?.path ?? "";
 	<% } %>
 
 	<% if (currProgramId) { %>
-		<div class="date-session-container">
+		<div class="date-section">
 
 			<% if (cycleArr.length > 0) { %>
 				<div class="cycle-list-container">
@@ -155,7 +149,7 @@ const currPath = locals.page?.path ?? "";
 											</p>
 											<% if(filteredSessionArr.length > 1) { %>
 												<div class="additional-session-indicator">
-													<% filteredSessionArr.filter((_session,index) => index !== 0).forEach((session, index) => { %>
+													<% filteredSessionArr.forEach((session, index) => { %>
 														<div class="additional-indication"></div>
 													<% }) %>
 												</div>
@@ -168,41 +162,41 @@ const currPath = locals.page?.path ?? "";
 					</ul>
 				</div>
 			<% } %>
-
-			
-
 		</div>
 	<% } %>
 
 	
 	<% if(currProgramId) { %>
-		<div class="active-session-container <%= activeDaySessionArr.length === 0 ? "no-session" : "" %>">
+		<div class="sessions-section <%= activeDaySessionArr.length === 0 ? "no-session" : "" %>">
 			<% if (activeDaySessionArr.length === 0) { %>
-				<div class="no-session"><h2> RESTING / NO-SESSION DAY</h2></div>
+				<h2> ( RESTING / NO-SESSION DAY )</h2>
 
 			<% } else if (activeDaySessionArr.length === 1) { %>
-				<div class="day-session-container">
-					<h3><%= activeDaySessionArr[0].session_name %></h3>
+				<div class="sessions-container">
+					<div class="session-container">
+						<h3><%= activeDaySessionArr[0].session_name %></h3>
+					</div>
 				</div>
 
 			<% } else { %>
-				<div>
+				<div class="sessions-container">
 					<div class="change-active-session-container">
 						<ul>
 							<% activeDaySessionArr.forEach(session => { %>
 								<li>
-									<a href="<%= `/?sessionId=${session.session_id}` %>">[<%= session.session_name %>]</a>
+									<a href="<%= `/?sessionId=${session.session_id}` %>"></a>
 								</li>
 							<% }) %>
 						</ul>
 					</div>
 
-					<div class="day-session-container">
+					<div class="session-container">
 						<h3>
+							<% const activeSession = currSessionId && 
+									activeDaySessionArr.find(session => session.session_id === currSessionId); %>
 							<%= 
-								currSessionId ? 
-									activeDaySessionArr.find(session => session.session_id === currSessionId)?.session_name : 
-									activeDaySessionArr[0].session_name 
+								activeSession === undefined ? 
+									activeDaySessionArr[0].session_name : activeSession.session_name
 							%>
 						</h3>
 					</div>

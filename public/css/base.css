@@ -105,7 +105,7 @@ footer.footer {
 
 .footer-indicator.isActive {
 	view-transition-name: active-tab-indicator;
-	background-color: var(--color-primary);
+	background-color: var(--color-stitch);
 }
 
 ::view-transition-old(active-tab-indicator),
