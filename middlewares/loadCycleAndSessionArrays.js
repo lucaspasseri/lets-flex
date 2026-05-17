@@ -2,9 +2,8 @@ import getSessionsByProgramId from "../services/getSessionsByProgramId.js";
 import * as cyclesDb from "../db/cycles/index.js";
 import pool from "../db/pool.js";
 
-const loadDashboardPageData = async (req, res, next) => {
-	const { programId, daysDifference, sessionId } = res.locals.sessionState;
-	const { currentProgram } = res.locals.appState;
+const loadCycleAndSessionArrays = async (req, res, next) => {
+	const { programId } = res.locals.sessionState;
 
 	const [cycleArr, sessionArr] = await Promise.all([
 		programId
@@ -24,4 +23,4 @@ const loadDashboardPageData = async (req, res, next) => {
 	next();
 };
 
-export { loadDashboardPageData };
+export { loadCycleAndSessionArrays };

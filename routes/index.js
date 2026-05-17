@@ -8,9 +8,11 @@ import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
 import pool from "../db/pool.js";
 import * as usersDb from "../db/users/index.js";
 import * as programsDb from "../db/programs/index.js";
-import { loadDashboardPageData } from "../middlewares/loadDashboardPageData.js";
+import { loadSessionStepArr } from "../middlewares/loadSessionStepArr.js";
 import { setActiveCycle } from "../middlewares/setActiveCycle.js";
 import { renderDashboardPage } from "../controllers/index.js";
+import { setActiveSessionMisc } from "../middlewares/setActiveSessionMisc.js";
+import { loadCycleAndSessionArrays } from "../middlewares/loadCycleAndSessionArrays.js";
 
 const router = Router();
 
@@ -46,8 +48,10 @@ router.get(
 		sessionKey: "sessionId",
 		transform: Number,
 	}),
-	loadDashboardPageData,
+	loadCycleAndSessionArrays,
 	setActiveCycle,
+	setActiveSessionMisc,
+	loadSessionStepArr,
 	renderDashboardPage,
 );
 

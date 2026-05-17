@@ -361,3 +361,33 @@
 		}
 	}
 }
+
+.sessions-section .session-header {
+	border: 1px solid red;
+	display: flex;
+	justify-content: space-between;
+
+	h3 {
+		font-size: 1.6em;
+	}
+
+	.complete-indicator-container {
+		height: fit-content;
+
+		span {
+			font-size: 0.9em;
+			letter-spacing: 0.1em;
+			color: var(--color-accent);
+			font-weight: 700;
+		}
+	}
+}
+
+.sessions-section .session-step-list-container {
+	margin-top: 1em;
+	border: 1px solid greenyellow;
+}
+.sessions-section .active-session-step {
+	margin-top: 1em;
+	border: 1px solid purple;
+}

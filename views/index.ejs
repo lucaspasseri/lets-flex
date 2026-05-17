@@ -9,24 +9,23 @@ const currSessionId = locals.sessionState?.sessionId ?? null;
 const daysDifference = locals.sessionState?.daysDifference ?? null;
 const activeCycleId = locals.sessionState?.activeCycleId ?? null;
 
+const currDay = new Date();
+const activeDay = locals.sessionState?.activeDay ?? currDay;
+
 const currProgram = locals.appState?.currentProgram ?? {};
 
 const cycleArr = locals.data?.cycleArr ?? [];
 const sessionArr = locals.data?.sessionArr ?? [];
+const sessionStepArr = locals.data?.sessionStepArr ?? [];
+const activeDaySessionArr = locals.data?.activeDaySessionArr ?? [];
 
-const currDay = new Date();
-const activeDay = daysDifference === null ? currDay : addDays && addDays(currDay, daysDifference);
-const formattedActiveDay =formatDate && formatDate(activeDay, "MMM dd, yyyy");
+const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
 
 const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
 
 const filterSessionsByDay = (sessionArr, day) => {
 	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
 }
-
-const activeDaySessionArr = filterSessionsByDay(sessionArr, activeDay);
-
-console.log({locals});
 %>
 
 
@@ -184,21 +183,48 @@ console.log({locals});
 						<ul>
 							<% activeDaySessionArr.forEach(session => { %>
 								<li>
-									<a href="<%= `/?sessionId=${session.session_id}` %>"></a>
+									<a href="<%= `/?daysDifference=${daysDifference}&sessionId=${session.session_id}` %>"></a>
 								</li>
 							<% }) %>
 						</ul>
 					</div>
 
 					<div class="session-container">
-						<h3>
-							<% const activeSession = currSessionId && 
-									activeDaySessionArr.find(session => session.session_id === currSessionId); %>
-							<%= 
-								activeSession === undefined ? 
-									activeDaySessionArr[0].session_name : activeSession.session_name
-							%>
-						</h3>
+						<div class="session-header">
+							<h3>
+								<% const activeSession = currSessionId ? 
+										activeDaySessionArr.find(session => session.session_id === currSessionId) :
+										activeDaySessionArr[0];
+								%>
+								<%= 
+									activeSession?.session_name
+								%>
+							</h3>
+							<div class="complete-indicator-container">
+								<span>
+									0% COMPLETE
+								</span>
+							</div>
+						</div>
+
+						
+						<% if(sessionStepArr.length > 0){ %>
+							<div class="session-step-list-container">
+								<ul>
+									<% sessionStepArr.forEach(step => { %>
+										<li>
+											<p>
+												<%= step.id %>
+											</p>
+										</li>
+									<% }) %>
+								</ul>
+							</div>
+						<% } %>
+
+						<div class="active-session-step">
+
+						</div>
 					</div>
 				</div>
 			<% } %>
