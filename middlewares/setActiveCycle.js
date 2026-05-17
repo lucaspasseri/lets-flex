@@ -1,8 +1,11 @@
 import { addDays, differenceInCalendarDays } from "date-fns";
+import toNullableNumber from "../utils/toNullableNumber.js";
 
 const getActiveCycleId = (startDate, currDay, daysDifference, cycleArr) => {
-	const relativeDay =
-		daysDifference !== 0 ? addDays(currDay, daysDifference) : currDay;
+	const currDifference = toNullableNumber(daysDifference);
+	const relativeDay = currDifference
+		? addDays(currDay, currDifference)
+		: currDay;
 
 	if (differenceInCalendarDays(relativeDay, startDate) < 0) {
 		return null;
@@ -29,15 +32,14 @@ const setActiveCycle = async (req, res, next) => {
 	const { currentProgram } = res.locals.appState;
 	const { cycleArr } = res.locals.data;
 
-	const startDate = currentProgram?.startDate ? currentProgram.startDate : null;
 	const currDay = new Date();
+	const startDate = currentProgram?.start_date
+		? currentProgram.start_date
+		: null;
+
 	let activeCycleId;
 
-	if (
-		daysDifference !== undefined ||
-		currentProgram?.startDate !== undefined ||
-		cycleArr.length > 0
-	) {
+	if (currentProgram?.start_date !== undefined && cycleArr.length > 0) {
 		activeCycleId = getActiveCycleId(
 			startDate,
 			currDay,

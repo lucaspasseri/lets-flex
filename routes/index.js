@@ -1,20 +1,16 @@
 import { Router } from "express";
-import { renderDashboardPage } from "../controllers/index.js";
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { getCurrentProgram } from "../middlewares/getCurrentProgram.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
-import { getDifferenceInCalendarDays } from "../middlewares/getDifferenceInCalendarDays.js";
-import { getCurrentSession } from "../middlewares/getCurrentSession.js";
-import { getCurrentUserFromParams } from "../middlewares/getCurrentUserFromParams.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
+import { getDashboardPageParams } from "../middlewares/getDashboardPageParams.js";
 import { makeCurrentEntity } from "../middlewares/makeCurrentEntity.js";
+import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
 import pool from "../db/pool.js";
 import * as usersDb from "../db/users/index.js";
 import * as programsDb from "../db/programs/index.js";
-import { getDashboardPageParams } from "../middlewares/getDashboardPageParams.js";
-import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
 import { loadDashboardPageData } from "../middlewares/loadDashboardPageData.js";
 import { setActiveCycle } from "../middlewares/setActiveCycle.js";
+import { renderDashboardPage } from "../controllers/index.js";
 
 const router = Router();
 

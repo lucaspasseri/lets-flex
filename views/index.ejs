@@ -33,9 +33,6 @@ const activeDaySessionArr = filterSessionsByDay(sessionArr, activeDay);
 
 const currUrl = locals.page?.url ?? "";
 const currPath = locals.page?.path ?? "";
-
-console.log({sessionArr});
-console.log([currDay, activeDay]);
 %>
 
 
@@ -147,10 +144,23 @@ console.log([currDay, activeDay]);
 										<p>REST</p>
 
 									<% } else if(filteredSessionArr.length === 1) { %>
-										<p><%= filteredSessionArr[0].session_name.substring(0,4) %></p>
+										<p>
+											<%= filteredSessionArr[0].session_name.substring(0,4) %>
+										</p>
 
 									<% } else { %>
-										<p><%= multiSessionLabel(filteredSessionArr.length, filteredSessionArr[0].session_name.substring(0,5)) %></p>
+										<div class="multiple-session-container">
+											<p>
+												<%= filteredSessionArr[0].session_name.substring(0,4) %>
+											</p>
+											<% if(filteredSessionArr.length > 1) { %>
+												<div class="additional-session-indicator">
+													<% filteredSessionArr.filter((_session,index) => index !== 0).forEach((session, index) => { %>
+														<div class="additional-indication"></div>
+													<% }) %>
+												</div>
+											<% } %>
+										</div>
 									<% } %>
 								</div>
 							</li>
@@ -159,42 +169,45 @@ console.log([currDay, activeDay]);
 				</div>
 			<% } %>
 
-			<div class="active-session-container">
-				<% if (activeDaySessionArr.length === 0) { %>
-					<h2> RESTING / NO-SESSION DAY</h2>
-
-				<% } else if (activeDaySessionArr.length === 1) { %>
-					<div class="day-session-container">
-						<h3><%= activeDaySessionArr[0].session_name %></h3>
-					</div>
-
-				<% } else { %>
-					<div>
-						<div class="change-active-session-container">
-							<ul>
-								<% activeDaySessionArr.forEach(session => { %>
-									<li>
-										<a href="<%= `/?sessionId=${session.session_id}` %>">[<%= session.session_name %>]</a>
-									</li>
-								<% }) %>
-							</ul>
-						</div>
-
-						<div class="day-session-container">
-							<h3>
-								<%= 
-									currSessionId ? 
-										activeDaySessionArr.find(session => session.session_id === currSessionId)?.session_name : 
-										activeDaySessionArr[0].session_name 
-								%>
-							</h3>
-						</div>
-					</div>
-				<% } %>
-			</div>
+			
 
 		</div>
 	<% } %>
 
+	
+	<% if(currProgramId) { %>
+		<div class="active-session-container <%= activeDaySessionArr.length === 0 ? "no-session" : "" %>">
+			<% if (activeDaySessionArr.length === 0) { %>
+				<div class="no-session"><h2> RESTING / NO-SESSION DAY</h2></div>
 
+			<% } else if (activeDaySessionArr.length === 1) { %>
+				<div class="day-session-container">
+					<h3><%= activeDaySessionArr[0].session_name %></h3>
+				</div>
+
+			<% } else { %>
+				<div>
+					<div class="change-active-session-container">
+						<ul>
+							<% activeDaySessionArr.forEach(session => { %>
+								<li>
+									<a href="<%= `/?sessionId=${session.session_id}` %>">[<%= session.session_name %>]</a>
+								</li>
+							<% }) %>
+						</ul>
+					</div>
+
+					<div class="day-session-container">
+						<h3>
+							<%= 
+								currSessionId ? 
+									activeDaySessionArr.find(session => session.session_id === currSessionId)?.session_name : 
+									activeDaySessionArr[0].session_name 
+							%>
+						</h3>
+					</div>
+				</div>
+			<% } %>
+		</div>
+	<% } %>
 </main>
