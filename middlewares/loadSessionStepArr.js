@@ -4,8 +4,6 @@ import pool from "../db/pool.js";
 const loadSessionStepArr = async (req, res, next) => {
 	const { sessionId } = res.locals.sessionState;
 
-	console.log({ sessionId });
-
 	const sessionStepArr = sessionId
 		? await sessionStepsDb.getSessionStepsBySessionId(pool, { sessionId })
 		: [];
@@ -14,8 +12,6 @@ const loadSessionStepArr = async (req, res, next) => {
 		...res.locals.data,
 		sessionStepArr,
 	};
-
-	console.log({ sessionStepArr });
 
 	next();
 };

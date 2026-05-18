@@ -417,12 +417,16 @@
 .sessions-section .button-container {
 	margin-top: 2em;
 	box-shadow: var(--box-shadow-header);
+	display: flex;
 
-	button {
-		width: 100%;
+	a {
 		background-color: var(--color-accent);
 		padding: 0.6em;
 		border: 0;
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.icon {

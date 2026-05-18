@@ -1,5 +1,5 @@
 const getDashboardPageParams = async (req, res, next) => {
-	const { daysDifference = 0, sessionId } = req.query;
+	const { daysDifference, sessionId } = req.query;
 
 	res.locals.dashboardPageParams ??= {};
 
