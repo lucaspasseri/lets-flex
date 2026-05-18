@@ -219,7 +219,7 @@
 .date-section .cycle-list-item {
 	padding: 0.6em 1em;
 	border-radius: 6px;
-	background-color: var(--color-stitch-secondary);
+	background-color: var(--color-surface);
 	border: 0.1em solid var(--color-border);
 }
 
@@ -270,7 +270,7 @@
 	justify-content: center;
 	align-items: center;
 	border: 0.1em solid var(--color-border);
-	background-color: var(--color-stitch-secondary);
+	background-color: var(--color-surface);
 	padding: 0.6em;
 
 	p {
@@ -318,7 +318,7 @@
 	margin-top: 1.2em;
 	display: flex;
 	flex: 1;
-	background-color: var(--color-stitch-secondary);
+	background-color: var(--color-header);
 	border-radius: 6px;
 }
 
@@ -334,10 +334,27 @@
 }
 
 .sessions-section .session-container {
-	background-color: var(--color-border);
+	background-color: var(--color-surface);
 	padding: 1em;
 	height: 100%;
 	border-radius: 4px;
+	border-top: 0.2em solid var(--color-stitch);
+	display: flex;
+	flex-direction: column;
+}
+
+.sessions-section .session-container .no-session-step-container {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.sessions-section .session-content {
+	flex: 1;
+	justify-content: center;
+	align-items: center;
+	display: flex;
 }
 
 .sessions-section .change-active-session-container {
@@ -363,7 +380,6 @@
 }
 
 .sessions-section .session-header {
-	border: 1px solid red;
 	display: flex;
 	justify-content: space-between;
 
@@ -385,9 +401,32 @@
 
 .sessions-section .session-step-list-container {
 	margin-top: 1em;
-	border: 1px solid greenyellow;
 }
-.sessions-section .active-session-step {
-	margin-top: 1em;
-	border: 1px solid purple;
+
+.sessions-section .session-step-list-item {
+	padding: 1.2em;
+	background-color: var(--color-surface);
+	border: 0.1em solid var(--color-border);
+	display: flex;
+	gap: 1em;
+
+	span {
+		font-size: 1.2em;
+	}
+}
+.sessions-section .button-container {
+	margin-top: 2em;
+	box-shadow: var(--box-shadow-header);
+
+	button {
+		width: 100%;
+		background-color: var(--color-accent);
+		padding: 0.6em;
+		border: 0;
+	}
+
+	.icon {
+		fill: var(--color-stitch-text);
+		width: fit-content;
+	}
 }

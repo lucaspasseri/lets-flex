@@ -3,8 +3,8 @@ const currentUrl = locals?.page?.url ?? "";
 const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/library", label: "Library"}, {href: "/profile", label: "Profile"}];
 
 const setIndicator = (tab) => {
-	if(tab.href === "/"){
-		if(currentUrl === "/"){
+	if(tab.label === "Dashboard"){
+		if(currentUrl === "/" || currentUrl.substring(0,2) === "/?"){
 			return "footer-indicator isActive";		
 		}
 		

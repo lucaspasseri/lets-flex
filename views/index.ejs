@@ -173,7 +173,59 @@ const filterSessionsByDay = (sessionArr, day) => {
 			<% } else if (activeDaySessionArr.length === 1) { %>
 				<div class="sessions-container">
 					<div class="session-container">
-						<h3><%= activeDaySessionArr[0].session_name %></h3>
+						<div class="session-header">
+							<h3>
+								<% const activeSession = currSessionId ? 
+										activeDaySessionArr.find(session => session.session_id === currSessionId) :
+										activeDaySessionArr[0];
+								%>
+								<%= 
+									activeSession?.session_name
+								%>
+							</h3>
+							<% if(sessionStepArr.length > 0){ %>
+								<div class="complete-indicator-container">
+									<span>
+										0% COMPLETE
+									</span>
+								</div>
+							<% } %>
+						</div>
+
+						<% if(sessionStepArr.length > 0){ %>
+							<div class="session-step-list-container">
+								<ul>
+									<% sessionStepArr.forEach(step => { %>
+										<li>
+											<div class="session-step-list-item">
+												<span>
+													<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
+												</span>
+												<span>
+													<%= step.name.toUpperCase() %>
+												</span>
+											</div>
+										</li>
+									<% }) %>
+								</ul>
+							</div>
+						<% } else { %>
+							<div class="no-session-step-container">
+								<p>
+									( EMPTY )
+								</p>
+							</div>
+						<% }%>
+
+						<% if(sessionStepArr.length > 0){ %>
+							<div class="button-container">
+								<button>
+									<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
+										<use href="../play-black-icon.svg"></use>
+									</svg>
+								</button>
+							</div>
+						<% } %>
 					</div>
 				</div>
 
@@ -200,31 +252,49 @@ const filterSessionsByDay = (sessionArr, day) => {
 									activeSession?.session_name
 								%>
 							</h3>
-							<div class="complete-indicator-container">
-								<span>
-									0% COMPLETE
-								</span>
-							</div>
+							<% if(sessionStepArr.length > 0){ %>
+								<div class="complete-indicator-container">
+									<span>
+										0% COMPLETE
+									</span>
+								</div>
+							<% } %>
 						</div>
 
-						
 						<% if(sessionStepArr.length > 0){ %>
 							<div class="session-step-list-container">
 								<ul>
 									<% sessionStepArr.forEach(step => { %>
 										<li>
-											<p>
-												<%= step.id %>
-											</p>
+											<div class="session-step-list-item">
+												<span>
+													<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
+												</span>
+												<span>
+													<%= step.name.toUpperCase() %>
+												</span>
+											</div>
 										</li>
 									<% }) %>
 								</ul>
 							</div>
+						<% } else { %>
+							<div class="no-session-step-container">
+								<p>
+									( EMPTY )
+								</p>
+							</div>
+						<% }%>
+
+						<% if(sessionStepArr.length > 0){ %>
+							<div class="button-container">
+								<button>
+									<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
+										<use href="../play-black-icon.svg"></use>
+									</svg>
+								</button>
+							</div>
 						<% } %>
-
-						<div class="active-session-step">
-
-						</div>
 					</div>
 				</div>
 			<% } %>
