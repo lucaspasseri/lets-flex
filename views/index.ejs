@@ -20,6 +20,7 @@ const sessionArr = locals.data?.sessionArr ?? [];
 const sessionStepArr = locals.data?.sessionStepArr ?? [];
 const activeDaySessionArr = locals.data?.activeDaySessionArr ?? [];
 
+
 const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
 
 const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];

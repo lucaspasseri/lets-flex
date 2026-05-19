@@ -1,33 +1,50 @@
 <%
-const currWorkoutSession = locals.appState?.currentWorkoutSession ?? {};
+const workoutSessionInProgressIdArr = locals.sessionState?.activeWorkoutSessionIdArr ?? [];
+const workoutSessionInProgressArr = locals.data?.workoutSessionInProgressArr ?? [];
+
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? workoutSessionInProgressArr.length > 0 ? workoutSessionInProgressArr[0] : [];
 const currSessionId = locals.sessionState?.sessionId ?? null;
 
 const activeDaySessionArr = locals.data?.activeDaySessionArr ?? [];
 const sessionStepArr = locals.data?.sessionStepArr ?? [];
-
-console.log({currWorkoutSession});
+console.log({sessionStepArr});
 %>
 
 <div class="session-component">
 	<% if(currWorkoutSession?.session_id === currSessionId ) { %>
 		<div class="session-header">
-				<h3>
-					<% const activeSession = currSessionId ? 
-							activeDaySessionArr.find(session => session.session_id === currSessionId) :
-							activeDaySessionArr[0];
-					%>
-					<%= 
-						activeSession?.session_name
-					%>
-				</h3>
-				<% if(sessionStepArr.length > 0){ %>
-					<div class="complete-indicator-container">
-						<span>
-							0% COMPLETE
-						</span>
-					</div>
-				<% } %>
-			</div>
+			<h3>
+				<% const activeSession = currSessionId ? 
+						activeDaySessionArr.find(session => session.session_id === currSessionId) :
+						activeDaySessionArr[0];
+				%>
+				<%= 
+					activeSession?.session_name
+				%>
+			</h3>
+			<% if(sessionStepArr.length > 0) { %>
+				<div class="complete-indicator-container">
+					<span>
+						0% COMPLETE
+					</span>
+				</div>
+			<% } %>
+		</div>
+
+		<h4>HAHAHAHAH AHHAHAH AHHAHHA</h4>
+
+		<% if(sessionStepArr.length > 0){ %>
+			<ul>
+				<% sessionStepArr.forEach(step => { %>
+					<li>
+						<p>
+							<%= step.name %>
+						</p>
+					</li>
+				<% }) %>
+			</ul>
+		<% } %>
+	
 	<% } else { %>
 		
 			<div class="session-header">

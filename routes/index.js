@@ -14,6 +14,7 @@ import { renderDashboardPage } from "../controllers/index.js";
 import { setActiveSessionMisc } from "../middlewares/setActiveSessionMisc.js";
 import { loadCycleAndSessionArrays } from "../middlewares/loadCycleAndSessionArrays.js";
 import * as workoutSessionsDb from "../db/workout_sessions/index.js";
+import { setActiveWorkoutSession } from "../middlewares/setActiveWorkoutSession.js";
 
 const router = Router();
 
@@ -60,6 +61,7 @@ router.get(
 	loadCycleAndSessionArrays,
 	setActiveCycle,
 	setActiveSessionMisc,
+	setActiveWorkoutSession,
 	loadSessionStepArr,
 	renderDashboardPage,
 );

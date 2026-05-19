@@ -3,6 +3,8 @@ import { Client } from "pg";
 const sql = `
 DROP TABLE IF EXISTS "workout_step_logs" CASCADE;
 DROP TABLE IF EXISTS "session_steps" CASCADE;
+DROP TABLE IF EXISTS "workout_sessions" CASCADE;
+DROP TYPE IF EXISTS "workout_step_log_status" CASCADE;
 DROP TABLE IF EXISTS "sessions" CASCADE;
 DROP TABLE IF EXISTS "training_days" CASCADE;
 DROP TABLE IF EXISTS "cycles" CASCADE;
@@ -123,6 +125,10 @@ ADD COLUMN workout_session_id integer NOT NULL REFERENCES workout_sessions(id) O
 ALTER TABLE workout_step_logs
 ADD CONSTRAINT unique_step_per_workout_session
 UNIQUE (workout_session_id, session_step_id);
+
+CREATE UNIQUE INDEX one_active_workout_session_per_session
+ON workout_sessions (session_id)
+WHERE finished_at IS NULL;
 
 CREATE TABLE "step_types" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

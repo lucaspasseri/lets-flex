@@ -20,4 +20,17 @@ async function getWorkoutSessionById(db, { workoutSessionId }) {
 	return rows[0];
 }
 
-export { insertWorkoutSession, getWorkoutSessionById };
+async function getWorkoutSessionInProgressBySessionId(db, { sessionId }) {
+	const { rows } = await db.query(
+		"SELECT * FROM workout_sessions WHERE status = 'in_progress' AND session_id = $1 ",
+		[sessionId],
+	);
+
+	return rows;
+}
+
+export {
+	insertWorkoutSession,
+	getWorkoutSessionById,
+	getWorkoutSessionInProgressBySessionId,
+};
