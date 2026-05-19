@@ -13,6 +13,7 @@ import { setActiveCycle } from "../middlewares/setActiveCycle.js";
 import { renderDashboardPage } from "../controllers/index.js";
 import { setActiveSessionMisc } from "../middlewares/setActiveSessionMisc.js";
 import { loadCycleAndSessionArrays } from "../middlewares/loadCycleAndSessionArrays.js";
+import * as workoutSessionsDb from "../db/workout_sessions/index.js";
 
 const router = Router();
 
@@ -35,6 +36,14 @@ router.get(
 		sessionKey: "programId",
 		appStateKey: "currentProgram",
 		getById: programId => programsDb.getProgramById(pool, { programId }),
+	}),
+	makeCurrentEntity({
+		pageParamsKey: "dashboardPageParams",
+		paramKey: "workoutSessionId",
+		sessionKey: "workoutSessionId",
+		appStateKey: "currentWorkoutSession",
+		getById: workoutSessionId =>
+			workoutSessionsDb.getWorkoutSessionById(pool, { workoutSessionId }),
 	}),
 	makeCurrentValue({
 		pageParamsKey: "dashboardPageParams",

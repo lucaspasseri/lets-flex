@@ -16,6 +16,7 @@ import expressEjsLayouts from "express-ejs-layouts";
 import appStateRouter from "./routes/app_state.js";
 import libraryRouter from "./routes/library.js";
 import exerciseClusterRouter from "./routes/exercise_cluster.js";
+import workoutSessionsRouter from "./routes/workout_sessions.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,7 @@ app.use("/profile", profileRouter);
 app.use("/app_state", appStateRouter);
 app.use("/library", libraryRouter);
 app.use("/exercise_cluster", exerciseClusterRouter);
+app.use("/workout_sessions", workoutSessionsRouter);
 
 app.use((err, _req, res, _next) => {
 	console.error(err.stack);

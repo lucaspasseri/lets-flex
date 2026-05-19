@@ -1,5 +1,14 @@
 import pool from "../pool.js";
 
+async function getSessionById(db, { sessionId }) {
+	const { rows: sessions } = await db.query(
+		"SELECT * FROM sessions WHERE id = $1",
+		[sessionId],
+	);
+
+	return sessions?.[0];
+}
+
 async function getAllSessions() {
 	const { rows } = await pool.query("SELECT * FROM sessions");
 	return rows;
@@ -99,6 +108,7 @@ async function postNewSession(name, trainingDayId, sessionOrder) {
 }
 
 export {
+	getSessionById,
 	getAllSessions,
 	getSessionByTrainingDayId,
 	getAllSessionsWithOutIds,

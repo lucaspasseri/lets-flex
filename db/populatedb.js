@@ -81,15 +81,48 @@ CREATE TABLE "session_steps" (
   UNIQUE (session_id, step_order)
 );
 
-CREATE TABLE "workout_step_logs" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "session_step_id" integer NOT NULL REFERENCES session_steps(id) ON DELETE CASCADE,
-  "performed_at" timestamp,
-  "sets" integer,
-  "reps" integer,
-  "load_value" float,
-  "load_unit" varchar
+
+
+CREATE TABLE workout_sessions (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  session_id integer NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+  started_at timestamp DEFAULT now(),
+  finished_at timestamp,
+  status text NOT NULL DEFAULT 'in_progress'
 );
+
+CREATE TYPE workout_step_log_status AS ENUM (
+  'planned',
+  'performed',
+  'skipped'
+);
+
+CREATE TABLE workout_step_logs (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  session_step_id integer NOT NULL REFERENCES session_steps(id) ON DELETE CASCADE,
+
+  status workout_step_log_status NOT NULL DEFAULT 'planned',
+  performed_at timestamp,
+
+  planned_sets integer,
+  planned_reps integer,
+  planned_load_value float,
+  planned_load_unit varchar,
+
+  actual_sets integer,
+  actual_reps integer,
+  actual_load_value float,
+  actual_load_unit varchar,
+
+  notes text
+);
+
+ALTER TABLE workout_step_logs
+ADD COLUMN workout_session_id integer NOT NULL REFERENCES workout_sessions(id) ON DELETE CASCADE;
+
+ALTER TABLE workout_step_logs
+ADD CONSTRAINT unique_step_per_workout_session
+UNIQUE (workout_session_id, session_step_id);
 
 CREATE TABLE "step_types" (
   "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

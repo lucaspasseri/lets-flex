@@ -1,0 +1,91 @@
+<%
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? {};
+const currSessionId = locals.sessionState?.sessionId ?? null;
+
+const activeDaySessionArr = locals.data?.activeDaySessionArr ?? [];
+const sessionStepArr = locals.data?.sessionStepArr ?? [];
+
+console.log({currWorkoutSession});
+%>
+
+<div class="session-component">
+	<% if(currWorkoutSession?.session_id === currSessionId ) { %>
+		<div class="session-header">
+				<h3>
+					<% const activeSession = currSessionId ? 
+							activeDaySessionArr.find(session => session.session_id === currSessionId) :
+							activeDaySessionArr[0];
+					%>
+					<%= 
+						activeSession?.session_name
+					%>
+				</h3>
+				<% if(sessionStepArr.length > 0){ %>
+					<div class="complete-indicator-container">
+						<span>
+							0% COMPLETE
+						</span>
+					</div>
+				<% } %>
+			</div>
+	<% } else { %>
+		
+			<div class="session-header">
+				<h3>
+					<% const activeSession = currSessionId ? 
+							activeDaySessionArr.find(session => session.session_id === currSessionId) :
+							activeDaySessionArr[0];
+					%>
+					<%= 
+						activeSession?.session_name
+					%>
+				</h3>
+				<% if(sessionStepArr.length > 0){ %>
+					<div class="complete-indicator-container">
+						<span>
+							0% COMPLETE
+						</span>
+					</div>
+				<% } %>
+			</div>
+
+			<% if(sessionStepArr.length > 0){ %>
+				<div class="session-step-list-container">
+					<ul>
+						<% sessionStepArr.forEach(step => { %>
+							<li>
+								<div class="session-step-list-item">
+									<span>
+										<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
+									</span>
+									<span>
+										<%= step.name.toUpperCase() %>
+									</span>
+								</div>
+							</li>
+						<% }) %>
+					</ul>
+				</div>
+			<% } else { %>
+				<div class="no-session-step-container">
+					<p>
+						( EMPTY )
+					</p>
+				</div>
+			<% }%>
+
+			<% if(sessionStepArr.length > 0){ %>
+				<div class="button-container">
+					<form method="POST" action="/workout_sessions">
+						<input type="hidden" name="sessionId" value="<%= currSessionId %>" />
+						<button type="submit">
+							<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
+								<use href="../play-black-icon.svg"></use>
+							</svg>
+						</button>
+					</form>
+				</div>
+			<% } %>
+
+	<% } %>
+</div>

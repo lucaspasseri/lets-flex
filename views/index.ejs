@@ -8,6 +8,7 @@ const currProgramId = locals.sessionState?.programId ?? null;
 const currSessionId = locals.sessionState?.sessionId ?? null;
 const daysDifference = locals.sessionState?.daysDifference ?? null;
 const activeCycleId = locals.sessionState?.activeCycleId ?? null;
+const workoutSessionId = locals.sessionState?.workoutSessionId ?? null;
 
 const currDay = new Date();
 const activeDay = locals.sessionState?.activeDay ?? currDay;
@@ -163,7 +164,6 @@ const filterSessionsByDay = (sessionArr, day) => {
 			<% } %>
 		</div>
 	<% } %>
-
 	
 	<% if(currProgramId) { %>
 		<div class="sessions-section <%= activeDaySessionArr.length === 0 ? "no-session" : "" %>">
@@ -172,61 +172,7 @@ const filterSessionsByDay = (sessionArr, day) => {
 
 			<% } else if (activeDaySessionArr.length === 1) { %>
 				<div class="sessions-container">
-					<div class="session-container">
-						<div class="session-header">
-							<h3>
-								<% const activeSession = currSessionId ? 
-										activeDaySessionArr.find(session => session.session_id === currSessionId) :
-										activeDaySessionArr[0];
-								%>
-								<%= 
-									activeSession?.session_name
-								%>
-							</h3>
-							<% if(sessionStepArr.length > 0){ %>
-								<div class="complete-indicator-container">
-									<span>
-										0% COMPLETE
-									</span>
-								</div>
-							<% } %>
-						</div>
-
-						<% if(sessionStepArr.length > 0){ %>
-							<div class="session-step-list-container">
-								<ul>
-									<% sessionStepArr.forEach(step => { %>
-										<li>
-											<div class="session-step-list-item">
-												<span>
-													<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
-												</span>
-												<span>
-													<%= step.name.toUpperCase() %>
-												</span>
-											</div>
-										</li>
-									<% }) %>
-								</ul>
-							</div>
-						<% } else { %>
-							<div class="no-session-step-container">
-								<p>
-									( EMPTY )
-								</p>
-							</div>
-						<% }%>
-
-						<% if(sessionStepArr.length > 0){ %>
-							<div class="button-container">
-								<a href="<%=currUrl %>">
-									<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
-										<use href="../play-black-icon.svg"></use>
-									</svg>
-								</a>
-							</div>
-						<% } %>
-					</div>
+						<%- include('partials/sessionComponent' ); %>
 				</div>
 
 			<% } else { %>
@@ -241,61 +187,7 @@ const filterSessionsByDay = (sessionArr, day) => {
 						</ul>
 					</div>
 
-					<div class="session-container">
-						<div class="session-header">
-							<h3>
-								<% const activeSession = currSessionId ? 
-										activeDaySessionArr.find(session => session.session_id === currSessionId) :
-										activeDaySessionArr[0];
-								%>
-								<%= 
-									activeSession?.session_name
-								%>
-							</h3>
-							<% if(sessionStepArr.length > 0){ %>
-								<div class="complete-indicator-container">
-									<span>
-										0% COMPLETE
-									</span>
-								</div>
-							<% } %>
-						</div>
-
-						<% if(sessionStepArr.length > 0){ %>
-							<div class="session-step-list-container">
-								<ul>
-									<% sessionStepArr.forEach(step => { %>
-										<li>
-											<div class="session-step-list-item">
-												<span>
-													<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
-												</span>
-												<span>
-													<%= step.name.toUpperCase() %>
-												</span>
-											</div>
-										</li>
-									<% }) %>
-								</ul>
-							</div>
-						<% } else { %>
-							<div class="no-session-step-container">
-								<p>
-									( EMPTY )
-								</p>
-							</div>
-						<% }%>
-
-						<% if(sessionStepArr.length > 0){ %>
-							<div class="button-container">
-								<a href="<%=currUrl %>">
-									<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
-										<use href="../play-black-icon.svg"></use>
-									</svg>
-								</a>
-							</div>
-						<% } %>
-					</div>
+					<%- include('partials/sessionComponent' ); %>
 				</div>
 			<% } %>
 		</div>

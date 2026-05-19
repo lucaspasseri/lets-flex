@@ -16,7 +16,7 @@ async function addNewSession(req, res) {
 		sessionOrder,
 	);
 
-	res.redirect(`/programs/day?dayId=${trainingDayId}?sessionId=${session.id}`);
+	res.redirect(`/programs/day?dayId=${trainingDayId}&?sessionId=${session.id}`);
 }
 
 export { getSessionByTrainingDayId, addNewSession };
