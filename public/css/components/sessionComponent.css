@@ -74,3 +74,28 @@
 		width: fit-content;
 	}
 }
+
+.session-component .workout-step-item {
+	border: 1px solid red;
+	padding: 0.8em;
+
+	> div {
+		display: flex;
+		align-items: center;
+	}
+
+	.step-order {
+		color: var(--color-stitch);
+		font-size: 1.1em;
+		font-weight: 700;
+	}
+	.step-name {
+		font-size: 1.1em;
+		font-weight: 700;
+		margin-left: 0.6em;
+	}
+	.step-status {
+		border: 1px solid yellowgreen;
+		margin-left: auto;
+	}
+}

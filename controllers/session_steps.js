@@ -35,10 +35,13 @@ async function addNewSessionStep(req, res) {
 		loadUnit,
 	);
 
-	const currDayId =
-		req.session?.state?.dayId && toNullableNumber(req.session.state.dayId);
+	const dayId = req.session.state?.dayId ?? null;
 
-	res.redirect(`/programs/day?dayId=${currDayId}&?sessions=${sessionId}`);
+	const path = dayId
+		? `/programs/day?dayId=${dayId}&sessionId=${sessionId}`
+		: `/programs/day?sessionId=${sessionId}`;
+
+	res.redirect(path);
 }
 
 export { getSessionStepsById, addNewSessionStep };

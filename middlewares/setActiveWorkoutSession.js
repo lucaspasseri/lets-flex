@@ -1,19 +1,20 @@
 import * as workoutSessionsDb from "../db/workout_sessions/index.js";
+import * as workoutStepLogsDb from "../db/workout_step_logs/index.js";
 import pool from "../db/pool.js";
 
-const setActiveWorkoutSession = async (_req, res, next) => {
+const setActiveWorkoutSession = async (req, res, next) => {
 	const { sessionId } = res.locals.sessionState;
-	const workoutSessionInProgressArr =
-		await workoutSessionsDb.getWorkoutSessionInProgressBySessionId(pool, {
-			sessionId,
-		});
+	const workoutSessionInProgress = sessionId
+		? await workoutSessionsDb.getWorkoutSessionInProgressBySessionId(pool, {
+				sessionId,
+			})
+		: null;
 
-	console.log({ workoutSessionInProgressArr });
-
-	res.locals.data.workoutSessionInProgressArr = workoutSessionInProgressArr;
-
-	res.locals.sessionState.activeWorkoutSessionIdArr =
-		workoutSessionInProgressArr.map(ws => ws.id);
+	if (workoutSessionInProgress !== null) {
+		req.session.state.workoutSessionId = workoutSessionInProgress?.id;
+		res.locals.appState.currentWorkoutSession = workoutSessionInProgress;
+		res.locals.sessionState.workoutSessionId = workoutSessionInProgress?.id;
+	}
 
 	next();
 };

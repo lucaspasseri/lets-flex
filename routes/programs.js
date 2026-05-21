@@ -4,26 +4,22 @@ import {
 	renderProgramsPage,
 	renderDayPage,
 } from "../controllers/programs.js";
-import { getHelpers } from "../middlewares/getHelpers.js";
-import { getCurrentUserFromParams } from "../middlewares/getCurrentUserFromParams.js";
-import { getCurrentProgram } from "../middlewares/getCurrentProgram.js";
+
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { getCurrentProgramByParams } from "../middlewares/getCurrentProgramByParams.js";
-import { getCurrentCycleByParams } from "../middlewares/getCurrentCycleByParams.js";
-import { getCurrentDayByParams } from "../middlewares/getCurrentDayByParams.js";
-import { getScheduledDate } from "../middlewares/getScheduledDate.js";
-import { getCurrentSessionByParams } from "../middlewares/getCurrentSessionByParams.js";
+import { getHelpers } from "../middlewares/getHelpers.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
-import { makeCurrentEntity } from "../middlewares/makeCurrentEntity.js";
-import pool from "../db/pool.js";
-import * as usersDb from "../db/users/index.js";
-import * as programsDb from "../db/programs/index.js";
-import * as cyclesDb from "../db/cycles/index.js";
-import * as sessionsDb from "../db/sessions/index.js";
 import { getProgramsPageParams } from "../middlewares/getProgramsPageParams.js";
-import { getDayPageParams } from "../middlewares/getDayPageParams.js";
-import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
+import { setProgramsPageUserContext } from "../middlewares/setProgramsPageUserContext.js";
+import { setProgramsPageProgramContext } from "../middlewares/setProgramsPageProgramContext.js";
+import { setProgramsPageCycleContext } from "../middlewares/setProgramsPageCycleContext.js";
 import { loadProgramsPageData } from "../middlewares/loadProgramsPageData.js";
+
+import { getDayPageParams } from "../middlewares/getDayPageParams.js";
+import { setDayPageUserContext } from "../middlewares/setDayPageUserContext.js";
+import { setDayPageProgramContext } from "../middlewares/setDayPageProgramContext.js";
+import { setDayPageCycleContext } from "../middlewares/setDayPageCycleContext.js";
+import { setDayPageDayContext } from "../middlewares/setDayPageDayContext.js";
+import { setDayPageSessionContext } from "../middlewares/setDayPageSessionContext.js";
 import { loadDayPageData } from "../middlewares/loadDayPageData.js";
 
 const router = express.Router();
@@ -36,27 +32,9 @@ router.get(
 	getHelpers,
 	getSessionState,
 	getProgramsPageParams,
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "userId",
-		sessionKey: "userId",
-		appStateKey: "currentUser",
-		getById: userId => usersDb.getUserById(pool, { userId }),
-	}),
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "programId",
-		sessionKey: "programId",
-		appStateKey: "currentProgram",
-		getById: programId => programsDb.getProgramById(pool, { programId }),
-	}),
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "cycleId",
-		sessionKey: "cycleId",
-		appStateKey: "currentCycle",
-		getById: cycleId => cyclesDb.getCycleById(pool, { cycleId }),
-	}),
+	setProgramsPageUserContext,
+	setProgramsPageProgramContext,
+	setProgramsPageCycleContext,
 	loadProgramsPageData,
 	renderProgramsPage,
 );
@@ -67,40 +45,11 @@ router.get(
 	getHelpers,
 	getSessionState,
 	getDayPageParams,
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "userId",
-		sessionKey: "userId",
-		appStateKey: "currentUser",
-		getById: userId => usersDb.getUserById(pool, { userId }),
-	}),
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "programId",
-		sessionKey: "programId",
-		appStateKey: "currentProgram",
-		getById: programId => programsDb.getProgramById(pool, { programId }),
-	}),
-	makeCurrentEntity({
-		pageParamsKey: "programsPageParams",
-		paramKey: "cycleId",
-		sessionKey: "cycleId",
-		appStateKey: "currentCycle",
-		getById: cycleId => cyclesDb.getCycleById(pool, { cycleId }),
-	}),
-	makeCurrentValue({
-		pageParamsKey: "dayPageParams",
-		paramKey: "dayId",
-		sessionKey: "dayId",
-		transform: Number,
-	}),
-	makeCurrentValue({
-		pageParamsKey: "dayPageParams",
-		paramKey: "sessionId",
-		sessionKey: "sessionId",
-		transform: Number,
-	}),
-	getScheduledDate,
+	setDayPageUserContext,
+	setDayPageProgramContext,
+	setDayPageCycleContext,
+	setDayPageSessionContext,
+	setDayPageDayContext,
 	loadDayPageData,
 	renderDayPage,
 );

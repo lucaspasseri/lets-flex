@@ -3,18 +3,19 @@ const { formatDate, addDays } = locals.helpers;
 
 const backUrl = locals.page?.backUrl ?? "";
 
-const currCycleId = locals.sessionState?.cycleId || null; 
-const currSessionId = locals.sessionState?.sessionId || null;
-const currDayId = locals.sessionState?.dayId || null;
+const currCycleId = locals.sessionState?.cycleId ?? null; 
+const currDayId = locals.sessionState?.dayId ?? null;
+const sessionId = locals.sessionState?.sessionId ?? null;
 
 const currProgram = locals.appState?.currentProgram ?? {};
-const scheduledDate = locals.appState?.scheduledDate ?? null;
+const currTrainingDay = locals.appState?.currentTrainingDay ?? null;
 
 const sessionArr = locals.data?.sessionArr ?? [];
 const trainingDayArr = locals.data?.trainingDayArr ?? [];
 const sessionStepArr = locals.data?.sessionStepArr ?? [];
 
-const formattedScheduledDate = scheduledDate ? (formatDate && formatDate(scheduledDate, "dd/MM/yyyy")) : "No date";
+
+const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "No date";
 
 const sessionBasicLineId = "dayPageSessionBasicLine";
 const sessionBasicLineEntity = "session";
@@ -34,7 +35,7 @@ const getNavLinkHref = (trainingDay) => {
 	return `/programs/day?dayId=${trainingDay.training_day_id}`;
 }
 
-const currSession = sessionArr.find(session => session.id === currSessionId) || {};
+const currSession = sessionArr.find(session => session.id === sessionId) || {};
 
 const renderContent = (content) => {
 	return `
@@ -78,7 +79,7 @@ const renderContent = (content) => {
 		<% } else { %>
 				<h2>CHOOSE THE ACTIVE SESSION</h2>
 		<% } %>
-		<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: currSessionId, path: chosenSessionPath }}) %>
+		<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: sessionId, path: chosenSessionPath }}) %>
 	</div>
 
 
@@ -88,7 +89,7 @@ const renderContent = (content) => {
 				<span>SESSION <%= currSession.session_order %>: <%= currSession.name %></span>
 				<h3>Exercises</h3>
 			</div>
-			<% if(currSessionId && sessionStepArr.length !== 0){ %>
+			<% if(sessionId && sessionStepArr.length !== 0){ %>
 				<ul>
 					<%- include("partials/accordion", { contentArr: sessionStepArr, renderContent: renderContent }) %>
 				</ul>

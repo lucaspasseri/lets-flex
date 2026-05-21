@@ -3,18 +3,17 @@ import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
 import { getDashboardPageParams } from "../middlewares/getDashboardPageParams.js";
-import { makeCurrentEntity } from "../middlewares/makeCurrentEntity.js";
-import { makeCurrentValue } from "../middlewares/makeCurrentValue.js";
-import pool from "../db/pool.js";
-import * as usersDb from "../db/users/index.js";
-import * as programsDb from "../db/programs/index.js";
-import { loadSessionStepArr } from "../middlewares/loadSessionStepArr.js";
-import { setActiveCycle } from "../middlewares/setActiveCycle.js";
-import { renderDashboardPage } from "../controllers/index.js";
-import { setActiveSessionMisc } from "../middlewares/setActiveSessionMisc.js";
+import { setDashboardPageUserContext } from "../middlewares/setDashboardPageUserContext.js";
+import { setDashboardPageProgramContext } from "../middlewares/setDashboardPageProgramContext.js";
+import { setDashboardPageDaysDifferenceContext } from "../middlewares/setDashboardPageDaysDifferenceContext.js";
+import { setDashboardPageSessionContext } from "../middlewares/setDashboardPageSessionContext.js";
 import { loadCycleAndSessionArrays } from "../middlewares/loadCycleAndSessionArrays.js";
-import * as workoutSessionsDb from "../db/workout_sessions/index.js";
+import { setActiveCycle } from "../middlewares/setActiveCycle.js";
+import { loadSessionStepArr } from "../middlewares/loadSessionStepArr.js";
+import { setActiveSessionMisc } from "../middlewares/setActiveSessionMisc.js";
 import { setActiveWorkoutSession } from "../middlewares/setActiveWorkoutSession.js";
+import { loadWorkoutSessionLogArr } from "../middlewares/loadWorkoutSessionLogArr.js";
+import { renderDashboardPage } from "../controllers/index.js";
 
 const router = Router();
 
@@ -24,45 +23,15 @@ router.get(
 	getHelpers,
 	getSessionState,
 	getDashboardPageParams,
-	makeCurrentEntity({
-		pageParamsKey: "dashboardPageParams",
-		paramKey: "userId",
-		sessionKey: "userId",
-		appStateKey: "currentUser",
-		getById: userId => usersDb.getUserById(pool, { userId }),
-	}),
-	makeCurrentEntity({
-		pageParamsKey: "dashboardPageParams",
-		paramKey: "programId",
-		sessionKey: "programId",
-		appStateKey: "currentProgram",
-		getById: programId => programsDb.getProgramById(pool, { programId }),
-	}),
-	makeCurrentEntity({
-		pageParamsKey: "dashboardPageParams",
-		paramKey: "workoutSessionId",
-		sessionKey: "workoutSessionId",
-		appStateKey: "currentWorkoutSession",
-		getById: workoutSessionId =>
-			workoutSessionsDb.getWorkoutSessionById(pool, { workoutSessionId }),
-	}),
-	makeCurrentValue({
-		pageParamsKey: "dashboardPageParams",
-		paramKey: "daysDifference",
-		sessionKey: "daysDifference",
-		transform: Number,
-	}),
-	makeCurrentValue({
-		pageParamsKey: "dashboardPageParams",
-		paramKey: "sessionId",
-		sessionKey: "sessionId",
-		transform: Number,
-	}),
+	setDashboardPageUserContext,
+	setDashboardPageProgramContext,
+	setDashboardPageDaysDifferenceContext,
+	setDashboardPageSessionContext,
 	loadCycleAndSessionArrays,
 	setActiveCycle,
 	setActiveSessionMisc,
 	setActiveWorkoutSession,
-	loadSessionStepArr,
+	loadWorkoutSessionLogArr,
 	renderDashboardPage,
 );
 

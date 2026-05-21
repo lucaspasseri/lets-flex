@@ -2,9 +2,7 @@ import toNullableNumber from "../utils/toNullableNumber.js";
 import { addDays, isSameDay } from "date-fns";
 
 const setActiveSessionMisc = async (_req, res, next) => {
-	const { daysDifference } = res.locals.sessionState;
-	const { sessionId } = res.locals.dashboardPageParams;
-
+	const { daysDifference, sessionId } = res.locals.sessionState;
 	const { sessionArr } = res.locals.data;
 
 	const currDay = new Date();

@@ -1,13 +1,10 @@
 <%
-const workoutSessionInProgressIdArr = locals.sessionState?.activeWorkoutSessionIdArr ?? [];
-const workoutSessionInProgressArr = locals.data?.workoutSessionInProgressArr ?? [];
-
-const currWorkoutSession = locals.appState?.currentWorkoutSession ?? workoutSessionInProgressArr.length > 0 ? workoutSessionInProgressArr[0] : [];
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? {};
 const currSessionId = locals.sessionState?.sessionId ?? null;
 
 const activeDaySessionArr = locals.data?.activeDaySessionArr ?? [];
 const sessionStepArr = locals.data?.sessionStepArr ?? [];
-console.log({sessionStepArr});
+const workoutStepLogArr = locals.data?.workoutStepLogArr ?? [];
 %>
 
 <div class="session-component">
@@ -33,13 +30,23 @@ console.log({sessionStepArr});
 
 		<h4>HAHAHAHAH AHHAHAH AHHAHHA</h4>
 
-		<% if(sessionStepArr.length > 0){ %>
+		<% if(workoutStepLogArr.length > 0){ %>
 			<ul>
-				<% sessionStepArr.forEach(step => { %>
-					<li>
-						<p>
-							<%= step.name %>
-						</p>
+				<% workoutStepLogArr.forEach(step => { %>
+					<li class="workout-step-item">
+						<div>
+							<span class="step-order">
+								<%= step.session_step_order <= 9 ? `0${step.session_step_order}` : step.session_step_order %>
+							</span>
+							<p class="step-name">
+							<%= step.session_name.toUpperCase() %>
+							</p>
+							<div class="step-status">
+								<% if(step.status === "planned") { %> 
+									
+								<% } %>
+							</div>
+						</div>
 					</li>
 				<% }) %>
 			</ul>

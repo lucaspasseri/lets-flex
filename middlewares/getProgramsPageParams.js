@@ -1,11 +1,7 @@
 const getProgramsPageParams = async (req, res, next) => {
-	const { programId, cycleId } = req.query;
-
-	res.locals.programsPageParams ??= {};
-
 	res.locals.programsPageParams = {
-		programId,
-		cycleId,
+		programId: req.query?.programId ? Number(req.query.programId) : null,
+		cycleId: req.query?.cycleId ? Number(req.query.cycleId) : null,
 	};
 
 	next();
