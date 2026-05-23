@@ -7,13 +7,17 @@ import { setDashboardPageUserContext } from "../middlewares/setDashboardPageUser
 import { setDashboardPageProgramContext } from "../middlewares/setDashboardPageProgramContext.js";
 import { setDashboardPageDaysDifferenceContext } from "../middlewares/setDashboardPageDaysDifferenceContext.js";
 import { setDashboardPageSessionContext } from "../middlewares/setDashboardPageSessionContext.js";
-import { loadCycleAndSessionArrays } from "../middlewares/loadCycleAndSessionArrays.js";
-import { setActiveCycle } from "../middlewares/setActiveCycle.js";
+import { loadCycleAndSessionArraysByProgramId } from "../middlewares/loadCycleAndSessionArraysByProgramId.js";
 import { loadSessionStepArr } from "../middlewares/loadSessionStepArr.js";
 import { setActiveSessionMisc } from "../middlewares/setActiveSessionMisc.js";
 import { setActiveWorkoutSession } from "../middlewares/setActiveWorkoutSession.js";
 import { loadWorkoutSessionLogArr } from "../middlewares/loadWorkoutSessionLogArr.js";
 import { renderDashboardPage } from "../controllers/index.js";
+import { setActiveDay } from "../middlewares/setActiveDay.js";
+import { setActiveCycle } from "../middlewares/setActiveCycle.js";
+import { loadCycleArrByProgramId } from "../middlewares/loadCycleArrByProgramId.js";
+import { loadSessionArrByProgramId } from "../middlewares/loadSessionArrByProgramId.js";
+import { setTrainingDayByActiveDay } from "../middlewares/setTrainingDayByActiveDay.js";
 
 const router = Router();
 
@@ -26,10 +30,12 @@ router.get(
 	setDashboardPageUserContext,
 	setDashboardPageProgramContext,
 	setDashboardPageDaysDifferenceContext,
+	setActiveDay,
+	setTrainingDayByActiveDay,
+	loadCycleArrByProgramId,
+	loadSessionArrByProgramId,
 	setDashboardPageSessionContext,
-	loadCycleAndSessionArrays,
-	setActiveCycle,
-	setActiveSessionMisc,
+	loadSessionStepArr,
 	setActiveWorkoutSession,
 	loadWorkoutSessionLogArr,
 	renderDashboardPage,

@@ -6,7 +6,6 @@
 	border-top: 0.2em solid var(--color-stitch);
 	display: flex;
 	flex-direction: column;
-	border: 1px solid red;
 }
 
 .session-component .no-session-step-container {
@@ -76,7 +75,6 @@
 }
 
 .session-component .workout-step-item {
-	border: 1px solid red;
 	padding: 0.8em;
 
 	> div {

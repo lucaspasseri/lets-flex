@@ -50,9 +50,23 @@ async function shiftScheduledDatesFromCycleOrder(
 	);
 }
 
+async function getTrainingDayByScheduledDate(db, { scheduledDate }) {
+	const { rows } = await db.query(
+		"SELECT * FROM training_days WHERE scheduled_date = $1",
+		[scheduledDate],
+	);
+
+	if (rows.length === 0) {
+		return null;
+	}
+
+	return rows[0];
+}
+
 export {
 	insertTrainingDay,
 	getTrainingDayById,
 	getTrainingDaysByCycleId,
 	shiftScheduledDatesFromCycleOrder,
+	getTrainingDayByScheduledDate,
 };

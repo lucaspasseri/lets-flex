@@ -2,21 +2,40 @@ import pool from "../db/pool.js";
 import * as sessionsDb from "../db/sessions/index.js";
 
 const setDashboardPageSessionContext = async (req, res, next) => {
-	let sessionId = res.locals.dashboardPageParams?.sessionId;
+	const { sessionId } = res.locals.dashboardPageParams;
+	const { trainingDayId } = res.locals.sessionState;
 
-	if (sessionId === null) {
-		sessionId = res.locals.sessionState?.sessionId;
-	}
+	const sessionArrByTrainingDay = await sessionsDb.getSessionByTrainingDayId(
+		pool,
+		{ trainingDayId },
+	);
 
-	const currentSession = sessionId
+	const paramSession = sessionId
 		? await sessionsDb.getSessionById(pool, { sessionId })
 		: null;
 
-	if (currentSession !== null) {
-		req.session.state.sessionId = currentSession?.id;
-		res.locals.appState.currentSession = currentSession;
-		res.locals.sessionState.sessionId = currentSession?.id;
+	let currentSession = null;
+
+	const paramSessionIsIncluded =
+		paramSession === null
+			? false
+			: sessionArrByTrainingDay.filter(
+					session => session.id === paramSession.id,
+				).length > 0;
+
+	if (paramSessionIsIncluded) {
+		currentSession = paramSession;
+	} else if (sessionArrByTrainingDay.length > 0) {
+		currentSession = sessionArrByTrainingDay[0];
 	}
+
+	res.locals.sessionState.sessionId = currentSession?.id ?? null;
+
+	res.locals.appState = {
+		...res.locals.appState,
+		currentSession,
+		sessionArrByTrainingDay,
+	};
 
 	next();
 };
