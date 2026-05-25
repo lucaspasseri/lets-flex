@@ -30,6 +30,7 @@ const setDashboardPageSessionContext = async (req, res, next) => {
 	}
 
 	res.locals.sessionState.sessionId = currentSession?.id ?? null;
+	req.session.state.sessionId = currentSession?.id ?? null;
 
 	res.locals.appState = {
 		...res.locals.appState,

@@ -59,7 +59,17 @@ async function insertWorkoutStepLogBySessionIdAndWorkoutSessionId(
 	return rows;
 }
 
+async function updateWorkoutStepLogStatus(db, { workoutStepLogId, status }) {
+	const { rows } = await db.query(
+		"UPDATE workout_step_logs SET status = $1 WHERE id = $2 RETURNING *",
+		[status, workoutStepLogId],
+	);
+
+	return rows[0];
+}
+
 export {
 	insertWorkoutStepLogBySessionIdAndWorkoutSessionId,
 	getWorkoutStepLogsByWorkoutSessionId,
+	updateWorkoutStepLogStatus,
 };

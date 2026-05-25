@@ -6,6 +6,14 @@
 	border-top: 0.2em solid var(--color-stitch);
 	display: flex;
 	flex-direction: column;
+	justify-content: space-between;
+	gap: 1em;
+}
+
+.session-component .no-workout-session-container {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
 }
 
 .session-component .no-session-step-container {
@@ -13,6 +21,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	height: 100%;
 }
 
 .session-component .session-header {
@@ -47,7 +56,6 @@
 }
 
 .session-component .button-container {
-	margin-top: 2em;
 	box-shadow: var(--box-shadow-header);
 
 	form {
@@ -73,7 +81,6 @@
 .session-component .session-step-list-container,
 .session-component .workout-step-list-container {
 	margin-top: 1em;
-	flex: 1;
 	display: flex;
 
 	ul {
@@ -85,11 +92,12 @@
 
 	.session-step-list-item,
 	.workout-step-list-item {
-		padding: 1.2em;
+		padding: 1em;
 		background-color: var(--color-surface);
 		border: 0.1em solid var(--color-border);
 		display: flex;
 		gap: 1em;
+		align-items: center;
 
 		span {
 			font-size: 1.2em;
@@ -105,14 +113,56 @@
 			color: var(--color-stitch);
 			font-size: 1.1em;
 			font-weight: 700;
+			height: fit-content;
 		}
 		.step-name {
 			font-size: 1.1em;
 			font-weight: 700;
+			height: fit-content;
 		}
 		.step-status {
-			border: 1px solid yellowgreen;
 			margin-left: auto;
+			width: 30px;
+			height: 30px;
+		}
+	}
+}
+
+.session-component .current-workout-step-container {
+	min-height: 20em;
+	display: flex;
+}
+
+.session-component .current-workout-step-container .session-header {
+	height: fit-content;
+	width: 100%;
+
+	h4 {
+		font-size: 0.6em;
+		letter-spacing: 0.2em;
+		color: var(--color-stitch);
+		margin-bottom: 0.3em;
+	}
+
+	.button-status-container {
+		display: flex;
+		gap: 0.6em;
+		form {
+			display: flex;
+			gap: 0.6em;
+		}
+
+		button {
+			padding: 0.6em;
+			border: 1px solid var(--color-accent);
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.icon {
+			fill: var(--color-stitch-text);
+			width: fit-content;
 		}
 	}
 }
