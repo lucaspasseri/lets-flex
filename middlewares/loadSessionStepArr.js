@@ -10,9 +10,6 @@ const loadSessionStepArr = async (req, res, next) => {
 			})
 		: [];
 
-	console.log({ currentSession });
-	console.log({ sessionStepArr });
-
 	res.locals.data = {
 		...res.locals.data,
 		sessionStepArr,

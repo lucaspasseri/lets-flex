@@ -3,12 +3,13 @@ import toNullableNumber from "../utils/toNullableNumber.js";
 
 async function startWorkoutSession(req, res) {
 	const { sessionId } = req.body;
+	const { daysDifference } = res.locals.sessionState;
 
 	const workoutSession = await startWorkoutSessionService({
 		sessionId: toNullableNumber(sessionId),
 	});
 
-	res.redirect(`/?workoutSessionId=${workoutSession.id}`);
+	res.redirect(`/?daysDifference=${daysDifference}&sessionId=${sessionId}`);
 }
 
 export { startWorkoutSession };

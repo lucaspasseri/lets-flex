@@ -1,26 +1,27 @@
 <%
 const currWorkoutSession = locals.appState?.currentWorkoutSession ?? {};
-const currSessionId = locals.sessionState?.sessionId ?? null;
 const currSession = locals.appState?.currentSession ?? null;
+const currSessionId = currSession?.id ?? null;
 
-const activeDaySessionArr = locals.data?.activeDaySessionArr ?? [];
 const sessionStepArr = locals.data?.sessionStepArr ?? [];
 const workoutStepLogArr = locals.data?.workoutStepLogArr ?? [];
 
 const isWorkoutSessionActive = currWorkoutSession?.session_id === currSessionId;
 const doesTheSessionHaveSteps = sessionStepArr.length > 0;
 const doesTheWorkoutSessionHaveSteps = workoutStepLogArr.length > 0;
-const activeSession = locals.appState?.currentSession ?? null;
 %>
 
 <div class="session-component">
 	<% if(isWorkoutSessionActive ) { %>
 		<div class="session-header">
-			<h3>
-				<%= 
-					activeSession?.name
-				%>
-			</h3>
+			<div class="session-header-text">	
+				<p>CURRENT SESSION</p>
+				<h3>
+					<%= 
+						currSession?.name
+					%>
+				</h3>
+			</div>
 			<% if(doesTheSessionHaveSteps) { %>
 				<div class="complete-indicator-container">
 					<span>
@@ -30,13 +31,12 @@ const activeSession = locals.appState?.currentSession ?? null;
 			<% } %>
 		</div>
 
-		<h4>HAHAHAHAH AHHAHAH AHHAHHA</h4>
-
 		<% if(doesTheWorkoutSessionHaveSteps){ %>
-			<ul>
+			<div class="workout-step-list-container">
+				<ul>
 				<% workoutStepLogArr.forEach(step => { %>
-					<li class="workout-step-item">
-						<div>
+					<li class="workout-step-list-item">
+			
 							<span class="step-order">
 								<%= step.session_step_order <= 9 ? `0${step.session_step_order}` : step.session_step_order %>
 							</span>
@@ -48,27 +48,30 @@ const activeSession = locals.appState?.currentSession ?? null;
 									
 								<% } %>
 							</div>
-						</div>
 					</li>
 				<% }) %>
 			</ul>
+			</div>
 		<% } %>
 	
 	<% } else { %>
 		
 			<div class="session-header">
-			<h3>
-				<%= 
-					activeSession?.name
-				%>
-			</h3>
-			<% if(doesTheSessionHaveSteps) { %>
-				<div class="complete-indicator-container">
-					<span>
-						0% COMPLETE
-					</span>
+				<div class="session-header-text">	
+					<p>CURRENT SESSION</p>
+					<h3>
+						<%= 
+							currSession?.name
+						%>
+					</h3>
 				</div>
-			<% } %>
+				<% if(doesTheSessionHaveSteps) { %>
+					<div class="complete-indicator-container">
+						<span>
+							0% COMPLETE
+						</span>
+					</div>
+				<% } %>
 		</div>
 
 			<% if(doesTheSessionHaveSteps){ %>
@@ -77,12 +80,12 @@ const activeSession = locals.appState?.currentSession ?? null;
 						<% sessionStepArr.forEach(step => { %>
 							<li>
 								<div class="session-step-list-item">
-									<span>
+									<span class="step-order">
 										<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
 									</span>
-									<span>
+									<p class="step-name">
 										<%= step.name.toUpperCase() %>
-									</span>
+									</p>
 								</div>
 							</li>
 						<% }) %>

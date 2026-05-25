@@ -1,5 +1,5 @@
 .session-component {
-	background-color: var(--color-surface);
+	background-color: var(--color-stitch-secondary);
 	padding: 1em;
 	height: 100%;
 	border-radius: 4px;
@@ -19,10 +19,6 @@
 	display: flex;
 	justify-content: space-between;
 
-	h3 {
-		font-size: 1.6em;
-	}
-
 	.complete-indicator-container {
 		height: fit-content;
 
@@ -35,21 +31,21 @@
 	}
 }
 
-.session-component .session-step-list-container {
-	margin-top: 1em;
-}
+.session-component .session-header-text {
+	margin-bottom: 1em;
 
-.session-component .session-step-list-item {
-	padding: 1.2em;
-	background-color: var(--color-surface);
-	border: 0.1em solid var(--color-border);
-	display: flex;
-	gap: 1em;
+	> p {
+		font-size: 0.6em;
+		letter-spacing: 0.2em;
+		color: var(--color-stitch);
+		margin-bottom: 0.3em;
+	}
 
-	span {
-		font-size: 1.2em;
+	h3 {
+		font-size: 1.6em;
 	}
 }
+
 .session-component .button-container {
 	margin-top: 2em;
 	box-shadow: var(--box-shadow-header);
@@ -74,26 +70,49 @@
 	}
 }
 
-.session-component .workout-step-item {
-	padding: 0.8em;
+.session-component .session-step-list-container,
+.session-component .workout-step-list-container {
+	margin-top: 1em;
+	flex: 1;
+	display: flex;
 
-	> div {
+	ul {
 		display: flex;
-		align-items: center;
+		flex-direction: column;
+		gap: 0.6em;
+		flex: 1;
 	}
 
-	.step-order {
-		color: var(--color-stitch);
-		font-size: 1.1em;
-		font-weight: 700;
-	}
-	.step-name {
-		font-size: 1.1em;
-		font-weight: 700;
-		margin-left: 0.6em;
-	}
-	.step-status {
-		border: 1px solid yellowgreen;
-		margin-left: auto;
+	.session-step-list-item,
+	.workout-step-list-item {
+		padding: 1.2em;
+		background-color: var(--color-surface);
+		border: 0.1em solid var(--color-border);
+		display: flex;
+		gap: 1em;
+
+		span {
+			font-size: 1.2em;
+		}
+
+		> div {
+			display: flex;
+			align-items: center;
+			width: 100%;
+		}
+
+		.step-order {
+			color: var(--color-stitch);
+			font-size: 1.1em;
+			font-weight: 700;
+		}
+		.step-name {
+			font-size: 1.1em;
+			font-weight: 700;
+		}
+		.step-status {
+			border: 1px solid yellowgreen;
+			margin-left: auto;
+		}
 	}
 }
