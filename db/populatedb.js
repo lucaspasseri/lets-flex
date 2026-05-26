@@ -1,190 +1,220 @@
 import { Client } from "pg";
 
 const sql = `
-DROP TABLE IF EXISTS "workout_step_logs" CASCADE;
-DROP TABLE IF EXISTS "session_steps" CASCADE;
-DROP TABLE IF EXISTS "workout_sessions" CASCADE;
-DROP TYPE IF EXISTS "workout_step_log_status" CASCADE;
-DROP TABLE IF EXISTS "sessions" CASCADE;
-DROP TABLE IF EXISTS "training_days" CASCADE;
-DROP TABLE IF EXISTS "cycles" CASCADE;
-DROP TABLE IF EXISTS "programs" CASCADE;
-DROP TABLE IF EXISTS "users" CASCADE;
-DROP TABLE IF EXISTS "goals" CASCADE;
-DROP TABLE IF EXISTS "step_types" CASCADE;
-DROP TABLE IF EXISTS "equipments" CASCADE;
-DROP TABLE IF EXISTS "exercise_variants" CASCADE;
-DROP TABLE IF EXISTS "exercises" CASCADE;
-DROP TABLE IF EXISTS "movement_patterns" CASCADE;
-DROP TABLE IF EXISTS "exercise_muscles" CASCADE;
-DROP TABLE IF EXISTS "muscles" CASCADE;
-DROP TABLE IF EXISTS "muscle_roles" CASCADE;
+DROP TABLE IF EXISTS workout_step_logs CASCADE;
+DROP TABLE IF EXISTS workout_sessions CASCADE;
+DROP TABLE IF EXISTS session_steps CASCADE;
+DROP TABLE IF EXISTS sessions CASCADE;
+DROP TABLE IF EXISTS training_days CASCADE;
+DROP TABLE IF EXISTS cycles CASCADE;
+DROP TABLE IF EXISTS programs CASCADE;
 
-CREATE TABLE "users" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar,
-  "date_of_birth" date,
-  "anamnesis" text
+DROP TABLE IF EXISTS exercise_muscles CASCADE;
+DROP TABLE IF EXISTS exercise_variants CASCADE;
+DROP TABLE IF EXISTS exercises CASCADE;
+DROP TABLE IF EXISTS movement_patterns CASCADE;
+DROP TABLE IF EXISTS muscles CASCADE;
+DROP TABLE IF EXISTS muscle_roles CASCADE;
+DROP TABLE IF EXISTS equipments CASCADE;
+DROP TABLE IF EXISTS step_types CASCADE;
+DROP TABLE IF EXISTS goals CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+
+DROP TYPE IF EXISTS workout_step_log_status CASCADE;
+DROP TYPE IF EXISTS workout_session_status CASCADE;
+
+CREATE TABLE users (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR,
+	date_of_birth DATE,
+	anamnesis TEXT
 );
 
-CREATE TABLE "goals" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar
+CREATE TABLE goals (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR NOT NULL
 );
 
-CREATE TABLE "programs" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "user_id" integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  "goal_id" integer,
-  "name" varchar,
-  "start_date" date DEFAULT CURRENT_DATE
+CREATE TABLE programs (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	goal_id INTEGER REFERENCES goals(id) ON DELETE SET NULL,
+	name VARCHAR,
+	start_date DATE DEFAULT CURRENT_DATE
 );
 
 CREATE TABLE cycles (
-  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  program_id INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  cycle_size INTEGER DEFAULT 7,
-  cycle_order INTEGER NOT NULL,
-  UNIQUE (program_id, cycle_order)
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	program_id INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
+	name TEXT NOT NULL,
+	cycle_size INTEGER NOT NULL DEFAULT 7,
+	cycle_order INTEGER NOT NULL,
+
+	UNIQUE (program_id, cycle_order)
 );
 
 CREATE TABLE training_days (
-  id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  cycle_id INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
-  day_order INTEGER NOT NULL,
-  scheduled_date DATE,
-  label VARCHAR(255),
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	cycle_id INTEGER NOT NULL REFERENCES cycles(id) ON DELETE CASCADE,
+	day_order INTEGER NOT NULL,
+	scheduled_date DATE,
+	label VARCHAR(255),
 
-  UNIQUE (cycle_id, day_order)
+	UNIQUE (cycle_id, day_order)
 );
 
-CREATE TABLE "sessions" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "training_day_id" INTEGER NOT NULL REFERENCES training_days(id) ON DELETE CASCADE,
-  "name" varchar,
-  "notes" text,
-  "session_order" integer NOT NULL,
+CREATE TABLE sessions (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	training_day_id INTEGER NOT NULL REFERENCES training_days(id) ON DELETE CASCADE,
+	name VARCHAR,
+	notes TEXT,
+	session_order INTEGER NOT NULL,
 
-  UNIQUE (training_day_id, session_order)
+	UNIQUE (training_day_id, session_order)
 );
 
-CREATE TABLE "session_steps" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "session_id" integer NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  "step_type_id" integer NOT NULL,
-  "exercise_variant_id" integer,
-  "name" varchar,
-  "sets" integer,
-  "reps" integer,
-  "load_value" float,
-  "load_unit" varchar,
-  "step_order" integer NOT NULL,
-  UNIQUE (session_id, step_order)
+CREATE TABLE step_types (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR NOT NULL UNIQUE
 );
 
+CREATE TABLE movement_patterns (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR NOT NULL UNIQUE,
+	notes TEXT
+);
 
+CREATE TABLE equipments (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR NOT NULL,
+	category VARCHAR
+);
+
+CREATE TABLE exercises (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR NOT NULL,
+	movement_pattern_id INTEGER REFERENCES movement_patterns(id)
+);
+
+CREATE TABLE exercise_variants (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+	equipment_id INTEGER REFERENCES equipments(id) ON DELETE SET NULL,
+	name VARCHAR NOT NULL,
+	setup_description TEXT,
+	environment VARCHAR,
+	notes TEXT
+);
+
+CREATE TABLE session_steps (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+	step_type_id INTEGER NOT NULL REFERENCES step_types(id),
+	exercise_variant_id INTEGER REFERENCES exercise_variants(id) ON DELETE SET NULL,
+
+	name VARCHAR,
+
+	sets INTEGER,
+	reps INTEGER,
+	load_value FLOAT,
+	load_unit VARCHAR,
+
+	step_order INTEGER NOT NULL,
+
+	UNIQUE (session_id, step_order)
+);
+
+CREATE TYPE workout_session_status AS ENUM (
+	'in_progress',
+	'finished'
+);
 
 CREATE TABLE workout_sessions (
-  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  session_id integer NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
-  started_at timestamp DEFAULT now(),
-  finished_at timestamp,
-  status text NOT NULL DEFAULT 'in_progress'
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+	session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
+
+	started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	finished_at TIMESTAMPTZ,
+
+	status workout_session_status NOT NULL DEFAULT 'in_progress',
+
+	CHECK (
+		(status = 'finished' AND finished_at IS NOT NULL)
+		OR
+		(status = 'in_progress')
+	)
 );
-
-CREATE TYPE workout_step_log_status AS ENUM (
-  'planned',
-  'performed',
-  'skipped'
-);
-
-CREATE TABLE workout_step_logs (
-  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  session_step_id integer NOT NULL REFERENCES session_steps(id) ON DELETE CASCADE,
-
-  status workout_step_log_status NOT NULL DEFAULT 'planned',
-  performed_at timestamp,
-
-  planned_sets integer,
-  planned_reps integer,
-  planned_load_value float,
-  planned_load_unit varchar,
-
-  actual_sets integer,
-  actual_reps integer,
-  actual_load_value float,
-  actual_load_unit varchar,
-
-  notes text
-);
-
-ALTER TABLE workout_step_logs
-ADD COLUMN workout_session_id integer NOT NULL REFERENCES workout_sessions(id) ON DELETE CASCADE;
-
-ALTER TABLE workout_step_logs
-ADD CONSTRAINT unique_step_per_workout_session
-UNIQUE (workout_session_id, session_step_id);
 
 CREATE UNIQUE INDEX one_active_workout_session_per_session
 ON workout_sessions (session_id)
-WHERE finished_at IS NULL;
+WHERE status = 'in_progress';
 
-CREATE TABLE "step_types" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar
+CREATE TYPE workout_step_log_status AS ENUM (
+	'planned',
+	'performed',
+	'skipped'
 );
 
-CREATE TABLE "exercise_variants" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "exercise_id" integer NOT NULL,
-  "equipment_id" integer,
-  "name" varchar,
-  "setup_description" text,
-  "environment" varchar,
-  "notes" text
+CREATE TABLE workout_step_logs (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+	workout_session_id INTEGER NOT NULL
+		REFERENCES workout_sessions(id)
+		ON DELETE CASCADE,
+
+	session_step_id INTEGER NOT NULL
+		REFERENCES session_steps(id)
+		ON DELETE CASCADE,
+
+	status workout_step_log_status NOT NULL DEFAULT 'planned',
+
+	performed_at TIMESTAMPTZ,
+
+	planned_sets INTEGER,
+	planned_reps INTEGER,
+	planned_load_value FLOAT,
+	planned_load_unit VARCHAR,
+
+	actual_sets INTEGER,
+	actual_reps INTEGER,
+	actual_load_value FLOAT,
+	actual_load_unit VARCHAR,
+
+	notes TEXT,
+
+	UNIQUE (workout_session_id, session_step_id)
 );
 
-CREATE TABLE "equipments" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar,
-  "category" varchar
+CREATE TABLE muscles (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	common_name VARCHAR NOT NULL,
+	scientific_name VARCHAR,
+	body_region VARCHAR,
+	reference_url VARCHAR
 );
 
-CREATE TABLE "exercises" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar,
-  "movement_pattern_id" integer
+CREATE TABLE muscle_roles (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	name VARCHAR UNIQUE NOT NULL,
+	description TEXT
 );
 
-CREATE TABLE "movement_patterns" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar,
-  "notes" text
-);
+CREATE TABLE exercise_muscles (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
-CREATE TABLE "muscles" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "common_name" varchar,
-  "scientific_name" varchar,
-  "body_region" varchar,
-  "reference_url" varchar
-);
+	exercise_id INTEGER NOT NULL
+		REFERENCES exercises(id)
+		ON DELETE CASCADE,
 
-CREATE TABLE "muscle_roles" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "name" varchar UNIQUE NOT NULL,
-  "description" text
-);
+	muscle_id INTEGER NOT NULL
+		REFERENCES muscles(id)
+		ON DELETE CASCADE,
 
-CREATE TABLE "exercise_muscles" (
-  "id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  "exercise_id" integer NOT NULL,
-  "muscle_id" integer NOT NULL,
-  "muscle_role_id" integer NOT NULL,
-  FOREIGN KEY ("exercise_id") REFERENCES "exercises"(id) ON DELETE CASCADE,
-  FOREIGN KEY ("muscle_id") REFERENCES "muscles"(id) ON DELETE CASCADE,
-  FOREIGN KEY ("muscle_role_id") REFERENCES "muscle_roles"(id)
+	muscle_role_id INTEGER NOT NULL
+		REFERENCES muscle_roles(id),
+
+	UNIQUE (exercise_id, muscle_id, muscle_role_id)
 );
 
 INSERT INTO "step_types" ("name")
@@ -311,6 +341,7 @@ async function main() {
 	try {
 		await client.connect();
 		await client.query(sql);
+
 		console.log("Database seeded successfully.");
 	} catch (err) {
 		console.error("Error while seeding database:", err);

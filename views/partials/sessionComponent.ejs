@@ -11,84 +11,107 @@ const doesTheSessionHaveSteps = sessionStepArr.length > 0;
 const doesTheWorkoutSessionHaveSteps = workoutStepLogArr.length > 0;
 
 const currWorkoutStepLog = workoutStepLogArr.find(log => log.status === "planned") ?? null;
+
+const appState = locals.appState;
+const {workoutSessionPerformedPercentage} = locals.appState;
+console.log({currWorkoutStepLog});
+
+console.log({currWorkoutSession});
+console.log({isWorkoutSessionActive});
+console.log({doesTheSessionHaveSteps});
+console.log({doesTheWorkoutSessionHaveSteps});
+console.log({currSession});
 %>
 
 <div class="session-component">
+
 	<% if(isWorkoutSessionActive ) { %>
-		<div>
-			<div class="session-header">
-				<div class="session-header-text">	
-					<p>CURRENT SESSION</p>
-					<h3>
-						<%= 
-							currSession?.name
-						%>
-					</h3>
+		<% if(currWorkoutSession?.status === "in_progress") { %>
+			<div>
+				<div class="session-header">
+					<div class="session-header-text">	
+						<p>CURRENT SESSION</p>
+						<h3>
+							<%= 
+								currSession?.name
+							%>
+						</h3>
+					</div>
+					<% if(doesTheSessionHaveSteps) { %>
+						<div class="complete-indicator-container">
+							<span>
+								<%= `${Math.round(workoutSessionPerformedPercentage)}%` %> COMPLETE
+							</span>
+						</div>
+					<% } %>
 				</div>
-				<% if(doesTheSessionHaveSteps) { %>
-					<div class="complete-indicator-container">
-						<span>
-							0% COMPLETE
-						</span>
+
+				<% if(doesTheWorkoutSessionHaveSteps){ %>
+					<div class="workout-step-list-container">
+						<ul>
+						<% workoutStepLogArr.forEach(step => { %>
+							<li class="workout-step-list-item">
+					
+									<span class="step-order">
+										<%= step.session_step_order <= 9 ? `0${step.session_step_order}` : step.session_step_order %>
+									</span>
+									<p class="step-name">
+									<%= step.session_name.toUpperCase() %>
+									</p>
+									<div class="step-status">
+										<% if(step.status === "planned") { %> 
+											<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+												<use href="../status-yellow.svg"></use>
+											</svg>
+										<% } else if(step.status === "performed") { %>
+											<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+												<use href="../status-green.svg"></use>
+											</svg>
+										<% } else { %>
+											<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+												<use href="../status-red.svg"></use>
+											</svg>
+										<% } %>
+									</div>
+							</li>
+						<% }) %>
+					</ul>
 					</div>
 				<% } %>
 			</div>
 
-			<% if(doesTheWorkoutSessionHaveSteps){ %>
-				<div class="workout-step-list-container">
-					<ul>
-					<% workoutStepLogArr.forEach(step => { %>
-						<li class="workout-step-list-item">
-				
-								<span class="step-order">
-									<%= step.session_step_order <= 9 ? `0${step.session_step_order}` : step.session_step_order %>
-								</span>
-								<p class="step-name">
-								<%= step.session_name.toUpperCase() %>
-								</p>
-								<div class="step-status">
-									<% if(step.status === "planned") { %> 
-										<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-											<use href="../status-yellow.svg"></use>
-										</svg>
-									<% } else if(step.status === "performed") { %>
-										<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-											<use href="../status-green.svg"></use>
-										</svg>
-									<% } else { %>
-										<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-											<use href="../status-red.svg"></use>
-										</svg>
-									<% } %>
-								</div>
-						</li>
-					<% }) %>
-				</ul>
+			<% if(currWorkoutStepLog !== null) { %>
+				<div class="current-workout-step-container">
+					<div class="session-header">
+						<div class="session-header-text">	
+						<p>CURRENT STEP</p>
+						<h3>
+							<%= 
+								currWorkoutStepLog.session_name
+							%>
+						</h3>
+					</div>
+					<div class="button-status-container">
+						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
+							<button type="submit">Skip</button>
+						</form>
+						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
+							<button type="submit">Complete</button>
+						</form>
+					</div>
 				</div>
+			<%  } else { %>
+				<form method="POST" action="/workout_sessions/<%= currWorkoutSession.id %>/finish">
+					<button type="submit">
+						FINISH SESSION
+					</button>
+				</form>
 			<% } %>
-		</div>
-
-		<% if(currWorkoutStepLog) { %>
-			<div class="current-workout-step-container">
-				<div class="session-header">
-					<div class="session-header-text">	
-					<p>CURRENT STEP</p>
-					<h3>
-						<%= 
-							currWorkoutStepLog.session_name
-						%>
-					</h3>
-				</div>
-				<div class="button-status-container">
-					<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
-						<button type="submit">Skip</button>
-					</form>
-					<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
-						<button type="submit">Complete</button>
-					</form>
-				</div>
-			</div>
-		<%  } %>
+		<% } else { %> 
+			<h1>
+				FINISHED
+			</h1>
+		<% } %>
 	
 	<% } else { %>
 		
