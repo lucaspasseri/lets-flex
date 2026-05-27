@@ -6,7 +6,6 @@
 	border-top: 0.2em solid var(--color-stitch);
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
 	gap: 1em;
 }
 
@@ -14,6 +13,7 @@
 	flex: 1;
 	display: flex;
 	flex-direction: column;
+	gap: 2em;
 }
 
 .session-component .no-session-step-container {

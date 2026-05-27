@@ -15,16 +15,10 @@ const setActiveWorkoutSession = async (req, res, next) => {
 	const workoutSessionFinished =
 		workoutSessionArr.find(session => session.status === "finished") ?? null;
 
-	console.log({ workoutSessionInProgress });
-	console.log({ workoutSessionFinished });
-
 	const currentWorkoutSession =
 		workoutSessionInProgress ?? workoutSessionFinished ?? null;
 
-	console.log({ currentWorkoutSession });
-
 	if (currentWorkoutSession !== null) {
-		req.session.state.workoutSessionId = currentWorkoutSession?.id ?? null;
 		res.locals.appState.currentWorkoutSession = currentWorkoutSession ?? null;
 		res.locals.sessionState.workoutSessionId =
 			currentWorkoutSession?.id ?? null;

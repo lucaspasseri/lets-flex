@@ -1,0 +1,136 @@
+<%
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? {};
+const currSession = locals.appState?.currentSession ?? null;
+const currSessionId = currSession?.id ?? null;
+
+const sessionStepArr = locals.data?.sessionStepArr ?? [];
+const workoutStepLogArr = locals.data?.workoutStepLogArr ?? [];
+const doesTheSessionHaveSteps = sessionStepArr.length > 0;
+const doesTheWorkoutSessionHaveSteps = workoutStepLogArr.length > 0;
+
+const isWorkoutSessionActive = currWorkoutSession?.session_id === currSessionId;
+const isThereAnyWorkoutStepLogPlanned = workoutStepLogArr.some(log => log.status === "planned");
+const currWorkoutStepLog = workoutStepLogArr.find(log => log.status === "planned") ?? null;
+%>
+
+<div class="session-component">
+	<%- include('./header' ); %>
+	<% if(doesTheWorkoutSessionHaveSteps && isThereAnyWorkoutStepLogPlanned) { %>
+		<div class="workout-step-list-container">
+			<ul>
+				<% workoutStepLogArr.forEach(step => { %>
+					<li class="workout-step-list-item">
+						<span class="step-order">
+							<%= step.session_step_order <= 9 ? `0${step.session_step_order}` : step.session_step_order %>
+						</span>
+						<p class="step-name">
+							<%= step.session_name.toUpperCase() %>
+						</p>
+						<div class="step-status">
+							<% if(step.status === "planned") { %> 
+								<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+									<use href="../status-yellow.svg"></use>
+								</svg>
+							<% } else if(step.status === "performed") { %>
+								<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+									<use href="../status-green.svg"></use>
+								</svg>
+							<% } else { %>
+								<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+									<use href="../status-red.svg"></use>
+								</svg>
+							<% } %>
+						</div>
+						</li>
+				<% }) %>
+			</ul>
+		</div>
+
+		<% if(currWorkoutStepLog !== null) { %>
+			<div class="current-workout-step-container">
+				<div class="session-header">
+					<div class="session-header-text">	
+						<p>CURRENT STEP</p>
+						<h3>
+							<%= 
+								currWorkoutStepLog.session_name
+							%>
+						</h3>
+					</div>
+				<div class="button-status-container">
+					<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
+						<button type="submit">Skip</button>
+					</form>
+					<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
+						<button type="submit">Complete</button>
+					</form>
+				</div>
+			</div>
+		<%  } else { %>
+			<form method="POST" action="/workout_sessions/<%= currWorkoutSession.id %>/finish">
+				<button type="submit">
+					FINISH SESSION
+				</button>
+			</form>
+		<% } %>
+
+	<% } else if(doesTheWorkoutSessionHaveSteps) { %>
+		<% if(doesTheSessionHaveSteps){ %>
+				<div class="session-step-list-container">
+					<ul>
+						<% sessionStepArr.forEach(step => { %>
+							<li>
+								<div class="session-step-list-item">
+									<span class="step-order">
+										<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
+									</span>
+									<p class="step-name">
+										<%= step.name.toUpperCase() %>
+									</p>
+								</div>
+							</li>
+						<% }) %>
+					</ul>
+				</div>
+		<% } %>
+	<% } else { %>
+		<div class="no-workout-session-container">
+			<% if(doesTheSessionHaveSteps){ %>
+				<div class="session-step-list-container">
+					<ul>
+						<% sessionStepArr.forEach(step => { %>
+							<li>
+								<div class="session-step-list-item">
+									<span class="step-order">
+										<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
+									</span>
+									<p class="step-name">
+										<%= step.name.toUpperCase() %>
+									</p>
+								</div>
+							</li>
+						<% }) %>
+					</ul>
+				</div>
+
+				<div class="button-container">
+					<form method="POST" action="/workout_sessions">
+						<input type="hidden" name="sessionId" value="<%= currSessionId %>" />
+						<button type="submit">
+							<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
+								<use href="../play-black-icon.svg"></use>
+							</svg>
+						</button>
+					</form>
+				</div>
+
+			<% } else { %>
+				<div class="no-session-step-container">
+					<p>
+						( EMPTY )
+					</p>
+				</div>
+			<% }%>
+		</div>
+	<% } %>
+</div>
