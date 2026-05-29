@@ -35,6 +35,19 @@
 
 	--horizontal-margin: 2em;
 
+	--dashed-line-color: var(--color-text);
+	--vertical-dashed-line: repeating-linear-gradient(
+		to bottom,
+		var(--dashed-line-color) 0 7px,
+		transparent 7px 12px
+	);
+
+	--horizontal-dashed-line: repeating-linear-gradient(
+		to right,
+		var(--dashed-line-color) 0 7px,
+		transparent 7px 12px
+	);
+
 	@media screen and (width < 500px) {
 		--horizontal-margin: 1em;
 	}
@@ -92,10 +105,12 @@ main {
 	color: var(--color-text);
 	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
 	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
+	border: 1px solid blue;
 }
 .content {
 	min-height: 100dvh;
 	width: 100%;
+	border: 1px solid red;
 }
 
 footer.footer {
