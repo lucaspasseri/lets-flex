@@ -174,19 +174,13 @@ footer.footer {
 	}
 } */
 
-.main.profile {
-	overflow: clip;
-}
-
 @media screen and (width < 818px) {
 	.basic-calendar > .list {
 		font-size: 0.8em;
 	}
-	.basic-line {
-		font-size: 0.9em;
-	}
 
-	.main-header {
+	.main-header,
+	.basic-line {
 		font-size: 0.9em;
 	}
 
@@ -204,11 +198,8 @@ footer.footer {
 		font-size: 0.5em;
 	}
 
+	.main-header,
 	.basic-line {
-		font-size: 0.7em;
-	}
-
-	.main-header {
 		font-size: 0.7em;
 	}
 
