@@ -4,7 +4,7 @@
 	background-color: var(--color-bg);
 	overflow-x: auto;
 	width: 100%;
-	min-width: 300px;
+	min-width: 290px;
 
 	ul {
 		display: flex;
@@ -16,6 +16,10 @@
 	li {
 		display: flex;
 		flex-direction: column;
+	}
+
+	li:first-of-type {
+		margin-left: var(--horizontal-margin);
 	}
 }
 
@@ -79,6 +83,7 @@
 
 .line-button-container {
 	margin-left: auto;
+	margin-right: var(--horizontal-margin);
 	background-color: transparent;
 	padding: 0;
 
