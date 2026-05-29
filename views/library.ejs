@@ -4,27 +4,30 @@ const createExerciseModalId = "createExerciseModal";
 %>
 
 <main class="main library">
-	<div>
-		<input
-			class="search-exercise"
-			type="search"
-			placeholder="SEARCH EXERCISES..."
-		/>
-	</div>
 
-
-		<div class="main-header">
-		<% if( exerciseArr.length > 0){ %>
-			<div class="title-mark"></div>
-			<div class="title-container">
-				<h1> MOVEMENT LIBRARY </h1>
-				<p>FOUNDATIONAL MECHANICS & TECHNICAL INDEX</p>
+	<div class="main-header">
+			<div class="search-container">
+				<input
+					class="search-exercise"
+					type="search"
+					placeholder="SEARCH EXERCISES..."
+				/>
 			</div>
-			<div class="total-results"><span>
-				<%= exerciseArr.length %>
-			</span>
-		  	<p>TOTAL </br> RESULTS</p>
-		</div>
+
+		<% if( exerciseArr.length > 0){ %>
+			<div class="title-container">
+				<div class="title-mark"></div>
+				<div class="title-text">
+					<h1> MOVEMENT LIBRARY </h1>
+					<p>FOUNDATIONAL MECHANICS & TECHNICAL INDEX</p>
+				</div>
+				<div class="total-results">
+					<span>
+						<%= exerciseArr.length %>
+					</span>
+					<p>TOTAL </br> RESULTS</p>
+				</div>
+			</div>
 		<% } %>
 	</div>
 	
@@ -49,7 +52,7 @@ const createExerciseModalId = "createExerciseModal";
 
 	</div>
 	<div class="custom-exercise-button-container">
-		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD EXERCISE</button>
+		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD NEW</button>
 	</div>
 </main>
 

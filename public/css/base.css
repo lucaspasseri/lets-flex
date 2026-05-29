@@ -30,7 +30,7 @@
 		rgba(0, 0, 0, 0.07) 0px -16px 16px;
 
 	--header-spacing: 8.5em;
-	--footer-spacing: 5.4em;
+	--footer-spacing: 8.2em;
 	--header-margin-top: 2em;
 
 	--horizontal-margin: 2em;
@@ -105,12 +105,12 @@ main {
 	color: var(--color-text);
 	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
 	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
-	border: 1px solid blue;
+	/* border: 1px solid blue; */
 }
 .content {
 	min-height: 100dvh;
 	width: 100%;
-	border: 1px solid red;
+	/* border: 1px solid red; */
 }
 
 footer.footer {
@@ -195,7 +195,9 @@ footer.footer {
 	}
 
 	.main-header,
-	.basic-line {
+	.basic-line,
+	.exercise-list-container,
+	.custom-exercise-button-container {
 		font-size: 0.9em;
 	}
 
@@ -214,7 +216,9 @@ footer.footer {
 	}
 
 	.main-header,
-	.basic-line {
+	.basic-line,
+	.exercise-list-container,
+	.custom-exercise-button-container {
 		font-size: 0.7em;
 	}
 

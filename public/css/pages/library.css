@@ -1,5 +1,4 @@
 .main.library {
-	padding: 1em 0;
 	display: flex;
 	flex-direction: column;
 	gap: 2em;
@@ -7,17 +6,24 @@
 
 .main.library .main-header {
 	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	margin: 0 var(--horizontal-margin);
+}
+
+.main.library .title-container {
+	display: flex;
 	gap: 0.6em;
 }
 
-.title-mark {
-	width: 0.24em;
+.main.library .title-mark {
+	width: max(0.24em, 4px);
 	margin-top: 0.3em;
 	height: calc(100% - 0.3em);
 	background-color: var(--color-stitch);
 }
 
-.main.library .title-container {
+.main.library .title-text {
 	p {
 		color: var(--color-text-muted);
 		font-size: 0.9em;
@@ -47,7 +53,7 @@
 	background-color: transparent;
 	color: var(--color-text);
 	padding: 1em 0.8em;
-	border: 0.2px var(--color-stitch) solid;
+	border: 0.2px solid var(--color-stitch);
 	width: 100%;
 	max-width: 500px;
 
@@ -57,6 +63,7 @@
 }
 
 .exercise-list-container {
+	margin: 0 var(--horizontal-margin);
 	display: flex;
 	flex-direction: column;
 	flex: 1;
@@ -88,12 +95,20 @@
 }
 
 .custom-exercise-button-container {
+	margin: 0 var(--horizontal-margin);
+
 	button {
 		width: 100%;
-		background-color: transparent;
 		padding: 1.4em;
 		color: var(--color-text);
-		border: 0.36em dashed var(--color-stitch-secondary);
+
+		background:
+			var(--horizontal-dashed-line) top left / 14px 3.2px repeat-x,
+			var(--horizontal-dashed-line) bottom left / 14px 3.2px repeat-x,
+			var(--vertical-dashed-line) top left / 3.2px 14px repeat-y,
+			var(--vertical-dashed-line) top right / 3.2px 14px repeat-y;
+
+		background-color: transparent;
 
 		&:hover {
 			cursor: pointer;
