@@ -1,19 +1,6 @@
 .main.dashboard {
 	display: flex;
 	flex-direction: column;
-	padding-bottom: 1em;
-}
-
-.main.dashboard .main-header {
-	p {
-		color: var(--color-stitch);
-		font-size: 0.8em;
-		letter-spacing: 0.2em;
-	}
-
-	h1 {
-		letter-spacing: 0.15em;
-	}
 }
 
 .main.dashboard .sync-status {
@@ -76,6 +63,7 @@
 	border-left: 0.2em solid var(--color-stitch);
 	border-radius: 4px;
 	background-color: var(--color-stitch-secondary);
+	margin: 2em var(--horizontal-margin);
 
 	p {
 		font-size: 0.6em;
@@ -151,7 +139,7 @@
 }
 
 .date-section {
-	margin-top: 3em;
+	margin: 3em var(--horizontal-margin) 0;
 }
 
 .date-section .current-day-container {
@@ -315,7 +303,7 @@
 }
 
 .sessions-section {
-	margin-top: 1.2em;
+	margin: 1.2em var(--horizontal-margin) 2em;
 	display: flex;
 	flex: 1;
 	background-color: var(--color-header);
@@ -325,6 +313,10 @@
 .sessions-section.no-session {
 	justify-content: center;
 	align-items: center;
+
+	h2 {
+		font-size: 1.4em;
+	}
 }
 
 .sessions-section .sessions-container {

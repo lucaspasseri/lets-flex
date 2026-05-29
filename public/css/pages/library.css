@@ -8,7 +8,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.6em;
-	margin: 0 var(--horizontal-margin);
+	margin: 2em var(--horizontal-margin);
 }
 
 .main.library .title-container {
@@ -49,13 +49,12 @@
 }
 
 .search-exercise {
-	margin-top: 1.5em;
 	background-color: transparent;
 	color: var(--color-text);
 	padding: 1em 0.8em;
-	border: 0.2px solid var(--color-stitch);
+	border: 2px solid var(--color-stitch);
 	width: 100%;
-	max-width: 500px;
+	max-width: 300px;
 
 	&::placeholder {
 		color: var(--color-text);
@@ -95,12 +94,13 @@
 }
 
 .custom-exercise-button-container {
-	margin: 0 var(--horizontal-margin);
+	margin: 0 var(--horizontal-margin) 2em;
 
 	button {
 		width: 100%;
 		padding: 1.4em;
 		color: var(--color-text);
+		border: 0;
 
 		background:
 			var(--horizontal-dashed-line) top left / 14px 3.2px repeat-x,

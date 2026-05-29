@@ -1,13 +1,15 @@
-.main.programs {
-	h2,
-	h3,
-	h4 {
-		margin-top: 1em;
+.main.programs .main-header {
+	margin-top: 2em;
+
+	> h1,
+	h1,
+	h2 {
+		margin: 0 var(--horizontal-margin);
 	}
 }
 
 .basic-calendar {
-	margin-top: 3em;
+	margin: 3em 0 2em;
 }
 
 .basic-calendar > .list {

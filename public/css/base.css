@@ -29,11 +29,11 @@
 		rgba(0, 0, 0, 0.07) 0px -4px 4px, rgba(0, 0, 0, 0.07) 0px -8px 8px,
 		rgba(0, 0, 0, 0.07) 0px -16px 16px;
 
-	--header-spacing: 8.5em;
-	--footer-spacing: 8.2em;
+	--header-spacing: 6.4em;
+	--footer-spacing: 7.6em;
 	--header-margin-top: 2em;
 
-	--horizontal-margin: 2em;
+	--horizontal-margin: 2rem;
 
 	--dashed-line-color: var(--color-text);
 	--vertical-dashed-line: repeating-linear-gradient(
@@ -49,7 +49,7 @@
 	);
 
 	@media screen and (width < 500px) {
-		--horizontal-margin: 1em;
+		--horizontal-margin: 1rem;
 	}
 }
 
@@ -106,9 +106,10 @@ main {
 	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
 	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
 	/* border: 1px solid blue; */
+	overflow-y: auto;
 }
-.content {
-	min-height: 100dvh;
+body > .content {
+	min-height: 100vh;
 	width: 100%;
 	/* border: 1px solid red; */
 }
@@ -194,10 +195,7 @@ footer.footer {
 		font-size: 0.8em;
 	}
 
-	.main-header,
-	.basic-line,
-	.exercise-list-container,
-	.custom-exercise-button-container {
+	.basic-line {
 		font-size: 0.9em;
 	}
 
@@ -215,10 +213,7 @@ footer.footer {
 		font-size: 0.5em;
 	}
 
-	.main-header,
-	.basic-line,
-	.exercise-list-container,
-	.custom-exercise-button-container {
+	.basic-line {
 		font-size: 0.7em;
 	}
 
