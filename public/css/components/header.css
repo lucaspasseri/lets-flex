@@ -2,7 +2,7 @@
 	position: fixed;
 	width: 100%;
 	height: fit-content;
-	padding: 1em;
+	padding: 1em var(--horizontal-margin);
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -15,8 +15,8 @@
 }
 
 .logoContainer {
-	height: 100px;
-	width: 100px;
+	height: 72px;
+	width: 72px;
 }
 
 .avatar {

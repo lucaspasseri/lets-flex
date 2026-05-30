@@ -2,7 +2,7 @@
 	position: fixed;
 	border-top: 0.2em solid var(--color-border);
 	background-color: var(--color-surface);
-	padding: 2em 1em;
+	padding: 1.4em var(--horizontal-margin);
 	width: 100%;
 	height: fit-content;
 	margin-top: auto;

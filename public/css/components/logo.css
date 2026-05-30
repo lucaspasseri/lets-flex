@@ -32,11 +32,12 @@
 .frame-path {
 	fill: rgba(255, 255, 255, 0.02);
 	stroke: url(#frameGradient);
-	stroke-width: 6;
+	stroke-width: 12;
 	filter: drop-shadow(0 0 6px rgba(255, 79, 216, 0.55))
 		drop-shadow(0 0 10px rgba(95, 216, 255, 0.45));
 	stroke-dasharray: 1600;
 	stroke-dashoffset: 1600;
+	stroke-dashoffset: 0;
 	/* animation:
 		draw-frame 0.8s ease forwards,
 		frame-flicker 6s 2.4s infinite; */
@@ -83,9 +84,9 @@
 		drop-shadow(0 0 12px rgba(95, 216, 255, 0.7));
 	stroke-dasharray: 500;
 	stroke-dashoffset: 500;
-	/* animation:
-		draw-accent 0.4s ease 0.8s forwards,
-		neon-flicker 6s 3s infinite; */
+	animation:
+		draw-accent 0.8s ease 0.2s forwards,
+		neon-flicker 6s 3s infinite;
 }
 
 .soft-glow {
