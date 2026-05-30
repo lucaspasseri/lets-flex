@@ -69,7 +69,7 @@ const renderContent = (content) => {
 
 	<div class="session-selection-container">
 		<% if( sessionArr.length === 0){ %>
-			<div>
+			<div class="no-session-header-container">
 				<h1>SESSION<br />INITIALIZATION</h1>
 				<p>
 					Enter precise baseline metric to calibrate the performance engine.
@@ -94,7 +94,7 @@ const renderContent = (content) => {
 					<%- include("partials/accordion", { contentArr: sessionStepArr, renderContent: renderContent }) %>
 				</ul>
 			<% } %>
-			<button type="button" class="button" data-modal-open="<%= createSessionStepModalId %>">ADD EXERCISE</button>
+			<button type="button" class="button" data-modal-open="<%= createSessionStepModalId %>">ADD NEW</button>
 		</div>
 	<% } %>
 </main>

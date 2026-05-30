@@ -218,7 +218,7 @@
 
 .date-section .training-day-list-container {
 	margin-top: 0.6em;
-	padding: 0.6em 1em;
+	border: 1px solid blue;
 
 	ul {
 		display: flex;

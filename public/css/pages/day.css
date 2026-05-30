@@ -33,20 +33,20 @@
 }
 
 .day-rail-wrapper {
-	margin: 2em var(--horizontal-margin) 0;
+	margin-top: 3em;
 	display: grid;
 	grid-template-columns: auto 1fr auto;
 	align-items: center;
-	gap: 0.5rem;
+	position: relative;
 }
 
 .day-rail {
 	display: flex;
-	gap: 0.75rem;
+	gap: 0.75em;
 	overflow-x: auto;
 	scroll-snap-type: x mandatory;
 	scroll-behavior: smooth;
-	padding: 1rem;
+	padding: 1em;
 	scrollbar-width: none;
 }
 
@@ -69,18 +69,48 @@
 	text-align: center;
 	text-decoration: none;
 	color: inherit;
+
+	&:hover {
+		cursor: pointer;
+		background-color: var(--color-border);
+	}
 }
 
 .day-card.active {
 	background: var(--color-text);
 	color: var(--color-bg);
 	view-transition-name: active-day-card;
+
+	&:hover {
+		cursor: pointer;
+		background-color: var(--color-border);
+	}
 }
 
 .day-arrow {
 	width: 2.5rem;
 	height: 2.5rem;
 	border-radius: 999px;
+	background-color: var(--color-text);
+	border: none;
+	position: absolute;
+	box-shadow: var(--box-shadow-header);
+	top: -50%;
+
+	&[data-scroll-left] {
+		left: var(--horizontal-margin);
+		z-index: 2;
+	}
+
+	&[data-scroll-right] {
+		right: var(--horizontal-margin);
+		z-index: 2;
+	}
+
+	&:hover {
+		cursor: pointer;
+		background-color: var(--color-border);
+	}
 }
 
 .session-selection-container {
@@ -91,11 +121,15 @@
 	}
 }
 
+.session-selection-container .no-session-header-container {
+	margin: 0 var(--horizontal-margin);
+}
+
 .session-step-container {
 	flex: 1;
 	margin: 2em var(--horizontal-margin);
 	background-color: var(--color-surface);
-	padding: 1em 2em;
+	padding: 1em 1em;
 	gap: 1em;
 
 	display: flex;
@@ -113,10 +147,17 @@
 	}
 
 	button {
+		background:
+			var(--horizontal-dashed-line) top left / 14px 3.2px repeat-x,
+			var(--horizontal-dashed-line) bottom left / 14px 3.2px repeat-x,
+			var(--vertical-dashed-line) top left / 3.2px 14px repeat-y,
+			var(--vertical-dashed-line) top right / 3.2px 14px repeat-y;
+
 		background-color: transparent;
+		border: 0;
 		padding: 1.4em;
 		color: var(--color-text);
-		border: 0.36em dashed var(--color-border);
+		width: 100%;
 
 		&:hover {
 			cursor: pointer;
