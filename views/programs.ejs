@@ -49,7 +49,7 @@ const getClassName = (index, trainingDay, currCycleId) => {
 
 const dayArr = trainingDayArr.map((trainingDay, index) => {
 	const hasCycleSelected = currCycleId === trainingDay.cycle_id && currCycleId !== null;
-	const date =formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM/yyyy");
+	const date =formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM");
 	const className = getClassName(index, trainingDay, currCycleId);
 	const href = `/programs/day?dayId=${trainingDay.training_day_id}`;
 

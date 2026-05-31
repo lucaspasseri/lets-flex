@@ -30,8 +30,8 @@
 		rgba(0, 0, 0, 0.07) 0px -16px 16px;
 
 	--header-spacing: 6.4em;
-	--footer-spacing: 7.6em;
-	--header-margin-top: 2em;
+	--footer-spacing: 4.2em;
+	--header-margin-top: 0.2em;
 
 	--horizontal-margin: 2rem;
 
@@ -105,13 +105,11 @@ main {
 	color: var(--color-text);
 	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
 	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
-	/* border: 1px solid blue; */
 	overflow-y: auto;
 }
 body > .content {
 	min-height: 100vh;
 	width: 100%;
-	/* border: 1px solid red; */
 }
 
 footer.footer {
@@ -191,10 +189,6 @@ footer.footer {
 } */
 
 @media screen and (width < 818px) {
-	.basic-calendar > .list {
-		font-size: 0.8em;
-	}
-
 	.basic-line {
 		font-size: 0.9em;
 	}
@@ -203,16 +197,12 @@ footer.footer {
 		font-size: 0.9em;
 	}
 
-	.date-section .training-day-list-container {
+	/* .date-section .training-day-list-container {
 		font-size: 0.9em;
-	}
+	} */
 }
 
 @media screen and (width < 665px) {
-	.basic-calendar > .list {
-		font-size: 0.5em;
-	}
-
 	.basic-line {
 		font-size: 0.7em;
 	}
@@ -221,27 +211,27 @@ footer.footer {
 		font-size: 0.7em;
 	}
 
-	.date-section .training-day-list-container {
+	/* .date-section .training-day-list-container {
 		font-size: 0.64em;
-	}
+	} */
 }
 
 @media screen and (width < 500px) {
-	.week-day-item {
+	/* .week-day-item {
 		font-size: 0.7em;
 	}
 
 	.date-section .training-day-list-container {
 		font-size: 0.5em;
-	}
+	} */
 }
 
 @media screen and (width < 435px) {
-	.basic-calendar > .list {
+	/* .basic-calendar > .list {
 		font-size: 0.36em;
-	}
+	} */
 
-	.date-section .training-day-list-container {
+	/* .date-section .training-day-list-container {
 		font-size: 0.4em;
-	}
+	} */
 }

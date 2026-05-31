@@ -46,7 +46,7 @@
 	overflow-x: auto;
 	scroll-snap-type: x mandatory;
 	scroll-behavior: smooth;
-	padding: 1em;
+	padding: 1em var(--horizontal-margin);
 	scrollbar-width: none;
 }
 

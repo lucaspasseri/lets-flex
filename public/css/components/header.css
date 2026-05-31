@@ -9,7 +9,7 @@
 	border-bottom: 0.2em solid var(--color-border);
 	background-color: var(--color-surface);
 	box-shadow: var(--box-shadow-header);
-	z-index: 2;
+	z-index: 99;
 	top: 0;
 	left: 0;
 }
