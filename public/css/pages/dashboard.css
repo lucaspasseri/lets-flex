@@ -8,11 +8,12 @@
 }
 
 .main.dashboard .sync-status {
-	margin: 2.6em var(--horizontal-margin) 0;
+	margin-top: 1em;
 
 	.title-container {
 		display: flex;
 		justify-content: space-between;
+		margin: 0 var(--horizontal-margin);
 	}
 
 	.title {
@@ -20,44 +21,68 @@
 		font-size: 0.8em;
 		letter-spacing: 0.2em;
 	}
+}
 
-	.current-week-container {
-		margin-top: 0.8em;
+.main.dashboard .current-week-container {
+	margin-top: 0.8em;
+	display: flex;
+	justify-content: center;
+
+	ul {
 		display: flex;
-		justify-content: center;
+		gap: 0.8em;
+	}
+}
 
+@media screen and (width < 500px) {
+	.main.dashboard .current-week-container {
 		ul {
-			display: flex;
-			gap: 0.8em;
+			gap: 0.4em;
 		}
 	}
+}
 
-	.week-day-item {
-		background-color: var(--color-stitch-secondary);
-		padding: 1em;
-		color: var(--color-text);
-		display: flex;
-		flex-direction: column;
-		gap: 0.25em;
-		align-items: center;
-		border-radius: 6px;
+.main.dashboard .week-day-item {
+	background-color: var(--color-stitch-secondary);
+	padding: 1em;
+	color: var(--color-text);
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+	align-items: center;
+	border-radius: 6px;
+
+	> span:first-of-type {
+		font-size: 0.7em;
+		color: var(--color-text-muted);
+	}
+
+	> span:nth-of-type(2) {
+		font-size: 1.2em;
+		letter-spacing: 0.1em;
+	}
+
+	&.active {
+		border-bottom: 0.2em solid var(--color-stitch);
+
+		> span {
+			color: var(--color-stitch);
+		}
+	}
+}
+
+@media screen and (width < 500px) {
+	.main.dashboard .week-day-item {
+		padding: 0.6em;
 
 		> span:first-of-type {
-			font-size: 0.7em;
+			font-size: 0.52em;
 			color: var(--color-text-muted);
 		}
 
 		> span:nth-of-type(2) {
-			font-size: 1.2em;
+			font-size: 0.9em;
 			letter-spacing: 0.1em;
-		}
-
-		&.active {
-			border-bottom: 0.2em solid var(--color-stitch);
-
-			> span {
-				color: var(--color-stitch);
-			}
 		}
 	}
 }
