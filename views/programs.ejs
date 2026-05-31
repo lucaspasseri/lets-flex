@@ -73,28 +73,46 @@ const dayArr = trainingDayArr.map((trainingDay, index) => {
 				<h2>Cycles</h2>
 				<%- include("partials/newBasicLine", {line: { basicLineId: cycleBasicLineId, entity: cycleBasicLineEntity, arr: cycleArr, modalId: createCycleModalId, currentItemId: currCycleId, path: chosenCyclePath }}) %>
 			<% } %>
+		<% } else { %>
+			<div class="no-active-program-container">
+				<div class="content">
+					<div class="image-container">
+						<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
+					</div>
+					<h2>NO ACTIVE USER</h2>
+					<p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p>
+					<a href="/profile">
+						<svg class="icon">
+							<use href="../plus.svg"></use>
+						</svg>
+						<p>CREATE YOUR USER PROFILE</p>
+					</a>
+				</div>
+			</div>
 		<% } %>
 	</div>
 
-	<div class="basic-calendar"> 
-		<ul class="list">
-			<% dayArr.forEach((day) => { %>
-				<li class="training-day-item <%= day.className %>" data-calendar-day-id="<%= day.trainingDayId %>"> 
-					<div class="container">
-						<% if(day?.hasCycleSelected) { %>
-							<a data-calendar-day-date="<%= day.date %>"  href="<%= day.href %>">
-								<p>	<%= day.date %></p>
-							</a>
-						<% } else { %>
-							<p >
-								<%= day.date %>
-							</p>
-						<% } %>
-					</div>
-				</li>
-			<% }) %>
-		</ul>
-	</div>
+	<% if(currUserId) { %>
+		<div class="basic-calendar"> 
+			<ul class="list">
+				<% dayArr.forEach((day) => { %>
+					<li class="training-day-item <%= day.className %>" data-calendar-day-id="<%= day.trainingDayId %>"> 
+						<div class="container">
+							<% if(day?.hasCycleSelected) { %>
+								<a data-calendar-day-date="<%= day.date %>"  href="<%= day.href %>">
+									<p>	<%= day.date %></p>
+								</a>
+							<% } else { %>
+								<p >
+									<%= day.date %>
+								</p>
+							<% } %>
+						</div>
+					</li>
+				<% }) %>
+			</ul>
+		</div>
+	<% } %>
 </main>
 
 <%- contentFor("overlays") %>

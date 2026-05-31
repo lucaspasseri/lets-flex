@@ -3,8 +3,12 @@
 	flex-direction: column;
 }
 
+.main.dashboard .main-header {
+	margin: 2em var(--horizontal-margin);
+}
+
 .main.dashboard .sync-status {
-	margin-top: 2.6em;
+	margin: 2.6em var(--horizontal-margin) 0;
 
 	.title-container {
 		display: flex;
@@ -79,10 +83,11 @@
 	}
 }
 
-.no-active-program-container {
+.no-active-program-container,
+.no-active-user-container {
 	display: flex;
 	justify-content: center;
-	margin-top: 2em;
+	margin: 2em var(--horizontal-margin) 0;
 
 	.content {
 		background-color: var(--color-stitch-secondary);
@@ -136,6 +141,10 @@
 			letter-spacing: 0.1em;
 		}
 	}
+}
+
+.no-active-program-container {
+	margin-bottom: 2em;
 }
 
 .date-section {
