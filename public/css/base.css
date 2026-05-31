@@ -128,7 +128,7 @@ body > .content {
 
 main {
 	color: var(--color-text);
-	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
+	height: calc(100dvh - var(--header-spacing) - var(--footer-spacing));
 	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
 	overflow-y: auto;
 	border: 1px solid blue;
