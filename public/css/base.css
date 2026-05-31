@@ -73,7 +73,7 @@ body {
 	background-color: var(--color-bg);
 }
 
-html {
+/* html {
 	min-height: 100vh;
 	display: flex;
 	height: 100%;
@@ -86,6 +86,12 @@ body {
 	flex: 1;
 	height: 100%;
 	position: relative;
+} */
+
+html,
+body {
+	height: 100%;
+	overflow: hidden;
 }
 
 ul {
@@ -101,7 +107,7 @@ input:-webkit-autofill:active {
 	caret-color: #fff;
 }
 
-main {
+/* main {
 	color: var(--color-text);
 	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
 	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
@@ -109,8 +115,23 @@ main {
 	border: 1px solid blue;
 }
 body > .content {
+	min-height: 100vh;
+	width: 100%;
 	border: 1px solid red;
+} */
+
+body > .content {
 	flex: 1;
+	min-height: 0;
+	border: 1px solid red;
+}
+
+main {
+	color: var(--color-text);
+	height: calc(100vh - var(--header-spacing) - var(--footer-spacing));
+	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
+	overflow-y: auto;
+	border: 1px solid blue;
 }
 
 footer.footer {
