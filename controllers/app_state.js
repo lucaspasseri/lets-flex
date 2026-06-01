@@ -11,9 +11,6 @@ async function setCurrentUser(req, res) {
 		return res.status(404).send("User not found");
 	}
 
-	console.log({ userId });
-	console.log({ session: req.session });
-
 	req.session.state = { userId };
 	res.send(200);
 }

@@ -3,11 +3,12 @@ import pool from "../db/pool.js";
 import { addDays } from "date-fns";
 
 const setTrainingDayByActiveDay = async (_req, res, next) => {
-	const { activeDay } = res.locals.sessionState;
+	const { activeDay, programId } = res.locals.sessionState;
 
 	const trainingDay = activeDay
-		? await trainingDaysDb.getTrainingDayByScheduledDate(pool, {
+		? await trainingDaysDb.getTrainingDayByScheduledDateAndProgramId(pool, {
 				scheduledDate: activeDay,
+				programId,
 			})
 		: null;
 

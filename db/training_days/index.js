@@ -63,10 +63,27 @@ async function getTrainingDayByScheduledDate(db, { scheduledDate }) {
 	return rows[0];
 }
 
+async function getTrainingDayByScheduledDateAndProgramId(
+	db,
+	{ scheduledDate, programId },
+) {
+	const { rows } = await db.query(
+		"SELECT * FROM training_days WHERE scheduled_date = $1 AND cycle_id IN (SELECT id FROM cycles WHERE program_id = $2)",
+		[scheduledDate, programId],
+	);
+
+	if (rows.length === 0) {
+		return null;
+	}
+
+	return rows[0];
+}
+
 export {
 	insertTrainingDay,
 	getTrainingDayById,
 	getTrainingDaysByCycleId,
 	shiftScheduledDatesFromCycleOrder,
 	getTrainingDayByScheduledDate,
+	getTrainingDayByScheduledDateAndProgramId,
 };

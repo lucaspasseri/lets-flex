@@ -7,10 +7,6 @@ async function addNewProgram(req, res) {
 
 async function renderProgramsPage(req, res) {
 	res.locals.page.title = "Let's Flex!";
-
-	// console.log({ programs: res.locals });
-	// console.log({ appState: res.locals.appState });
-
 	res.render("programs");
 }
 
