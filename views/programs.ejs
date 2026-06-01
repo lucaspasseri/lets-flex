@@ -68,10 +68,10 @@ const dayArr = trainingDayArr.map((trainingDay, index) => {
 	<div class="main-header">
 		<% if(currUserId){ %>
 			<h1>CHOOSE THE ACTIVE PROGRAM</h1>
-				<%- include("partials/newBasicLine", {line: { basicLineId: programBasicLineId, entity: programBasicLineEntity, arr: programArr, modalId: createProgramModalId, currentItemId: currProgramId, path: chosenProgramPath }}) %>
+				<%- include("partials/basicLine", {line: { basicLineId: programBasicLineId, entity: programBasicLineEntity, arr: programArr, modalId: createProgramModalId, currentItemId: currProgramId, path: chosenProgramPath }}) %>
 			<% if(currProgramId) { %>
 				<h2>Cycles</h2>
-				<%- include("partials/newBasicLine", {line: { basicLineId: cycleBasicLineId, entity: cycleBasicLineEntity, arr: cycleArr, modalId: createCycleModalId, currentItemId: currCycleId, path: chosenCyclePath }}) %>
+				<%- include("partials/basicLine", {line: { basicLineId: cycleBasicLineId, entity: cycleBasicLineEntity, arr: cycleArr, modalId: createCycleModalId, currentItemId: currCycleId, path: chosenCyclePath }}) %>
 			<% } %>
 		<% } else { %>
 			<div class="no-active-program-container">

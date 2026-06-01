@@ -5,7 +5,8 @@ const setProfilePageContext = async (req, res, next) => {
 	let userId = res.locals.profilePageParams?.userId;
 
 	if (userId === null) {
-		userId = res.locals.sessionState?.userId;
+		next();
+		return;
 	}
 
 	const currentUser = userId
@@ -17,7 +18,7 @@ const setProfilePageContext = async (req, res, next) => {
 		...res.locals.sessionState,
 		userId: currentUser?.id ?? null,
 	};
-	req.session.state.userId = currentUser?.id ?? null;
+	req.session.state = { userId: currentUser?.id ?? null };
 
 	next();
 };

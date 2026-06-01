@@ -23,7 +23,7 @@ const basicLineId = "profilePageUserBasicLine";
 		<% } %>
 	</div>
 
-	<%- include("partials/newBasicLine", {line: {basicLineId, entity, arr: userArr, modalId, currentItemId: currUserId, path: loggedUserPath }}) %>
+	<%- include("partials/basicLine", {line: {basicLineId, entity, arr: userArr, modalId, currentItemId: currUserId, path: loggedUserPath }}) %>
 </main>
 
 <%- contentFor("overlays") %>
@@ -33,7 +33,7 @@ const basicLineId = "profilePageUserBasicLine";
 			id: modalId,
 			title: "Create user",
 			description: "Fill in the user information below.",
-			renderContent: () => include("partialsOld/newUserForm")
+			renderContent: () => include("partials/newUserForm")
 		}
 	}) 
 %>

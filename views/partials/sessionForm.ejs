@@ -7,10 +7,10 @@ sessionArr.push({session_order: sessionArr.length + 1});
 <form class="forms" action="/sessions" method="POST">
 
 	<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
-	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "sessionForm", autocomplete: "name", required: true } }); %>
-	<%- include("../partialsOld/select", { data: { id: "sessionOrderSelect", label: "Session Order", name: "sessionOrder", required: true, 
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "sessionForm", autocomplete: "name", required: true } }); %>
+	<%- include("select", { data: { id: "sessionOrderSelect", label: "Session Order", name: "sessionOrder", required: true, 
 	options: sessionArr, getOptionLabel: (session) => session.session_order, getOptionValue: (session) => session.session_order  } }); %>
 
-	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 

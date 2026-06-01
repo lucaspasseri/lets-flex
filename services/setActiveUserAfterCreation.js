@@ -6,7 +6,7 @@ async function setActiveUserAfterCreation(req) {
 
 	try {
 		const userId = await usersDb.postNewUser(dob, { name, dob, anamnesis });
-		req.session.state = { ...req.session.state, userId };
+		req.session.state = { userId };
 	} catch (err) {
 		console.log(err);
 	}

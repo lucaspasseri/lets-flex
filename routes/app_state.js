@@ -5,6 +5,7 @@ import {
 	setCurrentCycle,
 	setCurrentSession,
 } from "../controllers/app_state.js";
+import { getSessionState } from "../middlewares/getSessionState.js";
 
 const router = express.Router();
 

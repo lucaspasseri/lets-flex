@@ -11,12 +11,10 @@ async function setCurrentUser(req, res) {
 		return res.status(404).send("User not found");
 	}
 
-	if (req.session?.state && req.session.state?.userId !== userId) {
-		req.session.state = { userId };
-		return res.send(200);
-	}
+	console.log({ userId });
+	console.log({ session: req.session });
 
-	req.session.state = { ...req.session.state, userId };
+	req.session.state = { userId };
 	res.send(200);
 }
 

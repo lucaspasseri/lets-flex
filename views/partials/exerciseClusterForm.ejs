@@ -6,17 +6,17 @@ const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 %>
 
 <form class="forms" action="/exercise_cluster" method="POST">
-	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
-	<%- include("../partialsOld/select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
+	<%- include("select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
 	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id  } }); %>
-	<%- include("../partialsOld/select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
+	<%- include("select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
 	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id  } }); %>
 
 	<div>
-		<%- include("../partialsOld/select", { data: { id: "muscleIdSelect", label: "Performing muscle",
+		<%- include("select", { data: { id: "muscleIdSelect", label: "Performing muscle",
 		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => muscle.id } }); %>	
 
-		<%- include("../partialsOld/select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
+		<%- include("select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
 		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => muscle_role.id } }); %>	
 
 		<button type="button" id="addMusclePerformingRoleButton" >Add to the performing muscle list</button>
@@ -24,7 +24,7 @@ const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 
 	<ul id="musclePerformingList"></ul>
 
-	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 
 <script>

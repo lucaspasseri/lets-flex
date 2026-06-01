@@ -1,34 +1,42 @@
 <%
+const currentItemId = line?.currentItemId ? Number(line?.currentItemId) : null;
 const arr = line?.arr || [];
-const modalId = line?.modalId || "0";
-const currentItemId = line?.currentItemId || "";
+const entity = line?.entity || "";
+const entityFirstLetterUppercase = entity.charAt(0).toUpperCase();
 const path = line?.path || "";
-const payloadName = line?.payloadName || "";
-const destination = line?.destination || "";
-const dataId = line?.dataId || "";
+const basicLineId = line?.basicLineId || "";
+const modalId = line?.modalId || "0";
+
 
 const getClass = (itemId) => {
-	if(itemId === currentItemId) { 
-		return 'line-card-button selectItemButton selected';
+	if (itemId === currentItemId) {
+		return "line-card-button selectItemButton selected";
 	}
 
-	return 'line-card-button selectItemButton not-selected';
+	return "line-card-button selectItemButton not-selected";
 };
 %>
 
-<div class="basic-line" data-path="<%= path %>" data-payload-name="<%= payloadName %>" data-destination="<%= destination %>" data-id="<%= dataId %>" >
+<div class="basic-line" data-id="<%= basicLineId %>">
 	<ul>
-		<% arr.forEach((item,index) => { %>
-			<li data-item-id="<%= item.id %>" class="line-card">
-				<button class="<%= getClass(item.id)  %>">
-					<p><%= `P${index+1}` %></p>
+		<% arr.forEach((item, index) => { %>
+			<li
+				id="<%= `${basicLineId}-item-${item.id}` %>"
+				data-item-id="<%= item.id %>"
+				class="line-card"
+			>
+				<a
+					class="<%= getClass(item.id) %>"
+					href="<%= `${path}${item.id}` %>"
+				>
+					<p><%= `${entityFirstLetterUppercase}${index + 1}` %></p>
 					<div>
 						<p><%= item.name %></p>
-							<% if(currentItemId === item.id){ %>
-								<p>ACTIVE PROGRAM</p>
-							<% } %>		
+						<% if (currentItemId === item.id) { %>
+							<p>ACTIVE <%= entity.toUpperCase() %></p>
+						<% } %>
 					</div>
-				</button>
+				</a>
 			</li>
 		<% }) %>
 	</ul>
@@ -43,49 +51,3 @@ const getClass = (itemId) => {
 		</button>
 	</div>
 </div>
-
-
-<script>
-	document.addEventListener("click", async (e) => {
-		const button = e.target.closest(".selectItemButton");
-		if (!button || button.disabled) return;
-
-		const basicLine = button.closest(".basic-line");
-		const path = basicLine?.dataset.path;
-		const payloadName = basicLine?.dataset.payloadName;
-		const destination = basicLine?.dataset.destination;
-
-		if (!path || !payloadName || !destination) return;
-
-		const li = button.closest("[data-item-id]");
-
-		if (!li) return;
-
-		const itemId = li.dataset.itemId;
-		if (!itemId) return;
-
-		button.disabled = true;
-
-		try {
-			const res = await fetch(path, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ [payloadName]: itemId }),
-			});
-
-			if (!res.ok) {
-				const message = await res.text();
-				console.error(message);
-				button.disabled = false;
-				return;
-			}
-
-			window.location.assign(destination);
-		} catch (err) {
-			console.error(err);
-			button.disabled = false;
-		}
-	});
-</script>

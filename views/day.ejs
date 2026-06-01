@@ -79,7 +79,7 @@ const renderContent = (content) => {
 		<% } else { %>
 				<h2>CHOOSE THE ACTIVE SESSION</h2>
 		<% } %>
-		<%- include("partials/newBasicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: sessionId, path: chosenSessionPath }}) %>
+		<%- include("partials/basicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: sessionId, path: chosenSessionPath }}) %>
 	</div>
 
 

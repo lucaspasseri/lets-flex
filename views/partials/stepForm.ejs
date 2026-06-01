@@ -13,28 +13,28 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 
 	<input hidden type="text" name="sessionId" value="<%= currSessionId %>" />
 
-	<%- include('../partialsOld/olaInput', { data: { label: "Name", type: "text", name: "name", context: "stepForm" } }); %>
+	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "stepForm" } }); %>
 
-	<%- include("../partialsOld/select", { data: { id: "stepTypeSelect", label: "Step type", name: "stepTypeId", required: true, 
+	<%- include("select", { data: { id: "stepTypeSelect", label: "Step type", name: "stepTypeId", required: true, 
 	options: stepTypeArr, getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id  } }); %>
 
-	<%- include("../partialsOld/select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
+	<%- include("select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
 	options: exerciseVariantArr, getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id  } }); %>
 
 
-	<%- include('../partialsOld/olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "stepForm" } }); %>
-	<%- include('../partialsOld/olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "stepForm" } }); %>
+	<%- include('olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "stepForm" } }); %>
+	<%- include('olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "stepForm" } }); %>
 
 	
-	<%- include('../partialsOld/olaInput', { data: { label: "Load", type: "number", name: "loadValue", context: "stepForm" } }); %>
+	<%- include('olaInput', { data: { label: "Load", type: "number", name: "loadValue", context: "stepForm" } }); %>
 	
-	<%- include("../partialsOld/select", { data: { id: "loadUnitSelect", label: "Load unit", name: "loadUnit" ,
+	<%- include("select", { data: { id: "loadUnitSelect", label: "Load unit", name: "loadUnit" ,
 	options: unitArr, getOptionLabel: (unit) => unit.name, getOptionValue: (unit) => unit.fullName  } }); %>
 
 
-	<%- include("../partialsOld/select", { data: { id: "stepOrderSelect", label: "Step order", name: "stepOrder", required: true, 
+	<%- include("select", { data: { id: "stepOrderSelect", label: "Step order", name: "stepOrder", required: true, 
 	options: sessionStepArr, getOptionLabel: (step) => step.step_order, getOptionValue: (step) => step.step_order  } }); %>
 
-	<%- include('../partialsOld/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 

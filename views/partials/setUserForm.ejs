@@ -1,9 +1,0 @@
-<%
-const {userArr = []} = locals;
-%>
-
-<form class="forms" action="/app_state/set_current_user" method="POST">
-	<%- include("../partialsOld/select", { data: { label: "user", name: "userId", options: userArr, required: true } })	%>
-
-	<%- include("../partialsOld/simpleButton", { data: { text: "Submit", type: "submit" } }); %>
-</form>
