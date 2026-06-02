@@ -26,7 +26,7 @@ const loadDayPageData = async (req, res, next) => {
 				})
 			: [],
 		stepTypesDb.getAllStepTypes(),
-		exerciseVariantsDb.getAllExerciseVariants(),
+		exerciseVariantsDb.getAllExerciseVariants(pool),
 		sessionId
 			? sessionStepsDb.getSessionStepsBySessionId(pool, { sessionId })
 			: [],

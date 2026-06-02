@@ -9,15 +9,15 @@ async function getSessionById(db, { sessionId }) {
 	return sessions?.[0];
 }
 
-async function getAllSessions() {
-	const { rows } = await pool.query("SELECT * FROM sessions");
+async function getAllSessions(db) {
+	const { rows } = await db.query("SELECT * FROM sessions");
 	return rows;
 }
 
 async function getSessionByTrainingDayId(db, { trainingDayId }) {
 	if (trainingDayId === null) return [];
 
-	const { rows } = await pool.query(
+	const { rows } = await db.query(
 		"SELECT * FROM sessions WHERE training_day_id = $1 ORDER BY session_order",
 		[trainingDayId],
 	);

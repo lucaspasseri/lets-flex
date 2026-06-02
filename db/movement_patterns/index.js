@@ -1,7 +1,7 @@
 import pool from "../pool.js";
 
-async function getAllMovementPatterns() {
-	const { rows: movementPatterns } = await pool.query(
+async function getAllMovementPatterns(db) {
+	const { rows: movementPatterns } = await db.query(
 		"SELECT * FROM movement_patterns",
 	);
 
