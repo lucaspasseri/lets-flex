@@ -1,0 +1,117 @@
+.main.library {
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
+}
+
+.main.library .main-header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	margin: 2em var(--horizontal-margin);
+}
+
+.main.library .title-container {
+	display: flex;
+	gap: 0.6em;
+}
+
+.main.library .title-mark {
+	width: max(0.24em, 4px);
+	margin-top: 0.3em;
+	height: calc(100% - 0.3em);
+	background-color: var(--color-stitch);
+}
+
+.main.library .title-text {
+	p {
+		color: var(--color-text-muted);
+		font-size: 0.9em;
+	}
+}
+
+.main.library .total-results {
+	margin-left: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+
+	span {
+		text-align: right;
+		font-size: 1.2em;
+	}
+
+	p {
+		text-align: right;
+		font-size: 0.8em;
+		color: var(--color-text-muted);
+	}
+}
+
+.search-exercise {
+	background-color: transparent;
+	color: var(--color-text);
+	padding: 1em 0.8em;
+	border: 2px solid var(--color-stitch);
+	width: 100%;
+	max-width: 300px;
+
+	&::placeholder {
+		color: var(--color-text);
+	}
+}
+
+.exercise-list-container {
+	margin: 0 var(--horizontal-margin);
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+
+	h2 {
+		font-size: 2em;
+		margin-bottom: 0.4em;
+	}
+}
+
+.empty-paragraph-container {
+	color: var(--color-text-muted);
+	padding: 0.2em 1em;
+	border-left: 0.16em solid var(--color-stitch);
+}
+
+.exercise-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+}
+
+.exercise-card {
+	width: 100%;
+	height: fit-content;
+	padding: 1em;
+	border-radius: 6px;
+	background: var(--color-stitch-secondary);
+}
+
+.custom-exercise-button-container {
+	margin: 0 var(--horizontal-margin) 2em;
+
+	button {
+		width: 100%;
+		padding: 1.4em;
+		color: var(--color-text);
+		border: 0;
+
+		background:
+			var(--horizontal-dashed-line) top left / 14px 3.2px repeat-x,
+			var(--horizontal-dashed-line) bottom left / 14px 3.2px repeat-x,
+			var(--vertical-dashed-line) top left / 3.2px 14px repeat-y,
+			var(--vertical-dashed-line) top right / 3.2px 14px repeat-y;
+
+		background-color: transparent;
+
+		&:hover {
+			cursor: pointer;
+		}
+	}
+}

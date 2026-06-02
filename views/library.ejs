@@ -1,55 +1,131 @@
 <% 
-const exerciseArr = locals.data?.exerciseVariantArr ?? [];
-const createExerciseModalId = "createExerciseModal";
+const exerciseArr = locals.data?.exerciseVariantArr ?? []; 
+const createExerciseModalId = "createExerciseModal"; 
+const sessionArr = [{id: 1, name: "Session 1"}, {id: 2, name: "Session 2"}, {id: 3, name: "Session 3"}, {id: 4, name: "Session 4"}, {id: 5, name: "Session 5"}, {id: 6, name: "Session 6"}, {id: 7, name: "Session 7"}, {id: 8, name: "Session 8"}, {id: 9, name: "Session 9"}];
+const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
+		if(index %2 === 0) {
+			acc.push([session]);
+		} else {
+			acc[acc.length - 1].push(session);
+		}
+		return acc;
+	}, []);
+
+console.log(exerciseArr);
+
+const renderContent = (content) => {
+	return `
+	<div class="session-step-accordion-content">
+		<p><strong>Name:</strong> ${content.name}</p>
+		<p><strong>Movement pattern:</strong> ${content.movement_pattern_name}</p>
+		<p><strong>Equipment name:</strong> ${content.equipment_name}</p>
+		<p><strong>Setup description:</strong> ${content.setup_description}</p>
+		<p><strong>Environment:</strong> ${content.environment}</p>
+		<p><strong>Notes:</strong> ${content.notes}</p>
+	</div>
+	`;
+}
 %>
 
 <main class="main library">
-
 	<div class="main-header">
-			<div class="search-container">
-				<input
-					class="search-exercise"
-					type="search"
-					placeholder="SEARCH EXERCISES..."
-				/>
-			</div>
-
-		<% if( exerciseArr.length > 0){ %>
-			<div class="title-container">
-				<div class="title-mark"></div>
-				<div class="title-text">
-					<h1> MOVEMENT LIBRARY </h1>
-					<p>FOUNDATIONAL MECHANICS & TECHNICAL INDEX</p>
-				</div>
-				<div class="total-results">
-					<span>
-						<%= exerciseArr.length %>
-					</span>
-					<p>TOTAL </br> RESULTS</p>
-				</div>
-			</div>
-		<% } %>
+		<div class="title-container">
+			<p>ASSET MANAGER</p>
+			<h1>Library</h1>
+		</div>
+		<div class="button-container">
+			<button type="button">+</button>
+		</div>
 	</div>
-	
-	<div class="exercise-list-container">
-		<% if( exerciseArr.length == 0){ %>
-			<h2> BUILD YOUR<br />ARSENAL</h2>
-			<div class="empty-paragraph-container">
-				<p>Your library is empty. Search out database of 500+ professional movements or add your own custom variations.</p>
-			</div>
-	
-		<% } else { %>
-			<ul class="exercise-list">
-				<% exerciseArr.forEach(exercise => { %>
-					<li>
-						<div class="exercise-card">
-							<%= exercise.name %>
-						</div>
-					</li>
+
+	<div class="search-container">
+		<form>
+			<label for="search">Q</label>
+			<input
+				id="search"
+				name="search"
+				class="search-exercise"
+				type="search"
+				placeholder="SEARCH EXERCISES..."
+			/>
+		</form>
+	</div>
+
+	<div class="session-template-container">
+		<div class="header">
+			<h2>Session Templates</h2>
+			<p><%=`${1+2} TOTAL` %></p>
+		</div>
+		<div class="list-container">
+			<ul>
+				<% pairedSessionArr.forEach(sessionPair => { %>
+					<div class="paired-session-card">
+						<li>
+							<div class="session-card">
+								<div class="header">
+								<div>
+										<p class="title"><%= sessionPair[0].name %></p>
+									<p class="subtitle">Lorem ipsum dolor </p>
+								</div>
+									<div class="settings">
+											<span>
+												♤
+											</span>
+											<span>
+												♧
+											</span>
+									</div>
+								</div>
+								<div class="body">
+									<div class="status">
+										<p> djsa jd ioasdj oisajd oisajd oisajdajs</p>
+									</div>
+								</div>
+							</div>
+						</li>
+
+						<% if(sessionPair[1]) { %>
+							<li>
+								<div class="session-card">
+									<div class="header">
+										<div>
+											<p class="title"><%= sessionPair[1].name %></p>
+											<p class="subtitle">Lorem ipsum dolor </p>
+										</div>
+										<div class="settings">
+											<span>
+												♤
+											</span>
+											<span>
+												♧
+											</span>
+										</div>
+									</div>
+									<div class="body">
+										<div class="status">
+											<p> djsa jd ioasdj oisajd oisajd oisajdajs</p>
+										</div>
+									</div>
+								</div>
+							</li>
+						<% } %>
+					</div>
 				<% }) %>
 			</ul>
-		<% } %>
+		</div>
+	</div>
 
+	<div class="active-session-template-container"></div>
+
+	<div class="exercise-variants-container">
+		<div class="header">
+			<h2>Exercise Templates</h2>
+			<p><%=`${2+2} TOTAL` %></p>
+		</div>
+		<div class="list-container">
+			<ul>
+				<%- include("partials/accordion", { contentArr: exerciseArr, renderContent: renderContent }) %>
+			</ul>
 	</div>
 	<div class="custom-exercise-button-container">
 		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD NEW</button>

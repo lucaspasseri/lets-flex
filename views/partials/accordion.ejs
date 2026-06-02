@@ -8,11 +8,11 @@ const renderContent = locals?.renderContent || function(content) { return `<p>${
 	<p>No content</p>
 <% } else { %>	
 	<div class="accordion">
-		<% contentArr.forEach(content => { %>
+		<% contentArr.forEach((content, index) => { %>
 			<div class="accordion-item">
 				<input type="radio" id="section<%= content.id %>" name="accordion" />
 				<label for="section<%= content.id %>" class="accordion-header">
-					<span class="accordion-title"><%= content?.step_order || "" %>: <%= content?.name || "" %></span>
+					<span class="accordion-title"><%= `${index + 1}` %>: <%= content?.name || "" %></span>
 					<div class="accordion-icon">
 						<svg
 							viewBox="0 0 16 16"

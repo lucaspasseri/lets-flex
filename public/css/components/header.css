@@ -1,4 +1,4 @@
-.header {
+.page-header {
 	position: fixed;
 	width: 100%;
 	height: fit-content;
@@ -14,12 +14,12 @@
 	left: 0;
 }
 
-.logoContainer {
+.page-header .logoContainer {
 	height: 72px;
 	width: 72px;
 }
 
-.avatar {
+.page-header .avatar {
 	height: 50px;
 	width: 50px;
 	border-radius: 12px;
@@ -27,7 +27,7 @@
 	margin-left: auto;
 }
 
-.avatar-name {
+.page-header .avatar-name {
 	color: var(--color-text);
 	margin-top: 0.2em;
 	display: flex;

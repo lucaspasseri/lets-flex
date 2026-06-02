@@ -1,99 +1,188 @@
-.main.library {
-	display: flex;
-	flex-direction: column;
-	gap: 2em;
-}
-
 .main.library .main-header {
-	display: flex;
-	flex-direction: column;
-	gap: 0.6em;
-	margin: 2em var(--horizontal-margin);
+	margin: 2em var(--horizontal-margin) 0;
+	display: grid;
+	grid-template-columns: 1fr auto;
 }
 
-.main.library .title-container {
-	display: flex;
-	gap: 0.6em;
-}
-
-.main.library .title-mark {
-	width: max(0.24em, 4px);
-	margin-top: 0.3em;
-	height: calc(100% - 0.3em);
-	background-color: var(--color-stitch);
-}
-
-.main.library .title-text {
+.main.library .main-header .title-container {
 	p {
-		color: var(--color-text-muted);
-		font-size: 0.9em;
-	}
-}
-
-.main.library .total-results {
-	margin-left: auto;
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-
-	span {
-		text-align: right;
-		font-size: 1.2em;
+		color: var(--color-accent);
+		font-weight: bold;
+		letter-spacing: 0.05em;
+		font-size: 0.6em;
 	}
 
-	p {
-		text-align: right;
-		font-size: 0.8em;
-		color: var(--color-text-muted);
-	}
-}
-
-.search-exercise {
-	background-color: transparent;
-	color: var(--color-text);
-	padding: 1em 0.8em;
-	border: 2px solid var(--color-stitch);
-	width: 100%;
-	max-width: 300px;
-
-	&::placeholder {
+	h1 {
 		color: var(--color-text);
+		font-size: 1.8em;
 	}
 }
 
-.exercise-list-container {
-	margin: 0 var(--horizontal-margin);
+.main.library .main-header .button-container {
+	align-self: stretch;
+	aspect-ratio: 1 / 1;
+
+	button {
+		background: var(--color-stitch);
+		color: var(--color-surface);
+		border: none;
+		height: 100%;
+		width: 100%;
+		font-size: 1.4em;
+		font-weight: bold;
+
+		border-radius: 4px;
+		cursor: pointer;
+	}
+}
+
+.main.library .search-container {
+	margin: 2em var(--horizontal-margin);
+	border: 2px solid var(--color-stitch);
+	border-radius: 4px;
+
+	> form {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		background-color: var(--color-surface);
+		align-items: center;
+
+		label {
+			padding-left: 0.6em;
+			color: var(--color-stitch);
+		}
+	}
+
+	.search-exercise {
+		color: var(--color-text);
+		padding: 1em 0.8em;
+		background-color: transparent;
+		border: 0;
+		color: var(--color-stitch);
+
+		width: 100%;
+
+		&::placeholder {
+			color: var(--color-stitch);
+		}
+
+		&:focus {
+			outline: none;
+		}
+	}
+}
+
+.main.library .session-template-container {
 	display: flex;
 	flex-direction: column;
-	flex: 1;
+	gap: 1.5em;
+}
+
+.main.library .session-template-container > .header {
+	margin: 2em var(--horizontal-margin);
+	display: flex;
+	justify-content: space-between;
 
 	h2 {
-		font-size: 2em;
-		margin-bottom: 0.4em;
+		font-size: 1.2em;
+		color: var(--color-text);
+	}
+
+	p {
+		font-size: 0.9em;
+		color: var(--color-stitch);
 	}
 }
 
-.empty-paragraph-container {
-	color: var(--color-text-muted);
-	padding: 0.2em 1em;
-	border-left: 0.16em solid var(--color-stitch);
+.main.library .session-template-container .list-container {
+	ul {
+		display: flex;
+		overflow-x: auto;
+		gap: 0.8em;
+	}
 }
 
-.exercise-list {
+.main.library .session-template-container .paired-session-card {
 	display: flex;
 	flex-direction: column;
-	gap: 0.4em;
+	gap: 0.8em;
+
+	&:first-of-type {
+		margin-left: var(--horizontal-margin);
+	}
+
+	&:last-of-type {
+		margin-right: var(--horizontal-margin);
+	}
 }
 
-.exercise-card {
-	width: 100%;
-	height: fit-content;
-	padding: 1em;
-	border-radius: 6px;
-	background: var(--color-stitch-secondary);
+.main.library .session-template-container .session-card {
+	width: 260px;
+	padding: 0.8em;
+	background-color: var(--color-stitch-secondary);
+	border-radius: 4px;
+
+	.header {
+		display: flex;
+		justify-content: space-between;
+
+		.title {
+			font-size: 1.3em;
+			color: var(--color-text);
+		}
+
+		.subtitle {
+			font-size: 0.9em;
+			color: var(--color-stitch);
+		}
+
+		> .settings {
+			display: flex;
+			gap: 0.4em;
+		}
+	}
+
+	.body {
+		margin-top: 0.75em;
+
+		p {
+			font-size: 0.8em;
+		}
+	}
 }
 
-.custom-exercise-button-container {
+.main.library .active-session-template-container {
+	margin: 1em var(--horizontal-margin);
+	height: 20px;
+}
+
+.main.library .exercise-variants-container {
+	> .header {
+		margin: 0 var(--horizontal-margin);
+		display: flex;
+		justify-content: space-between;
+	}
+
+	> .list-container {
+		margin: 1em var(--horizontal-margin);
+		display: flex;
+		gap: 0.8em;
+		overflow-x: auto;
+
+		ul {
+			display: flex;
+			gap: 0.8em;
+		}
+	}
+}
+
+.main.library .exercise-variants-container .list-container {
+	ul {
+		width: 100%;
+	}
+}
+
+.main.library .exercise-variants-container .custom-exercise-button-container {
 	margin: 0 var(--horizontal-margin) 2em;
 
 	button {
