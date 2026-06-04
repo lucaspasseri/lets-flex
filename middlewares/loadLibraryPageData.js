@@ -2,8 +2,9 @@ import * as equipmentsDb from "../db/equipments/index.js";
 import * as movementPatternsDb from "../db/movement_patterns/index.js";
 import * as musclesDb from "../db/muscles/index.js";
 import * as muscleRolesDb from "../db/muscle_roles/index.js";
-import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
 import * as sessionsDb from "../db/sessions/index.js";
+import * as stepTypesDb from "../db/step_types/index.js";
+import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
 import pool from "../db/pool.js";
 
 const loadLibraryPageData = async (req, res, next) => {
@@ -14,6 +15,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		muscleRoleArr,
 		exerciseVariantArr,
 		sessionArr,
+		stepTypeArr,
 	] = await Promise.all([
 		equipmentsDb.getAllEquipments(pool),
 		movementPatternsDb.getAllMovementPatterns(pool),
@@ -21,6 +23,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		muscleRolesDb.getAllMuscleRoles(pool),
 		exerciseVariantsDb.getAllExerciseVariants(pool),
 		sessionsDb.getAllSessions(pool),
+		stepTypesDb.getAllStepTypes(),
 	]);
 
 	res.locals.data = {
@@ -31,6 +34,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		muscleRoleArr,
 		exerciseVariantArr,
 		sessionArr,
+		stepTypeArr,
 	};
 
 	next();
