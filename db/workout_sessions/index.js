@@ -2,12 +2,10 @@ async function insertWorkoutSession(
 	db,
 	{ sessionId, trainingDayId, workoutSessionOrder, notes },
 ) {
-	console.log(1);
 	const { rows } = await db.query(
 		"INSERT INTO workout_sessions (session_id, training_day_id, workout_session_order, notes) VALUES ($1, $2, $3, $4) RETURNING *",
 		[sessionId, trainingDayId, workoutSessionOrder, notes],
 	);
-	console.log({ rows });
 
 	return rows[0];
 }

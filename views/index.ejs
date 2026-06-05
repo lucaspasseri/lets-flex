@@ -1,46 +1,36 @@
 <%
-const currUrl = locals.page?.url ?? "";
-const currPath = locals.page?.path ?? "";
-const {addDays, formatDate, isSameDay} = locals.helpers;
-
-const currUserId = locals.sessionState?.userId ?? null;
-const currProgramId = locals.sessionState?.programId ?? null;
-const currSessionId = locals.sessionState?.sessionId ?? null;
-const daysDifference = locals.sessionState?.daysDifference ?? null;
-const workoutSessionId = locals.sessionState?.workoutSessionId ?? null;
+const { formatDate, addDays, isSameDay} = locals.helpers;
 
 const currDay = new Date();
 const activeDay = locals.sessionState?.activeDay ?? currDay;
+const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
+const daysDifference = locals.sessionState?.daysDifference ?? null;
 
+const currUserId = locals.sessionState?.userId ?? null;
+const currProgramId = locals.sessionState?.programId ?? null;
+const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
 const currProgram = locals.appState?.currentProgram ?? {};
 const currTrainingDay = locals.appState?.currentTrainingDay ?? {};
-const sessionArrByTrainingDay = locals?.appState?.sessionArrByTrainingDay ?? [];
 
 const cycleArr = locals.data?.cycleArr ?? [];
-const sessionArr = locals.data?.sessionArr ?? [];
-const sessionStepArr = locals.data?.sessionStepArr ?? [];
 
-const workoutSessionInProgressArr = locals.data?.workoutSessionInProgressArr ?? [];
+const workoutSessionArr = locals.data?.workoutSessionArr ?? [];
 
-const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
-
-const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
-
-const filterSessionsByDay = (sessionArr, day) => {
+const filterWorkoutSessionByDay = (sessionArr, day) => {
 	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
 }
+
+const workoutSessionArrByDay = filterWorkoutSessionByDay(workoutSessionArr, activeDay);
 %>
 
 
 <main class="main dashboard">
-	<% if (!currProgramId) { %>
-		<div class="main-header" >
+	<% if (currUserId === null) { %>
+		<div class="main-header">
 			<p>OPERATIONAL STATUS</p>
 			<h1>LETS'S FLEX</h1>
 		</div>
-	<% } %>
 
-	<% if (!currProgramId) { %>
 		<div class="sync-status">
 			<div class="title-container">
 				<p class="title">TEMPORAL SYNC</p>
@@ -57,10 +47,8 @@ const filterSessionsByDay = (sessionArr, day) => {
 				</ul>
 			</div>
 		</div>
-	<% } %>
 
-	<% if (!currUserId) { %>
-		<div class="no-active-user-container">
+			<div class="no-active-user-container">
 			<div class="content">
 				<div class="image-container">
 					<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
@@ -77,7 +65,7 @@ const filterSessionsByDay = (sessionArr, day) => {
 		</div>
 	<% } %>
 
-	<% if (!currProgramId) { %>
+		<% if (currUserId !== null && currProgramId === null) { %>
 		<div class="no-active-program-container">
 			<div class="content">
 				<div class="image-container">
@@ -95,16 +83,13 @@ const filterSessionsByDay = (sessionArr, day) => {
 		</div>
 	<% } %>
 
-	<% if (currProgramId) { %>
+	<% if(currProgramId !== null) { %>
 		<div class="active-program-container">
 			<p>CURRENT PROGRAM</p>
 			<h1><%= currProgram.name %></h1>
 		</div>
-	<% } %>
 
-	<% if (currProgramId) { %>
 		<div class="date-section">
-
 			<% if (cycleArr.length > 0) { %>
 				<div class="cycle-list-container">
 					<ul>
@@ -128,14 +113,14 @@ const filterSessionsByDay = (sessionArr, day) => {
 				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" >></a>
 			</div>
 
-			<% if (sessionArr.length > 0) { %>
+			<% if (workoutSessionArr.length > 0) { %>
 				<div class="training-day-list-container">
 					<ul>
 						<% currWeek.forEach( (day, index) => { %>
 							<li class="<%= index === 3 ? 'active' : '' %>">
 								<span><%= formatDate(day, "EEE") %></span>
 								<div class="week-day <%= index === 3 ? 'active' : '' %>">
-									<% const filteredSessionArr = filterSessionsByDay(sessionArr, day); %>
+									<% const filteredSessionArr = filterWorkoutSessionByDay(workoutSessionArr, day); %>
 									<% if(filteredSessionArr.length === 0) { %>
 										<p>REST</p>
 
@@ -165,14 +150,12 @@ const filterSessionsByDay = (sessionArr, day) => {
 				</div>
 			<% } %>
 		</div>
-	<% } %>
-	
-	<% if(currProgramId) { %>
-		<div class="sessions-section <%= sessionArrByTrainingDay.length === 0 ? "no-session" : "" %>">
-			<% if (sessionArrByTrainingDay.length === 0) { %>
+
+			<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? "no-session" : "" %>">
+			<% if (workoutSessionArrByDay.length === 0) { %>
 				<h2> ( RESTING / NO-SESSION DAY )</h2>
 
-			<% } else if (sessionArrByTrainingDay.length === 1) { %>
+			<% } else if (workoutSessionArrByDay.length === 1) { %>
 				<div class="sessions-container">
 						<%- include('partials/sessionComponent/main' ); %>
 				</div>
@@ -181,7 +164,7 @@ const filterSessionsByDay = (sessionArr, day) => {
 				<div class="sessions-container">
 					<div class="change-active-session-container">
 						<ul>
-							<% sessionArrByTrainingDay.forEach(session => { %>
+							<% workoutSessionArrByDay.forEach(session => { %>
 								<li>
 									<a href="<%= `/?daysDifference=${daysDifference}&sessionId=${session.id}` %>"></a>
 								</li>
@@ -194,4 +177,5 @@ const filterSessionsByDay = (sessionArr, day) => {
 			<% } %>
 		</div>
 	<% } %>
+
 </main>

@@ -18,6 +18,7 @@ import { setActiveCycle } from "../middlewares/setActiveCycle.js";
 import { loadCycleArrByProgramId } from "../middlewares/loadCycleArrByProgramId.js";
 import { loadSessionArrByProgramId } from "../middlewares/loadSessionArrByProgramId.js";
 import { setTrainingDayByActiveDay } from "../middlewares/setTrainingDayByActiveDay.js";
+import { loadWorkoutSessionArrByProgramId } from "../middlewares/loadWorkoutSessionArrByProgramId.js";
 
 const router = Router();
 
@@ -33,11 +34,11 @@ router.get(
 	setActiveDay,
 	setTrainingDayByActiveDay,
 	loadCycleArrByProgramId,
-	loadSessionArrByProgramId,
-	setDashboardPageSessionContext,
-	loadSessionStepArr,
-	setActiveWorkoutSession,
-	loadWorkoutSessionLogArr,
+	loadWorkoutSessionArrByProgramId,
+	// setDashboardPageSessionContext,
+	// loadSessionStepArr,
+	// setActiveWorkoutSession,
+	// loadWorkoutSessionLogArr,
 	renderDashboardPage,
 );
 

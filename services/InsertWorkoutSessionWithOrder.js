@@ -3,8 +3,6 @@ import { getWorkoutSessionByTrainingDayId } from "../db/workout_sessions/index.j
 import * as workoutSessionsDb from "../db/workout_sessions/index.js";
 
 async function insertWorkoutSessionWithOrder({ sessionId, trainingDayId }) {
-	console.log({ sessionId, trainingDayId });
-
 	try {
 		const currRows = await getWorkoutSessionByTrainingDayId(pool, {
 			trainingDayId,
@@ -16,7 +14,6 @@ async function insertWorkoutSessionWithOrder({ sessionId, trainingDayId }) {
 		} else {
 			workoutSessionOrder = currRows.length + 1;
 		}
-		console.log({ workoutSessionOrder });
 
 		const {
 			rows: [workoutSession],
@@ -25,8 +22,6 @@ async function insertWorkoutSessionWithOrder({ sessionId, trainingDayId }) {
 			trainingDayId,
 			workoutSessionOrder,
 		});
-
-		console.log({ workoutSession });
 	} catch (err) {
 		console.log(err);
 	}

@@ -6,8 +6,6 @@ import pool from "../db/pool.js";
 async function createWorkoutSession(req, res) {
 	const { sessionId, trainingDayId } = req.body;
 
-	console.log({ sessionId, trainingDayId });
-
 	const workoutSession =
 		sessionId &&
 		trainingDayId &&
@@ -15,12 +13,6 @@ async function createWorkoutSession(req, res) {
 			sessionId,
 			trainingDayId,
 		}));
-
-	console.log(2);
-
-	// res.redirect(
-	// 	`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
-	// );
 
 	res.redirect("/programs/day");
 }
