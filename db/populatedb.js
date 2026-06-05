@@ -138,7 +138,7 @@ CREATE TABLE workout_sessions (
 		REFERENCES sessions(id)
 		ON DELETE RESTRICT,
 
-	session_order INTEGER NOT NULL,
+	workout_session_order INTEGER NOT NULL,
 
 	started_at TIMESTAMPTZ,
 	finished_at TIMESTAMPTZ,
@@ -147,7 +147,7 @@ CREATE TABLE workout_sessions (
 
 	notes TEXT,
 
-	UNIQUE (training_day_id, session_order),
+	UNIQUE (training_day_id, workout_session_order),
 
 	CHECK (
 		(status = 'planned' AND started_at IS NULL AND finished_at IS NULL)

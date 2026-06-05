@@ -7,7 +7,6 @@ async function getSessionsByProgramId(db, { programId }) {
 	s.id AS session_id,
 	s.name AS session_name,
 	s.notes AS session_note,
-	s.session_order,
 
 	t.id AS training_day_id,
 	t.label AS training_day_label,

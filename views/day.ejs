@@ -1,28 +1,16 @@
 <%
-const { formatDate, addDays } = locals.helpers;
+const currDayId = locals.sessionState?.dayId ?? null;
+const trainingDayArr = locals.data?.trainingDayArr ?? [];
+const sessionArr = locals.data?.sessionArr ?? [];
+const workoutSessionArr = locals.data?.workoutSessionArr ?? [];
+
 
 const backUrl = locals.page?.backUrl ?? "";
-
-const currCycleId = locals.sessionState?.cycleId ?? null; 
-const currDayId = locals.sessionState?.dayId ?? null;
-const sessionId = locals.sessionState?.sessionId ?? null;
+const { formatDate, addDays } = locals.helpers;
 
 const currProgram = locals.appState?.currentProgram ?? {};
 const currTrainingDay = locals.appState?.currentTrainingDay ?? null;
-
-const sessionArr = locals.data?.sessionArr ?? [];
-const trainingDayArr = locals.data?.trainingDayArr ?? [];
-const sessionStepArr = locals.data?.sessionStepArr ?? [];
-
-
 const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "No date";
-
-const sessionBasicLineId = "dayPageSessionBasicLine";
-const sessionBasicLineEntity = "session";
-const createSessionModalId = "createSessionModal";
-const chosenSessionPath = `/programs/day?dayId=${currDayId}&sessionId=`;
-const createSessionStepModalId = "createSessionStepModal";
-
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
@@ -35,20 +23,7 @@ const getNavLinkHref = (trainingDay) => {
 	return `/programs/day?dayId=${trainingDay.training_day_id}`;
 }
 
-const currSession = sessionArr.find(session => session.id === sessionId) || {};
-
-const renderContent = (content) => {
-	return `
-	<div class="session-step-accordion-content">
-		<p><strong>Step order:</strong> ${content.step_order}</p>
-		<p><strong>Name:</strong> ${content.name}</p>
-		<p><strong>Description:</strong> ${content?.description}</p>
-		<p><strong>Sets:</strong> ${content.sets}</p>
-		<p><strong>Reps:</strong> ${content.reps}</p>
-		<p><strong>Load:</strong> ${content.load_value} ${content.load_unit}</p>
-	</div>
-	`;
-}
+console.log({sessionArr, workoutSessionArr});
 %>
 <main class="main day">
 	<% if(trainingDayArr.length > 0){ %>
@@ -67,34 +42,34 @@ const renderContent = (content) => {
 		<h1><%= formattedScheduledDate %></h1>
 	</div>
 
-	<div class="session-selection-container">
-		<% if( sessionArr.length === 0){ %>
-			<div class="no-session-header-container">
-				<h1>SESSION<br />INITIALIZATION</h1>
-				<p>
-					Enter precise baseline metric to calibrate the performance engine.
-					Accuracy is required for optimal load calculation and volume prescription.
-				</p>
+	<div class="link-training-day-with-session-container">
+		<% if(workoutSessionArr.length === 0) { %>
+			<div class="no-session">
+				<h2> The current day has no workout session linked to it.</h2>
+				<p>You can link a session template here.</p>
 			</div>
 		<% } else { %>
-				<h2>CHOOSE THE ACTIVE SESSION</h2>
+			<div class="at-least-one-session">
+				<h2> <%= `The current day has ${sessionArr.length} workout session(s) linked to it.` %> </h2>
+			</div>
 		<% } %>
-		<%- include("partials/basicLine", {line: { basicLineId: sessionBasicLineId, entity: sessionBasicLineEntity, arr: sessionArr, modalId: createSessionModalId, currentItemId: sessionId, path: chosenSessionPath }}) %>
+
+		<form action="/workout_sessions" method="POST">
+			<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
+			<%- include("partials/select", { data: { id: "sessionSelect", label: "Session template", name: "sessionId", required: true, 
+			options: sessionArr, getOptionLabel: (session) => session.name, getOptionValue: (session) => session.id  } }); %>
+
+			<%- include('partials/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+		</form>
 	</div>
 
-
-	<% if(sessionArr.length > 0){ %>
-		<div class="session-step-container">
-			<div>
-				<span>SESSION <%= currSession.session_order %>: <%= currSession.name %></span>
-				<h3>Exercises</h3>
-			</div>
-			<% if(sessionId && sessionStepArr.length !== 0){ %>
-				<ul>
-					<%- include("partials/accordion", { contentArr: sessionStepArr, renderContent: renderContent }) %>
-				</ul>
-			<% } %>
-			<button type="button" class="button" data-modal-open="<%= createSessionStepModalId %>">ADD NEW</button>
+	<% if(workoutSessionArr.length > 0 ) { %>
+		<div class="workout-session-list-container">
+			<% workoutSessionArr.forEach(wSession => { %>
+				<li>
+					<%= `W-SESSION(${wSession.name}) - ${wSession.status}` %>
+				</li>
+			<% }) %>
 		</div>
 	<% } %>
 </main>
@@ -117,23 +92,3 @@ const renderContent = (content) => {
 		rail.scrollBy({ left: 240, behavior: "smooth" });
 	});
 </script>
-
-<%- contentFor("overlays") %>
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: createSessionModalId,
-		title: "Create session",
-		description: "Fill in the session information below.",
-		renderContent: () => include("partials/sessionForm")
-	}
-}) %>
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: createSessionStepModalId,
-		title: "Create session step",
-		description: "Fill in the step information below.",
-		renderContent: () => include("partials/stepForm")
-	}
-}) %>

@@ -1,21 +1,28 @@
-import startWorkoutSessionService from "../services/startWorkoutSessionService.js";
 import toNullableNumber from "../utils/toNullableNumber.js";
 import * as workoutSessionsDb from "../db/workout_sessions/index.js";
+import insertWorkoutSessionWithOrder from "../services/InsertWorkoutSessionWithOrder.js";
 import pool from "../db/pool.js";
 
-async function startWorkoutSession(req, res) {
-	const { sessionId } = req.body;
-	const { daysDifference } = res.locals.sessionState;
+async function createWorkoutSession(req, res) {
+	const { sessionId, trainingDayId } = req.body;
+
+	console.log({ sessionId, trainingDayId });
 
 	const workoutSession =
 		sessionId &&
-		(await startWorkoutSessionService({
-			sessionId: toNullableNumber(sessionId),
+		trainingDayId &&
+		(await insertWorkoutSessionWithOrder({
+			sessionId,
+			trainingDayId,
 		}));
 
-	res.redirect(
-		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession.id}`,
-	);
+	console.log(2);
+
+	// res.redirect(
+	// 	`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
+	// );
+
+	res.redirect("/programs/day");
 }
 
 async function finishWorkoutSession(req, res) {
@@ -33,4 +40,4 @@ async function finishWorkoutSession(req, res) {
 	);
 }
 
-export { startWorkoutSession, finishWorkoutSession };
+export { createWorkoutSession, finishWorkoutSession };
