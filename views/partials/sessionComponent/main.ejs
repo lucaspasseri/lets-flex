@@ -116,8 +116,7 @@ console.log({sessionStepArr});
 				</div>
 
 				<div class="button-container">
-					<form method="POST" action="/workout_sessions">
-						<input type="hidden" name="sessionId" value="<%= currSessionId %>" />
+					<form method="POST" action="/workout_sessions/<%= currWorkoutSession.id %>/start">
 						<button type="submit">
 							<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
 								<use href="../play-black-icon.svg"></use>

@@ -62,6 +62,23 @@ async function getWorkoutSessionBySessionId(db, { sessionId }) {
 	return rows;
 }
 
+async function startWorkoutSession(db, { workoutSessionId }) {
+	const { rows } = await db.query(
+		`
+		UPDATE workout_sessions
+		SET
+			status = 'in_progress',
+			started_at = NOW()
+		WHERE id = $1
+			AND status = 'planned'
+		RETURNING *
+		`,
+		[workoutSessionId],
+	);
+
+	return rows[0];
+}
+
 async function finishWorkoutSession(db, { workoutSessionId }) {
 	const { rows } = await db.query(
 		`
@@ -82,6 +99,7 @@ export {
 	insertWorkoutSession,
 	getWorkoutSessionById,
 	getWorkoutSessionInProgressBySessionId,
+	startWorkoutSession,
 	finishWorkoutSession,
 	getWorkoutSessionBySessionId,
 	getWorkoutSessionByTrainingDayId,
