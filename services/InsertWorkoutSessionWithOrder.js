@@ -15,9 +15,7 @@ async function insertWorkoutSessionWithOrder({ sessionId, trainingDayId }) {
 			workoutSessionOrder = currRows.length + 1;
 		}
 
-		const {
-			rows: [workoutSession],
-		} = await workoutSessionsDb.insertWorkoutSession(pool, {
+		await workoutSessionsDb.insertWorkoutSession(pool, {
 			sessionId,
 			trainingDayId,
 			workoutSessionOrder,

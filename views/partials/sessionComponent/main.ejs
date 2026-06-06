@@ -1,5 +1,5 @@
 <%
-const currWorkoutSession = locals.appState?.currentWorkoutSession ?? {};
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 const currSession = locals.appState?.currentSession ?? null;
 const currSessionId = currSession?.id ?? null;
 
@@ -11,6 +11,8 @@ const doesTheWorkoutSessionHaveSteps = workoutStepLogArr.length > 0;
 const isWorkoutSessionActive = currWorkoutSession?.session_id === currSessionId;
 const isThereAnyWorkoutStepLogPlanned = workoutStepLogArr.some(log => log.status === "planned");
 const currWorkoutStepLog = workoutStepLogArr.find(log => log.status === "planned") ?? null;
+console.log(1)
+console.log({sessionStepArr});
 %>
 
 <div class="session-component">
@@ -85,7 +87,7 @@ const currWorkoutStepLog = workoutStepLogArr.find(log => log.status === "planned
 										<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
 									</span>
 									<p class="step-name">
-										<%= step.name.toUpperCase() %>
+										<%= `${step.name.toUpperCase()}(${step.exercise_variant_name})` %>
 									</p>
 								</div>
 							</li>
@@ -105,7 +107,7 @@ const currWorkoutStepLog = workoutStepLogArr.find(log => log.status === "planned
 										<%= step.step_order <= 9 ? `0${step.step_order}` : step.step_order %>
 									</span>
 									<p class="step-name">
-										<%= step.name.toUpperCase() %>
+										<%= `${step.name.toUpperCase()}(${step.exercise_variant_name})` %>
 									</p>
 								</div>
 							</li>

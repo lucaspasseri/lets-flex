@@ -12,7 +12,13 @@ async function insertWorkoutSession(
 
 async function getWorkoutSessionById(db, { workoutSessionId }) {
 	const { rows } = await db.query(
-		"SELECT * FROM workout_sessions WHERE id = $1",
+		`
+		SELECT workoutSessions.*, sessionsTemplate.name, sessionsTemplate.notes AS session_notes
+		FROM workout_sessions AS workoutSessions
+		JOIN sessions AS sessionsTemplate
+		ON workoutSessions.session_id = sessionsTemplate.id
+		WHERE workoutSessions.id = $1
+		`,
 		[workoutSessionId],
 	);
 
@@ -22,11 +28,11 @@ async function getWorkoutSessionById(db, { workoutSessionId }) {
 
 	return rows[0];
 }
-// "SELECT * FROM workout_sessions WHERE training_day_id = $1"
+
 async function getWorkoutSessionByTrainingDayId(db, { trainingDayId }) {
 	const { rows } = await db.query(
 		`
-		SELECT workoutSessions.*, sessionsTemplate.name, sessionsTemplate.notes
+		SELECT workoutSessions.*, sessionsTemplate.name, sessionsTemplate.notes AS session_notes
 		FROM workout_sessions AS workoutSessions
 		JOIN sessions AS sessionsTemplate
 		ON workoutSessions.session_id = sessionsTemplate.id

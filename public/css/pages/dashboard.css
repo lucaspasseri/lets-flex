@@ -357,6 +357,7 @@
 	flex: 1;
 	background-color: var(--color-header);
 	border-radius: 6px;
+	border: 1px solid yellowgreen;
 }
 
 .sessions-section.no-session {

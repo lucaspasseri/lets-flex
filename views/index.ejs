@@ -164,9 +164,9 @@ const workoutSessionArrByDay = filterWorkoutSessionByDay(workoutSessionArr, acti
 				<div class="sessions-container">
 					<div class="change-active-session-container">
 						<ul>
-							<% workoutSessionArrByDay.forEach(session => { %>
+							<% workoutSessionArrByDay.forEach(wSession => { %>
 								<li>
-									<a href="<%= `/?daysDifference=${daysDifference}&sessionId=${session.id}` %>"></a>
+									<a href="<%= `/?daysDifference=${daysDifference}&workoutSessionId=${wSession.id}` %>"></a>
 								</li>
 							<% }) %>
 						</ul>
