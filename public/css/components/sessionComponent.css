@@ -7,7 +7,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1em;
-	border: 1px solid red;
 }
 
 .session-component .no-workout-session-container {

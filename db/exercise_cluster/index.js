@@ -4,7 +4,7 @@ async function addNewExerciseCluster(
 	name,
 	movementPatternId,
 	equipmentId,
-	muscleGroup,
+	muscleGroup = [],
 ) {
 	const client = await pool.connect();
 	try {

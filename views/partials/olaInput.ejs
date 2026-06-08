@@ -9,13 +9,15 @@
 	const step = data?.step ? data.step : "";
 %>
 
-<div class="input-control">
-  <input id="<%= inputId %>" placeholder=" " type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
-		min="<%= min %>" max="<%= max %>" step="<%= step %>"
-	/>
-  <label for="<%= inputId %>">
-    <% labelArr.forEach((letter, index) => { %>
-      <span style="--delay: <%= index * 50 %>ms;"><%= letter %></span>
-    <% }) %>
-  </label>
+<div class="field">
+	<div class="input-control">
+		<input id="<%= inputId %>" placeholder=" " type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
+			min="<%= min %>" max="<%= max %>" step="<%= step %>"
+		/>
+		<label for="<%= inputId %>">
+			<% labelArr.forEach((letter, index) => { %>
+				<span style="--delay: <%= index * 50 %>ms;"><%= letter %></span>
+			<% }) %>
+		</label>
+	</div>
 </div>

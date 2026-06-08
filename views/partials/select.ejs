@@ -9,16 +9,18 @@ const getOptionLabel = data?.getOptionLabel || ((option) => option.name ?? optio
 const getOptionValue = data?.getOptionValue || ((option) => option.id ?? option);
 %>
 
-<div class="select">
-	<label for="<%= id %>"><%= label %></label>
+<div class="field">
+	<div class="select">
+		<select id="<%= id %>" name="<%= name %>" <%= required %> <%= disabled %>>
+			<option value="" selected hidden>Select an option...</option>
 
-	<select id="<%= id %>" name="<%= name %>" <%= required %> <%= disabled %> >
-		<option value="" selected hidden>Select an option...</option>
+			<% optionsArr.forEach(option => { %>
+				<option value="<%= getOptionValue(option) %>">
+					<%= getOptionLabel(option) %>
+				</option>
+			<% }); %>
+		</select>
 
-		<% optionsArr.forEach(option => { %>
-			<option value="<%= getOptionValue(option) %>">
-				<%= getOptionLabel(option) %>
-			</option>
-		<% }); %>
-	</select>
+		<label for="<%= id %>"><%= label %></label>
+	</div>
 </div>

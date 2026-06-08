@@ -1,6 +1,6 @@
 .input-control {
 	position: relative;
-	width: fit-content;
+	width: 100%;
 }
 
 .input-control input {
@@ -8,10 +8,11 @@
 	border: 0;
 	border-bottom: 2px var(--color-text) solid;
 	display: block;
-	/* width: 100%; */
-	padding: 15px 0;
+	width: 100%;
+	padding: 20px 0 6px;
 	font-size: 18px;
 	color: var(--color-text);
+	height: 60px;
 }
 
 .input-control input:focus {
@@ -21,7 +22,7 @@
 
 .input-control label {
 	position: absolute;
-	top: 15px;
+	top: 1.5em;
 	left: 0;
 	pointer-events: none;
 }
@@ -39,7 +40,7 @@
 }
 
 .input-control input:not(:placeholder-shown) + label span {
-	transform: translateY(-30px);
+	transform: translateY(-25px);
 }
 
 .input-control input:-webkit-autofill + label span {
@@ -48,4 +49,22 @@
 
 .input-control label span {
 	transition-delay: var(--delay);
+}
+
+.field {
+	position: relative;
+	width: 100%;
+	color: var(--color-text);
+}
+
+.field input {
+	background-color: transparent;
+	border: 0;
+	border-bottom: 2px var(--color-text) solid;
+	display: block;
+	width: 100%;
+	padding: 20px 0 6px;
+	font-size: 18px;
+	color: var(--color-text);
+	height: 60px;
 }

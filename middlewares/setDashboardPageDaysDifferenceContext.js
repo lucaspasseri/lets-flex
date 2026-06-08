@@ -4,8 +4,6 @@ import * as sessionsDb from "../db/sessions/index.js";
 const setDashboardPageDaysDifferenceContext = async (req, res, next) => {
 	let daysDifference = res.locals.dashboardPageParams?.daysDifference ?? null;
 
-	console.log({ daysDifference });
-
 	res.locals.sessionState = {
 		...res.locals.sessionState,
 		daysDifference,

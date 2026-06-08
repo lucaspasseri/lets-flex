@@ -1,3 +1,10 @@
+.main.library {
+	h2 {
+		font-size: 1.1em;
+		color: var(--color-text);
+	}
+}
+
 .main.library .main-header {
 	margin: 2em var(--horizontal-margin) 0;
 	display: grid;
@@ -83,11 +90,6 @@
 	display: flex;
 	justify-content: space-between;
 
-	h2 {
-		font-size: 1.2em;
-		color: var(--color-text);
-	}
-
 	p {
 		font-size: 0.9em;
 		color: var(--color-stitch);
@@ -154,7 +156,6 @@
 .main.library .active-session-template-container {
 	margin: 1em var(--horizontal-margin);
 	height: 20px;
-	border: 1px solid red;
 }
 
 .main.library .exercise-variants-container {
@@ -162,6 +163,11 @@
 		margin: 0 var(--horizontal-margin);
 		display: flex;
 		justify-content: space-between;
+
+		p {
+			font-size: 0.9em;
+			color: var(--color-stitch);
+		}
 	}
 
 	> .list-container {

@@ -8,21 +8,24 @@ const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 <form class="forms" action="/exercise_cluster" method="POST">
 	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
 	<%- include("select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
-	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id  } }); %>
+	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id, required: true  } }); %>
 	<%- include("select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
-	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id  } }); %>
-
-	<div>
+	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id, required: true  } }); %>
+		<p>Muscle section</p>
+	<div class="muscle-section">
+		
 		<%- include("select", { data: { id: "muscleIdSelect", label: "Performing muscle",
 		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => muscle.id } }); %>	
 
 		<%- include("select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
 		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => muscle_role.id } }); %>	
 
-		<button type="button" id="addMusclePerformingRoleButton" >Add to the performing muscle list</button>
+		<%- include('simpleButton', { data: { text: "Add muscle", type: "button", id: "addMusclePerformingRoleButton" } }); %>
 	</div>
 
-	<ul id="musclePerformingList"></ul>
+	<ul id="musclePerformingList">
+		<p id="musclePerformingListMessage">No muscle relation found</p>
+	</ul>
 
 	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
@@ -33,6 +36,7 @@ const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 
 	const muscleSelect = document.getElementById("muscleIdSelect");
 	const muscleRoleSelect = document.getElementById("muscleRoleIdSelect");
+	const muscleMessage = document.getElementById("musclePerformingListMessage");
 
 	addButton.addEventListener("click", () => {
 		const index = Array.from(list.querySelectorAll("li")).length;
@@ -45,10 +49,15 @@ const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 
 		if (!muscleId || !muscleRoleId) return;
 
+
+
 		const item = document.createElement("li");
+		item.className="musclePerformingListItem"
+
+		muscleMessage.textContent= `${index + 1} muscle relation(s) added`
 
 		const summary = document.createElement("p");
-		summary.textContent = `${muscleName} — ${muscleRoleName}`;
+		summary.textContent = `${muscleName} (${muscleRoleName})`;
 
 		const muscleInput = document.createElement("input");
 		muscleInput.type = "hidden";
@@ -62,8 +71,13 @@ const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
 
 		const removeButton = document.createElement("button");
 		removeButton.type = "button";
-		removeButton.textContent = "Remove";
-		removeButton.addEventListener("click", () => item.remove());
+		removeButton.textContent = "X";
+		removeButton.className="simple-button";
+		removeButton.addEventListener("click", () => {
+			item.remove();
+			const listSize = Array.from(list.querySelectorAll("li")).length;
+			muscleMessage.textContent= listSize === 0 ? "No muscle relation found":`${Array.from(list.querySelectorAll("li")).length} muscle relation(s) added`;
+		});
 
 		item.append(summary, muscleInput, roleInput, removeButton);
 		list.appendChild(item);

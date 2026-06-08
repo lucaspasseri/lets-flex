@@ -1,3 +1,6 @@
-<% const text = data?.text || "Button"; const type = data?.type || "button"; %>
+<% const text = data?.text || "Button"; const type = data?.type || "button";
+const id = data?.id || ""; %>
 
-<button class="simple-button"><%= text %></button>
+<button id="<%= id %>" class="simple-button" type="<%= type %>">
+	<%= text %>
+</button>
