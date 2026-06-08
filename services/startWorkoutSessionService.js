@@ -17,8 +17,6 @@ async function startWorkoutSessionService(pool, { workoutSessionId }) {
 				workoutSessionId,
 			}));
 
-		console.log({ workoutSession });
-
 		if (!workoutSession) {
 			throw new Error("Workout session not found");
 		}

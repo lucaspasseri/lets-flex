@@ -5,7 +5,9 @@ const setDashboardPageWorkoutSessionContext = async (req, res, next) => {
 	const { workoutSessionId } = res.locals.dashboardPageParams;
 	const { workoutSessionArrByTrainingDay } = res.locals.data;
 
-	console.log({ workoutSessionId, workoutSessionArrByTrainingDay });
+	const currentWorkoutSession = workoutSessionId
+		? await workoutSessionsDb.getWorkoutSessionById(pool, { workoutSessionId })
+		: null;
 
 	if (workoutSessionId === null) {
 		const currentWorkoutSession = workoutSessionArrByTrainingDay?.[0] ?? null;
@@ -16,11 +18,6 @@ const setDashboardPageWorkoutSessionContext = async (req, res, next) => {
 		next();
 		return;
 	}
-
-	const currentWorkoutSession = await workoutSessionsDb.getWorkoutSessionById(
-		pool,
-		{ workoutSessionId },
-	);
 
 	res.locals.appState.currentWorkoutSession = currentWorkoutSession;
 	res.locals.sessionState.workoutSessionId = currentWorkoutSession?.id ?? null;

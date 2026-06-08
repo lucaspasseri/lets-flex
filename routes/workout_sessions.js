@@ -10,6 +10,6 @@ const router = express.Router();
 
 router.post("/", getSessionState, createWorkoutSession);
 router.post("/:workoutSessionId/start", startWorkoutSession);
-router.post("/:workoutSessionId/finish", getSessionState, finishWorkoutSession);
+router.post("/:workoutSessionId/finish", finishWorkoutSession);
 
 export default router;

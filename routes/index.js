@@ -40,8 +40,7 @@ router.get(
 	loadWorkoutSessionArrByTrainingDayId,
 	setDashboardPageWorkoutSessionContext,
 	loadSessionStepArr,
-	// setActiveWorkoutSession,
-	// loadWorkoutSessionLogArr,
+	loadWorkoutSessionLogArr,
 	renderDashboardPage,
 );
 

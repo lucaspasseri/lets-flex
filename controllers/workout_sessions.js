@@ -20,40 +20,29 @@ async function createWorkoutSession(req, res) {
 
 async function startWorkoutSession(req, res) {
 	const { workoutSessionId } = req.params;
+	const { daysDifference } = req.session.state;
 
-	console.log({ workoutSessionId });
+	const { workoutSession } = workoutSessionId
+		? await startWorkoutSessionService(pool, { workoutSessionId })
+		: null;
 
-	const w =
-		workoutSessionId && startWorkoutSessionService(pool, { workoutSessionId });
-
-	console.log({ w });
-
-	res.redirect("/");
-
-	// const { daysDifference, sessionId, workoutSessionId } =
-	// 	res.locals.sessionState;
-	// const workoutSession =
-	// 	workoutSessionId &&
-	// 	(await workoutSessionsDb.finishWorkoutSession(pool, {
-	// 		workoutSessionId,
-	// 	}));
-	// res.redirect(
-	// 	`/?daysDifference=${daysDifference}&sessionId=${sessionId}&workoutSessionId=${workoutSession.id}`,
-	// );
+	res.redirect(
+		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
+	);
 }
 
 async function finishWorkoutSession(req, res) {
-	const { daysDifference, sessionId, workoutSessionId } =
-		res.locals.sessionState;
+	const { workoutSessionId } = req.params;
+	const { daysDifference } = req.session.state;
 
-	const workoutSession =
-		workoutSessionId &&
-		(await workoutSessionsDb.finishWorkoutSession(pool, {
-			workoutSessionId,
-		}));
+	const workoutSession = workoutSessionId
+		? await workoutSessionsDb.finishWorkoutSession(pool, {
+				workoutSessionId,
+			})
+		: null;
 
 	res.redirect(
-		`/?daysDifference=${daysDifference}&sessionId=${sessionId}&workoutSessionId=${workoutSession.id}`,
+		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession.id}`,
 	);
 }
 
