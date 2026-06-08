@@ -2,16 +2,19 @@ import * as usersDb from "../db/users/index.js";
 import pool from "../db/pool.js";
 
 const setProfilePageContext = async (req, res, next) => {
-	let userId = res.locals.profilePageParams?.userId;
+	const { userId } = res.locals.profilePageParams;
+
+	let currentUser;
 
 	if (userId === null) {
-		next();
-		return;
-	}
+		const { userId: sessionUserId } = res.locals.sessionState;
 
-	const currentUser = userId
-		? await usersDb.getUserById(pool, { userId })
-		: null;
+		currentUser = sessionUserId
+			? await usersDb.getUserById(pool, { userId: sessionUserId })
+			: null;
+	} else {
+		currentUser = userId ? await usersDb.getUserById(pool, { userId }) : null;
+	}
 
 	res.locals.appState = { ...res.locals.appState, currentUser };
 	res.locals.sessionState = {

@@ -1,16 +1,108 @@
 <%
-const currDayId = locals.sessionState?.dayId ?? null;
-const sessionArr = locals.data?.sessionArr ?? [];
-sessionArr.push({session_order: sessionArr.length + 1});
+const currSessionId = locals.sessionState?.sessionId || null;
+const stepTypeArr = locals.data?.stepTypeArr ?? [];
+const exerciseVariantArr = locals.data?.exerciseVariantArr ?? [];
+
+const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb", fullName: "Pounds"}];
 %>
 
-<form class="forms" action="/sessions" method="POST">
+<form class="session-form" action="/sessions" method="POST">
+	<div class="session-fields-container">
+		<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "sessionForm", required: true } }); %>
+		<textarea name="notes" placeholder="Notes" rows="3"></textarea>
+	</div>
+	<div class="session-step-fields-container">
+		<p>Add as many steps as needed</p>
+		<%- include("select", { data: { id: "stepTypeSelect", label: "Step type", name: "stepTypeId", required: true, 
+	options: stepTypeArr, getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id  } }); %>
 
-	<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
-	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "sessionForm", autocomplete: "name", required: true } }); %>
-	<%- include("select", { data: { id: "sessionOrderSelect", label: "Session Order", name: "sessionOrder", required: true, 
-	options: sessionArr, getOptionLabel: (session) => session.session_order, getOptionValue: (session) => session.session_order  } }); %>
+		<%- include("select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
+	options: exerciseVariantArr, getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id  } }); %>
+
+		<%- include('olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "sessionForm" } }); %>
+		<%- include('olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "sessionForm" } }); %>
+
+	
+		<%- include('olaInput', { data: { label: "Load", type: "number", name: "loadValue", context: "sessionForm" } }); %>
+	
+		<%- include("select", { data: { id: "loadUnitSelect", label: "Load unit", name: "loadUnit" ,
+	options: unitArr, getOptionLabel: (unit) => unit.name, getOptionValue: (unit) => unit.fullName  } }); %>
+		<button type="button" id="addStepToCurrentStepList" >Add step</button>
+	</div>
+
+	<div class="current-steps-container">
+		<p class="current-step-list-message">
+			No steps added yet. Please use the form above to add steps to the session.
+		</p>
+
+		<ul id="currentStepList"></ul>
+	</div>
 
 	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 
+<script>
+	const addStepButton = document.getElementById("addStepToCurrentStepList");
+	const stepList = document.getElementById("currentStepList");
+
+	const stepTypeSelect = document.getElementById("stepTypeSelect");
+	const exerciseVariantSelect = document.getElementById("exerciseVariantSelect");
+	const setsInput = document.getElementById("sessionForm_sets");
+	const repsInput = document.getElementById("sessionForm_reps");
+	const loadValueInput = document.getElementById("sessionForm_loadValue");
+	const loadUnitSelect = document.getElementById("loadUnitSelect");
+
+
+	addStepButton.addEventListener("click", () => {
+		const index = Array.from(stepList.querySelectorAll("li")).length;
+		const stepTypeId = stepTypeSelect.value;
+		const stepTypeName = stepTypeSelect.options[stepTypeSelect.selectedIndex].text;
+		const exerciseVariantId = exerciseVariantSelect.value;
+		const exerciseVariantName = exerciseVariantSelect.options[exerciseVariantSelect.selectedIndex].text;
+
+		if (!stepTypeId || !exerciseVariantId) return;
+
+		const item = document.createElement("li");
+
+		const summary = document.createElement("p");
+		summary.textContent = `${stepTypeName} — ${exerciseVariantName}`;
+
+		const stepTypeHiddenInput = document.createElement("input");
+		stepTypeHiddenInput.type = "hidden";
+		stepTypeHiddenInput.name = `stepRow[${index}][stepTypeId]`;
+		stepTypeHiddenInput.value = stepTypeSelect.value;
+
+		const exerciseVariantHiddenInput = document.createElement("input");
+		exerciseVariantHiddenInput.type = "hidden";
+		exerciseVariantHiddenInput.name = `stepRow[${index}][exerciseVariantId]`;
+		exerciseVariantHiddenInput.value = exerciseVariantSelect.value;
+
+		const setsHiddenInput = document.createElement("input");
+		setsHiddenInput.type = "hidden";
+		setsHiddenInput.name = `stepRow[${index}][sets]`;
+		setsHiddenInput.value = setsInput.value;
+
+		const repsHiddenInput = document.createElement("input");
+		repsHiddenInput.type = "hidden";
+		repsHiddenInput.name = `stepRow[${index}][reps]`;
+		repsHiddenInput.value = repsInput.value;
+
+		const loadValueHiddenInput = document.createElement("input");
+		loadValueHiddenInput.type = "hidden";
+		loadValueHiddenInput.name = `stepRow[${index}][loadValue]`;
+		loadValueHiddenInput.value = loadValueInput.value;
+
+		const loadUnitHiddenInput = document.createElement("input");
+		loadUnitHiddenInput.type = "hidden";
+		loadUnitHiddenInput.name = `stepRow[${index}][loadUnit]`;
+		loadUnitHiddenInput.value = loadUnitSelect.value;
+
+		const removeButton = document.createElement("button");
+		removeButton.type = "button";
+		removeButton.textContent = "Remove";
+		removeButton.addEventListener("click", () => item.remove());
+
+		item.append(summary, stepTypeHiddenInput, exerciseVariantHiddenInput, setsHiddenInput, repsHiddenInput, loadValueHiddenInput, loadUnitHiddenInput, removeButton);
+		stepList.appendChild(item);
+	});
+</script>

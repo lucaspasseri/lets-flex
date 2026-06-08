@@ -1,7 +1,10 @@
-async function insertWorkoutSession(db, { sessionId }) {
+async function insertWorkoutSession(
+	db,
+	{ sessionId, trainingDayId, workoutSessionOrder, notes },
+) {
 	const { rows } = await db.query(
-		"INSERT INTO workout_sessions (session_id) VALUES ($1) RETURNING *",
-		[sessionId],
+		"INSERT INTO workout_sessions (session_id, training_day_id, workout_session_order, notes) VALUES ($1, $2, $3, $4) RETURNING *",
+		[sessionId, trainingDayId, workoutSessionOrder, notes],
 	);
 
 	return rows[0];
@@ -9,7 +12,13 @@ async function insertWorkoutSession(db, { sessionId }) {
 
 async function getWorkoutSessionById(db, { workoutSessionId }) {
 	const { rows } = await db.query(
-		"SELECT * FROM workout_sessions WHERE id = $1",
+		`
+		SELECT workoutSessions.*, sessionsTemplate.name, sessionsTemplate.notes AS session_notes
+		FROM workout_sessions AS workoutSessions
+		JOIN sessions AS sessionsTemplate
+		ON workoutSessions.session_id = sessionsTemplate.id
+		WHERE workoutSessions.id = $1
+		`,
 		[workoutSessionId],
 	);
 
@@ -18,6 +27,21 @@ async function getWorkoutSessionById(db, { workoutSessionId }) {
 	}
 
 	return rows[0];
+}
+
+async function getWorkoutSessionByTrainingDayId(db, { trainingDayId }) {
+	const { rows } = await db.query(
+		`
+		SELECT workoutSessions.*, sessionsTemplate.name, sessionsTemplate.notes AS session_notes
+		FROM workout_sessions AS workoutSessions
+		JOIN sessions AS sessionsTemplate
+		ON workoutSessions.session_id = sessionsTemplate.id
+		WHERE training_day_id = $1
+		`,
+		[trainingDayId],
+	);
+
+	return rows;
 }
 
 async function getWorkoutSessionInProgressBySessionId(db, { sessionId }) {
@@ -36,6 +60,23 @@ async function getWorkoutSessionBySessionId(db, { sessionId }) {
 	);
 
 	return rows;
+}
+
+async function startWorkoutSession(db, { workoutSessionId }) {
+	const { rows } = await db.query(
+		`
+		UPDATE workout_sessions
+		SET
+			status = 'in_progress',
+			started_at = NOW()
+		WHERE id = $1
+			AND status = 'planned'
+		RETURNING *
+		`,
+		[workoutSessionId],
+	);
+
+	return rows[0];
 }
 
 async function finishWorkoutSession(db, { workoutSessionId }) {
@@ -58,6 +99,8 @@ export {
 	insertWorkoutSession,
 	getWorkoutSessionById,
 	getWorkoutSessionInProgressBySessionId,
+	startWorkoutSession,
 	finishWorkoutSession,
 	getWorkoutSessionBySessionId,
+	getWorkoutSessionByTrainingDayId,
 };

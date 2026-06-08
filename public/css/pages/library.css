@@ -154,6 +154,7 @@
 .main.library .active-session-template-container {
 	margin: 1em var(--horizontal-margin);
 	height: 20px;
+	border: 1px solid red;
 }
 
 .main.library .exercise-variants-container {

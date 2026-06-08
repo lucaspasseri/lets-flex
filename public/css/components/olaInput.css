@@ -1,6 +1,6 @@
 .input-control {
 	position: relative;
-	width: 190px;
+	width: fit-content;
 }
 
 .input-control input {
@@ -8,7 +8,7 @@
 	border: 0;
 	border-bottom: 2px var(--color-text) solid;
 	display: block;
-	width: 100%;
+	/* width: 100%; */
 	padding: 15px 0;
 	font-size: 18px;
 	color: var(--color-text);

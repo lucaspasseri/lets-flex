@@ -1,8 +1,8 @@
 import pool from "../pool.js";
 import toNullableNumber from "../../utils/toNullableNumber.js";
 
-async function getAllExerciseVariants() {
-	const { rows } = await pool.query(
+async function getAllExerciseVariants(db) {
+	const { rows } = await db.query(
 		`
 	SELECT
 		exercise_variants.*,

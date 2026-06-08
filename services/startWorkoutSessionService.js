@@ -1,45 +1,48 @@
 import pool from "../db/pool.js";
-import toNullableNumber from "../utils/toNullableNumber.js";
-import * as workoutSessionsDb from "../db/workout_sessions/index.js";
-import * as sessionsDb from "../db/sessions/index.js";
-import * as sessionStepsDb from "../db/session_steps/index.js";
-import * as workoutStepLogsDb from "../db/workout_step_logs/index.js";
+import {
+	getWorkoutSessionById,
+	startWorkoutSession,
+} from "../db/workout_sessions/index.js";
+import { insertWorkoutStepLogsFromSessionSteps } from "../db/workout_step_logs/index.js";
 
-async function startWorkoutSessionService({ sessionId }) {
+async function startWorkoutSessionService(pool, { workoutSessionId }) {
 	const client = await pool.connect();
 
 	try {
 		await client.query("BEGIN");
 
-		const session = await sessionsDb.getSessionById(client, { sessionId });
+		const workoutSession =
+			workoutSessionId &&
+			(await getWorkoutSessionById(client, {
+				workoutSessionId,
+			}));
 
-		if (!session) {
-			throw new Error(`Session with ID ${sessionId} was not found`);
+		if (!workoutSession) {
+			throw new Error("Workout session not found");
 		}
 
-		const workoutSession = await workoutSessionsDb.insertWorkoutSession(
+		if (workoutSession.status !== "planned") {
+			throw new Error("Only planned workout sessions can be started");
+		}
+
+		const updatedWorkoutSession = await startWorkoutSession(client, {
+			workoutSessionId,
+		});
+
+		const workoutStepLogs = await insertWorkoutStepLogsFromSessionSteps(
 			client,
 			{
-				sessionId,
+				workoutSessionId,
+				sessionId: updatedWorkoutSession.session_id,
 			},
 		);
 
-		const sessionStepArr = await sessionStepsDb.getSessionStepsBySessionId(
-			client,
-			{ sessionId },
-		);
-
-		const workoutStepLogArr =
-			await workoutStepLogsDb.insertWorkoutStepLogBySessionIdAndWorkoutSessionId(
-				client,
-				{
-					sessionId,
-					workoutSessionId: workoutSession.id,
-				},
-			);
-
 		await client.query("COMMIT");
-		return workoutSession;
+
+		return {
+			workoutSession: updatedWorkoutSession,
+			workoutStepLogs,
+		};
 	} catch (err) {
 		await client.query("ROLLBACK");
 		throw err;
@@ -48,4 +51,4 @@ async function startWorkoutSessionService({ sessionId }) {
 	}
 }
 
-export default startWorkoutSessionService;
+export { startWorkoutSessionService };

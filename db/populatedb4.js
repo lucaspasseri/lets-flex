@@ -63,6 +63,16 @@ CREATE TABLE training_days (
 	UNIQUE (cycle_id, day_order)
 );
 
+CREATE TABLE sessions (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	training_day_id INTEGER NOT NULL REFERENCES training_days(id) ON DELETE CASCADE,
+	name VARCHAR,
+	notes TEXT,
+	session_order INTEGER NOT NULL,
+
+	UNIQUE (training_day_id, session_order)
+);
+
 CREATE TABLE step_types (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	name VARCHAR NOT NULL UNIQUE
@@ -96,12 +106,6 @@ CREATE TABLE exercise_variants (
 	notes TEXT
 );
 
-CREATE TABLE sessions (
-	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	name VARCHAR NOT NULL,
-	notes TEXT
-);
-
 CREATE TABLE session_steps (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
@@ -121,52 +125,33 @@ CREATE TABLE session_steps (
 );
 
 CREATE TYPE workout_session_status AS ENUM (
-	'planned',
 	'in_progress',
-	'finished',
-	'cancelled'
+	'finished'
 );
 
 CREATE TABLE workout_sessions (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 
-	training_day_id INTEGER NOT NULL
-		REFERENCES training_days(id)
-		ON DELETE CASCADE,
+	session_id INTEGER NOT NULL REFERENCES sessions(id) ON DELETE CASCADE,
 
-	session_id INTEGER NOT NULL
-		REFERENCES sessions(id)
-		ON DELETE RESTRICT,
-
-	workout_session_order INTEGER NOT NULL,
-
-	started_at TIMESTAMPTZ,
+	started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	finished_at TIMESTAMPTZ,
 
-	status workout_session_status NOT NULL DEFAULT 'planned',
-
-	notes TEXT,
-
-	UNIQUE (training_day_id, workout_session_order),
+	status workout_session_status NOT NULL DEFAULT 'in_progress',
 
 	CHECK (
-		(status = 'planned' AND started_at IS NULL AND finished_at IS NULL)
+		(status = 'finished' AND finished_at IS NOT NULL)
 		OR
-		(status = 'in_progress' AND started_at IS NOT NULL AND finished_at IS NULL)
-		OR
-		(status = 'finished' AND started_at IS NOT NULL AND finished_at IS NOT NULL)
-		OR
-		(status = 'cancelled')
+		(status = 'in_progress')
 	)
 );
 
-CREATE UNIQUE INDEX one_active_workout_session_per_training_day
-ON workout_sessions (training_day_id)
+CREATE UNIQUE INDEX one_active_workout_session_per_session
+ON workout_sessions (session_id)
 WHERE status = 'in_progress';
 
 CREATE TYPE workout_step_log_status AS ENUM (
 	'planned',
-	'in_progress',
 	'performed',
 	'skipped'
 );
@@ -178,18 +163,13 @@ CREATE TABLE workout_step_logs (
 		REFERENCES workout_sessions(id)
 		ON DELETE CASCADE,
 
-	session_step_id INTEGER
+	session_step_id INTEGER NOT NULL
 		REFERENCES session_steps(id)
-		ON DELETE SET NULL,
+		ON DELETE CASCADE,
 
 	status workout_step_log_status NOT NULL DEFAULT 'planned',
 
-	step_order INTEGER NOT NULL,
-
-	step_type_id INTEGER REFERENCES step_types(id),
-	exercise_variant_id INTEGER REFERENCES exercise_variants(id) ON DELETE SET NULL,
-
-	name VARCHAR,
+	performed_at TIMESTAMPTZ,
 
 	planned_sets INTEGER,
 	planned_reps INTEGER,
@@ -201,12 +181,9 @@ CREATE TABLE workout_step_logs (
 	actual_load_value FLOAT,
 	actual_load_unit VARCHAR,
 
-	started_at TIMESTAMPTZ,
-	performed_at TIMESTAMPTZ,
-
 	notes TEXT,
 
-	UNIQUE (workout_session_id, step_order)
+	UNIQUE (workout_session_id, session_step_id)
 );
 
 CREATE TABLE muscles (
@@ -270,58 +247,78 @@ VALUES
   ('rehabilitation'),
   ('general_fitness');
 
-INSERT INTO muscles (common_name, scientific_name, body_region, reference_url) VALUES
+	INSERT INTO muscles (common_name, scientific_name, body_region, reference_url) VALUES
+	-- Chest
 	('Chest', 'Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
 	('Upper Chest', 'Clavicular Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
 	('Lower Chest', 'Sternal Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
+
+	-- Back
 	('Upper Back', 'Trapezius', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Trapezius'),
 	('Lats', 'Latissimus Dorsi', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Latissimus_dorsi'),
 	('Mid Back', 'Rhomboids', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Rhomboid_muscles'),
 	('Lower Back', 'Erector Spinae', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Erector_spinae'),
+
+	-- Shoulders
 	('Front Delts', 'Anterior Deltoid', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
 	('Side Delts', 'Lateral Deltoid', 'Upper Body - Lateral', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
 	('Rear Delts', 'Posterior Deltoid', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
+
+	-- Arms
 	('Biceps', 'Biceps Brachii', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Biceps'),
 	('Triceps', 'Triceps Brachii', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Triceps'),
 	('Forearms', 'Forearm Flexors and Extensors', 'Upper Body - Distal', 'https://en.wikipedia.org/wiki/Forearm'),
+
+	-- Core
 	('Abs', 'Rectus Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Rectus_abdominis'),
 	('Obliques', 'External Obliques', 'Core - Lateral', 'https://en.wikipedia.org/wiki/Abdominal_oblique_muscles'),
 	('Deep Core', 'Transverse Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Transverse_abdominal_muscle'),
+
+	-- Glutes
 	('Glutes', 'Gluteus Maximus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gluteus_maximus'),
 	('Glute Med', 'Gluteus Medius', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Gluteus_medius'),
+
+	-- Legs
 	('Quads', 'Quadriceps', 'Lower Body - Anterior', 'https://en.wikipedia.org/wiki/Quadriceps'),
 	('Hamstrings', 'Hamstrings', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Hamstring'),
 	('Adductors', 'Hip Adductors', 'Lower Body - Medial', 'https://en.wikipedia.org/wiki/Adductor_muscles_of_the_hip'),
 	('Abductors', 'Hip Abductors', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Hip_abductor'),
+
+	-- Calves
 	('Calves', 'Gastrocnemius', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gastrocnemius'),
 	('Soleus', 'Soleus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Soleus');
 
-INSERT INTO equipments (name, category) VALUES
+	INSERT INTO equipments (name, category) VALUES
   ('Barbell', 'free_weight'),
   ('Dumbbell', 'free_weight'),
   ('Kettlebell', 'free_weight'),
+
   ('Smith Machine', 'machine'),
   ('Cable Machine', 'machine'),
   ('Leg Press Machine', 'machine'),
   ('Chest Press Machine', 'machine'),
   ('Lat Pulldown Machine', 'machine'),
+
   ('Pull-up Bar', 'bodyweight'),
   ('Dip Bar', 'bodyweight'),
+
   ('Resistance Band', 'accessory'),
   ('Suspension Trainer (TRX)', 'accessory'),
   ('Ab Wheel', 'accessory'),
   ('Medicine Ball', 'accessory'),
+
   ('Treadmill', 'cardio'),
   ('Stationary Bike', 'cardio'),
   ('Elliptical Trainer', 'cardio'),
   ('Rowing Machine', 'cardio'),
+
   ('Flat Bench', 'support'),
   ('Incline Bench', 'support'),
   ('Decline Bench', 'support'),
   ('Squat Rack', 'support'),
   ('Power Rack', 'support');
 
-INSERT INTO "muscle_roles" ("name", "description") VALUES
+	INSERT INTO "muscle_roles" ("name", "description") VALUES
   ('prime_mover', 'Primary muscle responsible for producing the movement (agonist)'),
   ('synergist', 'Assists the prime mover in performing the movement'),
   ('stabilizer', 'Stabilizes a joint or body segment during movement'),

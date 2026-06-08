@@ -1,7 +1,5 @@
-import pool from "../pool.js";
-
-async function getAllMuscles() {
-	const { rows } = await pool.query("SELECT * FROM muscles");
+async function getAllMuscles(db) {
+	const { rows } = await db.query("SELECT * FROM muscles");
 	return rows;
 }
 

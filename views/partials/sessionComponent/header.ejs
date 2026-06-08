@@ -1,30 +1,24 @@
 <%
-const currSession = locals.appState?.currentSession ?? null;
-const sessionStepArr = locals.data?.sessionStepArr ?? [];
-const workoutStepLogArr = locals.data?.workoutStepLogArr ?? [];
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage  ?? 0;
-
-const doesTheSessionHaveSteps = sessionStepArr.length > 0;
-const doesTheWorkoutSessionHaveSteps = workoutStepLogArr.length > 0;
-const isThereAnyWorkoutStepLogPlanned = workoutStepLogArr.some(log => log.status === "planned");
 %>
 
 <div class="session-header">
 	<div class="session-header-text">	
-		<p>CURRENT SESSION</p>
+		<p>CURRENT WORKOUT SESSION</p>
 		<h3>
 			<%= 
-				currSession?.name
+				currWorkoutSession?.name
 			%>
 		</h3>
 	</div>
-	<% if(doesTheWorkoutSessionHaveSteps && isThereAnyWorkoutStepLogPlanned) { %>
+	<% if(currWorkoutSession?.status === "in_progress") { %>
 		<div class="complete-indicator-container">
 			<span>
 				<%= `${Math.round(workoutSessionPerformedPercentage)}%` %> COMPLETE
 			</span>
 		</div>
-	<% } else if(doesTheWorkoutSessionHaveSteps) { %>
+	<% } else if(currWorkoutSession?.status === "finished") { %>
 		<div class="complete-indicator-container">
 			<span>
 				SESSION FINISHED

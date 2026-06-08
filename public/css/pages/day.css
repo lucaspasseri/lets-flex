@@ -19,6 +19,16 @@
 	}
 }
 
+.main.day .link-training-day-with-session-container {
+	border: 1px solid red;
+	margin: 2em var(--horizontal-margin) 0;
+}
+
+.main.day .workout-session-list-container {
+	border: 1px solid blue;
+	margin: 2em var(--horizontal-margin) 0;
+}
+
 .current-day-container {
 	text-align: center;
 	margin: 0 var(--horizontal-margin);

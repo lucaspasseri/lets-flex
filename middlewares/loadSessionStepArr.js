@@ -1,13 +1,11 @@
-import * as sessionStepsDb from "../db/session_steps/index.js";
 import pool from "../db/pool.js";
+import getSessionStepsByWorkoutSessionId from "../services/getSessionStepsByWorkoutSessionId.js";
 
 const loadSessionStepArr = async (req, res, next) => {
-	const { currentSession } = res.locals.appState;
+	const { workoutSessionId } = res.locals.sessionState;
 
-	const sessionStepArr = currentSession?.id
-		? await sessionStepsDb.getSessionStepsBySessionId(pool, {
-				sessionId: currentSession.id,
-			})
+	const sessionStepArr = workoutSessionId
+		? await getSessionStepsByWorkoutSessionId(pool, { workoutSessionId })
 		: [];
 
 	res.locals.data = {

@@ -1,6 +1,9 @@
 function toNullableNumber(value) {
-	if (value === undefined || value === null || value === "") return null;
-	return Number(value);
+	if (value == null || value === "") return null;
+
+	const parsed = Number(value);
+
+	return Number.isNaN(parsed) ? null : parsed;
 }
 
 export default toNullableNumber;

@@ -1,7 +1,10 @@
 <% 
 const exerciseArr = locals.data?.exerciseVariantArr ?? []; 
 const createExerciseModalId = "createExerciseModal"; 
-const sessionArr = [{id: 1, name: "Session 1"}, {id: 2, name: "Session 2"}, {id: 3, name: "Session 3"}, {id: 4, name: "Session 4"}, {id: 5, name: "Session 5"}, {id: 6, name: "Session 6"}, {id: 7, name: "Session 7"}, {id: 8, name: "Session 8"}, {id: 9, name: "Session 9"}];
+const sessionArr = locals.data?.sessionArr ?? [];
+
+const createSessionModalId = "createSessionModal";
+
 const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 		if(index %2 === 0) {
 			acc.push([session]);
@@ -11,14 +14,12 @@ const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 		return acc;
 	}, []);
 
-console.log(exerciseArr);
-
 const renderContent = (content) => {
 	return `
 	<div class="session-step-accordion-content">
 		<p><strong>Name:</strong> ${content.name}</p>
 		<p><strong>Movement pattern:</strong> ${content.movement_pattern_name}</p>
-		<p><strong>Equipment name:</strong> ${content.equipment_name}</p>
+		<p><strong>Equipment name:</strong> ${content.equipment_name}</p>			
 		<p><strong>Setup description:</strong> ${content.setup_description}</p>
 		<p><strong>Environment:</strong> ${content.environment}</p>
 		<p><strong>Notes:</strong> ${content.notes}</p>
@@ -34,7 +35,8 @@ const renderContent = (content) => {
 			<h1>Library</h1>
 		</div>
 		<div class="button-container">
-			<button type="button">+</button>
+			<button type="button"  data-modal-open="<%= createSessionModalId %>">+</button>
+			
 		</div>
 	</div>
 
@@ -54,7 +56,7 @@ const renderContent = (content) => {
 	<div class="session-template-container">
 		<div class="header">
 			<h2>Session Templates</h2>
-			<p><%=`${1+2} TOTAL` %></p>
+			<p><%=`${sessionArr.length} TOTAL` %></p>
 		</div>
 		<div class="list-container">
 			<ul>
@@ -120,7 +122,7 @@ const renderContent = (content) => {
 	<div class="exercise-variants-container">
 		<div class="header">
 			<h2>Exercise Templates</h2>
-			<p><%=`${2+2} TOTAL` %></p>
+			<p><%=`${exerciseArr.length} TOTAL` %></p>
 		</div>
 		<div class="list-container">
 			<ul>
@@ -133,6 +135,15 @@ const renderContent = (content) => {
 </main>
 
 <%- contentFor("overlays") %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: createSessionModalId,
+		title: "Create session",
+		description: "Fill in the session information below.",
+		renderContent: () => include("partials/sessionForm")
+	}
+}) %>
 
 <%- include("partials/basicModal", {
 	modal: {

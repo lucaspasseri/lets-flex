@@ -1,85 +1,199 @@
-<% 
-	const userArr = data?.userArr; 
-	const programArr = data?.programArr; 
-	const cycleArr = data?.cycleArr;
-	const sessionArr = data?.sessionArr;
-	const sessionStepArr = data?.sessionStepArr;
-	const stepTypeArr = data?.stepTypeArr;
-	const exerciseArr = data?.exerciseArr;
-	const movementPatternArr = data?.movementPatternArr;
-	const exerciseMuscleArr = data?.exerciseMuscleArr;
-	const muscleArr = data?.muscleArr;
-	const equipmentArr = data?.equipmentArr;
-	const exerciseVariantArr = data?.exerciseVariantArr;
+<%
+const currUrl = locals.page?.url ?? "";
+const currPath = locals.page?.path ?? "";
+const {addDays, formatDate, isSameDay} = locals.helpers;
+
+const currUserId = locals.sessionState?.userId ?? null;
+const currProgramId = locals.sessionState?.programId ?? null;
+const daysDifference = locals.sessionState?.daysDifference ?? null;
+const workoutSessionId = locals.sessionState?.workoutSessionId ?? null;
+
+const currDay = new Date();
+const activeDay = locals.sessionState?.activeDay ?? currDay;
+
+const workoutSessionArrByProgram = locals.data?.workoutSessionArr ?? [];
+const workoutSessionArrByDay = workoutSessionArrByProgram;
+
+const currProgram = locals.appState?.currentProgram ?? {};
+const currTrainingDay = locals.appState?.currentTrainingDay ?? {};
+
+
+const cycleArr = locals.data?.cycleArr ?? [];
+const sessionArr = locals.data?.sessionArr ?? [];
+const sessionStepArr = locals.data?.sessionStepArr ?? [];
+
+const workoutSessionInProgressArr = locals.data?.workoutSessionInProgressArr ?? [];
+
+const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
+
+const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
+
+const filterSessionsByDay = (sessionArr, day) => {
+	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
+}
 %>
 
-<!doctype html>
-<html lang="en">
-	<%- include('partials/head'); %>
-	<body>
 
+<main class="main dashboard">
+	<% if (!currProgramId) { %>
+		<div class="main-header" >
+			<p>OPERATIONAL STATUS</p>
+			<h1>LETS'S FLEX</h1>
+		</div>
+	<% } %>
+
+	<% if (!currProgramId) { %>
+		<div class="sync-status">
+			<div class="title-container">
+				<p class="title">TEMPORAL SYNC</p>
+				<p><%= formattedActiveDay %></p>
+			</div>
+			<div class="current-week-container">
+				<ul>
+					<% currWeek.forEach((day,index) => { %>
+						<li class="week-day-item <%= index === 3 ? 'active' : '' %>">
+							<span><%= formatDate(day, "EEE").toUpperCase() %></span> 
+							<span><%= formatDate(day, "dd") %></span> 
+						</li>
+					<% }) %>
+				</ul>
+			</div>
+		</div>
+	<% } %>
+
+	<% if (!currUserId) { %>
+		<div class="no-active-user-container">
+			<div class="content">
+				<div class="image-container">
+					<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
+				</div>
+				<h2>NO ACTIVE USER</h2>
+				<p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p>
+				<a href="/profile">
+					<svg class="icon">
+						<use href="../plus.svg"></use>
+					</svg>
+					<p>CREATE YOUR USER PROFILE</p>
+				</a>
+			</div>
+		</div>
+	<% } %>
+
+	<% if (!currProgramId) { %>
+		<div class="no-active-program-container">
+			<div class="content">
+				<div class="image-container">
+					<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
+				</div>
+				<h2>NO ACTIVE PROGRAM</h2>
+				<p>Your training architecture starts here. Build a custom program or choose from a professional template to begin your progression.</p>
+				<a href="/programs">
+					<svg class="icon">
+						<use href="../plus.svg"></use>
+					</svg>
+					<p>CREATE YOUR FIRST PROGRAM</p>
+				</a>
+			</div>
+		</div>
+	<% } %>
+
+	<% if (currProgramId) { %>
+		<div class="active-program-container">
+			<p>CURRENT PROGRAM</p>
+			<h1><%= currProgram.name %></h1>
+		</div>
+	<% } %>
+
+	<% if (currProgramId) { %>
+		<div class="date-section">
+
+			<% if (cycleArr.length > 0) { %>
+				<div class="cycle-list-container">
+					<ul>
+						<% cycleArr.forEach(cycle => { %>
+							<li class="cycle-list-item <%= cycle.id === currTrainingDay.cycle_id ? 'active' : ''  %>">
+								<span>
+									<%= cycle.name.substring(0,2) %>
+								</span>
+							</li>
+						<% }) %>
+					</ul>
+				</div>
+			<% } %>
+			
+			<div class="current-day-container">
+				<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><</a>
+				<div class="current-day">
+					<span><%= formatDate(activeDay, "dd / MM") %></span>
+					<span><%= formatDate(activeDay, "EEEE").toUpperCase() %></span>
+				</div>
+				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" >></a>
+			</div>
+
+			<% if (sessionArr.length > 0) { %>
+				<div class="training-day-list-container">
+					<ul>
+						<% currWeek.forEach( (day, index) => { %>
+							<li class="<%= index === 3 ? 'active' : '' %>">
+								<span><%= formatDate(day, "EEE") %></span>
+								<div class="week-day <%= index === 3 ? 'active' : '' %>">
+									<% const filteredSessionArr = filterSessionsByDay(sessionArr, day); %>
+									<% if(filteredSessionArr.length === 0) { %>
+										<p>REST</p>
+
+									<% } else if(filteredSessionArr.length === 1) { %>
+										<p>
+											<%= filteredSessionArr[0].session_name.substring(0,4) %>
+										</p>
+
+									<% } else { %>
+										<div class="multiple-session-container">
+											<p>
+												<%= filteredSessionArr[0].session_name.substring(0,4) %>
+											</p>
+											<% if(filteredSessionArr.length > 1) { %>
+												<div class="additional-session-indicator">
+													<% filteredSessionArr.forEach((session, index) => { %>
+														<div class="additional-indication"></div>
+													<% }) %>
+												</div>
+											<% } %>
+										</div>
+									<% } %>
+								</div>
+							</li>
+						<% }) %>
+					</ul>
+				</div>
+			<% } %>
+		</div>
+	<% } %>
 	
-			<div class="crud-container"	>
-				<h1>Users</h1>
-				<div>
-					<%- include('partials/userForm'); %>
-					<%- include('partials/listFromArray', { data: { list: userArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
-				</div>
-			</div>
-			<div class="crud-container">
-				<h1>Programs</h1>
-				<div>
-					<%- include('partials/programForm'); %>
-					<%- include('partials/listFromArray', { data: { list: programArr, listItem: (item) => `<li>${item.user_name} + ${item.goal_name} -> ${item.name}</li>` } }); %>
-				</div>
-			</div>
+	<% if(currProgramId) { %>
+		<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? "no-session" : "" %>">
+			<% if (workoutSessionArrByDay.length === 0) { %>
+				<h2> ( RESTING / NO-SESSION DAY )</h2>
 
-			<div class="crud-container">
-				<h1><Cap></Cap>Cycles</h1>
-				<div>
-					<%- include('partials/cycleForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: cycleArr, listItem: (item) => `<li>${item.program_name} - ${item.cycle_name} (${item.cycle_order})</li>` } }); %>
+			<% } else if (workoutSessionArrByDay.length === 1) { %>
+				<div class="sessions-container">
+						<%- include('partials/sessionComponent/main' ); %>
 				</div>
-			</div>
 
-			<div class="crud-container">
-				<h1>Sessions</h1>
-				<div>
-					<%- include('partials/sessionForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: sessionArr, listItem: (item) => `<li>${item.cycle_name} - ${item.session_name} (${item.session_order})</li>` } }); %>
-				</div>
-			</div>
+			<% } else { %>
+				<div class="sessions-container">
+					<div class="change-active-session-container">
+						<ul>
+							<% workoutSessionArrByDay.forEach(session => { %>
+								<li>
+									<a href="<%= `/?daysDifference=${daysDifference}&sessionId=${session.id}` %>"></a>
+								</li>
+							<% }) %>
+						</ul>
+					</div>
 
-			<div class="crud-container">
-				<h1>Sessions steps</h1>
-				<div>
-					<%- include('partials/sessionStepForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: sessionStepArr, listItem: (item) => `<li>${item.session_name} - ${item.name} - ${item.step_type_name} - ${item.exercise_variant_name} (${item.step_order})</li>` } }); %>
+					<%- include('partials/sessionComponent/main' ); %>
 				</div>
-			</div>
-
-			<div class="crud-container">
-				<h1>Exercises</h1>
-				<div>
-					<%- include('partials/exerciseForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: exerciseArr, listItem: (item) => `<li>${item.name}</li>` } }); %>
-				</div>
-			</div>
-
-			<div class="crud-container">
-				<h1>Exercise Muscles</h1>
-				<div>
-					<%- include('partials/exerciseMusclesForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: exerciseMuscleArr, listItem: (item) => `<li>${item.exercise_name} - ${item.muscle_common_name} (${item.role})</li>` } }); %>
-				</div>
-			</div>
-
-			<div class="crud-container">
-				<h1>Exercise variants</h1>
-				<div>
-					<%- include('partials/exerciseVariantsForm' ); %>
-					<%- include('partials/listFromArray', { data: { list: exerciseVariantArr, listItem: (item) => `<li>${item.name} (${item.exercise_name} - ${item.equipment_name})</li>` } }); %>
-				</div>
-			</div>
-	</body>
-</html>
+			<% } %>
+		</div>
+	<% } %>
+</main>

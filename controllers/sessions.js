@@ -1,4 +1,6 @@
 import * as sessionsDb from "../db/sessions/index.js";
+import pool from "../db/pool.js";
+import { addSessionAndItsSteps } from "../services/addSectionAndItsSteps.js";
 
 async function getSessionByTrainingDayId(req, res) {
 	const { dayId } = req.params;
@@ -8,15 +10,11 @@ async function getSessionByTrainingDayId(req, res) {
 }
 
 async function addNewSession(req, res) {
-	const { name = "", trainingDayId, sessionOrder } = req.body;
+	const { name, notes, stepRow: stepRowArr } = req.body;
 
-	const session = await sessionsDb.postNewSession(
-		name,
-		trainingDayId,
-		sessionOrder,
-	);
+	await addSessionAndItsSteps(name, notes, stepRowArr);
 
-	res.redirect(`/programs/day?dayId=${trainingDayId}&sessionId=${session.id}`);
+	res.redirect("/library");
 }
 
 export { getSessionByTrainingDayId, addNewSession };

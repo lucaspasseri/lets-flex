@@ -1,12 +1,9 @@
-const getDashboardPageParams = async (req, res, next) => {
+import toNullableNumber from "../utils/toNullableNumber.js";
+
+const getDashboardPageParams = (req, res, next) => {
 	res.locals.dashboardPageParams = {
-		daysDifference: req.query?.daysDifference
-			? Number(req.query.daysDifference)
-			: null,
-		sessionId: req.query?.sessionId ? Number(req.query.sessionId) : null,
-		workoutSessionId: req.query?.workoutSessionId
-			? Number(req.query.workoutSessionId)
-			: null,
+		daysDifference: toNullableNumber(req.query.daysDifference) || 0,
+		workoutSessionId: toNullableNumber(req.query.workoutSessionId),
 	};
 
 	next();

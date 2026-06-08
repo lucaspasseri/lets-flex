@@ -1,0 +1,39 @@
+.session-form {
+	/* border: 1px solid var(--color-primary); */
+}
+
+.session-form .session-fields-container {
+	width: 100%;
+
+	textarea {
+		margin-top: 1em;
+		width: 100%;
+		border: 0;
+		background-color: var(--color-surface);
+		color: var(--color-text);
+		border-radius: 4px;
+
+		&:focus {
+			outline: 0;
+		}
+
+		&::placeholder {
+			color: var(--color-text);
+		}
+	}
+
+	.input-control {
+		background-color: var(--color-surface);
+	}
+}
+
+.session-form .session-step-fields-container {
+	border: 1px solid blue;
+	margin-top: 1.6em;
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+	p {
+		color: var(--color-text-muted);
+	}
+}

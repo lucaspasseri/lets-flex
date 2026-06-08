@@ -1,13 +1,15 @@
 import express from "express";
 import {
 	finishWorkoutSession,
+	createWorkoutSession,
 	startWorkoutSession,
 } from "../controllers/workout_sessions.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
 
 const router = express.Router();
 
-router.post("/", getSessionState, startWorkoutSession);
-router.post("/:workoutSessionId/finish", getSessionState, finishWorkoutSession);
+router.post("/", getSessionState, createWorkoutSession);
+router.post("/:workoutSessionId/start", startWorkoutSession);
+router.post("/:workoutSessionId/finish", finishWorkoutSession);
 
 export default router;
