@@ -5,28 +5,38 @@ async function skipWorkoutStep(req, res) {
 	const { daysDifference, workoutSessionId } = res.locals.sessionState;
 	const { workoutStepLogId } = req.params;
 
-	await workoutStepLogsDb.updateWorkoutStepLogStatus(pool, {
-		workoutStepLogId,
-		status: "skipped",
-	});
+	const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
+		pool,
+		{
+			workoutStepLogId,
+			status: "skipped",
+		},
+	);
 
 	res.redirect(
-		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSessionId}`,
+		`/?daysDifference=${daysDifference ?? 0}&workoutSessionId=${workoutStepLog.workout_session_id}`,
 	);
 }
 
-async function performWorkoutStep(req, res) {
-	const { daysDifference, workoutSessionId } = res.locals.sessionState;
-	const { workoutStepLogId } = req.params;
+async function performWorkoutStep(req, res, next) {
+	try {
+		const { daysDifference } = res.locals.sessionState;
+		const { workoutStepLogId } = req.params;
 
-	await workoutStepLogsDb.updateWorkoutStepLogStatus(pool, {
-		workoutStepLogId,
-		status: "performed",
-	});
+		const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
+			pool,
+			{
+				workoutStepLogId,
+				status: "performed",
+			},
+		);
 
-	res.redirect(
-		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSessionId}`,
-	);
+		res.redirect(
+			`/?daysDifference=${daysDifference ?? 0}&workoutSessionId=${workoutStepLog.workout_session_id}`,
+		);
+	} catch (error) {
+		next(error);
+	}
 }
 
 export { skipWorkoutStep, performWorkoutStep };

@@ -1,6 +1,6 @@
 import * as trainingDaysDb from "../db/training_days/index.js";
 import pool from "../db/pool.js";
-import { addDays } from "date-fns";
+import { addDays, format } from "date-fns";
 
 const setTrainingDayByActiveDay = async (_req, res, next) => {
 	const { activeDay, programId } = res.locals.sessionState;
