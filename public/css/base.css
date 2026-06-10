@@ -70,13 +70,9 @@
 
 html,
 body {
-	background-color: var(--color-bg);
-}
-
-html,
-body {
 	height: 100%;
 	overflow: hidden;
+	background-color: var(--color-bg);
 }
 
 ul {
@@ -92,9 +88,16 @@ input:-webkit-autofill:active {
 	caret-color: #fff;
 }
 
+body {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+}
+
 body > .content {
 	flex: 1;
 	min-height: 0;
+	overflow-y: auto;
+	scroll-behavior: smooth;
 }
 
 main {

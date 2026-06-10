@@ -22,7 +22,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		musclesDb.getAllMuscles(pool),
 		muscleRolesDb.getAllMuscleRoles(pool),
 		exerciseVariantsDb.getAllExerciseVariants(pool),
-		sessionsDb.getAllSessions(pool),
+		sessionsDb.getAllSessionsWithExerciseInfo(pool),
 		stepTypesDb.getAllStepTypes(),
 	]);
 

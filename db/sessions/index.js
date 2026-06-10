@@ -13,115 +13,69 @@ async function getAllSessions(db) {
 	return rows;
 }
 
-export { insertSession, getAllSessions };
+async function getAllSessionsWithExerciseInfo(db) {
+	const { rows } = await db.query(
+		`
+		SELECT 
+			se.id,
+			se.name,
+			se.notes,
+			(
+				SELECT COALESCE(
+					json_agg(
+						json_build_object(
+							'id', ss.id,
+							'name', ss.name,
+							'sets', ss.sets,
+							'reps', ss.reps,
+							'load_value', ss.load_value,
+							'load_unit', ss.load_unit,
+							'step_order', ss.step_order,
+							'step_type_name', st.name,
+							'exercise_variant_name', ev.name,
+							'exercise_name', ex.name,
+							'movement_pattern_name', mp.name,
+							'equipment_name', eq.name,
+							'equipment_category', eq.category,
+							'muscles', (
+								SELECT COALESCE(
+									json_agg(
+										json_build_object(
+											'common_name', m.common_name,
+											'scientific_name', m.scientific_name
+										)
+									),
+									'[]'
+								)
+								FROM exercise_muscles AS em
+								JOIN muscles AS m
+									ON em.muscle_id = m.id
+								WHERE em.exercise_id = ex.id
+							)
+						)
+						ORDER BY ss.step_order
+					),
+					'[]'
+				)
+				FROM session_steps AS ss
+				JOIN step_types AS st
+					ON ss.step_type_id = st.id
+				JOIN exercise_variants AS ev
+					ON ss.exercise_variant_id = ev.id
+				JOIN exercises AS ex
+					ON ev.exercise_id = ex.id
+				JOIN movement_patterns AS mp
+					ON ex.movement_pattern_id = mp.id
+				JOIN equipments AS eq
+					ON ev.equipment_id = eq.id
+				WHERE ss.session_id = se.id
+			) AS steps
+		FROM sessions AS se
+		ORDER BY se.id;
+`,
+	);
 
-// async function getSessionById(db, { sessionId }) {
-// 	const { rows: sessions } = await db.query(
-// 		"SELECT * FROM sessions WHERE id = $1",
-// 		[sessionId],
-// 	);
+	return rows;
+}
 
-// 	return sessions?.[0];
-// }
-
-// async function getSessionByTrainingDayId(db, { trainingDayId }) {
-// 	if (trainingDayId === null) return [];
-
-// 	const { rows } = await db.query(
-// 		"SELECT * FROM sessions WHERE training_day_id = $1 ORDER BY session_order",
-// 		[trainingDayId],
-// 	);
-// 	return rows;
-// }
-
-// async function getAllSessionsWithOutIds() {
-// 	const { rows: sessions } = await pool.query(
-// 		"SELECT sessions.id, cycles.name AS cycle_name, sessions.name AS session_name, sessions.session_order AS session_order FROM sessions JOIN cycles ON sessions.cycle_id = cycles.id",
-// 	);
-
-// 	return sessions;
-// }
-// async function insertSession(db, { cycleId, name, sessionOrder }) {
-// 	const { rows } = await db.query(
-// 		"INSERT INTO sessions (name, cycle_id, session_order) VALUES ($1, $2, $3) RETURNING *",
-// 		[name, cycleId, sessionOrder],
-// 	);
-
-// 	return rows[0];
-// }
-
-// async function postNewSession(name, trainingDayId, sessionOrder) {
-// 	const client = await pool.connect();
-
-// 	const numericTrainingDayId = Number(trainingDayId);
-// 	const numericSessionOrder = Number(sessionOrder);
-
-// 	try {
-// 		await client.query("BEGIN");
-
-// 		const { rows: trainingDays } = await client.query(
-// 			"SELECT id FROM training_days WHERE id = $1",
-// 			[numericTrainingDayId],
-// 		);
-
-// 		if (trainingDays.length === 0) {
-// 			throw new Error(
-// 				`Training day with ID ${numericTrainingDayId} was not found`,
-// 			);
-// 		}
-
-// 		const { rows: sessionCountRows } = await client.query(
-// 			"SELECT COUNT(*) FROM sessions WHERE training_day_id = $1",
-// 			[numericTrainingDayId],
-// 		);
-
-// 		const numberOfSessions = Number(sessionCountRows[0].count);
-
-// 		if (
-// 			!Number.isInteger(numericSessionOrder) ||
-// 			numericSessionOrder < 1 ||
-// 			numericSessionOrder > numberOfSessions + 1
-// 		) {
-// 			throw new Error(
-// 				`Session order must be between 1 and ${numberOfSessions + 1}`,
-// 			);
-// 		}
-
-// 		await client.query(
-// 			`
-// 			UPDATE sessions
-// 			SET session_order = session_order + 1
-// 			WHERE training_day_id = $1
-// 			  AND session_order >= $2
-// 			`,
-// 			[numericTrainingDayId, numericSessionOrder],
-// 		);
-
-// 		const { rows } = await client.query(
-// 			`
-// 			INSERT INTO sessions (name, training_day_id, session_order)
-// 			VALUES ($1, $2, $3)
-// 			RETURNING *
-// 			`,
-// 			[name, numericTrainingDayId, numericSessionOrder],
-// 		);
-
-// 		await client.query("COMMIT");
-
-// 		return rows[0];
-// 	} catch (err) {
-// 		await client.query("ROLLBACK");
-// 		throw err;
-// 	} finally {
-// 		client.release();
-// 	}
-// }
-
-// export {
-// 	getSessionById,
-// 	getAllSessions,
-// 	getSessionByTrainingDayId,
-// 	getAllSessionsWithOutIds,
-// 	postNewSession,
-// 	insertSession,
-// };
+export { insertSession, getAllSessions, getAllSessionsWithExerciseInfo };

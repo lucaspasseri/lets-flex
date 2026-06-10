@@ -164,6 +164,7 @@
 		p {
 			color: var(--color-stitch-text);
 			letter-spacing: 0.1em;
+			display: block;
 		}
 	}
 }

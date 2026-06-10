@@ -3,6 +3,10 @@ const exerciseArr = locals.data?.exerciseVariantArr ?? [];
 const createExerciseModalId = "createExerciseModal"; 
 const sessionArr = locals.data?.sessionArr ?? [];
 
+
+
+
+
 const createSessionModalId = "createSessionModal";
 
 const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
@@ -25,6 +29,35 @@ const renderContent = (content) => {
 		<p><strong>Notes:</strong> ${content.notes}</p>
 	</div>
 	`;
+}
+
+const getMuscleListBySession = (session) => {
+	const distinctSessions = new Set();
+
+	session.steps.forEach(step => {
+		step.muscles.forEach(muscle => {
+			distinctSessions.add(muscle.common_name)
+		})
+	});
+
+	const iterator = distinctSessions.values();
+	let output = "";
+	let condition = true;
+	while(condition){
+		const currValue = iterator.next().value;
+		if(currValue === undefined){
+			condition = false;
+			continue;
+		}
+		
+		if(output === ""){
+			output = currValue;
+		} else {
+			output += ` ${currValue}`
+		}
+	}
+
+	return output;
 }
 %>
 
@@ -67,7 +100,7 @@ const renderContent = (content) => {
 								<div class="header">
 								<div>
 										<p class="title"><%= sessionPair[0].name %></p>
-									<p class="subtitle">Lorem ipsum dolor </p>
+									<p class="subtitle"><%= sessionPair[0].notes %></p>
 								</div>
 									<div class="settings">
 											<span>
@@ -80,7 +113,7 @@ const renderContent = (content) => {
 								</div>
 								<div class="body">
 									<div class="status">
-										<p> djsa jd ioasdj oisajd oisajd oisajdajs</p>
+										<p> <%= getMuscleListBySession(sessionPair[0]) %></p>
 									</div>
 								</div>
 							</div>
@@ -92,7 +125,7 @@ const renderContent = (content) => {
 									<div class="header">
 										<div>
 											<p class="title"><%= sessionPair[1].name %></p>
-											<p class="subtitle">Lorem ipsum dolor </p>
+											<p class="subtitle"><%= sessionPair[1].notes %></p>
 										</div>
 										<div class="settings">
 											<span>
@@ -105,7 +138,7 @@ const renderContent = (content) => {
 									</div>
 									<div class="body">
 										<div class="status">
-											<p> djsa jd ioasdj oisajd oisajd oisajdajs</p>
+											<p><%= getMuscleListBySession(sessionPair[1]) %></p>
 										</div>
 									</div>
 								</div>

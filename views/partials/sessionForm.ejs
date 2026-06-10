@@ -6,9 +6,9 @@ const exerciseVariantArr = locals.data?.exerciseVariantArr ?? [];
 const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb", fullName: "Pounds"}];
 %>
 
-<form class="session-form" action="/sessions" method="POST">
+<form class="forms session-form" action="/sessions" method="POST">
 	<div class="session-fields-container">
-		<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "sessionForm", required: true } }); %>
+		<%- include('olaInput', { data: { label: "Session name", type: "text", name: "name", context: "sessionForm", required: true } }); %>
 		<textarea name="notes" placeholder="Notes" rows="3"></textarea>
 	</div>
 	<div class="session-step-fields-container">
@@ -27,7 +27,8 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 	
 		<%- include("select", { data: { id: "loadUnitSelect", label: "Load unit", name: "loadUnit" ,
 	options: unitArr, getOptionLabel: (unit) => unit.name, getOptionValue: (unit) => unit.fullName  } }); %>
-		<button type="button" id="addStepToCurrentStepList" >Add step</button>
+		
+		<%- include('simpleButton', { data: { text: "Add Step", type: "button", id: "addStepToCurrentStepList" } }); %>
 	</div>
 
 	<div class="current-steps-container">

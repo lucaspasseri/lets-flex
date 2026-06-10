@@ -1,5 +1,5 @@
 .main.programs .main-header {
-	margin-top: 2em;
+	margin: 2em 0;
 
 	> h1 {
 		margin: 0 var(--horizontal-margin);

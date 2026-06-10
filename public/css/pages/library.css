@@ -83,10 +83,11 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1.5em;
+	padding: 1em 0;
 }
 
 .main.library .session-template-container > .header {
-	margin: 2em var(--horizontal-margin);
+	margin: 0 var(--horizontal-margin);
 	display: flex;
 	justify-content: space-between;
 
