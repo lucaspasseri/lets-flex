@@ -5,6 +5,26 @@
 	}
 }
 
+.main.library .exercise-variants-container {
+}
+
+.main.library .exercise-variants-container .accordion {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+	border-top-left-radius: 12px;
+	border-top-right-radius: 12px;
+	background-color: var(--color-stitch-secondary);
+}
+
+.main.library .exercise-variants-container .accordion-item {
+	margin-bottom: 0;
+
+	.accordion-header {
+		color: var(--color-text);
+	}
+}
+
 .main.library .main-header {
 	margin: 2em var(--horizontal-margin) 0;
 	display: grid;
@@ -98,12 +118,10 @@
 	}
 }
 
-.main.library .session-template-container .list-container {
-	ul {
-		display: flex;
-		overflow-x: auto;
-		gap: 0.8em;
-	}
+.main.library .session-template-container .list-container > ul {
+	display: flex;
+	overflow-x: auto;
+	gap: 0.8em;
 }
 
 .main.library .session-template-container .paired-session-card {
@@ -177,11 +195,11 @@
 		display: flex;
 		gap: 0.8em;
 		overflow-x: auto;
+	}
 
-		ul {
-			display: flex;
-			gap: 0.8em;
-		}
+	> .list > ul {
+		display: flex;
+		gap: 0.8em;
 	}
 }
 
@@ -192,7 +210,7 @@
 }
 
 .main.library .exercise-variants-container .custom-exercise-button-container {
-	margin: 0 var(--horizontal-margin) 2em;
+	margin: 2em var(--horizontal-margin) 2em;
 
 	button {
 		width: 100%;

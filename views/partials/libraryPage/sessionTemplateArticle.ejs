@@ -35,7 +35,7 @@ const muscleInfo =  getMuscleListBySession(sessionTemplate);
 const searchText = `${sessionTemplate.name} ${sessionTemplate.notes} ${muscleInfo}`
 %>
 
-<article class="session-card" data-search-item data-search-text="<%= searchText %>">
+<article class="session-card" data-search-session-item data-search-text="<%= searchText %>">
 	<div class="header">
 		<div>
 			<p class="title"><%= sessionTemplate.name %></p>

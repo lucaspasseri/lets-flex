@@ -3,35 +3,16 @@ const exerciseArr = locals.data?.exerciseVariantArr ?? [];
 const createExerciseModalId = "createExerciseModal"; 
 const sessionArr = locals.data?.sessionArr ?? [];
 
-
-
-
-
 const createSessionModalId = "createSessionModal";
 
 const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
-		if(index %2 === 0) {
-			acc.push([session]);
-		} else {
-			acc[acc.length - 1].push(session);
-		}
-		return acc;
-	}, []);
-
-const renderContent = (content) => {
-	return `
-	<div class="session-step-accordion-content">
-		<p><strong>Name:</strong> ${content.name}</p>
-		<p><strong>Movement pattern:</strong> ${content.movement_pattern_name}</p>
-		<p><strong>Equipment name:</strong> ${content.equipment_name}</p>			
-		<p><strong>Setup description:</strong> ${content.setup_description}</p>
-		<p><strong>Environment:</strong> ${content.environment}</p>
-		<p><strong>Notes:</strong> ${content.notes}</p>
-	</div>
-	`;
-}
-
-
+	if(index %2 === 0) {
+		acc.push([session]);
+	} else {
+		acc[acc.length - 1].push(session);
+	}
+	return acc;
+}, []);
 %>
 
 <main class="main library">
@@ -62,7 +43,7 @@ const renderContent = (content) => {
 	<div class="session-template-container">
 		<div class="header">
 			<h2>Session Templates</h2>
-			<p id="sessionTemplateArrSize"><%=`${sessionArr.length} TOTAL` %></p>
+			<p id="sessionArrSizeIndication"><%=`${sessionArr.length} TOTAL` %></p>
 		</div>
 		<div class="list-container">
 			<ul>
@@ -87,46 +68,61 @@ const renderContent = (content) => {
 	<div class="exercise-variants-container">
 		<div class="header">
 			<h2>Exercise Templates</h2>
-			<p><%=`${exerciseArr.length} TOTAL` %></p>
+			<p id="exerciseArrSizeIndication"><%=`${exerciseArr.length} TOTAL` %></p>
 		</div>
 		<div class="list-container">
-			<ul>
-				<%- include("partials/accordion", { contentArr: exerciseArr, renderContent: renderContent }) %>
+			<ul class="accordion">
+				<% exerciseArr.forEach(exercise => { %>
+					<li>
+						<%- include("partials/libraryPage/exerciseTemplateArticle", {exerciseTemplate: exercise}) %>
+					</li>
+				<% }) %>
 			</ul>
-	</div>
+		</div>
 	<div class="custom-exercise-button-container">
 		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD NEW</button>
 	</div>
 </main>
 
 <script>
+
 const searchInput = document.getElementById("libraryPageSearchInput");
-console.log({searchInput});
 
-const searchItemArr = Array.from(document.querySelectorAll("article[data-search-item]"));
-console.log({searchItemArr});
+const searchSessionItemArr = Array.from(document.querySelectorAll("article[data-search-session-item]"));
+const searchExerciseItemArr = Array.from(document.querySelectorAll("article[data-search-exercise-item]"));
 
-const sessionTemplateArrSize = document.getElementById("sessionTemplateArrSize");
+const sessionArrSizeIndication = document.getElementById("sessionArrSizeIndication");
+const exerciseArrSizeIndication = document.getElementById("exerciseArrSizeIndication");
 
 searchInput.addEventListener("input", (ev) => {
-	console.log({ev});
 	const queryText = ev.target.value.trim().toLowerCase();
-	console.log({queryText});
 
-	let originalSize = searchItemArr.length;
+	let sessionArrSize = searchSessionItemArr.length;
+	let exerciseArrSize = searchExerciseItemArr.length;
 
-	searchItemArr.forEach(item => {
+	searchSessionItemArr.forEach(item => {
 		const { searchText } = item.dataset;
-		console.log({searchText})
+		
 		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
 		item.hidden = shouldBeHidden;
 
 		if(shouldBeHidden){
-			originalSize-=1;
+			sessionArrSize-=1;
 		}
 	})
 
-	sessionTemplateArrSize.textContent = `${originalSize} TOTAL`
+		searchExerciseItemArr.forEach(item => {
+		const { searchText } = item.dataset;
+		
+		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
+		item.hidden = shouldBeHidden;
+
+		if(shouldBeHidden){
+			exerciseArrSize-=1;
+		}
+	})
+
+	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TOTAL`
 
 
 });

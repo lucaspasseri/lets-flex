@@ -1,0 +1,46 @@
+<% 
+const exerciseTemplate = locals?.exerciseTemplate ?? null
+const searchText = `${exerciseTemplate?.name}`
+%>
+
+<article class="accordion-item" data-search-exercise-item data-search-text="<%= searchText %>">
+	<input type="radio" id="section<%= exerciseTemplate?.id %>" name="accordion" />
+	<label for="section<%= exerciseTemplate?.id %>" class="accordion-header">
+		<span class="accordion-title"><%= exerciseTemplate?.name || "" %></span>
+		<div class="accordion-icon">
+			<svg
+				viewBox="0 0 16 16"
+				fill="none"
+				height="16"
+				width="16"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					d="M4.293 5.293a1 1 0 0 1 1.414 0L8 7.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414z"
+					fill="currentColor"
+				></path>
+			</svg>
+		</div>
+	</label>
+	<div class="content">
+		<div class="settings">
+			<span> ♤ </span>
+			<span> ♧ </span>
+		</div>
+		<div class="session-step-accordion-content">
+			<p><strong>Name:</strong><%= ` ${exerciseTemplate.name}(${exerciseTemplate.exercise_name})` %></p>
+			<p><strong>Movement pattern:</strong><%= ` ${exerciseTemplate.movement_pattern_name}` %></p>
+			<p><strong>Equipment name:</strong><%= ` ${exerciseTemplate.equipment_name}` %></p>			
+			
+			<% if(exerciseTemplate.setup_description){%>
+				<p><strong>Setup description:</strong><%= ` ${exerciseTemplate.setup_description}` %></p>
+			<% } %>
+			<% if(exerciseTemplate.setup_description){%>
+				<p><strong>Setup description:</strong><%= ` ${exerciseTemplate.environment}` %></p>
+			<% } %>
+			<% if(exerciseTemplate.setup_description){%>
+				<p><strong>Setup description:</strong><%= ` ${exerciseTemplate.notes}` %></p>
+			<% } %>
+		</div>
+	</div>
+</article>
