@@ -48,7 +48,8 @@
 	border: 2px solid var(--color-stitch);
 	border-radius: 4px;
 
-	> form {
+	> form,
+	div {
 		display: grid;
 		grid-template-columns: auto 1fr;
 		background-color: var(--color-surface);
@@ -60,7 +61,7 @@
 		}
 	}
 
-	.search-exercise {
+	.search-exercise-input {
 		color: var(--color-text);
 		padding: 1em 0.8em;
 		background-color: transparent;

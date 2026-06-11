@@ -31,34 +31,7 @@ const renderContent = (content) => {
 	`;
 }
 
-const getMuscleListBySession = (session) => {
-	const distinctSessions = new Set();
 
-	session.steps.forEach(step => {
-		step.muscles.forEach(muscle => {
-			distinctSessions.add(muscle.common_name)
-		})
-	});
-
-	const iterator = distinctSessions.values();
-	let output = "";
-	let condition = true;
-	while(condition){
-		const currValue = iterator.next().value;
-		if(currValue === undefined){
-			condition = false;
-			continue;
-		}
-		
-		if(output === ""){
-			output = currValue;
-		} else {
-			output += ` ${currValue}`
-		}
-	}
-
-	return output;
-}
 %>
 
 <main class="main library">
@@ -68,80 +41,39 @@ const getMuscleListBySession = (session) => {
 			<h1>Library</h1>
 		</div>
 		<div class="button-container">
-			<button type="button"  data-modal-open="<%= createSessionModalId %>">+</button>
+			<button type="button" data-modal-open="<%= createSessionModalId %>">+</button>
 			
 		</div>
 	</div>
 
 	<div class="search-container">
-		<form>
+		<div>
 			<label for="search">Q</label>
 			<input
-				id="search"
+				id="libraryPageSearchInput"
 				name="search"
-				class="search-exercise"
+				class="search-exercise-input"
 				type="search"
 				placeholder="SEARCH EXERCISES..."
 			/>
-		</form>
+		</div>
 	</div>
 
 	<div class="session-template-container">
 		<div class="header">
 			<h2>Session Templates</h2>
-			<p><%=`${sessionArr.length} TOTAL` %></p>
+			<p id="sessionTemplateArrSize"><%=`${sessionArr.length} TOTAL` %></p>
 		</div>
 		<div class="list-container">
 			<ul>
 				<% pairedSessionArr.forEach(sessionPair => { %>
 					<div class="paired-session-card">
 						<li>
-							<div class="session-card">
-								<div class="header">
-								<div>
-										<p class="title"><%= sessionPair[0].name %></p>
-									<p class="subtitle"><%= sessionPair[0].notes %></p>
-								</div>
-									<div class="settings">
-											<span>
-												♤
-											</span>
-											<span>
-												♧
-											</span>
-									</div>
-								</div>
-								<div class="body">
-									<div class="status">
-										<p> <%= getMuscleListBySession(sessionPair[0]) %></p>
-									</div>
-								</div>
-							</div>
+							<%- include("partials/libraryPage/sessionTemplateArticle", {sessionTemplate: sessionPair[0]}) %>
 						</li>
-
 						<% if(sessionPair[1]) { %>
 							<li>
-								<div class="session-card">
-									<div class="header">
-										<div>
-											<p class="title"><%= sessionPair[1].name %></p>
-											<p class="subtitle"><%= sessionPair[1].notes %></p>
-										</div>
-										<div class="settings">
-											<span>
-												♤
-											</span>
-											<span>
-												♧
-											</span>
-										</div>
-									</div>
-									<div class="body">
-										<div class="status">
-											<p><%= getMuscleListBySession(sessionPair[1]) %></p>
-										</div>
-									</div>
-								</div>
+								<%- include("partials/libraryPage/sessionTemplateArticle", {sessionTemplate: sessionPair[1]}) %>
 							</li>
 						<% } %>
 					</div>
@@ -166,6 +98,39 @@ const getMuscleListBySession = (session) => {
 		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD NEW</button>
 	</div>
 </main>
+
+<script>
+const searchInput = document.getElementById("libraryPageSearchInput");
+console.log({searchInput});
+
+const searchItemArr = Array.from(document.querySelectorAll("article[data-search-item]"));
+console.log({searchItemArr});
+
+const sessionTemplateArrSize = document.getElementById("sessionTemplateArrSize");
+
+searchInput.addEventListener("input", (ev) => {
+	console.log({ev});
+	const queryText = ev.target.value.trim().toLowerCase();
+	console.log({queryText});
+
+	let originalSize = searchItemArr.length;
+
+	searchItemArr.forEach(item => {
+		const { searchText } = item.dataset;
+		console.log({searchText})
+		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
+		item.hidden = shouldBeHidden;
+
+		if(shouldBeHidden){
+			originalSize-=1;
+		}
+	})
+
+	sessionTemplateArrSize.textContent = `${originalSize} TOTAL`
+
+
+});
+</script>
 
 <%- contentFor("overlays") %>
 

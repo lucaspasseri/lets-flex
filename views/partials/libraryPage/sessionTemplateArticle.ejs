@@ -1,0 +1,54 @@
+<% 
+const sessionTemplate = locals?.sessionTemplate ?? null
+
+const getMuscleListBySession = (session) => {
+	const distinctSessions = new Set();
+
+	session.steps.forEach(step => {
+		step.muscles.forEach(muscle => {
+			distinctSessions.add(muscle.common_name)
+		})
+	});
+
+	const iterator = distinctSessions.values();
+	let output = "";
+	let condition = true;
+	while(condition){
+		const currValue = iterator.next().value;
+		if(currValue === undefined){
+			condition = false;
+			continue;
+		}
+		
+		if(output === ""){
+			output = currValue;
+		} else {
+			output += ` ${currValue}`
+		}
+	}
+
+	return output;
+}
+
+const muscleInfo =  getMuscleListBySession(sessionTemplate);
+
+const searchText = `${sessionTemplate.name} ${sessionTemplate.notes} ${muscleInfo}`
+%>
+
+<article class="session-card" data-search-item data-search-text="<%= searchText %>">
+	<div class="header">
+		<div>
+			<p class="title"><%= sessionTemplate.name %></p>
+			<p class="subtitle"><%= sessionTemplate.notes %></p>
+		</div>
+		<div class="settings">
+			<span> ♤ </span>
+			<span> ♧ </span>
+		</div>
+	</div>
+	<div class="body">
+		<div class="status">
+			<p><%= muscleInfo %></p>
+		</div>
+	</div>
+</article>
