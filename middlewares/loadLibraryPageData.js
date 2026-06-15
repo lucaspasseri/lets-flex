@@ -26,6 +26,10 @@ const loadLibraryPageData = async (req, res, next) => {
 		stepTypesDb.getAllStepTypes(),
 	]);
 
+	const notArchivedSessionArr = sessionArr.filter(
+		session => session.is_archived === false,
+	);
+
 	res.locals.data = {
 		...res.locals.data,
 		equipmentArr,
@@ -33,7 +37,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		muscleArr,
 		muscleRoleArr,
 		exerciseVariantArr,
-		sessionArr,
+		sessionArr: notArchivedSessionArr,
 		stepTypeArr,
 	};
 

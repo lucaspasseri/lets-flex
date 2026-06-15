@@ -42,8 +42,11 @@ const searchText = `${sessionTemplate.name} ${sessionTemplate.notes} ${muscleInf
 			<p class="subtitle"><%= sessionTemplate.notes %></p>
 		</div>
 		<div class="settings">
-			<span> ♤ </span>
-			<span> ♧ </span>
+			<a href="<%= `/library?sessionId=${sessionTemplate.id}` %>">
+				<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+					<use href="/edit-icon.svg"></use>
+				</svg>
+			</a>
 		</div>
 	</div>
 	<div class="body">

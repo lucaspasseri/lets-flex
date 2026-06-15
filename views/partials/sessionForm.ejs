@@ -81,22 +81,22 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 		const setsHiddenInput = document.createElement("input");
 		setsHiddenInput.type = "hidden";
 		setsHiddenInput.name = `stepRow[${index}][sets]`;
-		setsHiddenInput.value = setsInput.value;
+		setsHiddenInput.value = setsInput.value || 0;
 
 		const repsHiddenInput = document.createElement("input");
 		repsHiddenInput.type = "hidden";
 		repsHiddenInput.name = `stepRow[${index}][reps]`;
-		repsHiddenInput.value = repsInput.value;
+		repsHiddenInput.value = repsInput.value || 0;
 
 		const loadValueHiddenInput = document.createElement("input");
 		loadValueHiddenInput.type = "hidden";
 		loadValueHiddenInput.name = `stepRow[${index}][loadValue]`;
-		loadValueHiddenInput.value = loadValueInput.value;
+		loadValueHiddenInput.value = loadValueInput.value || 0;
 
 		const loadUnitHiddenInput = document.createElement("input");
 		loadUnitHiddenInput.type = "hidden";
 		loadUnitHiddenInput.name = `stepRow[${index}][loadUnit]`;
-		loadUnitHiddenInput.value = loadUnitSelect.value;
+		loadUnitHiddenInput.value = loadUnitSelect.value || "Kilograms";
 
 		const removeButton = document.createElement("button");
 		removeButton.type = "button";

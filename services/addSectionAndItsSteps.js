@@ -12,9 +12,10 @@ async function addSessionAndItsSteps(name, notes, stepRowArr) {
 		);
 
 		let returningSteps = [];
-		for (let i = 0; i < stepRowArr.length; i++) {
+		for (let i = 0; i < stepRowArr?.length; i++) {
 			const { stepTypeId, exerciseVariantId, sets, reps, loadValue, loadUnit } =
 				stepRowArr[i];
+
 			const {
 				rows: [step],
 			} = await client.query(

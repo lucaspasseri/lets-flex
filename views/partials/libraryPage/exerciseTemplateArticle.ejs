@@ -52,7 +52,7 @@ const searchText = `${exerciseTemplate?.name}`
 
 <script>
 	document.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-modal-open]");
+  const button = event.target.closest("[data-modal-open='deleteExerciseModalId']");
   if (!button) return;
 
   const modalId = button.dataset.modalOpen;
@@ -60,7 +60,7 @@ const searchText = `${exerciseTemplate?.name}`
 
   const exerciseVariantId = button.dataset.exerciseVariantId;
 
-  const form = modal.querySelector("form");
+  const form = modal?.querySelector("form");
   form.action = `/exercise_variants/${exerciseVariantId}?_method=DELETE`;
 });
 </script>

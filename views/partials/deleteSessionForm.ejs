@@ -1,0 +1,16 @@
+<%
+const {currSessionId} = locals;
+const action = `sessions/${currSessionId}?_method=PATCH`;
+%>
+
+<form
+  id="deleteSessionForm"
+	method="POST"
+  action="<%= action %>"
+	class="forms"
+>
+  <p>Are you sure?</p>
+
+  <%- include('simpleButton', { data: { text: "Confirm delete", type: "submit" } }); %>
+</form>
+

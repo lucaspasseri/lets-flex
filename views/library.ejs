@@ -6,6 +6,7 @@ const sessionArr = locals.data?.sessionArr ?? [];
 const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
 const deleteExerciseModalId = "deleteExerciseModalId";
+const deleteSessionModalId = "deleteSessionModalId";
 
 const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 	if(index %2 === 0) {
@@ -15,6 +16,8 @@ const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 	}
 	return acc;
 }, []);
+
+const {currentSession } = locals?.appState ?? null;
 %>
 
 <main class="main library">
@@ -64,7 +67,33 @@ const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 		</div>
 	</div>
 
-	<div class="active-session-template-container"></div>
+	<% if(currentSession !== null){ %>
+		<div class="active-session-template-container">
+			<h3>SESSION DETAILS</h3>
+
+			<div class="active-session-container">
+				<div class="header">
+					<p><%= currentSession.name %></p>
+					<div class="settings">
+						<button type="button" class="button" data-modal-open="<%= deleteSessionModalId %>">
+							<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+								<use href="/trash-icon.svg"></use>
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<div class="active-session-steps-container">
+					<p>SESSION STEPS</p>
+					<ul>
+						<% currentSession.steps?.forEach(step => { %>
+							<li> <%= step.name %></li>
+						<% }) %>
+					</ul>
+				</div>
+			</div>
+		</div>
+	<% } %>
 
 	<div class="exercise-variants-container">
 		<div class="header">
@@ -159,4 +188,15 @@ searchInput.addEventListener("input", (ev) => {
 	}
 }) 
 %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: deleteSessionModalId,
+		title: "Delete session template",
+		description: "",
+		renderContent: () => include("partials/deleteSessionForm", {currSessionId: currentSession?.id ?? null})
+	}
+}) 
+%>
+
 

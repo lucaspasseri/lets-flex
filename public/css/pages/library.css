@@ -24,13 +24,23 @@
 	.content {
 		display: grid;
 		grid-template-columns: 1fr auto;
+
+		strong {
+			color: var(--color-text);
+		}
 	}
 
 	.settings {
-		background-color: var(--color-text);
-		border-radius: 8px;
 		width: 24px;
-		aspect-ratio: 1 /1;
+		height: fit-content;
+
+		button {
+			border: 0;
+			padding: 0;
+			border-radius: 4px;
+			background-color: var(--color-text);
+			height: fit-content;
+		}
 	}
 
 	.icon {
@@ -118,7 +128,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1.5em;
-	padding: 1em 0;
+	padding-top: 1em;
 }
 
 .main.library .session-template-container > .header {
@@ -153,7 +163,7 @@
 }
 
 .main.library .session-template-container .session-card {
-	width: 260px;
+	width: 280px;
 	padding: 0.8em;
 	background-color: var(--color-stitch-secondary);
 	border-radius: 4px;
@@ -173,8 +183,22 @@
 		}
 
 		> .settings {
-			display: flex;
-			gap: 0.4em;
+			width: 24px;
+			height: fit-content;
+
+			a {
+				padding: 0;
+				border: 0;
+				display: block;
+				width: fit-content;
+				background-color: var(--color-text);
+				border-radius: 4px;
+			}
+
+			.icon {
+				width: 100%;
+				height: 100%;
+			}
 		}
 	}
 
@@ -189,12 +213,51 @@
 
 .main.library .active-session-template-container {
 	margin: 1em var(--horizontal-margin);
-	height: 20px;
+	height: fit-content;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+
+	h3 {
+		font-size: 0.8em;
+	}
+}
+
+.main.library .active-session-container {
+	background-color: var(--color-stitch-secondary);
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+	padding: 0.8em;
+
+	.header {
+		display: grid;
+		grid-template-columns: 1fr auto;
+	}
+
+	.settings {
+		width: 24px;
+		height: fit-content;
+
+		button {
+			border: 0;
+			padding: 0;
+			border-radius: 4px;
+			background-color: var(--color-text);
+			height: fit-content;
+		}
+	}
+
+	.icon {
+		width: 100%;
+		height: 100%;
+	}
 }
 
 .main.library .exercise-variants-container {
 	> .header {
-		margin: 0 var(--horizontal-margin);
+		margin: 3em var(--horizontal-margin) 0;
 		display: flex;
 		justify-content: space-between;
 

@@ -15,7 +15,6 @@ async function addNewExerciseVariant(req, res) {
 
 async function deleteExerciseVariant(req, res) {
 	const { exerciseVariantId } = req.params;
-	console.log({ exerciseVariantId });
 
 	await exerciseVariantsDb.deleteExerciseVariant(pool, { exerciseVariantId });
 

@@ -99,7 +99,8 @@ CREATE TABLE exercise_variants (
 CREATE TABLE sessions (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	name VARCHAR NOT NULL,
-	notes TEXT
+	notes TEXT,
+	is_archived BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE session_steps (

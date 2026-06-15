@@ -17,4 +17,12 @@ async function addNewSession(req, res) {
 	res.redirect("/library");
 }
 
-export { getSessionByTrainingDayId, addNewSession };
+async function archiveSession(req, res) {
+	const { sessionId } = req.params;
+
+	await sessionsDb.archiveSessionTemplateById(pool, { sessionId });
+
+	res.redirect("/library");
+}
+
+export { getSessionByTrainingDayId, addNewSession, archiveSession };
