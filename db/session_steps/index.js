@@ -81,7 +81,6 @@ async function postNewSessionStep(
 			throw new Error("Step order must be a positive integer");
 		}
 
-		// Move affected rows far away first to avoid unique constraint collisions
 		await client.query(
 			`
 			UPDATE session_steps
@@ -120,7 +119,6 @@ async function postNewSessionStep(
 			],
 		);
 
-		// Bring shifted rows back to the correct order
 		await client.query(
 			`
 			UPDATE session_steps

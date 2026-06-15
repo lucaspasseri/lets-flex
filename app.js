@@ -18,6 +18,7 @@ import libraryRouter from "./routes/library.js";
 import exerciseClusterRouter from "./routes/exercise_cluster.js";
 import workoutSessionsRouter from "./routes/workout_sessions.js";
 import workoutStepLogRouter from "./routes/workout_step_logs.js";
+import methodOverride from "method-override";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,7 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(process.cwd(), "public")));
 app.use(express.json());
+app.use(methodOverride("_method"));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);

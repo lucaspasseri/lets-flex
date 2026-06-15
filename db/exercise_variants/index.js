@@ -31,4 +31,18 @@ async function postNewExerciseVariant(name, exerciseId, equipmentId) {
 	);
 }
 
-export { getAllExerciseVariants, postNewExerciseVariant };
+async function deleteExerciseVariant(db, { exerciseVariantId }) {
+	await pool.query(
+		`
+			DELETE FROM exercise_variants
+			WHERE id = $1
+		`,
+		[exerciseVariantId],
+	);
+}
+
+export {
+	getAllExerciseVariants,
+	postNewExerciseVariant,
+	deleteExerciseVariant,
+};

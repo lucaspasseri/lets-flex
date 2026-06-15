@@ -1,4 +1,5 @@
 <% 
+const deleteExerciseModalId = locals?.deleteExerciseModalId ?? null
 const exerciseTemplate = locals?.exerciseTemplate ?? null
 const searchText = `${exerciseTemplate?.name}`
 %>
@@ -23,12 +24,8 @@ const searchText = `${exerciseTemplate?.name}`
 		</div>
 	</label>
 	<div class="content">
-		<div class="settings">
-			<span> ♤ </span>
-			<span> ♧ </span>
-		</div>
 		<div class="session-step-accordion-content">
-			<p><strong>Name:</strong><%= ` ${exerciseTemplate.name}(${exerciseTemplate.exercise_name})` %></p>
+			<p><strong>Name:</strong><%= ` ${exerciseTemplate.name}` %></p>
 			<p><strong>Movement pattern:</strong><%= ` ${exerciseTemplate.movement_pattern_name}` %></p>
 			<p><strong>Equipment name:</strong><%= ` ${exerciseTemplate.equipment_name}` %></p>			
 			
@@ -42,5 +39,28 @@ const searchText = `${exerciseTemplate?.name}`
 				<p><strong>Setup description:</strong><%= ` ${exerciseTemplate.notes}` %></p>
 			<% } %>
 		</div>
+		<div class="settings">
+			<button type="button" class="button" data-modal-open="<%= deleteExerciseModalId %>" data-exercise-variant-id="<%= exerciseTemplate.id %>">
+				<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+					<use href="/trash-icon.svg"></use>
+				</svg>
+			</button>
+		</div>
 	</div>
 </article>
+
+
+<script>
+	document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-modal-open]");
+  if (!button) return;
+
+  const modalId = button.dataset.modalOpen;
+  const modal = document.getElementById(modalId);
+
+  const exerciseVariantId = button.dataset.exerciseVariantId;
+
+  const form = modal.querySelector("form");
+  form.action = `/exercise_variants/${exerciseVariantId}?_method=DELETE`;
+});
+</script>

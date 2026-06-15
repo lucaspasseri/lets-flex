@@ -1,9 +1,11 @@
 <% 
 const exerciseArr = locals.data?.exerciseVariantArr ?? []; 
-const createExerciseModalId = "createExerciseModal"; 
+
 const sessionArr = locals.data?.sessionArr ?? [];
 
 const createSessionModalId = "createSessionModal";
+const createExerciseModalId = "createExerciseModal"; 
+const deleteExerciseModalId = "deleteExerciseModalId";
 
 const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 	if(index %2 === 0) {
@@ -23,7 +25,6 @@ const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 		</div>
 		<div class="button-container">
 			<button type="button" data-modal-open="<%= createSessionModalId %>">+</button>
-			
 		</div>
 	</div>
 
@@ -74,7 +75,7 @@ const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
 			<ul class="accordion">
 				<% exerciseArr.forEach(exercise => { %>
 					<li>
-						<%- include("partials/libraryPage/exerciseTemplateArticle", {exerciseTemplate: exercise}) %>
+						<%- include("partials/libraryPage/exerciseTemplateArticle", {exerciseTemplate: exercise, deleteExerciseModalId}) %>
 					</li>
 				<% }) %>
 			</ul>
@@ -111,7 +112,7 @@ searchInput.addEventListener("input", (ev) => {
 		}
 	})
 
-		searchExerciseItemArr.forEach(item => {
+	searchExerciseItemArr.forEach(item => {
 		const { searchText } = item.dataset;
 		
 		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
@@ -148,3 +149,14 @@ searchInput.addEventListener("input", (ev) => {
 	}
 }) 
 %>
+
+<%- include("partials/basicModal", {
+	modal: {
+		id: deleteExerciseModalId,
+		title: "Delete exercise",
+		description: "",
+		renderContent: () => include("partials/deleteExerciseForm")
+	}
+}) 
+%>
+
