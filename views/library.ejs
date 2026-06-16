@@ -1,7 +1,7 @@
 <% 
 const exerciseArr = locals.data?.exerciseVariantArr ?? []; 
 
-const sessionArr = locals.data?.sessionArr ?? [];
+const sessionArr = locals.data?.sessionArr?.filter(session => session.isArchived === false) ?? [];
 
 const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
@@ -50,18 +50,11 @@ const {currentSession } = locals?.appState ?? null;
 			<p id="sessionArrSizeIndication"><%=`${sessionArr.length} TOTAL` %></p>
 		</div>
 		<div class="list-container">
-			<ul>
-				<% pairedSessionArr.forEach(sessionPair => { %>
-					<div class="paired-session-card">
-						<li>
-							<%- include("partials/libraryPage/sessionTemplateArticle", {sessionTemplate: sessionPair[0]}) %>
-						</li>
-						<% if(sessionPair[1]) { %>
-							<li>
-								<%- include("partials/libraryPage/sessionTemplateArticle", {sessionTemplate: sessionPair[1]}) %>
-							</li>
-						<% } %>
-					</div>
+			<ul class="session-template-list">
+				<% sessionArr.forEach(session => { %>
+					<li>
+						<%- include("partials/libraryPage/sessionTemplateArticle", {sessionTemplate: session}) %>
+					</li>
 				<% }) %>
 			</ul>
 		</div>
@@ -71,27 +64,7 @@ const {currentSession } = locals?.appState ?? null;
 		<div class="active-session-template-container">
 			<h3>SESSION DETAILS</h3>
 
-			<div class="active-session-container">
-				<div class="header">
-					<p><%= currentSession.name %></p>
-					<div class="settings">
-						<button type="button" class="button" data-modal-open="<%= deleteSessionModalId %>">
-							<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-								<use href="/trash-icon.svg"></use>
-							</svg>
-						</button>
-					</div>
-				</div>
-
-				<div class="active-session-steps-container">
-					<p>SESSION STEPS</p>
-					<ul>
-						<% currentSession.steps?.forEach(step => { %>
-							<li> <%= step.name %></li>
-						<% }) %>
-					</ul>
-				</div>
-			</div>
+			<%- include("partials/session/sessionCard", { session: currentSession, modalId: deleteSessionModalId }) %>
 		</div>
 	<% } %>
 
@@ -131,30 +104,31 @@ searchInput.addEventListener("input", (ev) => {
 	let exerciseArrSize = searchExerciseItemArr.length;
 
 	searchSessionItemArr.forEach(item => {
-		const { searchText } = item.dataset;
-		
-		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
-		item.hidden = shouldBeHidden;
+		const searchText = item.dataset.searchText ?? "";
 
-		if(shouldBeHidden){
-			sessionArrSize-=1;
+		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
+
+		item.closest("li").hidden = shouldBeHidden;
+
+		if (shouldBeHidden) {
+			sessionArrSize -= 1;
 		}
-	})
+	});
 
 	searchExerciseItemArr.forEach(item => {
-		const { searchText } = item.dataset;
-		
+		const searchText = item.dataset.searchText ?? "";
+
 		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
-		item.hidden = shouldBeHidden;
 
-		if(shouldBeHidden){
-			exerciseArrSize-=1;
+		item.closest("li").hidden = shouldBeHidden;
+
+		if (shouldBeHidden) {
+			exerciseArrSize -= 1;
 		}
-	})
+	});
 
-	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TOTAL`
-
-
+	sessionArrSizeIndication.textContent = `${sessionArrSize} TOTAL`;
+	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TOTAL`;
 });
 </script>
 

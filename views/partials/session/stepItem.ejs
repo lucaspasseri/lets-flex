@@ -1,0 +1,27 @@
+<li class="step-item">
+	<div class="step-item-main">
+		<strong class="step-item-title">
+			<%= `${step.exerciseVariantName || step.exerciseName || step.name}:` %>
+		</strong>
+
+		<span class="step-item-meta">
+			<%= step.sets %> sets × <%= step.reps %> reps
+		</span>
+
+		<% if (step.loadValue) { %>
+			<span class="step-item-load">
+				<%= step.loadValue %> <%= step.loadUnit %>
+			</span>
+		<% } %>
+	</div>
+
+	<div class="step-item-details">
+		<% if (step.equipmentName) { %>
+			<span><%= step.equipmentName %></span>
+		<% } %>
+
+		<% if (step.movementPatternName) { %>
+			<span><%= step.movementPatternName %></span>
+		<% } %>
+	</div>
+</li>

@@ -10,7 +10,7 @@ const { formatDate, addDays } = locals.helpers;
 
 const currProgram = locals.appState?.currentProgram ?? {};
 const currTrainingDay = locals.appState?.currentTrainingDay ?? null;
-const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "No date";
+const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "Date outside the programs's boundaries";
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
@@ -19,31 +19,40 @@ const getScheduledDate = (index) => {
 	return date;
 }
 
-const getNavLinkHref = (trainingDay) => {
-	return `/programs/day?dayId=${trainingDay.training_day_id}`;
+const getNavLinkHref = (dayId) => {
+	return `/programs/day?dayId=${dayId}`;
 }
+
+const trainingDayIdArr = trainingDayArr.map( day => day.training_day_id);
 %>
 <main class="main day">
-	<% if(trainingDayArr.length > 0){ %>
-		<nav class="day-rail-wrapper">
-			<button class="day-arrow" data-scroll-left>‹</button>
-			<ul class="day-rail" id="dayRail">
-				<% trainingDayArr.forEach((trainingDay,index) => { %>
-					<li><a href="<%= getNavLinkHref(trainingDay) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduledDate(index) %></a></li>
-				<% }) %>
-			</ul>
-			<button class="day-arrow" data-scroll-right>›</button>
-		</nav>
-	<% } %>
 
 	<div class="current-day-container session-selected" data-calendar-day-id="<%= currDayId %>">
 		<h1><%= formattedScheduledDate %></h1>
 	</div>
 
+	<% if(trainingDayArr.length > 0){ %>
+		<nav class="day-rail-wrapper">
+			<% if(trainingDayIdArr.includes(currDayId-1)) {%>
+				<a href="<%= getNavLinkHref(currDayId - 1) %>" class="day-arrow" data-scroll-left><span><</span></a>
+			<% } %>
+			<ul class="day-rail" id="dayRail">
+				<% trainingDayArr.forEach((trainingDay,index) => { %>
+					<li><a href="<%= getNavLinkHref(trainingDay?.training_day_id) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduledDate(index) %></a></li>
+				<% }) %>
+			</ul>
+			<% if(trainingDayIdArr.includes(currDayId+1)) {%>
+				<a href="<%= getNavLinkHref(currDayId + 1) %>" class="day-arrow" data-scroll-right><span>></span></a>
+			<% } %>
+		</nav>
+	<% } %>
+
+
+
 	<div class="link-training-day-with-session-container">
 		<% if(workoutSessionArr.length === 0) { %>
 			<div class="no-session">
-				<h2> The current day has no workout session linked to it.</h2>
+				<h2> The current day does not yet have any training sessions associated with it.</h2>
 				<p>You can link a session template here.</p>
 			</div>
 		<% } else { %>
@@ -52,7 +61,7 @@ const getNavLinkHref = (trainingDay) => {
 			</div>
 		<% } %>
 
-		<form action="/workout_sessions" method="POST">
+		<form action="/workout_sessions" method="POST" class="forms">
 			<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
 			<%- include("partials/select", { data: { id: "sessionSelect", label: "Session template", name: "sessionId", required: true, 
 			options: sessionArr, getOptionLabel: (session) => session.name, getOptionValue: (session) => session.id  } }); %>
@@ -63,13 +72,17 @@ const getNavLinkHref = (trainingDay) => {
 
 	<% if(workoutSessionArr.length > 0 ) { %>
 		<div class="workout-session-list-container">
-			<% workoutSessionArr.forEach(wSession => { %>
-				<li>
-					<%= `W-SESSION(${wSession.name}) - ${wSession.status}` %>
-				</li>
-			<% }) %>
+			<ul>
+				<% workoutSessionArr.forEach(wSession => { %>
+					<li>
+							<%- include("partials/session/sessionCard", {session: wSession}) %>
+					</li>
+				<% }) %>
+			</ul>
 		</div>
 	<% } %>
+
+
 </main>
 
 <script>

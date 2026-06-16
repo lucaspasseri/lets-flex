@@ -24,17 +24,21 @@ const loadDayPageData = async (req, res, next) => {
 		stepTypesDb.getAllStepTypes(),
 		exerciseVariantsDb.getAllExerciseVariants(pool),
 		sessionsDb.getAllSessions(pool),
-		workoutSessionsDb.getWorkoutSessionByTrainingDayId(pool, {
+		workoutSessionsDb.getWorkoutSessionWithStepsInfoByTrainingDayId(pool, {
 			trainingDayId: dayId,
 		}),
 	]);
+
+	const notArchivedSessionArr = sessionArr.filter(
+		session => session.is_archived === false,
+	);
 
 	res.locals.data = {
 		...res.locals.data,
 		trainingDayArr,
 		stepTypeArr,
 		exerciseVariantArr,
-		sessionArr,
+		sessionArr: notArchivedSessionArr,
 		workoutSessionArr,
 	};
 

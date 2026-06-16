@@ -1,0 +1,31 @@
+<%
+const modalId = locals?.modalId ?? null;
+%>
+
+<header class="session-card-header">
+	<div>
+		<h2 class="session-card-title">
+			<%= session.name %>
+		</h2>
+
+		<% if (session.notes) { %>
+			<p class="session-card-notes">
+				<%= session.notes %>
+			</p>
+		<% } %>
+	</div>
+
+	<% if (session.type === "workout" && session.status) { %>
+		<span class="session-card-status">
+			<%= session.status %>
+		</span>
+	<% } %>
+
+	<div class="settings">
+		<button type="button" class="button" data-modal-open="<%= modalId %>">
+			<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+				<use href="/trash-icon.svg"></use>
+			</svg>
+		</button>
+	</div>
+</header>

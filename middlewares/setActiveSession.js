@@ -1,5 +1,6 @@
 import pool from "../db/pool.js";
 import * as sessionsDb from "../db/sessions/index.js";
+import { toSessionViewModel } from "../views/viewModels/toSessionViewModel.js";
 
 async function setActiveSession(req, res, next) {
 	const { sessionArr } = res.locals.data;
@@ -19,7 +20,9 @@ async function setActiveSession(req, res, next) {
 		? await sessionsDb.getSessionWithExerciseInfoById(pool, { sessionId })
 		: null;
 
-	res.locals.appState.currentSession = currentSession;
+	res.locals.appState.currentSession = toSessionViewModel(currentSession, {
+		type: "template",
+	});
 	res.locals.sessionState.sessionId = currentSession?.id ?? null;
 
 	next();

@@ -5,6 +5,70 @@
 	}
 }
 
+.main.library .session-card {
+	background-color: var(--color-stitch-secondary);
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	padding: 0.8em;
+
+	h2 {
+		font-size: 1.2em;
+	}
+
+	> p {
+		font-size: 0.7em;
+		color: var(--color-accent);
+		letter-spacing: 0.1em;
+		margin-top: 0.8em;
+		margin-bottom: 0.4em;
+	}
+
+	> ol {
+		list-style: none;
+	}
+}
+
+.main.library .session-card .session-card-header {
+	display: grid;
+	grid-template-columns: 1fr auto auto;
+
+	.session-card-notes {
+		color: var(--color-stitch);
+		font-size: 0.9em;
+	}
+
+	.icon {
+		width: 100%;
+		height: 100%;
+	}
+}
+
+.main.library .session-card .session-card-header .settings {
+	width: 24px;
+	height: fit-content;
+
+	button {
+		border: 0;
+		padding: 0;
+		border-radius: 4px;
+		background-color: var(--color-text);
+		height: fit-content;
+	}
+}
+
+.main.library .session-card .step-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+}
+
+.main.library .session-card .step-item {
+	.step-item-title {
+		color: var(--color-stitch);
+	}
+}
+
 .main.library .exercise-variants-container .accordion {
 	display: flex;
 	flex-direction: column;
@@ -143,12 +207,17 @@
 }
 
 .main.library .session-template-container .list-container > ul {
-	display: flex;
-	overflow-x: auto;
-	gap: 0.8em;
-}
+	display: grid;
 
-.main.library .session-template-container .paired-session-card {
+	grid-auto-flow: column;
+	grid-template-rows: repeat(2, auto);
+	grid-auto-columns: 280px;
+	padding: 0 var(--horizontal-margin);
+	gap: 1em;
+
+	overflow-x: auto;
+}
+/* .main.library .session-template-container .paired-session-card {
 	display: flex;
 	flex-direction: column;
 	gap: 0.8em;
@@ -160,17 +229,18 @@
 	&:last-of-type {
 		margin-right: var(--horizontal-margin);
 	}
-}
+} */
 
 .main.library .session-template-container .session-card {
 	width: 280px;
 	padding: 0.8em;
 	background-color: var(--color-stitch-secondary);
 	border-radius: 4px;
+	height: 100%;
 
 	.header {
-		display: flex;
-		justify-content: space-between;
+		display: grid;
+		grid-template-columns: 1fr auto;
 
 		.title {
 			font-size: 1.3em;
@@ -204,9 +274,13 @@
 
 	.body {
 		margin-top: 0.75em;
-
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
 		p {
 			font-size: 0.8em;
+			margin-top: auto;
 		}
 	}
 }

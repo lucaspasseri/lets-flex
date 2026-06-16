@@ -6,6 +6,8 @@ import * as sessionsDb from "../db/sessions/index.js";
 import * as stepTypesDb from "../db/step_types/index.js";
 import * as exerciseVariantsDb from "../db/exercise_variants/index.js";
 import pool from "../db/pool.js";
+import session from "express-session";
+import { toSessionViewModel } from "../views/viewModels/toSessionViewModel.js";
 
 const loadLibraryPageData = async (req, res, next) => {
 	const [
@@ -26,8 +28,8 @@ const loadLibraryPageData = async (req, res, next) => {
 		stepTypesDb.getAllStepTypes(),
 	]);
 
-	const notArchivedSessionArr = sessionArr.filter(
-		session => session.is_archived === false,
+	const shapedSessionArr = sessionArr.map(session =>
+		toSessionViewModel(session, { type: "template" }),
 	);
 
 	res.locals.data = {
@@ -37,7 +39,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		muscleArr,
 		muscleRoleArr,
 		exerciseVariantArr,
-		sessionArr: notArchivedSessionArr,
+		sessionArr: shapedSessionArr,
 		stepTypeArr,
 	};
 
