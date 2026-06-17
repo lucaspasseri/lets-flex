@@ -14,60 +14,89 @@ const filterWorkoutSessionByDay = (sessionArr, day) => {
 }
 const workoutSessionArrByDay = filterWorkoutSessionByDay(workoutSessionArr, activeDay);
 
-console.log({currTrainingDay});
+const currProgramId = locals.sessionState?.programId ?? null; 
+
+
+
+
+console.log({currWeek});
+
+const weekRailItemArr = currWeek.map((day) => {
+	const workoutSessionArrFilteredByDay = isSameDay && workoutSessionArr.filter(ws => isSameDay(ws.scheduled_date, day)) || [];
+	return workoutSessionArrFilteredByDay;
+});
+
+console.log({weekRailItemArr});
+
+const calendarSize = 7;
+const dayObjArr = [];
+for(let i =0; i < calendarSize/2; i++){
+	if(i === 0){
+		const obj = {
+			isActive: true,
+			day: activeDay,
+			workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, activeDay)
+		}
+
+		dayObjArr.push(obj);
+		continue;
+	}
+
+	const previousDay = addDays(activeDay, -i);
+	const nextDay = addDays(activeDay, +i);
+
+	const pObj = {
+		isActive: false,
+		day: previousDay,
+		workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, previousDay)
+	}
+
+		const nObj = {
+		isActive: false,
+		day: nextDay,
+		workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, nextDay)
+	}
+
+	dayObjArr.unshift(pObj);
+	dayObjArr.push(nObj);
+}
+
+console.log({dayObjArr});
+
 %>
 <main class="main dashboard">
 	<%- include("partials/dashboardPage/noActiveProgramSection"); %>
 
-	<%- include("partials/dashboardPage/currentProgramBanner"); %>
+	<% if( currProgramId !== null) { %>
+
+		<%- include("partials/dashboardPage/currentProgramBanner"); %>
 
 		<div class="date-section">
-	
-			<div class="current-day-container">
+			<div class="training-day-list-container">
 				<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><</a>
-				<div class="current-day">
-					<span><%= formatDate(activeDay, "dd / MM") %></span>
-					<span><%= formatDate(activeDay, "EEEE").toUpperCase() %></span>
-				</div>
-				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" >></a>
-			</div>
-
-			<% if (workoutSessionArr.length > 0) { %>
-				<div class="training-day-list-container">
-					<ul>
-						<% currWeek.forEach( (day, index) => { %>
-							<li class="<%= index === 3 ? 'active' : '' %>">
-								<span><%= formatDate(day, "EEE") %></span>
-								<div class="week-day <%= index === 3 ? 'active' : '' %>">
-									<% const filteredSessionArr = filterWorkoutSessionByDay(workoutSessionArr, day); %>
-									<% if(filteredSessionArr.length === 0) { %>
-										<p>REST</p>
-
-									<% } else if(filteredSessionArr.length === 1) { %>
-										<p>
-											<%= filteredSessionArr[0].session_name.substring(0,4) %>
-										</p>
-
-									<% } else { %>
-										<div class="multiple-session-container">
-											<p>
-												<%= filteredSessionArr[0].session_name.substring(0,4) %>
-											</p>
-											<% if(filteredSessionArr.length > 1) { %>
-												<div class="additional-session-indicator">
-													<% filteredSessionArr.forEach((session, index) => { %>
-														<div class="additional-indication"></div>
-													<% }) %>
-												</div>
-											<% } %>
-										</div>
-									<% } %>
-								</div>
+				<ol>
+					<% dayObjArr.forEach( (day, index) => { %>
+							<li class="<%= day.isActive ? 'active' : '' %>">
+								<span><%= formatDate(day.day, "EEE") %></span>
+								<div class="week-day <%=day.isActive ? 'active' : '' %>">
+									<div class="current-day">
+										<span><%= formatDate(day.day, "dd / MM") %></span>
+									</div>
+									<div class="workout-session-indication-container">
+						
+											<ul>
+												<% day.workoutSessionArr.forEach(ws => { %>
+													<li></li>
+												<% }) %>
+											</ul>
+							
+									</div>
+								</div>							
 							</li>
 						<% }) %>
-					</ul>
-				</div>
-			<% } %>
+				</ol>
+				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" >></a>
+			</div>
 		</div>
 
 		<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? "no-session" : "" %>">
@@ -95,4 +124,5 @@ console.log({currTrainingDay});
 				</div>
 			<% } %>
 		</div>
+ 	<% } %>
 </main>

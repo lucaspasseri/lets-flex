@@ -208,23 +208,29 @@
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
-	padding: 1.4em 0.4em;
-	border-radius: 8px;
-	border: 0.16em solid var(--color-stitch);
-	width: fit-content;
+	width: 100%;
 	background-color: var(--color-stitch-secondary);
 
 	& span:first-of-type {
-		font-size: 2em;
+		font-size: 0.9em;
 		color: var(--color-stitch);
 		font-weight: 700;
-		letter-spacing: -0.02em;
+		letter-spacing: -0.06em;
+		white-space: nowrap;
+	}
+}
+
+.date-section .workout-session-indication-container {
+	ul {
+		display: flex;
+		gap: 0.4em;
+		height: 0.3em;
 	}
 
-	& span:nth-of-type(2) {
-		font-size: 0.7em;
-		letter-spacing: 0.1em;
-		color: var(--color-stitch);
+	li {
+		width: 0.3em;
+		height: 0.3em;
+		background-color: red;
 	}
 }
 
@@ -275,13 +281,14 @@
 	display: flex;
 	justify-content: center;
 
-	ul {
+	ol {
 		display: flex;
-		gap: 0.6em;
+		gap: 0.2em;
 		justify-content: center;
 		max-width: 700px;
 		width: 100%;
 		padding: 0 0.2em;
+		border: 1px solid blue;
 	}
 
 	li {
@@ -323,10 +330,9 @@
 .date-section .week-day {
 	width: min(100%, 5em);
 	aspect-ratio: 1 /1;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	border: 0.1em solid var(--color-border);
+	display: grid;
+	grid-template-rows: 1fr auto;
+	border: 0.2em solid var(--color-border);
 	background-color: var(--color-surface);
 	text-overflow: ellipsis;
 
@@ -336,7 +342,7 @@
 }
 
 .date-section .week-day.active {
-	background-color: var(--color-stitch);
+	border: 0.2em solid var(--color-stitch);
 	color: var(--color-stitch-secondary);
 	font-weight: 700;
 }
