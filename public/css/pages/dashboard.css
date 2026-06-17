@@ -87,12 +87,14 @@
 	}
 }
 
-.active-program-container {
-	padding: 1.4em;
+.program-banner-container,
+.outside-scope-banner-container,
+.cycle-banner-container {
+	padding: 1.2em;
 	border-left: 0.2em solid var(--color-stitch);
 	border-radius: 4px;
 	background-color: var(--color-stitch-secondary);
-	margin: 2em var(--horizontal-margin);
+	margin: 2em var(--horizontal-margin) 0;
 
 	p {
 		font-size: 0.6em;
@@ -105,6 +107,23 @@
 		font-size: 1.5em;
 		color: var(--color-text);
 		font-weight: 500;
+	}
+}
+
+.outside-scope-banner-container {
+	border-left: 0.2em solid var(--color-text);
+
+	p {
+		color: var(--color-text);
+	}
+}
+
+.cycle-banner-container {
+	margin: 0.5em var(--horizontal-margin);
+	padding: 0.5em 1.4em;
+	border-left: 0.2em solid var(--color-accent);
+	p {
+		color: var(--color-accent);
 	}
 }
 
