@@ -17,17 +17,6 @@ const workoutSessionArrByDay = filterWorkoutSessionByDay(workoutSessionArr, acti
 const currProgramId = locals.sessionState?.programId ?? null; 
 
 
-
-
-console.log({currWeek});
-
-const weekRailItemArr = currWeek.map((day) => {
-	const workoutSessionArrFilteredByDay = isSameDay && workoutSessionArr.filter(ws => isSameDay(ws.scheduled_date, day)) || [];
-	return workoutSessionArrFilteredByDay;
-});
-
-console.log({weekRailItemArr});
-
 const calendarSize = 7;
 const dayObjArr = [];
 for(let i =0; i < calendarSize/2; i++){
@@ -61,8 +50,6 @@ for(let i =0; i < calendarSize/2; i++){
 	dayObjArr.push(nObj);
 }
 
-console.log({dayObjArr});
-
 %>
 <main class="main dashboard">
 	<%- include("partials/dashboardPage/noActiveProgramSection"); %>
@@ -73,29 +60,26 @@ console.log({dayObjArr});
 
 		<div class="date-section">
 			<div class="training-day-list-container">
-				<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><</a>
+				<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><span><</span></a>
 				<ol>
-					<% dayObjArr.forEach( (day, index) => { %>
-							<li class="<%= day.isActive ? 'active' : '' %>">
-								<span><%= formatDate(day.day, "EEE") %></span>
-								<div class="week-day <%=day.isActive ? 'active' : '' %>">
-									<div class="current-day">
-										<span><%= formatDate(day.day, "dd / MM") %></span>
-									</div>
-									<div class="workout-session-indication-container">
-						
-											<ul>
-												<% day.workoutSessionArr.forEach(ws => { %>
-													<li></li>
-												<% }) %>
-											</ul>
-							
-									</div>
-								</div>							
-							</li>
-						<% }) %>
+					<% dayObjArr.forEach((day,index) => { %>
+						<li class="week-day-item <%= day.isActive ? 'active' : '' %>">
+							<div>
+								<span><%= formatDate(day.day, "EEE").toUpperCase() %></span> 
+								<span><%= formatDate(day.day, "dd") %></span> 
+							</div>
+							<div class="workout-session-indication-container">
+								<ol>
+									<% day.workoutSessionArr.forEach(ws => { %>
+										<li class="<%= ws.status === 'in_progress' ? 'indication-in-progress' : '' %>"></li>
+									<% }) %>
+								</ol>
+							</div>								
+						</li>
+					<% }) %>
 				</ol>
-				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" >></a>
+							
+				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" ><span>></span></a>
 			</div>
 		</div>
 
@@ -119,6 +103,8 @@ console.log({dayObjArr});
 							<% }) %>
 						</ul>
 					</div>
+
+				
 
 					<%- include('partials/sessionComponent/main' ); %>
 				</div>

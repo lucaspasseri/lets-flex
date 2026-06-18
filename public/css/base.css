@@ -202,3 +202,15 @@ footer.footer {
 		font-size: 0.7em;
 	}
 }
+
+@media screen and (width < 485px) {
+	.training-day-list-container {
+		font-size: 0.8em;
+	}
+}
+
+@media screen and (width < 400px) {
+	.training-day-list-container {
+		font-size: 0.6em;
+	}
+}

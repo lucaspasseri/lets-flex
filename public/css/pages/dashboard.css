@@ -1,6 +1,9 @@
 .main.dashboard {
 	display: flex;
 	flex-direction: column;
+
+	--week-list-arrow-size: 2.2em;
+	--workout-session-indication-item-size: 0.5em;
 }
 
 .main.dashboard .main-header {
@@ -44,45 +47,32 @@
 
 .main.dashboard .week-day-item {
 	background-color: var(--color-stitch-secondary);
-	padding: 1em;
+	padding: 0.8em 1em 0.4em;
 	color: var(--color-text);
-	display: flex;
-	flex-direction: column;
-	gap: 0.25em;
-	align-items: center;
 	border-radius: 6px;
+	border-top: 0.2em solid transparent;
 
-	> span:first-of-type {
+	> div {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25em;
+		align-items: center;
+	}
+
+	> div > span:first-of-type {
 		font-size: 0.7em;
 		color: var(--color-text-muted);
 	}
 
-	> span:nth-of-type(2) {
+	> div > span:nth-of-type(2) {
 		font-size: 1.2em;
 		letter-spacing: 0.1em;
 	}
 
 	&.active {
-		border-bottom: 0.2em solid var(--color-stitch);
-
-		> span {
+		border-color: var(--color-stitch);
+		> div > span {
 			color: var(--color-stitch);
-		}
-	}
-}
-
-@media screen and (width < 500px) {
-	.main.dashboard .week-day-item {
-		padding: 0.6em;
-
-		> span:first-of-type {
-			font-size: 0.52em;
-			color: var(--color-text-muted);
-		}
-
-		> span:nth-of-type(2) {
-			font-size: 0.9em;
-			letter-spacing: 0.1em;
 		}
 	}
 }
@@ -193,7 +183,7 @@
 }
 
 .date-section {
-	margin-top: 3em;
+	margin-top: 1em;
 }
 
 .date-section .current-day-container {
@@ -221,32 +211,43 @@
 }
 
 .date-section .workout-session-indication-container {
-	ul {
+	ol {
 		display: flex;
 		gap: 0.4em;
-		height: 0.3em;
+		height: var(--workout-session-indication-item-size);
 	}
 
 	li {
-		width: 0.3em;
-		height: 0.3em;
-		background-color: red;
+		height: 100%;
+		aspect-ratio: 1 / 1;
+		background-color: var(--color-stitch-text);
+		border-radius: 20%;
+	}
+
+	li.indication-in-progress {
+		background-color: var(--color-accent);
 	}
 }
 
 .date-section .previousDayArrow,
 .nextDayArrow {
 	border: none;
-	padding: 0.4em 0.8em;
+	box-shadow: var(--box-shadow-header);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+
+	height: var(--week-list-arrow-size);
+	aspect-ratio: 1/ 1;
 	border-radius: 6px;
-	color: var(--color-text-muted);
+	color: var(--color-text);
 	&:link,
 	&:visited {
 		background-color: var(--color-stitch-text);
 
 		text-align: center;
 		text-decoration: none;
-		display: inline-block;
 	}
 
 	&:hover,
@@ -277,53 +278,30 @@
 }
 
 .date-section .training-day-list-container {
-	margin-top: 0.6em;
 	display: flex;
 	justify-content: center;
+	position: relative;
+	margin: 0.6em var(--horizontal-margin) 0;
 
 	ol {
 		display: flex;
 		gap: 0.2em;
 		justify-content: center;
-		max-width: 700px;
 		width: 100%;
-		padding: 0 0.2em;
-		border: 1px solid blue;
+		list-style: none;
+		margin-top: 0.4em;
 	}
 
-	li {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 1;
-
-		span {
-			font-size: 1.2em;
-			letter-spacing: 0.1em;
-			margin-bottom: 0.2em;
-		}
-
-		&.active {
-			font-size: 1.15em;
-
-			span {
-				color: var(--color-stitch);
-				font-weight: 700;
-				margin-bottom: 0.2em;
-			}
-		}
+	a:first-of-type {
+		position: absolute;
+		top: calc(50% - var(--week-list-arrow-size) / 2);
+		left: 0;
 	}
-}
 
-@media screen and (width < 400px) {
-	.date-section .training-day-list-container {
-		ul {
-			gap: 0.2em;
-			p {
-				font-size: 0.8em;
-			}
-		}
+	a:nth-of-type(2) {
+		position: absolute;
+		top: calc(50% - var(--week-list-arrow-size) / 2);
+		right: 0;
 	}
 }
 
