@@ -12,6 +12,7 @@
 
 .main.dashboard .sync-status {
 	margin-top: 1em;
+	border: 1px solid red;
 
 	.title-container {
 		display: flex;
@@ -26,6 +27,33 @@
 	}
 }
 
+.main.dashboard .sync-status .week-day-item {
+	background-color: var(--color-stitch-secondary);
+	padding: 1em;
+	color: var(--color-text);
+	border-radius: 6px;
+	border-top: 0.2em solid var(--color-text);
+	display: flex;
+	flex-direction: column;
+	gap: 0.2em;
+	align-items: center;
+
+	&.active {
+		border-color: var(--color-stitch);
+		color: var(--color-stitch);
+	}
+
+	> span:first-of-type {
+		font-size: 0.7em;
+		color: var(--color-text-muted);
+	}
+
+	> span:nth-of-type(2) {
+		font-size: 1.2em;
+		letter-spacing: 0.1em;
+	}
+}
+
 .main.dashboard .current-week-container {
 	margin-top: 0.8em;
 	display: flex;
@@ -33,24 +61,16 @@
 
 	ul {
 		display: flex;
-		gap: 0.8em;
+		gap: 0.65em;
 	}
 }
 
-@media screen and (width < 500px) {
-	.main.dashboard .current-week-container {
-		ul {
-			gap: 0.4em;
-		}
-	}
-}
-
-.main.dashboard .week-day-item {
+.main.dashboard .training-day-list-container .week-day-item {
 	background-color: var(--color-stitch-secondary);
 	padding: 0.8em 1em 0.4em;
 	color: var(--color-text);
 	border-radius: 6px;
-	border-top: 0.2em solid transparent;
+	border-top: 0.2em solid var(--color-text);
 
 	> div {
 		display: flex;
@@ -325,16 +345,6 @@
 	font-weight: 700;
 }
 
-.date-section .change-active-session-container {
-	margin-top: 2.2em;
-	ul {
-		display: flex;
-		gap: 1em;
-		margin: 0 auto;
-		width: fit-content;
-	}
-}
-
 .date-section .multiple-session-container {
 	display: flex;
 	flex-direction: column;
@@ -359,9 +369,8 @@
 	margin: 1.2em var(--horizontal-margin) 2em;
 	display: flex;
 	flex: 1;
-	background-color: var(--color-header);
+	background-color: var(--color-stitch-secondary);
 	border-radius: 6px;
-	border: 1px solid yellowgreen;
 }
 
 .sessions-section.no-session {
@@ -397,6 +406,12 @@
 			border-radius: 6px;
 			width: 100%;
 			box-shadow: var(--box-shadow-header);
+		}
+
+		&.active-item {
+			a {
+				background-color: var(--color-stitch);
+			}
 		}
 	}
 }

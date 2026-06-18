@@ -1,0 +1,34 @@
+<%
+const currWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
+const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage  ?? 0;
+%>
+
+<div class="session-header">
+	<div class="session-header-text">	
+		<p>CURRENT WORKOUT SESSION</p>
+		<h3>
+			<%= 
+				currWorkoutSession?.name
+			%>
+		</h3>
+	</div>
+	<% if(currWorkoutSession?.status === "in_progress") { %>
+		<div class="complete-indicator-container">
+			<span>
+				<%= `${Math.round(workoutSessionPerformedPercentage)}%` %> COMPLETE
+			</span>
+		</div>
+	<% } else if(currWorkoutSession?.status === "finished") { %>
+		<div class="complete-indicator-container">
+			<span>
+				SESSION FINISHED
+			</span>
+		</div>
+	<% } else { %>
+		<div class="complete-indicator-container">
+			<span>
+				SESSION NOT STARTED
+			</span>
+		</div>
+	<% } %>
+</div>

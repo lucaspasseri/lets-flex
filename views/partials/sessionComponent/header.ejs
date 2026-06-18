@@ -1,34 +1,55 @@
 <%
-const currWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
-const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage  ?? 0;
+const sessionVm = locals.sessionVm ?? null;
+const performedPercentage = locals.performedPercentage ?? 0;
+
+const isWorkout = sessionVm?.type === "workout";
+const isTemplate = sessionVm?.type === "template";
+
+const status = sessionVm?.status ?? null;
+
+const eyebrow = isWorkout
+	? "CURRENT WORKOUT SESSION"
+	: isTemplate
+		? "SESSION TEMPLATE"
+		: "SESSION";
+
+const getStatusLabel = () => {
+	if (isTemplate) {
+		return `${sessionVm?.steps?.length ?? 0} STEPS`;
+	}
+
+	if (status === "in_progress") {
+		return `${Math.round(performedPercentage)}% COMPLETE`;
+	}
+
+	if (status === "finished") {
+		return "SESSION FINISHED";
+	}
+
+	if (status === "planned") {
+		return "SESSION NOT STARTED";
+	}
+
+	if (status === "cancelled") {
+		return "SESSION CANCELLED";
+	}
+
+	return "NO STATUS";
+};
 %>
 
 <div class="session-header">
 	<div class="session-header-text">	
-		<p>CURRENT WORKOUT SESSION</p>
+		<p><%= eyebrow %></p>
+
 		<h3>
-			<%= 
-				currWorkoutSession?.name
-			%>
+			<%= sessionVm?.name ?? "( NO SESSION )" %>
 		</h3>
 	</div>
-	<% if(currWorkoutSession?.status === "in_progress") { %>
-		<div class="complete-indicator-container">
-			<span>
-				<%= `${Math.round(workoutSessionPerformedPercentage)}%` %> COMPLETE
-			</span>
-		</div>
-	<% } else if(currWorkoutSession?.status === "finished") { %>
-		<div class="complete-indicator-container">
-			<span>
-				SESSION FINISHED
-			</span>
-		</div>
-	<% } else { %>
-		<div class="complete-indicator-container">
-			<span>
-				SESSION NOT STARTED
-			</span>
-		</div>
-	<% } %>
+
+	<div class="complete-indicator-container">
+		<span>
+			<%= getStatusLabel() %>
+		</span>
+	</div>
 </div>

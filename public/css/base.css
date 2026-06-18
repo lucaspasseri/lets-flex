@@ -204,13 +204,15 @@ footer.footer {
 }
 
 @media screen and (width < 485px) {
-	.training-day-list-container {
+	.training-day-list-container,
+	.current-week-container {
 		font-size: 0.8em;
 	}
 }
 
 @media screen and (width < 400px) {
-	.training-day-list-container {
+	.training-day-list-container,
+	.current-week-container {
 		font-size: 0.6em;
 	}
 }

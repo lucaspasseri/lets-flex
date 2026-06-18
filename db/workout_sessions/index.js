@@ -62,6 +62,7 @@ async function getWorkoutSessionWithStepsInfoByTrainingDayId(
 
 			se.name,
 			se.is_archived,
+			se.notes AS session_notes,
 
 			(
 				SELECT COALESCE(

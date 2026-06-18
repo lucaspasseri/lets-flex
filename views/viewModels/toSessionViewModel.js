@@ -5,11 +5,12 @@ function toSessionViewModel(session, { type }) {
 		id: session.id,
 		name: session.name,
 		notes: session.notes,
+		sessionNotes: session.session_notes,
 		isArchived: session.is_archived,
 		status: session.status ?? null,
 		startedAt: session.started_at ?? null,
 		finishedAt: session.finished_at ?? null,
-		steps: session.steps.map(toStepViewModel),
+		steps: (session.steps ?? []).map(toStepViewModel),
 	};
 
 	function toStepViewModel(step) {

@@ -1,55 +1,15 @@
 <% 
-const { formatDate, addDays, isSameDay } = locals.helpers;
 const daysDifference = locals.sessionState?.daysDifference ?? null;
-const activeDay = locals.sessionState?.activeDay ?? currDay;
-
-const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
-
-const currTrainingDay = locals.appState?.currentTrainingDay ?? {};
-
-const workoutSessionArr = locals.data?.workoutSessionArr ?? [];
-
-const filterWorkoutSessionByDay = (sessionArr, day) => {
-	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
-}
-const workoutSessionArrByDay = filterWorkoutSessionByDay(workoutSessionArr, activeDay);
 
 const currProgramId = locals.sessionState?.programId ?? null; 
+const workoutSessionId = locals.sessionState?.workoutSessionId ?? null;
 
 
-const calendarSize = 7;
-const dayObjArr = [];
-for(let i =0; i < calendarSize/2; i++){
-	if(i === 0){
-		const obj = {
-			isActive: true,
-			day: activeDay,
-			workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, activeDay)
-		}
+const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage  ?? 0;
+const workoutSessionArrByDay = locals.data?.workoutSessionArrByTrainingDay ?? [];
+const workoutStepLogArr = locals.data?.workoutStepLogArr ?? [];
 
-		dayObjArr.push(obj);
-		continue;
-	}
-
-	const previousDay = addDays(activeDay, -i);
-	const nextDay = addDays(activeDay, +i);
-
-	const pObj = {
-		isActive: false,
-		day: previousDay,
-		workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, previousDay)
-	}
-
-		const nObj = {
-		isActive: false,
-		day: nextDay,
-		workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, nextDay)
-	}
-
-	dayObjArr.unshift(pObj);
-	dayObjArr.push(nObj);
-}
-
+const currentWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 %>
 <main class="main dashboard">
 	<%- include("partials/dashboardPage/noActiveProgramSection"); %>
@@ -58,38 +18,19 @@ for(let i =0; i < calendarSize/2; i++){
 
 		<%- include("partials/dashboardPage/currentProgramBanner"); %>
 
-		<div class="date-section">
-			<div class="training-day-list-container">
-				<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><span><</span></a>
-				<ol>
-					<% dayObjArr.forEach((day,index) => { %>
-						<li class="week-day-item <%= day.isActive ? 'active' : '' %>">
-							<div>
-								<span><%= formatDate(day.day, "EEE").toUpperCase() %></span> 
-								<span><%= formatDate(day.day, "dd") %></span> 
-							</div>
-							<div class="workout-session-indication-container">
-								<ol>
-									<% day.workoutSessionArr.forEach(ws => { %>
-										<li class="<%= ws.status === 'in_progress' ? 'indication-in-progress' : '' %>"></li>
-									<% }) %>
-								</ol>
-							</div>								
-						</li>
-					<% }) %>
-				</ol>
-							
-				<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" ><span>></span></a>
-			</div>
-		</div>
+		<%- include("partials/dashboardPage/dateSection"); %>
 
-		<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? "no-session" : "" %>">
+		<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? 'no-session' : '' %>">
 			<% if (workoutSessionArrByDay.length === 0) { %>
 				<h2> ( RESTING / NO-SESSION DAY )</h2>
 
 			<% } else if (workoutSessionArrByDay.length === 1) { %>
 				<div class="sessions-container">
-						<%- include('partials/sessionComponent/main' ); %>
+						<%- include('partials/sessionComponent/main', {
+	sessionVm: currentWorkoutSession,
+	workoutStepLogArr,
+	performedPercentage: workoutSessionPerformedPercentage,
+}) %>
 				</div>
 
 			<% } else { %>
@@ -97,16 +38,22 @@ for(let i =0; i < calendarSize/2; i++){
 					<div class="change-active-session-container">
 						<ul>
 							<% workoutSessionArrByDay.forEach(wSession => { %>
-								<li>
+								<li class="<%= wSession.id === workoutSessionId ? 'active-item' : '' %>">
 									<a href="<%= `/?daysDifference=${daysDifference}&workoutSessionId=${wSession.id}` %>"></a>
 								</li>
+
+						
 							<% }) %>
 						</ul>
 					</div>
 
+					<%- include('partials/sessionComponent/main', {
+	sessionVm: currentWorkoutSession,
+	workoutStepLogArr,
+	performedPercentage: workoutSessionPerformedPercentage,
+}) %>
+						
 				
-
-					<%- include('partials/sessionComponent/main' ); %>
 				</div>
 			<% } %>
 		</div>

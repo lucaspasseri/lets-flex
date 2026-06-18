@@ -1,0 +1,69 @@
+<%
+const { formatDate, addDays, isSameDay } = locals.helpers;
+
+const daysDifference = locals.sessionState?.daysDifference ?? null;
+const activeDay = locals.sessionState?.activeDay ?? currDay;
+const workoutSessionArr = locals.data?.workoutSessionArr ?? [];
+
+const filterWorkoutSessionByDay = (sessionArr, day) => {
+	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);
+}
+
+const calendarSize = 7;
+const dayObjArr = [];
+for(let i =0; i < calendarSize/2; i++){
+	if(i === 0){
+		const obj = {
+			isActive: true,
+			day: activeDay,
+			workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, activeDay)
+		}
+
+		dayObjArr.push(obj);
+		continue;
+	}
+
+	const previousDay = addDays(activeDay, -i);
+	const nextDay = addDays(activeDay, +i);
+
+	const pObj = {
+		isActive: false,
+		day: previousDay,
+		workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, previousDay)
+	}
+
+		const nObj = {
+		isActive: false,
+		day: nextDay,
+		workoutSessionArr: filterWorkoutSessionByDay(workoutSessionArr, nextDay)
+	}
+
+	dayObjArr.unshift(pObj);
+	dayObjArr.push(nObj);
+}
+%>
+
+<div class="date-section">
+	<div class="training-day-list-container">
+		<a href="<%= `/?daysDifference=${daysDifference -1}` %>" class="previousDayArrow" ><span><</span></a>
+		<ol>
+			<% dayObjArr.forEach((day,index) => { %>
+				<li class="week-day-item <%= day.isActive ? 'active' : '' %>">
+					<div>
+						<span><%= formatDate(day.day, "EEE").toUpperCase() %></span> 
+						<span><%= formatDate(day.day, "dd") %></span> 
+					</div>
+					<div class="workout-session-indication-container">
+						<ol>
+							<% day.workoutSessionArr.forEach(ws => { %>
+								<li class="<%= ws.status === 'in_progress' ? 'indication-in-progress' : '' %>"></li>
+							<% }) %>
+						</ol>
+					</div>								
+				</li>
+			<% }) %>
+		</ol>
+					
+		<a href="<%= `/?daysDifference=${daysDifference +1}` %>"class="nextDayArrow" ><span>></span></a>
+	</div>
+</div>
