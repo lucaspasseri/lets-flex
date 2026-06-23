@@ -178,12 +178,28 @@ async function finishWorkoutSession(db, { workoutSessionId }) {
 	return rows[0];
 }
 
+async function cancelWorkoutSession(db, { workoutSessionId }) {
+	const { rows } = await db.query(
+		`
+		UPDATE workout_sessions
+		SET
+			status = 'cancelled'
+		WHERE id = $1
+		RETURNING *
+		`,
+		[workoutSessionId],
+	);
+
+	return rows[0];
+}
+
 export {
 	insertWorkoutSession,
 	getWorkoutSessionById,
 	getWorkoutSessionInProgressBySessionId,
 	startWorkoutSession,
 	finishWorkoutSession,
+	cancelWorkoutSession,
 	getWorkoutSessionBySessionId,
 	getWorkoutSessionByTrainingDayId,
 	getWorkoutSessionWithStepsInfoByTrainingDayId,

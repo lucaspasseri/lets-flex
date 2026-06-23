@@ -46,4 +46,19 @@ async function finishWorkoutSession(req, res) {
 	);
 }
 
-export { createWorkoutSession, startWorkoutSession, finishWorkoutSession };
+async function cancelWorkoutSession(req, res) {
+	const { workoutSessionId } = req.params;
+
+	const returningId = await workoutSessionsDb.cancelWorkoutSession(pool, {
+		workoutSessionId,
+	});
+
+	res.redirect("/programs/day");
+}
+
+export {
+	createWorkoutSession,
+	startWorkoutSession,
+	finishWorkoutSession,
+	cancelWorkoutSession,
+};

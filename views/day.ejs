@@ -25,6 +25,10 @@ const getNavLinkHref = (dayId) => {
 
 const trainingDayIdArr = trainingDayArr.map( day => day.training_day_id);
 
+const baseNameModalId = "deleteWorkoutSessionId";
+
+const notCancelledWorkoutSessionArr = workoutSessionArr.filter(ws => ws.status !== "cancelled");
+
 %>
 <main class="main day">
 
@@ -71,12 +75,12 @@ const trainingDayIdArr = trainingDayArr.map( day => day.training_day_id);
 		</form>
 	</div>
 
-	<% if(workoutSessionArr.length > 0 ) { %>
+	<% if(notCancelledWorkoutSessionArr.length > 0 ) { %>
 		<div class="workout-session-list-container">
 			<ul>
-				<% workoutSessionArr.forEach(wSession => { %>
+				<% notCancelledWorkoutSessionArr.forEach( wSession => { %>
 					<li>
-							<%- include("partials/session/sessionCard", {session: wSession}) %>
+							<%- include("partials/session/sessionCard", {session: wSession, modalId: `${baseNameModalId}-${wSession.id}` }) %>
 					</li>
 				<% }) %>
 			</ul>
@@ -104,3 +108,20 @@ const trainingDayIdArr = trainingDayArr.map( day => day.training_day_id);
 		rail.scrollBy({ left: 240, behavior: "smooth" });
 	});
 </script>
+
+<%- contentFor("overlays") %>
+
+
+
+<% workoutSessionArr.forEach( (wSession) => { %>
+
+	<%- include("partials/basicModal", {
+		modal: {
+			id: `${baseNameModalId}-${wSession.id}`,
+			title: "Delete the workout session",
+			description: "",
+			renderContent: () => include("partials/deleteSessionWorkoutForm", {currWorkoutSessionId: wSession.id})
+		}
+	}) %>
+	
+<% }) %>
