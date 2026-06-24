@@ -84,15 +84,15 @@ const getStepName = step => {
 						<div class="step-status">
 							<% if (step.status === "planned") { %>
 								<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-									<use href="/status-yellow.svg"></use>
+									<use href="/empty-status.svg"></use>
 								</svg>
 							<% } else if (step.status === "performed") { %>
 								<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-									<use href="/status-green.svg"></use>
+									<use href="/done-status.svg"></use>
 								</svg>
 							<% } else { %>
 								<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-									<use href="/status-red.svg"></use>
+									<use href="/skipped-status.svg"></use>
 								</svg>
 							<% } %>
 						</div>

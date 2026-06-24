@@ -73,9 +73,9 @@ const currWorkoutStepLog =
 	workoutStepLogVmArr.find(log => log.status === "planned") ?? null;
 
 const getStatusIconHref = status => {
-	if (status === "planned") return "/status-yellow.svg";
-	if (status === "performed") return "/status-green.svg";
-	return "/status-red.svg";
+	if (status === "planned") return "/empty-status.svg";
+	if (status === "performed") return "/done-status.svg";
+	return "/skipped-status.svg";
 };
 
 const shouldShowStartButton =
@@ -127,8 +127,8 @@ const shouldShowWorkoutLogs =
 							<%= getStepName(step) %>
 						</p>
 
-						<div class="step-status">
-							<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
+						<div class="step-status <%= step.status %>">
+							<svg width="32" height="32" viewBox="0 0 64 64" class="icon">
 								<use href="<%= getStatusIconHref(step.status) %>"></use>
 							</svg>
 						</div>
@@ -152,13 +152,17 @@ const shouldShowWorkoutLogs =
 					<div class="button-status-container">
 						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
 							<button type="submit">
-								Skip
+								<svg width="36" height="36" viewBox="6 6 52 52" class="icon">
+									<use href="/skipped-status-borderless.svg"></use>
+								</svg>
 							</button>
 						</form>
 
 						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
 							<button type="submit">
-								Complete
+								<svg width="36" height="36" viewBox="6 6 52 52" class="icon">
+									<use href="/done-status-borderless.svg"></use>
+								</svg>
 							</button>
 						</form>
 					</div>
@@ -167,11 +171,11 @@ const shouldShowWorkoutLogs =
 
 		<% } else if (shouldShowFinishButton) { %>
 
-			<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/finish">
-				<button type="submit">
-					FINISH SESSION
-				</button>
-			</form>
+			<div class="finish-workout-session-button-container">
+				<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/finish">
+					<%- include('../simpleButton', { data: { text: "Finish session", type: "submit" } }); %>
+				</form>
+			</div>
 
 		<% } %>
 
