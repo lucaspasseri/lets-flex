@@ -7,7 +7,6 @@ const workoutSessionId = locals.sessionState?.workoutSessionId ?? null;
 
 const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage  ?? 0;
 const workoutSessionArrByDay = locals.data?.workoutSessionArrByTrainingDay ?? [];
-const workoutStepLogArr = locals.data?.workoutStepLogArr ?? [];
 
 const currentWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 %>
@@ -27,10 +26,9 @@ const currentWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 			<% } else if (workoutSessionArrByDay.length === 1) { %>
 				<div class="sessions-container">
 						<%- include('partials/sessionComponent/main', {
-	sessionVm: currentWorkoutSession,
-	workoutStepLogArr,
-	performedPercentage: workoutSessionPerformedPercentage,
-}) %>
+							sessionVm: currentWorkoutSession,
+							performedPercentage: workoutSessionPerformedPercentage,
+						}) %>
 				</div>
 
 			<% } else { %>
@@ -48,12 +46,10 @@ const currentWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 					</div>
 
 					<%- include('partials/sessionComponent/main', {
-	sessionVm: currentWorkoutSession,
-	workoutStepLogArr,
-	performedPercentage: workoutSessionPerformedPercentage,
-}) %>
+						sessionVm: currentWorkoutSession,
+						performedPercentage: workoutSessionPerformedPercentage,
+					}) %>
 						
-				
 				</div>
 			<% } %>
 		</div>

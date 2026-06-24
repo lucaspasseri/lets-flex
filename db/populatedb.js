@@ -210,6 +210,10 @@ CREATE TABLE workout_step_logs (
 	UNIQUE (workout_session_id, step_order)
 );
 
+ALTER TABLE workout_step_logs
+ADD CONSTRAINT workout_step_logs_unique_workout_session_step
+UNIQUE (workout_session_id, session_step_id);
+
 CREATE TABLE muscles (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	common_name VARCHAR NOT NULL,
