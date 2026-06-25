@@ -1,7 +1,7 @@
 import pool from "../pool.js";
 
-async function getAllUsers() {
-	const { rows: users } = await pool.query("SELECT * FROM users");
+async function getAllUsers(db) {
+	const { rows: users } = await db.query("SELECT * FROM users");
 
 	return users;
 }

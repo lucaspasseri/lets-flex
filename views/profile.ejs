@@ -1,6 +1,6 @@
 <% 
-const currUserId = locals.sessionState.userId ?? null;
-const userArr = locals.data?.userArr ?? [];
+const currUserId = locals?.appState?.user?.id ?? null;
+const userArr = locals?.data?.users?.items ?? [];
 
 const entity = "user";
 const loggedUserPath = "/profile/?userId=";

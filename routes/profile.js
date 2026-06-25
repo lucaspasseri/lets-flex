@@ -2,21 +2,23 @@ import { Router } from "express";
 
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
-import { getProfilePageParams } from "../middlewares/getProfilePageParams.js";
-import { setProfilePageContext } from "../middlewares/setProfilePageContext.js";
-import { loadProfilePageData } from "../middlewares/loadProfilePageData.js";
-import { renderProfilePage } from "../controllers/profile.js";
+import { profileController } from "../controllers/profileController.js";
 
 const router = Router();
 
-router.get(
-	"/",
-	getUrlAndPath,
-	getSessionState,
-	getProfilePageParams,
-	setProfilePageContext,
-	loadProfilePageData,
-	renderProfilePage,
-);
+router.use(getUrlAndPath);
+router.use(getSessionState);
+
+router.get("/", profileController.show);
 
 export default router;
+
+// router.get(
+// 	"/",
+// 	getUrlAndPath,
+// 	getSessionState,
+// 	getProfilePageParams,
+// 	setProfilePageContext,
+// 	loadProfilePageData,
+// 	renderProfilePage,
+// );
