@@ -14,7 +14,11 @@ const setDashboardPageWorkoutSessionContext = async (req, res, next) => {
 		: null;
 
 	if (workoutSessionId === null) {
-		const currentWorkoutSession = workoutSessionArrByTrainingDay?.[0] ?? null;
+		const currentWorkoutSession = workoutSessionArrByTrainingDay?.[0]
+			? toSessionViewModel(workoutSessionArrByTrainingDay[0], {
+					type: "workout",
+				})
+			: null;
 
 		res.locals.appState.currentWorkoutSession = currentWorkoutSession;
 		res.locals.sessionState.workoutSessionId =
@@ -22,10 +26,6 @@ const setDashboardPageWorkoutSessionContext = async (req, res, next) => {
 		next();
 		return;
 	}
-
-	const shapedWorkoutSessionArr = workoutSessionArrByTrainingDay.map(ws =>
-		toSessionViewModel(ws, { type: "workout" }),
-	);
 
 	res.locals.appState.currentWorkoutSession = toSessionViewModel(
 		currentWorkoutSession,

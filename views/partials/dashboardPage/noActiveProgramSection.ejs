@@ -1,11 +1,11 @@
 <% 
 const { formatDate, addDays} = locals.helpers;
 const currDay = new Date();
-const activeDay = locals.sessionState?.activeDay ?? currDay;
+const activeDay = locals?.appState?.day ?? currDay;
 const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
 const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
-const currUserId = locals.sessionState?.userId ?? null; 
-const currProgramId = locals.sessionState?.programId ?? null; 
+const currUserId = locals?.appState?.user?.id ?? null; 
+const currProgramId = locals?.appState?.program?.id ?? null; 
 %>
 
 <div>

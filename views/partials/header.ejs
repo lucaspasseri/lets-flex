@@ -1,7 +1,9 @@
-<% const username = locals.appState?.currentUser?.name ?? "Guest" %>
+<% const username = locals?.appState?.user?.name ?? "Guest" %>
 
 <header class="page-header">
-	<div class="logoContainer"><%- include('logo'); %></div>
+	<div class="logoContainer">
+		<a href="/"> <%- include('logo'); %> </a>
+	</div>
 	<div>
 		<div class="avatar"></div>
 		<div class="avatar-name">

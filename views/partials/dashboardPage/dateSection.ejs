@@ -1,9 +1,10 @@
 <%
 const { formatDate, addDays, isSameDay } = locals.helpers;
 
-const daysDifference = locals.sessionState?.daysDifference ?? null;
-const activeDay = locals.sessionState?.activeDay ?? currDay;
-const workoutSessionArr = locals.data?.workoutSessionArr ?? [];
+const daysDifference = locals?.pageState?.daysDifference ?? null;
+const currDay = new Date();
+const activeDay = locals?.appState?.day ?? currDay;
+const workoutSessionArr = locals.data?.workoutSessions?.items ?? [];
 
 const filterWorkoutSessionByDay = (sessionArr, day) => {
 	return (isSameDay && sessionArr.filter(session => isSameDay(session.scheduled_date, day)) || []);

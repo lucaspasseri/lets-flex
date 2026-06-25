@@ -1,8 +1,7 @@
 <%
-	const currProgram = locals.appState?.currentProgram ?? {};
-	const currTrainingDay = locals.appState?.currentTrainingDay ?? null;
-	const cycleArr = locals.data?.cycleArr ?? [];
-
+	const currProgram = locals?.appState?.program ?? null;
+	const currTrainingDay = locals?.appState?.trainingDay ?? null;
+	const cycleArr = locals.data?.cycles?.items ?? [];
 	const filteredCycleArr = cycleArr.filter(cycle => cycle.id === currTrainingDay?.cycle_id);
 	const currCycle = filteredCycleArr.length > 0 ? filteredCycleArr[0] : null;
 %>

@@ -1,14 +1,11 @@
 <% 
-const daysDifference = locals.sessionState?.daysDifference ?? null;
+const daysDifference = locals?.pageState?.daysDifference ?? null; 
+const currProgramId = locals?.appState?.program?.id ?? null; 
+const workoutSessionId = locals?.appState?.workoutSession?.id ?? null; 
+const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage ?? 0;
+const workoutSessionArrByDay = locals?.data?.workoutSessions?.itemsByTrainingDay ?? [];
+const currentWorkoutSession = locals?.appState?.workoutSession ?? null; 
 
-const currProgramId = locals.sessionState?.programId ?? null; 
-const workoutSessionId = locals.sessionState?.workoutSessionId ?? null;
-
-
-const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage  ?? 0;
-const workoutSessionArrByDay = locals.data?.workoutSessionArrByTrainingDay ?? [];
-
-const currentWorkoutSession = locals.appState?.currentWorkoutSession ?? null;
 %>
 <main class="main dashboard">
 	<%- include("partials/dashboardPage/noActiveProgramSection"); %>
