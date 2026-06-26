@@ -1,7 +1,7 @@
 import pool from "../pool.js";
 
-async function getAllStepTypes() {
-	const { rows: stepTypes } = await pool.query("SELECT * FROM step_types");
+async function getAllStepTypes(db) {
+	const { rows: stepTypes } = await db.query("SELECT * FROM step_types");
 
 	return stepTypes;
 }

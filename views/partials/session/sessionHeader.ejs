@@ -5,19 +5,19 @@ const modalId = locals?.modalId ?? null;
 <header class="session-card-header">
 	<div>
 		<h2 class="session-card-title">
-			<%= session.name %>
+			<%= session?.name %>
 		</h2>
 
-		<% if (session.notes) { %>
+		<% if (session?.notes) { %>
 			<p class="session-card-notes">
-				<%= session.notes %>
+				<%= session?.notes %>
 			</p>
 		<% } %>
 	</div>
 
-	<% if (session.type === "workout" && session.status) { %>
+	<% if (session?.type === "workout" && session?.status) { %>
 		<span class="session-card-status">
-			<%= session.status %>
+			<%= session?.status %>
 		</span>
 	<% } %>
 

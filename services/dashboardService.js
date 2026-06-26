@@ -14,37 +14,27 @@ async function getDashboardPage({ query, sessionState }) {
 
 	const { userId, programId } = sessionState;
 
-	const user = userId ? await usersDb.getUserById(pool, { userId }) : null;
-
-	const program = programId
-		? await programsDb.getProgramById(pool, { programId })
-		: null;
-
 	const currDay = new Date();
-
 	const day =
 		pageState.daysDifference === null
 			? currDay
 			: addDays(currDay, pageState.daysDifference);
 
-	const trainingDay = day
-		? await trainingDaysDb.getTrainingDayByScheduledDateAndProgramId(pool, {
+	const [user, program, trainingDay, cycleArr, workoutSessionArr] =
+		await Promise.all([
+			usersDb.getUserById(pool, { userId }),
+			programsDb.getProgramById(pool, { programId }),
+			trainingDaysDb.getTrainingDayByScheduledDateAndProgramId(pool, {
 				scheduledDate: day,
-				programId: program?.id,
-			})
-		: null;
-
-	const cycleArr = program?.id
-		? await cyclesDb.getCyclesByProgramId(pool, {
-				programId: program.id,
-			})
-		: [];
-
-	const workoutSessionArr = program?.id
-		? await workoutSessionsDb.getWorkoutSessionByProgramId(pool, {
-				programId: program.id,
-			})
-		: [];
+				programId: programId,
+			}),
+			cyclesDb.getCyclesByProgramId(pool, {
+				programId: programId,
+			}),
+			workoutSessionsDb.getWorkoutSessionByProgramId(pool, {
+				programId: programId,
+			}),
+		]);
 
 	const workoutSessionArrByTrainingDay = trainingDay?.id
 		? await workoutSessionsDb.getWorkoutSessionWithStepsInfoByTrainingDayId(

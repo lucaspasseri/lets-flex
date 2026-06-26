@@ -1,4 +1,4 @@
-<article class="session-card session-card-<%= session.type %>">
+<article class="session-card session-card-<%= session?.type %>">
 	<%- include("./sessionHeader", { session }) %>
 	<p>SESSION STEPS</p>
 	<%- include("./stepList", { steps: session?.steps }) %>

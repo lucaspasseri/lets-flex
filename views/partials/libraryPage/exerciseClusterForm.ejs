@@ -1,33 +1,33 @@
 <%
-const movementPatternArr = locals.data?.movementPatternArr ?? [];
-const equipmentArr = locals.data?.equipmentArr ?? [];
-const muscleArr = locals.data?.muscleArr ?? [];
-const muscleRoleArr = locals.data?.muscleRoleArr ?? [];
+const movementPatternArr = locals?.data?.movementPatterns?.items ?? [];
+const equipmentArr = locals?.data?.equipments?.items ?? [];
+const muscleArr = locals?.data?.muscles?.items ?? [];
+const muscleRoleArr = locals.data?.muscleRoles?.items ?? [];
 %>
 
 <form class="forms" action="/exercise_cluster" method="POST">
-	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
-	<%- include("select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
+	<%- include('../olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
+	<%- include("../select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
 	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id, required: true  } }); %>
-	<%- include("select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
+	<%- include("../select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
 	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id, required: true  } }); %>
 		<p>Muscle section</p>
 	<div class="muscle-section">
 		
-		<%- include("select", { data: { id: "muscleIdSelect", label: "Performing muscle",
+		<%- include("../select", { data: { id: "muscleIdSelect", label: "Performing muscle",
 		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => muscle.id } }); %>	
 
-		<%- include("select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
+		<%- include("../select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
 		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => muscle_role.id } }); %>	
 
-		<%- include('simpleButton', { data: { text: "Add muscle", type: "button", id: "addMusclePerformingRoleButton" } }); %>
+		<%- include('../simpleButton', { data: { text: "Add muscle", type: "button", id: "addMusclePerformingRoleButton" } }); %>
 	</div>
 
 	<ul id="musclePerformingList">
 		<p id="musclePerformingListMessage">No muscle relation found</p>
 	</ul>
 
-	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+	<%- include('../simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 
 <script>

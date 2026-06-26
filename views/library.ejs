@@ -1,23 +1,13 @@
 <% 
-const exerciseArr = locals.data?.exerciseVariantArr ?? []; 
+const exerciseArr = locals?.data?.exerciseVariants?.items ?? []; 
+const sessionArr = locals?.data?.sessions?.items?.filter(session => session.isArchived === false) ?? [];
 
-const sessionArr = locals.data?.sessionArr?.filter(session => session.isArchived === false) ?? [];
+const currentSession = locals?.appState?.session ?? null;
 
 const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
 const deleteExerciseModalId = "deleteExerciseModalId";
 const deleteSessionModalId = "deleteSessionModalId";
-
-const pairedSessionArr = sessionArr.reduce((acc, session, index) => {
-	if(index %2 === 0) {
-		acc.push([session]);
-	} else {
-		acc[acc.length - 1].push(session);
-	}
-	return acc;
-}, []);
-
-const {currentSession } = locals?.appState ?? null;
 %>
 
 <main class="main library">
@@ -139,7 +129,7 @@ searchInput.addEventListener("input", (ev) => {
 		id: createSessionModalId,
 		title: "Create session",
 		description: "Fill in the session information below.",
-		renderContent: () => include("partials/sessionForm")
+		renderContent: () => include("partials/libraryPage/sessionForm")
 	}
 }) %>
 
@@ -148,7 +138,7 @@ searchInput.addEventListener("input", (ev) => {
 		id: createExerciseModalId,
 		title: "Create exercise",
 		description: "Fill in the exercise information below.",
-		renderContent: () => include("partials/exerciseClusterForm")
+		renderContent: () => include("partials/libraryPage/exerciseClusterForm")
 	}
 }) 
 %>
@@ -158,7 +148,7 @@ searchInput.addEventListener("input", (ev) => {
 		id: deleteExerciseModalId,
 		title: "Delete exercise",
 		description: "",
-		renderContent: () => include("partials/deleteExerciseForm")
+		renderContent: () => include("partials/libraryPage/deleteExerciseForm")
 	}
 }) 
 %>
@@ -168,7 +158,7 @@ searchInput.addEventListener("input", (ev) => {
 		id: deleteSessionModalId,
 		title: "Delete session template",
 		description: "",
-		renderContent: () => include("partials/deleteSessionForm", {currSessionId: currentSession?.id ?? null})
+		renderContent: () => include("partials/libraryPage/deleteSessionForm", {currSessionId: currentSession?.id ?? null})
 	}
 }) 
 %>

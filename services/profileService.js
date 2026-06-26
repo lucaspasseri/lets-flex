@@ -6,8 +6,10 @@ async function getProfilePage({ query, sessionState }) {
 	const pageState = { userId: toNullableNumber(query?.userId) };
 	const userId = query?.userId ?? sessionState?.userId ?? null;
 
-	const user = userId ? await usersDb.getUserById(pool, { userId }) : null;
-	const userArr = (await usersDb.getAllUsers(pool)) ?? [];
+	const [user, userArr] = await Promise.all([
+		usersDb.getUserById(pool, { userId }),
+		usersDb.getAllUsers(pool),
+	]);
 
 	return {
 		pageState,

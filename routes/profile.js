@@ -12,13 +12,3 @@ router.use(getSessionState);
 router.get("/", profileController.show);
 
 export default router;
-
-// router.get(
-// 	"/",
-// 	getUrlAndPath,
-// 	getSessionState,
-// 	getProfilePageParams,
-// 	setProfilePageContext,
-// 	loadProfilePageData,
-// 	renderProfilePage,
-// );

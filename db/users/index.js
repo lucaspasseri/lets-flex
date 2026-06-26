@@ -20,7 +20,7 @@ async function getUserById(db, { userId }) {
 		userId,
 	]);
 
-	return users?.[0];
+	return users?.[0] ?? null;
 }
 
 async function postNewUser(db, { name, dob, anamnesis }) {

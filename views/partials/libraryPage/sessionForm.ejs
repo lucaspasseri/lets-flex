@@ -1,34 +1,34 @@
 <%
-const currSessionId = locals.sessionState?.sessionId || null;
-const stepTypeArr = locals.data?.stepTypeArr ?? [];
-const exerciseVariantArr = locals.data?.exerciseVariantArr ?? [];
+const currSessionId = locals?.appState?.session?.id || null;
+const stepTypeArr = locals?.data?.stepTypes?.items ?? [];
+const exerciseVariantArr = locals?.data?.exerciseVariants?.items ?? [];
 
 const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb", fullName: "Pounds"}];
 %>
 
 <form class="forms session-form" action="/sessions" method="POST">
 	<div class="session-fields-container">
-		<%- include('olaInput', { data: { label: "Session name", type: "text", name: "name", context: "sessionForm", required: true } }); %>
+		<%- include('../olaInput', { data: { label: "Session name", type: "text", name: "name", context: "sessionForm", required: true } }); %>
 		<textarea name="notes" placeholder="Notes" rows="3"></textarea>
 	</div>
 	<div class="session-step-fields-container">
 		<p>Add as many steps as needed</p>
-		<%- include("select", { data: { id: "stepTypeSelect", label: "Step type", name: "stepTypeId", required: true, 
+		<%- include("../select", { data: { id: "stepTypeSelect", label: "Step type", name: "stepTypeId", required: true, 
 	options: stepTypeArr, getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id  } }); %>
 
-		<%- include("select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
+		<%- include("../select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
 	options: exerciseVariantArr, getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id  } }); %>
 
-		<%- include('olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "sessionForm" } }); %>
-		<%- include('olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "sessionForm" } }); %>
+		<%- include('../olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "sessionForm" } }); %>
+		<%- include('../olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "sessionForm" } }); %>
 
 	
-		<%- include('olaInput', { data: { label: "Load", type: "number", name: "loadValue", context: "sessionForm" } }); %>
+		<%- include('../olaInput', { data: { label: "Load", type: "number", name: "loadValue", context: "sessionForm" } }); %>
 	
-		<%- include("select", { data: { id: "loadUnitSelect", label: "Load unit", name: "loadUnit" ,
+		<%- include("../select", { data: { id: "loadUnitSelect", label: "Load unit", name: "loadUnit" ,
 	options: unitArr, getOptionLabel: (unit) => unit.name, getOptionValue: (unit) => unit.fullName  } }); %>
 		
-		<%- include('simpleButton', { data: { text: "Add Step", type: "button", id: "addStepToCurrentStepList" } }); %>
+		<%- include('../simpleButton', { data: { text: "Add Step", type: "button", id: "addStepToCurrentStepList" } }); %>
 	</div>
 
 	<div class="current-steps-container">
@@ -39,7 +39,7 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 		<ul id="currentStepList"></ul>
 	</div>
 
-	<%- include('simpleButton', { data: { text: "Submit", type: "submit" } }); %>
+	<%- include('../simpleButton', { data: { text: "Submit", type: "submit" } }); %>
 </form>
 
 <script>
