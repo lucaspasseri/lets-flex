@@ -1,4 +1,5 @@
 import * as profileService from "../services/profileService.js";
+import toNullableNumber from "../utils/toNullableNumber.js";
 
 async function show(req, res, next) {
 	try {
@@ -7,10 +8,19 @@ async function show(req, res, next) {
 			sessionState: res.locals.sessionState,
 		});
 
-		req.session.state = {
-			...req.session.state,
-			userId: appState?.user?.id ?? null,
-		};
+		const previousUserId = toNullableNumber(res?.locals?.sessionState?.userId);
+		const currentUserId = toNullableNumber(appState.user?.id);
+
+		if (currentUserId !== null && currentUserId !== previousUserId) {
+			req.session.state = {
+				userId: appState?.user?.id ?? null,
+			};
+		} else {
+			req.session.state = {
+				...req.session.state,
+				userId: appState?.user?.id ?? null,
+			};
+		}
 
 		const profile = {
 			page: { ...res.locals.page, title: "Let's Flex!" },

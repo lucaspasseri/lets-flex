@@ -1,18 +1,17 @@
 <% 
 const {formatDate, addDays} = locals.helpers;
 
-const currUserId = locals.sessionState?.userId ?? null;
-const currProgramId = locals.sessionState?.programId ?? null;
-const currCycleId = locals.sessionState?.cycleId ?? null;
-const currSessionId = locals.sessionState?.sessionId ?? null;
-const currDayId = locals.sessionState?.dayId ?? null;
+const currUserId = locals?.appState?.user?.id ?? null;
+const currProgramId = locals?.appState?.program?.id ?? null;
+const currCycleId = locals?.appState?.cycle?.id ?? null;
+const currSessionId = locals?.appState?.session?.id ?? null;
+const currDayId = locals?.appState?.day?.id ?? null;
 
-const currProgram = locals.appState?.currentProgram ?? {};
+const currProgram = locals?.appState?.program ?? {};
 
-const programArr = locals.data?.programArr ?? [];
-const cycleArr = locals.data?.cycleArr ?? [];
-const sessionArr = locals.data?.sessionArr ?? [];
-const trainingDayArr = locals.data?.trainingDayArr ?? [];
+const programArr = locals?.data?.programs?.items ?? [];
+const cycleArr = locals?.data?.cycles?.items ?? [];
+const trainingDayArr = locals?.data?.trainingDays?.items ?? [];
 
 const programBasicLineId = "programsPageProgramBasicLine";
 const programBasicLineEntity = "program";

@@ -1,7 +1,7 @@
 import pool from "../pool.js";
 
-async function getAllGoals() {
-	const { rows: goals } = await pool.query("SELECT * FROM goals");
+async function getAllGoals(db) {
+	const { rows: goals } = await db.query("SELECT * FROM goals");
 
 	return goals;
 }

@@ -8,11 +8,6 @@ import {
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
-import { getProgramsPageParams } from "../middlewares/getProgramsPageParams.js";
-import { setProgramsPageUserContext } from "../middlewares/setProgramsPageUserContext.js";
-import { setProgramsPageProgramContext } from "../middlewares/setProgramsPageProgramContext.js";
-import { setProgramsPageCycleContext } from "../middlewares/setProgramsPageCycleContext.js";
-import { loadProgramsPageData } from "../middlewares/loadProgramsPageData.js";
 
 import { getDayPageParams } from "../middlewares/getDayPageParams.js";
 import { setDayPageUserContext } from "../middlewares/setDayPageUserContext.js";
@@ -21,23 +16,17 @@ import { setDayPageCycleContext } from "../middlewares/setDayPageCycleContext.js
 import { setDayPageDayContext } from "../middlewares/setDayPageDayContext.js";
 import { setDayPageSessionContext } from "../middlewares/setDayPageSessionContext.js";
 import { loadDayPageData } from "../middlewares/loadDayPageData.js";
+import { programsController } from "../controllers/programsController.js";
 
 const router = express.Router();
 
+router.use(getUrlAndPath);
+router.use(getHelpers);
+router.use(getSessionState);
+
 router.post("/", addNewProgram);
 
-router.get(
-	"/",
-	getUrlAndPath,
-	getHelpers,
-	getSessionState,
-	getProgramsPageParams,
-	setProgramsPageUserContext,
-	setProgramsPageProgramContext,
-	setProgramsPageCycleContext,
-	loadProgramsPageData,
-	renderProgramsPage,
-);
+router.get("/", programsController.show);
 
 router.get(
 	"/day",

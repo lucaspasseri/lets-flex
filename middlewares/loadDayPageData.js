@@ -21,7 +21,7 @@ const loadDayPageData = async (req, res, next) => {
 					programId,
 				})
 			: [],
-		stepTypesDb.getAllStepTypes(),
+		stepTypesDb.getAllStepTypes(pool),
 		exerciseVariantsDb.getAllExerciseVariants(pool),
 		sessionsDb.getAllSessions(pool),
 		workoutSessionsDb.getWorkoutSessionWithStepsInfoByTrainingDayId(pool, {

@@ -25,7 +25,7 @@ const loadLibraryPageData = async (req, res, next) => {
 		muscleRolesDb.getAllMuscleRoles(pool),
 		exerciseVariantsDb.getAllExerciseVariants(pool),
 		sessionsDb.getAllSessionsWithExerciseInfo(pool),
-		stepTypesDb.getAllStepTypes(),
+		stepTypesDb.getAllStepTypes(pool),
 	]);
 
 	const shapedSessionArr = sessionArr.map(session =>
