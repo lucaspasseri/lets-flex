@@ -17,6 +17,7 @@ import { setDayPageDayContext } from "../middlewares/setDayPageDayContext.js";
 import { setDayPageSessionContext } from "../middlewares/setDayPageSessionContext.js";
 import { loadDayPageData } from "../middlewares/loadDayPageData.js";
 import { programsController } from "../controllers/programsController.js";
+import { dayController } from "../controllers/dayController.js";
 
 const router = express.Router();
 
@@ -28,19 +29,21 @@ router.post("/", addNewProgram);
 
 router.get("/", programsController.show);
 
-router.get(
-	"/day",
-	getUrlAndPath,
-	getHelpers,
-	getSessionState,
-	getDayPageParams,
-	setDayPageUserContext,
-	setDayPageProgramContext,
-	setDayPageCycleContext,
-	setDayPageSessionContext,
-	setDayPageDayContext,
-	loadDayPageData,
-	renderDayPage,
-);
+router.get("/day", dayController.show);
 
 export default router;
+
+// router.get(
+// 	"/day",
+// 	getUrlAndPath,
+// 	getHelpers,
+// 	getSessionState,
+// 	getDayPageParams,
+// 	setDayPageUserContext,
+// 	setDayPageProgramContext,
+// 	setDayPageCycleContext,
+// 	setDayPageSessionContext,
+// 	setDayPageDayContext,
+// 	loadDayPageData,
+// 	renderDayPage,
+// );

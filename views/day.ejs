@@ -1,21 +1,21 @@
 <%
-const currDayId = locals.sessionState?.dayId ?? null;
-const trainingDayArr = locals.data?.trainingDayArr ?? [];
-const sessionArr = locals.data?.sessionArr ?? [];
-const workoutSessionArr = locals.data?.workoutSessionArr ?? [];
-
+const currDayId = locals?.appState?.day?.id ?? null;
+const trainingDayArr = locals?.data?.days?.items ?? [];
+const sessionArr = locals?.data?.sessions?.notArchivedItems ?? [];
+const workoutSessionArr = locals?.data?.workoutSessions?.notCancelledItems ?? [];
 
 const backUrl = locals.page?.backUrl ?? "";
 const { formatDate, addDays } = locals.helpers;
 
-const currProgram = locals.appState?.currentProgram ?? {};
-const currTrainingDay = locals.appState?.currentTrainingDay ?? null;
+const currProgram = locals?.appState?.program ?? {};
+const currTrainingDay = locals?.appState?.day ?? null;
+
 const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "Date outside the programs's boundaries";
 
 const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
 
-const getScheduledDate = (index) => {
-	const date = formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM/yyyy");
+const getScheduledDate = (trainingDay) => {
+	const date = formatDate && formatDate(trainingDay.scheduled_date, "dd/MM/yyyy");
 	return date;
 }
 
@@ -26,9 +26,6 @@ const getNavLinkHref = (dayId) => {
 const trainingDayIdArr = trainingDayArr.map( day => day.training_day_id);
 
 const baseNameModalId = "deleteWorkoutSessionId";
-
-const notCancelledWorkoutSessionArr = workoutSessionArr.filter(ws => ws.status !== "cancelled");
-
 %>
 <main class="main day">
 
@@ -42,8 +39,8 @@ const notCancelledWorkoutSessionArr = workoutSessionArr.filter(ws => ws.status !
 				<a href="<%= getNavLinkHref(currDayId - 1) %>" class="day-arrow" data-scroll-left><span><</span></a>
 			<% } %>
 			<ul class="day-rail" id="dayRail">
-				<% trainingDayArr.forEach((trainingDay,index) => { %>
-					<li><a href="<%= getNavLinkHref(trainingDay?.training_day_id) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduledDate(index) %></a></li>
+				<% trainingDayArr.forEach((trainingDay) => { %>
+					<li><a href="<%= getNavLinkHref(trainingDay?.training_day_id) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduledDate(trainingDay) %></a></li>
 				<% }) %>
 			</ul>
 			<% if(trainingDayIdArr.includes(currDayId+1)) {%>
@@ -75,10 +72,10 @@ const notCancelledWorkoutSessionArr = workoutSessionArr.filter(ws => ws.status !
 		</form>
 	</div>
 
-	<% if(notCancelledWorkoutSessionArr.length > 0 ) { %>
+	<% if(workoutSessionArr.length > 0 ) { %>
 		<div class="workout-session-list-container">
 			<ul>
-				<% notCancelledWorkoutSessionArr.forEach( wSession => { %>
+				<% workoutSessionArr.forEach( wSession => { %>
 					<li>
 							<%- include("partials/session/sessionCard", {session: wSession, modalId: `${baseNameModalId}-${wSession.id}` }) %>
 					</li>

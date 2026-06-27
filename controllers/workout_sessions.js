@@ -15,7 +15,7 @@ async function createWorkoutSession(req, res) {
 			trainingDayId,
 		}));
 
-	res.redirect("/programs/day");
+	res.redirect(`/programs/day?dayId=${trainingDayId}`);
 }
 
 async function startWorkoutSession(req, res) {
@@ -48,12 +48,13 @@ async function finishWorkoutSession(req, res) {
 
 async function cancelWorkoutSession(req, res) {
 	const { workoutSessionId } = req.params;
+	const { trainingDayId } = req.body;
 
 	const returningId = await workoutSessionsDb.cancelWorkoutSession(pool, {
 		workoutSessionId,
 	});
 
-	res.redirect("/programs/day");
+	res.redirect(`/programs/day?dayId=${trainingDayId}`);
 }
 
 export {

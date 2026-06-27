@@ -1,6 +1,7 @@
 <%
 const {currWorkoutSessionId} = locals;
 const action = `/workout_sessions/${currWorkoutSessionId}?_method=PATCH`;
+const currDayId = locals?.appState?.day?.id ?? null;
 %>
 
 <form
@@ -10,7 +11,7 @@ const action = `/workout_sessions/${currWorkoutSessionId}?_method=PATCH`;
 	class="forms"
 >
   <p>Are you sure?</p>
-
+	<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
   <%- include('simpleButton', { data: { text: "Confirm delete", type: "submit" } }); %>
 </form>
 

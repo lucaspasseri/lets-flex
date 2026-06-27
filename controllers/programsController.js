@@ -22,8 +22,6 @@ async function show(req, res, next) {
 			data,
 		};
 
-		console.log({ programs });
-
 		res.render("programs", programs);
 	} catch (err) {
 		next(err);
