@@ -20,7 +20,8 @@ async function createWorkoutSession(req, res) {
 
 async function startWorkoutSession(req, res) {
 	const { workoutSessionId } = req.params;
-	const { daysDifference } = req.session.state;
+	const daysDifference =
+		req.body.daysDifference ?? res.locals.sessionState.daysDifference;
 
 	const { workoutSession } = workoutSessionId
 		? await startWorkoutSessionService(pool, { workoutSessionId })
@@ -33,7 +34,8 @@ async function startWorkoutSession(req, res) {
 
 async function finishWorkoutSession(req, res) {
 	const { workoutSessionId } = req.params;
-	const { daysDifference } = req.session.state;
+	const daysDifference =
+		req.body.daysDifference ?? res.locals.sessionState.daysDifference;
 
 	const workoutSession = workoutSessionId
 		? await workoutSessionsDb.finishWorkoutSession(pool, {

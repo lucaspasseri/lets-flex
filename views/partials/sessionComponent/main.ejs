@@ -1,6 +1,7 @@
 <%
 const sessionVm = locals.sessionVm ?? null;
 const performedPercentage = locals.performedPercentage ?? 0;
+const daysDifference = locals?.pageState?.daysDifference ?? null;
 
 const isTemplate = sessionVm?.type === "template";
 const isWorkout = sessionVm?.type === "workout";
@@ -178,6 +179,7 @@ const shouldShowWorkoutLogs =
 
 					<div class="button-status-container">
 						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
+							<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 							<button type="submit">
 								<svg width="36" height="36" viewBox="6 6 52 52" class="icon">
 									<use href="/skipped-status-borderless.svg"></use>
@@ -186,6 +188,7 @@ const shouldShowWorkoutLogs =
 						</form>
 
 						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
+							<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 							<button type="submit">
 								<svg width="36" height="36" viewBox="6 6 52 52" class="icon">
 									<use href="/done-status-borderless.svg"></use>
@@ -199,7 +202,9 @@ const shouldShowWorkoutLogs =
 		<% } else if (shouldShowFinishButton) { %>
 
 			<div class="finish-workout-session-button-container">
+			
 				<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/finish">
+					<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 					<%- include('../simpleButton', { data: { text: "Finish session", type: "submit" } }); %>
 				</form>
 			</div>
@@ -244,6 +249,7 @@ const shouldShowWorkoutLogs =
 			<% if (shouldShowStartButton) { %>
 				<div class="button-container">
 					<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/start">
+						<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 						<button type="submit" aria-label="Start workout session">
 							<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
 								<use href="/play-black-icon.svg"></use>

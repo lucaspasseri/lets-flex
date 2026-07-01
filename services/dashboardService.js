@@ -1,72 +1,31 @@
-import pool from "../db/pool.js";
-import * as usersDb from "../db/users/index.js";
-import * as programsDb from "../db/programs/index.js";
-import * as trainingDaysDb from "../db/training_days/index.js";
-import * as cyclesDb from "../db/cycles/index.js";
-import * as workoutSessionsDb from "../db/workout_sessions/index.js";
-import toNullableNumber from "../utils/toNullableNumber.js";
-import { addDays } from "date-fns";
 import { toSessionViewModel } from "../views/viewModels/toSessionViewModel.js";
+import * as pageStateResolver from "./dashboardPageStateResolver.js";
+import * as dataLoader from "./dashboardDataLoader.js";
+import * as appStateResolver from "./dashboardAppStateResolver.js";
 
 async function getDashboardPage({ query, sessionState }) {
 	const { daysDifference, workoutSessionId } = query;
-	const pageState = { daysDifference: toNullableNumber(daysDifference) };
+
+	const pageState = await pageStateResolver.getPageState({
+		daysDifference,
+		workoutSessionId,
+	});
 
 	const { userId, programId } = sessionState;
 
-	const currDay = new Date();
-	const day =
-		pageState.daysDifference === null
-			? currDay
-			: addDays(currDay, pageState.daysDifference);
+	const data = await dataLoader.getData({
+		userId,
+		programId,
+		daysDifference: pageState.daysDifference,
+	});
 
-	const [user, program, trainingDay, cycleArr, workoutSessionArr] =
-		await Promise.all([
-			usersDb.getUserById(pool, { userId }),
-			programsDb.getProgramById(pool, { programId }),
-			trainingDaysDb.getTrainingDayByScheduledDateAndProgramId(pool, {
-				scheduledDate: day,
-				programId: programId,
-			}),
-			cyclesDb.getCyclesByProgramId(pool, {
-				programId: programId,
-			}),
-			workoutSessionsDb.getWorkoutSessionByProgramId(pool, {
-				programId: programId,
-			}),
-		]);
+	const appState = await appStateResolver.getAppState({
+		workoutSessionId: pageState.workoutSessionId,
+		data,
+	});
 
-	const workoutSessionArrByTrainingDay = trainingDay?.id
-		? await workoutSessionsDb.getWorkoutSessionWithStepsInfoByTrainingDayId(
-				pool,
-				{
-					trainingDayId: trainingDay.id,
-				},
-			)
-		: [];
-
-	const shapedWorkoutSessionArrByTrainingDay =
-		workoutSessionArrByTrainingDay.map(ws =>
-			toSessionViewModel(ws, { type: "workout" }),
-		);
-
-	let workoutSession = workoutSessionId
-		? await workoutSessionsDb.getWorkoutSessionWithStepsInfoByWorkoutSessionId(
-				pool,
-				{ workoutSessionId },
-			)
-		: null;
-
-	if (workoutSession === null) {
-		workoutSession = workoutSessionArrByTrainingDay?.[0]
-			? toSessionViewModel(workoutSessionArrByTrainingDay[0], {
-					type: "workout",
-				})
-			: null;
-	}
-
-	const shapedWorkoutSession = workoutSession
-		? toSessionViewModel(workoutSession, {
+	const shapedWorkoutSession = appState.workoutSession
+		? toSessionViewModel(appState.workoutSession, {
 				type: "workout",
 			})
 		: null;
@@ -74,19 +33,17 @@ async function getDashboardPage({ query, sessionState }) {
 	return {
 		pageState,
 		appState: {
-			user,
-			program,
-			day,
-			trainingDay,
+			...appState,
+			day: data.day,
 			workoutSession: shapedWorkoutSession,
 		},
 		data: {
 			cycles: {
-				items: cycleArr,
+				items: data.cycleArr,
 			},
 			workoutSessions: {
-				items: workoutSessionArr,
-				itemsByTrainingDay: shapedWorkoutSessionArrByTrainingDay,
+				items: data.workoutSessionArr,
+				itemsByTrainingDay: data.workoutSessionArrByTrainingDay,
 			},
 		},
 	};

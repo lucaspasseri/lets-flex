@@ -2,8 +2,10 @@ import pool from "../db/pool.js";
 import * as workoutStepLogsDb from "../db/workout_step_logs/index.js";
 
 async function skipWorkoutStep(req, res) {
-	const { daysDifference, workoutSessionId } = res.locals.sessionState;
+	const { workoutSessionId } = res.locals.sessionState;
 	const { workoutStepLogId } = req.params;
+	const daysDifference =
+		req.body.daysDifference ?? res.locals.sessionState.daysDifference;
 
 	const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 		pool,
@@ -20,8 +22,9 @@ async function skipWorkoutStep(req, res) {
 
 async function performWorkoutStep(req, res, next) {
 	try {
-		const { daysDifference } = res.locals.sessionState;
 		const { workoutStepLogId } = req.params;
+		const daysDifference =
+			req.body.daysDifference ?? res.locals.sessionState.daysDifference;
 
 		const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 			pool,
