@@ -24,18 +24,11 @@ async function getDashboardPage({ query, sessionState }) {
 		data,
 	});
 
-	const shapedWorkoutSession = appState.workoutSession
-		? toSessionViewModel(appState.workoutSession, {
-				type: "workout",
-			})
-		: null;
-
 	return {
 		pageState,
 		appState: {
 			...appState,
 			day: data.day,
-			workoutSession: shapedWorkoutSession,
 		},
 		data: {
 			cycles: {

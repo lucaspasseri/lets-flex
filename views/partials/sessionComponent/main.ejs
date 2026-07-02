@@ -166,7 +166,6 @@ const shouldShowWorkoutLogs =
 		</div>
 
 		<% if (workoutIsInProgress && currWorkoutStepLog) { %>
-
 			<div class="current-workout-step-container">
 				<div class="session-header">
 					<div class="session-header-text">
@@ -218,7 +217,6 @@ const shouldShowWorkoutLogs =
 		<% } %>
 
 	<% } else { %>
-
 		<div class="no-workout-session-container">
 			<div class="session-step-list-container">
 				<ul>
@@ -236,7 +234,7 @@ const shouldShowWorkoutLogs =
 							
 									<div class="step-status planned">
 										<svg width="32" height="32" viewBox="0 0 64 64" class="icon">
-											<use href="<%= getStatusIconHref(step.status) %>"></use>
+											<use href="/empty-status.svg"></use>
 										</svg>
 									</div>
 						
