@@ -414,3 +414,15 @@
 		}
 	}
 }
+
+.canvas-container {
+	margin: 1em 0 2em;
+	display: flex;
+	justify-content: center;
+
+	canvas {
+		max-width: 600px;
+		margin: 0 auto;
+		flex: 1;
+	}
+}
