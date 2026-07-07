@@ -20,11 +20,10 @@
 }
 
 .page-header .avatar {
-	height: 50px;
-	width: 50px;
 	border-radius: 12px;
 	background-color: var(--color-text);
 	margin-left: auto;
+	width: fit-content;
 }
 
 .page-header .avatar-name {
