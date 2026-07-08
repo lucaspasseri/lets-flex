@@ -468,7 +468,7 @@
 }
 
 .heat-map-section .grid .cell.no-workout-session {
-	background-color: grey;
+	background-color: transparent;
 }
 
 .heat-map-section .grid .cell.one-workout-session {
