@@ -4,8 +4,8 @@ const sessionArrContainer = document.querySelector(
 	"[data-workout-session-array]",
 );
 
-const stringifyArr = sessionArrContainer.dataset.workoutSessionArray;
-const workoutSessionArr = JSON.parse(stringifyArr);
+const stringifyArr = sessionArrContainer?.dataset?.workoutSessionArray ?? null;
+const workoutSessionArr = stringifyArr ? JSON.parse(stringifyArr) : [];
 
 function getStartOfWeek(year, week) {
 	const options = {

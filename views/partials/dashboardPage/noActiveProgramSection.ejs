@@ -36,14 +36,15 @@ const currProgramId = locals?.appState?.program?.id ?? null;
 			<div class="no-active-user-container">
 			<div class="content">
 				<div class="image-container">
-					<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
+					<img src="/compasso.png" width="40" height="40" alt="compasso icon" />
 				</div>
 				<h2>NO ACTIVE USER</h2>
 				<p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p>
 				<a href="/profile">
 					<svg class="icon">
-						<use href="../plus.svg"></use>
+						<use href="/plus.svg"></use>
 					</svg>
+					<%- include("../icons/plus") %>
 					<p>CREATE YOUR USER PROFILE</p>
 				</a>
 			</div>
@@ -51,21 +52,22 @@ const currProgramId = locals?.appState?.program?.id ?? null;
 		<% } %>
 
 		<% if(currProgramId === null){ %>
-				<div class="no-active-program-container">
-			<div class="content">
-				<div class="image-container">
-					<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
+			<div class="no-active-program-container">
+				<div class="content">
+					<div class="image-container">
+						<img src="/compasso.png" width="40" height="40" alt="compasso icon" />
+					</div>
+					<h2>NO ACTIVE PROGRAM</h2>
+					<p>Your training architecture starts here. Build a custom program or choose from a professional template to begin your progression.</p>
+					<a href="/programs">
+						<svg class="icon">
+							<use href="/plus.svg"></use>
+						</svg>
+						<i data-lucide="plus"></i>
+						<p>CREATE YOUR FIRST PROGRAM</p>
+					</a>
 				</div>
-				<h2>NO ACTIVE PROGRAM</h2>
-				<p>Your training architecture starts here. Build a custom program or choose from a professional template to begin your progression.</p>
-				<a href="/programs">
-					<svg class="icon">
-						<use href="../plus.svg"></use>
-					</svg>
-					<p>CREATE YOUR FIRST PROGRAM</p>
-				</a>
 			</div>
-		</div>
 		<% } %>
 	<% } %>
 </div>
