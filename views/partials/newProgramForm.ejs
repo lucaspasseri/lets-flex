@@ -1,6 +1,6 @@
 <%
-const goalArr = locals.data?.goalArr ?? [];
-const currUser = locals.appState?.currentUser ?? {id:0, name: "Guest"}
+const goalArr = locals?.data?.goals?.items ?? [];
+const currUser = locals?.appState?.user ?? null;
 %>
 
 <form class="forms" action="/programs" method="POST">

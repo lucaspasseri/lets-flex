@@ -89,57 +89,59 @@ const getDate = (startDate, cycleArr, cycleIndex, cellIndex) => {
 		</div>
  	<% } %>
 
-	<div class="heat-map-section">
-		<h2><%= `${currProgram?.name.toUpperCase() ?? "PROGRAM"}'S METRICS`%></h2>
-		<div class="grid-container">
-			<div class="grid">
-				<div class="cell">
-					<p>SUN</p>
-				</div>
-				<div class="cell">
-					<p>MON</p>
-				</div>
-				<div class="cell">
-					<p>TUE</p>
-				</div>
-				<div class="cell">
-					<p>WED</p>
-				</div>
-				<div class="cell">
-					<p>THU</p>
-				</div>
-				<div class="cell">
-					<p>FRI</p>
-				</div>
-				<div class="cell">
-					<p>SAT</p>
-				</div>
-			</div>
-			<% cycleArr.forEach((cycle, cycleIndex) => {%>
-				<p><%= cycle.name %></p>
+	<% if(currProgramId !== null && workoutSessionArr.length > 0) { %>
+		<div class="heat-map-section">
+			<h2><%= `${currProgram?.name.toUpperCase() ?? "PROGRAM"}'S METRICS`%></h2>
+			<div class="grid-container">
 				<div class="grid">
-					<% range(cycle.cycle_size).forEach((_cell, cellIndex) => { %>
-						<% 
-							const {currDate, offset} = getDate(startDate, cycleArr, cycleIndex, cellIndex) ;
-							const workoutSessionFilteredByDate = workoutSessionArr.filter(ws => ws.finished_at && isSameDay(currDate, ws.finished_at));
-							const cellClass = workoutSessionFilteredByDate.length === 0 ? "no-workout-session" : (workoutSessionFilteredByDate.length === 1 ? "one-workout-session" : "many-workout-session");
-						%>
-
-						<% if(offset !== null && offset !== 0){ %>
-							<% range(offset).forEach( emptyCell => { %>
-								<div></div>
-							<% }) %>
-
-						<% } %>
-
-						<div class="cell <%= cellClass %>">
-							<p><%= formatDate(currDate, "dd/MM") %></p>
-						</div>
-					<% }) %>
+					<div class="cell">
+						<p>SUN</p>
+					</div>
+					<div class="cell">
+						<p>MON</p>
+					</div>
+					<div class="cell">
+						<p>TUE</p>
+					</div>
+					<div class="cell">
+						<p>WED</p>
+					</div>
+					<div class="cell">
+						<p>THU</p>
+					</div>
+					<div class="cell">
+						<p>FRI</p>
+					</div>
+					<div class="cell">
+						<p>SAT</p>
+					</div>
 				</div>
-			<% }) %>
+				<% cycleArr.forEach((cycle, cycleIndex) => {%>
+					<p><%= cycle.name %></p>
+					<div class="grid">
+						<% range(cycle.cycle_size).forEach((_cell, cellIndex) => { %>
+							<% 
+								const {currDate, offset} = getDate(startDate, cycleArr, cycleIndex, cellIndex) ;
+								const workoutSessionFilteredByDate = workoutSessionArr.filter(ws => ws.finished_at && isSameDay(currDate, ws.finished_at));
+								const cellClass = workoutSessionFilteredByDate.length === 0 ? "no-workout-session" : (workoutSessionFilteredByDate.length === 1 ? "one-workout-session" : "many-workout-session");
+							%>
+
+							<% if(offset !== null && offset !== 0){ %>
+								<% range(offset).forEach( emptyCell => { %>
+									<div></div>
+								<% }) %>
+
+							<% } %>
+
+							<div class="cell <%= cellClass %>">
+								<p><%= formatDate(currDate, "dd/MM") %></p>
+							</div>
+						<% }) %>
+					</div>
+				<% }) %>
+			</div>
 		</div>
-	</div>
+	<% } %>
 
 	<% if(currProgramId !== null && workoutSessionArr.length > 0) { %>
 		<div class="canvas-container">
