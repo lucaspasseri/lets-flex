@@ -23,9 +23,7 @@ const modalId = locals?.modalId ?? null;
 
 	<div class="settings">
 		<button type="button" class="button" data-modal-open="<%= modalId %>">
-			<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-				<use href="/trash-icon.svg"></use>
-			</svg>
+			<%- include("../icons/trash") %>
 		</button>
 	</div>
 </header>

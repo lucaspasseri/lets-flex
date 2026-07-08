@@ -43,9 +43,7 @@ const searchText = `${sessionTemplate.name} ${sessionTemplate.notes} ${muscleInf
 		</div>
 		<div class="settings">
 			<a href="<%= `/library?sessionId=${sessionTemplate.id}` %>">
-				<svg width="64" height="64" viewBox="0 0 64 64" class="icon">
-					<use href="/edit-icon.svg"></use>
-				</svg>
+				<%- include("../icons/settings") %>
 			</a>
 		</div>
 	</div>

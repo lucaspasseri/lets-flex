@@ -100,9 +100,9 @@ const currWorkoutStepLog =
 
 const getStatusIconHref = status => {
 
-	if (status === "planned") return "/empty-status.svg";
-	if (status === "performed") return "/done-status.svg";
-	return "/skipped-status.svg";
+	if (status === "planned") return "/empty-circle";
+	if (status === "performed") return "/check-circle";
+	return "/skip-circle";
 };
 
 const shouldShowStartButton =
@@ -156,9 +156,7 @@ const shouldShowWorkoutLogs =
 						</p>
 
 						<div class="step-status <%= step.status %>">
-							<svg width="32" height="32" viewBox="0 0 64 64" class="icon">
-								<use href="<%= getStatusIconHref(step.status) %>"></use>
-							</svg>
+							<%- include(`../icons/${getStatusIconHref(step.status)}`) %>
 						</div>
 					</li>
 				<% }) %>
@@ -180,18 +178,14 @@ const shouldShowWorkoutLogs =
 						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
 							<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 							<button type="submit">
-								<svg width="36" height="36" viewBox="6 6 52 52" class="icon">
-									<use href="/skipped-status-borderless.svg"></use>
-								</svg>
+								<%- include("../icons/skip-circle") %>
 							</button>
 						</form>
 
 						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
 							<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 							<button type="submit">
-								<svg width="36" height="36" viewBox="6 6 52 52" class="icon">
-									<use href="/done-status-borderless.svg"></use>
-								</svg>
+								<%- include("../icons/check-circle") %>
 							</button>
 						</form>
 					</div>
@@ -233,9 +227,7 @@ const shouldShowWorkoutLogs =
 
 							
 									<div class="step-status planned">
-										<svg width="32" height="32" viewBox="0 0 64 64" class="icon">
-											<use href="/empty-status.svg"></use>
-										</svg>
+										<%- include("../icons/empty-circle") %>
 									</div>
 						
 							</div>
@@ -249,9 +241,7 @@ const shouldShowWorkoutLogs =
 					<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/start">
 						<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 						<button type="submit" aria-label="Start workout session">
-							<svg width="40" height="40" viewBox="6 6 52 52" class="icon">
-								<use href="/play-black-icon.svg"></use>
-							</svg>
+							<%- include("../icons/play") %>
 						</button>
 					</form>
 				</div>

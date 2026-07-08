@@ -70,11 +70,11 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-	}
 
-	.icon {
-		fill: var(--color-stitch-text);
-		width: fit-content;
+		> svg {
+			width: 40px;
+			height: 40px;
+		}
 	}
 }
 
@@ -161,9 +161,9 @@
 			border-radius: 4px;
 		}
 
-		.icon {
-			fill: var(--color-stitch-text);
-			width: fit-content;
+		svg {
+			width: 32px;
+			height: 32px;
 		}
 	}
 }

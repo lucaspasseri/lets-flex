@@ -23,7 +23,9 @@
 	border-radius: 12px;
 	background-color: var(--color-text);
 	margin-left: auto;
-	width: fit-content;
+	width: 42px;
+	height: 42px;
+	padding: 0.3em;
 }
 
 .page-header .avatar-name {
