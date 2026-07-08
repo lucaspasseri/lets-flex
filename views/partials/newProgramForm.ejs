@@ -5,7 +5,7 @@ const currUser = locals?.appState?.user ?? null;
 
 <form class="forms" action="/programs" method="POST">
 
-	<input hidden type="text" name="userId" value="<%= currUser.id %>" />
+	<input hidden type="text" name="userId" value="<%= currUser?.id %>" />
 	<%- include('olaInput', { data: { label: "Name", type: "text", name: "name", context: "programForm", autocomplete: "name", required: true } }); %>
 	<%- include('select', { data: { label: "Goals", name: "goalId", options: goalArr, required: true } })	%>
 	<%- include('olaInput', { data: { label: "Start date", type: "date", name: "startDate", context: "userForm" } }); %>
