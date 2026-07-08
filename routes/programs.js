@@ -32,18 +32,3 @@ router.get("/", programsController.show);
 router.get("/day", dayController.show);
 
 export default router;
-
-// router.get(
-// 	"/day",
-// 	getUrlAndPath,
-// 	getHelpers,
-// 	getSessionState,
-// 	getDayPageParams,
-// 	setDayPageUserContext,
-// 	setDayPageProgramContext,
-// 	setDayPageCycleContext,
-// 	setDayPageSessionContext,
-// 	setDayPageDayContext,
-// 	loadDayPageData,
-// 	renderDayPage,
-// );

@@ -5,6 +5,7 @@ import {
 	format,
 	parseISO,
 	differenceInCalendarDays,
+	startOfWeek,
 } from "date-fns";
 
 const getHelpers = async (_req, res, next) => {
@@ -15,6 +16,7 @@ const getHelpers = async (_req, res, next) => {
 		formatDate: format,
 		parseDateString: parseISO,
 		differenceInCalendarDays,
+		startOfWeek,
 	};
 
 	next();

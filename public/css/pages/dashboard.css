@@ -416,13 +416,65 @@
 }
 
 .canvas-container {
-	margin: 1em 0 2em;
+	margin: 1em var(--horizontal-margin) 2em;
 	display: flex;
 	justify-content: center;
+	background-color: var(--color-stitch-secondary);
+	padding: 1em;
 
 	canvas {
 		max-width: 600px;
-		margin: 0 auto;
+		height: auto;
 		flex: 1;
 	}
+}
+
+.heat-map-section {
+	margin: 2em var(--horizontal-margin);
+	background-color: var(--color-stitch-secondary);
+	border-radius: 4px;
+	padding: 1em;
+
+	> h2 {
+		color: var(--color-stitch);
+		font-size: 0.7em;
+		letter-spacing: 0.2em;
+		margin-bottom: 1em;
+	}
+
+	& > .grid-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1em;
+		justify-content: center;
+		align-items: center;
+
+		> p {
+			color: var(--color-stitch);
+		}
+	}
+}
+
+.heat-map-section .grid {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	width: 100%;
+}
+
+.heat-map-section .grid .cell {
+	display: flex;
+	justify-content: center;
+	border: 1px solid white;
+}
+
+.heat-map-section .grid .cell.no-workout-session {
+	background-color: grey;
+}
+
+.heat-map-section .grid .cell.one-workout-session {
+	background-color: #40c463;
+}
+
+.heat-map-section .grid .cell.many-workout-session {
+	background-color: #216e39;
 }

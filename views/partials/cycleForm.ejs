@@ -1,6 +1,6 @@
 <%
-const currProgramId = locals.sessionState?.programId ?? null;
-let cycleArr = locals.data?.cycleArr || [];
+const currProgramId = locals?.appState?.program?.id ?? null;
+let cycleArr = locals?.data?.cycles?.items || [];
 cycleArr.push({cycle_order: cycleArr.length + 1});
 %>
 
