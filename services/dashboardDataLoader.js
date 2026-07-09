@@ -6,6 +6,7 @@ import * as cyclesDb from "../db/cycles/index.js";
 import * as workoutSessionsDb from "../db/workout_sessions/index.js";
 import toNullableNumber from "../utils/toNullableNumber.js";
 import { addDays } from "date-fns";
+import { getHeatmapArr } from "./getHeatmapArr.js";
 
 async function getData({ userId, programId, daysDifference }) {
 	userId = toNullableNumber(userId);
@@ -41,6 +42,9 @@ async function getData({ userId, programId, daysDifference }) {
 			)
 		: [];
 
+	const startDate = program?.start_date ?? null;
+	const heatmapArr = getHeatmapArr(startDate, cycleArr, workoutSessionArr);
+
 	return {
 		user,
 		program,
@@ -49,6 +53,7 @@ async function getData({ userId, programId, daysDifference }) {
 		cycleArr,
 		workoutSessionArr,
 		workoutSessionArrByTrainingDay,
+		heatmapArr,
 	};
 }
 

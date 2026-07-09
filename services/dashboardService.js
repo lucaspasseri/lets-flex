@@ -38,6 +38,9 @@ async function getDashboardPage({ query, sessionState }) {
 				items: data.workoutSessionArr,
 				itemsByTrainingDay: data.workoutSessionArrByTrainingDay,
 			},
+			heatmap: {
+				items: data.heatmapArr,
+			},
 		},
 	};
 }
