@@ -6,4 +6,14 @@ async function addNewUser(req, res) {
 	res.redirect("/profile");
 }
 
-export { addNewUser };
+async function clearSession(req, res) {
+	delete req.session.state;
+
+	const { backUrl, backUrlWithoutParams } = res.locals.page;
+
+	if (backUrlWithoutParams === "/profile/") res.redirect(backUrlWithoutParams);
+
+	res.redirect(backUrl);
+}
+
+export { addNewUser, clearSession };

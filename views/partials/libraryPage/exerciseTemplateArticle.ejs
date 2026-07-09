@@ -41,7 +41,7 @@ const searchText = `${exerciseTemplate?.name}`
 		</div>
 		<div class="settings">
 			<button type="button" class="button" data-modal-open="<%= deleteExerciseModalId %>" data-exercise-variant-id="<%= exerciseTemplate.id %>">
-				<%- include("../icons/trash") %>
+				<%- include("../icons/trash", {strokeColor: "black"}) %>
 			</button>
 		</div>
 	</div>

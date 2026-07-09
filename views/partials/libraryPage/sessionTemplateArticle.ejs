@@ -43,7 +43,7 @@ const searchText = `${sessionTemplate.name} ${sessionTemplate.notes} ${muscleInf
 		</div>
 		<div class="settings">
 			<a href="<%= `/library?sessionId=${sessionTemplate.id}` %>">
-				<%- include("../icons/settings") %>
+				<%- include("../icons/settings", {strokeColor: "black"}) %>
 			</a>
 		</div>
 	</div>
