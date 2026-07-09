@@ -5,7 +5,18 @@
 		<%- include('../partials/header'); %>
 		<div class="content"><%- body %></div>
 		<%- include('../partials/footer'); %>
-		<div class="overlays"><%- defineContent("overlays") %></div>
+		<div class="overlays">
+				<%- include("../partials/basicModal", {
+					modal: {
+							id: "logoutUserModalId",
+							title: "Logout user",
+							description: "",
+							renderContent: () => include("../partials/profilePage/logoutUserForm")
+						}
+					})
+				%> 
+			<%- defineContent("overlays") %>
+		</div>
 
 		<script src="https://unpkg.com/lucide@latest"></script>
 		<script>

@@ -19,6 +19,15 @@
 	width: 72px;
 }
 
+.page-header .avatar-container {
+	background-color: transparent;
+	border: 0;
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
 .page-header .avatar {
 	border-radius: 12px;
 	background-color: var(--color-text);

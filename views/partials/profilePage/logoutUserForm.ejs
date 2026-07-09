@@ -1,0 +1,11 @@
+<form
+  id="deleteSessionForm"
+	method="POST"
+  action="/users/clear-session"
+	class="forms"
+>
+  <p>Are you sure?</p>
+
+  <%- include('../simpleButton', { data: { text: "Confirm", type: "submit" } }); %>
+</form>
+

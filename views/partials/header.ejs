@@ -4,10 +4,14 @@
 	<div class="logoContainer">
 		<a href="/"> <%- include('logo'); %> </a>
 	</div>
-	<div>
+	<button
+		type="button"
+		class="avatar-container"
+		data-modal-open="logoutUserModalId"
+	>
 		<div class="avatar"><%- include("icons/person"); %></div>
 		<div class="avatar-name">
 			<p><%= username %></p>
 		</div>
-	</div>
+	</button>
 </header>
