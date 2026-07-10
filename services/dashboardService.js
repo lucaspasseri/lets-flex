@@ -41,6 +41,11 @@ async function getDashboardPage({ query, sessionState }) {
 			heatmap: {
 				items: data.heatmapArr,
 			},
+			barChart: {
+				weekArr: data.barChart.weekArr,
+				scheduledCountArr: data.barChart.scheduledCountArr,
+				finishedCountArr: data.barChart.finishedCountArr,
+			},
 		},
 	};
 }

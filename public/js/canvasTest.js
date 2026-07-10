@@ -1,11 +1,43 @@
 const canvas = document.getElementById("test-canvas");
 
-const sessionArrContainer = document.querySelector(
-	"[data-workout-session-array]",
-);
+const canvasContainerElement = document.querySelector(".canvas-container");
 
-const stringifyArr = sessionArrContainer?.dataset?.workoutSessionArray ?? null;
-const workoutSessionArr = stringifyArr ? JSON.parse(stringifyArr) : [];
+const stringifyWeekArr =
+	canvasContainerElement?.dataset?.barChartWeekArr ?? null;
+const weekArr = stringifyWeekArr ? JSON.parse(stringifyWeekArr) : [];
+
+const stringifyScheduledCountArr =
+	canvasContainerElement?.dataset?.barChartScheduledCountArr ?? null;
+const scheduledCountArr = stringifyScheduledCountArr
+	? JSON.parse(stringifyScheduledCountArr)
+	: [];
+
+const stringifyFinishedCountArr =
+	canvasContainerElement?.dataset?.barChartFinishedCountArr ?? null;
+const finishedCountArr = stringifyFinishedCountArr
+	? JSON.parse(stringifyFinishedCountArr)
+	: [];
+
+if (canvas) {
+	new Chart(canvas, {
+		type: "bar",
+		data: {
+			labels: weekArr,
+			datasets: [
+				{
+					label: "Scheduled",
+					data: scheduledCountArr,
+					backgroundColor: "#60a5fa",
+				},
+				{
+					label: "Finished",
+					data: finishedCountArr,
+					backgroundColor: "#22c55e",
+				},
+			],
+		},
+	});
+}
 
 function getStartOfWeek(year, week) {
 	const options = {
@@ -16,47 +48,4 @@ function getStartOfWeek(year, week) {
 	const date = dateFns.setWeek(referenceDate, week, options);
 
 	return dateFns.startOfWeek(date, options);
-}
-
-const prepareArr = arr => {
-	const reg = {};
-
-	arr.forEach(item => {
-		const date = new Date(item.finished_at);
-
-		const week = dateFns.getISOWeek(date);
-		const year = dateFns.getISOWeekYear(date);
-
-		const key = `${year}-${week}`;
-
-		reg[key] = (reg[key] ?? 0) + 1;
-	});
-
-	return Object.entries(reg).map(([key, count]) => {
-		const [year, week] = key.split("-").map(Number);
-
-		const startWeekDay = getStartOfWeek(year, week);
-
-		return {
-			week: dateFns.format(startWeekDay, "dd/MM"),
-			count,
-		};
-	});
-};
-
-const preparedArr = prepareArr(workoutSessionArr);
-
-if (canvas) {
-	new Chart(canvas, {
-		type: "bar",
-		data: {
-			labels: preparedArr.map(row => row.week),
-			datasets: [
-				{
-					label: "Workout Sessions Per Week",
-					data: preparedArr.map(row => row.count),
-				},
-			],
-		},
-	});
 }

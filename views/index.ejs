@@ -6,6 +6,8 @@
 	const workoutSessionArrByDay = locals?.data?.workoutSessions?.itemsByTrainingDay ?? [];
 	const currentWorkoutSession = locals?.appState?.workoutSession ?? null; 
 	const workoutSessionArr = locals.data?.workoutSessions?.items ?? [];
+
+	const {weekArr = [], scheduledCountArr =[], finishedCountArr =[]} = locals?.data?.barChart;
 %>
 
 <main class="main dashboard">
@@ -17,7 +19,7 @@
 
 		<%- include("partials/dashboardPage/dateSection"); %>
 
-		<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? 'no-session' : '' %>" data-workout-session-array="<%=JSON.stringify(workoutSessionArr) %>">
+		<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? 'no-session' : '' %>">
 			<% if (workoutSessionArrByDay.length === 0) { %>
 				<h2> ( RESTING / NO-SESSION DAY )</h2>
 
@@ -58,7 +60,7 @@
 	
 
 	<% if(currProgramId !== null && workoutSessionArr.length > 0) { %>
-		<div class="canvas-container">
+		<div class="canvas-container" data-bar-chart-week-arr="<%= JSON.stringify(weekArr) %>" data-bar-chart-scheduled-count-arr="<%= JSON.stringify(scheduledCountArr) %>" data-bar-chart-finished-count-arr="<%= JSON.stringify(finishedCountArr) %>">
 			<canvas id="test-canvas"></canvas>
 		</div>
 	<% } %>
