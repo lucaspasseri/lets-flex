@@ -456,12 +456,15 @@
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
 	width: 100%;
+	max-width: 800px;
+	gap: 0.8em 0.5em;
 }
 
 .heat-map-section .grid .cell {
 	display: flex;
 	justify-content: center;
 	border: 1px solid white;
+	border-radius: 4px;
 }
 
 .heat-map-section .grid .cell.no-workout-session {

@@ -48,14 +48,3 @@ if (canvas) {
 		},
 	});
 }
-
-function getStartOfWeek(year, week) {
-	const options = {
-		weekStartsOn: 1,
-		firstWeekContainsDate: 4,
-	};
-	const referenceDate = new Date(year, 0, 1);
-	const date = dateFns.setWeek(referenceDate, week, options);
-
-	return dateFns.startOfWeek(date, options);
-}

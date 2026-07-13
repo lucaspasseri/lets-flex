@@ -8,11 +8,10 @@ import {
 import range from "../utils/range.js";
 
 function getHeatmapArr(startDate, cycleArr, workoutSessionArr) {
+	let lastCycleDayIndex = 0;
 	const heatMapArr = cycleArr.map(cycle => {
 		const cycleName = cycle.name;
 		const cycleSize = cycle.cycle_size;
-
-		let lastCycleDayIndex = 0;
 
 		const currCycleDayArr = range(cycleSize).map(index => {
 			const currDay = addDays(startDate, lastCycleDayIndex + index);
