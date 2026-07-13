@@ -1,4 +1,4 @@
-const canvas = document.getElementById("test-canvas");
+const canvas = document.getElementById("bar-chart-canvas");
 
 const canvasContainerElement = document.querySelector(".canvas-container");
 
@@ -35,6 +35,16 @@ if (canvas) {
 					backgroundColor: "#22c55e",
 				},
 			],
+		},
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true,
+					ticks: {
+						precision: 0,
+					},
+				},
+			},
 		},
 	});
 }
