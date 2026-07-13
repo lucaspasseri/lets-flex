@@ -1,4 +1,6 @@
 <%
+const { range } = locals.helpers;
+
 const sessionVm = locals.sessionVm ?? null;
 const performedPercentage = locals.performedPercentage ?? 0;
 const daysDifference = locals?.pageState?.daysDifference ?? null;
@@ -14,6 +16,8 @@ const workoutIsFinished = isWorkout && workoutStatus === "finished";
 
 const steps = sessionVm?.steps ?? [];
 const emptySession = steps.length === 0;
+
+console.log({sessionVm})
 
 const formatOrder = order => {
 	if (order === null || order === undefined) return "--";
@@ -173,23 +177,9 @@ const shouldShowWorkoutLogs =
 							<%= getStepName(currWorkoutStepLog) %>
 						</h3>
 					</div>
-
-					<div class="button-status-container">
-						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/skip">
-							<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-							<button type="submit">
-								<%- include("../icons/skip-circle") %>
-							</button>
-						</form>
-
-						<form method="POST" action="/workout_step_logs/<%= currWorkoutStepLog.id %>/perform">
-							<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-							<button type="submit">
-								<%- include("../icons/check-circle") %>
-							</button>
-						</form>
-					</div>
 				</div>
+				
+				<%- include("workoutLogsForm", {workoutStep: currWorkoutStepLog}) %>
 			</div>
 
 		<% } else if (shouldShowFinishButton) { %>

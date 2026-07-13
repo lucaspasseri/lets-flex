@@ -7,11 +7,12 @@
 	const min = data?.min ? data.min : "";
 	const max = data?.max ? data.max : "";
 	const step = data?.step ? data.step : "";
+	const initialValue = data?.initialValue ? data.initialValue : "";
 %>
 
 <div class="field">
 	<div class="input-control">
-		<input id="<%= inputId %>" placeholder=" " type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
+		<input id="<%= inputId %>" placeholder=" " value="<%= initialValue %>" type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
 			min="<%= min %>" max="<%= max %>" step="<%= step %>"
 		/>
 		<label for="<%= inputId %>">

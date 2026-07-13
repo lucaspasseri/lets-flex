@@ -7,6 +7,7 @@
 	display: grid;
 	grid-template-rows: auto 1fr auto;
 	gap: 1em;
+	border: 1px solid red;
 }
 
 .session-component .no-workout-session-container {
@@ -131,11 +132,15 @@
 .session-component .current-workout-step-container {
 	min-height: 20em;
 	display: flex;
+	flex-direction: column;
+
+	border: 1px solid greenyellow;
 }
 
 .session-component .current-workout-step-container .session-header {
 	height: fit-content;
 	width: 100%;
+	border: 1px solid purple;
 
 	h4 {
 		font-size: 0.6em;
@@ -165,6 +170,26 @@
 			width: 32px;
 			height: 32px;
 		}
+	}
+}
+
+.session-component .current-workout-step-container .logs-form-container {
+	border: 1px solid blue;
+	height: 100%;
+
+	form {
+		border: 1px solid orange;
+	}
+
+	.session-set {
+		border: 1px solid pink;
+		display: flex;
+		gap: 1em;
+	}
+
+	button {
+		width: 40px;
+		height: 40px;
 	}
 }
 

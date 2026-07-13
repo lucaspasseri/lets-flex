@@ -22,9 +22,25 @@ async function skipWorkoutStep(req, res) {
 
 async function performWorkoutStep(req, res, next) {
 	try {
+		console.log({ b: req.body });
 		const { workoutStepLogId } = req.params;
-		const daysDifference =
-			req.body.daysDifference ?? res.locals.sessionState.daysDifference;
+
+		const {
+			daysDifference,
+			performedReps,
+			performedLoadValue,
+			performedLoadUnit,
+		} = req.body;
+
+		console.log(
+			daysDifference,
+			performedReps,
+			performedLoadValue,
+			performedLoadUnit,
+		);
+
+		// const daysDifference =
+		// 	req.body.daysDifference ?? res.locals.sessionState.daysDifference;
 
 		const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 			pool,
