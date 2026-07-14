@@ -1,40 +1,26 @@
 <%
 	const { range } = locals?.helpers ?? {};
-	const { workoutStep = null} = locals;
 	const { daysDifference = null } = locals?.pageState ?? {};
-
-	const loadUnitSelectOption = [
-		{name: "Kg", value: "Kilograms"},
-		{name: "lb", value: "Libra"},
-	]
-
-	console.log({daysDifference})
+	const { workoutStep = null} = locals;
+	const stepLog = workoutStep?.stepLog ?? null
 %>
 
 <div class="logs-form-container">
-	<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/perform">
+		<button type="button" id="add-set-button">Add set</button>
+		<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/perform" id="log-form">
 		<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 
-		<% workoutStep?.stepLog?.plannedSets && range(workoutStep?.stepLog?.plannedSets).forEach((set, index) => { %>
+		<% stepLog?.plannedSets && range(stepLog?.plannedSets).forEach((set, index) => { %>
 			<div class="session-set">
 				<div class="set-title"><%= `Set ${index + 1}` %></div>
-				<div class="set-reps">
-					<%- include('../olaInput', { data: { label: "Reps", type: "number", name: "performedReps", initialValue: workoutStep?.stepLog?.plannedReps ,context: `log-form-${index}` } }); %>
-				</div>
-				<div class="set-load-value">
-					<%- include('../olaInput', { data: { label: "Load value", type: "number", name: "performedLoadValue", initialValue: workoutStep?.stepLog?.plannedLoadValue ,context: `log-form-${index}` } }); %>
-				</div>
-				<div class="set-load-unit">
-						<%- include("../select", { data: { id: `log-form-${index}-select`, label: "Load unit", name: "performedLoadUnit", required: true, 
-	options: loadUnitSelectOption, getOptionLabel: (option) => option.name, getOptionValue: (option) => option.value  } }); %>
-				</div>
+				<%- include("workoutLogsFormRow", {stepLog}) %>
 			</div>
 		<% }) %>
+	</form>
 
-		<button type="submit">
+	<button type="submit" form="log-form">
 			<%- include("../icons/check-circle") %>
 		</button>
-	</form>
 
 	<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/skip">
 		<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
@@ -42,4 +28,40 @@
 			<%- include("../icons/skip-circle") %>
 		</button>
 	</form>
+
+	<template id="set-row-template">
+		<div class="session-set">
+			<div class="set-title">Set</div>
+				<%- include("workoutLogsFormRow", {stepLog}) %>
+			</div>
+	</template>
+
+
+	<script>
+		const setsContainer = document.querySelector("#log-form");
+		const setRowTemplate = document.querySelector("#set-row-template");
+		const addSetButton = document.querySelector("#add-set-button");
+
+		addSetButton.addEventListener("click", () => {
+
+			const index = setsContainer.children.length;
+
+			const clone = setRowTemplate.content.cloneNode(true);
+			setsContainer.append(clone);
+
+			Array.from(setsContainer.querySelectorAll(".set-title")).forEach((title, index) =>{
+				title.textContent= `Set ${index + 1}`
+			})
+		});
+
+		setsContainer.addEventListener("click", (event) => {
+			const removeButton = event.target.closest(
+				'[data-action="remove-set"]'
+			);
+
+			if (!removeButton) return;
+
+			removeButton.closest(".session-set").remove();
+		});
+	</script>
 </div>

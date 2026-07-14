@@ -47,6 +47,10 @@ async function performWorkoutStep(req, res, next) {
 			{
 				workoutStepLogId,
 				status: "performed",
+				actual_sets: performedReps.length,
+				actual_reps: performedReps[0],
+				actual_load_value: performedLoadValue[0],
+				actual_load_unit: performedLoadUnit[0],
 			},
 		);
 

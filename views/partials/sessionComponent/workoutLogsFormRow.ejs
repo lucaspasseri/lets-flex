@@ -1,0 +1,20 @@
+<%
+	const { stepLog = null} = locals;
+	const loadUnitSelectOption = [
+		{name: "Kg", value: "Kilograms"},
+		{name: "lb", value: "Libra"},
+	];
+%>
+	<div class="set-reps">
+		<%- include('../olaInput', { data: { label: "Reps", type: "number", name: "performedReps", initialValue: stepLog?.plannedReps ,context: "workout-session-log-form-input" } }); %>
+	</div>
+	<div class="set-load-value">
+		<%- include('../olaInput', { data: { label: "Load value", type: "number", name: "performedLoadValue", initialValue: stepLog?.plannedLoadValue ,context: "workout-session-log-form-input" } }); %>
+	</div>
+	<div class="set-load-unit">
+			<%- include("../select", { data: { id: "workout-session-log-form-input", label: "Load unit", name: "performedLoadUnit", required: true, 
+options: loadUnitSelectOption, getOptionLabel: (option) => option.name, getOptionValue: (option) => option.value  } }); %>
+	</div>
+	<button type="button" data-action="remove-set">
+			Remove
+	</button>
