@@ -1,20 +1,26 @@
 <%
-	const { stepLog = null} = locals;
+	const { stepLog = null, index = "template"} = locals;
 	const loadUnitSelectOption = [
 		{name: "Kg", value: "Kilograms"},
 		{name: "lb", value: "Libra"},
 	];
+
+	const context = `logFormRows[${index}]`
 %>
+
+<div class="form-row">
+	<div class="set-title"><%= `Set ${index + 1}` %></div>
 	<div class="set-reps">
-		<%- include('../olaInput', { data: { label: "Reps", type: "number", name: "performedReps", initialValue: stepLog?.plannedReps ,context: "workout-session-log-form-input" } }); %>
+		<%- include('../olaInput', { data: { label: "Reps", type: "number", name: `${context}[performedReps]`, initialValue: stepLog?.plannedReps  } }); %>
 	</div>
 	<div class="set-load-value">
-		<%- include('../olaInput', { data: { label: "Load value", type: "number", name: "performedLoadValue", initialValue: stepLog?.plannedLoadValue ,context: "workout-session-log-form-input" } }); %>
+		<%- include('../olaInput', { data: { label: "Load value", type: "number", name: `${context}[performedLoadValue]`, initialValue: stepLog?.plannedLoadValue  } }); %>
 	</div>
 	<div class="set-load-unit">
-			<%- include("../select", { data: { id: "workout-session-log-form-input", label: "Load unit", name: "performedLoadUnit", required: true, 
-options: loadUnitSelectOption, getOptionLabel: (option) => option.name, getOptionValue: (option) => option.value  } }); %>
+			<%- include("../select", { data: { label: "Load unit", name:`${context}[performedLoadUnit]`, required: true, 
+	options: loadUnitSelectOption, getOptionLabel: (option) => option.name, getOptionValue: (option) => option.value  } }); %>
 	</div>
 	<button type="button" data-action="remove-set">
 			Remove
 	</button>
+</div>

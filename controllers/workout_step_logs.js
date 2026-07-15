@@ -25,34 +25,20 @@ async function performWorkoutStep(req, res, next) {
 		console.log({ b: req.body });
 		const { workoutStepLogId } = req.params;
 
-		const {
-			daysDifference,
-			performedReps,
-			performedLoadValue,
-			performedLoadUnit,
-		} = req.body;
+		const { daysDifference, logFormRows } = req.body;
 
-		console.log(
-			daysDifference,
-			performedReps,
-			performedLoadValue,
-			performedLoadUnit,
-		);
-
-		// const daysDifference =
-		// 	req.body.daysDifference ?? res.locals.sessionState.daysDifference;
+		console.log({ daysDifference, logFormRows });
 
 		const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 			pool,
 			{
 				workoutStepLogId,
 				status: "performed",
-				actual_sets: performedReps.length,
-				actual_reps: performedReps[0],
-				actual_load_value: performedLoadValue[0],
-				actual_load_unit: performedLoadUnit[0],
+				logFormRows,
 			},
 		);
+
+		console.log({ workoutStepLog });
 
 		res.redirect(
 			`/?daysDifference=${daysDifference ?? 0}&workoutSessionId=${workoutStepLog.workout_session_id}`,

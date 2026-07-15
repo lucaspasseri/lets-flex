@@ -1,8 +1,10 @@
 <%
-  const labelArr = Array.from(data?.label || "");
-	const inputId = `${data?.context || ''}_${data?.name || ''}`;
-	const autocomplete = data?.autocomplete || "off";
-	const type = data?.type || "text";
+  const labelArr = Array.from(data?.label ?? "");
+	const context = data?.context ?? "";
+	const name = data?.name ?? "";
+	const id = data?.id ?? (context ? `${context}_${name}` : name);
+	const autocomplete = data?.autocomplete ?? "off";
+	const type = data?.type ?? "text";
 	const required = data?.required ? "required" : "";
 	const min = data?.min ? data.min : "";
 	const max = data?.max ? data.max : "";
@@ -12,10 +14,10 @@
 
 <div class="field">
 	<div class="input-control">
-		<input id="<%= inputId %>" placeholder=" " value="<%= initialValue %>" type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
+		<input id="<%= id %>" placeholder=" " value="<%= initialValue %>" type="<%= type %>" name="<%= data?.name || '' %>" autocomplete="<%=autocomplete %>" <%= required %>
 			min="<%= min %>" max="<%= max %>" step="<%= step %>"
 		/>
-		<label for="<%= inputId %>">
+		<label for="<%= id %>">
 			<% labelArr.forEach((letter, index) => { %>
 				<span style="--delay: <%= index * 50 %>ms;"><%= letter %></span>
 			<% }) %>

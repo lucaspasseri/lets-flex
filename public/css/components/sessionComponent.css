@@ -181,7 +181,7 @@
 		border: 1px solid orange;
 	}
 
-	.session-set {
+	.form-row {
 		border: 1px solid pink;
 		display: flex;
 		gap: 1em;

@@ -103,32 +103,26 @@ async function insertWorkoutStepLogsFromSessionSteps(
 
 async function updateWorkoutStepLogStatus(
 	db,
-	{
-		workoutStepLogId,
-		status,
-		actual_sets,
-		actual_reps,
-		actual_load_value,
-		actual_load_unit,
-	},
+	{ workoutStepLogId, status, logFormRows },
 ) {
 	console.log({
 		status,
-		actual_sets,
-		actual_reps,
-		actual_load_value,
-		actual_load_unit,
 		workoutStepLogId,
 	});
+
+	console.log({ logFormRows });
+
+	const { performedReps, performedLoadValue, performedLoadUnit } =
+		logFormRows[0];
 
 	const { rows } = await db.query(
 		"UPDATE workout_step_logs SET status = $1, actual_sets = $2, actual_reps = $3, actual_load_value = $4, actual_load_unit = $5, performed_at = NOW() WHERE id = $6 RETURNING *",
 		[
 			status,
-			actual_sets,
-			actual_reps,
-			actual_load_value,
-			actual_load_unit,
+			logFormRows.length,
+			performedReps,
+			performedLoadValue,
+			performedLoadUnit,
 			workoutStepLogId,
 		],
 	);
