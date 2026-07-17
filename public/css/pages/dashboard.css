@@ -466,10 +466,7 @@
 	justify-content: center;
 	border: 1px solid white;
 	border-radius: 4px;
-}
-
-.heat-map-section .grid .cell.no-workout-session {
-	background-color: transparent;
+	background-color: black;
 }
 
 .heat-map-section .grid .cell.one-workout-session {

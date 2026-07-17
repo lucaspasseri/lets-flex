@@ -4,8 +4,9 @@ import * as workoutStepLogsDb from "../db/workout_step_logs/index.js";
 async function skipWorkoutStep(req, res) {
 	const { workoutSessionId } = res.locals.sessionState;
 	const { workoutStepLogId } = req.params;
-	const daysDifference =
-		req.body.daysDifference ?? res.locals.sessionState.daysDifference;
+	const { daysDifference } = req.body;
+
+	console.log({ workoutSessionId, workoutStepLogId, daysDifference });
 
 	const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 		pool,

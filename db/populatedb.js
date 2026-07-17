@@ -1,6 +1,7 @@
 import { Client } from "pg";
 
 const sql = `
+DROP TABLE IF EXISTS workout_set_logs CASCADE;
 DROP TABLE IF EXISTS workout_step_logs CASCADE;
 DROP TABLE IF EXISTS workout_sessions CASCADE;
 DROP TABLE IF EXISTS session_steps CASCADE;
@@ -192,27 +193,36 @@ CREATE TABLE workout_step_logs (
 
 	name VARCHAR,
 
+	-- Snapshot of the original plan
 	planned_sets INTEGER,
 	planned_reps INTEGER,
 	planned_load_value FLOAT,
 	planned_load_unit VARCHAR,
-
-	actual_sets INTEGER,
-	actual_reps INTEGER,
-	actual_load_value FLOAT,
-	actual_load_unit VARCHAR,
 
 	started_at TIMESTAMPTZ,
 	performed_at TIMESTAMPTZ,
 
 	notes TEXT,
 
-	UNIQUE (workout_session_id, step_order)
+	UNIQUE (workout_session_id, step_order),
+	UNIQUE (workout_session_id, session_step_id)
 );
 
-ALTER TABLE workout_step_logs
-ADD CONSTRAINT workout_step_logs_unique_workout_session_step
-UNIQUE (workout_session_id, session_step_id);
+CREATE TABLE workout_set_logs (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+
+	workout_step_log_id INTEGER NOT NULL
+		REFERENCES workout_step_logs(id)
+		ON DELETE CASCADE,
+
+	set_order INTEGER NOT NULL,
+
+	reps INTEGER,
+	load_value FLOAT,
+	load_unit VARCHAR,
+
+	UNIQUE (workout_step_log_id, set_order)
+);
 
 CREATE TABLE muscles (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

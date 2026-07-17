@@ -72,6 +72,10 @@
 		justify-content: center;
 		align-items: center;
 
+		&:hover {
+			cursor: pointer;
+		}
+
 		> svg {
 			width: 40px;
 			height: 40px;
