@@ -6,25 +6,31 @@
 %>
 
 <div class="logs-form-container">
-		<button type="button" id="add-form-row-button">Add set</button>
+		
+	<div class="sets-container">
 		<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/perform" id="log-form">
-		<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
+			<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
 
-		<% stepLog?.plannedSets && range(stepLog?.plannedSets).forEach((set, index) => { %>
-			<%- include("workoutLogsFormRow", {stepLog, index}) %>
-		<% }) %>
-	</form>
+			<% stepLog?.plannedSets && range(stepLog?.plannedSets).forEach((set, index) => { %>
+				<%- include("workoutLogsFormRow", {stepLog, index}) %>
+			<% }) %>
+		</form>
 
-	<button type="submit" form="log-form">
-			<%- include("../icons/check-circle") %>
+		<button type="button" id="add-form-row-button" class="form-row add-row">ADD NEW</button>
+	</div>
+
+	<div class="step-log-button-container">
+		<button type="submit" form="log-form">
+			<%- include("../icons/check-circle", {strokeColor: "white"}) %>
 		</button>
 
-	<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/skip">
-		<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-		<button type="submit">
-			<%- include("../icons/skip-circle") %>
-		</button>
-	</form>
+		<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/skip">
+			<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
+			<button type="submit">
+				<%- include("../icons/skip-circle", {strokeColor: "white"}) %>
+			</button>
+		</form>
+	</div>
 
 	<template id="set-row-template">
 		<%- include("workoutLogsFormRow", {stepLog, index: "template"}) %>

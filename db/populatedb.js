@@ -200,7 +200,7 @@ CREATE TABLE workout_step_logs (
 	planned_load_unit VARCHAR,
 
 	started_at TIMESTAMPTZ,
-	performed_at TIMESTAMPTZ,
+	completed_at TIMESTAMPTZ,
 
 	notes TEXT,
 

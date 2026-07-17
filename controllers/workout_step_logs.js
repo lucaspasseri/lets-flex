@@ -6,8 +6,6 @@ async function skipWorkoutStep(req, res) {
 	const { workoutStepLogId } = req.params;
 	const { daysDifference } = req.body;
 
-	console.log({ workoutSessionId, workoutStepLogId, daysDifference });
-
 	const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 		pool,
 		{
@@ -23,12 +21,9 @@ async function skipWorkoutStep(req, res) {
 
 async function performWorkoutStep(req, res, next) {
 	try {
-		console.log({ b: req.body });
 		const { workoutStepLogId } = req.params;
 
 		const { daysDifference, logFormRows } = req.body;
-
-		console.log({ daysDifference, logFormRows });
 
 		const workoutStepLog = await workoutStepLogsDb.updateWorkoutStepLogStatus(
 			pool,
@@ -38,8 +33,6 @@ async function performWorkoutStep(req, res, next) {
 				logFormRows,
 			},
 		);
-
-		console.log({ workoutStepLog });
 
 		res.redirect(
 			`/?daysDifference=${daysDifference ?? 0}&workoutSessionId=${workoutStepLog.workout_session_id}`,

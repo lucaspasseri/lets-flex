@@ -17,8 +17,6 @@ const workoutIsFinished = isWorkout && workoutStatus === "finished";
 const steps = sessionVm?.steps ?? [];
 const emptySession = steps.length === 0;
 
-console.log({sessionVm})
-
 const formatOrder = order => {
 	if (order === null || order === undefined) return "--";
 	return String(order).padStart(2, "0");

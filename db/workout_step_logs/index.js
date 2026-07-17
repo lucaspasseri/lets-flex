@@ -103,7 +103,7 @@ async function insertWorkoutStepLogsFromSessionSteps(
 
 async function updateWorkoutStepLogStatus(db, { workoutStepLogId, status }) {
 	const { rows } = await db.query(
-		"UPDATE workout_step_logs SET status = $1, performed_at = NOW() WHERE id = $2 RETURNING *",
+		"UPDATE workout_step_logs SET status = $1, completed_at = NOW() WHERE id = $2 RETURNING *",
 		[status, workoutStepLogId],
 	);
 

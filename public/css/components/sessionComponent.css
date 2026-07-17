@@ -7,7 +7,6 @@
 	display: grid;
 	grid-template-rows: auto 1fr auto;
 	gap: 1em;
-	border: 1px solid red;
 }
 
 .session-component .no-workout-session-container {
@@ -137,14 +136,11 @@
 	min-height: 20em;
 	display: flex;
 	flex-direction: column;
-
-	border: 1px solid greenyellow;
 }
 
 .session-component .current-workout-step-container .session-header {
 	height: fit-content;
 	width: 100%;
-	border: 1px solid purple;
 
 	h4 {
 		font-size: 0.6em;
@@ -178,22 +174,60 @@
 }
 
 .session-component .current-workout-step-container .logs-form-container {
-	border: 1px solid blue;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 2em;
 
 	form {
-		border: 1px solid orange;
-	}
-
-	.form-row {
-		border: 1px solid pink;
 		display: flex;
+		flex-direction: column;
 		gap: 1em;
 	}
+}
+.session-component .logs-form-container .sets-container {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+
+	.form-row.add-row {
+		height: 4em;
+		background-color: transparent;
+		border: 0.2em dashed white;
+		color: white;
+		display: flex;
+		justify-content: center;
+		background-color: var(--color-surface);
+	}
+}
+
+.session-component .logs-form-container .sets-container .form-row {
+	display: flex;
+	gap: 1em;
+	align-items: center;
+	background-color: var(--color-surface);
+	border: 0.1em solid var(--color-border);
 
 	button {
-		width: 40px;
-		height: 40px;
+		color: white;
+		background-color: transparent;
+		margin-left: auto;
+		border: 0.1em dashed white;
+		padding: 0.8em;
+	}
+}
+
+.session-component .logs-form-container .step-log-button-container {
+	display: flex;
+	justify-content: space-evenly;
+
+	button {
+		height: 4em;
+		width: 4em;
+		padding: 0.4em;
+		border-radius: 6px;
+		border: 1px solid white;
+		background-color: var(--color-surface);
 	}
 }
 
