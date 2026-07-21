@@ -1,5 +1,5 @@
-import * as profileService from "../services/profileService.js";
-import toNullableNumber from "../utils/toNullableNumber.js";
+import * as profileService from "../../../services/profileService.js";
+import toNullableNumber from "../../../utils/toNullableNumber.js";
 
 async function show(req, res, next) {
 	try {

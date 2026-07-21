@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
-import { profileController } from "../controllers/profileController.js";
+import { profileController } from "../src/interfaces/controllers/profileController.js";
 
 const router = Router();
 
