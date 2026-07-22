@@ -1,5 +1,5 @@
 <% 
-const exerciseArr = locals?.data?.exerciseVariants?.items ?? []; 
+const exerciseArr = locals?.data?.exerciseTemplates?.items ?? []; 
 const sessionArr = locals?.data?.sessions?.items?.filter(session => session.isArchived === false) ?? [];
 
 const currentSession = locals?.appState?.session ?? null;
@@ -7,7 +7,7 @@ const currentSession = locals?.appState?.session ?? null;
 const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
 const deleteExerciseModalId = "deleteExerciseModalId";
-const deleteSessionModalId = "deleteSessionModalId";
+const archiveSessionModalId = "archiveSessionModalId";
 %>
 
 <main class="main library">
@@ -54,7 +54,7 @@ const deleteSessionModalId = "deleteSessionModalId";
 		<div class="active-session-template-container">
 			<h3>SESSION DETAILS</h3>
 
-			<%- include("partials/session/sessionCard", { session: currentSession, modalId: deleteSessionModalId }) %>
+			<%- include("partials/session/sessionCard", { session: currentSession, modalId: archiveSessionModalId }) %>
 		</div>
 	<% } %>
 
@@ -155,10 +155,10 @@ searchInput.addEventListener("input", (ev) => {
 
 <%- include("partials/basicModal", {
 	modal: {
-		id: deleteSessionModalId,
+		id: archiveSessionModalId,
 		title: "Delete session template",
 		description: "",
-		renderContent: () => include("partials/libraryPage/deleteSessionForm", {currSessionId: currentSession?.id ?? null})
+		renderContent: () => include("partials/libraryPage/archiveSessionForm", {currSessionId: currentSession?.id ?? null})
 	}
 }) 
 %>

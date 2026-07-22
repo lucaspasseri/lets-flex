@@ -2,6 +2,8 @@
 const deleteExerciseModalId = locals?.deleteExerciseModalId ?? null
 const exerciseTemplate = locals?.exerciseTemplate ?? null
 const searchText = `${exerciseTemplate?.name}`
+
+console.log({exerciseTemplate})
 %>
 
 <article class="accordion-item" data-search-exercise-item data-search-text="<%= searchText %>">
@@ -40,7 +42,7 @@ const searchText = `${exerciseTemplate?.name}`
 			<% } %>
 		</div>
 		<div class="settings">
-			<button type="button" class="button" data-modal-open="<%= deleteExerciseModalId %>" data-exercise-variant-id="<%= exerciseTemplate.id %>">
+			<button type="button" class="button" data-modal-open="<%= deleteExerciseModalId %>" data-exercise-id="<%= exerciseTemplate.id %>">
 				<%- include("../icons/trash", {strokeColor: "black"}) %>
 			</button>
 		</div>
@@ -56,9 +58,9 @@ const searchText = `${exerciseTemplate?.name}`
   const modalId = button.dataset.modalOpen;
   const modal = document.getElementById(modalId);
 
-  const exerciseVariantId = button.dataset.exerciseVariantId;
+  const exerciseId = button.dataset.exerciseId;
 
   const form = modal?.querySelector("form");
-  form.action = `/exercise_variants/${exerciseVariantId}?_method=DELETE`;
+  form.action = `/exerciseTemplates/${exerciseId}?_method=DELETE`;
 });
 </script>

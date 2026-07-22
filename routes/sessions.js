@@ -1,15 +1,9 @@
 import { Router } from "express";
-import {
-	getSessionByTrainingDayId,
-	addNewSession,
-	archiveSession,
-} from "../controllers/sessions.js";
+import { sessionController } from "../src/interfaces/controllers/sessionController.js";
 
 const router = Router();
 
-router.get("/:dayId", getSessionByTrainingDayId);
-
-router.post("/", addNewSession);
-router.patch("/:sessionId", archiveSession);
+router.post("/", sessionController.create);
+router.patch("/:sessionId", sessionController.archive);
 
 export default router;

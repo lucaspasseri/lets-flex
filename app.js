@@ -15,7 +15,7 @@ import session from "express-session";
 import expressEjsLayouts from "express-ejs-layouts";
 import appStateRouter from "./routes/app_state.js";
 import libraryRouter from "./routes/library.js";
-import exerciseClusterRouter from "./routes/exercise_cluster.js";
+import exerciseTemplatesRouter from "./routes/exerciseTemplates.js";
 import workoutSessionsRouter from "./routes/workout_sessions.js";
 import workoutStepLogRouter from "./routes/workout_step_logs.js";
 import methodOverride from "method-override";
@@ -56,7 +56,7 @@ app.use("/exercise_variants", exerciseVariantsRouter);
 app.use("/profile", profileRouter);
 app.use("/app_state", appStateRouter);
 app.use("/library", libraryRouter);
-app.use("/exercise_cluster", exerciseClusterRouter);
+app.use("/exerciseTemplates", exerciseTemplatesRouter);
 app.use("/workout_sessions", workoutSessionsRouter);
 app.use("/workout_step_logs", workoutStepLogRouter);
 

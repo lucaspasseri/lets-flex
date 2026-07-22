@@ -7,10 +7,5 @@ import {
 const router = Router();
 
 router.post("/", addNewExerciseVariant);
-router.delete(
-	"/:exerciseVariantId",
-
-	deleteExerciseVariant,
-);
 
 export default router;

@@ -1,9 +1,10 @@
-import setActiveUserAfterCreation from "../../features/users/setActiveUserAfterCreation.js";
+import createUser from "../../features/users/createUser.js";
+import asyncHandler from "../../../utils/asyncControllerHandler.js";
 
-async function create(req, res, next) {
+async function create(req, res) {
 	const { name, dob, anamnesis } = req.body;
 
-	const user = await setActiveUserAfterCreation({
+	const user = await createUser({
 		name,
 		dob,
 		anamnesis,
@@ -23,6 +24,6 @@ async function reset(req, res) {
 }
 
 export const userController = {
-	create,
+	create: asyncHandler(create),
 	reset,
 };

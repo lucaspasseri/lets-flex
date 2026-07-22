@@ -7,7 +7,7 @@ import * as muscleRolesRepository from "../muscleRoles/repository.js";
 import * as exerciseVariantsRepository from "../exerciseVariants/repository.js";
 import * as sessionsRepository from "../sessions/repository.js";
 import * as stepTypesRepository from "../stepTypes/repository.js";
-// import { toSessionViewModel } from "../../../views/viewModels/toSessionViewModel.js";
+import * as exerciseTemplatesRepository from "../exerciseTemplates/repository.js";
 import { toSessionViewModel } from "../../../views/viewModels/toSessionViewModel.js";
 
 export async function getLibraryPage({ query, sessionState }) {
@@ -21,7 +21,7 @@ export async function getLibraryPage({ query, sessionState }) {
 		movementPatternArr,
 		muscleArr,
 		muscleRoleArr,
-		exerciseVariantArr,
+		exerciseTemplateArr,
 		sessionArr,
 		stepTypeArr,
 	] = await Promise.all([
@@ -30,7 +30,7 @@ export async function getLibraryPage({ query, sessionState }) {
 		movementPatternsRepository.findAll(),
 		musclesRepository.findAll(),
 		muscleRolesRepository.findAll(),
-		exerciseVariantsRepository.findAll(),
+		exerciseTemplatesRepository.findAll(),
 		sessionsRepository.findAll(),
 		stepTypesRepository.findAll(),
 	]);
@@ -40,17 +40,18 @@ export async function getLibraryPage({ query, sessionState }) {
 	);
 
 	const session = pageState.sessionId
-		? await sessionsDb.getSessionWithExerciseInfoById(pool, {
-				sessionId: pageState.sessionId,
-			})
+		? await sessionsRepository.findById({ sessionId: pageState.sessionId })
 		: null;
+
+	console.log({ exerciseTemplateArr });
+	console.log({ session });
 
 	return {
 		pageState,
 		appState: { user, session },
 		data: {
-			exerciseVariants: {
-				items: exerciseVariantArr,
+			exerciseTemplates: {
+				items: exerciseTemplateArr,
 			},
 			sessions: {
 				items: shapedSessionArr,

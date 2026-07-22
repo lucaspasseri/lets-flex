@@ -1,7 +1,7 @@
 <%
 const currSessionId = locals?.appState?.session?.id || null;
 const stepTypeArr = locals?.data?.stepTypes?.items ?? [];
-const exerciseVariantArr = locals?.data?.exerciseVariants?.items ?? [];
+const exerciseArr = locals?.data?.exerciseTemplates?.items ?? [];
 
 const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb", fullName: "Pounds"}];
 %>
@@ -17,7 +17,7 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 	options: stepTypeArr, getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id  } }); %>
 
 		<%- include("../select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
-	options: exerciseVariantArr, getOptionLabel: (exerciseVariant) => exerciseVariant.name, getOptionValue: (exerciseVariant) => exerciseVariant.id  } }); %>
+	options: exerciseArr, getOptionLabel: (exercise) => exercise.name, getOptionValue: (exercise) => exercise.id  } }); %>
 
 		<%- include('../olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "sessionForm" } }); %>
 		<%- include('../olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "sessionForm" } }); %>
