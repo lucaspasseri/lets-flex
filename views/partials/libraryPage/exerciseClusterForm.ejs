@@ -8,7 +8,7 @@ const muscleRoleArr = locals.data?.muscleRoles?.items ?? [];
 <form class="forms" action="/exercise_cluster" method="POST">
 	<%- include('../olaInput', { data: { label: "Name", type: "text", name: "name", context: "newExerciseForm", autocomplete: "name", required: true } }); %>
 	<%- include("../select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
-	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern.name, getOptionValue: (movementPattern) => movementPattern.id, required: true  } }); %>
+	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern?.name, getOptionValue: (movementPattern) => movementPattern?.id, required: true  } }); %>
 	<%- include("../select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
 	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id, required: true  } }); %>
 		<p>Muscle section</p>
