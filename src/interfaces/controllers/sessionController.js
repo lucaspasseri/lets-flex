@@ -1,10 +1,9 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import createSession from "../../features/sessions/createSession.js";
+import archiveSession from "../../features/sessions/archiveSession.js";
 
 async function create(req, res) {
 	const { name, notes, stepRow } = req.body;
-
-	console.log({ name, notes, stepRow });
 
 	await createSession({ name, notes, stepRowArr: stepRow });
 
@@ -13,8 +12,6 @@ async function create(req, res) {
 
 async function archive(req, res) {
 	const { sessionId } = req.params;
-
-	console.log({ sessionId });
 
 	await archiveSession(sessionId);
 

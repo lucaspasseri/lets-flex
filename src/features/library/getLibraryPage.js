@@ -43,9 +43,6 @@ export async function getLibraryPage({ query, sessionState }) {
 		? await sessionsRepository.findById({ sessionId: pageState.sessionId })
 		: null;
 
-	console.log({ exerciseTemplateArr });
-	console.log({ session });
-
 	return {
 		pageState,
 		appState: { user, session },

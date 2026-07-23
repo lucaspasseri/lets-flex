@@ -17,7 +17,7 @@ const unitArr = [{id: 1, name: "Kg", fullName: "Kilograms"}, {id: 2, name: "lb",
 	options: stepTypeArr, getOptionLabel: (stepType) => stepType.name, getOptionValue: (stepType) => stepType.id  } }); %>
 
 		<%- include("../select", { data: { id: "exerciseVariantSelect", label: "Exercise", name: "exerciseVariantId", required: true, 
-	options: exerciseArr, getOptionLabel: (exercise) => exercise.name, getOptionValue: (exercise) => exercise.id  } }); %>
+	options: exerciseArr, getOptionLabel: (exercise) => exercise.name, getOptionValue: (exercise) => exercise.exercise_variant_id  } }); %>
 
 		<%- include('../olaInput', { data: { label: "# of Sets", type: "number", name: "sets", context: "sessionForm" } }); %>
 		<%- include('../olaInput', { data: { label: "# of Reps", type: "number", name: "reps", context: "sessionForm" } }); %>

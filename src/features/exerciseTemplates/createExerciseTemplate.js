@@ -13,38 +13,19 @@ async function createExerciseTemplate({
 	try {
 		await client.query("BEGIN");
 
-		// const {
-		// 	rows: [{ id: exerciseId }],
-		// } = await client.query(
-		// 	"INSERT INTO exercises (name, movement_pattern_id) VALUES ($1, $2) RETURNING id",
-		// 	[name, movementPatternId],
-		// );
-
-		// ESTA CORRETO CRIAR UM NOVO EXERCICIO TODA VEZ OU AS VARIANTS TERIAM ESSE PAPEL???????
+		// ESTA CORRETO CRIAR UM NOVO EXERCíCIO TODA VEZ OU AS VARIANTS TERIAM ESSE PAPEL???????
 
 		const exercise = await exercisesRepository.create(
 			{ name, movementPatternId },
 			client,
 		);
 
-		console.log({ exercise });
-
 		for (const { muscleId, muscleRoleId } of muscleGroup) {
-			// await client.query(
-			// 	"INSERT INTO exercise_muscles (exercise_id, muscle_id, muscle_role_id) VALUES ($1, $2, $3)",
-			// 	[exerciseId, muscleId, muscleRoleId],
-			// );
-
 			await exerciseMusclesRepository.create(
 				{ exerciseId: exercise?.id, muscleId, muscleRoleId },
 				client,
 			);
 		}
-
-		// await client.query(
-		// 	"INSERT INTO exercise_variants (name, exercise_id, equipment_id) VALUES ($1, $2, $3)",
-		// 	[name, exerciseId, equipmentId],
-		// );
 
 		await exerciseVariantsRepository.create(
 			{ name, exerciseId: exercise?.id, equipmentId },
