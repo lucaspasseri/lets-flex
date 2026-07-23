@@ -16,7 +16,6 @@ async function addNewCycle(req, res) {
 
 async function getCyclesByProgramId(req, res) {
 	const { programId } = req.params;
-
 	const cycles = await cyclesDb.getCyclesByProgramId(pool, { programId });
 
 	res.json(cycles);
