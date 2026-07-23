@@ -1,5 +1,13 @@
 import pool from "../../../db/pool.js";
 
+export async function findById({ trainingDayId }, db = pool) {
+	const { rows } = await db.query("SELECT * FROM training_days WHERE id = $1", [
+		trainingDayId,
+	]);
+
+	return rows[0] ?? null;
+}
+
 export async function findAllByProgramId({ programId }, db = pool) {
 	const { rows } = await db.query(
 		"SELECT training_days.id AS training_day_id, training_days.day_order, cycle_id, cycle_order, program_id, scheduled_date FROM training_days JOIN cycles ON training_days.cycle_id = cycles.id WHERE cycles.program_id = $1 ORDER BY cycles.cycle_order, training_days.day_order",
@@ -7,6 +15,18 @@ export async function findAllByProgramId({ programId }, db = pool) {
 	);
 
 	return rows;
+}
+
+export async function create(
+	{ cycleId, dayOrder, label, scheduledDate },
+	db = pool,
+) {
+	const { rows } = await db.query(
+		"INSERT INTO training_days ( cycle_id, day_order, label, scheduled_date) VALUES ($1, $2, $3, $4) RETURNING *",
+		[cycleId, dayOrder, label, scheduledDate],
+	);
+
+	return rows[0];
 }
 
 export async function shiftScheduledDates(
@@ -24,16 +44,4 @@ export async function shiftScheduledDates(
 		`,
 		[programId, cycleOrder, amountOfDays],
 	);
-}
-
-export async function create(
-	{ cycleId, dayOrder, label, scheduledDate },
-	db = pool,
-) {
-	const { rows } = await db.query(
-		"INSERT INTO training_days ( cycle_id, day_order, label, scheduled_date) VALUES ($1, $2, $3, $4) RETURNING *",
-		[cycleId, dayOrder, label, scheduledDate],
-	);
-
-	return rows[0];
 }

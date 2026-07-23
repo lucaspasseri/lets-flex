@@ -1,11 +1,9 @@
 import express from "express";
-import { addNewProgram } from "../controllers/programs.js";
-
 import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
-import { dayController } from "../controllers/dayController.js";
 import { programsController } from "../src/interfaces/controllers/programController.js";
+import { dayController } from "../src/interfaces/controllers/dayController.js";
 
 const router = express.Router();
 

@@ -47,21 +47,20 @@
 .main.day .session-card .session-card-header {
 	display: grid;
 	grid-template-columns: 1fr auto auto;
+	gap: 1em;
+	align-items: center;
 
 	.session-card-notes {
 		color: var(--color-stitch);
 		font-size: 0.9em;
 	}
-
-	.icon {
-		width: 100%;
-		height: 100%;
-	}
 }
 
 .main.day .session-card .session-card-header .settings {
-	width: 24px;
-	height: fit-content;
+	svg {
+		width: 24px;
+		aspect-ratio: 1 / 1;
+	}
 
 	button {
 		border: 0;
@@ -69,6 +68,10 @@
 		border-radius: 4px;
 		background-color: var(--color-text);
 		height: fit-content;
+
+		&:hover {
+			cursor: pointer;
+		}
 	}
 }
 
