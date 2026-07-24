@@ -16,8 +16,10 @@ router.use(getSessionState);
 
 router.post("/", workoutSessionController.create);
 
-router.post("/:workoutSessionId/start", startWorkoutSession);
-router.post("/:workoutSessionId/finish", finishWorkoutSession);
+// router.post("/:workoutSessionId/start", startWorkoutSession);
+router.post("/:workoutSessionId/start", workoutSessionController.start);
+// router.post("/:workoutSessionId/finish", finishWorkoutSession);
+router.post("/:workoutSessionId/finish", workoutSessionController.finish);
 
 router.patch("/:workoutSessionId", workoutSessionController.cancel);
 

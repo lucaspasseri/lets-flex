@@ -45,3 +45,15 @@ export async function shiftScheduledDates(
 		[programId, cycleOrder, amountOfDays],
 	);
 }
+
+export async function findByProgramIdAndScheduledDate(
+	{ programId, scheduledDate },
+	db = pool,
+) {
+	const { rows } = await db.query(
+		"SELECT * FROM training_days WHERE scheduled_date = $1 AND cycle_id IN (SELECT id FROM cycles WHERE program_id = $2)",
+		[scheduledDate, programId],
+	);
+
+	return rows[0] ?? null;
+}

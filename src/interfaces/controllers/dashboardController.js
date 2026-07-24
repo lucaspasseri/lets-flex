@@ -1,5 +1,5 @@
-import getDashboardPage from "../src/features/dashboard/getDashboardPage.js";
-import asyncHandler from "../utils/asyncControllerHandler.js";
+import getDashboardPage from "../../features/dashboard/getDashboardPage.js";
+import asyncHandler from "../../../utils/asyncControllerHandler.js";
 
 async function show(req, res) {
 	const { pageState, appState, data } = await getDashboardPage({
