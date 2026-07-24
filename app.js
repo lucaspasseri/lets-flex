@@ -1,24 +1,22 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import indexRouter from "./routes/index.js";
-import usersRouter from "./routes/users.js";
-import programsRouter from "./routes/programs.js";
-import cyclesRouter from "./routes/cycles.js";
-import sessionRouter from "./routes/sessions.js";
-import sessionStepsRouter from "./routes/session_steps.js";
-import exercisesRouter from "./routes/exercises.js";
-import exerciseMusclesRouter from "./routes/exercise_muscles.js";
-import exerciseVariantsRouter from "./routes/exercise_variants.js";
-import profileRouter from "./routes/profile.js";
 import session from "express-session";
 import expressEjsLayouts from "express-ejs-layouts";
-import appStateRouter from "./routes/app_state.js";
+import methodOverride from "method-override";
+
 import libraryRouter from "./routes/library.js";
+import indexRouter from "./routes/index.js";
+import profileRouter from "./routes/profile.js";
+
+import programsRouter from "./routes/programs.js";
+
+import usersRouter from "./routes/users.js";
+import cyclesRouter from "./routes/cycles.js";
+import sessionRouter from "./routes/sessions.js";
 import exerciseTemplatesRouter from "./routes/exerciseTemplates.js";
 import workoutSessionsRouter from "./routes/workout_sessions.js";
 import workoutStepLogRouter from "./routes/workout_step_logs.js";
-import methodOverride from "method-override";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +26,6 @@ const port = process.env.PORT || 3000;
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-
 app.use(expressEjsLayouts);
 app.set("layout", "./layouts/pageShell");
 
@@ -45,17 +42,14 @@ app.use(express.json());
 app.use(methodOverride("_method"));
 
 app.use("/", indexRouter);
-app.use("/users", usersRouter);
+app.use("/profile", profileRouter);
+app.use("/library", libraryRouter);
+
 app.use("/programs", programsRouter);
+
+app.use("/users", usersRouter);
 app.use("/cycles", cyclesRouter);
 app.use("/sessions", sessionRouter);
-app.use("/session_steps", sessionStepsRouter);
-app.use("/exercises", exercisesRouter);
-app.use("/exercise_muscles", exerciseMusclesRouter);
-app.use("/exercise_variants", exerciseVariantsRouter);
-app.use("/profile", profileRouter);
-app.use("/app_state", appStateRouter);
-app.use("/library", libraryRouter);
 app.use("/exerciseTemplates", exerciseTemplatesRouter);
 app.use("/workout_sessions", workoutSessionsRouter);
 app.use("/workout_step_logs", workoutStepLogRouter);

@@ -1,10 +1,6 @@
 import express from "express";
 import { getSessionState } from "../middlewares/getSessionState.js";
-import {
-	skipWorkoutStep,
-	performWorkoutStep,
-} from "../controllers/workout_step_logs.js";
-import { workoutStepLogController } from "../controllers/workoutStepLogController.js";
+import { workoutStepLogController } from "../src/interfaces/controllers/workoutStepLogController.js";
 
 const router = express.Router();
 

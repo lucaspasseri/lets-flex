@@ -40,7 +40,7 @@ async function finish(req, res) {
 	const workoutSession = await finishWorkoutSession({ workoutSessionId });
 
 	res.redirect(
-		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession.id}`,
+		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
 	);
 }
 
