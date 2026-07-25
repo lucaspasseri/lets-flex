@@ -1,33 +1,26 @@
-import toNullableNumber from "../../../utils/toNullableNumber.js";
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
-import { getProfilePage } from "../../features/profile/getProfilePage.js";
+import getProfilePageData from "../../features/profile/getProfilePageData.js";
+import createProfilePageViewModel from "../../features/profile/createProfilePageViewModel.js";
+import resolveActiveUserId from "../../features/profile/resolveActiveUserId.js";
 
 async function show(req, res) {
-	const { pageState, appState, data } = await getProfilePage({
-		query: req.query,
-		sessionState: res.locals.sessionState,
+	const userId = resolveActiveUserId({
+		query: req?.query,
+		sessionState: res.locals?.sessionState,
 	});
 
-	const previousUserId = toNullableNumber(res?.locals?.sessionState?.userId);
-	const currentUserId = toNullableNumber(appState.user?.id);
-
-	if (currentUserId !== null && currentUserId !== previousUserId) {
-		req.session.state = {
-			userId: appState?.user?.id ?? null,
-		};
-	} else {
-		req.session.state = {
-			...req.session.state,
-			userId: appState?.user?.id ?? null,
-		};
-	}
-
-	const profile = {
-		page: { ...res.locals.page, title: "Let's Flex!" },
-		pageState,
-		appState,
-		data,
+	req.session.state = {
+		...req.session.state,
+		userId,
 	};
+
+	const page = { ...res.locals.page, title: "Let's Flex!" };
+
+	const data = await getProfilePageData({
+		userId,
+	});
+
+	const profile = await createProfilePageViewModel({ page, data });
 
 	res.render("profile", profile);
 }
