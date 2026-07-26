@@ -7,12 +7,10 @@ async function getProfilePageData({ userId }) {
 		usersRepository.findAll(),
 	]);
 
-	const output = {
+	return {
 		user: user && userMapper.toLoggedUser(user),
 		userArr: userArr.length && userArr.map(userMapper.toLoggedUser),
 	};
-
-	return output;
 }
 
 export default getProfilePageData;

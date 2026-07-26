@@ -16,11 +16,13 @@ async function show(req, res) {
 
 	const page = { ...res.locals.page, title: "Let's Flex!" };
 
+	const pageState = { userId };
+
 	const data = await getProfilePageData({
 		userId,
 	});
 
-	const profile = await createProfilePageViewModel({ page, data });
+	const profile = await createProfilePageViewModel({ page, pageState, data });
 
 	res.render("profile", profile);
 }

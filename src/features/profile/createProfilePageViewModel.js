@@ -1,11 +1,9 @@
-function createProfilePageViewModel({ page, data }) {
+function createProfilePageViewModel({ page, pageState, data }) {
 	const { user, userArr } = data;
 
 	const profile = {
 		page,
-		pageState: {
-			userId: user?.id,
-		},
+		pageState,
 		appState: {
 			user,
 		},

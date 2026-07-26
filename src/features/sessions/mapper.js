@@ -1,0 +1,38 @@
+import toCapitalizedString from "../../../utils/toCapitalizedString.js";
+import { toMuscle } from "../muscles/mapper.js";
+
+export function toSessionTemplateSeed(session) {
+	return {
+		id: session.id,
+		name: session.name,
+		notes: session.notes,
+		isArchived: session.is_archived,
+		steps: session.steps?.map(toSessionTemplateStepSeed),
+	};
+}
+
+function toSessionTemplateStepSeed(step) {
+	return {
+		id: step.id,
+		name: step.name,
+		order: step.step_order,
+		type: toCapitalizedString(step.step_type_name).replace("_", " "),
+		sets: step.sets,
+		reps: step.reps,
+		loadValue: step.load_value,
+		loadUnit: step.load_unit,
+		movementPattern: toCapitalizedString(step.movement_pattern_name),
+		exercise: {
+			name: step.exercise_name,
+			variantName: step.exercise_variant_name,
+		},
+		equipment: {
+			name: step.equipment_name,
+			category: toCapitalizedString(step.equipment_category).replaceAll(
+				"_",
+				" ",
+			),
+		},
+		muscles: step.muscles.map(toMuscle),
+	};
+}

@@ -6,6 +6,7 @@ export function findAllQuery() {
 			movement_patterns.name AS movement_pattern_name,
 			movement_patterns.notes AS movement_pattern_notes,
 			equipments.name AS equipment_name,
+			equipments.category AS equipment_category,
 			exercise_variants.id AS exercise_variant_id,
 			exercise_variants.name AS exercise_variant_name,
 			exercise_variants.setup_description AS exercise_variant_setup_description,

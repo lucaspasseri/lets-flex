@@ -6,7 +6,7 @@ const getMuscleListBySession = (session) => {
 
 	session.steps.forEach(step => {
 		step.muscles.forEach(muscle => {
-			distinctSessions.add(muscle.common_name)
+			distinctSessions.add(muscle.commonName)
 		})
 	});
 

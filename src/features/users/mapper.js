@@ -1,12 +1,10 @@
 import { format } from "date-fns";
 
-export function toLoggedUser({ id, name, date_of_birth, anamnesis }) {
-	const output = {
-		id,
-		name,
-		dob: format(date_of_birth, "dd/MM/yyyy"),
-		anamnesis,
+export function toLoggedUser(user) {
+	return {
+		id: user.id,
+		name: user.name,
+		dob: format(user.date_of_birth, "dd/MM/yyyy"),
+		anamnesis: user.anamnesis,
 	};
-
-	return output;
 }

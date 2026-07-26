@@ -10,12 +10,12 @@ const muscleRoleArr = locals.data?.muscleRoles?.items ?? [];
 	<%- include("../select", { data: { id: "movementPatternId", label: "Movement pattern", name: "movementPatternId",
 	options: movementPatternArr, getOptionLabel: (movementPattern) => movementPattern?.name, getOptionValue: (movementPattern) => movementPattern?.id, required: true  } }); %>
 	<%- include("../select", { data: { id: "equipmentId", label: "Equipment", name: "equipmentId",
-	options: equipmentArr, getOptionLabel: (equipment) => equipment.name, getOptionValue: (equipment) => equipment.id, required: true  } }); %>
+	options: equipmentArr, getOptionLabel: (equipment) => `${equipment.name} (${equipment.category})`, getOptionValue: (equipment) => equipment.id, required: true  } }); %>
 		<p>Muscle section</p>
 	<div class="muscle-section">
 		
 		<%- include("../select", { data: { id: "muscleIdSelect", label: "Performing muscle",
-		options: muscleArr, getOptionLabel: (muscle) => muscle.common_name, getOptionValue: (muscle) => muscle.id } }); %>	
+		options: muscleArr, getOptionLabel: (muscle) => `${muscle.commonName} (${muscle.scientificName})`, getOptionValue: (muscle) => muscle.id } }); %>	
 
 		<%- include("../select", { data: { id: "muscleRoleIdSelect", label: "Muscle role", 
 		options: muscleRoleArr, getOptionLabel: (muscle_role) => muscle_role.name, getOptionValue: (muscle_role) => muscle_role.id } }); %>	
