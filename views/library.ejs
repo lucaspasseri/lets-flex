@@ -3,9 +3,8 @@ const exerciseArr = locals?.data?.exerciseTemplates?.items ?? [];
 const sessionArr = locals?.data?.sessions?.items?.filter(session => session.isArchived === false) ?? [];
 
 const currentSession = locals?.appState?.session ?? null;
-const newCurrentSession = locals?.data?.sessions?.items?.filter(session => session.id === locals?.appState?.session?.id)
 
-console.log({newCurrentSession})
+console.log({currentSession})
 
 const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
@@ -57,7 +56,7 @@ const archiveSessionModalId = "archiveSessionModalId";
 		<div class="active-session-template-container">
 			<h3>SESSION DETAILS</h3>
 
-			<%- include("partials/session/sessionCard", { session: newCurrentSession, modalId: archiveSessionModalId }) %>
+			<%- include("partials/session/sessionCard", { session: currentSession, modalId: archiveSessionModalId }) %>
 		</div>
 	<% } %>
 

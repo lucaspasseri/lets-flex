@@ -20,7 +20,6 @@ import * as stepTypeMapper from "../stepTypes/mapper.js";
 async function getLibraryPageData({ userId, sessionId }) {
 	const [
 		user,
-		session,
 		sessionArr,
 		equipmentArr,
 		movementPatternArr,
@@ -30,7 +29,6 @@ async function getLibraryPageData({ userId, sessionId }) {
 		stepTypeArr,
 	] = await Promise.all([
 		usersRepository.findById({ userId }),
-		sessionsRepository.findById({ sessionId }),
 		sessionsRepository.findAll(),
 		equipmentsRepository.findAll(),
 		movementPatternsRepository.findAll(),
@@ -42,7 +40,11 @@ async function getLibraryPageData({ userId, sessionId }) {
 
 	return {
 		user: user && userMapper.toLoggedUser(user),
-		session: session && sessionMapper.toSessionTemplateSeed(session),
+		session: sessionArr.length
+			? sessionArr
+					.map(sessionMapper.toSessionTemplateSeed)
+					.filter(session => session.id === sessionId)?.[0]
+			: null,
 		sessionArr: sessionArr.length
 			? sessionArr.map(sessionMapper.toSessionTemplateSeed)
 			: [],
