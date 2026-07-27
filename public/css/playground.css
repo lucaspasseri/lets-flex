@@ -1,0 +1,10 @@
+main.playground {
+	padding: 2em;
+
+	.catalog {
+		display: flex;
+		flex-direction: column;
+		gap: 4em;
+		border: 1px solid blue;
+	}
+}

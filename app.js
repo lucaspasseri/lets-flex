@@ -18,6 +18,8 @@ import exerciseTemplatesRouter from "./routes/exerciseTemplates.js";
 import workoutSessionsRouter from "./routes/workout_sessions.js";
 import workoutStepLogRouter from "./routes/workout_step_logs.js";
 
+import playgroundRouter from "./routes/playground.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -53,6 +55,8 @@ app.use("/sessions", sessionRouter);
 app.use("/exerciseTemplates", exerciseTemplatesRouter);
 app.use("/workout_sessions", workoutSessionsRouter);
 app.use("/workout_step_logs", workoutStepLogRouter);
+
+app.use("/playground", playgroundRouter);
 
 app.use((err, _req, res, _next) => {
 	console.error(err.stack);
