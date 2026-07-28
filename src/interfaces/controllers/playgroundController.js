@@ -5,6 +5,8 @@ async function show(req, res) {
 
 	const path = "playground/";
 
+	console.log({ component });
+
 	res.render(component ? path + component : path + "test", {
 		layout: "./layouts/playgroundShell",
 	});

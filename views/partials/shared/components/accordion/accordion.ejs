@@ -1,0 +1,23 @@
+<% 
+	const {heading, panel, collapsed} = locals.accordion;
+%>
+
+<div class="shared-accordion  <%= collapsed ? "collapsed" : "" %>"  data-accordion >
+	
+
+	<div class="heading" data-accordion-heading >
+		<h3><%= heading %></h3>
+		<div class="icon">
+			<%- include("../../../icons/chevron-down") %>
+		</div>
+	</div>
+		
+
+
+
+	<div class="panel"  data-accordion-panel <%= collapsed ? "hidden" : "" %> >
+		<p><%= panel %></p>
+	</div>
+	
+
+</div>

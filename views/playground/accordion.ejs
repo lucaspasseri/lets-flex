@@ -1,7 +1,21 @@
+<%
+	const arr = [
+	{heading: "Oi!", panel: "123 123 123"},
+
+
+	{heading: "Boa noite!", panel: "abc abc"}
+	]
+
+%>
+
 <main class="playground">
 	<h1>ACCORDION PLAYGROUND</h1>
 
 	<div class="catalog">
-		<%-include("../partials/shared/components/accordion") %>
+		<%-include("../partials/shared/components/accordion/accordion", {accordion: {heading: 123, panel : 456}}) %>
+
+		<% arr.forEach(row => { %>
+			<%- include("../partials/shared/components/accordion/accordion", {accordion:row}) %>
+		<% }) %>
 	</div>
 </main>
