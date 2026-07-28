@@ -3,7 +3,7 @@
 	position: relative;
 }
 
-.shared-accordion .heading {
+.shared-accordion .header {
 	display: grid;
 	grid-template-columns: 1fr auto;
 	padding: 1em;

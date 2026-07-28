@@ -1,9 +1,9 @@
 <%
 	const arr = [
-	{heading: "Oi!", panel: "123 123 123"},
+	{heading: "Oi!", panel: "123 123 123", collapsed: true},
 
 
-	{heading: "Boa noite!", panel: "abc abc"}
+	{heading: "Boa noite!", panel: "abc abc",collapsed: true}
 	]
 
 %>
@@ -12,10 +12,10 @@
 	<h1>ACCORDION PLAYGROUND</h1>
 
 	<div class="catalog">
-		<%-include("../partials/shared/components/accordion/accordion", {accordion: {heading: 123, panel : 456}}) %>
+		<%-include("../partials/shared/components/accordion/accordion", {accordion: {id: "accordion-test-0" ,heading: 123, panel : 456}}) %>
 
-		<% arr.forEach(row => { %>
-			<%- include("../partials/shared/components/accordion/accordion", {accordion:row}) %>
+		<% arr.forEach((row, index) => { %>
+			<%- include("../partials/shared/components/accordion/accordion", {accordion:{...row, id: `accordion-test-${index+1}` }}) %>
 		<% }) %>
 	</div>
 </main>

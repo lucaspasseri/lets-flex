@@ -1,23 +1,19 @@
 <% 
-	const {heading, panel, collapsed} = locals.accordion;
+	const {id, heading, panel, collapsed} = locals.accordion;
+	const panelId = `accordion-panel-${id}`;
 %>
 
-<div class="shared-accordion  <%= collapsed ? "collapsed" : "" %>"  data-accordion >
-	
+<div class="shared-accordion<%= collapsed ? " collapsed" : "" %>"  data-accordion>
 
-	<div class="heading" data-accordion-heading >
+	<div class="header" role="button" tabindex="1" aria-controls="<%= panelId %>" data-accordion-header>
 		<h3><%= heading %></h3>
 		<div class="icon">
 			<%- include("../../../icons/chevron-down") %>
 		</div>
 	</div>
-		
 
-
-
-	<div class="panel"  data-accordion-panel <%= collapsed ? "hidden" : "" %> >
+	<div class="panel" id="<%= panelId%>" <%= collapsed ? "hidden" : "" %> data-accordion-panel>
 		<p><%= panel %></p>
 	</div>
 	
-
 </div>
