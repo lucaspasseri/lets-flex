@@ -373,3 +373,19 @@
 		}
 	}
 }
+
+.accordion-content-container {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	padding: 1em;
+
+	.settings {
+		button {
+			border: 0;
+			border-radius: 4px;
+		}
+		svg {
+			width: 30px;
+		}
+	}
+}

@@ -2,44 +2,47 @@ function createAccordion(root) {
 	const trigger = root.querySelector("[data-accordion-header]");
 	const panel = root.querySelector("[data-accordion-panel]");
 
-	trigger.addEventListener("click", () => collapsedClassToggle(root, panel));
-	trigger.addEventListener("keydown", e => handleKeyDown(e, root, panel));
+	let animating = false;
+	let opening = false;
+
+	trigger.addEventListener("click", toggle);
+	panel.addEventListener("transitionend", handleTransitionEnd);
 
 	if (panel.hidden) {
-		trigger.classList.add("collapsed");
 		trigger.setAttribute("aria-expanded", false);
 	} else {
 		trigger.setAttribute("aria-expanded", true);
 	}
-}
 
-function collapsedClassToggle(accordion, panel) {
-	if (!panel.hidden) {
-		accordion.classList.toggle("collapsed");
-
-		setTimeout(() => {
-			panel.hidden = !panel.hidden;
-			accordion
-				.querySelector("[data-accordion-header]")
-				.setAttribute("aria-expanded", !panel.hidden);
-		}, 200);
-	} else {
-		panel.hidden = !panel.hidden;
-		accordion
-			.querySelector("[data-accordion-header]")
-			.setAttribute("aria-expanded", !panel.hidden);
-
-		setTimeout(() => {
-			accordion.classList.toggle("collapsed");
-		}, 20);
+	function open() {
+		animating = true;
+		opening = true;
+		panel.hidden = false;
+		root.classList.remove("collapsed");
+		trigger.setAttribute("aria-expanded", true);
 	}
-}
 
-function handleKeyDown(e, root, panel) {
-	const key = e.code;
+	function close() {
+		animating = true;
+		opening = false;
+		root.classList.add("collapsed");
+		trigger.setAttribute("aria-expanded", false);
+	}
 
-	if (key === "Space" || key === "Enter") {
-		collapsedClassToggle(root, panel);
+	function toggle() {
+		if (!animating) {
+			panel.hidden ? open() : close();
+		}
+	}
+
+	function handleTransitionEnd(e) {
+		if (e.propertyName !== "grid-template-rows") return;
+
+		if (!opening) {
+			panel.hidden = true;
+		}
+
+		animating = false;
 	}
 }
 

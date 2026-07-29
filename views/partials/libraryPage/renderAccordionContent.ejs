@@ -1,0 +1,27 @@
+<%
+	const {exercise, deleteExerciseModalId } = locals;
+	const searchText = `${exercise.name}`
+%>
+
+<div class="accordion-content-container" data-search-exercise-item data-search-text="<%= searchText %>">
+	<div class="body">
+		<p><strong>Name:</strong><%= ` ${exercise.name}` %></p>
+		<p><strong>Movement pattern:</strong><%= ` ${exercise.movementPattern.name}` %></p>
+		<p><strong>Equipment name:</strong><%= ` ${exercise.equipment.name}` %></p>			
+		
+		<% if(exercise.setup_description){%>
+			<p><strong>Setup description:</strong><%= ` ${exercise.variant.setupDescription}` %></p>
+		<% } %>
+		<% if(exercise.setup_description){%>
+			<p><strong>Setup description:</strong><%= ` ${exercise.variant.environment}` %></p>
+		<% } %>
+		<% if(exercise.setup_description){%>
+			<p><strong>Setup description:</strong><%= ` ${exercise.variant.notes}` %></p>
+		<% } %>
+	</div>
+	<div class="settings">
+		<button type="button" class="button" data-modal-open="<%= deleteExerciseModalId %>" data-exercise-id="<%= exercise.id %>">
+			<%- include("../icons/trash", {strokeColor: "black"}) %>
+		</button>
+	</div>
+</div>

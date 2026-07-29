@@ -4,12 +4,14 @@ const sessionArr = locals?.data?.sessions?.items?.filter(session => session.isAr
 
 const currentSession = locals?.appState?.session ?? null;
 
-console.log({currentSession})
-
 const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
 const deleteExerciseModalId = "deleteExerciseModalId";
 const archiveSessionModalId = "archiveSessionModalId";
+
+
+
+
 %>
 
 <main class="main library">
@@ -65,15 +67,17 @@ const archiveSessionModalId = "archiveSessionModalId";
 			<h2>Exercise Templates</h2>
 			<p id="exerciseArrSizeIndication"><%=`${exerciseArr.length} TOTAL` %></p>
 		</div>
+
 		<div class="list-container">
 			<ul class="accordion">
-				<% exerciseArr.forEach(exercise => { %>
+				<% exerciseArr.forEach((exercise, index) => { %>
 					<li>
-						<%- include("partials/libraryPage/exerciseTemplateArticle", {exerciseTemplate: exercise, deleteExerciseModalId}) %>
+						<%- include("partials/shared/components/accordion/accordion", { accordion: {id: index , heading: exercise?.name, collapsed:true ,renderPanel: () =>  include("partials/libraryPage/renderAccordionContent", { exercise, deleteExerciseModalId}) }} ) %>
 					</li>
 				<% }) %>
 			</ul>
 		</div>
+
 	<div class="custom-exercise-button-container">
 		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD NEW</button>
 	</div>
@@ -84,7 +88,7 @@ const archiveSessionModalId = "archiveSessionModalId";
 const searchInput = document.getElementById("libraryPageSearchInput");
 
 const searchSessionItemArr = Array.from(document.querySelectorAll("article[data-search-session-item]"));
-const searchExerciseItemArr = Array.from(document.querySelectorAll("article[data-search-exercise-item]"));
+const searchExerciseItemArr = Array.from(document.querySelectorAll("[data-search-exercise-item]"));
 
 const sessionArrSizeIndication = document.getElementById("sessionArrSizeIndication");
 const exerciseArrSizeIndication = document.getElementById("exerciseArrSizeIndication");
