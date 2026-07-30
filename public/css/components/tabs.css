@@ -1,0 +1,33 @@
+h2 + [data-tabs] {
+	margin-top: 1em;
+}
+
+[data-tab-list] {
+	display: flex;
+	gap: 0.6em;
+}
+
+[data-tab] {
+	border: 0;
+	padding: 1em;
+	background-color: var(--color-surface);
+	transition: background-color 400ms ease;
+	color: var(--color-text);
+	font-size: 1.1em;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+
+[data-tab]:hover {
+	cursor: pointer;
+}
+
+[data-tab-panel]:not([hidden]) {
+	box-shadow: var(--box-shadow-header);
+	padding: 2em;
+	background-color: var(--color-border);
+}
+
+[data-tab][aria-selected="true"] {
+	background-color: var(--color-border);
+}

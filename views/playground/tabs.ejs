@@ -1,0 +1,16 @@
+<%
+	const tabArr= [
+		{tab: "aaaaaaaa1", tabpanel: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque aliquam praesentium nisi eos dolor tempore laboriosam voluptas itaque esse, aperiam minus at, molestiae, blanditiis reprehenderit. Ipsum sit pariatur placeat molestiae."},
+		{tab: "bbbbbb2", tabpanel: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque aliquam praesentium nisi eos dolor tempore laboriosam voluptas itaque esse, aperiam minus at, molestiae, blanditiis reprehenderit. Ipsum sit pariatur placeat molestiae."},
+		{tab: "cc3", tabpanel: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque aliquam praesentium nisi eos dolor tempore laboriosam voluptas itaque esse, aperiam minus at, molestiae, blanditiis reprehenderit. Ipsum sit pariatur placeat molestiae."},
+	];
+%>
+
+<main class="playground">
+	<h1>TABS PLAYGROUND</h1>
+
+	<div class="examples">
+		<%- include("../partials/shared/components/tabs/tabs", {tabs: { id: "tabsInThePlayground", label: "Lista arrumada", tabArr }}) %>
+	</div>
+</main>
+

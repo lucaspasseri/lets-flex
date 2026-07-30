@@ -1,0 +1,55 @@
+<%
+	const {
+		id,
+		label,
+		tabArr = []
+	} = locals.tabs;
+
+	const labelledBy = `labelledby=${id}`
+	const ariaLabel = `aria-label=tabs-${id}`
+%>
+
+<div>
+	<% if (label) { %>
+		<h2 id="<%= `${id}-label` %>"><%= label %></h2>
+	<% } %>
+
+	<div data-tabs>
+		<div
+			data-tab-list
+			role="tablist"
+			<% if (label) { %>
+				aria-labelledby="<%= `${id}-label` %>"
+			<% } else { %>
+				aria-label="Tabs"
+			<% } %>
+		>
+			<% tabArr.forEach((tab, index) => { %>
+				<button 
+					data-tab-list-index="<%= index %>"
+					data-tab id="<%= `tab-${index+1}` %>" 
+					type="button" role="tab" 
+					aria-controls="<%= `tabpanel-${index+1}` %>" <%= index === 0 ? "aria-selected=true" : "aria-selected=false" %>
+					tabindex="<%= index === 0 ? "0": "-1" %>"	
+				>
+					<%= tab.heading %>
+				</button>
+			<% }) %>
+		</div>
+	
+		<% tabArr.forEach((tab,index) => {%>
+			<div 
+				id="<%= `tabpanel-${index+1}` %>" 
+				data-tab-panel 
+				role="tabpanel" 
+				aria-labelledby="<%= `tab-${index+1}` %>" 
+				<%= index === 0 ? "": "hidden" %>
+				tabindex="<%= index === 0 ? "0": "-1" %>"		
+			>
+				<%= tab.tabpanel %>
+			</div>
+		<% }) %>
+	</div>
+</div>
+
+
