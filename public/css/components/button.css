@@ -1,0 +1,48 @@
+.shared-button {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4em;
+
+	width: fit-content;
+	padding: 0.6em 1.2em;
+	border-radius: 4px;
+	box-shadow: var(--box-shadow-header);
+
+	transition:
+		transform 100ms ease,
+		background-color 100ms ease;
+}
+
+.shared-button.reverse {
+	flex-direction: row-reverse;
+}
+
+.shared-button.danger {
+	background-color: var(--color-primary);
+}
+
+.shared-button.primary {
+	background-color: var(--color-stitch);
+}
+
+.shared-button:not(:disabled):hover {
+	cursor: pointer;
+	filter: brightness(0.95);
+}
+
+.shared-button:not(:disabled):active {
+	transform: scale(0.95);
+	background-color: rgba(255, 180, 172, 0.2);
+}
+
+.shared-button:focus-visible {
+	outline: 3px solid var(--color-focus);
+	outline-offset: 3px;
+}
+
+.shared-button .label {
+	font-size: 1.7em;
+	line-height: 0.9;
+}

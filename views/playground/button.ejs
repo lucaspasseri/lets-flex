@@ -1,0 +1,52 @@
+<main class="playground">
+	<h1>BUTTON PLAYGROUND</h1>
+
+	<div class="examples">
+		<%- include("../partials/shared/components/button/button", {button: { 
+			id: 123,
+			type: "button",
+			label: "ABC",
+			attributes: {
+				role: "button",
+				"data-pressed": true,
+			}}}) 
+		%>
+
+					<%- include("../partials/shared/components/button/button", {button: { 
+			id: 456,
+			type: "button",
+			label: "def",
+			variant: "primary"
+		}}) %>
+
+
+		<%- include("../partials/shared/components/button/button", {button: { 
+			id: 1213,
+			type: "button",
+			label: "MNO",
+			renderIcon: (attributes) => include("../partials/icons/play", {svg: { attributes}}),
+			iconOnly: true,
+		}}) %>
+
+		<%- include("../partials/shared/components/button/button", {button: { 
+			id: 789,
+			type: "button",
+			label: "GHI",
+			renderIcon: (attributes) => include("../partials/icons/play", {svg: { attributes}}),
+			disabled: true,
+		}}) %>
+
+		<%- include("../partials/shared/components/button/button", {button: { 
+			id: 1011,
+			type: "button",
+			label: "JKL",
+			renderIcon:(attributes) => include("../partials/icons/play", {svg: { attributes}}),
+			iconAfterText: true,
+			variant: "danger"
+		}}) %>
+
+
+	</div>
+</main>
+
+	

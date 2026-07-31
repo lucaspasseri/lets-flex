@@ -3,22 +3,67 @@
 }
 
 :root {
-	--color-bg: #0b0c10;
-	--color-surface: #16181d;
+	/* Palette */
+	--neutral-950: #0b0c10;
+	--neutral-900: #16181d;
+	--neutral-850: #1c1c1c;
+	--neutral-700: #2a2d34;
+	--neutral-500: #6b7280;
+	--neutral-300: #9ca3af;
+	--neutral-100: #e5e7eb;
 
-	--color-primary: #e63946;
-	--color-primary-hover: #c1121f;
+	--red-500: #e63946;
+	--red-600: #c1121f;
+	--red-900: #670505;
 
-	--color-stitch: #ffb4ac;
-	--color-stitch-secondary: #1c1c1c;
-	--color-stitch-text: #670505;
+	--coral-300: #ffb4ac;
+	--coral-400: #f59f98;
 
-	--color-accent: #2ec4b6;
+	--green-400: #2ec4b6;
+	--green-500: #25a99e;
 
-	--color-text: #e5e7eb;
-	--color-text-muted: #6b7280;
-	--color-text-dark: rgb(60, 63, 70);
-	--color-border: #2a2d34;
+	/* Surfaces */
+	--color-page: var(--neutral-950);
+	--color-surface: var(--neutral-900);
+	--color-surface-subtle: var(--neutral-850);
+	--color-border: var(--neutral-700);
+
+	/* Text */
+	--color-text: var(--neutral-100);
+	--color-text-muted: var(--neutral-300);
+	--color-text-disabled: var(--neutral-500);
+	--color-text-on-action: var(--red-900);
+	--color-text-on-danger: #ffffff;
+
+	/* Identity */
+	--color-brand: var(--red-500);
+	--color-brand-strong: var(--red-600);
+
+	/* Actions */
+	--color-action: var(--coral-300);
+	--color-action-hover: var(--coral-400);
+
+	/* Feedback */
+	--color-success: var(--green-400);
+	--color-success-hover: var(--green-500);
+	--color-danger: var(--red-500);
+	--color-danger-hover: var(--red-600);
+
+	/* Accessibility */
+	--color-focus: var(--coral-300);
+
+	/* OLD */
+	--color-bg: var(--color-page);
+	--color-surface: var(--color-surface);
+
+	--color-primary: var(--color-brand);
+	--color-primary-hover: var(--color-brand-strong);
+
+	--color-stitch: var(--color-action);
+	--color-stitch-secondary: var(--color-surface-subtle);
+	--color-stitch-text: var(--color-text-on-action);
+
+	--color-accent: var(--color-success);
 
 	--box-shadow-header:
 		rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px,

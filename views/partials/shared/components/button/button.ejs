@@ -1,0 +1,42 @@
+<%
+	const {
+		id,
+		type = "button",
+		label,
+		attributes = {},
+		renderIcon,
+		iconAfterText = false,
+		iconOnly = false,
+		variant = "",
+		disabled = false
+	} = locals.button;
+%>
+
+<button
+	<% if (id) { %>id="<%= id %>"<% } %>
+	type="<%= type %>"
+	class="shared-button <%= iconAfterText ? `${variant} reverse` : variant %>"
+	<% if (iconOnly) { %>aria-label="<%= label %>"<% } %>
+	<% if (disabled) { %><%= "disabled"  %><% } %>
+
+	<% Object.entries(attributes).forEach(([name, value]) => { %>
+		<% if (value === true || value === null) { %>
+			<%= name %>
+		<% } else if (value !== false && value !== undefined) { %>
+			<%= name %>="<%= value %>"
+		<% } %>
+	<% }) %>
+	
+>
+	<% if (renderIcon) { %>
+		<%- renderIcon({
+			"aria-hidden": true,
+			width: "2em",
+			height: "2em"
+		}) %>
+	<% } %>
+
+	<% if (!iconOnly) { %>
+		<span class="label"><%= label %></span>
+	<% } %>
+</button>

@@ -20,7 +20,8 @@
 		</div>
 
 	<% } else { %>
-		<div class="sessions-container">
+		<div style="display: grid; grid-template-columns: 1fr; width: 100%">
+			<div class="sessions-container">
 			<div class="change-active-session-container">
 				<ul>
 					<% workoutSessionArrByDay.forEach(wSession => { %>
@@ -37,5 +38,13 @@
 			}) %>
 				
 		</div>
+
+				<div class="sessions-container">
+			
+			<%- include("../shared/components/tabs/tabs", {tabs: {id: 123,label: 123, tabArr: workoutSessionArrByDay}}) %>
+				
+		</div>
+		</div>
+
 	<% } %>
 </div>
