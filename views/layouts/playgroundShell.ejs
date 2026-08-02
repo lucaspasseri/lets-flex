@@ -3,6 +3,12 @@
 	<%- include('../partials/head'); %>
 	<body>
 		<div class="playground"><%- body %></div>
-		<%- include("../partials/scripts") %>
+
+		<div class="overlays"><%- defineContent("overlays") %></div>
+		<script src="https://unpkg.com/lucide@latest"></script>
+		<script>
+			lucide.createIcons();
+		</script>
+		<script src="/js/app.js" type="module"></script>
 	</body>
 </html>

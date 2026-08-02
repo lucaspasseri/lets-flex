@@ -1,0 +1,27 @@
+<%
+	const modalId = "playgroundModalId";
+%>
+
+
+<main class="playground">
+	<h1>TABS PLAYGROUND</h1>
+
+	<div class="examples">
+
+
+		<%- include("../partials/shared/components/button/button", {button: { 
+			id: "modalButtonPlayground",
+			type: "button",
+			label: "Open...",
+			variant: "primary",
+			attributes: {
+				"data-modal-open": modalId
+			}
+		}}) %>
+	</div>
+</main>
+
+
+<%- contentFor("overlays") %>
+
+<%- include("../partials/shared/components/modal/modal", {modal: { id: modalId }}) %>

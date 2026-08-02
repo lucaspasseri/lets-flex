@@ -1,0 +1,27 @@
+<%
+	const {id} = locals?.modal;
+%>
+
+<div 
+	data-modal
+	<% if(id) { %> <%= `id=${id}`%> <% } %>
+	hidden
+>
+	<div data-modal-backdrop></div>
+	<div data-modal-content tabindex="-1">
+		<div data-modal-content-header>
+			<h2 data-modal-heading>Bem-vindo</h2>
+				<%- include("../button/button", {button: { 
+					type: "button",
+					label: "Close modal",
+					renderIcon: (attributes) => include("../../../icons/close", {svg: { attributes}}),
+					iconOnly: true,
+					attributes: {
+						"data-modal-close-button": null,
+						"tabindex": "-1"
+					}
+				}}) %>
+		</div>
+		<div data-modal-content-body></div>
+	</div>
+</div>
