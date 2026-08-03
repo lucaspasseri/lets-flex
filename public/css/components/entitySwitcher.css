@@ -1,0 +1,65 @@
+.entity-switcher {
+	--item-width: 8.8em;
+	--item-height: 8.8em;
+	--item-radius: 4px;
+	--item-background-color: transparent;
+	border: 1px solid red;
+	padding: 1em var(--horizontal-margin);
+}
+
+.entity-switcher > div {
+	margin-top: 2em;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 1em;
+}
+
+.entity-switcher__list {
+	display: flex;
+	gap: 1em;
+}
+
+.entity-switcher__item,
+.entity-switcher__add-button {
+	font-size: 1rem;
+	border-radius: var(--item-radius);
+	width: var(--item-width);
+	height: var(--item-height);
+}
+
+.entity-switcher__add-button {
+	background-color: transparent;
+	border: 0.2em dashed white;
+	color: white;
+}
+
+.entity-switcher__item {
+	background-color: var(--color-surface-subtle);
+}
+
+.entity-switcher__item > a {
+	height: 100%;
+	padding: 0.6em;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	color: var(--color-text);
+}
+
+.entity-switcher__item span {
+	font-size: 1.2em;
+	font-weight: 700;
+}
+
+span.entity-switcher__active-marker {
+	font-size: 0.8em;
+	font-weight: 400;
+}
+
+.entity-switcher__item.isActive {
+	background-color: var(--color-action);
+
+	a {
+		color: var(--color-text-on-action);
+	}
+}

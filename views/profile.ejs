@@ -24,9 +24,28 @@ const basicLineId = "profilePageUserBasicLine";
 	</div>
 
 	<%- include("partials/basicLine", {line: {basicLineId, entity, arr: userArr, modalId, currentItemId: currUserId, path: loggedUserPath }}) %>
+
+	<%- include("partials/entitySwitcher", {switcher: {
+		items: userArr,
+		modalId: "123",
+		linkPath: loggedUserPath,
+		activeItemId: currUserId,
+		label: "Choose a user",
+		headingLevel: 1
+	}}) %>
+
+
 </main>
 
 <%- contentFor("overlays") %>
+
+<%- include("partials/shared/components/modal/modal", { modal: { 
+	id: "123", 
+	title: "Welcome to the modal", 
+	renderContent: () => include("partials/newUserForm")
+	}}) %>
+
+
 
 <%- include("partials/basicModal", {
 		modal: {

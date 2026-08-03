@@ -54,7 +54,6 @@
 
 	/* OLD */
 	--color-bg: var(--color-page);
-	--color-surface: var(--color-surface);
 
 	--color-primary: var(--color-brand);
 	--color-primary-hover: var(--color-brand-strong);
@@ -113,15 +112,14 @@
 	overflow: clip;
 }
 
-html {
-	scrollbar-gutter: stable;
-}
-
 html,
 body {
 	height: 100%;
 	overflow: hidden;
 	background-color: var(--color-bg);
+}
+body {
+	scrollbar-gutter: stable;
 }
 
 body.has-open-modal {
