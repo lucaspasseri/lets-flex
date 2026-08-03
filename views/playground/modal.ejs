@@ -15,7 +15,7 @@
 			label: "Open...",
 			variant: "primary",
 			attributes: {
-				"data-modal-open": modalId
+				"data-modal-open": modalId,
 			}
 		}}) %>
 	</div>
@@ -24,4 +24,13 @@
 
 <%- contentFor("overlays") %>
 
-<%- include("../partials/shared/components/modal/modal", {modal: { id: modalId }}) %>
+<%- include("../partials/shared/components/modal/modal", { modal: { 
+	id: modalId, 
+	title: "Welcome to the modal", 
+	renderContent: () => `
+		<div>
+			<p>This is the modal content.</p>
+			<a href="#">This is a link</a>
+		</div>`
+	}})
+%>

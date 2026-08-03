@@ -31,7 +31,7 @@
 	left: 20%;
 	padding: 1em;
 	transform: translateY(120%);
-	transition: transform 300ms;
+	transition: transform 300ms ease-out;
 }
 
 [data-modal-content-header] {
@@ -45,4 +45,14 @@
 
 [data-modal-content].is-open {
 	transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-modal-content] {
+		transition-duration: 0s;
+	}
+}
+
+.icon-close.icon {
+	--icon-stroke-width: 3.6;
 }

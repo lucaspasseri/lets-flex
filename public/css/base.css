@@ -113,11 +113,22 @@
 	overflow: clip;
 }
 
+html {
+	scrollbar-gutter: stable;
+}
+
 html,
 body {
 	height: 100%;
 	overflow: hidden;
 	background-color: var(--color-bg);
+}
+
+body.has-open-modal {
+	position: fixed;
+	inset-inline: 0;
+	width: 100%;
+	overflow: hidden;
 }
 
 ul {
@@ -241,4 +252,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 	.current-week-container {
 		font-size: 0.6em;
 	}
+}
+
+.icon {
+	width: var(--icon-size, 1.5rem);
+	height: var(--icon-size, 1.5rem);
+	color: var(--icon-color, currentColor);
+	stroke-width: var(--icon-stroke-width, 2);
+	flex-shrink: 0;
 }

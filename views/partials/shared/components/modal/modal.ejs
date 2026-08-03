@@ -1,27 +1,40 @@
 <%
-	const {id} = locals?.modal;
+	const {id, title, renderContent} = locals?.modal;
+
+	if (!id) {
+		throw new Error("Modal requires an id");
+	}
 %>
 
 <div 
 	data-modal
-	<% if(id) { %> <%= `id=${id}`%> <% } %>
+	<%= `id=${id}` %>
 	hidden
+	role="dialog"
+	aria-modal="true"
+	<% if(title) { %> aria-labelledby="<%= id %>-heading" <% } %>
+	<% if(!title) { %> aria-label="Modal-<%= id %>" <% } %>
 >
 	<div data-modal-backdrop></div>
 	<div data-modal-content tabindex="-1">
 		<div data-modal-content-header>
-			<h2 data-modal-heading>Bem-vindo</h2>
-				<%- include("../button/button", {button: { 
-					type: "button",
-					label: "Close modal",
-					renderIcon: (attributes) => include("../../../icons/close", {svg: { attributes}}),
-					iconOnly: true,
-					attributes: {
-						"data-modal-close-button": null,
-						"tabindex": "-1"
-					}
-				}}) %>
+			<% if (title) { %>
+				<h2 id="<%= id %>-heading" data-modal-heading>
+					<%= title %>
+				</h2>
+			<% } %>
+			<%- include("../button/button", {button: { 
+				type: "button",
+				label: "Close modal",
+				renderIcon: () => include("../../../icons/close", {icon: { className: "icon-close" }}),
+				iconOnly: true,
+				attributes: {
+					"data-modal-close-button": null,
+				}
+			}}) %>
 		</div>
-		<div data-modal-content-body></div>
+		<div data-modal-content-body>
+			<%- renderContent && renderContent() %>
+		</div>
 	</div>
 </div>

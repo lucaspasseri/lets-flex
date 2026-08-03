@@ -1,13 +1,28 @@
+<%
+	const {
+		size = 24,
+		className = "",
+		label = null,
+	} = locals.icon ?? {};
+%>
+
 <svg
+	class="icon <%= className %>"
 	xmlns="http://www.w3.org/2000/svg"
-	width="24"
-	height="24"
+	width="<%= size %>"
+	height="<%= size %>"
 	viewBox="0 0 24 24"
 	fill="none"
 	stroke="currentColor"
 	stroke-width="2"
 	stroke-linecap="round"
 	stroke-linejoin="round"
+	<% if (label) { %>
+		role="img"
+		aria-label="<%= label %>"
+	<% } else { %>
+		aria-hidden="true"
+	<% } %>
 >
 	<path d="M18 6 6 18" />
 	<path d="m6 6 12 12" />

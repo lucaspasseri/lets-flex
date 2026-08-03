@@ -54,6 +54,7 @@ async function getLibraryPageData({ userId, sessionId }) {
 		movementPatternArr: movementPatternArr.length
 			? movementPatternArr.map(movementPatternMapper.toMovementPattern)
 			: [],
+
 		muscleArr: muscleArr.length ? muscleArr.map(muscleMapper.toMuscle) : [],
 		muscleRoleArr: muscleRoleArr.length
 			? muscleRoleArr.map(muscleRoleMapper.toMuscleRole)
