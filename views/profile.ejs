@@ -1,59 +1,26 @@
 <% 
-const currUserId = locals?.appState?.user?.id ?? null;
-const userArr = locals?.data?.users?.items ?? [];
-
-const entity = "user";
-const loggedUserPath = "/profile/?userId=";
-const modalId = "createUserModal";
-const basicLineId = "profilePageUserBasicLine";
+	const userId = locals?.appState?.users?.current?.id ?? null;
+	const userArr = locals?.appState?.users?.items ?? [];
+	const switcherData = locals?.features?.userSwitcher ?? {};
 %>
 
 <main class="main profile">
-	<div class="main-header">
-		<% if( userArr.length === 0){ %>
-			<div>
-				<h1>ATHLETE<br />INITIALIZATION</h1>
-				<p>
-					Enter precise baseline metric to calibrate the performance engine.
-					Accuracy is required for optimal load calculation and volume prescription.
-				</p>
-			</div>
-		<% } else { %>
-			<h1>CHOOSE THE ACTIVE USER</h1>
-		<% } %>
-	</div>
-
-	<%- include("partials/basicLine", {line: {basicLineId, entity, arr: userArr, modalId, currentItemId: currUserId, path: loggedUserPath }}) %>
-
 	<%- include("partials/entitySwitcher", {switcher: {
-		items: userArr,
-		modalId: "123",
-		linkPath: loggedUserPath,
-		activeItemId: currUserId,
-		label: "Choose a user",
-		headingLevel: 1
-	}}) %>
-
-
+			id: switcherData.id,
+			label: switcherData.label,
+			headingLevel: switcherData.headingLevel,
+			items: switcherData.items,
+			addAction: switcherData.addAction,
+		}}) 
+	%>
 </main>
 
 <%- contentFor("overlays") %>
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
-	id: "123", 
-	title: "Welcome to the modal", 
-	renderContent: () => include("partials/newUserForm")
-	}}) %>
-
-
-
-<%- include("partials/basicModal", {
-		modal: {
-			id: modalId,
-			title: "Create user",
-			description: "Fill in the user information below.",
-			renderContent: () => include("partials/newUserForm")
-		}
-	}) 
+		id: switcherData.addAction?.modalId ?? "createUserModal", 
+		title: switcherData.addAction?.label ?? "Add User", 
+		renderContent: () => include("partials/newUserForm")
+	}}) 
 %>
 

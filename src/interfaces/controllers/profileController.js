@@ -1,7 +1,7 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import getProfilePageData from "../../features/profile/getProfilePageData.js";
-import createProfilePageViewModel from "../../features/profile/createProfilePageViewModel.js";
 import resolveActiveUserId from "../../features/profile/resolveActiveUserId.js";
+import createProfilePageViewModel from "../../../views/viewModels/createProfilePageViewModel.js";
 
 async function show(req, res) {
 	const userId = resolveActiveUserId({
@@ -15,14 +15,17 @@ async function show(req, res) {
 	};
 
 	const page = { ...res.locals.page, title: "Let's Flex!" };
-
 	const pageState = { userId };
-
-	const data = await getProfilePageData({
+	const { user, userArr } = await getProfilePageData({
 		userId,
 	});
 
-	const profile = await createProfilePageViewModel({ page, pageState, data });
+	const profile = await createProfilePageViewModel({
+		page,
+		pageState,
+		user,
+		userArr,
+	});
 
 	res.render("profile", profile);
 }

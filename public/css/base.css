@@ -182,12 +182,9 @@ footer.footer {
 	animation-duration: 160ms;
 }
 
-.main.profile {
-	.basic-line[data-id="profilePageUserBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: profile-page-basic-line-item-selected;
-		}
-	}
+[data-user-switcher-id="profilePageUserSwitcher"]
+	[data-user-switcher-item-id].isActive {
+	view-transition-name: profile-page-user-switcher-item-selected;
 }
 
 .main.programs {

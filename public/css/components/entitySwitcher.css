@@ -3,7 +3,6 @@
 	--item-height: 8.8em;
 	--item-radius: 4px;
 	--item-background-color: transparent;
-	border: 1px solid red;
 	padding: 1em var(--horizontal-margin);
 }
 

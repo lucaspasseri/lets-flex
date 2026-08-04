@@ -1,10 +1,11 @@
 <%
-	const {items = [], modalId = null, linkPath, activeItemId = null, headingLevel = 3, label = null } = locals?.switcher;
+	const {id, items = [], headingLevel = 3, label = null  } = locals?.switcher;
+	const {label: buttonLabel = "Add", modalId} = locals?.switcher?.addAction ?? {};
 
-	console.log({items})
+	console.log({buttonLabel, modalId})
 %>
 
-<section class="entity-switcher" 
+<section id="<%= id %>" class="entity-switcher" data-user-switcher-id="<%= id %>"
 	<% if(label){ %>
 		<%= 'aria-labelledby="entity-switcher-heading"' %>
 	<% } %>
@@ -29,20 +30,16 @@
 	<div>
 		<ul class="entity-switcher__list">
 			<% items.forEach((item, index) => { %>
-				<% const isItemActive = item?.id === activeItemId %>
 				<li 
-					class="entity-switcher__item<%= isItemActive ? ' isActive' : ''%>"
+					class="entity-switcher__item<%= item.isActive ? ' isActive' : ''%>"
+					data-user-switcher-item-id="<%= `userSwitcher-${item.id}` %>"
 				>
-					<% 
-						const itemHref = linkPath + item?.id;
-						console.log({itemHref});
-					%>
-					<a href="<%= itemHref %>">
+					<a href="<%= item.href %>">
 						<span>
 							<%= `U${index+1}` %>
 						</span>
 						<div>
-							<% if(isItemActive) { %>
+							<% if(item.isActive) { %>
 								<span class="entity-switcher__active-marker">
 									(ACTIVE) <br/>
 								</span>
@@ -58,7 +55,7 @@
 
 		<% if(modalId){ %>
 			<button class="entity-switcher__add-button" data-modal-open="<%= modalId%>">
-				Add<br/>new user
+				<%= buttonLabel %>
 			</button>
 		<% } %>
 	</div>
