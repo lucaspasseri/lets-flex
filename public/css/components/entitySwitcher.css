@@ -56,7 +56,7 @@ span.entity-switcher__active-marker {
 	font-weight: 400;
 }
 
-.entity-switcher__item.isActive {
+.entity-switcher__item.is-active {
 	background-color: var(--color-action);
 
 	a {

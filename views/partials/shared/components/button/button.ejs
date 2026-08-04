@@ -7,15 +7,18 @@
 		renderIcon,
 		iconAfterText = false,
 		iconOnly = false,
-		variant = "",
-		disabled = false
+		variant = null,
+		disabled = false,
+		className = null
 	} = locals.button;
+
+	const additionalClass = variant || className;
 %>
 
 <button
 	<% if (id) { %>id="<%= id %>"<% } %>
 	type="<%= type %>"
-	class="shared-button <%= iconAfterText ? `${variant} reverse` : variant %>"
+	class="shared-button<%= iconAfterText ? ` reverse` : '' %><%= additionalClass ? ` ${additionalClass}` : ''%>"
 	<% if (iconOnly) { %>aria-label="<%= label %>"<% } %>
 	<% if (disabled) { %><%= "disabled"  %><% } %>
 

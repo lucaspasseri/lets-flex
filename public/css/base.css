@@ -182,8 +182,7 @@ footer.footer {
 	animation-duration: 160ms;
 }
 
-[data-user-switcher-id="profilePageUserSwitcher"]
-	[data-user-switcher-item-id].isActive {
+#profilePageUserSwitcher .entity-switcher__item.is-active {
 	view-transition-name: profile-page-user-switcher-item-selected;
 }
 

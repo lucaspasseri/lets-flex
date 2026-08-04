@@ -23,13 +23,13 @@
 [data-modal-content] {
 	background-color: var(--color-surface);
 	width: 60%;
-	height: 80%;
+	max-height: 80%;
 	position: absolute;
-	z-index: 4;
-	top: 10%;
+	z-index: 3;
+	top: 20%;
 	left: 20%;
 	padding: 1em;
-	transform: translateY(120%);
+	transform: translateY(120vh);
 	transition: transform 300ms ease-out;
 }
 
