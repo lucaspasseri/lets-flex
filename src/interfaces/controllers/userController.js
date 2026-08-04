@@ -18,7 +18,10 @@ async function reset(req, res) {
 	delete req.session.state;
 
 	const { backUrl, backUrlWithoutParams } = res.locals.page;
-	if (backUrlWithoutParams === "/profile/") res.redirect(backUrlWithoutParams);
+	if (backUrlWithoutParams === "/profile/") {
+		res.redirect(backUrlWithoutParams);
+		return;
+	}
 
 	res.redirect(backUrl);
 }

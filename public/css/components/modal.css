@@ -1,5 +1,4 @@
 [data-modal] {
-	border: 1px solid greenyellow;
 	width: 0;
 	height: 0;
 }
@@ -22,7 +21,7 @@
 }
 
 [data-modal-content] {
-	background-color: white;
+	background-color: var(--color-surface);
 	width: 60%;
 	height: 80%;
 	position: absolute;
@@ -37,6 +36,8 @@
 [data-modal-content-header] {
 	display: grid;
 	grid-template-columns: 1fr auto;
+	color: var(--color-text);
+	margin-bottom: 2em;
 }
 
 [data-modal-backdrop].is-open {

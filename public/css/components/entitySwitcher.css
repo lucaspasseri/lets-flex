@@ -8,14 +8,14 @@
 
 .entity-switcher > div {
 	margin-top: 2em;
-	display: grid;
-	grid-template-columns: 1fr auto;
+	display: flex;
 	gap: 1em;
 }
 
 .entity-switcher__list {
 	display: flex;
 	gap: 1em;
+	overflow-x: auto;
 }
 
 .entity-switcher__item,
@@ -24,6 +24,7 @@
 	border-radius: var(--item-radius);
 	width: var(--item-width);
 	height: var(--item-height);
+	flex-shrink: 0;
 }
 
 .entity-switcher__add-button {

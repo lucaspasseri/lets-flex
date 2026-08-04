@@ -1,8 +1,6 @@
 <%
 	const {id, items = [], headingLevel = 3, label = null  } = locals?.switcher;
 	const {label: buttonLabel = "Add", modalId} = locals?.switcher?.addAction ?? {};
-
-	console.log({buttonLabel, modalId})
 %>
 
 <section id="<%= id %>" class="entity-switcher" data-user-switcher-id="<%= id %>"

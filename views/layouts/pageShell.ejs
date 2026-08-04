@@ -6,15 +6,13 @@
 		<div class="content" data-page-content><%- body %></div>
 		<%- include('../partials/footer'); %>
 		<div class="overlays">
-				<%- include("../partials/basicModal", {
-					modal: {
-							id: "logoutUserModalId",
-							title: "Logout user",
-							description: "",
-							renderContent: () => include("../partials/profilePage/logoutUserForm")
-						}
-					})
-				%> 
+		<%- include("../partials/shared/components/modal/modal", { modal: { 
+				id: "logoutUserModalId", 
+				title: "Reset user selection", 
+				renderContent: () => include("../partials/profilePage/logoutUserForm")
+			}}) 
+		%>
+
 			<%- defineContent("overlays") %>
 		</div>
 
