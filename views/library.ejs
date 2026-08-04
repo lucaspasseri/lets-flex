@@ -8,6 +8,8 @@ const createSessionModalId = "createSessionModal";
 const createExerciseModalId = "createExerciseModal"; 
 const deleteExerciseModalId = "deleteExerciseModalId";
 const archiveSessionModalId = "archiveSessionModalId";
+
+const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 %>
 
 <main class="main library">
@@ -17,7 +19,7 @@ const archiveSessionModalId = "archiveSessionModalId";
 			<h1>Library</h1>
 		</div>
 		<div class="button-container">
-			<button type="button" data-modal-open="<%= createSessionModalId %>">+</button>
+			<button type="button">+</button>
 		</div>
 	</div>
 
@@ -33,6 +35,10 @@ const archiveSessionModalId = "archiveSessionModalId";
 			/>
 		</div>
 	</div>
+
+	<%- include("partials/libraryPage/librarySearch") %>
+
+	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
 
 	<div class="session-template-container">
 		<div class="header">
@@ -126,14 +132,23 @@ searchInput.addEventListener("input", (ev) => {
 
 <%- contentFor("overlays") %>
 
-<%- include("partials/basicModal", {
+<%- include("partials/shared/components/modal/modal", { modal: { 
+		id: sessionWorkspace?.createAction?.modalId ?? null, 
+		title: "Create Session", 
+		renderContent: () => include("partials/libraryPage/sessionForm")
+	}}) 
+%>
+
+
+
+<!-- <%- include("partials/basicModal", {
 	modal: {
 		id: createSessionModalId,
 		title: "Create session",
 		description: "Fill in the session information below.",
 		renderContent: () => include("partials/libraryPage/sessionForm")
 	}
-}) %>
+}) %> -->
 
 <%- include("partials/basicModal", {
 	modal: {

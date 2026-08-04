@@ -1,0 +1,179 @@
+<%
+	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipments = [], movementPatterns = [], steps = [], actions={} }= locals?.session
+%>
+
+
+<% if (!session) { %>
+	<section class="session-details session-details--empty">
+		<i data-lucide="list-checks" aria-hidden="true"></i>
+		<h3>Select a session</h3>
+		<p>Choose a session to inspect its exercises and prescription.</p>
+	</section>
+<% } else { %>
+	<article
+		class="session-details"
+		aria-labelledby="<%= headingId %>"
+	>
+		<header class="session-details__header">
+			<div>
+				<div class="session-details__labels">
+					<span class="status-badge">
+						Session template
+					</span>
+
+					<% if (isArchived) { %>
+						<span class="status-badge status-badge--muted">
+							Archived
+						</span>
+					<% } %>
+				</div>
+
+				<h3 id="<%= headingId %>">
+					<%= name %>
+				</h3>
+
+				<% if (description) { %>
+					<p class="session-details__description">
+						<%= description %>
+					</p>
+				<% } %>
+			</div>
+
+			<a
+				class="button button--secondary"
+				href="<%= actions.edit.href %>"
+			>
+				<i data-lucide="pencil" aria-hidden="true"></i>
+				<span><%= actions.edit.label %></span>
+			</a>
+		</header>
+
+		<dl class="session-stats">
+			<% stats.forEach((stat) => { %>
+				<div class="session-stat">
+					<i data-lucide="<%= stat.icon %>" aria-hidden="true"></i>
+
+					<div>
+						<dt><%= stat.label %></dt>
+						<dd><%= stat.value %></dd>
+					</div>
+				</div>
+			<% }) %>
+		</dl>
+
+		<% if (notes) { %>
+			<section
+				class="session-details__notes"
+				aria-labelledby="session-notes-title"
+			>
+				<i data-lucide="notebook-pen" aria-hidden="true"></i>
+
+				<div>
+					<h4 id="session-notes-title">Coach notes</h4>
+					<p><%= notes %></p>
+				</div>
+			</section>
+		<% } %>
+
+		<section
+			class="session-details__section"
+			aria-labelledby="session-exercises-title"
+		>
+			<header class="section-heading">
+				<div>
+					<p class="section-heading__eyebrow">Prescription</p>
+					<h4 id="session-exercises-title">Exercises</h4>
+				</div>
+
+				<span><%= steps.length %> total</span>
+			</header>
+
+			<ol class="session-steps">
+				<% steps.forEach((step) => { %>
+					<li class="session-step">
+						<div class="session-step__order" aria-hidden="true">
+							<%= step.order %>
+						</div>
+
+						<div class="session-step__content">
+							<header class="session-step__header">
+								<div>
+									<span class="session-step__type">
+										<%= step.type.name %>
+									</span>
+
+									<h5>
+										<%= step.exercise.variantName
+											|| step.exercise.name %>
+									</h5>
+
+									<% if (
+										step.exercise.variantName &&
+										step.exercise.variantName !== step.exercise.name
+									) { %>
+										<p><%= step.exercise.name %></p>
+									<% } %>
+								</div>
+
+								<strong class="session-step__prescription">
+									<%= step.prescription.summary %>
+								</strong>
+							</header>
+
+							<dl class="session-step__metadata">
+								<% if (step.exercise.movementPattern) { %>
+									<div>
+										<dt>Movement</dt>
+										<dd>
+											<%= step.exercise.movementPattern %>
+										</dd>
+									</div>
+								<% } %>
+
+								<% if (step.exercise.equipment) { %>
+									<div>
+										<dt>Equipment</dt>
+										<dd><%= step.exercise.equipment %></dd>
+									</div>
+								<% } %>
+							</dl>
+
+							<% if (step.setupDescription) { %>
+								<div class="session-step__instruction">
+									<h6>Setup</h6>
+									<p><%= step.setupDescription %></p>
+								</div>
+							<% } %>
+
+							<% if (step.notes) { %>
+								<div class="session-step__instruction">
+									<h6>Notes</h6>
+									<p><%= step.notes %></p>
+								</div>
+							<% } %>
+
+							<% if (
+								step.muscles.primary?.length ||
+								step.muscles.secondary?.length
+							) { %>
+								<div class="session-step__muscles">
+									<% step.muscles.primary.forEach((muscle) => { %>
+										<span class="tag tag--primary">
+											<%= muscle %>
+										</span>
+									<% }) %>
+
+									<% step.muscles.secondary.forEach((muscle) => { %>
+										<span class="tag">
+											<%= muscle %>
+										</span>
+									<% }) %>
+								</div>
+							<% } %>
+						</div>
+					</li>
+				<% }) %>
+			</ol>
+		</section>
+	</article>
+<% } %>

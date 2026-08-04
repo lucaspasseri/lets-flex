@@ -1,0 +1,46 @@
+<% 
+	const { id= null, heading="", createAction={}, summaries={}, details={} } = locals?.sessionWorkspace;
+%>
+
+<section
+	class="session-workspace"
+	aria-labelledby="session-workspace-title"
+>
+	<header class="session-workspace__header">
+		<div>
+			<p class="session-workspace__eyebrow">Workout library</p>
+			<h2 id="session-workspace-title">
+				<%= heading %>
+			</h2>
+		</div>
+
+		<!-- <button
+			class="button button--primary"
+			type="button"
+			data-modal-open="<%= createAction.modalId %>"
+		>
+			<i data-lucide="plus" aria-hidden="true"></i>
+			<span><%= createAction.label %></span>
+		</button> -->
+
+		<%- include("../../shared/components/button/button", {button: {
+					id: `sessionWorkspace-${id}-addButton`,
+					type: "button",
+					label: createAction.label,
+					attributes: {
+						"data-modal-open": createAction.modalId
+					}
+				}}) 
+			%>
+	</header>
+
+	<div class="session-workspace__content">
+		<%- include("./sessionSummaries", {
+			summaries: summaries
+		}) %>
+
+		<%- include("./sessionDetails", {
+			session: details
+		}) %>
+	</div>
+</section>

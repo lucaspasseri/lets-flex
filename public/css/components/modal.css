@@ -22,12 +22,12 @@
 
 [data-modal-content] {
 	background-color: var(--color-surface);
-	width: 60%;
-	max-height: 80%;
+	width: 70%;
+	max-height: 70%;
 	position: absolute;
 	z-index: 3;
-	top: 20%;
-	left: 20%;
+	top: 10%;
+	left: 15%;
 	padding: 1em;
 	transform: translateY(120vh);
 	transition: transform 300ms ease-out;

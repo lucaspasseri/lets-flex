@@ -1,0 +1,65 @@
+<%
+	const {id= null, heading="", emptyMessage="", items=[]} = locals?.summaries;
+%>
+
+<section
+	class="session-summaries"
+	aria-labelledby="<%= id %>-title"
+>
+	<header class="session-summaries__header">
+		<h3 id="<%= id %>-title">
+			<%= heading %>
+		</h3>
+
+		<span class="session-summaries__count">
+			<%= items.length %>
+		</span>
+	</header>
+
+	<% if (items.length === 0) { %>
+		<p class="session-summaries__empty">
+			<%= emptyMessage %>
+		</p>
+	<% } else { %>
+		<nav aria-label="Session templates">
+			<ul class="session-summaries__list">
+				<% items.forEach((item) => { %>
+					<li>
+						<a
+							class="session-summary <%= item.isCurrent
+								? 'session-summary--current'
+								: '' %>"
+							href="<%= item.href %>"
+							<% if (item.isCurrent) { %>
+								aria-current="true"
+							<% } %>
+						>
+							<span class="session-summary__body">
+								<strong class="session-summary__name">
+									<%= item.name %>
+								</strong>
+
+								<% if (item.description) { %>
+									<span class="session-summary__description">
+										<%= item.description %>
+									</span>
+								<% } %>
+
+								<span class="session-summary__metadata">
+									<span><%= item.stepCountLabel %></span>
+									<span aria-hidden="true">•</span>
+									<span><%= item.setCountLabel %></span>
+								</span>
+							</span>
+
+							<i
+								data-lucide="chevron-right"
+								aria-hidden="true"
+							></i>
+						</a>
+					</li>
+				<% }) %>
+			</ul>
+		</nav>
+	<% } %>
+</section>
