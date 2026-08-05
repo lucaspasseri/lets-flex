@@ -24,7 +24,7 @@
 		<nav aria-label="Session templates">
 			<ul class="session-summaries__list">
 				<% items.forEach((item) => { %>
-					<li>
+					<li data-search-session-item data-search-key-word="<%= item.searchKeyWord %>">
 						<a
 							class="session-summary <%= item.isCurrent
 								? 'session-summary--current'
@@ -49,6 +49,8 @@
 									<span><%= item.stepCountLabel %></span>
 									<span aria-hidden="true">•</span>
 									<span><%= item.setCountLabel %></span>
+									<span aria-hidden="true">•</span>
+									<span><%= item.movementPatterns %></span>
 								</span>
 							</span>
 

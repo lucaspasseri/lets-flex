@@ -1,5 +1,7 @@
 <%
-	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipments = [], movementPatterns = [], steps = [], actions={} }= locals?.session
+	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={} }= locals?.session
+
+	console.log({id, name, description, stats, equipment, movementPatterns, steps})
 %>
 
 
@@ -13,6 +15,7 @@
 	<article
 		class="session-details"
 		aria-labelledby="<%= headingId %>"
+		data-session-details-transition
 	>
 		<header class="session-details__header">
 			<div>
@@ -41,10 +44,10 @@
 
 			<a
 				class="button button--secondary"
-				href="<%= actions.edit.href %>"
+				href="<%= actions.edit?.href %>"
 			>
 				<i data-lucide="pencil" aria-hidden="true"></i>
-				<span><%= actions.edit.label %></span>
+				<span><%= actions.edit?.label %></span>
 			</a>
 		</header>
 
@@ -90,6 +93,9 @@
 
 			<ol class="session-steps">
 				<% steps.forEach((step) => { %>
+					<%
+					console.log({ step });
+					%>
 					<li class="session-step">
 						<div class="session-step__order" aria-hidden="true">
 							<%= step.order %>
@@ -99,7 +105,7 @@
 							<header class="session-step__header">
 								<div>
 									<span class="session-step__type">
-										<%= step.type.name %>
+										<%= step.type %>
 									</span>
 
 									<h5>
@@ -153,19 +159,15 @@
 							<% } %>
 
 							<% if (
-								step.muscles.primary?.length ||
-								step.muscles.secondary?.length
+								step.muscles.length
 							) { %>
 								<div class="session-step__muscles">
-									<% step.muscles.primary.forEach((muscle) => { %>
+									<% step.muscles.forEach((muscle) => { %>
 										<span class="tag tag--primary">
-											<%= muscle %>
+											<%= muscle.commonName %>
 										</span>
-									<% }) %>
-
-									<% step.muscles.secondary.forEach((muscle) => { %>
 										<span class="tag">
-											<%= muscle %>
+											<%= muscle.scientificName %>
 										</span>
 									<% }) %>
 								</div>

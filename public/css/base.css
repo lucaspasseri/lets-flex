@@ -186,6 +186,14 @@ footer.footer {
 	view-transition-name: profile-page-user-switcher-item-selected;
 }
 
+#session-workspace .session-summary--current {
+	view-transition-name: library-page-session-summary-current;
+}
+
+#session-workspace [data-session-details-transition] {
+	view-transition-name: library-page-session-details;
+}
+
 .main.programs {
 	.basic-line[data-id="programsBasicLine"] {
 		.selectItemButton.selected {

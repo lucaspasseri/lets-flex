@@ -87,9 +87,10 @@ const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 
 <script>
 
-const searchInput = document.getElementById("libraryPageSearchInput");
+const searchInput = document.getElementById("library-search");
 
-const searchSessionItemArr = Array.from(document.querySelectorAll("article[data-search-session-item]"));
+// const searchSessionItemArr = Array.from(document.querySelectorAll("article[data-search-session-item]"));
+const searchSessionItemArr = Array.from(document.querySelectorAll("[data-search-session-item]"));
 const searchExerciseItemArr = Array.from(document.querySelectorAll("[data-search-exercise-item]"));
 
 const sessionArrSizeIndication = document.getElementById("sessionArrSizeIndication");
@@ -102,7 +103,8 @@ searchInput.addEventListener("input", (ev) => {
 	let exerciseArrSize = searchExerciseItemArr.length;
 
 	searchSessionItemArr.forEach(item => {
-		const searchText = item.dataset.searchText ?? "";
+		// const searchText = item.dataset.searchText ?? "";
+		const searchText = item.dataset.searchKeyWord ?? "";
 
 		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
 

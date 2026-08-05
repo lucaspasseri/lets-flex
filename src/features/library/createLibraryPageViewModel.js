@@ -11,6 +11,31 @@ function createLibraryPageViewModel({ page, pageState, data }) {
 		stepTypeArr,
 	} = data;
 
+	console.log({ session, session0: sessionArr?.[0] });
+
+	console.log({
+		step: session?.steps?.[0],
+		step0: sessionArr?.[0]?.steps?.[0],
+	});
+
+	function createSessionSummaryViewModel({ item }) {
+		return {
+			id: item.id,
+			name: item.name,
+			href: `/library?sessionId=${item.id}`,
+			isCurrent: item.id === session?.id,
+			description: item.description ?? "Remember, safety first.",
+			stepCountLabel: `${item.steps?.length || 0} exercises`,
+			setCountLabel: `${item.steps.reduce((acc, curr) => acc + curr.sets, 0)} sets`,
+			// still repeating movement patterns
+			movementPatterns: item.steps.reduce(
+				(acc, curr) => acc + curr.movementPattern + " ",
+				"",
+			),
+			searchKeyWord: `${item.name} ${getDistinctMuscles(item)}`,
+		};
+	}
+
 	return {
 		page,
 		pageState,
@@ -57,8 +82,8 @@ function createLibraryPageViewModel({ page, pageState, data }) {
 					heading: "Sessions",
 					emptyMessage: "No session templates have been created yet.",
 
-					items: sessionArr?.map(session =>
-						createSessionSummaryViewModel({ session }),
+					items: sessionArr?.map(item =>
+						createSessionSummaryViewModel({ item }),
 					),
 				},
 
@@ -68,60 +93,50 @@ function createLibraryPageViewModel({ page, pageState, data }) {
 	};
 }
 
-function createSessionSummaryViewModel({ session }) {
-	return {
-		id: session.id,
-		name: session.name,
-		href: `/library?sessionId=${session.id}`,
-		isCurrent: session.isCurrent,
-
-		description: session.description,
-		stepCountLabel: `${session.stepCount} exercises`,
-		setCountLabel: `${session.workingSetCount} sets`,
-
-		movementPatterns: session.movementPatternArr?.map(
-			movementPattern => movementPattern.name,
-		),
-	};
-}
-
 function createSessionDetailsViewModel({ session }) {
 	if (!session) {
-		return null;
+		return {};
 	}
 
 	return {
 		id: session.id,
 		headingId: `session-details-title-${session.id}`,
 		name: session.name,
-		description: session.description,
+		description: session.description ?? "Remember, safety first.",
 		notes: session.notes,
 		isArchived: session.isArchived,
 
 		stats: [
 			{
 				label: "Exercises",
-				value: session.exerciseCount,
+				value: session.steps?.length || 0,
 				icon: "dumbbell",
 			},
 			{
 				label: "Working sets",
-				value: session.workingSetCount,
+				value: session.steps.reduce((acc, curr) => acc + curr.sets, 0),
 				icon: "layers",
 			},
 			{
 				label: "Movement patterns",
-				value: session.movementPatternCount,
+				value: session.steps.reduce(
+					(acc, curr) => acc + curr.movementPattern + "",
+					"",
+				),
 				icon: "activity",
 			},
 			{
 				label: "Equipment",
-				value: session.equipmentCount,
+				value: session.steps.reduce(
+					(acc, curr) => acc + curr.equipment.name + "",
+					"",
+				),
 				icon: "wrench",
 			},
 		],
 
-		equipment: session.equipmentArr?.map(equipment => equipment.name),
+		// equipment: session.steps.map(step => step.equipment.name),
+		equipment: "BRA BRA BRASIL",
 
 		movementPatterns: session.movement,
 		steps: session.steps?.map(createStepViewModel),
@@ -140,41 +155,67 @@ function createSessionDetailsViewModel({ session }) {
 }
 
 function createStepViewModel(step) {
+	console.log("Oi, Boa noite!");
+	console.log({ step });
 	return {
 		id: step.id,
 		order: step.order,
-		type: {
-			id: step.type.id,
-			name: step.type.name,
-		},
+		type: step.type,
 
 		exercise: {
 			name: step.exercise.name,
 			variantName: step.exercise.variantName,
-			movementPattern: step.exercise.movementPattern,
-			equipment: step.exercise.equipment,
+			movementPattern: step.movementPattern,
+			equipment: step.equipment.name,
 		},
 
 		prescription: {
-			// sets: step.prescription.sets,
-			// reps: step.prescription.reps,
-			// loadValue: step.prescription.loadValue,
-			// loadUnit: step.prescription.loadUnit,
-			// summary: step.prescription.summary,
+			sets: step.sets,
+			reps: step.reps,
+			loadValue: step.loadValue,
+			loadUnit: step.loadUnit,
+			// I think it is the only property of prescription that is in use
+			summary: step.summary ?? "Stay safe and lift smart!",
 		},
 
-		setupDescription: step.setupDescription,
+		setupDescription: step.setupDescription ?? "-",
 
-		notes: step.notes,
+		notes: step.notes ?? "-",
 
-		muscles: {
-			primary: step.muscles.primary?.map(muscle => muscle.name),
-			secondary: step.muscles.secondary?.map(muscle => muscle.name),
-		},
+		muscles: step.muscles ?? [],
 	};
 }
 
 export default createLibraryPageViewModel;
+
+function getDistinctMuscles(session) {
+	const distinctSessions = new Set();
+
+	session.steps.forEach(step => {
+		step.muscles.forEach(muscle => {
+			distinctSessions.add(muscle.commonName);
+		});
+	});
+
+	const iterator = distinctSessions.values();
+	let output = "";
+	let condition = true;
+	while (condition) {
+		const currValue = iterator.next().value;
+		if (currValue === undefined) {
+			condition = false;
+			continue;
+		}
+
+		if (output === "") {
+			output = currValue;
+		} else {
+			output += ` ${currValue}`;
+		}
+	}
+	console.log({ output });
+	return output;
+}
 
 // const sessionWorkspace = {
 // 	id: "session-workspace",
