@@ -1,0 +1,63 @@
+<%
+	const {id = null, label="", description="",  countLabel = 0, items=[], emptyState=null, actions ={}} = locals?.exerciseTemplates;
+%>
+
+<section
+	class="exercise-templates"
+	aria-labelledby="<%= id %>-heading"
+>
+	<header class="exercise-templates__header">
+		<div>
+			<p class="exercise-templates__eyebrow">Exercise library</p>
+
+			<h2 id="<%= id %>-heading">
+				<%= label %>
+			</h2>
+
+			<% if (description) { %>
+				<p class="exercise-templates__description">
+					<%= description %>
+				</p>
+			<% } %>
+		</div>
+
+		<div class="exercise-templates__header-actions">
+			<span class="exercise-templates__count">
+				<%= countLabel %>
+			</span>
+
+			<button
+				type="button"
+				class="shared-button shared-button--secondary"
+				data-modal-open="<%= actions.create.modalId %>"
+			>
+				<%= actions.create.label %>
+			</button>
+		</div>
+	</header>
+
+	<% if (items.length) { %>
+		<ul class="exercise-templates__list">
+			<% items.forEach(template => { %>
+				<li data-search-exercise-item data-search-key-word="<%= template.searchKeyWord %>">
+					<%- include("../shared/components/accordion/accordion", { 
+						accordion: { 
+							id: template.id,
+					 		renderHeaderContent: () => include("./exerciseTemplateSummary", {
+								template
+							}), 
+					 		renderPanel: () => include("./exerciseTemplateDetails", {
+								template,
+							})
+						}
+					}) %>
+				</li>
+			<% }) %>
+		</ul>
+	<% } else { %>
+		<%- include("./exerciseTemplatesEmptyState", {
+			emptyState: emptyState,
+			createAction: actions.create,
+		}) %>
+	<% } %>
+</section>

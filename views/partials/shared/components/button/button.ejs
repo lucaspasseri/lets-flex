@@ -7,20 +7,45 @@
 		renderIcon,
 		iconAfterText = false,
 		iconOnly = false,
-		variant = null,
+		variant = "primary",
 		disabled = false,
-		className = null
 	} = locals.button;
 
-	const additionalClass = variant || className;
+	const variantClasses = {
+		primary: "shared-button--primary",
+		secondary: "shared-button--secondary",
+		danger: "shared-button--danger",
+		ghost: "shared-button--ghost",
+	};
+
+	const variantClass =
+		variantClasses[variant] ?? variantClasses.primary;
+
+	const classNames = [
+		"shared-button",
+		variantClass,
+		iconAfterText && "shared-button--icon-after",
+		iconOnly && "shared-button--icon-only",
+	]
+		.filter(Boolean)
+		.join(" ");
 %>
 
 <button
-	<% if (id) { %>id="<%= id %>"<% } %>
+	<% if (id) { %>
+		id="<%= id %>"
+	<% } %>
+
 	type="<%= type %>"
-	class="shared-button<%= iconAfterText ? ` reverse` : '' %><%= additionalClass ? ` ${additionalClass}` : ''%>"
-	<% if (iconOnly) { %>aria-label="<%= label %>"<% } %>
-	<% if (disabled) { %><%= "disabled"  %><% } %>
+	class="<%= classNames %>"
+
+	<% if (iconOnly) { %>
+		aria-label="<%= label %>"
+	<% } %>
+
+	<% if (disabled) { %>
+		disabled
+	<% } %>
 
 	<% Object.entries(attributes).forEach(([name, value]) => { %>
 		<% if (value === true || value === null) { %>
@@ -29,13 +54,12 @@
 			<%= name %>="<%= value %>"
 		<% } %>
 	<% }) %>
-	
 >
 	<% if (renderIcon) { %>
 		<%- renderIcon() %>
 	<% } %>
 
 	<% if (!iconOnly) { %>
-		<span class="label"><%= label %></span>
+		<span class="shared-button__label"><%= label %></span>
 	<% } %>
 </button>

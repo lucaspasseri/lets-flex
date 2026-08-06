@@ -1,12 +1,25 @@
 <% 
-	const {id, heading, renderPanel, collapsed} = locals.accordion;
+	const {id=null, heading="", renderPanel=null, collapsed=true, renderHeaderContent = null} = locals.accordion;
 	const panelId = `accordion-panel-${id}`;
 %>
 
 <div class="shared-accordion<%= collapsed ? " collapsed" : "" %>"  data-accordion>
 
 	<button class="header" type="button" aria-controls="<%= panelId %>" data-accordion-header>
-		<h3><%= heading %></h3>
+		<div class="header-base"> 
+			
+			<% if(heading) { %>
+				<h3><%= heading %></h3>
+			<% } %>
+
+			<% if(renderHeaderContent) { %>
+				<div class="header-content">
+					<%- renderHeaderContent() %>
+				</div>
+			<% } %>
+
+		</div>
+
 		<div class="icon">
 			<%- include("../../../icons/chevron-down") %>
 		</div>

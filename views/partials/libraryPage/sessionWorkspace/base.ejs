@@ -15,19 +15,11 @@
 			</h2>
 		</div>
 
-		<!-- <button
-			class="button button--primary"
-			type="button"
-			data-modal-open="<%= createAction.modalId %>"
-		>
-			<i data-lucide="plus" aria-hidden="true"></i>
-			<span><%= createAction.label %></span>
-		</button> -->
-
 		<%- include("../../shared/components/button/button", {button: {
 					id: `sessionWorkspace-${id}-addButton`,
 					type: "button",
 					label: createAction.label,
+					variant: "secondary",
 					attributes: {
 						"data-modal-open": createAction.modalId
 					}

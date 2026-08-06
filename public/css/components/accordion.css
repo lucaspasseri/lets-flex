@@ -1,34 +1,38 @@
 .shared-accordion {
+	--header-and-panel-padding: 1em;
 	box-shadow: var(--box-shadow-header);
 	position: relative;
 	color: var(--color-text);
 }
 
 .shared-accordion .header {
-	display: grid;
-	grid-template-columns: 1fr auto;
-	padding: 1em;
+	padding: var(--header-and-panel-padding);
 	background-color: var(--color-stitch-secondary);
 	z-index: 2;
 	position: relative;
 	border: 0;
 	width: 100%;
-	align-items: center;
 	color: var(--color-text);
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+}
 
-	&:hover {
-		cursor: pointer;
-	}
+.shared-accordion .header:hover {
+	cursor: pointer;
+	background: rgb(255 255 255 / 3%);
+}
 
+.shared-accordion .header-base {
 	h3 {
 		font-size: 1.2em;
 		margin-right: auto;
-
 		height: fit-content;
 	}
 }
 
 .shared-accordion .panel {
+	padding: 0 var(--header-and-panel-padding);
 	background-color: var(--color-surface);
 	z-index: 1;
 	position: relative;
@@ -55,8 +59,9 @@
 
 .shared-accordion .icon {
 	transition: transform 240ms;
+	transform: rotate(180deg);
 }
 
 .shared-accordion.collapsed .icon {
-	transform: rotate(180deg);
+	transform: rotate(0);
 }

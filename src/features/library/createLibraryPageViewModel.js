@@ -1,3 +1,4 @@
+import createExerciseTemplates from "./createExerciseTemplatesViewModel.js";
 import createSessionWorkspace from "./createSessionWorkspaceViewModel.js";
 
 function createLibraryPageViewModel({ page, pageState, data }) {
@@ -48,6 +49,7 @@ function createLibraryPageViewModel({ page, pageState, data }) {
 				sessionArr,
 				activeSession: session,
 			}),
+			exerciseTemplates: createExerciseTemplates({ exerciseTemplateArr }),
 		},
 	};
 }

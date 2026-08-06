@@ -12,8 +12,6 @@ function createDetails({ session }) {
 	const movements = getDistinctMovements(session);
 	const equipments = getDistinctEquipments(session);
 
-	console.log({ session });
-
 	return {
 		id: session.id,
 		headingId: `session-details-title-${session.id}`,

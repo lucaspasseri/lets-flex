@@ -1,0 +1,11 @@
+<% const {id= null, name="", summary= {}} = locals?.template %>
+
+<span class="exercise-template__summary">
+	<strong class="exercise-template__name"> <%= name %> </strong>
+
+	<span class="exercise-template__metadata">
+		<span><%= summary.movementPatternLabel %></span>
+		<span aria-hidden="true">•</span>
+		<span><%= summary.equipmentSummary %></span>
+	</span>
+</span>

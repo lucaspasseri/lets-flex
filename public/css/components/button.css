@@ -1,48 +1,91 @@
 .shared-button {
-	position: relative;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.4em;
+	gap: 0.5rem;
 
-	width: fit-content;
-	padding: 0.6em 1.2em;
-	border-radius: 4px;
-	box-shadow: var(--box-shadow-header);
+	min-height: 2.75rem;
+	padding: 0.625rem 1rem;
+	border: 1px solid transparent;
+	border-radius: 0.75rem;
+
+	font: inherit;
+	font-weight: 600;
+	line-height: 1;
+	cursor: pointer;
 
 	transition:
-		transform 100ms ease,
-		background-color 100ms ease;
+		background-color 160ms ease,
+		border-color 160ms ease,
+		color 160ms ease,
+		transform 160ms ease;
 }
 
-.shared-button.reverse {
-	flex-direction: row-reverse;
+.shared-button:hover:not(:disabled) {
+	transform: translateY(-1px);
 }
 
-.shared-button.danger {
-	background-color: var(--color-primary);
-}
-
-.shared-button.primary {
-	background-color: var(--color-stitch);
-}
-
-.shared-button:not(:disabled):hover {
-	cursor: pointer;
-	filter: brightness(0.95);
-}
-
-.shared-button:not(:disabled):active {
-	transform: scale(0.95);
-	background-color: rgba(255, 180, 172, 0.2);
+.shared-button:active:not(:disabled) {
+	transform: translateY(0);
 }
 
 .shared-button:focus-visible {
-	outline: 3px solid var(--color-focus);
-	outline-offset: 3px;
+	outline: 3px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
+	outline-offset: 2px;
 }
 
-.shared-button .label {
-	font-size: 1.2em;
-	line-height: 0.9;
+.shared-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Main action */
+.shared-button--primary {
+	background: var(--color-stitch);
+	color: var(--color-stitch-text);
+}
+
+.shared-button--primary:hover:not(:disabled) {
+	background: color-mix(in srgb, var(--color-stitch) 88%, white);
+}
+
+/* Less prominent action */
+.shared-button--secondary {
+	background: var(--color-surface);
+	border-color: var(--color-border);
+	color: var(--color-text);
+}
+
+.shared-button--secondary:hover:not(:disabled) {
+	background: var(--color-stitch-secondary);
+	border-color: var(--color-text-muted);
+}
+
+/* Destructive action */
+.shared-button--danger {
+	background: var(--color-primary);
+	color: white;
+}
+
+.shared-button--danger:hover:not(:disabled) {
+	background: var(--color-primary-hover);
+}
+
+/* Low-emphasis action */
+.shared-button--ghost {
+	background: transparent;
+	color: var(--color-text);
+}
+
+.shared-button--ghost:hover:not(:disabled) {
+	background: var(--color-surface);
+}
+
+.shared-button--icon-after {
+	flex-direction: row-reverse;
+}
+
+.shared-button--icon-only {
+	width: 2.75rem;
+	padding-inline: 0;
 }

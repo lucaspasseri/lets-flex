@@ -10,6 +10,10 @@ function createSummary({ session, activeSessionId }) {
 
 	const setCount = steps.reduce((total, step) => total + (step.sets ?? 0), 0);
 
+	const searchKeyWord = [session.name, ...movements, ...muscles]
+		.filter(Boolean)
+		.join(" ");
+
 	return {
 		id: session.id,
 		name: session.name,
@@ -20,9 +24,7 @@ function createSummary({ session, activeSessionId }) {
 		setCountLabel: `${setCount} sets`,
 		movementPatternsLabel:
 			movements.length > 0 ? movements.join(", ") : "No movement patterns",
-		searchKeywords: [session.name, ...movements, ...muscles]
-			.filter(Boolean)
-			.join(" "),
+		searchKeyWord,
 	};
 }
 

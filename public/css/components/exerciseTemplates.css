@@ -1,0 +1,385 @@
+/* ======================================================
+   Exercise templates
+   ====================================================== */
+
+.exercise-templates {
+	--template-surface: var(--color-surface, #16181d);
+	--template-surface-raised: #1d2026;
+	--template-surface-soft: #121419;
+	--template-border: var(--color-border, #2a2d34);
+	--template-text: var(--color-text, #e5e7eb);
+	--template-muted: #a6a9b2;
+	--template-accent: var(--color-stitch, #ffb4ac);
+	--template-accent-soft: rgb(255 180 172 / 12%);
+	--template-positive: var(--color-accent, #2ec4b6);
+
+	display: grid;
+	gap: 1rem;
+	margin: 1em var(--horizontal-margin);
+}
+
+/* ======================================================
+   Section header
+   ====================================================== */
+
+.exercise-templates__header {
+	display: flex;
+	align-items: end;
+	justify-content: space-between;
+	gap: 1.5rem;
+	padding-bottom: 0.75rem;
+	border-bottom: 1px solid var(--template-border);
+}
+
+.exercise-templates__eyebrow {
+	margin: 0 0 0.25rem;
+	color: var(--template-accent);
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.exercise-templates__header h2 {
+	margin: 0;
+	color: var(--template-text);
+	font-size: clamp(1.15rem, 2vw, 1.4rem);
+	line-height: 1.2;
+}
+
+.exercise-templates__description {
+	max-width: 38rem;
+	margin: 0.35rem 0 0;
+	color: var(--template-muted);
+	font-size: 0.875rem;
+	line-height: 1.5;
+}
+
+.exercise-templates__header-actions {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-shrink: 0;
+}
+
+.exercise-templates__count {
+	color: var(--template-accent);
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+/* ======================================================
+   Template list
+   ====================================================== */
+
+.exercise-templates__list {
+	display: grid;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.exercise-templates__list > li {
+	min-width: 0;
+}
+
+/* ======================================================
+   Accordion container
+   ====================================================== */
+
+.exercise-template {
+	overflow: hidden;
+	border: 1px solid var(--template-border);
+	border-radius: 0.75rem;
+	background: var(--template-surface);
+	transition:
+		border-color 180ms ease,
+		box-shadow 180ms ease;
+}
+
+.exercise-template:has(.exercise-template__trigger[aria-expanded="true"]) {
+	border-color: rgb(255 180 172 / 45%);
+	box-shadow: 0 0 0 1px rgb(255 180 172 / 8%);
+}
+
+.exercise-template__summary {
+	display: flex;
+	gap: 1em;
+	min-width: 0;
+}
+
+.exercise-template__name {
+	overflow: hidden;
+	color: var(--template-text);
+	font-size: 1rem;
+	line-height: 1.25;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.exercise-template__metadata {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.4rem;
+	color: var(--template-muted);
+	font-size: 0.78rem;
+	line-height: 1.4;
+}
+
+.exercise-template__metadata [aria-hidden="true"] {
+	color: var(--template-accent);
+}
+
+/* ======================================================
+   Accordion panel
+   ====================================================== */
+
+.exercise-template__panel {
+	border-top: 1px solid var(--template-border);
+	background: var(--template-surface-soft);
+}
+
+.exercise-template__panel[hidden] {
+	display: none;
+}
+
+.exercise-template__content {
+	display: grid;
+	gap: 1.25rem;
+	padding: 1.25rem;
+}
+
+/* ======================================================
+   Main template facts
+   ====================================================== */
+
+.exercise-template__facts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.75rem;
+}
+
+.exercise-template__facts > div {
+	display: grid;
+	align-content: start;
+	gap: 0.4rem;
+	min-height: 4.5rem;
+	padding: 0.85rem;
+
+	border: 1px solid var(--template-border);
+	border-radius: 0.6rem;
+	background: var(--template-surface);
+}
+
+.exercise-template__field-label {
+	color: var(--template-muted);
+	font-size: 0.65rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.exercise-template__facts strong {
+	color: var(--template-text);
+	font-size: 0.9rem;
+}
+
+/* ======================================================
+   Muscle tags
+   ====================================================== */
+
+.exercise-template__tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.exercise-template__tags .tag {
+	display: inline-flex;
+	align-items: center;
+	min-height: 1.5rem;
+	padding: 0.2rem 0.55rem;
+
+	border: 1px solid rgb(46 196 182 / 18%);
+	border-radius: 999px;
+	background: rgb(46 196 182 / 12%);
+	color: var(--template-positive);
+
+	font-size: 0.7rem;
+	font-weight: 700;
+	line-height: 1;
+}
+
+/* ======================================================
+   Variants
+   ====================================================== */
+
+.exercise-template__variant-section {
+	display: grid;
+	gap: 0.75rem;
+}
+
+.exercise-template__variant {
+	display: flex;
+	flex-direction: column;
+	gap: 1em;
+}
+
+.exercise-template__variants-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.exercise-template__variants-header h3 {
+	margin: 0;
+	color: var(--template-text);
+	font-size: 0.95rem;
+}
+
+.exercise-template__variants-header span {
+	color: var(--template-muted);
+	font-size: 0.75rem;
+}
+
+.exercise-variant {
+	position: relative;
+	display: grid;
+	gap: 0.85rem;
+	padding: 1rem 1rem 1rem 1.2rem;
+
+	border: 1px solid var(--template-border);
+	border-radius: 0.65rem;
+	background: var(--template-surface);
+}
+
+/* Small accent line, similar to your coach-notes card. */
+
+.exercise-variant::before {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 2px;
+	border-radius: 0.65rem 0 0 0.65rem;
+	background: var(--template-accent);
+	content: "";
+}
+
+.exercise-variant > strong {
+	color: var(--template-text);
+	font-size: 0.95rem;
+}
+
+.exercise-variant__facts {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+	margin: 0;
+}
+
+.exercise-variant__facts > div {
+	display: grid;
+	align-content: start;
+	gap: 0.25rem;
+	min-width: 0;
+}
+
+.exercise-variant__facts dt {
+	color: var(--template-muted);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.exercise-variant__facts dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+	color: var(--template-text);
+	font-size: 0.8rem;
+	line-height: 1.45;
+}
+
+/* ======================================================
+   Actions
+   ====================================================== */
+
+.exercise-template__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.65rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--template-border);
+}
+
+/* ======================================================
+   Empty state
+   ====================================================== */
+
+.exercise-templates__empty {
+	display: grid;
+	justify-items: center;
+	gap: 0.75rem;
+	padding: 2.5rem 1.25rem;
+
+	border: 1px dashed var(--template-border);
+	border-radius: 0.75rem;
+	background: rgb(255 255 255 / 1.5%);
+	text-align: center;
+}
+
+.exercise-templates__empty h3 {
+	margin: 0;
+	color: var(--template-text);
+	font-size: 1rem;
+}
+
+.exercise-templates__empty p {
+	max-width: 30rem;
+	margin: 0;
+	color: var(--template-muted);
+	font-size: 0.85rem;
+	line-height: 1.5;
+}
+
+/* ======================================================
+   Responsive layout
+   ====================================================== */
+
+@media (max-width: 45rem) {
+	.exercise-templates__header {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.exercise-templates__header-actions {
+		justify-content: space-between;
+	}
+
+	.exercise-template__facts,
+	.exercise-variant__facts {
+		grid-template-columns: 1fr;
+	}
+
+	.exercise-template__actions {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.exercise-template__actions .shared-button {
+		justify-content: center;
+		width: 100%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.exercise-template,
+	.exercise-template__trigger,
+	.exercise-template__trigger > svg {
+		transition-duration: 0.01ms;
+	}
+}

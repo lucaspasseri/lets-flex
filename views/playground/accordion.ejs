@@ -12,7 +12,10 @@
 	<h1>ACCORDION PLAYGROUND</h1>
 
 	<div class="examples">
-		<%-include("../partials/shared/components/accordion/accordion", {accordion: {id: "accordion-test-0" ,heading: 123, renderPanel: () => 456}}) %>
+		<%-include("../partials/shared/components/accordion/accordion", {accordion: {id: "accordion-test-0" ,heading: 123, renderPanel: () => `<a href="">456</a>`}}) %>
+
+
+		<%-include("../partials/shared/components/accordion/accordion", {accordion: {id: "accordion-test-99" , renderHeaderContent: () => "ABC" ,renderPanel: () => 456}}) %>
 
 		<% arr.forEach((row, index) => { %>
 			<%- include("../partials/shared/components/accordion/accordion", {accordion:{...row, id: `accordion-test-${index+1}` }}) %>

@@ -26,7 +26,8 @@
 			<%- include("../button/button", {button: { 
 				type: "button",
 				label: "Close modal",
-				renderIcon: () => include("../../../icons/close", {icon: { className: "icon-close" }}),
+				renderIcon: () => include("../../../icons/close"),
+				variant: "secondary",
 				iconOnly: true,
 				attributes: {
 					"data-modal-close-button": null,

@@ -1,17 +1,6 @@
 <% 
-const exerciseArr = locals?.data?.exerciseTemplates?.items ?? []; 
-const sessionArr = locals?.data?.sessions?.items?.filter(session => session.isArchived === false) ?? [];
-
-const currentSession = locals?.appState?.session ?? null;
-
-const createSessionModalId = "createSessionModal";
-const createExerciseModalId = "createExerciseModal"; 
-const deleteExerciseModalId = "deleteExerciseModalId";
-const archiveSessionModalId = "archiveSessionModalId";
-
 const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
-
-
+const exerciseTemplates = locals?.features?.exerciseTemplates ?? null;
 %>
 
 <main class="main library">
@@ -22,78 +11,23 @@ const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 		</div>
 	</div>
 
-	<!-- <div class="search-container">
-		<div>
-			<label for="libraryPageSearchInput">Q</label>
-			<input
-				id="libraryPageSearchInput"
-				name="search"
-				class="search-exercise-input"
-				type="search"
-				placeholder="SEARCH EXERCISES..."
-			/>
-		</div>
-	</div> -->
-
 	<%- include("partials/libraryPage/librarySearch") %>
 
 	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
 
-	<!-- <div class="session-template-container">
-		<div class="header">
-			<h2>Session Templates</h2>
-			<p id="sessionArrSizeIndication"><%=`${sessionArr.length} TOTAL` %></p>
-		</div>
-		<div class="list-container">
-			<ul class="session-template-list">
-				<% sessionArr.forEach(session => { %>
-					<li>
-						<%- include("partials/libraryPage/sessionTemplateArticle", {sessionTemplate: session}) %>
-					</li>
-				<% }) %>
-			</ul>
-		</div>
-	</div>
+	<%- include("partials/libraryPage/exerciseTemplates", {exerciseTemplates}) %>
 
-	<% if(currentSession !== null){ %>
-		<div class="active-session-template-container">
-			<h3>SESSION DETAILS</h3>
-
-			<%- include("partials/session/sessionCard", { session: currentSession, modalId: archiveSessionModalId }) %>
-		</div>
-	<% } %> -->
-
-	<div class="exercise-variants-container">
-		<div class="header">
-			<h2>Exercise Templates</h2>
-			<p id="exerciseArrSizeIndication"><%=`${exerciseArr.length} TOTAL` %></p>
-		</div>
-
-		<div class="list-container">
-			<ul class="accordion">
-				<% exerciseArr.forEach((exercise, index) => { %>
-					<li>
-						<%- include("partials/shared/components/accordion/accordion", { accordion: {id: index , heading: exercise?.name, collapsed:true ,renderPanel: () =>  include("partials/libraryPage/renderAccordionContent", { exercise, deleteExerciseModalId}) }} ) %>
-					</li>
-				<% }) %>
-			</ul>
-		</div>
-
-	<div class="custom-exercise-button-container">
-		<button type="button" class="button" data-modal-open="<%= createExerciseModalId %>">ADD NEW</button>
-	</div>
 </main>
 
 <script>
 
 const searchInput = document.getElementById("library-search");
 
-// const searchSessionItemArr = Array.from(document.querySelectorAll("article[data-search-session-item]"));
 const searchSessionItemArr = Array.from(document.querySelectorAll("[data-search-session-item]"));
 const searchExerciseItemArr = Array.from(document.querySelectorAll("[data-search-exercise-item]"));
 
-const sessionArrSizeIndication = document.getElementById("sessionArrSizeIndication");
-const exerciseArrSizeIndication = document.getElementById("exerciseArrSizeIndication");
+const sessionArrSizeIndication = document.querySelector(".session-summaries__count");
+const exerciseArrSizeIndication = document.querySelector(".exercise-templates__count");
 
 searchInput.addEventListener("input", (ev) => {
 	const queryText = ev.target.value.trim().toLowerCase();
@@ -102,7 +36,6 @@ searchInput.addEventListener("input", (ev) => {
 	let exerciseArrSize = searchExerciseItemArr.length;
 
 	searchSessionItemArr.forEach(item => {
-		// const searchText = item.dataset.searchText ?? "";
 		const searchText = item.dataset.searchKeyWord ?? "";
 
 		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
@@ -115,7 +48,7 @@ searchInput.addEventListener("input", (ev) => {
 	});
 
 	searchExerciseItemArr.forEach(item => {
-		const searchText = item.dataset.searchText ?? "";
+		const searchText = item.dataset.searchKeyWord ?? "";
 
 		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
 
@@ -126,8 +59,8 @@ searchInput.addEventListener("input", (ev) => {
 		}
 	});
 
-	sessionArrSizeIndication.textContent = `${sessionArrSize} TOTAL`;
-	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TOTAL`;
+	sessionArrSizeIndication.textContent = `${sessionArrSize}`;
+	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TEMPLATES`;
 });
 </script>
 
@@ -135,50 +68,16 @@ searchInput.addEventListener("input", (ev) => {
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
 		id: sessionWorkspace?.createAction?.modalId ?? null, 
-		title: "Create Session", 
+		title:sessionWorkspace?.createAction?.modalId ?? "Create session template", 
 		renderContent: () => include("partials/libraryPage/sessionForm")
 	}}) 
 %>
 
-
-
-<!-- <%- include("partials/basicModal", {
-	modal: {
-		id: createSessionModalId,
-		title: "Create session",
-		description: "Fill in the session information below.",
-		renderContent: () => include("partials/libraryPage/sessionForm")
-	}
-}) %> -->
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: createExerciseModalId,
-		title: "Create exercise",
-		description: "Fill in the exercise information below.",
+<%- include("partials/shared/components/modal/modal", { modal: { 
+		id:exerciseTemplates?.actions?.create?.modalId ?? null, 
+		title: exerciseTemplates?.actions?.create?.label ?? "Create exercise template", 
 		renderContent: () => include("partials/libraryPage/exerciseClusterForm")
-	}
-}) 
-%>
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: deleteExerciseModalId,
-		title: "Delete exercise",
-		description: "",
-		renderContent: () => include("partials/libraryPage/deleteExerciseForm")
-	}
-}) 
-%>
-
-<%- include("partials/basicModal", {
-	modal: {
-		id: archiveSessionModalId,
-		title: "Delete session template",
-		description: "",
-		renderContent: () => include("partials/libraryPage/archiveSessionForm", {currSessionId: currentSession?.id ?? null})
-	}
-}) 
+	}}) 
 %>
 
 

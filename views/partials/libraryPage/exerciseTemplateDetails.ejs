@@ -1,0 +1,91 @@
+<%
+	const {id= null, details={}, actions={}, summary={}} = locals?.template ?? {};
+%>
+
+<div
+	class="exercise-template__panel"
+	id="exercise-template-<%= id %>-panel"
+	role="region"
+	aria-labelledby="exercise-template-<%= id %>-trigger"
+>
+	<div class="exercise-template__content">
+		<div class="exercise-template__facts">
+			<div>
+				<span class="exercise-template__field-label">
+					Movement pattern
+				</span>
+				<strong>
+					<%= details.movementPattern.name %>
+				</strong>
+			</div>
+
+			<div>
+				<span class="exercise-template__field-label">
+					Primary muscles
+				</span>
+
+				<div class="exercise-template__tags">
+
+
+					<span class="tag"><%= details.muscleTemplate.primary.name %></span>
+				</div>
+			</div>
+		</div>
+
+		<section
+			class="exercise-template__variant-section"
+			aria-labelledby="exercise-template-<%= id %>-variants"
+		>
+			<header class="exercise-template__variants-header">
+				<h3 id="exercise-template-<%= id %>-variants">
+					Variant
+				</h3>
+			</header>
+
+			
+			
+			<div class="exercise-template__variant">
+				<strong><%= details?.variant?.name %></strong>
+
+				<dl class="exercise-variant__facts">
+					<div>
+						<dt>Equipment</dt>
+						<dd><%= details?.variant?.equipment?.name ?? "None" %></dd>
+					</div>
+
+					<div>
+						<dt>Environment</dt>
+						<dd><%= details?.variant?.environmentLabel ?? "Not specified" %></dd>
+					</div>
+
+					<div>
+						<dt>Setup</dt>
+						<dd>
+							<%= details?.variant?.setupDescription ?? "No setup instructions" %>
+						</dd>
+					</div>
+				</dl>
+			</div>
+
+		</section>
+
+		<div class="exercise-template__actions">
+			<a
+				class="shared-button shared-button--secondary"
+				href="<%= actions.edit.href %>"
+			>
+				Edit template
+			</a>
+
+			<button
+				type="button"
+				class="shared-button shared-button--danger"
+				aria-label="<%= actions.remove.label %>"
+				data-modal-open="<%= actions.remove.modalId %>"
+				data-exercise-template-id="<%= actions.remove.value %>"
+			>
+				Delete
+			</button>
+		</div>
+	</div>
+</div>
