@@ -4,8 +4,7 @@
 
 	display: grid;
 	gap: 1.5rem;
-	margin: 1em var(--horizontal-margin);
-	border: 1px solid red;
+	margin: 2em var(--horizontal-margin);
 }
 
 .session-workspace__header {

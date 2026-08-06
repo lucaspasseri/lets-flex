@@ -10,6 +10,8 @@ const deleteExerciseModalId = "deleteExerciseModalId";
 const archiveSessionModalId = "archiveSessionModalId";
 
 const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
+
+
 %>
 
 <main class="main library">
@@ -18,12 +20,9 @@ const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 			<p>ASSET MANAGER</p>
 			<h1>Library</h1>
 		</div>
-		<div class="button-container">
-			<button type="button">+</button>
-		</div>
 	</div>
 
-	<div class="search-container">
+	<!-- <div class="search-container">
 		<div>
 			<label for="libraryPageSearchInput">Q</label>
 			<input
@@ -34,13 +33,13 @@ const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 				placeholder="SEARCH EXERCISES..."
 			/>
 		</div>
-	</div>
+	</div> -->
 
 	<%- include("partials/libraryPage/librarySearch") %>
 
 	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
 
-	<div class="session-template-container">
+	<!-- <div class="session-template-container">
 		<div class="header">
 			<h2>Session Templates</h2>
 			<p id="sessionArrSizeIndication"><%=`${sessionArr.length} TOTAL` %></p>
@@ -62,7 +61,7 @@ const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 
 			<%- include("partials/session/sessionCard", { session: currentSession, modalId: archiveSessionModalId }) %>
 		</div>
-	<% } %>
+	<% } %> -->
 
 	<div class="exercise-variants-container">
 		<div class="header">

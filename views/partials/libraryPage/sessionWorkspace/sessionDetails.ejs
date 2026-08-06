@@ -1,7 +1,5 @@
 <%
-	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={} }= locals?.session
-
-	console.log({id, name, description, stats, equipment, movementPatterns, steps})
+	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={}, stepNumber }= locals?.session
 %>
 
 
@@ -88,14 +86,11 @@
 					<h4 id="session-exercises-title">Exercises</h4>
 				</div>
 
-				<span><%= steps.length %> total</span>
+				<span><%= stepNumber %> total</span>
 			</header>
 
 			<ol class="session-steps">
 				<% steps.forEach((step) => { %>
-					<%
-					console.log({ step });
-					%>
 					<li class="session-step">
 						<div class="session-step__order" aria-hidden="true">
 							<%= step.order %>
@@ -122,7 +117,7 @@
 								</div>
 
 								<strong class="session-step__prescription">
-									<%= step.prescription.summary %>
+									<%= ` ${step.prescription.sets} × ${step.prescription.reps} - ${step.prescription.loadValue} ${step.prescription.loadUnit}` %>
 								</strong>
 							</header>
 
@@ -165,9 +160,6 @@
 									<% step.muscles.forEach((muscle) => { %>
 										<span class="tag tag--primary">
 											<%= muscle.commonName %>
-										</span>
-										<span class="tag">
-											<%= muscle.scientificName %>
 										</span>
 									<% }) %>
 								</div>
