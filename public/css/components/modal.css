@@ -1,59 +1,68 @@
-[data-modal] {
-	width: 0;
-	height: 0;
+.modal {
+	--modal-content-padding: 0.6em;
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+
+	display: grid;
+	place-items: center;
+	padding: 1rem;
+	overflow-y: auto;
 }
 
-[data-modal-backdrop] {
-	height: 100%;
-	width: 100%;
-	background-color: rgb(0, 0, 0, 0.5);
-
+.modal__backdrop {
 	position: absolute;
-	top: 0;
-	left: 0;
-	z-index: 2;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
+	inset: 0;
+	background: rgb(0 0 0 / 70%);
 	opacity: 0;
 	transition: opacity 300ms;
 }
 
-[data-modal-content] {
-	background-color: var(--color-surface);
-	width: 70%;
-	max-height: 70%;
-	position: absolute;
-	z-index: 3;
-	top: 10%;
-	left: 15%;
-	padding: 1em;
-	transform: translateY(120vh);
-	transition: transform 300ms ease-out;
-}
-
-[data-modal-content-header] {
-	display: grid;
-	grid-template-columns: 1fr auto;
-	color: var(--color-text);
-	margin-bottom: 2em;
-}
-
-[data-modal-backdrop].is-open {
+.modal__backdrop.is-open {
 	opacity: 1;
 }
 
-[data-modal-content].is-open {
-	transform: translateY(0);
+.modal__content {
+	position: relative;
+	z-index: 1;
+
+	width: min(42rem, 100%);
+	max-height: calc(100dvh - 2rem);
+	padding: var(--modal-content-padding);
+	color: var(--color-text);
+
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto;
+
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: 0.75rem;
+
+	opacity: 0;
+	transform: translateY(120vh) scale(0.98);
+	transition:
+		opacity 180ms ease,
+		transform 180ms ease;
 }
 
-@media (prefers-reduced-motion: reduce) {
-	[data-modal-content] {
-		transition-duration: 0s;
+.modal__content.is-open {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+}
+
+.modal__body {
+	min-height: 0;
+	overflow-y: auto;
+}
+
+.modal__close {
+	position: absolute;
+	top: var(--modal-content-padding);
+	right: var(--modal-content-padding);
+}
+
+@media (max-height: 40rem) {
+	.modal {
+		align-items: start;
 	}
-}
-
-.icon-close.icon {
-	--icon-stroke-width: 3.6;
 }

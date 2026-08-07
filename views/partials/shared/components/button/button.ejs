@@ -9,6 +9,7 @@
 		iconOnly = false,
 		variant = "primary",
 		disabled = false,
+		alternativeClassname = null
 	} = locals.button;
 
 	const variantClasses = {
@@ -26,6 +27,7 @@
 		variantClass,
 		iconAfterText && "shared-button--icon-after",
 		iconOnly && "shared-button--icon-only",
+		alternativeClassname
 	]
 		.filter(Boolean)
 		.join(" ");

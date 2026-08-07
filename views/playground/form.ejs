@@ -1,0 +1,38 @@
+<%
+	const modalId = "modalWithForm";
+%>
+
+<main class="playground">
+	<h1>FORM</h1>
+
+	<div class="examples">
+		<%- include("../partials/shared/components/form/form", {form: {
+			heading: "Oi, Boa noite!",
+			description: "Será?",
+			action: "/123",			
+		}}) %>
+
+		<%- include("../partials/shared/components/button/button", {
+			button: {
+				label: "Cancel",
+				variant: "secondary",
+				attributes: {
+					"data-modal-open" : modalId
+				}
+			}
+		}) %>
+	</div>
+</main>
+
+
+<%- contentFor("overlays") %>
+
+<%- include("../partials/shared/components/modal/modal", { modal: { 
+		id: modalId ?? "Test", 
+		title: "abc" ?? "More test", 
+		renderContent: () => include("../partials/shared/components/form/form", {form: {
+			heading: "dsadasdsadasdasdasdasdad",
+			description: "123123123123123?",
+			action: "/123456",			
+	}})}})
+%>

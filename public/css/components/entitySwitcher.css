@@ -1,7 +1,7 @@
 .entity-switcher {
 	--item-width: 8.8em;
 	--item-height: 8.8em;
-	--item-radius: 4px;
+	--item-radius: 6px;
 	--item-background-color: transparent;
 	padding: 1em var(--horizontal-margin);
 }
@@ -35,6 +35,18 @@
 
 .entity-switcher__item {
 	background-color: var(--color-surface-subtle);
+	border: 1px solid transparent;
+	transition:
+		background-color 160ms ease,
+		border-color 160ms ease,
+		color 160ms ease,
+		transform 160ms ease;
+}
+
+.entity-switcher__item:hover {
+	border: 1px solid var(--color-border);
+	background: var(--color-surface);
+	transform: translateY(-1px);
 }
 
 .entity-switcher__item > a {

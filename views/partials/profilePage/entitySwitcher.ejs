@@ -1,6 +1,6 @@
 <%
-	const {id, items = [], headingLevel = 3, label = null  } = locals?.switcher;
-	const {label: buttonLabel = "Add", modalId} = locals?.switcher?.addAction ?? {};
+	const {id= null, items = [], headingLevel = 3, label = null  } = locals?.switcherData ?? {};
+	const {label: buttonLabel = "Add", modalId=null} = locals?.switcherData?.addAction ?? {};
 %>
 
 <section id="<%= id %>" class="entity-switcher"
@@ -54,14 +54,14 @@
 		</ul>
 
 		<% if(modalId){ %>
-			<%- include("shared/components/button/button", {button: {
+			<%- include("../shared/components/button/button", {button: {
 					id: `entity-switcher-add-button-${id}`,
 					type: "button",
 					label: buttonLabel,
-					variant: "secondary",
 					attributes: {
 						"data-modal-open": modalId
-					}
+					},
+					alternativeClassname:"entity-switcher__add-button"
 				}}) 
 			%>
 		<% } %>

@@ -1,18 +1,6 @@
 <%
-	const attributes = locals?.svg?.attributes ?? null ;
-
-	const attributesString = attributes && Object.entries(attributes).reduce((acc, curr) => {
-		const [key, value] = curr;
-
-		let partialString;
-		if(value !== null)	{
-			partialString = `${key}=${value}`;
-		} else {
-			partialString = key;
-		}
-
-		return (acc + " " + partialString).trim();
-	}, "");
+	const attributes = locals.svg?.attributes ?? {};
+	const validAttributeName = /^[a-zA-Z_:][a-zA-Z0-9:._-]*$/;
 %>
 
 <svg
@@ -23,7 +11,13 @@
 	stroke-width="2"
 	stroke-linecap="round"
 	stroke-linejoin="round"
-	<%= attributesString %>
+<% Object.entries(attributes).forEach(([name, value]) => { %>
+		<% if (validAttributeName.test(name) && value === true) { %>
+			<%= name %>
+		<% } else if (validAttributeName.test(name) && value != null && value !== false) { %>
+			<%= name %>="<%= value %>"
+		<% } %>
+	<% }) %>
 >
 	<path
 		d="M9 9.003a1 1 0 0 1 1.517-.859l4.997 2.997a1 1 0 0 1 0 1.718l-4.997 2.997A1 1 0 0 1 9 14.996z"

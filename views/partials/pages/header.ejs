@@ -9,7 +9,16 @@
 		class="avatar-container"
 		data-modal-open="logoutUserModalId"
 	>
-		<div class="avatar"><%- include("icons/person"); %></div>
+		<div class="avatar">
+			<%- include("../shared/components/icons/guestUser", {icon: {
+						attributes: {
+						"stroke-width": 3,
+						width: 40,
+						height: 40
+					}
+				}}) 
+			%>
+	</div>
 		<div class="avatar-name">
 			<p><%= username %></p>
 		</div>

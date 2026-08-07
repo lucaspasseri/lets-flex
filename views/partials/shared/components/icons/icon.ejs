@@ -1,0 +1,37 @@
+<%
+	const {
+		attributes: providedAttributes = {},
+		content = ""
+	} = locals.icon ?? {};
+
+	const defaultAttributes = {
+		xmlns: "http://www.w3.org/2000/svg",
+		viewBox: "0 0 24 24",
+		fill: "none",
+		stroke: "currentColor",
+		"stroke-width": 3,
+		"stroke-linecap": "round",
+		"stroke-linejoin": "round"
+	};
+
+	const attributes = {
+		...defaultAttributes,
+		...providedAttributes
+	};
+
+	const validAttributeName = /^[a-zA-Z_:][a-zA-Z0-9:._-]*$/;
+%>
+
+<svg
+	<% Object.entries(attributes).forEach(([name, value]) => { %>
+		<% if (!validAttributeName.test(name)) return; %>
+
+		<% if (value === true) { %>
+			<%= name %>
+		<% } else if (value != null && value !== false) { %>
+			<%= name %>="<%= value %>"
+		<% } %>
+	<% }) %>
+>
+	<%- content %>
+</svg>

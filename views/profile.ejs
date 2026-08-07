@@ -1,26 +1,18 @@
 <% 
-	const userId = locals?.appState?.users?.current?.id ?? null;
-	const userArr = locals?.appState?.users?.items ?? [];
 	const switcherData = locals?.features?.userSwitcher ?? {};
 %>
 
 <main class="main profile">
-	<%- include("partials/entitySwitcher", {switcher: {
-			id: switcherData.id,
-			label: switcherData.label,
-			headingLevel: switcherData.headingLevel,
-			items: switcherData.items,
-			addAction: switcherData.addAction,
-		}}) 
+	<%- include("partials/profilePage/entitySwitcher", {switcherData}) 
 	%>
 </main>
 
 <%- contentFor("overlays") %>
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
-		id: switcherData.addAction?.modalId ?? "createUserModal", 
-		title: switcherData.addAction?.label ?? "Create User", 
-		renderContent: () => include("partials/newUserForm")
-	}}) 
+		id: switcherData?.addAction?.modalId ?? "createUserModal", 
+		title: switcherData?.addAction?.label ?? "Create User", 
+		renderContent: () => include("partials/profilePage/newUserForm")
+	}})
 %>
 

@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%- include('../partials/head'); %>
+	<%- include('../partials/pages/head'); %>
 	<body>
-		<%- include('../partials/header'); %>
+		<%- include('../partials/pages/header'); %>
 		<div class="content" data-page-content><%- body %></div>
-		<%- include('../partials/footer'); %>
+		<%- include('../partials/pages/footer'); %>
 		<div class="overlays">
 		<%- include("../partials/shared/components/modal/modal", { modal: { 
 				id: "logoutUserModalId", 
 				title: "Reset user selection", 
-				renderContent: () => include("../partials/profilePage/logoutUserForm")
+				renderContent: () => include("../partials/pages/logoutUserForm")
 			}}) 
 		%>
 
 			<%- defineContent("overlays") %>
 		</div>
 
-		<%- include("../partials/scripts") %>
+		<%- include("../partials/pages/scripts") %>
 	</body>
 </html>

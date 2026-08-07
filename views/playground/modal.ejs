@@ -1,5 +1,6 @@
 <%
 	const modalId = "playgroundModalId";
+	const anotherModalId = "playgroundModalId2";
 %>
 
 
@@ -18,6 +19,16 @@
 				"data-modal-open": modalId,
 			}
 		}}) %>
+
+			<%- include("../partials/shared/components/button/button", {button: { 
+			id: "modalButtonPlayground",
+			type: "button",
+			label: "Open2...",
+			variant: "secondary",
+			attributes: {
+				"data-modal-open": anotherModalId,
+			}
+		}}) %>
 	</div>
 </main>
 
@@ -27,6 +38,17 @@
 <%- include("../partials/shared/components/modal/modal", { modal: { 
 	id: modalId, 
 	title: "Welcome to the modal", 
+	renderContent: () => `
+		<div>
+			<p>This is the modal content.</p>
+			<a href="#">This is a link</a>
+		</div>`
+	}})
+%>
+
+<%- include("../partials/shared/components/modal/modal", { modal: { 
+	id: anotherModalId, 
+	showTitle: false,
 	renderContent: () => `
 		<div>
 			<p>This is the modal content.</p>

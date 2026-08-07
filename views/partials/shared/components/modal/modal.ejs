@@ -1,9 +1,6 @@
 <%
-	const {id, title, renderContent} = locals?.modal;
-
-	if (!id) {
-		throw new Error("Modal requires an id");
-	}
+	const {id = null, title="Generic modal", showTitle = true, renderContent} = locals?.modal;
+	const titleId = `${id}-title`;
 %>
 
 <div 
@@ -12,30 +9,39 @@
 	hidden
 	role="dialog"
 	aria-modal="true"
-	<% if(title) { %> aria-labelledby="<%= id %>-heading" <% } %>
-	<% if(!title) { %> aria-label="Modal-<%= id %>" <% } %>
+	<% if (showTitle) { %>
+		aria-labelledby="<%= titleId %>"
+	<% } else { %>
+		aria-label="<%= title %>"
+	<% } %>
+	class="modal"
 >
-	<div data-modal-backdrop></div>
-	<div data-modal-content tabindex="-1">
-		<div data-modal-content-header>
-			<% if (title) { %>
-				<h2 id="<%= id %>-heading" data-modal-heading>
+	<div data-modal-backdrop class="modal__backdrop"></div>
+	<div data-modal-content tabindex="-1" class="modal__content">
+		<header class="modal__header">
+			<% if (showTitle) { %>
+				<h2 id="<%= titleId %>">
 					<%= title %>
 				</h2>
 			<% } %>
-			<%- include("../button/button", {button: { 
-				type: "button",
-				label: "Close modal",
-				renderIcon: () => include("../../../icons/close"),
-				variant: "secondary",
-				iconOnly: true,
-				attributes: {
-					"data-modal-close-button": null,
-				}
-			}}) %>
-		</div>
-		<div data-modal-content-body>
+				<%- include("../button/button", {button: { 
+						type: "button",
+						label: "Close modal",
+						renderIcon: () => include("../icons/close"),
+						variant: "secondary",
+						iconOnly: true,
+						attributes: {
+							"data-modal-close-button": null,
+						},
+						alternativeClassname: "modal__close"
+					}}) 
+				%>
+		</header>
+		<div class="modal__body">
 			<%- renderContent && renderContent() %>
 		</div>
+
+		<footer class="modal__footer">
+		</footer>
 	</div>
 </div>
