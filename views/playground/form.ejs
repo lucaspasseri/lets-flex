@@ -7,6 +7,7 @@
 
 	<div class="examples">
 		<%- include("../partials/shared/components/form/form", {form: {
+				id: "simplest-test",
 				heading: "Heading...",
 				description: "Description, description...",
 				action: "/test",
@@ -38,6 +39,7 @@
 		title: "abc" ?? "More test", 
 		showTitle: false,
 		renderContent: () => include("../partials/shared/components/form/form", {form: {
+			id: "new-user-form-test",
 			heading: "User name",
 			description: "It will be use to identify yourself",
 			action: "/fake-path",

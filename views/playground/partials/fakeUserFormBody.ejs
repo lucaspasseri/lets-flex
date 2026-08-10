@@ -1,26 +1,46 @@
-<%- include("../../partials/shared/components/form/field", 
-	{field : {
+<%- include("../../partials/shared/components/form/field", {
+	field: {
 		id: "name-input",
 		name: "name",
 		label: "User's name",
+		control: "input",
 		type: "text",
 		required: true,
-		hint: "Enter the name displayed on your profile."
-	}}) 
-%> 
-<%- include("../../partials/shared/components/form/field", 
-	{field : {
+		hint: "Enter the name displayed on the profile.",
+		attributes: {
+			autocomplete: "name",
+			maxlength: 100
+		}
+	}
+}) %>
+<%- include("../../partials/shared/components/form/field", {
+	field: {
 		id: "dob-input",
 		name: "dob",
-		label: "User's Date of birth",
-		type: "text",
-	}}) 
-%> 
-<%- include("../../partials/shared/components/form/field", 
-	{field : {
+		label: "User's date of birth",
+		control: "input",
+		type: "date",
+		required: true,
+		hint: "Enter the date of birth displayed on the profile.",
+		attributes: {
+			autocomplete: "bday",
+		}
+	}
+}) %>
+<%- include("../../partials/shared/components/form/field", {
+	field: {
 		id: "anamnesis-input",
 		name: "anamnesis",
 		label: "Anamnesis",
-		type: "text",
-	}}) 
-%> 
+		control: "textarea",
+		value: "",
+		hint: "Include relevant injuries, health conditions, or limitations.",
+		attributes: {
+			rows: 5,
+			maxlength: 1000,
+			placeholder: "Describe any relevant health information..."
+		}
+	}
+}) %>
+
+

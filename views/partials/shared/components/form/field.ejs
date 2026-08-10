@@ -1,81 +1,82 @@
 <%
-	const defaultHint = locals?.field?.required ? "(required)" : "(optional)";
-	const {id= null, label = "", name = "", value="", type= "text", optionArr = [], required = false, disabled = false, min=null, max=null, step=null ,defaultOption = {label:"Select an option...", value:"" }, hint = defaultHint, error = null } = locals?.field ?? {};
+	const field = locals?.field ?? {};
+
+	const {
+		id,
+		name,
+		label = "",
+		control = "input",
+		type = "text",
+		value = "",
+		required = false,
+		disabled = false,
+		options = [],
+		defaultOption = {
+			label: "Select an option...",
+			value: ""
+		},
+		hint = required ? "(required)" : "(optional)",
+		error = null,
+		attributes = {}
+	} = field;
+
+	const controlPaths = {
+		input: "controls/input",
+		select: "controls/select",
+		textarea: "controls/textarea"
+	};
+
+	const controlPath = controlPaths[control];
+
+	if (!id) {
+		throw new Error("A form field requires an id.");
+	}
+
+	if (!name) {
+		throw new Error(`The form field "${id}" requires a name.`);
+	}
+
+	if (!controlPath) {
+		throw new Error(`Unsupported form control: "${control}".`);
+	}
 %>
 
 <div class="form-field">
 	<label class="form-field__label" for="<%= id %>">
 		<%= label %>
+
 		<% if (required) { %>
 			<span aria-hidden="true">*</span>
 		<% } %>
 	</label>
 
-	<% if(type === "select") { %>
-		<select
-			class="form-select"
-			id="<%= id %>"
-			name="<%= name %>"
-			<% if(required) { %>
-				<%= "required" %>
-			<% } %>
-				<% if(disabled) { %>
-				<%= "disabled" %>
-			<% } %>
-		>
-			<option 
-				selected
-				hidden
-				value="<%= defaultOption.value %>"
-			>
-				<%= defaultOption.label %>
-			</option>
+	<%- include(controlPath, {
+		control: {
+			id,
+			name,
+			type,
+			value,
+			required,
+			disabled,
+			options,
+			defaultOption,
+			error,
+			attributes
+		}
+	}) %>
 
-			<% optionArr.forEach(option => { %>
-				<option
-					value="<%= option.value %>"
-					<% if (option.value === value) { %>selected<% } %>
-				>
-					<%= option.label %>
-				</option>
-			<% }) %>
-		</select>
-		
-	<% } else { %>
-		<input
-			class="form-input"
-			id="<%= id %>"
-			name="<%= name %>"
-			type="<%= type %>"
-			<% if(required) { %>
-				<%= "required" %>
-			<% } %>
-			<% if(disabled) { %>
-				<%= "disabled" %>
-			<% } %>
-			<% if (type === "number" && min !== null) { %>
-				min="<%= min %>"
-			<% } %>
-			<% if (type === "number" && max !== null) { %>
-				max="<%= max %>"
-			<% } %>
-			<% if (type === "number" && step !== null) { %>
-				step="<%= step %>"
-			<% } %>
-			aria-invalid="<%= error ? "true" : "false" %>"
-			aria-describedby="<%= [
-				`${id}-hint`,
-				error ? `${id}-error` : null
-			].filter(Boolean).join(" ") %>"
-		/>
-	<% } %>
-
-	<p class="form-field__hint" id="<%= `${id}-hint` %>">
+	<p
+		class="form-field__hint"
+		id="<%= `${id}-hint` %>"
+	>
 		<%= hint %>
 	</p>
 
 	<% if (error) { %>
-		<p id="<%= `${id}-error` %>" class="form-field__error">
+		<p
+			class="form-field__error"
+			id="<%= `${id}-error` %>"
+		>
 			<%= error %>
 		</p>
 	<% } %>

@@ -1,0 +1,73 @@
+<%
+	const {
+		id,
+		name,
+		type = "text",
+		value = "",
+		required = false,
+		disabled = false,
+		error = null,
+		attributes = {}
+	} = locals?.control ?? {};
+
+	const describedBy = [
+		`${id}-hint`,
+		error ? `${id}-error` : null
+	]
+		.filter(Boolean)
+		.join(" ");
+
+	const validAttributeName = /^[a-zA-Z_:][a-zA-Z0-9:._-]*$/;
+
+	const reservedAttributes = new Set([
+		"class",
+		"id",
+		"name",
+		"type",
+		"value",
+		"required",
+		"disabled",
+		"aria-invalid",
+		"aria-describedby"
+	]);
+
+	const additionalAttributes = Object.entries(attributes).filter(
+		([attributeName]) =>
+			validAttributeName.test(attributeName) &&
+			!reservedAttributes.has(attributeName)
+	);
+%>
+
+<input
+	class="form-input"
+	id="<%= id %>"
+	name="<%= name %>"
+	type="<%= type %>"
+	value="<%= value %>"
+
+	<% if (required) { %>
+		required
+	<% } %>
+
+	<% if (disabled) { %>
+		disabled
+	<% } %>
+
+	<% if (error) { %>
+		aria-invalid="true"
+	<% } %>
+
+	aria-describedby="<%= describedBy %>"
+
+	<% additionalAttributes.forEach(([attributeName, attributeValue]) => { %>
+		<% if (attributeValue === true) { %>
+			<%= attributeName %>
+		<% } else if (
+			attributeValue !== false &&
+			attributeValue !== null &&
+			attributeValue !== undefined
+		) { %>
+			<%= attributeName %>="<%= attributeValue %>"
+		<% } %>
+	<% }) %>
+/>
