@@ -1,16 +1,16 @@
 <%
 	const {
-		id,
+		id = null,
 		type = "button",
-		label,
+		label = "",
 		attributes = {},
-		renderIcon,
+		renderIcon = () => {},
 		iconAfterText = false,
 		iconOnly = false,
 		variant = "primary",
 		disabled = false,
 		alternativeClassname = null
-	} = locals.button;
+	} = locals?.button ?? {};
 
 	const variantClasses = {
 		primary: "shared-button--primary",

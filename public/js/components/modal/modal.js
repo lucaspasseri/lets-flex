@@ -3,8 +3,10 @@ function createModal(root) {
 	const backdrop = root.querySelector("[data-modal-backdrop]");
 	const content = root.querySelector("[data-modal-content]");
 	const closeButton = root.querySelector("[data-modal-close-button]");
-	const trigger =
+	const openTrigger =
 		root.id && document.querySelector(`[data-modal-open="${root.id}"]`);
+	const closeTrigger =
+		root.id && document.querySelector(`[data-modal-close="${root.id}"]`);
 
 	if (!backdrop || !content || !closeButton) {
 		throw new Error("Invalid modal structure");
@@ -20,7 +22,8 @@ function createModal(root) {
 	let previouslyFocusedElement = null;
 	let scrollPosition = 0;
 
-	trigger?.addEventListener("click", open);
+	openTrigger?.addEventListener("click", open);
+	closeTrigger?.addEventListener("click", close);
 	backdrop.addEventListener("click", close);
 	closeButton.addEventListener("click", close);
 	root.addEventListener("keydown", handleKeyDown);
@@ -90,7 +93,7 @@ function createModal(root) {
 	function restoreFocus() {
 		const focusTarget = isValidFocusTarget(previouslyFocusedElement)
 			? previouslyFocusedElement
-			: trigger;
+			: openTrigger;
 
 		focusTarget?.focus({ preventScroll: true });
 		previouslyFocusedElement = null;

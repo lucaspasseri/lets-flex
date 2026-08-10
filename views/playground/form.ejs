@@ -3,24 +3,30 @@
 %>
 
 <main class="playground">
-	<h1>FORM</h1>
+	<h2>FORM</h2>
 
 	<div class="examples">
 		<%- include("../partials/shared/components/form/form", {form: {
-			heading: "Oi, Boa noite!",
-			description: "Será?",
-			action: "/123",			
-		}}) %>
+				heading: "Heading...",
+				description: "Description, description...",
+				action: "/test",
+				slots: {
+					body: include("partials/testForm")
+				}			
+			}}) 
+		%>
 
-		<%- include("../partials/shared/components/button/button", {
-			button: {
-				label: "Cancel",
-				variant: "secondary",
+		<br/>
+		<br/>
+
+		<%- include("../partials/shared/components/button/button", {button: {
+				label: "Open create User Form",
+				variant: "primary",
 				attributes: {
 					"data-modal-open" : modalId
 				}
-			}
-		}) %>
+			}}) 
+		%>
 	</div>
 </main>
 
@@ -30,9 +36,14 @@
 <%- include("../partials/shared/components/modal/modal", { modal: { 
 		id: modalId ?? "Test", 
 		title: "abc" ?? "More test", 
+		showTitle: false,
 		renderContent: () => include("../partials/shared/components/form/form", {form: {
-			heading: "dsadasdsadasdasdasdasdad",
-			description: "123123123123123?",
-			action: "/123456",			
+			heading: "User name",
+			description: "It will be use to identify yourself",
+			action: "/fake-path",
+			slots: {
+				body: include("partials/fakeUserFormBody"),
+				footer: include("partials/fakeUserFormFooter", { modalId })
+			}			
 	}})}})
 %>

@@ -1,5 +1,5 @@
 <%
-	const { heading = "Welcome!", description = null, action="/"} = locals?.form ?? {};
+	const { heading = "Welcome!", description = null, action="/", slots = {}} = locals?.form ?? {};
 %>
 
 <form method="POST" action="<%= action %>" class="form">
@@ -11,9 +11,15 @@
 			<%= description %>
 		<% } %>
 	</div>
-	<div class="form-body"></div>
+	<% if (slots.body) { %>
+		<div class="form-body">
+			<%- slots.body %>
+		</div>
+	<% } %>
 
-	<div class="form-footer">
-		
-	</div>
+	<% if(slots.footer) { %>
+		<div class="form-footer">
+			<%- slots.footer %>
+		</div>
+	<% } %>
 </form>
