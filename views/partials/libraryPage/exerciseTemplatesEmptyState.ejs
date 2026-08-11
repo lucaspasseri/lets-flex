@@ -1,0 +1,39 @@
+<%
+	const {
+		title = "No exercise templates yet",
+		description = "Create your first exercise template to start building reusable training sessions.",
+		icon = "dumbbell"
+	} = locals.emptyState ?? {};
+
+	const {
+		label: createLabel = "Create exercise template",
+		modalId
+	} = locals.createAction ?? {};
+%>
+
+<div class="exercise-templates-empty-state">
+	<div
+		class="exercise-templates-empty-state__icon"
+		aria-hidden="true"
+	>
+		<i data-lucide="<%= icon %>"></i>
+	</div>
+
+	<h3 class="exercise-templates-empty-state__title">
+		<%= title %>
+	</h3>
+
+	<p class="exercise-templates-empty-state__description">
+		<%= description %>
+	</p>
+
+	<% if (modalId) { %>
+		<button
+			class="shared-button shared-button--primary"
+			type="button"
+			data-modal-open="<%= modalId %>"
+		>
+			<%= createLabel %>
+		</button>
+	<% } %>
+</div>
