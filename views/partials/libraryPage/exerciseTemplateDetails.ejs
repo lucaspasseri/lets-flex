@@ -15,7 +15,7 @@
 					Movement pattern
 				</span>
 				<strong>
-					<%= details.movementPattern.name %>
+					<%= details?.movementPattern?.name %>
 				</strong>
 			</div>
 
@@ -27,7 +27,7 @@
 				<div class="exercise-template__tags">
 
 
-					<span class="tag"><%= details.muscleTemplate.primary.name %></span>
+					<span class="tag"><%= details?.muscleTemplate?.primary?.name %></span>
 				</div>
 			</div>
 		</div>
@@ -72,7 +72,7 @@
 		<div class="exercise-template__actions">
 			<a
 				class="shared-button shared-button--secondary"
-				href="<%= actions.edit.href %>"
+				href="<%= actions?.edit?.href %>"
 			>
 				Edit template
 			</a>
@@ -80,9 +80,9 @@
 			<button
 				type="button"
 				class="shared-button shared-button--danger"
-				aria-label="<%= actions.remove.label %>"
-				data-modal-open="<%= actions.remove.modalId %>"
-				data-exercise-template-id="<%= actions.remove.value %>"
+				aria-label="<%= actions?.remove?.label %>"
+				data-modal-open="<%= actions?.remove?.modalId %>"
+				data-exercise-template-id="<%= actions?.remove?.value %>"
 			>
 				Delete
 			</button>

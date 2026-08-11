@@ -1,5 +1,5 @@
 <%
-	const {id = null, label="", description="",  countLabel = 0, items=[], emptyState=null, actions ={}} = locals?.exerciseTemplates;
+	const {id = null, label="", description="",  countLabel = 0, items=[], emptyState=null, actions ={}} = locals?.exerciseTemplates ?? {};
 %>
 
 <section
@@ -29,9 +29,9 @@
 			<button
 				type="button"
 				class="shared-button shared-button--secondary"
-				data-modal-open="<%= actions.create.modalId %>"
+				data-modal-open="<%= actions?.create?.modalId %>"
 			>
-				<%= actions.create.label %>
+				<%= actions?.create?.label ?? "" %>
 			</button>
 		</div>
 	</header>
@@ -39,10 +39,10 @@
 	<% if (items.length) { %>
 		<ul class="exercise-templates__list">
 			<% items.forEach(template => { %>
-				<li data-search-exercise-item data-search-key-word="<%= template.searchKeyWord %>">
+				<li data-search-exercise-item data-search-key-word="<%= template?.searchKeyWord %>">
 					<%- include("../shared/components/accordion/accordion", { 
 						accordion: { 
-							id: template.id,
+							id: template?.id,
 					 		renderHeaderContent: () => include("./exerciseTemplateSummary", {
 								template
 							}), 
@@ -57,7 +57,7 @@
 	<% } else { %>
 		<%- include("./exerciseTemplatesEmptyState", {
 			emptyState: emptyState,
-			createAction: actions.create,
+			createAction: actions?.create,
 		}) %>
 	<% } %>
 </section>
