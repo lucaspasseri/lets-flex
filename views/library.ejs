@@ -1,6 +1,9 @@
 <% 
 const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 const exerciseTemplates = locals?.features?.exerciseTemplates ?? null;
+
+console.log({sessionWorkspace});
+console.log({exerciseTemplates})
 %>
 
 <main class="main library">
@@ -12,8 +15,6 @@ const exerciseTemplates = locals?.features?.exerciseTemplates ?? null;
 	</div>
 
 	<%- include("partials/libraryPage/librarySearch") %>
-
-	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
 
 	<%- include("partials/libraryPage/exerciseTemplates", {exerciseTemplates}) %>
 
@@ -65,13 +66,6 @@ searchInput.addEventListener("input", (ev) => {
 </script>
 
 <%- contentFor("overlays") %>
-
-<%- include("partials/shared/components/modal/modal", { modal: { 
-		id: sessionWorkspace?.createAction?.modalId ?? null, 
-		title:sessionWorkspace?.createAction?.modalId ?? "Create session template", 
-		renderContent: () => include("partials/libraryPage/sessionForm")
-	}}) 
-%>
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
 		id:exerciseTemplates?.actions?.create?.modalId ?? null, 
