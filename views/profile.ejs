@@ -10,9 +10,17 @@
 <%- contentFor("overlays") %>
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
-		id: switcherData?.addAction?.modalId ?? "createUserModal", 
-		title: switcherData?.addAction?.label ?? "Create User", 
-		renderContent: () => include("partials/profilePage/newUserForm")
-	}})
+        id: switcherData?.addAction?.modalId ?? "createUserModal", 
+        title: switcherData?.addAction?.label ?? "Create User", 
+        showTitle: true,
+        renderContent: () => include("partials/shared/components/form/form", { form: {
+                id: "resetUserForm",
+                heading: switcherData?.addAction?.label ?? "Create User",
+                description: "Reset profile selection",
+                action: "/users",
+                slots: {
+                        body: include("partials/profilePage/createUserFormBody"),
+                        footer: include("partials/profilePage/createUserFormFooter", { modalId: switcherData?.addAction?.modalId ?? "createUserModal" })
+                }}})
+        }})
 %>
-

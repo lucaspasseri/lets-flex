@@ -1,0 +1,19 @@
+<%
+	const modalId = locals?.modalId ?? null;
+%>
+
+
+<%- include("../../partials/shared/components/button/button",  {button: {
+		label: "Cancel",
+		variant: "secondary",
+		attributes: {
+			"data-modal-close" : modalId
+		}
+	}}) 
+%> 
+<%- include("../../partials/shared/components/button/button", {button: {
+		label: "Reset",
+		variant: "primary",
+		type: "submit"
+	}}) 
+%>
