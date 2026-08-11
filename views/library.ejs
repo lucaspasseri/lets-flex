@@ -1,10 +1,9 @@
 <% 
-console.log(0)
 const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
 const exerciseTemplates = locals?.features?.exerciseTemplates ?? null;
 
 console.log({sessionWorkspace});
-console.log({exerciseTemplates})
+console.log({exerciseTemplates});
 %>
 
 <main class="main library">
@@ -17,11 +16,11 @@ console.log({exerciseTemplates})
 
 	<%- include("partials/libraryPage/librarySearch") %>
 
+	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
+
 </main>
 
 <script>
-
-	console.log(1)
 
 const searchInput = document.getElementById("library-search");
 
@@ -63,10 +62,23 @@ searchInput.addEventListener("input", (ev) => {
 
 	sessionArrSizeIndication.textContent = `${sessionArrSize}`;
 	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TEMPLATES`;
-	console.log(2)
 });
 </script>
 
 <%- contentFor("overlays") %>
+
+<%- include("partials/shared/components/modal/modal", { modal: { 
+		id: sessionWorkspace?.createAction?.modalId ?? null, 
+		title:sessionWorkspace?.createAction?.modalId ?? "Create session template", 
+		renderContent: () => include("partials/libraryPage/sessionForm")
+	}}) 
+%>
+
+<%- include("partials/shared/components/modal/modal", { modal: { 
+		id:exerciseTemplates?.actions?.create?.modalId ?? null, 
+		title: exerciseTemplates?.actions?.create?.label ?? "Create exercise template", 
+		renderContent: () => include("partials/libraryPage/exerciseClusterForm")
+	}}) 
+%>
 
 
