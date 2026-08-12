@@ -1,0 +1,163 @@
+	<%
+		const { movementPatterns = {}, equipments = {}, muscles = {}, muscleRoles={}} = locals?.data ?? {};
+
+		const movementPatternArr = movementPatterns?.items ?? [];
+		const equipmentArr = equipments?.items ?? [];
+		const muscleArr = muscles?.items ?? [];
+		const muscleRoleArr = muscleRoles?.items ?? [];
+	%>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "name-input",
+			name: "name",
+			label: "Exercise's name",
+			control: "input",
+			type: "text",
+			required: true,
+			hint: "Enter the name for the exercise template.",
+			attributes: {
+				autocomplete: "on",
+				maxlength: 100
+			}
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "movement-pattern-select",
+			name: "movementPatternId",
+			label: "Movement pattern",
+			control: "select",
+			required: true,
+			hint: "Choose a movement pattern for the exercise template.",
+			options: movementPatternArr.map(movement => ({
+				label: movement.name,
+				value: movement.id
+			})),
+			attributes: {
+				autocomplete: "off"
+			}
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "equipment-select",
+			name: "equipmentId",
+			label: "Equipment",
+			control: "select",
+			required: true,
+			hint: "Choose an equipment for the exercise template.",
+			options: equipmentArr.map(equipment => ({
+				label: equipment.name,
+				value: equipment.id
+			})),
+			attributes: {
+				autocomplete: "off"
+			}
+		}
+	}) %>
+
+	<div class="muscle-section">
+		<%- include("../../shared/components/form/field", {
+			field: {
+				id: "muscle-select",
+				name: "muscleId",
+				label: "Performing muscle",
+				control: "select",
+				required: true,
+				hint: "Choose a muscle for the exercise template.",
+				options: muscleArr.map(muscle => ({
+					label:`${muscle.commonName} (${muscle.scientificName})`,
+					value: muscle.id
+				})),
+				attributes: {
+					autocomplete: "off"
+				}}
+			}) 
+		%>
+
+		<%- include("../../shared/components/form/field", {
+			field: {
+				id: "muscle-role-select",
+				name: "muscleRoleId",
+				label: "Performed role",
+				control: "select",
+				required: true,
+				hint: "Choose a muscle role for the exercise template.",
+				options: muscleRoleArr.map(role => ({
+					label: role.name,
+					value: role.id
+				})),
+				attributes: {
+					autocomplete: "off"
+				}}
+			}) 
+		%>
+
+		<%- include("../../shared/components/button/button",  {button: {
+				id: "add-muscle-role-relation",
+				label: "Add muscle",
+				variant: "primary",
+			}}) 
+		%> 
+	</div>
+
+	<ul id="muscle-role-list">
+		<p id="muscle-role-list-message">No muscle relation found</p>
+	</ul>
+
+	<script>
+		const addButton = document.getElementById("add-muscle-role-relation");
+		const list = document.getElementById("muscle-role-list");
+
+		const muscleSelect = document.getElementById("muscle-select");
+		const muscleRoleSelect = document.getElementById("muscle-role-select");
+		const muscleMessage = document.getElementById("muscle-role-list-message");
+
+		addButton.addEventListener("click", () => {
+			const index = Array.from(list.querySelectorAll("li")).length;
+
+			const muscleId = muscleSelect.value;
+			const muscleName = muscleSelect.options[muscleSelect.selectedIndex].text;
+
+			const muscleRoleId = muscleRoleSelect.value;
+			const muscleRoleName = muscleRoleSelect.options[muscleRoleSelect.selectedIndex].text;
+
+			if (!muscleId || !muscleRoleId) return;
+
+
+
+			const item = document.createElement("li");
+			item.className="musclePerformingListItem"
+
+			muscleMessage.textContent= `${index + 1} muscle relation(s) added`
+
+			const summary = document.createElement("p");
+			summary.textContent = `${muscleName} (${muscleRoleName})`;
+
+			const muscleInput = document.createElement("input");
+			muscleInput.type = "hidden";
+			muscleInput.name = `muscleGroup[${index}][muscleId]`;
+			muscleInput.value = muscleId;
+
+			const roleInput = document.createElement("input");
+			roleInput.type = "hidden";
+			roleInput.name = `muscleGroup[${index}][muscleRoleId]`;
+			roleInput.value = muscleRoleId;
+
+			const removeButton = document.createElement("button");
+			removeButton.type = "button";
+			removeButton.textContent = "X";
+			removeButton.className="simple-button";
+			removeButton.addEventListener("click", () => {
+				item.remove();
+				const listSize = Array.from(list.querySelectorAll("li")).length;
+				muscleMessage.textContent= listSize === 0 ? "No muscle relation found":`${Array.from(list.querySelectorAll("li")).length} muscle relation(s) added`;
+			});
+
+			item.append(summary, muscleInput, roleInput, removeButton);
+			list.appendChild(item);
+		});
+	</script>

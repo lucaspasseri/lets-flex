@@ -320,29 +320,42 @@
    Empty state
    ====================================================== */
 
-.exercise-templates__empty {
+.exercise-templates-empty-state {
 	display: grid;
 	justify-items: center;
 	gap: 0.75rem;
-	padding: 2.5rem 1.25rem;
-
-	border: 1px dashed var(--template-border);
-	border-radius: 0.75rem;
-	background: rgb(255 255 255 / 1.5%);
+	padding: 3rem 1.5rem;
+	border: 1px dashed var(--color-border);
+	border-radius: 1rem;
+	background: var(--color-surface);
 	text-align: center;
 }
 
-.exercise-templates__empty h3 {
-	margin: 0;
-	color: var(--template-text);
-	font-size: 1rem;
+.exercise-templates-empty-state__icon {
+	display: grid;
+	place-items: center;
+	width: 3.5rem;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+	color: var(--color-accent);
 }
 
-.exercise-templates__empty p {
-	max-width: 30rem;
+.exercise-templates-empty-state__icon svg {
+	width: 1.75rem;
+	height: 1.75rem;
+}
+
+.exercise-templates-empty-state__title {
 	margin: 0;
-	color: var(--template-muted);
-	font-size: 0.85rem;
+	color: var(--color-text);
+	font-size: 1.125rem;
+}
+
+.exercise-templates-empty-state__description {
+	max-width: 32rem;
+	margin: 0 0 0.5rem;
+	color: var(--color-text-muted);
 	line-height: 1.5;
 }
 

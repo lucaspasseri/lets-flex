@@ -1,9 +1,6 @@
 <% 
-const sessionWorkspace = locals?.features?.sessionWorkspace ?? null;
-const exerciseTemplates = locals?.features?.exerciseTemplates ?? null;
-
-console.log({sessionWorkspace});
-console.log({exerciseTemplates});
+	const sessionWorkspace = locals?.features?.sessionWorkspace ?? {};
+	const exerciseTemplates = locals?.features?.exerciseTemplates ?? {};
 %>
 
 <main class="main library">
@@ -16,58 +13,15 @@ console.log({exerciseTemplates});
 
 	<%- include("partials/libraryPage/librarySearch") %>
 
-	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
+	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace: {}}) %>
 
 	<%- include("partials/libraryPage/exerciseTemplates", {exerciseTemplates }) %>
 
 </main>
 
-<script>
-
-const searchInput = document.getElementById("library-search");
-
-const searchSessionItemArr = Array.from(document.querySelectorAll("[data-search-session-item]"));
-const searchExerciseItemArr = Array.from(document.querySelectorAll("[data-search-exercise-item]"));
-
-const sessionArrSizeIndication = document.querySelector(".session-summaries__count");
-const exerciseArrSizeIndication = document.querySelector(".exercise-templates__count");
-
-searchInput.addEventListener("input", (ev) => {
-	const queryText = ev.target.value.trim().toLowerCase();
-
-	let sessionArrSize = searchSessionItemArr.length;
-	let exerciseArrSize = searchExerciseItemArr.length;
-
-	searchSessionItemArr.forEach(item => {
-		const searchText = item.dataset.searchKeyWord ?? "";
-
-		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
-
-		item.closest("li").hidden = shouldBeHidden;
-
-		if (shouldBeHidden) {
-			sessionArrSize -= 1;
-		}
-	});
-
-	searchExerciseItemArr.forEach(item => {
-		const searchText = item.dataset.searchKeyWord ?? "";
-
-		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
-
-		item.closest("li").hidden = shouldBeHidden;
-
-		if (shouldBeHidden) {
-			exerciseArrSize -= 1;
-		}
-	});
-
-	sessionArrSizeIndication.textContent = `${sessionArrSize}`;
-	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TEMPLATES`;
-});
-</script>
-
 <%- contentFor("overlays") %>
+
+<script type="module" src="/js/pages/library.js"></script>
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
 		id: sessionWorkspace?.createAction?.modalId ?? null, 
@@ -76,11 +30,20 @@ searchInput.addEventListener("input", (ev) => {
 	}}) 
 %>
 
+// hard coded values
+
 <%- include("partials/shared/components/modal/modal", { modal: { 
-		id:exerciseTemplates?.actions?.create?.modalId ?? null, 
+		id: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModalId", 
 		title: exerciseTemplates?.actions?.create?.label ?? "Create exercise template", 
-		renderContent: () => include("partials/libraryPage/exerciseClusterForm")
-	}}) 
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", {form: {
+			id: "create-exercise-template-form",
+			heading: "Create exercise template",
+			description: "Define a reusable exercise template.",
+			action: "/exerciseTemplates",
+			slots: {
+				body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody"),
+				footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", {modalId: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModalId"}),
+			}			
+	}})}})
 %>
-
-

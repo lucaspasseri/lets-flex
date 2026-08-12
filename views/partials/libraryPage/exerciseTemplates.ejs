@@ -1,5 +1,5 @@
 <%
-	const {id = null, label="", description="",  countLabel = 0, items=[], emptyState=null, actions ={}} = locals?.exerciseTemplates ?? {};
+	const {id = null, label="", description="",  countLabel = `0 templates`, items=[], emptyState=null, actions ={}} = locals?.exerciseTemplates ?? {};
 %>
 
 <section
@@ -26,13 +26,14 @@
 				<%= countLabel %>
 			</span>
 
-			<button
-				type="button"
-				class="shared-button shared-button--secondary"
-				data-modal-open="<%= actions?.create?.modalId %>"
-			>
-				<%= actions?.create?.label ?? "" %>
-			</button>
+			<%- include("../shared/components/button/button", {button: {
+					label: actions?.create?.label ?? "Create exercise template",
+					variant: "primary",
+					attributes: {
+						"data-modal-open" : actions?.create?.modalId ?? "createExerciseModalId"
+					}
+				}}) 
+			%>
 		</div>
 	</header>
 

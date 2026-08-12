@@ -1,0 +1,20 @@
+<%
+	const modalId = locals?.modalId ?? null;
+%>
+
+
+<%- include("../../shared/components/button/button",  {button: {
+		label: "Cancel",
+		variant: "secondary",
+		attributes: {
+			"data-modal-close" : modalId
+		}
+	}}) 
+%> 
+<%-
+include("../../shared/components/button/button", {button: {
+		label: "Create exercise",
+		variant: "primary",
+		type: "submit"
+	}}) 
+%>
