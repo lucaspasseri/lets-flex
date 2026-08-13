@@ -1,5 +1,5 @@
 <%
-	const {id= null, heading="", emptyMessage="", items=[]} = locals?.summaries;
+	const {id= null, heading="Template list", emptyMessage="(Empty)", items=[]} = locals?.summaries;
 %>
 
 <section
@@ -17,14 +17,17 @@
 	</header>
 
 	<% if (items.length === 0) { %>
-		<p class="session-summaries__empty">
-			<%= emptyMessage %>
-		</p>
+		<%- include("sessionSummariesEmpty") %>
 	<% } else { %>
 		<nav aria-label="Session templates">
 			<ul class="session-summaries__list">
 				<% items.forEach((item) => { %>
-					<li data-search-session-item data-search-key-word="<%= item.searchKeyWord %>">
+					<li
+						<% if(item?.id) { %>
+							<%= `id=${item.id}` %>
+						<% } %>
+						data-search-session-item data-search-key-word="<%= item.searchKeyWord %>"
+					>
 						<a
 							class="session-summary <%= item.isCurrent
 								? 'session-summary--current'

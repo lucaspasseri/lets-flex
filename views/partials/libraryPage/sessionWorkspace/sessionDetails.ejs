@@ -1,11 +1,14 @@
 <%
-	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={}, stepNumber }= locals?.session
+	const session = locals?.session ?? null;
+	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={}, stepNumber } = session ?? {};
 %>
 
 
 <% if (!session) { %>
 	<section class="session-details session-details--empty">
-		<i data-lucide="list-checks" aria-hidden="true"></i>
+		<div class="icon-container">
+			<i data-lucide="square-mouse-pointer" aria-hidden="true"></i>
+		</div>
 		<h3>Select a session</h3>
 		<p>Choose a session to inspect its exercises and prescription.</p>
 	</section>

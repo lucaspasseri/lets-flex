@@ -1,5 +1,5 @@
 <% 
-	const { id= null, heading="", createAction={}, summaries={}, details={} } = locals?.sessionWorkspace;
+	const { id= null, heading="Session templates", createAction={}, summaries={}, details=null } = locals?.sessionWorkspace;
 %>
 
 <section
@@ -18,7 +18,7 @@
 		<%- include("../../shared/components/button/button", {button: {
 					id: `sessionWorkspace-${id}-addButton`,
 					type: "button",
-					label: createAction.label,
+					label: createAction?.label ?? "Create session template",
 					variant: "secondary",
 					attributes: {
 						"data-modal-open": createAction.modalId

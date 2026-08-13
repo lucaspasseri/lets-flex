@@ -7,7 +7,7 @@
 
 	const {
 		label: createLabel = "Create exercise template",
-		modalId
+		modalId = "modal"
 	} = locals.createAction ?? {};
 %>
 
@@ -27,7 +27,6 @@
 		<%= description %>
 	</p>
 
-	<% if (modalId) { %>
 		<button
 			class="shared-button shared-button--primary"
 			type="button"
@@ -35,5 +34,4 @@
 		>
 			<%= createLabel %>
 		</button>
-	<% } %>
 </div>
