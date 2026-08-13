@@ -17,7 +17,6 @@ async function create(req, res) {
 
 async function destroy(req, res) {
 	const { exerciseId } = req.params;
-
 	await deleteExerciseTemplate(exerciseId);
 
 	res.redirect("/library");

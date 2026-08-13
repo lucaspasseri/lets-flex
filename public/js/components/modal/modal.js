@@ -3,10 +3,11 @@ function createModal(root) {
 	const backdrop = root.querySelector("[data-modal-backdrop]");
 	const content = root.querySelector("[data-modal-content]");
 	const closeButton = root.querySelector("[data-modal-close-button]");
-	const openTrigger =
-		root.id && document.querySelector(`[data-modal-open="${root.id}"]`);
 	const closeTrigger =
 		root.id && document.querySelector(`[data-modal-close="${root.id}"]`);
+
+	const openTriggerArr =
+		root.id && document.querySelectorAll(`[data-modal-open="${root.id}"]`);
 
 	if (!backdrop || !content || !closeButton) {
 		throw new Error("Invalid modal structure");
@@ -22,7 +23,10 @@ function createModal(root) {
 	let previouslyFocusedElement = null;
 	let scrollPosition = 0;
 
-	openTrigger?.addEventListener("click", open);
+	openTriggerArr.forEach(trigger => {
+		trigger.addEventListener("click", open);
+	});
+
 	closeTrigger?.addEventListener("click", close);
 	backdrop.addEventListener("click", close);
 	closeButton.addEventListener("click", close);

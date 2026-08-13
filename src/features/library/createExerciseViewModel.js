@@ -45,14 +45,10 @@ function createExercise({ exerciseTemplate = {} }) {
 		},
 
 		actions: {
-			edit: {
-				label: `Edit ${variant?.name}`,
-				href: "/library/exercises/1/edit",
-			},
 			remove: {
 				label: `Delete ${variant?.name}`,
 				modalId: "deleteExerciseModal",
-				value: 1,
+				value: variant?.id,
 			},
 		},
 	};

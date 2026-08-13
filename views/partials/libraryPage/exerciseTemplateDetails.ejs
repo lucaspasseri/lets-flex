@@ -70,22 +70,15 @@
 		</section>
 
 		<div class="exercise-template__actions">
-			<a
-				class="shared-button shared-button--secondary"
-				href="<%= actions?.edit?.href %>"
-			>
-				Edit template
-			</a>
-
-			<button
-				type="button"
-				class="shared-button shared-button--danger"
-				aria-label="<%= actions?.remove?.label %>"
-				data-modal-open="<%= actions?.remove?.modalId %>"
-				data-exercise-template-id="<%= actions?.remove?.value %>"
-			>
-				Delete
-			</button>
+			<%- include("../shared/components/button/button",  {button: {
+					label: "Delete",
+					variant: "danger",
+					attributes: {
+						"data-modal-open": actions?.remove?.modalId,
+						"data-exercise-id": actions?.remove?.value
+					}
+				}}) 
+			%> 
 		</div>
 	</div>
 </div>

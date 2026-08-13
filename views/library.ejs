@@ -21,19 +21,27 @@
 
 <%- contentFor("overlays") %>
 
-<script type="module" src="/js/pages/library.js"></script>
+// hard coded values
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
-		id: sessionWorkspace?.createAction?.modalId ?? null, 
-		title:sessionWorkspace?.createAction?.modalId ?? "Create session template", 
-		renderContent: () => include("partials/libraryPage/sessionForm")
-	}}) 
+		id: exerciseTemplates?.actions?.delete?.modalId ?? "deleteExerciseModal", 
+		title: exerciseTemplates?.actions?.delete?.label ?? "Delete exercise template", 
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", {form: {
+			id: "delete-exercise-template-form",
+			heading: "Delete exercise template",
+			description: "Are you sure to continue?",
+			action: "/exerciseTemplates",
+			slots: {
+				footer: include("partials/libraryPage/deleteExerciseTemplateForm/deleteExerciseFormFooter", {modalId: exerciseTemplates?.actions?.delete?.modalId ?? "deleteExerciseModal"}),
+			}			
+	}})}})
 %>
 
 // hard coded values
 
 <%- include("partials/shared/components/modal/modal", { modal: { 
-		id: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModalId", 
+		id: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModal", 
 		title: exerciseTemplates?.actions?.create?.label ?? "Create exercise template", 
 		showTitle: false,
 		renderContent: () => include("partials/shared/components/form/form", {form: {
@@ -43,7 +51,11 @@
 			action: "/exerciseTemplates",
 			slots: {
 				body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody"),
-				footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", {modalId: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModalId"}),
+				footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", {modalId: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModal"}),
 			}			
 	}})}})
 %>
+
+<script type="module" src="/js/pages/library/searchAndFiltering.js"></script>
+<script type="module" src="/js/pages/library/manageMuscleRoleFormField.js"></script>
+<script type="module" src="/js/pages/library/configureDeleteExerciseFormAction.js"></script>
