@@ -1,15 +1,31 @@
 import * as usersRepository from "../users/repository.js";
 import * as userMapper from "../users/mapper.js";
 
+/**
+ * @typedef {import("../users/users.types.js").FindUserInput} FindUserInput
+ * @typedef {import("../users/users.types.js").User} User
+ */
+
+/**
+ * @typedef {object} ProfilePageData
+ * @property {User | null} user
+ * @property {User[]} users
+ */
+
+/**
+ * @param {FindUserInput} input
+ * @returns {Promise<ProfilePageData>}
+ */
+
 async function getProfilePageData({ userId }) {
-	const [user, userArr] = await Promise.all([
+	const [userRow, userRows] = await Promise.all([
 		usersRepository.findById({ userId }),
 		usersRepository.findAll(),
 	]);
 
 	return {
-		user: user && userMapper.toLoggedUser(user),
-		userArr: userArr.length && userArr.map(userMapper.toLoggedUser),
+		user: userRow ? userMapper.toLoggedUser(userRow) : null,
+		users: userRows.map(userMapper.toLoggedUser),
 	};
 }
 

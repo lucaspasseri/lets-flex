@@ -17,7 +17,8 @@
 	"scripts": {
 		"start": "node app.js",
 		"dev": "node --env-file-if-exists=.env --watch app.js",
-		"seed": "node --env-file-if-exists=.env db/populatedb.js"
+		"seed": "node --env-file-if-exists=.env db/populatedb.js",
+		"check:types": "tsc --project jsconfig.json --noEmit"
 	},
 	"dependencies": {
 		"date-fns": "^4.1.0",
@@ -27,5 +28,9 @@
 		"express-session": "^1.19.0",
 		"method-override": "^3.0.0",
 		"pg": "^8.20.0"
+	},
+	"devDependencies": {
+		"@types/express": "^5.0.6",
+		"typescript": "^7.0.2"
 	}
 }

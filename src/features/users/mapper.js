@@ -1,10 +1,22 @@
 import { format } from "date-fns";
 
-export function toLoggedUser(user) {
+/**
+ * @typedef {import("./users.types.js").UserRow} UserRow
+ */
+
+/**
+ * @param {UserRow} row
+ * @returns
+ */
+
+export function toLoggedUser(row) {
 	return {
-		id: user.id,
-		name: user.name,
-		dob: format(user.date_of_birth, "dd/MM/yyyy"),
-		anamnesis: user.anamnesis,
+		id: row.id,
+		name: row.name,
+		dob:
+			row?.date_of_birth instanceof Date
+				? format(row.date_of_birth, "dd/MM/yyyy")
+				: null,
+		anamnesis: row.anamnesis,
 	};
 }
