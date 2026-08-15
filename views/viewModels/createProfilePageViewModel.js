@@ -55,7 +55,10 @@ function createProfilePageViewModel({ page, pageState, user, userArr }) {
 			},
 		},
 		features: {
-			userSwitcher: createUserSwitcherViewModel({ user, userArr }),
+			userSwitcher: createUserSwitcherViewModel({
+				userId: user?.id ?? null,
+				userArr,
+			}),
 		},
 	};
 }

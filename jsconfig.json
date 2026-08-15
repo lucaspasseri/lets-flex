@@ -4,6 +4,6 @@
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext"
 	},
-	"include": ["src/**/*.js"],
+	"include": ["src/**/*.js", "views/viewModels/**/*.js"],
 	"exclude": ["node_modules", "public"]
 }

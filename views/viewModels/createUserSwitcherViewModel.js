@@ -4,7 +4,7 @@
 
 /**
  * @typedef {object} UserSwitcherInput
- * @property {User | null} user
+ * @property {User["id"] | null} userId
  * @property {User[]} userArr
  */
 
@@ -37,7 +37,7 @@
  * @param {UserSwitcherInput} input
  * @returns {UserSwitcherViewModel}
  */
-function createUserSwitcherViewModel({ user = null, userArr = [] }) {
+function createUserSwitcherViewModel({ userId = null, userArr = [] }) {
 	return {
 		id: "profilePageUserSwitcher",
 		label: userArr.length === 0 ? "Create user" : "Switch user",
@@ -45,7 +45,7 @@ function createUserSwitcherViewModel({ user = null, userArr = [] }) {
 		items: userArr.map(userItem => ({
 			id: userItem.id,
 			name: userItem.name,
-			isActive: userItem.id === user?.id,
+			isActive: userItem.id === userId,
 			href: `/profile?userId=${userItem.id}`,
 		})),
 		addAction: {

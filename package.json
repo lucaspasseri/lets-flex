@@ -18,7 +18,9 @@
 		"start": "node app.js",
 		"dev": "node --env-file-if-exists=.env --watch app.js",
 		"seed": "node --env-file-if-exists=.env db/populatedb.js",
-		"check:types": "tsc --project jsconfig.json --noEmit"
+		"check:types": "tsc --project jsconfig.json --noEmit",
+		"test": "node --test",
+		"test:watch": "node --test --watch"
 	},
 	"dependencies": {
 		"date-fns": "^4.1.0",
