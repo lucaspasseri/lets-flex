@@ -31,7 +31,7 @@
  * Values required to find a user.
  *
  * @typedef {object} FindUserInput
- * @property {number | null} userId
+ * @property {User["id"] | null} userId
  */
 
 export {};

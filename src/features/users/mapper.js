@@ -2,18 +2,19 @@ import { format } from "date-fns";
 
 /**
  * @typedef {import("./users.types.js").UserRow} UserRow
+ * @typedef {import("./users.types.js").User} User
  */
 
 /**
  * @param {UserRow} row
- * @returns
+ * @returns {User}
  */
 
 export function toLoggedUser(row) {
 	return {
 		id: row.id,
 		name: row.name,
-		dob:
+		dateOfBirth:
 			row?.date_of_birth instanceof Date
 				? format(row.date_of_birth, "dd/MM/yyyy")
 				: null,

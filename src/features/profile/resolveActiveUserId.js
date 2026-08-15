@@ -1,5 +1,6 @@
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 
+// @ts-ignore
 function resolveActiveUserId({ query, sessionState }) {
 	const queryUserId = toNullableNumber(query?.userId);
 	const sessionUserId = toNullableNumber(sessionState?.userId);

@@ -3,6 +3,12 @@ import pool from "../../../db/pool.js";
 /**
  * @typedef {import("./users.types.js").CreateUserInput} CreateUserInput
  * @typedef {import("./users.types.js").FindUserInput} FindUserInput
+ * @typedef {import("./users.types.js").UserRow} UserRow
+ */
+
+/**
+ * @param {*} db
+ * @returns {Promise<UserRow[]>}
  */
 
 export async function findAll(db = pool) {
@@ -12,6 +18,7 @@ export async function findAll(db = pool) {
 
 /**
  * @param {FindUserInput} input
+ * @returns {Promise<UserRow | null>}
  */
 
 export async function findById({ userId }, db = pool) {
@@ -24,6 +31,7 @@ export async function findById({ userId }, db = pool) {
 
 /**
  * @param {CreateUserInput} input
+ * @returns {Promise<UserRow | null>}
  */
 
 export async function create({ name, dateOfBirth, anamnesis }, db = pool) {

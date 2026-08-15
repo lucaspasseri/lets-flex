@@ -9,7 +9,7 @@ import * as userMapper from "../users/mapper.js";
 /**
  * @typedef {object} ProfilePageData
  * @property {User | null} user
- * @property {User[]} users
+ * @property {User[]} userArr
  */
 
 /**
@@ -25,7 +25,7 @@ async function getProfilePageData({ userId }) {
 
 	return {
 		user: userRow ? userMapper.toLoggedUser(userRow) : null,
-		users: userRows.map(userMapper.toLoggedUser),
+		userArr: userRows.map(userMapper.toLoggedUser),
 	};
 }
 

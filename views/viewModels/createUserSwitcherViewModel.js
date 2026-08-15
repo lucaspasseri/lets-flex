@@ -1,4 +1,43 @@
-function createUserSwitcherViewModel({ user, userArr }) {
+/**
+ * @typedef {import("../../src/features/users/users.types.js").User} User
+ */
+
+/**
+ * @typedef {object} UserSwitcherInput
+ * @property {User | null} user
+ * @property {User[]} userArr
+ */
+
+/**
+ * @typedef {object} UserSwitcherItem
+ * @property {User["id"]} id
+ * @property {string} name
+ * @property {boolean} isActive
+ * @property {string} href
+ */
+
+/**
+ * @typedef {object} UserSwitcherAction
+ * @property {string} label
+ * @property {string} modalId
+ */
+
+/**
+ * @typedef {object} UserSwitcherViewModel
+ * @property {string} id
+ * @property {string} label
+ * @property {number} headingLevel
+ * @property {UserSwitcherItem[]} items
+ * @property {UserSwitcherAction} addAction
+ */
+
+/**
+ * Creates the data required by the user switcher component.
+ *
+ * @param {UserSwitcherInput} input
+ * @returns {UserSwitcherViewModel}
+ */
+function createUserSwitcherViewModel({ user = null, userArr = [] }) {
 	return {
 		id: "profilePageUserSwitcher",
 		label: userArr.length === 0 ? "Create user" : "Switch user",
@@ -7,7 +46,7 @@ function createUserSwitcherViewModel({ user, userArr }) {
 			id: userItem.id,
 			name: userItem.name,
 			isActive: userItem.id === user?.id,
-			href: `/profile/?userId=${userItem.id}`,
+			href: `/profile?userId=${userItem.id}`,
 		})),
 		addAction: {
 			label: "Create user",
