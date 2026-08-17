@@ -21,6 +21,22 @@
 
 <%- contentFor("overlays") %>
 
+<%- include("partials/shared/components/modal/modal", { modal: { 
+		id: sessionWorkspace.createAction.modalId ?? "createExerciseModal", 
+		title: sessionWorkspace.createAction.label ?? "Create exercise template", 
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", {form: {
+			id: "create-session-template-form",
+			heading: "Create session template",
+			description: "Define a reusable session template.",
+			action: "/sessions",
+			slots: {
+				body: include("partials/libraryPage/createSessionForm/createSessionFormBody"),
+				footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", {modalId: sessionWorkspace?.createAction?.modalId ?? "createSessionModal"}),
+			}			
+	}})}})
+%>
+
 // hard coded values
 
 <%- include("partials/shared/components/modal/modal", { modal: { 

@@ -4,11 +4,19 @@
 		"checkJs": true,
 		"noEmit": true,
 		"strict": true,
-
+		"skipLibCheck": true,
 		"target": "ES2022",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext"
 	},
-	"include": ["src/**/*.js", "views/**/*.js"],
-	"exclude": ["node_modules", "public"]
+	"include": [
+		"app.js",
+		"routes/**/*.js",
+		"middlewares/**/*.js",
+		"utils/**/*.js",
+		"db/**/*.js",
+		"src/**/*.js",
+		"views/**/*.js"
+	],
+	"exclude": ["node_modules", "public", "old", "views/partialsOld"]
 }

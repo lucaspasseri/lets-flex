@@ -43,13 +43,15 @@
 				<% } %>
 			</div>
 
-			<a
-				class="button button--secondary"
-				href="<%= actions.edit?.href %>"
-			>
-				<i data-lucide="pencil" aria-hidden="true"></i>
-				<span><%= actions.edit?.label %></span>
-			</a>
+			<%  if(actions?.edit) { %>
+				<a
+					class="button button--secondary"
+					href="<%= actions.edit?.href %>"
+				>
+					<i data-lucide="pencil" aria-hidden="true"></i>
+					<span><%= actions.edit?.label %></span>
+				</a>
+			<% } %>
 		</header>
 
 		<dl class="session-stats">

@@ -1,0 +1,22 @@
+<%
+	const modalId = locals?.modalId ?? null;
+%>
+
+<%- include("../../shared/components/button/button", {
+	button: {
+		label: "Cancel",
+		variant: "secondary",
+		type: "button",
+		attributes: {
+			"data-modal-close": modalId
+		}
+	}
+}) %>
+
+<%- include("../../shared/components/button/button", {
+	button: {
+		label: "Create session",
+		variant: "primary",
+		type: "submit"
+	}
+}) %>

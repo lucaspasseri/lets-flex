@@ -1,0 +1,312 @@
+<%
+	const {
+		stepTypes = {},
+		exerciseTemplates = {}
+	} = locals?.data ?? {};
+
+	const stepTypeArr = stepTypes.items ?? [];
+	const exerciseTemplateArr = exerciseTemplates.items ?? [];
+
+	const loadUnitArr = [
+		{ label: "Kg", value: "Kilograms" },
+		{ label: "lb", value: "Pounds" }
+	];
+%>
+
+<%- include("../../shared/components/form/field", {
+	field: {
+		id: "session-name-input",
+		name: "name",
+		label: "Session name",
+		control: "input",
+		type: "text",
+		required: true,
+		hint: "Enter a name for the session template.",
+		attributes: {
+			autocomplete: "off",
+			maxlength: 100
+		}
+	}
+}) %>
+
+<%- include("../../shared/components/form/field", {
+	field: {
+		id: "session-notes-input",
+		name: "notes",
+		label: "Notes",
+		control: "textarea",
+		hint: "Add any general instructions for this session.",
+		attributes: {
+			rows: 3,
+			maxlength: 500
+		}
+	}
+}) %>
+
+<section class="session-step-fields-container">
+	<h4>Add a step</h4>
+	<p>Configure a step and add it to the session.</p>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "session-step-type-select",
+			name: "draftStepTypeId",
+			label: "Step type",
+			control: "select",
+			required: false,
+			hint: "Choose the kind of step.",
+			options: stepTypeArr.map(stepType => ({
+				label: stepType.name,
+				value: stepType.id
+			}))
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "session-exercise-variant-select",
+			name: "draftExerciseVariantId",
+			label: "Exercise",
+			control: "select",
+			required: false,
+			hint: "Choose the exercise for this step.",
+			options: exerciseTemplateArr.map(exercise => ({
+				label: exercise.name,
+				value: exercise.variant.id
+			}))
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "session-step-sets-input",
+			name: "draftSets",
+			label: "Sets",
+			control: "input",
+			type: "number",
+			hint: "Number of planned sets.",
+			attributes: {
+				min: 1,
+				step: 1
+			}
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "session-step-reps-input",
+			name: "draftReps",
+			label: "Repetitions",
+			control: "input",
+			type: "number",
+			hint: "Number of planned repetitions per set.",
+			attributes: {
+				min: 1,
+				step: 1
+			}
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "session-step-load-input",
+			name: "draftLoadValue",
+			label: "Load",
+			control: "input",
+			type: "number",
+			hint: "Planned load for the exercise.",
+			attributes: {
+				min: 0,
+				step: "any"
+			}
+		}
+	}) %>
+
+	<%- include("../../shared/components/form/field", {
+		field: {
+			id: "session-step-load-unit-select",
+			name: "draftLoadUnit",
+			label: "Load unit",
+			control: "select",
+			hint: "Choose the unit used for the load.",
+			options: loadUnitArr
+		}
+	}) %>
+
+	<p
+		id="session-step-draft-error"
+		class="form-field__error"
+		hidden
+	></p>
+
+	<%- include("../../shared/components/button/button", {
+		button: {
+			id: "add-session-step",
+			label: "Add step",
+			variant: "secondary",
+			type: "button"
+		}
+	}) %>
+</section>
+
+<section class="current-steps-container">
+	<h4>Session steps</h4>
+
+	<p id="session-step-list-message">
+		No steps have been added yet.
+	</p>
+
+	<ol id="session-step-list"></ol>
+</section>
+
+<script>
+	(() => {
+		const script = document.currentScript;
+		const form = script?.closest("form");
+
+		if (!form) return;
+
+		const addButton = form.querySelector("#add-session-step");
+		const stepList = form.querySelector("#session-step-list");
+		const emptyMessage = form.querySelector("#session-step-list-message");
+		const errorMessage = form.querySelector("#session-step-draft-error");
+
+		const stepTypeSelect = form.querySelector(
+			"#session-step-type-select"
+		);
+		const exerciseSelect = form.querySelector(
+			"#session-exercise-variant-select"
+		);
+		const setsInput = form.querySelector("#session-step-sets-input");
+		const repsInput = form.querySelector("#session-step-reps-input");
+		const loadInput = form.querySelector("#session-step-load-input");
+		const loadUnitSelect = form.querySelector(
+			"#session-step-load-unit-select"
+		);
+
+		if (
+			!addButton ||
+			!stepList ||
+			!emptyMessage ||
+			!errorMessage ||
+			!stepTypeSelect ||
+			!exerciseSelect ||
+			!setsInput ||
+			!repsInput ||
+			!loadInput ||
+			!loadUnitSelect
+		) {
+			return;
+		}
+
+		addButton.addEventListener("click", addStep);
+
+		function addStep() {
+			const stepTypeId = stepTypeSelect.value;
+			const exerciseVariantId = exerciseSelect.value;
+
+			if (!stepTypeId || !exerciseVariantId) {
+				errorMessage.textContent =
+					"Select both a step type and an exercise.";
+				errorMessage.hidden = false;
+				return;
+			}
+
+			errorMessage.hidden = true;
+
+			const item = document.createElement("li");
+			item.className = "session-step-draft";
+
+			const summary = document.createElement("p");
+			summary.textContent = [
+				selectedLabel(stepTypeSelect),
+				selectedLabel(exerciseSelect),
+				prescriptionLabel()
+			]
+				.filter(Boolean)
+				.join(" — ");
+
+			item.append(
+				summary,
+				createHiddenInput("stepTypeId", stepTypeId),
+				createHiddenInput("exerciseVariantId", exerciseVariantId),
+				createHiddenInput("sets", setsInput.value || "0"),
+				createHiddenInput("reps", repsInput.value || "0"),
+				createHiddenInput("loadValue", loadInput.value || "0"),
+				createHiddenInput(
+					"loadUnit",
+					loadUnitSelect.value || "Kilograms"
+				)
+			);
+
+			const removeButton = document.createElement("button");
+			removeButton.type = "button";
+			removeButton.textContent = "Remove";
+
+			removeButton.addEventListener("click", () => {
+				item.remove();
+				updateStepList();
+			});
+
+			item.append(removeButton);
+			stepList.append(item);
+
+			clearDraft();
+			updateStepList();
+		}
+
+		function createHiddenInput(fieldName, value) {
+			const input = document.createElement("input");
+
+			input.type = "hidden";
+			input.dataset.stepField = fieldName;
+			input.value = value;
+
+			return input;
+		}
+
+		function updateStepList() {
+			const items = Array.from(
+				stepList.querySelectorAll(".session-step-draft")
+			);
+
+			items.forEach((item, index) => {
+				item
+					.querySelectorAll("[data-step-field]")
+					.forEach(input => {
+						input.name =
+							`stepRow[${index}][${input.dataset.stepField}]`;
+					});
+			});
+
+			emptyMessage.hidden = items.length > 0;
+		}
+
+		function selectedLabel(select) {
+			return select.options[select.selectedIndex]?.text ?? "";
+		}
+
+		function prescriptionLabel() {
+			const sets = setsInput.value;
+			const reps = repsInput.value;
+			const load = loadInput.value;
+			const unit = selectedLabel(loadUnitSelect);
+
+			const setLabel =
+				sets && reps ? `${sets} × ${reps}` : null;
+			const loadLabel =
+				load ? `${load} ${unit}` : null;
+
+			return [setLabel, loadLabel].filter(Boolean).join(", ");
+		}
+
+		function clearDraft() {
+			stepTypeSelect.value = "";
+			exerciseSelect.value = "";
+			setsInput.value = "";
+			repsInput.value = "";
+			loadInput.value = "";
+			loadUnitSelect.value = "";
+		}
+	})();
+</script>
