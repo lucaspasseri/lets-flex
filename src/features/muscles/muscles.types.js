@@ -13,6 +13,7 @@
  * Mapper of a Muscle.
  *
  * @typedef {object} MuscleMapper
+ * @property {MuscleRow["id"]} id
  * @property {string} commonName
  * @property {string} scientificName
  * @property {string} bodyPart

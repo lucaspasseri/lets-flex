@@ -32,7 +32,7 @@ async function createExerciseTemplate({
 			client,
 		);
 
-		await await client.query("COMMIT");
+		await client.query("COMMIT");
 	} catch (err) {
 		console.log({ err });
 		await client.query("ROLLBACK");

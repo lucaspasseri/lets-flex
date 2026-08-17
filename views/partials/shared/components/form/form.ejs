@@ -1,8 +1,19 @@
 <%
-	const { heading = "Welcome!", description = null, action="/", slots = {}} = locals?.form ?? {};
+	const { heading = "Welcome!", description = null, action="/", slots = {}, attributes = {}} = locals?.form ?? {};
 %>
 
-<form method="POST" action="<%= action %>" class="form">
+<form 
+	method="POST" 
+	action="<%= action %>" 
+	class="form"
+	<% Object.entries(attributes).forEach(([name, value]) => { %>
+		<% if (value === true || value === null) { %>
+			<%= name %>
+		<% } else if (value !== false && value !== undefined) { %>
+			<%= name %>="<%= value %>"
+		<% } %>
+	<% }) %>
+	>
 	<div class="form-header">
 		<h3>
 			<%= heading %>

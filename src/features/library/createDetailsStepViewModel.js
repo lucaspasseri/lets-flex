@@ -1,7 +1,6 @@
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapperStep} SessionMapperStep
  * @typedef {import("../sessions/sessions.types.js").DetailsStepsViewModel} DetailsStepsViewModel
- * @typedef {import("../muscles/muscles.types.js").MuscleMapper} MuscleMapper
  */
 
 /**
