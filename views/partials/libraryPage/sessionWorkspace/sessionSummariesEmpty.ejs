@@ -1,8 +1,13 @@
-<% const emptyMessage = locals?.emptyMessage ?? "(Empty)" %>
+<%
+	const {
+		message = "No session templates yet.",
+		icon = "list-ordered"
+	} = locals.emptyState;
+%>
 
 <div class="session-summaries__empty">
 	<div class="session-summaries__empty-icon-container" aria-hidden="true">
-		<i data-lucide="list-ordered"></i>
+		<i data-lucide="<%= icon %>"></i>
 	</div>
-	<p><%= emptyMessage %></p>
+	<p><%= message %></p>
 </div>

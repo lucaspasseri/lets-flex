@@ -1,5 +1,5 @@
 <%
-	const {id= null, heading="Template list", emptyMessage="(Empty)", items=[]} = locals?.summaries;
+	const {id= null, heading="Template list", emptyState={}, items=[]} = locals.summaries;
 %>
 
 <section
@@ -17,7 +17,7 @@
 	</header>
 
 	<% if (items.length === 0) { %>
-		<%- include("sessionSummariesEmpty") %>
+		<%- include("sessionSummariesEmpty", { emptyState }) %>
 	<% } else { %>
 		<nav aria-label="Session templates">
 			<ul class="session-summaries__list">
@@ -53,7 +53,7 @@
 									<span aria-hidden="true">•</span>
 									<span><%= item.setCountLabel %></span>
 									<span aria-hidden="true">•</span>
-									<span><%= item.movementPatterns %></span>
+									<span><%= item.movementPatternsLabel %></span>
 								</span>
 							</span>
 

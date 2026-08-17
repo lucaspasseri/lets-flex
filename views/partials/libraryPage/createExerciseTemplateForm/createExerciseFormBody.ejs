@@ -7,6 +7,7 @@
 	} = locals.createExerciseForm.fields;
 %>
 
+<div class="form-grid form-grid--two-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
 			id: "name-input",
@@ -52,8 +53,17 @@
 			}
 		}
 	}) %>
+</div>
 
-	<div class="muscle-section">
+<section class="form-section" aria-labelledby="exercise-muscles-heading">
+	<div class="form-section__header">
+		<div>
+			<h4 id="exercise-muscles-heading">Muscle roles</h4>
+			<p>Associate one or more muscles with their role in the exercise.</p>
+		</div>
+	</div>
+
+	<div class="form-grid form-grid--two-columns">
 		<%- include("../../shared/components/form/field", {
 			field: {
 				id: "muscle-select",
@@ -84,14 +94,21 @@
 			}) 
 		%>
 
-		<%- include("../../shared/components/button/button",  {button: {
+	</div>
+
+	<div class="form-section__actions">
+		<%- include("../../shared/components/button/button", {button: {
 				id: "add-muscle-role-relation",
 				label: locals.createExerciseForm.actions.addMuscle.label,
 				variant: "primary",
 			}}) 
-		%> 
+		%>
 	</div>
 
-	<p id="muscle-role-list-message">No muscle relation found</p>
-	<ul id="muscle-role-list">
-	</ul>
+	<div class="form-collection" aria-live="polite">
+		<p id="muscle-role-list-message" class="form-collection__empty">
+			No muscles added yet.
+		</p>
+		<ul id="muscle-role-list" class="form-collection__list"></ul>
+	</div>
+</section>

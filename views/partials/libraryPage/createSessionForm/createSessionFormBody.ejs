@@ -6,6 +6,7 @@
 	} = locals.createSessionForm.fields;
 %>
 
+<div class="form-grid form-grid--two-columns">
 <%- include("../../shared/components/form/field", {
 	field: {
 		id: "session-name-input",
@@ -35,11 +36,17 @@
 		}
 	}
 }) %>
+</div>
 
-<section class="session-step-fields-container">
-	<h4>Add a step</h4>
-	<p>Configure a step and add it to the session.</p>
+<section class="form-section" aria-labelledby="session-step-heading">
+	<div class="form-section__header">
+		<div>
+			<h4 id="session-step-heading">Add a step</h4>
+			<p>Configure an exercise prescription, then add it to the session.</p>
+		</div>
+	</div>
 
+	<div class="form-grid form-grid--two-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
 			id: "session-step-type-select",
@@ -63,7 +70,9 @@
 			options: exerciseOptions
 		}
 	}) %>
+	</div>
 
+	<div class="form-grid form-grid--four-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
 			id: "session-step-sets-input",
@@ -119,6 +128,7 @@
 			options: loadUnitOptions
 		}
 	}) %>
+	</div>
 
 	<p
 		id="session-step-draft-error"
@@ -126,6 +136,7 @@
 		hidden
 	></p>
 
+	<div class="form-section__actions">
 	<%- include("../../shared/components/button/button", {
 		button: {
 			id: "add-session-step",
@@ -134,14 +145,21 @@
 			type: "button"
 		}
 	}) %>
+	</div>
 </section>
 
-<section class="current-steps-container">
-	<h4>Session steps</h4>
+<section class="form-section" aria-labelledby="session-step-list-heading">
+	<div class="form-section__header">
+		<div>
+			<h4 id="session-step-list-heading">Session steps</h4>
+			<p>Steps will be performed in the order shown here.</p>
+		</div>
+	</div>
 
-	<p id="session-step-list-message">
-		No steps have been added yet.
-	</p>
-
-	<ol id="session-step-list"></ol>
+	<div class="form-collection" aria-live="polite">
+		<p id="session-step-list-message" class="form-collection__empty">
+			No steps added yet.
+		</p>
+		<ol id="session-step-list" class="form-collection__list"></ol>
+	</div>
 </section>

@@ -37,7 +37,10 @@ function createSessionWorkspace({ sessionArr = [], activeSession }) {
 		summaries: {
 			id: "session-summaries",
 			heading: "Sessions",
-			emptyMessage: "No session templates have been created yet.",
+			emptyState: {
+				message: "No session templates have been created yet.",
+				icon: "list-ordered",
+			},
 
 			items: summaryArr,
 		},

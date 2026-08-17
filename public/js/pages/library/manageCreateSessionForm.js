@@ -19,7 +19,7 @@ export function initializeCreateSessionForm(form) {
 		}
 		errorMessage.hidden = true;
 		const item = document.createElement("li");
-		item.className = "session-step-draft";
+		item.className = "form-collection__item session-step-draft";
 		const summary = document.createElement("p");
 		summary.textContent = `${selectedLabel(stepType)} — ${selectedLabel(exercise)}`;
 		item.append(
@@ -60,6 +60,7 @@ function createRemoveButton(remove) {
 	const button = document.createElement("button");
 	button.type = "button";
 	button.textContent = "Remove";
+	button.className = "form-collection__remove";
 	button.addEventListener("click", remove);
 	return button;
 }

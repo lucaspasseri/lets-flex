@@ -27,7 +27,11 @@
 				<div class="exercise-template__tags">
 
 
-					<span class="tag"><%= details?.muscleTemplate?.primary?.name %></span>
+					<% if (details?.muscleTemplates?.primary?.name) { %>
+						<span class="tag"><%= details.muscleTemplates.primary.name %></span>
+					<% } else { %>
+						<span class="exercise-template__empty-value">Not specified</span>
+					<% } %>
 				</div>
 			</div>
 		</div>
@@ -44,7 +48,7 @@
 
 			
 			
-			<div class="exercise-template__variant">
+			<div class="exercise-variant">
 				<strong><%= details?.variant?.name %></strong>
 
 				<dl class="exercise-variant__facts">

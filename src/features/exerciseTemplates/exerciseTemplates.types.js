@@ -124,7 +124,7 @@
  * @property {string} description
  * @property {number} count
  * @property {string} countLabel
- * @property {string} emptyState
+ * @property {{title: string, description: string, icon: string}} emptyState
  * @property {ExerciseTemplateMuscleItemViewModel[]} items
  * @property {ExerciseTemplateActions} actions
  */

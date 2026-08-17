@@ -17,7 +17,8 @@
 		},
 		hint = required ? "(required)" : "(optional)",
 		error = null,
-		attributes = {}
+		attributes = {},
+		className = null
 	} = field;
 
 	const controlPaths = {
@@ -41,13 +42,12 @@
 	}
 %>
 
-<div class="form-field">
+<div class="form-field<%= className ? ` ${className}` : "" %>">
 	<label class="form-field__label" for="<%= id %>">
-		<%= label %>
-
-		<% if (required) { %>
-			<span aria-hidden="true">*</span>
-		<% } %>
+		<span><%= label %></span>
+		<span class="form-field__requirement">
+			<%= required ? "Required" : "Optional" %>
+		</span>
 	</label>
 
 	<%- include(controlPath, {
@@ -65,12 +65,11 @@
 		}
 	}) %>
 
-	<p
-		class="form-field__hint"
-		id="<%= `${id}-hint` %>"
-	>
-		<%= hint %>
-	</p>
+	<% if (hint) { %>
+		<p class="form-field__hint" id="<%= `${id}-hint` %>">
+			<%= hint %>
+		</p>
+	<% } %>
 
 	<% if (error) { %>
 		<p

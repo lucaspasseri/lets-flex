@@ -3,12 +3,12 @@
 		title = "No exercise templates yet",
 		description = "Create your first exercise template to start building reusable training sessions.",
 		icon = "dumbbell"
-	} = locals.emptyState ?? {};
+	} = locals.emptyState;
 
 	const {
 		label: createLabel = "Create exercise template",
 		modalId = "modal"
-	} = locals.createAction ?? {};
+	} = locals.createAction;
 %>
 
 <div class="exercise-templates-empty-state">
