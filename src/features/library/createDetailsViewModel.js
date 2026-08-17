@@ -2,12 +2,30 @@ import {
 	getDistinctMovements,
 	getDistinctEquipments,
 } from "./selectors/sessionSelectors.js";
+import createDetailsStepViewModel from "./createDetailsStepViewModel.js";
+
+/**
+ * @typedef {import("../sessions/sessions.types.js").SessionMapper} SessionMapper
+ * @typedef {import("../sessions/sessions.types.js").SessionMapperStep} SessionMapperStep
+ * @typedef {import("../sessions/sessions.types.js").DetailsViewModel} DetailsViewModel
+ */
+
+/**
+ * @typedef {object} CreateDetailsInput
+ * @property { SessionMapper | null} session
+ */
+
+/**
+ * @param {CreateDetailsInput} input
+ * @returns {DetailsViewModel | null}
+ */
 
 function createDetails({ session }) {
 	if (!session) {
-		return {};
+		return null;
 	}
 	const steps = session.steps ?? [];
+	const stepCount = steps.length;
 	const setCount = steps.reduce((total, step) => total + step.sets, 0);
 	const movements = getDistinctMovements(session);
 	const equipments = getDistinctEquipments(session);
@@ -16,14 +34,17 @@ function createDetails({ session }) {
 		id: session.id,
 		headingId: `session-details-title-${session.id}`,
 		name: session.name,
-		description: session.description ?? "Remember, safety first.",
+		description: "Remember, safety first.",
 		notes: session.notes,
 		isArchived: session.isArchived,
+
+		stepNumber: stepCount,
+		steps: steps.map(createDetailsStepViewModel),
 
 		stats: [
 			{
 				label: "Exercises",
-				value: steps.length,
+				value: stepCount,
 				icon: "dumbbell",
 			},
 			{
@@ -33,60 +54,26 @@ function createDetails({ session }) {
 			},
 			{
 				label: "Movement patterns",
-				// value:
-				// 	movements.length > 0 ? movements.join(", ") : "No movement patterns",
 				value: movements.length,
 				icon: "activity",
 			},
 			{
 				label: "Equipment",
-				// value: equipments.length > 0 ? equipments.join(", ") : "No equipment",
 				value: equipments.length,
 				icon: "wrench",
 			},
 		],
 
-		stepNumber: steps.length,
-		steps: steps.map(createStepViewModel),
-
 		actions: {
-			edit: {
-				label: "Edit session",
-				href: `/sessions/${session.id}/edit`,
-			},
+			// edit: {
+			// 	label: "Edit session",
+			// 	href: `/sessions/${session.id}/edit`,
+			// },
 			archive: {
 				label: "Archive session",
 				action: `/sessions/${session.id}/archive`,
 			},
 		},
-	};
-}
-
-function createStepViewModel(step) {
-	return {
-		id: step.id,
-		order: step.order,
-		type: step.type,
-
-		exercise: {
-			name: step.exercise.name,
-			variantName: step.exercise.variantName,
-			movementPattern: step.movementPattern,
-			equipment: step.equipment.name,
-		},
-
-		prescription: {
-			sets: step.sets,
-			reps: step.reps,
-			loadValue: step.loadValue,
-			loadUnit: step.loadUnit,
-		},
-
-		setupDescription: step.setupDescription ?? "-",
-
-		notes: step.notes ?? "-",
-
-		muscles: step.muscles ?? [],
 	};
 }
 

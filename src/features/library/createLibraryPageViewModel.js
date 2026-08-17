@@ -1,6 +1,40 @@
 import createExerciseTemplates from "./createExerciseTemplatesViewModel.js";
 import createSessionWorkspace from "./createSessionWorkspaceViewModel.js";
 
+/**
+ * @typedef {import("../../types/libraryPage.types.js").LocalsPage} LocalsPage
+ * @typedef {import("../../types/libraryPage.types.js").LocalsLibraryPageState} LocalsLibraryPageState
+ * @typedef {import("../../features/exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplatesViewModel} ExerciseTemplatesViewModel
+ * @typedef {import("../../features/sessions/sessions.types.js").SessionWorkspaceViewModel} SessionWorkspaceViewModel
+ */
+
+/**
+ * @typedef {object} LibraryPageViewModelInput
+ * @property {LocalsPage} page
+ * @property {LocalsLibraryPageState} pageState
+ * @property {*} data
+ */
+
+/**
+ * @typedef {object} FeaturesViewModel
+ * @property {ExerciseTemplatesViewModel} exerciseTemplates
+ * @property {SessionWorkspaceViewModel} sessionWorkspace
+ */
+
+/**
+ * @typedef {object} LibraryViewModel
+ * @property {LocalsPage} page
+ * @property {LocalsLibraryPageState} pageState
+ * @property {*} data
+ * @property {*} appState
+ * @property {FeaturesViewModel} features
+ */
+
+/**
+ * @param {LibraryPageViewModelInput} input
+ * @returns { LibraryViewModel}
+ */
+
 function createLibraryPageViewModel({ page, pageState, data }) {
 	const {
 		user,
@@ -13,6 +47,13 @@ function createLibraryPageViewModel({ page, pageState, data }) {
 		exerciseTemplateArr,
 		stepTypeArr,
 	} = data;
+
+	const sessionWorkspace = createSessionWorkspace({
+		sessionArr,
+		activeSession: session,
+	});
+
+	const exerciseTemplates = createExerciseTemplates({ exerciseTemplateArr });
 
 	return {
 		page,
@@ -45,11 +86,8 @@ function createLibraryPageViewModel({ page, pageState, data }) {
 			},
 		},
 		features: {
-			sessionWorkspace: createSessionWorkspace({
-				sessionArr,
-				activeSession: session,
-			}),
-			exerciseTemplates: createExerciseTemplates({ exerciseTemplateArr }),
+			sessionWorkspace,
+			exerciseTemplates,
 		},
 	};
 }

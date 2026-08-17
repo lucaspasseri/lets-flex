@@ -1,5 +1,15 @@
 import toCapitalizedString from "../../../utils/toCapitalizedString.js";
 
+/**
+ * @typedef {import("./equipments.types.js").EquipmentRow} EquipmentRow
+ * @typedef {import("./equipments.types.js").EquipmentViewModel} EquipmentViewModel
+ */
+
+/**
+ * @param {EquipmentRow} equipment
+ * @returns {EquipmentViewModel}
+ */
+
 export function toEquipment(equipment) {
 	return {
 		id: equipment.id,

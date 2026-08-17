@@ -1,3 +1,12 @@
+/**
+ * @typedef {import("../../sessions/sessions.types.js").SessionTemplate} SessionTemplate
+ */
+
+/**
+ * @param {SessionTemplate} session
+ * @returns {string[]}
+ */
+
 export function getDistinctMovements(session) {
 	return [
 		...new Set(
@@ -5,6 +14,11 @@ export function getDistinctMovements(session) {
 		),
 	];
 }
+
+/**
+ * @param {SessionTemplate} session
+ * @returns {string[]}
+ */
 
 export function getDistinctMuscles(session) {
 	return [
@@ -15,6 +29,11 @@ export function getDistinctMuscles(session) {
 		),
 	];
 }
+
+/**
+ * @param {SessionTemplate} session
+ * @returns {string[]}
+ */
 
 export function getDistinctEquipments(session) {
 	return [

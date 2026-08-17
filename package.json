@@ -19,6 +19,7 @@
 		"dev": "node --env-file-if-exists=.env --watch app.js",
 		"seed": "node --env-file-if-exists=.env db/populatedb.js",
 		"check:types": "tsc --project jsconfig.json --noEmit",
+		"typecheck": "tsc --project jsconfig.json",
 		"test": "node --test",
 		"test:watch": "node --test --watch"
 	},

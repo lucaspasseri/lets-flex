@@ -1,12 +1,22 @@
-import createMuscleTemplate from "./createMuscleViewModel.js";
+import createMuscles from "./createMuscleViewModel.js";
 
-function createExercise({ exerciseTemplate = {} }) {
-	const {
-		movementPattern = {},
-		equipment = {},
-		variant = {},
-		muscles = [],
-	} = exerciseTemplate;
+/**
+ * @typedef {import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplateMapper} ExerciseTemplateMapper
+ * @typedef {import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplateItemViewModel} ExerciseTemplateItemViewModel
+ */
+
+/**
+ * @typedef {object} CreateExerciseInput
+ * @property {ExerciseTemplateMapper} exerciseTemplate
+ */
+
+/**
+ * @param {CreateExerciseInput} input
+ * @returns {ExerciseTemplateItemViewModel}
+ */
+
+function createExercise({ exerciseTemplate }) {
+	const { movementPattern, equipment, variant, muscles } = exerciseTemplate;
 
 	const movementPatternLabel = movementPattern?.name
 		? movementPattern?.notes
@@ -14,7 +24,7 @@ function createExercise({ exerciseTemplate = {} }) {
 			: movementPattern.name
 		: "-";
 
-	const muscleTemplate = createMuscleTemplate({ muscles });
+	const muscleTemplates = createMuscles({ muscles });
 
 	const searchKeyWord = `${variant?.name ?? ""} ${movementPattern?.name ?? ""} ${equipment?.name ?? ""}`;
 
@@ -33,7 +43,7 @@ function createExercise({ exerciseTemplate = {} }) {
 			movementPattern: {
 				name: movementPatternLabel,
 			},
-			muscleTemplate,
+			muscleTemplates,
 			variant: {
 				id: variant?.id,
 				name: variant?.name,

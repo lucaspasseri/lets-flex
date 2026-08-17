@@ -1,17 +1,34 @@
 import toCapitalizedString from "../../../utils/toCapitalizedString.js";
 import { toMuscle } from "../muscles/mapper.js";
 
-export function toSessionTemplateSeed(session) {
+/**
+ * @typedef {import("./sessions.types.js").SessionRow} SessionRow
+ * @typedef {import("./sessions.types.js").SessionQueryStepRow} SessionQueryStepRow
+ * @typedef {import("./sessions.types.js").SessionMapperStep} SessionMapperStep
+ * @typedef {import("./sessions.types.js").SessionMapper} SessionMapper
+ */
+
+/**
+ * @param {SessionRow} session
+ * @returns {SessionMapper}
+ */
+
+export function toSessionMapperSeed(session) {
 	return {
 		id: session.id,
 		name: session.name,
 		notes: session.notes,
 		isArchived: session.is_archived,
-		steps: session.steps?.map(toSessionTemplateStepSeed),
+		steps: session.steps?.map(toSessionMapperStepSeed),
 	};
 }
 
-function toSessionTemplateStepSeed(step) {
+/**
+ * @param {SessionQueryStepRow} step
+ * @returns { SessionMapperStep}
+ */
+
+function toSessionMapperStepSeed(step) {
 	return {
 		id: step.id,
 		name: step.name,
@@ -25,6 +42,9 @@ function toSessionTemplateStepSeed(step) {
 		exercise: {
 			name: step.exercise_name,
 			variantName: step.exercise_variant_name,
+			setupDescription: step.exercise_variant_setup_description,
+			environment: step.exercise_variant_environment,
+			notes: step.exercise_variant_notes,
 		},
 		equipment: {
 			name: step.equipment_name,

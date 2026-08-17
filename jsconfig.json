@@ -1,9 +1,14 @@
 {
 	"compilerOptions": {
+		"allowJs": true,
 		"checkJs": true,
+		"noEmit": true,
+		"strict": true,
+
+		"target": "ES2022",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext"
 	},
-	"include": ["src/**/*.js", "views/viewModels/**/*.js"],
+	"include": ["src/**/*.js", "views/**/*.js"],
 	"exclude": ["node_modules", "public"]
 }

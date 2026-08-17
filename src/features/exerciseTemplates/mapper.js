@@ -1,6 +1,16 @@
 import toCapitalizedString from "../../../utils/toCapitalizedString.js";
 import { toMuscleRole } from "../muscleRoles/mapper.js";
 
+/**
+ * @typedef {import("./exerciseTemplates.types.js").ExerciseTemplateRow} ExerciseTemplateRow
+ * @typedef {import("./exerciseTemplates.types.js").ExerciseTemplateMapper} ExerciseTemplateMapper
+ */
+
+/**
+ * @param {ExerciseTemplateRow} exercise
+ * @returns {ExerciseTemplateMapper}
+ */
+
 export function toExerciseTemplateSeed(exercise) {
 	const muscles = exercise.muscles.map(muscle => {
 		return {

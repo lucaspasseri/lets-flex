@@ -3,6 +3,16 @@ import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getLibraryPageData from "../../features/library/getLibraryPageData.js";
 import createLibraryPageViewModel from "../../features/library/createLibraryPageViewModel.js";
 
+/**
+ * @typedef {import("express").Request} Request
+ * @typedef {import("express").Response} Response
+ */
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ */
+
 async function show(req, res) {
 	const userId = toNullableNumber(res?.locals?.sessionState?.userId);
 	const sessionId = toNullableNumber(req?.query?.sessionId);

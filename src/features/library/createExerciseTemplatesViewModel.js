@@ -1,5 +1,21 @@
 import createExercise from "./createExerciseViewModel.js";
 
+/**
+ * @typedef { import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplateMapper} ExerciseTemplateMapper
+ * @typedef { import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplatesViewModel} ExerciseTemplatesViewModel
+ */
+
+/**
+ * @typedef {object} CreateExerciseTemplateInput
+ * @property {ExerciseTemplateMapper[]} exerciseTemplateArr
+ */
+
+/**
+ *
+ * @param {CreateExerciseTemplateInput} input
+ * @returns {ExerciseTemplatesViewModel}
+ */
+
 function createExerciseTemplates({ exerciseTemplateArr = [] }) {
 	const exerciseTemplateCount = exerciseTemplateArr.length;
 	const items = exerciseTemplateArr.map(exerciseTemplate =>

@@ -18,6 +18,9 @@ export function findAllQuery() {
 										'step_order', ss.step_order,
 										'step_type_name', st.name,
 										'exercise_variant_name', ev.name,
+										'exercise_variant_setup_description', ev.setup_description,
+										'exercise_variant_environment', ev.environment,
+										'exercise_variant_notes', ev.notes,
 										'exercise_name', ex.name,
 										'movement_pattern_name', mp.name,
 										'equipment_name', eq.name,
@@ -27,7 +30,9 @@ export function findAllQuery() {
 												json_agg(
 													json_build_object(
 														'common_name', m.common_name,
-														'scientific_name', m.scientific_name
+														'scientific_name', m.scientific_name,
+														'body_region', m.body_region,
+														'reference_url', m.reference_url
 													)
 												),
 												'[]'

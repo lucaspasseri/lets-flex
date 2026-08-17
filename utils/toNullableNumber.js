@@ -1,3 +1,8 @@
+/**
+ * @param {*} value
+ * @returns { number | null}
+ */
+
 function toNullableNumber(value) {
 	if (value == null || value === "") return null;
 
