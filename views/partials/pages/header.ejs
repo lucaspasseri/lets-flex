@@ -1,4 +1,10 @@
-<% const username = locals?.appState?.users?.current?.name ?? "Guest" %>
+<%
+	const username =
+		locals?.shell?.currentUser?.name ??
+		locals?.appState?.users?.current?.name ??
+		locals?.appState?.user?.name ??
+		"Guest";
+%>
 
 <header class="page-header">
 	<div class="logoContainer">

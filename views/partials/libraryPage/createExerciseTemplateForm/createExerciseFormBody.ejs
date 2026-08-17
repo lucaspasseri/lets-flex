@@ -1,11 +1,11 @@
-	<%
-		const { movementPatterns = {}, equipments = {}, muscles = {}, muscleRoles={}} = locals?.data ?? {};
-
-		const movementPatternArr = movementPatterns?.items ?? [];
-		const equipmentArr = equipments?.items ?? [];
-		const muscleArr = muscles?.items ?? [];
-		const muscleRoleArr = muscleRoles?.items ?? [];
-	%>
+<%
+	const {
+		movementPatternOptions,
+		equipmentOptions,
+		muscleOptions,
+		muscleRoleOptions
+	} = locals.createExerciseForm.fields;
+%>
 
 	<%- include("../../shared/components/form/field", {
 		field: {
@@ -31,10 +31,7 @@
 			control: "select",
 			required: true,
 			hint: "Choose a movement pattern for the exercise template.",
-			options: movementPatternArr.map(movement => ({
-				label: movement.name,
-				value: movement.id
-			})),
+			options: movementPatternOptions,
 			attributes: {
 				autocomplete: "off"
 			}
@@ -49,10 +46,7 @@
 			control: "select",
 			required: true,
 			hint: "Choose an equipment for the exercise template.",
-			options: equipmentArr.map(equipment => ({
-				label: equipment.name,
-				value: equipment.id
-			})),
+			options: equipmentOptions,
 			attributes: {
 				autocomplete: "off"
 			}
@@ -68,10 +62,7 @@
 				control: "select",
 				required: true,
 				hint: "Choose a muscle for the exercise template.",
-				options: muscleArr.map(muscle => ({
-					label:`${muscle.commonName} (${muscle.scientificName})`,
-					value: muscle.id
-				})),
+				options: muscleOptions,
 				attributes: {
 					autocomplete: "off"
 				}}
@@ -86,10 +77,7 @@
 				control: "select",
 				required: true,
 				hint: "Choose a muscle role for the exercise template.",
-				options: muscleRoleArr.map(role => ({
-					label: role.name,
-					value: role.id
-				})),
+				options: muscleRoleOptions,
 				attributes: {
 					autocomplete: "off"
 				}}
@@ -98,7 +86,7 @@
 
 		<%- include("../../shared/components/button/button",  {button: {
 				id: "add-muscle-role-relation",
-				label: "Add muscle",
+				label: locals.createExerciseForm.actions.addMuscle.label,
 				variant: "primary",
 			}}) 
 		%> 

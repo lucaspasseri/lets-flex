@@ -1,16 +1,9 @@
 <%
 	const {
-		stepTypes = {},
-		exerciseTemplates = {}
-	} = locals?.data ?? {};
-
-	const stepTypeArr = stepTypes.items ?? [];
-	const exerciseTemplateArr = exerciseTemplates.items ?? [];
-
-	const loadUnitArr = [
-		{ label: "Kg", value: "Kilograms" },
-		{ label: "lb", value: "Pounds" }
-	];
+		stepTypeOptions,
+		exerciseOptions,
+		loadUnitOptions
+	} = locals.createSessionForm.fields;
 %>
 
 <%- include("../../shared/components/form/field", {
@@ -55,10 +48,7 @@
 			control: "select",
 			required: false,
 			hint: "Choose the kind of step.",
-			options: stepTypeArr.map(stepType => ({
-				label: stepType.name,
-				value: stepType.id
-			}))
+			options: stepTypeOptions
 		}
 	}) %>
 
@@ -70,10 +60,7 @@
 			control: "select",
 			required: false,
 			hint: "Choose the exercise for this step.",
-			options: exerciseTemplateArr.map(exercise => ({
-				label: exercise.name,
-				value: exercise.variant.id
-			}))
+			options: exerciseOptions
 		}
 	}) %>
 
@@ -129,7 +116,7 @@
 			label: "Load unit",
 			control: "select",
 			hint: "Choose the unit used for the load.",
-			options: loadUnitArr
+			options: loadUnitOptions
 		}
 	}) %>
 
@@ -142,7 +129,7 @@
 	<%- include("../../shared/components/button/button", {
 		button: {
 			id: "add-session-step",
-			label: "Add step",
+			label: locals.createSessionForm.actions.addStep.label,
 			variant: "secondary",
 			type: "button"
 		}
@@ -158,4 +145,3 @@
 
 	<ol id="session-step-list"></ol>
 </section>
-

@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../../sessions/sessions.types.js").SessionTemplate} SessionTemplate
+ * @typedef {import("../../sessions/sessions.types.js").SessionMapper} SessionTemplate
  */
 
 /**
