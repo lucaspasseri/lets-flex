@@ -1,8 +1,9 @@
 <%
-	const { heading = "Welcome!", description = null, action="/", slots = {}, attributes = {}} = locals?.form ?? {};
+	const { id = null, heading = "Welcome!", description = null, action="/", slots = {}, attributes = {}} = locals?.form ?? {};
 %>
 
 <form 
+	<% if (id) { %>id="<%= id %>"<% } %>
 	method="POST" 
 	action="<%= action %>" 
 	class="form"

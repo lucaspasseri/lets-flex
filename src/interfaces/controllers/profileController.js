@@ -1,7 +1,7 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import getProfilePageData from "../../features/profile/getProfilePageData.js";
 import resolveActiveUserId from "../../features/profile/resolveActiveUserId.js";
-import createProfilePageViewModel from "../../../views/viewModels/createProfilePageViewModel.js";
+import createProfilePageViewModel from "../../../views/viewModels/profilePage/createProfilePageViewModel.js";
 
 /**
  * @typedef {import("express").Request} Request
@@ -29,15 +29,14 @@ async function show(req, res) {
 	const page = { ...res.locals.page, title: "Let's Flex!" };
 	const pageState = { userId };
 
-	const { user, userArr } = await getProfilePageData({
+	const data = await getProfilePageData({
 		userId,
 	});
 
 	const profile = createProfilePageViewModel({
 		page,
 		pageState,
-		user,
-		userArr,
+		data,
 	});
 
 	res.render("profile", profile);

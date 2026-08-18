@@ -1,0 +1,9 @@
+<% const { fields } = locals.createUserForm; %>
+
+<div class="form-grid form-grid--two-columns">
+	<% fields.slice(0, 2).forEach(field => { %>
+		<%- include("../../shared/components/form/field", { field }) %>
+	<% }) %>
+</div>
+
+<%- include("../../shared/components/form/field", { field: fields[2] }) %>

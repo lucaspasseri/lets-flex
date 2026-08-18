@@ -1,0 +1,14 @@
+<% const { modal, actions } = locals.createUserForm; %>
+
+<%- include("../../shared/components/button/button", { button: {
+	label: actions.cancel.label,
+	variant: "secondary",
+	type: "button",
+	attributes: { "data-modal-close": modal.id }
+} }) %>
+
+<%- include("../../shared/components/button/button", { button: {
+	label: actions.submit.label,
+	variant: "primary",
+	type: "submit"
+} }) %>

@@ -1,3 +1,4 @@
-.main.profile .main-header {
-	margin: 2em var(--horizontal-margin) 0;
+.main.profile {
+	display: grid;
+	align-content: start;
 }

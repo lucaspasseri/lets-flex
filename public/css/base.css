@@ -182,7 +182,7 @@ footer.footer {
 	animation-duration: 160ms;
 }
 
-#profilePageUserSwitcher .entity-switcher__item.is-active {
+#profile-picker .profile-card--current {
 	view-transition-name: profile-page-user-switcher-item-selected;
 }
 
