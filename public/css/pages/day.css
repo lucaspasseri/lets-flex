@@ -7,16 +7,6 @@
 		color: inherit;
 	}
 
-	& > .training-day-item {
-		height: fit-content;
-	}
-
-	.basic-line[data-id="dayPageSessionBasicLine"] {
-		& .line-card-button {
-			align-items: flex-start;
-			justify-content: space-between;
-		}
-	}
 }
 
 .main.day .session-card {

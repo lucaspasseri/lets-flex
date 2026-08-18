@@ -1,0 +1,55 @@
+import createProgramSwitcherViewModel from "./createProgramSwitcherViewModel.js";
+import createCycleSwitcherViewModel from "./createCycleSwitcherViewModel.js";
+import createCalendarNavigationViewModel from "./createCalendarNavigationViewModel.js";
+import createProgramFormViewModel from "./createProgramFormViewModel.js";
+import createCycleFormViewModel from "./createCycleFormViewModel.js";
+
+/**
+ * @typedef {import("../../../src/features/programs/programsPage.types.js").CreateProgramsPageViewModelInput} CreateProgramsPageViewModelInput
+ * @typedef {import("./programsPage.types.js").ProgramsPageViewModel} ProgramsPageViewModel
+ */
+
+/**
+ * @param {CreateProgramsPageViewModelInput} input
+ * @returns {ProgramsPageViewModel}
+ */
+export default function createProgramsPageViewModel({ page, pageState, data }) {
+	const { currentUser, programs, cycles, trainingDays, goals } = data;
+
+	return {
+		page,
+		pageState,
+		shell: {
+			currentUser,
+		},
+		components: {
+			programSwitcher: createProgramSwitcherViewModel({
+				currentProgramId: programs.current?.id ?? null,
+				programs: programs.items,
+				goals,
+			}),
+			cycleSwitcher: createCycleSwitcherViewModel({
+				currentProgram: programs.current,
+				currentCycleId: cycles.current?.id ?? null,
+				cycles: cycles.items,
+			}),
+			calendarNavigation: createCalendarNavigationViewModel({
+				currentProgram: programs.current,
+				currentCycle: cycles.current,
+				trainingDays,
+			}),
+			createProgramForm: createProgramFormViewModel({ goals }),
+			createCycleForm: createCycleFormViewModel({
+				currentProgram: programs.current,
+				cycles: cycles.items,
+			}),
+			noActiveUser: {
+				isVisible: currentUser === null,
+				title: "No active profile",
+				description:
+					"Create or select a profile before managing training programs.",
+				action: { label: "Choose a profile", href: "/profile", icon: "plus" },
+			},
+		},
+	};
+}

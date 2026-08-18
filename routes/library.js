@@ -4,7 +4,7 @@ import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
 import { libraryController } from "../src/interfaces/controllers/libraryController.js";
 
-const router = new Router();
+const router = Router();
 
 router.use(getUrlAndPath);
 router.use(getSessionState);

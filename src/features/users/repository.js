@@ -7,7 +7,6 @@ import pool from "../../../db/pool.js";
  */
 
 /**
- * @param {*} db
  * @returns {Promise<UserRow[]>}
  */
 

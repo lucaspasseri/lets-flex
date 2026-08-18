@@ -1,0 +1,39 @@
+<%
+	const { id, heading, description, items, emptyState } =
+		locals.calendarNavigation;
+%>
+<section
+	class="calendar-navigation"
+	id="<%= id %>"
+	aria-labelledby="<%= id %>-heading"
+>
+	<header class="calendar-navigation__header">
+		<p class="calendar-navigation__eyebrow">Training days</p>
+		<h2 id="<%= id %>-heading"><%= heading %></h2>
+		<p><%= description %></p>
+	</header>
+
+	<% if (items.length === 0) { %>
+		<div class="calendar-navigation__empty">
+			<i data-lucide="calendar-x" aria-hidden="true"></i>
+			<h3><%= emptyState.title %></h3>
+			<p><%= emptyState.description %></p>
+		</div>
+	<% } else { %>
+		<ul class="calendar-navigation__grid">
+			<% items.forEach(item => { %>
+				<li>
+					<a
+						class="<%= item.className %>"
+						href="<%= item.href %>"
+						aria-label="<%= item.accessibleLabel %>"
+					>
+						<span class="calendar-navigation__cycle">Cycle <%= item.cycleOrder %></span>
+						<strong><%= item.dateLabel %></strong>
+						<span class="calendar-navigation__label"><%= item.label %></span>
+					</a>
+				</li>
+			<% }) %>
+		</ul>
+	<% } %>
+</section>

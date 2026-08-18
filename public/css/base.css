@@ -194,49 +194,17 @@ footer.footer {
 	view-transition-name: library-page-session-details;
 }
 
-.main.programs {
-	.basic-line[data-id="programsBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: programs-basic-line-item-selected;
-		}
-	}
-}
-
-.main.programs {
-	.basic-line[data-id="cyclesBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: cycles-basic-line-item-selected;
-		}
-	}
-}
-
-.main.day {
-	.basic-line[data-id="dayPageSessionBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: sessions-basic-line-item-selected;
-		}
-	}
-}
-
 input[type="date"]::-webkit-calendar-picker-indicator {
 	filter: invert(1);
 }
 
 @media screen and (width < 818px) {
-	.basic-line {
-		font-size: 0.9em;
-	}
-
 	.main .current-day-container {
 		font-size: 0.9em;
 	}
 }
 
 @media screen and (width < 665px) {
-	.basic-line {
-		font-size: 0.7em;
-	}
-
 	.main .current-day-container {
 		font-size: 0.7em;
 	}

@@ -73,7 +73,12 @@ async function createCycle({ programId, name, cycleSize, cycleOrder }) {
 		}
 
 		const cycle = await cyclesRepository.create(
-			{ programId, name, cycleSize, cycleOrder },
+			{
+				programId,
+				name,
+				cycleSize: numericCycleSize,
+				cycleOrder: numericCycleOrder,
+			},
 			client,
 		);
 
