@@ -1,17 +1,10 @@
-<%
-const {currWorkoutSessionId} = locals;
-const action = `/workout_sessions/${currWorkoutSessionId}?_method=PATCH`;
-const currDayId = locals?.appState?.day?.id ?? null;
-%>
-
 <form
   id="deleteSessionForm"
-	method="POST"
-  action="<%= action %>"
+	method="<%= form.method %>"
+  action="<%= form.action %>"
 	class="forms"
 >
   <p>Are you sure?</p>
-	<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
-  <%- include('simpleButton', { data: { text: "Confirm delete", type: "submit" } }); %>
+	<input type="hidden" name="trainingDayId" value="<%= form.trainingDayId ?? "" %>">
+  <%- include("simpleButton", { data: { text: form.submitLabel, type: "submit" } }) %>
 </form>
-

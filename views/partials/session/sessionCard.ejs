@@ -1,5 +1,5 @@
-<article class="session-card session-card-<%= session?.type %>">
-	<%- include("./sessionHeader", { session }) %>
+<article class="session-card session-card-<%= card.type %>">
+	<%- include("./sessionHeader", { header: card.header }) %>
 	<p>SESSION STEPS</p>
-	<%- include("./stepList", { steps: session?.steps }) %>
+	<%- include("./stepList", { steps: card.steps }) %>
 </article>

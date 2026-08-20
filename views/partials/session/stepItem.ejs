@@ -3,27 +3,23 @@
 <li class="step-item">
 	<div class="step-item-main">
 		<strong class="step-item-title">
-			<%= `${step.exerciseVariantName || step.exerciseName || step.name}:` %>
+			<%= step.title %>
 		</strong>
 
 		<span class="step-item-meta">
-			<%= step.sets %> sets × <%= step.reps %> reps
+			<%= step.prescriptionLabel %>
 		</span>
 
-		<% if (step.loadValue) { %>
+		<% if (step.loadLabel) { %>
 			<span class="step-item-load">
-				<%= step.loadValue %> <%= step.loadUnit %>
+				<%= step.loadLabel %>
 			</span>
 		<% } %>
 	</div>
 
 	<div class="step-item-details">
-		<% if (step.equipmentName) { %>
-			<span><%= step.equipmentName %></span>
-		<% } %>
-
-		<% if (step.movementPatternName) { %>
-			<span><%= step.movementPatternName %></span>
-		<% } %>
+		<% step.details.forEach(detail => { %>
+			<span><%= detail %></span>
+		<% }) %>
 	</div>
 </li>

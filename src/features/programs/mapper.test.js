@@ -37,7 +37,7 @@ test("Programs page mappers isolate database column names", () => {
 
 	assert.deepEqual(
 		toTrainingDay({
-			training_day_id: 5,
+			id: 5,
 			cycle_id: 4,
 			program_id: 1,
 			cycle_order: 1,

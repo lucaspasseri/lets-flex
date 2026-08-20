@@ -9,7 +9,7 @@
  */
 export function toTrainingDay(row) {
 	return {
-		id: row.training_day_id,
+		id: row.id,
 		cycleId: row.cycle_id,
 		programId: row.program_id,
 		cycleOrder: row.cycle_order,

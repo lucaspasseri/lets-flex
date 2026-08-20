@@ -1,28 +1,24 @@
-<%
-const modalId = locals?.modalId ?? null;
-%>
-
 <header class="session-card-header">
 	<div>
 		<h2 class="session-card-title">
-			<%= session?.name %>
+			<%= header.title %>
 		</h2>
 
-		<% if (session?.notes) { %>
+		<% if (header.notes) { %>
 			<p class="session-card-notes">
-				<%= session?.notes %>
+				<%= header.notes %>
 			</p>
 		<% } %>
 	</div>
 
-	<% if (session?.type === "workout" && session?.status) { %>
+	<% if (header.statusLabel) { %>
 		<span class="session-card-status">
-			<%= session?.status %>
+			<%= header.statusLabel %>
 		</span>
 	<% } %>
 
 	<div class="settings">
-		<button type="button" class="button" data-modal-open="<%= modalId %>">
+		<button type="button" class="button" data-modal-open="<%= header.modalId %>" aria-label="<%= header.deleteActionLabel %>">
 			<%- include("../icons/trash",  {strokeColor: "black"}) %>
 		</button>
 	</div>

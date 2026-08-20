@@ -1,7 +1,7 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getDayPageData from "../../features/day/getDayPageData.js";
-import createDayPageViewModel from "../../features/day/createDayPageViewModel.js";
+import createDayPageViewModel from "../../../views/viewModels/dayPage/createDayPageViewModel.js";
 
 /**
  * @typedef {import("express").Request} Request
@@ -20,10 +20,6 @@ async function show(req, res) {
 	const dayId =
 		toNullableNumber(req?.query?.dayId) ??
 		toNullableNumber(sessionState?.dayId);
-	// @ts-ignore
-	const sessionId =
-		toNullableNumber(req?.query?.sessionId) ??
-		toNullableNumber(sessionState?.sessionId);
 
 	const data = await getDayPageData({ userId, programId, dayId });
 
