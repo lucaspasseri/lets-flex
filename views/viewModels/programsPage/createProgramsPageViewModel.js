@@ -21,6 +21,7 @@ export default function createProgramsPageViewModel({ page, pageState, data }) {
 		pageState,
 		shell: {
 			currentUser,
+			activeNavigation: "programs",
 		},
 		components: {
 			programSwitcher: createProgramSwitcherViewModel({

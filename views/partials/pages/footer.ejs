@@ -1,35 +1,30 @@
 <%
-const currentUrl = locals?.page?.url ?? ""; 
-const tabs = [{href: "/", label: "Dashboard"}, {href: "/programs", label: "Programs"}, {href: "/library", label: "Library"}, {href: "/profile", label: "Profile"}];
-
-const setIndicator = (tab) => {
-	if(tab.label === "Dashboard"){
-		if(currentUrl === "/" || currentUrl.substring(0,2) === "/?"){
-			return "footer-indicator isActive";		
-		}
-		
-		return "footer-indicator";	
-	}
-
-	const active = currentUrl.includes(tab.href) ? "isActive" : "";
-	return `footer-indicator ${active}`;
-}
+	const activeNavigation = locals?.shell?.activeNavigation ?? null;
+	const navigationItems = [
+		{ id: "dashboard", href: "/", label: "Dashboard" },
+		{ id: "programs", href: "/programs", label: "Programs" },
+		{ id: "library", href: "/library", label: "Library" },
+		{ id: "profile", href: "/profile", label: "Profile" },
+	];
 %>
 
 <footer class="footer">
-	<nav class="footer-nav">
-		<ul>
-			<% tabs.forEach(tab => { %>
-				<li>
-					<a href="<%= tab.href %>">
-					<span 
-						><%= tab.label %></span
+	<nav class="footer-nav" aria-label="Primary">
+		<ul class="footer-nav__list">
+			<% navigationItems.forEach(item => { %>
+				<% const isActive = item.id === activeNavigation; %>
+				<li class="footer-nav__item">
+					<a
+						class="footer-nav__link"
+						href="<%= item.href %>"
+						<% if (isActive) { %>aria-current="page"<% } %>
 					>
-					<span
-						class="<%= setIndicator(tab) %>"
-						aria-hidden="true"
-					></span>
-				</a>
+						<span><%= item.label %></span>
+						<span
+							class="footer-nav__indicator<%= isActive ? " is-active" : "" %>"
+							aria-hidden="true"
+						></span>
+					</a>
 				</li>
 			<% }) %>
 		</ul>

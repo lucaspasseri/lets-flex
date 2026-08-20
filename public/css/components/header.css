@@ -1,5 +1,4 @@
 .page-header {
-	position: fixed;
 	width: 100%;
 	height: fit-content;
 	padding: 1em var(--horizontal-margin);
@@ -10,8 +9,6 @@
 	background-color: var(--color-surface);
 	box-shadow: var(--box-shadow-header);
 	z-index: 99;
-	top: 0;
-	left: 0;
 }
 
 .page-header .logoContainer {

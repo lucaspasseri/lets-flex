@@ -18,6 +18,7 @@ export default function createProfilePageViewModel({ page, pageState, data }) {
 		pageState,
 		shell: {
 			currentUser: data.currentUser,
+			activeNavigation: "profile",
 		},
 		components: {
 			profilePicker: createProfilePickerViewModel({

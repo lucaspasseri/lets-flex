@@ -16,7 +16,7 @@
  * @typedef {object} LibraryPageViewModel
  * @property {LocalsPage} page
  * @property {LibraryPageState} pageState
- * @property {{currentUser: User | null, activeSession: Session | null}} shell
+ * @property {{currentUser: User | null, activeSession: Session | null, activeNavigation: "library"}} shell
  * @property {{sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, createSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel}} components
  */
 

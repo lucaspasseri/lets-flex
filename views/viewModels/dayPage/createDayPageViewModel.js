@@ -14,7 +14,7 @@ export default function createDayPageViewModel({ page, pageState, data }) {
 	return {
 		page,
 		pageState: { ...pageState, dayId: currentDayId },
-		shell: { currentUser },
+		shell: { currentUser, activeNavigation: "programs" },
 		components: {
 			dayHeader: {
 				dayId: currentDayId,

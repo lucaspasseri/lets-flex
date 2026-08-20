@@ -49,7 +49,7 @@
  * @typedef { object} DayPageViewModel
  * @property {LocalsPage} page
  * @property {PageState} pageState
- * @property {{currentUser: User | null}} shell
+ * @property {{currentUser: User | null, activeNavigation: "programs"}} shell
  * @property {*} components
  */
 

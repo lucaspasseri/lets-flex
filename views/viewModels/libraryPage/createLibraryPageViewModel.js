@@ -22,6 +22,7 @@ export default function createLibraryPageViewModel({ page, pageState, data }) {
 		shell: {
 			currentUser: data.user,
 			activeSession: data.activeSession,
+			activeNavigation: "library",
 		},
 		components: {
 			sessionWorkspace: createSessionWorkspace({

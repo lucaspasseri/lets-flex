@@ -24,7 +24,7 @@ export default function createDashboardPageViewModel({ page, pageState, data }) 
 	return {
 		page,
 		pageState: resolvedPageState,
-		shell: { currentUser: data.currentUser },
+		shell: { currentUser: data.currentUser, activeNavigation: "dashboard" },
 		components,
 	};
 }

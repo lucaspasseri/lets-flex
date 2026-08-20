@@ -12,7 +12,7 @@
  * @typedef {object} ProfilePageViewModel
  * @property {LocalsPage} page
  * @property {ProfilePageState} pageState
- * @property {{currentUser: User | null}} shell
+ * @property {{currentUser: User | null, activeNavigation: "profile"}} shell
  * @property {{profilePicker: ProfilePickerViewModel, createUserForm: CreateUserFormViewModel}} components
  */
 

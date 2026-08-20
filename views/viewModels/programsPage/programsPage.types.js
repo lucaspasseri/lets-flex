@@ -13,7 +13,7 @@
  * @typedef {object} ProgramsPageViewModel
  * @property {LocalsPage} page
  * @property {PageState} pageState
- * @property {{currentUser: User | null}} shell
+ * @property {{currentUser: User | null, activeNavigation: "programs"}} shell
  * @property {{programSwitcher: ProgramSwitcherViewModel, cycleSwitcher: CycleSwitcherViewModel, calendarNavigation: CalendarNavigationViewModel, createProgramForm: CreateProgramFormViewModel, createCycleForm: CreateCycleFormViewModel, noActiveUser: {isVisible: boolean, title: string, description: string, action: {label: string, href: string, icon: string}}}} components
  */
 
