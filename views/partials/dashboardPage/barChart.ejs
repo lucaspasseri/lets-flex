@@ -1,3 +1,6 @@
 <% if (barChart.isVisible) { %>
-	<div class="canvas-container" data-bar-chart-week-arr="<%= JSON.stringify(barChart.labels) %>" data-bar-chart-scheduled-count-arr="<%= JSON.stringify(barChart.scheduledCounts) %>" data-bar-chart-finished-count-arr="<%= JSON.stringify(barChart.finishedCounts) %>"><canvas id="bar-chart-canvas"></canvas></div>
+	<section class="dashboard-metric dashboard-chart">
+		<div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">Volume</p><h2>Weekly sessions</h2></div></div>
+		<div class="canvas-container" data-bar-chart-week-arr="<%= JSON.stringify(barChart.labels) %>" data-bar-chart-scheduled-count-arr="<%= JSON.stringify(barChart.scheduledCounts) %>" data-bar-chart-finished-count-arr="<%= JSON.stringify(barChart.finishedCounts) %>"><canvas id="bar-chart-canvas"></canvas></div>
+	</section>
 <% } %>

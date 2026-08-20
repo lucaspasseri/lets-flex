@@ -1,8 +1,12 @@
-<% if (programBanner.isOutsideProgram) { %>
-	<div class="outside-scope-banner-container"><p>CURRENT PROGRAM</p><h1>Outside the scope of the program</h1></div>
-<% } else { %>
-	<div class="program-banner-container"><p>CURRENT PROGRAM</p><h1><%= programBanner.programName %></h1></div>
-<% } %>
-<% if (programBanner.cycleName) { %>
-	<div class="cycle-banner-container"><p>CURRENT CYCLE</p><h1><%= programBanner.cycleName %></h1></div>
-<% } %>
+<header class="dashboard-program <%= programBanner.isOutsideProgram ? 'dashboard-program--outside' : '' %>">
+	<div class="dashboard-program__primary">
+		<p class="dashboard-eyebrow">Current program</p>
+		<h1><%= programBanner.isOutsideProgram ? "Outside the scope of the program" : programBanner.programName %></h1>
+	</div>
+	<% if (programBanner.cycleName) { %>
+		<div class="dashboard-program__cycle">
+			<p class="dashboard-eyebrow">Current cycle</p>
+			<p class="dashboard-program__cycle-name"><%= programBanner.cycleName %></p>
+		</div>
+	<% } %>
+</header>

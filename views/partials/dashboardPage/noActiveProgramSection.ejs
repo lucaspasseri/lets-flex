@@ -1,8 +1,37 @@
-<% if (status.isVisible) { %><section aria-label="Dashboard status">
-	<div class="main-header"><p>OPERATIONAL STATUS</p><h1>LET'S FLEX</h1></div>
-	<div class="sync-status"><div class="title-container"><p class="title">TEMPORAL SYNC</p><p><%= status.dateLabel %></p></div><div class="current-week-container"><ul>
-		<% status.days.forEach(day => { %><li class="week-day-item <%= day.isCurrent ? 'active' : '' %>"><span><%= day.label %></span><span><%= day.dayLabel %></span></li><% }) %>
-	</ul></div></div>
-	<% if (status.userEmptyState.isVisible) { %><div class="no-active-user-container"><div class="content"><div class="image-container"><img src="/compasso.png" width="40" height="40" alt="Compass icon" /></div><h2>NO ACTIVE USER</h2><p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p><a href="<%= status.userEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { class: "icon", "aria-hidden": true } } }) %><p>CREATE YOUR USER PROFILE</p></a></div></div><% } %>
-	<% if (status.programEmptyState.isVisible) { %><div class="no-active-program-container"><div class="content"><div class="image-container"><img src="/compasso.png" width="40" height="40" alt="Compass icon" /></div><h2>NO ACTIVE PROGRAM</h2><p>Your training architecture starts here. Build a custom program or choose from a professional template to begin your progression.</p><a href="<%= status.programEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { class: "icon", "aria-hidden": true } } }) %><p>CREATE YOUR FIRST PROGRAM</p></a></div></div><% } %>
-</section><% } %>
+<% if (status.isVisible) { %>
+	<section class="dashboard-onboarding" aria-labelledby="dashboard-status-title">
+		<header class="dashboard-hero">
+			<p class="dashboard-eyebrow">Operational status</p>
+			<h1 id="dashboard-status-title">LET'S FLEX</h1>
+			<p>Your training overview starts with an active profile and program.</p>
+		</header>
+
+		<section class="dashboard-status" aria-labelledby="dashboard-sync-title">
+			<div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">Temporal sync</p><h2 id="dashboard-sync-title"><%= status.dateLabel %></h2></div></div>
+			<ul class="dashboard-status__week">
+				<% status.days.forEach(day => { %>
+					<li class="dashboard-status__day <%= day.isCurrent ? 'is-current' : '' %>" <%- day.isCurrent ? 'aria-current="date"' : '' %>><span><%= day.label %></span><strong><%= day.dayLabel %></strong></li>
+				<% }) %>
+			</ul>
+		</section>
+
+		<div class="dashboard-onboarding__cards">
+			<% if (status.userEmptyState.isVisible) { %>
+				<article class="dashboard-onboarding-card">
+					<div class="dashboard-onboarding-card__icon"><%- include("../shared/components/icons/guestUser", { icon: { attributes: { "aria-hidden": true } } }) %></div>
+					<div><p class="dashboard-eyebrow">First step</p><h2>NO ACTIVE USER</h2></div>
+					<p>Create and activate your profile to personalize your training workspace.</p>
+					<a class="dashboard-action-link" href="<%= status.userEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { "aria-hidden": true } } }) %><span>Create your user profile</span></a>
+				</article>
+			<% } %>
+			<% if (status.programEmptyState.isVisible) { %>
+				<article class="dashboard-onboarding-card">
+					<div class="dashboard-onboarding-card__icon"><img src="/compasso.png" width="32" height="32" alt="" /></div>
+					<div><p class="dashboard-eyebrow">Build your plan</p><h2>NO ACTIVE PROGRAM</h2></div>
+					<p>Build a custom program or choose a template to begin your progression.</p>
+					<a class="dashboard-action-link" href="<%= status.programEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { "aria-hidden": true } } }) %><span>Create your first program</span></a>
+				</article>
+			<% } %>
+		</div>
+	</section>
+<% } %>

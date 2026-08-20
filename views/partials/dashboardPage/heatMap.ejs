@@ -1,8 +1,11 @@
 <% if (heatmap.isVisible) { %>
-	<section class="heat-map-section"><h2><%= heatmap.title %></h2><div class="grid-container">
-		<div class="grid"><% heatmap.weekdays.forEach(day => { %><div class="cell"><p><%= day %></p></div><% }) %></div>
-		<% heatmap.cycles.forEach(cycle => { %><p><%= cycle.name %></p><div class="grid">
-			<% cycle.days.forEach(day => { %><% day.emptyCells.forEach(() => { %><div></div><% }) %><div class="cell <%= day.cellClass %>"><p><%= day.dateLabel %></p></div><% }) %>
-		</div><% }) %>
-	</div></section>
+	<section class="dashboard-metric dashboard-heatmap">
+		<div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">Consistency</p><h2><%= heatmap.title %></h2></div></div>
+		<div class="dashboard-heatmap__scroll"><div class="dashboard-heatmap__content">
+			<div class="dashboard-heatmap__weekdays"><% heatmap.weekdays.forEach(day => { %><span><%= day %></span><% }) %></div>
+			<% heatmap.cycles.forEach(cycle => { %><div class="dashboard-heatmap__cycle"><h3><%= cycle.name %></h3><div class="dashboard-heatmap__grid">
+				<% cycle.days.forEach(day => { %><% day.emptyCells.forEach(() => { %><span aria-hidden="true"></span><% }) %><div class="dashboard-heatmap__cell <%= day.cellClass %>" title="<%= day.dateLabel %>"><span><%= day.dateLabel %></span></div><% }) %>
+			</div></div><% }) %>
+		</div></div>
+	</section>
 <% } %>

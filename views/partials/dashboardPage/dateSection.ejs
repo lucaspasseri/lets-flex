@@ -1,10 +1,20 @@
-<nav class="date-section" aria-label="Training dates"><div class="training-day-list-container">
-	<a href="<%= dateNavigation.previousHref %>" class="previousDayArrow" aria-label="Previous day"><span aria-hidden="true">&lt;</span></a>
-	<ol><% dateNavigation.days.forEach(day => { %>
-		<li class="week-day-item <%= day.isActive ? 'active' : '' %>" <%- day.isActive ? 'aria-current="date"' : '' %>>
-			<div><span><%= day.weekdayLabel %></span><span><%= day.dayLabel %></span></div>
-			<div class="workout-session-indication-container"><ol><% day.indicators.forEach(indicator => { %><li class="<%= indicator.isInProgress ? 'indication-in-progress' : '' %>"></li><% }) %></ol></div>
-		</li>
-	<% }) %></ol>
-	<a href="<%= dateNavigation.nextHref %>" class="nextDayArrow" aria-label="Next day"><span aria-hidden="true">&gt;</span></a>
-</div></nav>
+<nav class="dashboard-calendar" aria-label="Training dates">
+	<div class="dashboard-section-heading">
+		<div><p class="dashboard-eyebrow">Schedule</p><h2>Training week</h2></div>
+		<div class="dashboard-calendar__controls">
+			<a href="<%= dateNavigation.previousHref %>" class="dashboard-calendar__arrow" aria-label="Previous day"><span aria-hidden="true">&larr;</span></a>
+			<a href="<%= dateNavigation.nextHref %>" class="dashboard-calendar__arrow" aria-label="Next day"><span aria-hidden="true">&rarr;</span></a>
+		</div>
+	</div>
+	<ol class="dashboard-calendar__rail">
+		<% dateNavigation.days.forEach(day => { %>
+			<li class="dashboard-calendar__day <%= day.isActive ? 'dashboard-calendar__day--active' : '' %>" <%- day.isActive ? 'aria-current="date"' : '' %>>
+				<span class="dashboard-calendar__weekday"><%= day.weekdayLabel %></span>
+				<span class="dashboard-calendar__date"><%= day.dayLabel %></span>
+				<ul class="dashboard-calendar__indicators" aria-label="<%= day.indicators.length %> workout sessions">
+					<% day.indicators.forEach(indicator => { %><li class="<%= indicator.isInProgress ? 'is-in-progress' : '' %>"></li><% }) %>
+				</ul>
+			</li>
+		<% }) %>
+	</ol>
+</nav>

@@ -1,23 +1,23 @@
 <article class="session-component">
 	<%- include('./header', { header: workout.header }) %>
 	<% if (workout.isEmpty) { %>
-		<div class="no-session-step-container"><p>( EMPTY )</p></div>
+		<div class="no-session-step-container"><span aria-hidden="true">—</span><p>This session has no steps yet.</p></div>
 	<% } else if (workout.showWorkoutLogs) { %>
-		<div class="workout-step-list-container"><ul><% workout.steps.forEach(step => { %>
-			<li class="workout-step-list-item"><span class="step-order"><%= step.orderLabel %></span><p class="step-name"><%= step.title %></p><div class="step-status <%= step.status %>"><%- include('../shared/components/icons/statusCircle', { status: step.status, icon: { attributes: { "aria-hidden": true } } }) %></div></li>
+		<div class="workout-step-list-container"><p class="session-section-label">Session steps</p><ul><% workout.steps.forEach(step => { %>
+			<li class="workout-step-list-item"><span class="step-order"><%= step.orderLabel %></span><p class="step-name"><%= step.title %></p><div class="step-status <%= step.status %>" aria-label="<%= step.status %>"><%- include('../shared/components/icons/statusCircle', { status: step.status, icon: { attributes: { "aria-hidden": true } } }) %></div></li>
 		<% }) %></ul></div>
 
 		<% if (workout.currentStep) { %>
-			<div class="current-workout-step-container"><div class="session-header"><div class="session-header-text"><p>CURRENT STEP</p><h3><%= workout.currentStep.title %></h3></div></div>
+			<section class="current-workout-step-container"><header><p class="session-section-label">Current step</p><h3><%= workout.currentStep.title %></h3></header>
 				<%- include("workoutLogsForm", { workoutLogForm: workout.currentStep }) %>
-			</div>
+			</section>
 		<% } else if (workout.showFinish) { %>
 			<div class="finish-workout-session-button-container"><form method="POST" action="<%= workout.finishForm.action %>"><input type="hidden" name="daysDifference" value="<%= workout.finishForm.daysDifference ?? 0 %>">
 				<%- include('../shared/components/button/button', { button: { label: "Finish session", type: "submit" } }) %>
 			</form></div>
-		<% } else if (workout.showMissingLogs) { %><div class="no-session-step-container"><p>( WORKOUT LOGS NOT CREATED )</p></div><% } %>
+		<% } else if (workout.showMissingLogs) { %><div class="no-session-step-container"><span aria-hidden="true">!</span><p>Workout logs could not be created.</p></div><% } %>
 	<% } else { %>
-		<div class="no-workout-session-container"><div class="session-step-list-container"><ul><% workout.steps.forEach(step => { %>
+		<div class="no-workout-session-container"><div class="session-step-list-container"><p class="session-section-label">Planned steps</p><ul><% workout.steps.forEach(step => { %>
 			<li><div class="session-step-list-item"><span class="step-order"><%= step.orderLabel %></span><p class="step-name"><%= step.title %></p><div class="step-status planned"><%- include('../shared/components/icons/statusCircle', { status: "planned", icon: { attributes: { "aria-hidden": true } } }) %></div></div></li>
 		<% }) %></ul></div>
 		<% if (workout.showStart) { %><div class="button-container"><form method="POST" action="<%= workout.startForm.action %>"><input type="hidden" name="daysDifference" value="<%= workout.startForm.daysDifference ?? 0 %>">
