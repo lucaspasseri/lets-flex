@@ -1,49 +1,8 @@
-
-<%
-	const { range } = locals.helpers;
-
-	const currProgram = locals?.appState?.program ?? null;
-	const currProgramId = locals?.appState?.program?.id ?? null;
-	const currProgramName = locals?.appState?.program?.name?.toUpperCase() ?? "PROGRAM"; 
-
-	const weekDayArr = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-	const heatmapArr = locals?.data?.heatmap?.items ?? [];
-%>
-
-
-<% if(currProgramId !== null) { %>
-	<div class="heat-map-section">
-		<h2><%= `${currProgramName}'S METRICS`%></h2>
-		<div class="grid-container">
-
-			<div class="grid">
-				<% weekDayArr.forEach(day => { %>
-					<div class="cell">
-						<p><%= day %></p>
-					</div>
-				<% }) %>
-			</div>
-
-			<% heatmapArr.forEach(cycle => { %>
-				<p><%= cycle.cycleName %></p>
-
-				<div class="grid">
-					<% cycle.cycleDayArr.forEach(day => { %>
-
-						<% if(day?.offset !== null && day?.offset !== 0){ %>
-							<% range(day?.offset).forEach( emptyCell => { %>
-								<div></div>
-							<% }) %>
-						<% } %>
-
-						<div class="cell <%= day?.cellClass %>">
-							<p><%= day?.currDay %></p>
-						</div>
-
-					<% }) %>
-				</div>
-			<% }) %> 
-		
-		</div>
-	</div>
+<% if (heatmap.isVisible) { %>
+	<section class="heat-map-section"><h2><%= heatmap.title %></h2><div class="grid-container">
+		<div class="grid"><% heatmap.weekdays.forEach(day => { %><div class="cell"><p><%= day %></p></div><% }) %></div>
+		<% heatmap.cycles.forEach(cycle => { %><p><%= cycle.name %></p><div class="grid">
+			<% cycle.days.forEach(day => { %><% day.emptyCells.forEach(() => { %><div></div><% }) %><div class="cell <%= day.cellClass %>"><p><%= day.dateLabel %></p></div><% }) %>
+		</div><% }) %>
+	</div></section>
 <% } %>

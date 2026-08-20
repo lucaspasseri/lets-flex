@@ -1,50 +1,10 @@
-<%
-	const daysDifference = locals?.pageState?.daysDifference ?? null; 
-	const workoutSessionId = locals?.appState?.workoutSession?.id ?? null;
-	const workoutSessionPerformedPercentage = locals.appState?.workoutSessionPerformedPercentage ?? 0; 
-	const workoutSessionArrByDay = locals?.data?.workoutSessions?.itemsByTrainingDay ?? [];
-	const currentWorkoutSession = locals?.appState?.workoutSession ?? null; 
-	const workoutSessionArr = locals.data?.workoutSessions?.items ?? [];
-%>
-
-<div class="sessions-section <%= workoutSessionArrByDay.length === 0 ? 'no-session' : '' %>">
-	<% if (workoutSessionArrByDay.length === 0) { %>
-		<h2> ( RESTING / NO-SESSION DAY )</h2>
-
-	<% } else if (workoutSessionArrByDay.length === 1) { %>
+<section class="sessions-section <%= currentWorkout.isRestDay ? 'no-session' : '' %>">
+	<% if (currentWorkout.isRestDay) { %><h2>( RESTING / NO-SESSION DAY )</h2><% } else { %>
 		<div class="sessions-container">
-				<%- include('../sessionComponent/main', {
-					sessionVm: currentWorkoutSession,
-					performedPercentage: workoutSessionPerformedPercentage,
-				}) %>
+			<% if (currentWorkout.hasMultipleSessions) { %><nav class="change-active-session-container" aria-label="Workout sessions"><ul>
+				<% currentWorkout.selectors.forEach(selector => { %><li class="<%= selector.isActive ? 'active-item' : '' %>"><a href="<%= selector.href %>" <%- selector.isActive ? 'aria-current="true"' : '' %>><span class="visually-hidden">Workout session <%= selector.id %></span></a></li><% }) %>
+			</ul></nav><% } %>
+			<%- include('../sessionComponent/main', { workout: currentWorkout.session }) %>
 		</div>
-
-	<% } else { %>
-		<div style="display: grid; grid-template-columns: 1fr; width: 100%">
-			<div class="sessions-container">
-			<div class="change-active-session-container">
-				<ul>
-					<% workoutSessionArrByDay.forEach(wSession => { %>
-						<li class="<%= wSession.id === workoutSessionId ? 'active-item' : '' %>">
-							<a href="<%= `/?daysDifference=${daysDifference}&workoutSessionId=${wSession.id}` %>"></a>
-						</li>
-					<% }) %>
-				</ul>
-			</div>
-
-			<%- include('../sessionComponent/main', {
-				sessionVm: currentWorkoutSession,
-				performedPercentage: workoutSessionPerformedPercentage,
-			}) %>
-				
-		</div>
-
-				<div class="sessions-container">
-			
-			<%- include("../shared/components/tabs/tabs", {tabs: {id: 123,label: 123, tabArr: workoutSessionArrByDay}}) %>
-				
-		</div>
-		</div>
-
 	<% } %>
-</div>
+</section>

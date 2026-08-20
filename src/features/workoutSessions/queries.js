@@ -103,7 +103,8 @@ export function findAllByProgramId() {
 		cycle.cycle_size AS cycle_size,
 		cycle.cycle_order AS cycle_order,
 		session.name AS session_name,
-		session.notes AS session_notes
+		session.notes AS session_notes,
+		session.is_archived AS is_archived
 
 
 		FROM workout_sessions AS workoutSession

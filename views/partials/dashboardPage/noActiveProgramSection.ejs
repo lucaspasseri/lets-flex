@@ -1,67 +1,8 @@
-<% 
-const { formatDate, addDays} = locals.helpers;
-const currDay = new Date();
-const activeDay = locals?.appState?.day ?? currDay;
-const formattedActiveDay = formatDate && formatDate(activeDay, "MMM dd, yyyy");
-const currWeek = addDays && [addDays(activeDay, -3), addDays(activeDay, -2), addDays(activeDay, -1), activeDay, addDays(activeDay, 1), addDays(activeDay, 2), addDays(activeDay, 3)];
-const currUserId = locals?.appState?.user?.id ?? null; 
-const currProgramId = locals?.appState?.program?.id ?? null; 
-%>
-
-<div>
-	<% if(currUserId === null || currProgramId === null){ %>
-		<div class="main-header">
-			<p>OPERATIONAL STATUS</p>
-			<h1>LETS'S FLEX</h1>
-		</div>
-
-		<div class="sync-status">
-			<div class="title-container">
-				<p class="title">TEMPORAL SYNC</p>
-				<p><%= formattedActiveDay %></p>
-			</div>
-			<div class="current-week-container">
-				<ul>
-					<% currWeek.forEach((day,index) => { %>
-						<li class="week-day-item <%= index === 3 ? 'active' : '' %>">
-							<span><%= formatDate(day, "EEE").toUpperCase() %></span> 
-							<span><%= formatDate(day, "dd") %></span> 
-						</li>
-					<% }) %>
-				</ul>
-			</div>
-		</div>
-
-		<% if(currUserId === null){ %>
-			<div class="no-active-user-container">
-			<div class="content">
-				<div class="image-container">
-					<img src="/compasso.png" width="40" height="40" alt="compasso icon" />
-				</div>
-				<h2>NO ACTIVE USER</h2>
-				<p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p>
-				<a href="/profile">
-					<%- include("../icons/plus") %>
-					<p>CREATE YOUR USER PROFILE</p>
-				</a>
-			</div>
-		</div>
-		<% } %>
-
-		<% if(currProgramId === null){ %>
-			<div class="no-active-program-container">
-				<div class="content">
-					<div class="image-container">
-						<img src="/compasso.png" width="40" height="40" alt="compasso icon" />
-					</div>
-					<h2>NO ACTIVE PROGRAM</h2>
-					<p>Your training architecture starts here. Build a custom program or choose from a professional template to begin your progression.</p>
-					<a href="/programs">
-						<%- include("../icons/plus") %>
-						<p>CREATE YOUR FIRST PROGRAM</p>
-					</a>
-				</div>
-			</div>
-		<% } %>
-	<% } %>
-</div>
+<% if (status.isVisible) { %><section aria-label="Dashboard status">
+	<div class="main-header"><p>OPERATIONAL STATUS</p><h1>LET'S FLEX</h1></div>
+	<div class="sync-status"><div class="title-container"><p class="title">TEMPORAL SYNC</p><p><%= status.dateLabel %></p></div><div class="current-week-container"><ul>
+		<% status.days.forEach(day => { %><li class="week-day-item <%= day.isCurrent ? 'active' : '' %>"><span><%= day.label %></span><span><%= day.dayLabel %></span></li><% }) %>
+	</ul></div></div>
+	<% if (status.userEmptyState.isVisible) { %><div class="no-active-user-container"><div class="content"><div class="image-container"><img src="/compasso.png" width="40" height="40" alt="Compass icon" /></div><h2>NO ACTIVE USER</h2><p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p><a href="<%= status.userEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { class: "icon", "aria-hidden": true } } }) %><p>CREATE YOUR USER PROFILE</p></a></div></div><% } %>
+	<% if (status.programEmptyState.isVisible) { %><div class="no-active-program-container"><div class="content"><div class="image-container"><img src="/compasso.png" width="40" height="40" alt="Compass icon" /></div><h2>NO ACTIVE PROGRAM</h2><p>Your training architecture starts here. Build a custom program or choose from a professional template to begin your progression.</p><a href="<%= status.programEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { class: "icon", "aria-hidden": true } } }) %><p>CREATE YOUR FIRST PROGRAM</p></a></div></div><% } %>
+</section><% } %>

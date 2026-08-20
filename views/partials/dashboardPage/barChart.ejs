@@ -1,11 +1,3 @@
-<%
-	const currProgramId = locals?.appState?.program?.id ?? null; 
-	const workoutSessionArr = locals.data?.workoutSessions?.items ?? [];
-	const {weekArr = [], scheduledCountArr =[], finishedCountArr =[]} = locals?.data?.barChart;
-%>
-
-<% if(currProgramId !== null && workoutSessionArr.length > 0) { %>
-		<div class="canvas-container" data-bar-chart-week-arr="<%= JSON.stringify(weekArr) %>" data-bar-chart-scheduled-count-arr="<%= JSON.stringify(scheduledCountArr) %>" data-bar-chart-finished-count-arr="<%= JSON.stringify(finishedCountArr) %>">
-			<canvas id="bar-chart-canvas"></canvas>
-		</div>
+<% if (barChart.isVisible) { %>
+	<div class="canvas-container" data-bar-chart-week-arr="<%= JSON.stringify(barChart.labels) %>" data-bar-chart-scheduled-count-arr="<%= JSON.stringify(barChart.scheduledCounts) %>" data-bar-chart-finished-count-arr="<%= JSON.stringify(barChart.finishedCounts) %>"><canvas id="bar-chart-canvas"></canvas></div>
 <% } %>

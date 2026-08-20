@@ -1,56 +1,34 @@
-import {
-	addDays,
-	startOfWeek,
-	differenceInCalendarDays,
-	format,
-	isSameDay,
-} from "date-fns";
+import { addDays, startOfWeek, differenceInCalendarDays, format, isSameDay } from "date-fns";
 import range from "../../../utils/range.js";
 
-function getHeatmapArr(startDate, cycleArr, workoutSessionArr) {
-	let lastCycleDayIndex = 0;
-	const heatMapArr = cycleArr.map(cycle => {
-		const cycleName = cycle.name;
-		const cycleSize = cycle.cycle_size;
+/**
+ * @param {string | Date | null} startDate
+ * @param {import("../cycles/cycles.types.js").Cycle[]} cycles
+ * @param {import("../workoutSessions/workoutSessions.types.js").WorkoutSession[]} workoutSessions
+ * @returns {Array<{cycleId: number, cycleName: string, days: Array<{date: Date, dateLabel: string, offset: number | null, intensity: "none" | "one" | "many"}>}>}
+ */
+export default function getHeatmapArr(startDate, cycles, workoutSessions) {
+	if (!startDate) return [];
 
-		const currCycleDayArr = range(cycleSize).map(index => {
-			const currDay = addDays(startDate, lastCycleDayIndex + index);
-			let offset = null;
-
-			if (index === 0) {
-				const startWeekDay = startOfWeek(currDay);
-				offset = differenceInCalendarDays(currDay, startWeekDay);
-			}
-
-			if (index === cycleSize - 1) {
-				lastCycleDayIndex += cycleSize;
-			}
-
-			const numberOfFinishedWorkoutSession = workoutSessionArr.filter(
-				ws => ws.finished_at && isSameDay(currDay, ws.finished_at),
+	let elapsedDays = 0;
+	return cycles.map(cycle => {
+		const days = range(cycle.size).map(index => {
+			const date = addDays(startDate, elapsedDays + index);
+			const finishedCount = workoutSessions.filter(
+				session => session.finishedAt && isSameDay(date, session.finishedAt),
 			).length;
 
-			const cellClass =
-				numberOfFinishedWorkoutSession === 0
-					? "no-workout-session"
-					: numberOfFinishedWorkoutSession === 1
-						? "one-workout-session"
-						: "many-workout-session";
-
+			/** @type {"none" | "one" | "many"} */
+			const intensity = finishedCount === 0 ? "none" : finishedCount === 1 ? "one" : "many";
 			return {
-				currDay: format(currDay, "dd/MM"),
-				offset,
-				cellClass,
+				date,
+				dateLabel: format(date, "dd/MM"),
+				offset: index === 0 ? differenceInCalendarDays(date, startOfWeek(date)) : null,
+				intensity,
 			};
 		});
 
-		return {
-			cycleName,
-			cycleDayArr: currCycleDayArr,
-		};
+		elapsedDays += cycle.size;
+		return { cycleId: cycle.id, cycleName: cycle.name, days };
 	});
-
-	return heatMapArr;
 }
-
-export default getHeatmapArr;

@@ -23,9 +23,10 @@ export function toWorkoutSession(row) {
 		startedAt: row.started_at ?? null,
 		finishedAt: row.finished_at ?? null,
 		notes: row.notes ?? null,
-		name: row.name,
+		name: row.name ?? row.session_name,
 		sessionNotes: row.session_notes ?? null,
 		isArchived: row.is_archived,
+		scheduledDate: row.scheduled_date ?? null,
 		steps: (row.steps ?? []).map(toWorkoutSessionStep),
 	};
 }

@@ -1,240 +1,27 @@
-<%
-const { range } = locals.helpers;
+<article class="session-component">
+	<%- include('./header', { header: workout.header }) %>
+	<% if (workout.isEmpty) { %>
+		<div class="no-session-step-container"><p>( EMPTY )</p></div>
+	<% } else if (workout.showWorkoutLogs) { %>
+		<div class="workout-step-list-container"><ul><% workout.steps.forEach(step => { %>
+			<li class="workout-step-list-item"><span class="step-order"><%= step.orderLabel %></span><p class="step-name"><%= step.title %></p><div class="step-status <%= step.status %>"><%- include('../shared/components/icons/statusCircle', { status: step.status, icon: { attributes: { "aria-hidden": true } } }) %></div></li>
+		<% }) %></ul></div>
 
-const sessionVm = locals.sessionVm ?? null;
-const performedPercentage = locals.performedPercentage ?? 0;
-const daysDifference = locals?.pageState?.daysDifference ?? null;
-
-const isTemplate = sessionVm?.type === "template";
-const isWorkout = sessionVm?.type === "workout";
-
-const workoutStatus = sessionVm?.status ?? null;
-
-const workoutWasNotStarted = isWorkout && workoutStatus === "planned";
-const workoutIsInProgress = isWorkout && workoutStatus === "in_progress";
-const workoutIsFinished = isWorkout && workoutStatus === "finished";
-
-const steps = sessionVm?.steps ?? [];
-const emptySession = steps.length === 0;
-
-const formatOrder = order => {
-	if (order === null || order === undefined) return "--";
-	return String(order).padStart(2, "0");
-};
-
-const getStepOrder = step => {
-	return (
-		step.order ??
-		step.stepOrder ??
-		step.step_order ??
-		null
-	);
-};
-
-const getStepLog = step => {
-	return (
-		step.stepLog ??
-		step.step_log ??
-		null
-	);
-};
-
-const getStepName = step => {
-	const baseName =
-		step.name ??
-		step.exerciseName ??
-		step.exercise_name ??
-		step.exerciseVariantName ??
-		step.exercise_variant_name ??
-		"Step";
-
-	const variantName =
-		step.exerciseVariantName ??
-		step.exercise_variant_name ??
-		null;
-
-	if (variantName && variantName !== baseName) {
-		return `${baseName.toUpperCase()} (${variantName})`;
-	}
-
-	return baseName.toUpperCase();
-};
-
-const normalizeWorkoutStep = step => {
-	const stepLog = getStepLog(step);
-
-	return {
-		stepId: step.id,
-
-		id: stepLog?.id ?? null,
-
-		status:
-			stepLog?.status ??
-			step.status ??
-			"planned",
-
-		order: getStepOrder(step),
-
-		name:
-			step.name ??
-			null,
-
-		exerciseVariantName:
-			step.exerciseVariantName ??
-			step.exercise_variant_name ??
-			null,
-
-		exerciseName:
-			step.exerciseName ??
-			step.exercise_name ??
-			null,
-
-		stepLog,
-	};
-};
-
-const workoutStepVmArr = steps.map(normalizeWorkoutStep);
-
-const hasWorkoutLogs = workoutStepVmArr.some(step => step.id);
-
-const currWorkoutStepLog =
-	workoutStepVmArr.find(step => step.id && step.status === "planned") ?? null;
-
-const getStatusIconHref = status => {
-
-	if (status === "planned") return "/empty-circle";
-	if (status === "performed") return "/check-circle";
-	return "/skip-circle";
-};
-
-const shouldShowStartButton =
-	isWorkout &&
-	workoutWasNotStarted &&
-	sessionVm?.id;
-
-const shouldShowFinishButton =
-	isWorkout &&
-	workoutIsInProgress &&
-	hasWorkoutLogs &&
-	!currWorkoutStepLog &&
-	sessionVm?.id;
-
-const shouldShowWorkoutLogs =
-	isWorkout &&
-	(workoutIsInProgress || workoutIsFinished) &&
-	workoutStepVmArr.length > 0;
-%>
-
-<div class="session-component">
-	<%- include('./header', {
-		sessionVm,
-		performedPercentage,
-	}) %>
-
-	<% if (!sessionVm) { %>
-
-		<div class="no-session-step-container">
-			<p>( NO SESSION )</p>
-		</div>
-
-	<% } else if (emptySession && !shouldShowWorkoutLogs) { %>
-
-		<div class="no-session-step-container">
-			<p>( EMPTY )</p>
-		</div>
-
-	<% } else if (shouldShowWorkoutLogs) { %>
-
-		<div class="workout-step-list-container">
-			<ul>
-				<% workoutStepVmArr.forEach(step => { %>
-					<li class="workout-step-list-item">
-						<span class="step-order">
-							<%= formatOrder(step.order) %>
-						</span>
-
-						<p class="step-name">
-							<%= getStepName(step) %>
-						</p>
-
-						<div class="step-status <%= step.status %>">
-							<%- include(`../icons/${getStatusIconHref(step.status)}`) %>
-						</div>
-					</li>
-				<% }) %>
-			</ul>
-		</div>
-
-		<% if (workoutIsInProgress && currWorkoutStepLog) { %>
-			<div class="current-workout-step-container">
-				<div class="session-header">
-					<div class="session-header-text">
-						<p>CURRENT STEP</p>
-
-						<h3>
-							<%= getStepName(currWorkoutStepLog) %>
-						</h3>
-					</div>
-				</div>
-				
-				<%- include("workoutLogsForm", {workoutStep: currWorkoutStepLog}) %>
+		<% if (workout.currentStep) { %>
+			<div class="current-workout-step-container"><div class="session-header"><div class="session-header-text"><p>CURRENT STEP</p><h3><%= workout.currentStep.title %></h3></div></div>
+				<%- include("workoutLogsForm", { workoutLogForm: workout.currentStep }) %>
 			</div>
-
-		<% } else if (shouldShowFinishButton) { %>
-
-			<div class="finish-workout-session-button-container">
-			
-				<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/finish">
-					<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-					<%- include('../simpleButton', { data: { text: "Finish session", type: "submit" } }); %>
-				</form>
-			</div>
-
-		<% } else if (workoutIsInProgress && !hasWorkoutLogs) { %>
-
-			<div class="no-session-step-container">
-				<p>( WORKOUT LOGS NOT CREATED )</p>
-			</div>
-
-		<% } %>
-
+		<% } else if (workout.showFinish) { %>
+			<div class="finish-workout-session-button-container"><form method="POST" action="<%= workout.finishForm.action %>"><input type="hidden" name="daysDifference" value="<%= workout.finishForm.daysDifference ?? 0 %>">
+				<%- include('../shared/components/button/button', { button: { label: "Finish session", type: "submit" } }) %>
+			</form></div>
+		<% } else if (workout.showMissingLogs) { %><div class="no-session-step-container"><p>( WORKOUT LOGS NOT CREATED )</p></div><% } %>
 	<% } else { %>
-		<div class="no-workout-session-container">
-			<div class="session-step-list-container">
-				<ul>
-					<% steps.forEach(step => { %>
-						<li>
-							<div class="session-step-list-item">
-								<span class="step-order">
-									<%= formatOrder(getStepOrder(step)) %>
-								</span>
-
-								<p class="step-name">
-									<%= getStepName(step) %>
-								</p>
-
-							
-									<div class="step-status planned">
-										<%- include("../icons/empty-circle") %>
-									</div>
-						
-							</div>
-						</li>
-					<% }) %>
-				</ul>
-			</div>
-
-			<% if (shouldShowStartButton) { %>
-				<div class="button-container">
-					<form method="POST" action="/workout_sessions/<%= sessionVm.id %>/start">
-						<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-						<button type="submit" aria-label="Start workout session">
-							<%- include("../icons/play") %>
-						</button>
-					</form>
-				</div>
-			<% } %>
-		</div>
-
+		<div class="no-workout-session-container"><div class="session-step-list-container"><ul><% workout.steps.forEach(step => { %>
+			<li><div class="session-step-list-item"><span class="step-order"><%= step.orderLabel %></span><p class="step-name"><%= step.title %></p><div class="step-status planned"><%- include('../shared/components/icons/statusCircle', { status: "planned", icon: { attributes: { "aria-hidden": true } } }) %></div></div></li>
+		<% }) %></ul></div>
+		<% if (workout.showStart) { %><div class="button-container"><form method="POST" action="<%= workout.startForm.action %>"><input type="hidden" name="daysDifference" value="<%= workout.startForm.daysDifference ?? 0 %>">
+			<%- include('../shared/components/button/button', { button: { label: "Start workout session", type: "submit", iconOnly: true, alternativeClassname: "session-start-button", renderIcon: () => include("../shared/components/icons/playCircle", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
+		</form></div><% } %></div>
 	<% } %>
-</div>
+</article>

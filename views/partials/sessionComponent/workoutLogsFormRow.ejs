@@ -1,26 +1,7 @@
-<%
-	const { stepLog = null, index = "template"} = locals;
-	const loadUnitSelectOption = [
-		{name: "Kg", value: "Kilograms"},
-		{name: "lb", value: "Libra"},
-	];
-
-	const context = `logFormRows[${index}]`
-%>
-
 <div class="form-row">
-	<div class="set-title"><%= `Set ${index + 1}` %></div>
-	<div class="set-reps">
-		<%- include('../olaInput', { data: { label: "Reps", type: "number", name: `${context}[performedReps]`, initialValue: stepLog?.plannedReps  } }); %>
-	</div>
-	<div class="set-load-value">
-		<%- include('../olaInput', { data: { label: "Load value", type: "number", name: `${context}[performedLoadValue]`, initialValue: stepLog?.plannedLoadValue  } }); %>
-	</div>
-	<div class="set-load-unit">
-			<%- include("../select", { data: { label: "Load unit", name:`${context}[performedLoadUnit]`, required: true, 
-	options: loadUnitSelectOption, getOptionLabel: (option) => option.name, getOptionValue: (option) => option.value  } }); %>
-	</div>
-	<button type="button" data-action="remove-set">
-			X
-	</button>
+	<div class="set-title"><%= row.title %></div>
+	<div class="set-reps"><%- include('../shared/components/form/field', { field: row.fields.reps }) %></div>
+	<div class="set-load-value"><%- include('../shared/components/form/field', { field: row.fields.loadValue }) %></div>
+	<div class="set-load-unit"><%- include('../shared/components/form/field', { field: row.fields.loadUnit }) %></div>
+	<%- include('../shared/components/button/button', { button: { label: "Remove set", type: "button", iconOnly: true, variant: "ghost", attributes: { "data-action": "remove-set" }, renderIcon: () => include("../shared/components/icons/close", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
 </div>

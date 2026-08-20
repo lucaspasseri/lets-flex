@@ -61,6 +61,8 @@
  * @property {string} name
  * @property {boolean} is_archived
  * @property {string} session_notes
+ * @property {string | Date | null} [scheduled_date]
+ * @property {string} [session_name]
  * @property {WorkoutSessionStepRow[]} steps
  */
 
@@ -102,6 +104,7 @@
  * @property {string} name
  * @property {string | null} sessionNotes
  * @property {boolean} isArchived
+ * @property {string | Date | null} [scheduledDate]
  * @property {WorkoutSessionStep[]} steps
  */
 

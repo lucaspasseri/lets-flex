@@ -1,87 +1,22 @@
-<%
-	const { range } = locals?.helpers ?? {};
-	const { daysDifference = null } = locals?.pageState ?? {};
-	const { workoutStep = null} = locals;
-	const stepLog = workoutStep?.stepLog ?? null
-%>
-
 <div class="logs-form-container">
-		
 	<div class="sets-container">
-		<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/perform" id="log-form">
-			<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-
-			<% stepLog?.plannedSets && range(stepLog?.plannedSets).forEach((set, index) => { %>
-				<%- include("workoutLogsFormRow", {stepLog, index}) %>
-			<% }) %>
+		<form method="POST" action="<%= workoutLogForm.performAction %>" id="log-form">
+			<input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>">
+			<% workoutLogForm.rows.forEach(row => { %><%- include("workoutLogsFormRow", { row }) %><% }) %>
 		</form>
-
-		<button type="button" id="add-form-row-button" class="form-row add-row">ADD NEW</button>
+		<%- include('../shared/components/button/button', { button: { id: "add-form-row-button", label: "Add new", type: "button", alternativeClassname: "form-row add-row" } }) %>
 	</div>
-
 	<div class="step-log-button-container">
-		<button type="submit" form="log-form">
-			<%- include("../icons/check-circle", {strokeColor: "white"}) %>
-		</button>
-
-		<form method="POST" action="/workout_step_logs/<%= workoutStep?.id %>/skip">
-			<input type="hidden" name="daysDifference" value="<%= daysDifference %>">
-			<button type="submit">
-				<%- include("../icons/skip-circle", {strokeColor: "white"}) %>
-			</button>
-		</form>
+		<%- include('../shared/components/button/button', { button: { label: "Complete step", type: "submit", iconOnly: true, attributes: { form: "log-form" }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "performed", icon: { attributes: { "aria-hidden": true } } }) } }) %>
+		<form method="POST" action="<%= workoutLogForm.skipAction %>"><input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>"><%- include('../shared/components/button/button', { button: { label: "Skip step", type: "submit", iconOnly: true, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "skipped", icon: { attributes: { "aria-hidden": true } } }) } }) %></form>
 	</div>
-
-	<template id="set-row-template">
-		<%- include("workoutLogsFormRow", {stepLog, index: "template"}) %>
-	</template>
-
-	<script>
-		const form = document.querySelector("#log-form");
-		const rowTemplate = document.querySelector("#set-row-template");
-		const addSetButton = document.querySelector("#add-form-row-button");
-
-		function reindexRows() {
-			const rows = form.querySelectorAll(".form-row");
-
-			rows.forEach((row, index) => {
-				row.querySelector(".set-title").textContent = `Set ${index + 1}`;
-
-				row.querySelectorAll("[id], [name], label[for]").forEach((element) => {
-					if (element.id) {
-						element.id = element.id.replace(/\d+|template/, index);
-					}
-
-					if (element.name) {
-						element.name = element.name.replace(/\d+|template/, index);
-					}
-
-					if (element.htmlFor) {
-						element.htmlFor = element.htmlFor.replace(/\d+|template/, index);
-					}
-				});
-			});
-		}
-
-		function addRow() {
-			const clone = rowTemplate.content.cloneNode(true);
-			form.append(clone);
-			reindexRows();
-		}
-
-		function removeRow(button) {
-			button.closest(".form-row")?.remove();
-			reindexRows();
-		}
-
-		addSetButton.addEventListener("click", addRow);
-
-		form.addEventListener("click", (event) => {
-			const removeButton = event.target.closest('[data-action="remove-set"]');
-
-			if (removeButton) {
-				removeRow(removeButton);
-			}
-		});
-	</script>
+	<template id="set-row-template"><%- include("workoutLogsFormRow", { row: workoutLogForm.templateRow }) %></template>
 </div>
+<script>
+	const form = document.querySelector("#log-form");
+	const rowTemplate = document.querySelector("#set-row-template");
+	const addSetButton = document.querySelector("#add-form-row-button");
+	function reindexRows() { form.querySelectorAll(".form-row").forEach((row, index) => { row.querySelector(".set-title").textContent = `Set ${index + 1}`; row.querySelectorAll("[id], [name], label[for]").forEach(element => { if (element.id) element.id = element.id.replace(/\d+|template/, index); if (element.name) element.name = element.name.replace(/\d+|template/, index); if (element.htmlFor) element.htmlFor = element.htmlFor.replace(/\d+|template/, index); }); }); }
+	addSetButton?.addEventListener("click", () => { form.append(rowTemplate.content.cloneNode(true)); reindexRows(); });
+	form?.addEventListener("click", event => { const button = event.target.closest('[data-action="remove-set"]'); if (button) { button.closest(".form-row")?.remove(); reindexRows(); } });
+</script>

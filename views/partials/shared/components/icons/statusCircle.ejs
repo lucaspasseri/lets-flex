@@ -1,0 +1,2 @@
+<% const shape = locals.status === "performed" ? "check-circle" : locals.status === "skipped" ? "minus-circle" : "circle"; %>
+<%- include("icon", { icon: { attributes: locals.icon?.attributes, content: include(`shapes/${shape}`) } }) %>
