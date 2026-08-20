@@ -97,7 +97,7 @@ function createModal(root) {
 	function restoreFocus() {
 		const focusTarget = isValidFocusTarget(previouslyFocusedElement)
 			? previouslyFocusedElement
-			: openTrigger;
+			: openTriggerArr[0];
 
 		focusTarget?.focus({ preventScroll: true });
 		previouslyFocusedElement = null;

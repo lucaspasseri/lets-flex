@@ -2,79 +2,29 @@
 	const { dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
 %>
 
-<main class="main day" data-day-page>
-	<div class="current-day-container session-selected" data-calendar-day-id="<%= dayHeader.dayId ?? "" %>">
+<main class="main day-page" data-day-page>
+	<header class="day-page__hero" data-calendar-day-id="<%= dayHeader.dayId ?? "" %>">
+		<p class="day-page__eyebrow">Training day</p>
 		<h1><%= dayHeader.dateLabel %></h1>
+		<p class="day-page__intro">Review the plan, link a session template, and manage this day’s workouts.</p>
+	</header>
+
+	<%- include("partials/dayPage/dayNavigation", { dayNavigation }) %>
+
+	<div class="day-page__content">
+		<%- include("partials/dayPage/sessionLinkPanel", { sessionLinkForm }) %>
+		<%- include("partials/dayPage/workoutSessionList", { workoutSessionList }) %>
 	</div>
-
-	<% if (dayNavigation.isVisible) { %>
-		<nav class="day-rail-wrapper" aria-label="Training days">
-			<% if (dayNavigation.previous) { %>
-				<a href="<%= dayNavigation.previous.href %>" class="day-arrow" data-scroll-left aria-label="Previous training day"><span>&lt;</span></a>
-			<% } %>
-			<ul class="day-rail" id="dayRail">
-				<% dayNavigation.items.forEach(day => { %>
-					<li><a href="<%= day.href %>" class="day-card <%= day.isCurrent ? "active" : "" %>"><%= day.label %></a></li>
-				<% }) %>
-			</ul>
-			<% if (dayNavigation.next) { %>
-				<a href="<%= dayNavigation.next.href %>" class="day-arrow" data-scroll-right aria-label="Next training day"><span>&gt;</span></a>
-			<% } %>
-		</nav>
-	<% } %>
-
-	<div class="link-training-day-with-session-container">
-		<% if (workoutSessionList.emptyState.isVisible) { %>
-			<div class="no-session">
-				<h2><%= workoutSessionList.emptyState.title %></h2>
-				<p><%= workoutSessionList.emptyState.description %></p>
-			</div>
-		<% } else { %>
-			<div class="at-least-one-session"><h2><%= workoutSessionList.countLabel %></h2></div>
-		<% } %>
-
-		<form action="<%= sessionLinkForm.action %>" method="<%= sessionLinkForm.method %>" class="forms">
-			<input type="hidden" name="trainingDayId" value="<%= sessionLinkForm.fields.trainingDayId ?? "" %>">
-			<%- include("partials/select", { data: {
-				...sessionLinkForm.fields.session,
-				disabled: !sessionLinkForm.isEnabled,
-				getOptionLabel: option => option.label,
-				getOptionValue: option => option.value,
-			} }) %>
-			<%- include("partials/simpleButton", { data: {
-				text: sessionLinkForm.actions.submit.label,
-				type: "submit",
-				disabled: sessionLinkForm.actions.submit.disabled,
-			} }) %>
-		</form>
-	</div>
-
-	<% if (workoutSessionList.items.length > 0) { %>
-		<div class="workout-session-list-container">
-			<ul>
-				<% workoutSessionList.items.forEach(card => { %>
-					<li><%- include("partials/session/sessionCard", { card }) %></li>
-				<% }) %>
-			</ul>
-		</div>
-	<% } %>
 </main>
 
-<script>
-	const rail = document.getElementById("dayRail");
-	const activeDay = rail?.querySelector(".day-card.active");
-	activeDay?.scrollIntoView({ behavior: "instant", inline: "center", block: "nearest" });
-	document.querySelector("[data-scroll-left]")?.addEventListener("click", () => rail.scrollBy({ left: -240, behavior: "smooth" }));
-	document.querySelector("[data-scroll-right]")?.addEventListener("click", () => rail.scrollBy({ left: 240, behavior: "smooth" }));
-</script>
-
 <%- contentFor("overlays") %>
-
 <% workoutSessionList.cancelModals.forEach(cancelModal => { %>
-	<%- include("partials/basicModal", { modal: {
+	<%- include("partials/shared/components/modal/modal", { modal: {
 		id: cancelModal.id,
 		title: cancelModal.title,
-		description: "",
-		renderContent: () => include("partials/deleteSessionWorkoutForm", { form: cancelModal.form }),
+		renderContent: () => include("partials/deleteSessionWorkoutForm", { form: cancelModal.form, modalId: cancelModal.id }),
 	} }) %>
 <% }) %>
+
+<%- contentFor("scripts") %>
+<script type="module" src="/js/pages/day/index.js"></script>

@@ -1,25 +1,29 @@
-<header class="session-card-header">
-	<div>
-		<h2 class="session-card-title">
+<header class="workout-card__header">
+	<div class="workout-card__heading">
+		<h3 class="workout-card__title">
 			<%= header.title %>
-		</h2>
+		</h3>
 
 		<% if (header.notes) { %>
-			<p class="session-card-notes">
+			<p class="workout-card__notes">
 				<%= header.notes %>
 			</p>
 		<% } %>
 	</div>
 
 	<% if (header.statusLabel) { %>
-		<span class="session-card-status">
+		<span class="workout-card__status workout-card__status--<%= header.statusLabel %>">
 			<%= header.statusLabel %>
 		</span>
 	<% } %>
 
-	<div class="settings">
-		<button type="button" class="button" data-modal-open="<%= header.modalId %>" aria-label="<%= header.deleteActionLabel %>">
-			<%- include("../icons/trash",  {strokeColor: "black"}) %>
-		</button>
-	</div>
+	<%- include("../shared/components/button/button", { button: {
+		type: "button",
+		label: header.deleteActionLabel,
+		variant: "ghost",
+		iconOnly: true,
+		alternativeClassname: "workout-card__delete",
+		attributes: { "data-modal-open": header.modalId },
+		renderIcon: () => include("../icons/trash"),
+	} }) %>
 </header>

@@ -49,6 +49,7 @@ function toStepViewModel(step) {
 
 	return {
 		id: step.id,
+		orderLabel: String(step.order).padStart(2, "0"),
 		title: `${title}:`,
 		prescriptionLabel: `${step.sets} sets × ${step.reps} reps`,
 		loadLabel: hasLoad ? [step.loadValue, step.loadUnit].filter(Boolean).join(" ") : null,

@@ -1,25 +1,27 @@
 
 
-<li class="step-item">
-	<div class="step-item-main">
-		<strong class="step-item-title">
+<li class="workout-step">
+	<div class="workout-step__order" aria-hidden="true"><%= step.orderLabel %></div>
+	<div class="workout-step__content">
+		<div class="workout-step__main">
+		<strong class="workout-step__title">
 			<%= step.title %>
 		</strong>
 
-		<span class="step-item-meta">
+		<span class="workout-step__prescription">
 			<%= step.prescriptionLabel %>
 		</span>
 
 		<% if (step.loadLabel) { %>
-			<span class="step-item-load">
+			<span class="workout-step__load">
 				<%= step.loadLabel %>
 			</span>
 		<% } %>
-	</div>
-
-	<div class="step-item-details">
+		</div>
+	<div class="workout-step__details">
 		<% step.details.forEach(detail => { %>
 			<span><%= detail %></span>
 		<% }) %>
+	</div>
 	</div>
 </li>

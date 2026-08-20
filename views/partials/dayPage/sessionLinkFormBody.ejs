@@ -1,0 +1,9 @@
+<input type="hidden" name="trainingDayId" value="<%= sessionLinkForm.fields.trainingDayId ?? "" %>">
+<%- include("../shared/components/form/field", { field: {
+	...sessionLinkForm.fields.session,
+	control: "select",
+	disabled: !sessionLinkForm.isEnabled,
+	hint: sessionLinkForm.isEnabled
+		? "Only active session templates are shown."
+		: "Select a training day and create an active template first.",
+} }) %>

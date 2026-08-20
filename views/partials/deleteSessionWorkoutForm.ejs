@@ -1,10 +1,11 @@
-<form
-  id="deleteSessionForm"
-	method="<%= form.method %>"
-  action="<%= form.action %>"
-	class="forms"
->
-  <p>Are you sure?</p>
-	<input type="hidden" name="trainingDayId" value="<%= form.trainingDayId ?? "" %>">
-  <%- include("simpleButton", { data: { text: form.submitLabel, type: "submit" } }) %>
-</form>
+<%- include("shared/components/form/form", { form: {
+	action: form.action,
+	method: form.method,
+	heading: "Cancel this workout session?",
+	description: "You can link the template again later if plans change.",
+	attributes: { "data-cancel-workout-form": true },
+	slots: {
+		body: include("dayPage/cancelWorkoutSessionFormBody", { form }),
+		footer: include("dayPage/cancelWorkoutSessionFormFooter", { form, modalId: locals.modalId }),
+	},
+} }) %>

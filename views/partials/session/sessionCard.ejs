@@ -1,5 +1,5 @@
-<article class="session-card session-card-<%= card.type %>">
+<article class="workout-card workout-card--<%= card.type %>">
 	<%- include("./sessionHeader", { header: card.header }) %>
-	<p>SESSION STEPS</p>
+	<p class="workout-card__section-label">Session steps</p>
 	<%- include("./stepList", { steps: card.steps }) %>
 </article>

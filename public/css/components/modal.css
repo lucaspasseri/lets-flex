@@ -1,3 +1,7 @@
+.modal[hidden] {
+	display: none;
+}
+
 .modal {
 	--modal-content-padding: 0.6em;
 	position: fixed;
