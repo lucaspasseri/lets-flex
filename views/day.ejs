@@ -1,14 +1,13 @@
 <%
-const currDayId = locals?.appState?.day?.id ?? null;
-const trainingDayArr = locals?.data?.days?.items ?? [];
-const sessionArr = locals?.data?.sessions?.notArchivedItems ?? [];
-const workoutSessionArr = locals?.data?.workoutSessions?.notCancelledItems ?? [];
+const currDayId = null
+const trainingDayArr = []
+const sessionArr = []
+const workoutSessionArr = []
 
 const backUrl = locals.page?.backUrl ?? "";
-const { formatDate, addDays } = locals.helpers;
 
-const currProgram = locals?.appState?.program ?? {};
-const currTrainingDay = locals?.appState?.day ?? null;
+const currProgram = null
+const currTrainingDay = null
 
 const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "Date outside the programs's boundaries";
 

@@ -15,7 +15,7 @@
  * Row returned by the Programs-page training-day query.
  *
  * @typedef {object} ProgramTrainingDayRow
- * @property {number} training_day_id
+ * @property {TrainingDayRow["id"]} id
  * @property {CycleRow["id"]} cycle_id
  * @property {CycleRow["program_id"]} program_id
  * @property {CycleRow["cycle_order"]} cycle_order
@@ -28,7 +28,7 @@
  * Application representation of a training day.
  *
  * @typedef {object} TrainingDay
- * @property {number} id
+ * @property {TrainingDayRow["id"]} id
  * @property {CycleRow["id"]} cycleId
  * @property {CycleRow["program_id"]} programId
  * @property {CycleRow["cycle_order"]} cycleOrder

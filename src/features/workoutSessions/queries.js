@@ -44,7 +44,9 @@ export function findAll() {
 									json_agg(
 										json_build_object(
 											'common_name', m.common_name,
-											'scientific_name', m.scientific_name
+											'scientific_name', m.scientific_name,
+											'body_region', m.body_region,
+											'reference_url', m.reference_url
 										)
 									),
 									'[]'
