@@ -16,43 +16,41 @@
 .brand-mark__halo {
 	fill: none;
 	stroke: url(#brand-ring);
-	stroke-width: 13;
-	opacity: 0.16;
+	stroke-width: 12;
+	opacity: 0.14;
 	filter: url(#brand-soft-glow);
 }
 
 .brand-mark__arm {
+	fill: rgb(255 255 255 / 3%);
+	stroke-width: 3.5;
 	stroke-linecap: round;
 	stroke-linejoin: round;
+	filter: url(#brand-arm-glow);
 }
 
-.brand-mark__arm--red {
-	fill: rgb(255 49 88 / 14%);
-	stroke: #ff3158;
-	stroke-width: 3;
-	filter: url(#brand-red-glow);
+.brand-mark__arm--red { stroke: #ff3158; }
+.brand-mark__arm--blue { stroke: #32c7ff; }
+
+.brand-mark__forearm {
+	transform-box: view-box;
+	transform-origin: 43px 128px;
 }
 
-.brand-mark__arm--blue {
-	fill: rgb(50 199 255 / 14%);
-	stroke: #32c7ff;
-	stroke-width: 3;
-	filter: url(#brand-blue-glow);
+.brand-mark__elbow {
+	fill: #0d1420;
+	stroke-width: 3.5;
 }
 
 .brand-mark__arm-detail {
 	fill: none;
 	stroke-width: 2;
-	opacity: 0.65;
-}
-
-.brand-mark__fist {
-	stroke-width: 3;
+	opacity: 0.72;
 }
 
 .brand-mark__core {
 	fill: url(#brand-core);
-	stroke: rgb(255 255 255 / 10%);
+	stroke: rgb(255 255 255 / 12%);
 	stroke-width: 1;
 }
 
@@ -62,75 +60,59 @@
 	filter: url(#brand-soft-glow);
 }
 
-.brand-mark__ring--outer {
-	stroke-width: 3.5;
-}
-
-.brand-mark__ring--inner {
-	stroke-width: 1;
-	opacity: 0.45;
-}
-
-.brand-mark__lettering {
-	filter: url(#brand-soft-glow);
-}
+.brand-mark__ring--outer { stroke-width: 3.5; }
+.brand-mark__ring--inner { stroke-width: 1; opacity: 0.42; }
+.brand-mark__lettering { filter: url(#brand-soft-glow); }
 
 .brand-mark__kicker,
-.brand-mark__word,
-.brand-mark__caption {
+.brand-mark__word {
 	font-family: "Trebuchet MS", Arial, sans-serif;
 	fill: #f7fbff;
 }
 
 .brand-mark__kicker {
-	font-size: 15px;
+	font-size: 13px;
 	font-weight: 700;
-	letter-spacing: 5px;
+	letter-spacing: 4px;
 }
 
 .brand-mark__word {
 	fill: url(#brand-word);
-	font-size: 42px;
+	font-size: 38px;
 	font-weight: 900;
-	letter-spacing: 1px;
+	letter-spacing: 0.5px;
 }
 
-.brand-mark__caption {
-	fill: #a9bed2;
-	font-size: 7px;
-	font-weight: 700;
-	letter-spacing: 2.5px;
-}
-
-.brand-mark__bar,
-.brand-mark__plate {
+.brand-mark__underline {
 	fill: none;
 	stroke: url(#brand-ring);
-	stroke-linecap: round;
 	stroke-width: 3;
-}
-
-.brand-mark__plate {
-	stroke-width: 2.5;
+	stroke-linecap: round;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-	.page-header__home:hover .brand-mark__ring--outer {
-		animation: brand-neon-pulse 1.5s ease-in-out infinite alternate;
+	.brand-mark__forearm {
+		animation: brand-forearm-flex 5.6s steps(3, end) infinite;
 	}
 
-	.page-header__home:hover .brand-mark__arm--red,
-	.page-header__home:hover .brand-mark__arm--blue {
-		animation: brand-arm-glow 900ms ease-in-out alternate;
+	.page-header__home:hover .brand-mark__ring--outer,
+	.page-header__home:focus-visible .brand-mark__ring--outer {
+		animation: brand-neon-pulse 900ms steps(3, end) infinite alternate;
 	}
+}
+
+/* The elbow is fixed; three angular steps mimic a switched neon animation. */
+@keyframes brand-forearm-flex {
+	0%, 38% { transform: rotate(0deg); }
+	46%, 88% { transform: rotate(90deg); }
+	96%, 100% { transform: rotate(0deg); }
 }
 
 @keyframes brand-neon-pulse {
-	from { opacity: 0.76; }
+	from { opacity: 0.72; }
 	to { opacity: 1; }
 }
 
-@keyframes brand-arm-glow {
-	from { opacity: 0.76; }
-	to { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+	.brand-mark__forearm { transform: rotate(90deg); }
 }

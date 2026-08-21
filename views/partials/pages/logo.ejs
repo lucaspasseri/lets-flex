@@ -1,56 +1,30 @@
 <div class="brand-mark">
-	<svg
-		class="brand-mark__svg"
-		viewBox="0 0 240 240"
-		aria-hidden="true"
-		focusable="false"
-	>
+	<svg class="brand-mark__svg" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
 		<defs>
-			<linearGradient
-				id="brand-ring"
-				x1="38"
-				y1="54"
-				x2="202"
-				y2="194"
-				gradientUnits="userSpaceOnUse"
-			>
+			<linearGradient id="brand-ring" x1="50" y1="55" x2="190" y2="185" gradientUnits="userSpaceOnUse">
 				<stop offset="0" stop-color="#ff3158" />
-				<stop offset="0.48" stop-color="#f5f7ff" />
+				<stop offset="0.5" stop-color="#f8fbff" />
 				<stop offset="1" stop-color="#32c7ff" />
 			</linearGradient>
-			<linearGradient
-				id="brand-word"
-				x1="70"
-				y1="0"
-				x2="174"
-				y2="0"
-				gradientUnits="userSpaceOnUse"
-			>
-				<stop offset="0" stop-color="#ff8097" />
+			<linearGradient id="brand-word" x1="78" y1="0" x2="164" y2="0" gradientUnits="userSpaceOnUse">
+				<stop offset="0" stop-color="#ff8ba0" />
 				<stop offset="0.5" stop-color="#ffffff" />
-				<stop offset="1" stop-color="#79dcff" />
+				<stop offset="1" stop-color="#82e1ff" />
 			</linearGradient>
-			<radialGradient id="brand-core" cx="50%" cy="43%" r="58%">
-				<stop offset="0" stop-color="#203754" stop-opacity="0.78" />
-				<stop offset="0.55" stop-color="#101727" stop-opacity="0.94" />
-				<stop offset="1" stop-color="#080b13" />
+			<radialGradient id="brand-core" cx="50%" cy="42%" r="62%">
+				<stop offset="0" stop-color="#243b59" stop-opacity="0.82" />
+				<stop offset="0.58" stop-color="#101827" stop-opacity="0.96" />
+				<stop offset="1" stop-color="#070a11" />
 			</radialGradient>
-			<filter id="brand-red-glow" x="-80%" y="-80%" width="260%" height="260%">
-				<feGaussianBlur stdDeviation="4" result="blur" />
-				<feMerge>
-					<feMergeNode in="blur" />
-					<feMergeNode in="SourceGraphic" />
-				</feMerge>
-			</filter>
-			<filter id="brand-blue-glow" x="-80%" y="-80%" width="260%" height="260%">
-				<feGaussianBlur stdDeviation="4" result="blur" />
+			<filter id="brand-arm-glow" x="-80%" y="-80%" width="260%" height="260%">
+				<feGaussianBlur stdDeviation="3.5" result="blur" />
 				<feMerge>
 					<feMergeNode in="blur" />
 					<feMergeNode in="SourceGraphic" />
 				</feMerge>
 			</filter>
 			<filter id="brand-soft-glow" x="-50%" y="-50%" width="200%" height="200%">
-				<feGaussianBlur stdDeviation="7" result="blur" />
+				<feGaussianBlur stdDeviation="5" result="blur" />
 				<feMerge>
 					<feMergeNode in="blur" />
 					<feMergeNode in="SourceGraphic" />
@@ -58,82 +32,37 @@
 			</filter>
 		</defs>
 
-		<circle class="brand-mark__halo" cx="120" cy="126" r="92" />
+		<circle class="brand-mark__halo" cx="120" cy="120" r="76" />
 
-		<!-- Raised left arm: fist, forearm, elbow and flexed bicep. -->
+		<!-- The forearm rotates around the elbow while the upper arm stays anchored. -->
 		<g class="brand-mark__arm brand-mark__arm--red">
-			<path
-				d="M58 181 C43 176 32 164 29 149 C26 134 31 120 44 109 L51 103 L51 65 H68 V104 C80 104 91 110 98 120 C105 130 107 141 104 151 C98 145 91 142 84 143 C75 144 69 150 67 158 C77 162 90 159 101 151 L104 169 C92 181 74 187 58 181 Z"
-			/>
-			<path
-				class="brand-mark__arm-detail"
-				d="M47 111 C56 107 66 107 75 111 M67 158 C76 164 89 162 98 156 M77 115 C86 118 92 124 96 132"
-			/>
-			<path
-				class="brand-mark__fist"
-				d="M51 67 L46 62 C43 59 43 54 46 51 L49 49 V45 C49 41 52 39 56 40 C58 36 64 36 67 40 C71 38 76 41 76 45 C80 46 82 50 80 54 L78 59 C77 64 73 67 68 69 H56 C54 69 52 68 51 67 Z"
-			/>
-			<path
-				class="brand-mark__arm-detail brand-mark__knuckles"
-				d="M56 41 V49 M67 41 V49 M76 46 L74 53 M48 51 C55 50 63 52 68 57"
-			/>
+			<path class="brand-mark__upper-arm" d="M79 112 C67 108 55 111 43 120 L40 128 L44 136 C56 145 68 146 79 140 Z" />
+			<path class="brand-mark__arm-detail" d="M48 121 C58 116 68 117 76 122" />
+			<g class="brand-mark__forearm">
+				<path d="M46 118 C35 116 26 116 18 119 L12 116 L6 122 L9 128 L6 134 L12 140 L18 137 C27 140 36 140 46 137 Z" />
+				<path class="brand-mark__arm-detail" d="M17 120 L20 128 L17 136 M25 123 H42" />
+			</g>
+			<circle class="brand-mark__elbow" cx="43" cy="128" r="9" />
 		</g>
 
-		<!-- The blue arm mirrors the red arm. -->
-		<g
-			class="brand-mark__arm brand-mark__arm--blue"
-			transform="translate(240 0) scale(-1 1)"
-		>
-			<path
-				d="M58 181 C43 176 32 164 29 149 C26 134 31 120 44 109 L51 103 L51 65 H68 V104 C80 104 91 110 98 120 C105 130 107 141 104 151 C98 145 91 142 84 143 C75 144 69 150 67 158 C77 162 90 159 101 151 L104 169 C92 181 74 187 58 181 Z"
-			/>
-			<path
-				class="brand-mark__arm-detail"
-				d="M47 111 C56 107 66 107 75 111 M67 158 C76 164 89 162 98 156 M77 115 C86 118 92 124 96 132"
-			/>
-			<path
-				class="brand-mark__fist"
-				d="M51 67 L46 62 C43 59 43 54 46 51 L49 49 V45 C49 41 52 39 56 40 C58 36 64 36 67 40 C71 38 76 41 76 45 C80 46 82 50 80 54 L78 59 C77 64 73 67 68 69 H56 C54 69 52 68 51 67 Z"
-			/>
-			<path
-				class="brand-mark__arm-detail brand-mark__knuckles"
-				d="M56 41 V49 M67 41 V49 M76 46 L74 53 M48 51 C55 50 63 52 68 57"
-			/>
+		<g class="brand-mark__arm brand-mark__arm--blue" transform="translate(240 0) scale(-1 1)">
+			<path class="brand-mark__upper-arm" d="M79 112 C67 108 55 111 43 120 L40 128 L44 136 C56 145 68 146 79 140 Z" />
+			<path class="brand-mark__arm-detail" d="M48 121 C58 116 68 117 76 122" />
+			<g class="brand-mark__forearm">
+				<path d="M46 118 C35 116 26 116 18 119 L12 116 L6 122 L9 128 L6 134 L12 140 L18 137 C27 140 36 140 46 137 Z" />
+				<path class="brand-mark__arm-detail" d="M17 120 L20 128 L17 136 M25 123 H42" />
+			</g>
+			<circle class="brand-mark__elbow" cx="43" cy="128" r="9" />
 		</g>
 
-		<circle class="brand-mark__core" cx="120" cy="126" r="76" />
-		<circle
-			class="brand-mark__ring brand-mark__ring--outer"
-			cx="120"
-			cy="126"
-			r="80"
-		/>
-		<circle
-			class="brand-mark__ring brand-mark__ring--inner"
-			cx="120"
-			cy="126"
-			r="72"
-		/>
+		<circle class="brand-mark__core" cx="120" cy="120" r="63" />
+		<circle class="brand-mark__ring brand-mark__ring--outer" cx="120" cy="120" r="67" />
+		<circle class="brand-mark__ring brand-mark__ring--inner" cx="120" cy="120" r="59" />
 
 		<g class="brand-mark__lettering">
-			<text class="brand-mark__kicker" x="120" y="104" text-anchor="middle">
-				LET'S
-			</text>
-			<text class="brand-mark__word" x="120" y="143" text-anchor="middle">
-				FLEX
-			</text>
-			<path class="brand-mark__bar" d="M76 153 H164" />
-			<path
-				class="brand-mark__plate brand-mark__plate--left"
-				d="M67 148 V158 M72 146 V160"
-			/>
-			<path
-				class="brand-mark__plate brand-mark__plate--right"
-				d="M173 148 V158 M168 146 V160"
-			/>
-			<text class="brand-mark__caption" x="120" y="174" text-anchor="middle">
-				TRAIN • GROW
-			</text>
+			<text class="brand-mark__kicker" x="120" y="105" text-anchor="middle">LET'S</text>
+			<text class="brand-mark__word" x="120" y="142" text-anchor="middle">FLEX</text>
+			<path class="brand-mark__underline" d="M82 151 H158" />
 		</g>
 	</svg>
 </div>
