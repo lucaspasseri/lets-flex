@@ -1,32 +1,30 @@
 <%
-	const username =
-		locals?.shell?.currentUser?.name ??
-		locals?.appState?.users?.current?.name ??
-		locals?.appState?.user?.name ??
-		"Guest";
+	const username = locals?.shell?.currentUser?.name ?? "Guest";
+	const profileAccessibleLabel = locals?.shell?.currentUser
+		? `Choose profile. Current profile: ${username}`
+		: "Choose a profile";
 %>
 
 <header class="page-header">
-	<div class="logoContainer">
-		<a href="/"> <%- include('logo'); %> </a>
-	</div>
-	<button
-		type="button"
-		class="avatar-container"
-		data-modal-open="resetUserSessionModalId"
+	<a class="page-header__home" href="/" aria-label="Let's Flex home">
+		<%- include("logo"); %>
+	</a>
+	<a
+		class="page-header__profile"
+		href="/profile"
+		aria-label="<%= profileAccessibleLabel %>"
+		title="<%= profileAccessibleLabel %>"
 	>
-		<div class="avatar">
+		<span class="page-header__avatar" aria-hidden="true">
 			<%- include("../shared/components/icons/guestUser", {icon: {
-						attributes: {
+				attributes: {
 						"stroke-width": 3,
-						width: 40,
-						height: 40
+						"aria-hidden": "true",
+						focusable: "false"
 					}
-				}}) 
+				}})
 			%>
-	</div>
-		<div class="avatar-name">
-			<p><%= username %></p>
-		</div>
-	</button>
+		</span>
+		<span class="page-header__username"><%= username %></span>
+	</a>
 </header>

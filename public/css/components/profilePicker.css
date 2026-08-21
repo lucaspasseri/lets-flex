@@ -38,6 +38,14 @@
 	line-height: 1.55;
 }
 
+.profile-picker__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.5rem;
+	flex: 0 0 auto;
+}
+
 .profile-picker__list {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, var(--profile-card-width));
@@ -176,5 +184,5 @@
 
 @media (max-width: 28rem) {
 	.profile-picker__header { align-items: stretch; flex-direction: column; }
-	.profile-picker__header .shared-button { align-self: flex-start; }
+	.profile-picker__actions { justify-content: flex-start; flex-wrap: wrap; }
 }

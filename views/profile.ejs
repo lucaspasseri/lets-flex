@@ -1,5 +1,6 @@
 <%
-	const { profilePicker, createUserForm } = locals.components;
+		const { profilePicker, createUserForm } = locals.components;
+		const { clearSelectionAction } = profilePicker;
 %>
 
 <main class="main profile">
@@ -18,4 +19,18 @@
 			footer: include("partials/profilePage/createUserForm/createUserFormFooter", { createUserForm })
 		}
 	}})
-} }) %>
+	} }) %>
+
+<% if (clearSelectionAction.isVisible) { %>
+	<%- include("partials/shared/components/modal/modal", { modal: {
+		id: clearSelectionAction.modal.id,
+		title: clearSelectionAction.modal.title,
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", { form: {
+			...clearSelectionAction.form,
+			slots: {
+				footer: include("partials/profilePage/clearProfileSelectionFormFooter", { clearSelectionAction })
+			}
+		}})
+	} }) %>
+<% } %>

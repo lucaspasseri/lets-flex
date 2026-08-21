@@ -42,6 +42,9 @@ test("profile page exposes its template-boundary contract", () => {
 	]);
 	assert.equal(result.shell.currentUser, users[1]);
 	assert.equal(result.components.profilePicker.items[1].isCurrent, true);
+	assert.equal(result.components.profilePicker.clearSelectionAction.isVisible, true);
+	assert.equal(result.components.profilePicker.clearSelectionAction.form.action, "/profile/clear-selection");
+	assert.match(result.components.profilePicker.clearSelectionAction.form.description, /No programs, sessions, or workout history will be deleted/);
 	assert.equal(result.components.createUserForm.form.action, "/users");
 	assert.equal("layout" in result, false);
 });
@@ -54,8 +57,9 @@ test("profile template renders populated and empty picker states", async () => {
 	const contentFor = name => `<!-- section:${name} -->`;
 
 	for (const data of [
-		{ currentUser: users[1], users },
-		{ currentUser: null, users: [] },
+		{ currentUser: users[1], users, showsGuestAction: true },
+		{ currentUser: null, users, showsGuestAction: false },
+		{ currentUser: null, users: [], showsGuestAction: false },
 	]) {
 		const viewModel = createProfilePageViewModel({
 			page,
@@ -69,5 +73,7 @@ test("profile template renders populated and empty picker states", async () => {
 
 		assert.match(html, /class="profile-picker"/);
 		assert.match(html, /create-user-form/);
+		assert.equal(html.includes("clear-profile-selection-modal"), data.showsGuestAction);
+		assert.equal(html.includes("Use as guest"), data.showsGuestAction);
 	}
 });

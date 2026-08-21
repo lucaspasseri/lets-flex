@@ -5,22 +5,7 @@
 		<%- include('../partials/pages/header'); %>
 		<div class="content" data-page-content><%- body %></div>
 		<%- include('../partials/pages/footer'); %>
-		<div class="overlays">	
-		<%- include("../partials/shared/components/modal/modal", { modal: { 
-			id: "resetUserSessionModalId", 
-			title: "Reset User Session", 
-			showTitle: false,
-			renderContent: () => include("../partials/shared/components/form/form", { form: {
-				id: "resetUserForm",
-				heading: "Reset User Session",
-				description: "Reset profile selection",
-				action: "/users/clear-session",
-				slots: {
-					footer: include("../partials/pages/resetUserSessionFormFooter", { modalId: "resetUserSessionModalId" })
-				}}})
-			}})
-		%>
-		<%- defineContent("overlays") %></div>
+		<div class="overlays"><%- defineContent("overlays") %></div>
 
 		<%- include("../partials/pages/scripts") %>
 		<%- defineContent("scripts") %>

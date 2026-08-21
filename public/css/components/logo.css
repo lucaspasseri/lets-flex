@@ -114,25 +114,13 @@
 	stroke-width: 2.5;
 }
 
-.page-header .logoContainer a {
-	display: block;
-	width: 100%;
-	height: 100%;
-	border-radius: 50%;
-}
-
-.page-header .logoContainer a:focus-visible {
-	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
-	outline-offset: 4px;
-}
-
 @media (prefers-reduced-motion: no-preference) {
-	.page-header .logoContainer:hover .brand-mark__ring--outer {
+	.page-header__home:hover .brand-mark__ring--outer {
 		animation: brand-neon-pulse 1.5s ease-in-out infinite alternate;
 	}
 
-	.page-header .logoContainer:hover .brand-mark__arm--red,
-	.page-header .logoContainer:hover .brand-mark__arm--blue {
+	.page-header__home:hover .brand-mark__arm--red,
+	.page-header__home:hover .brand-mark__arm--blue {
 		animation: brand-arm-glow 900ms ease-in-out alternate;
 	}
 }

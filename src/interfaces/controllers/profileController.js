@@ -42,6 +42,19 @@ async function show(req, res) {
 	res.render("profile", profile);
 }
 
+/**
+ * Clears only the active profile selection and preserves other session state.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ */
+function clearSelection(req, res) {
+	// @ts-ignore
+	delete req.session.state.userId;
+	res.redirect("/profile");
+}
+
 export const profileController = {
 	show: asyncHandler(show),
+	clearSelection,
 };

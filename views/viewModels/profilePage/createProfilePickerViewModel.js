@@ -6,6 +6,8 @@
  * @param {{currentUserId: User["id"] | null, users: User[]}} input
  */
 export default function createProfilePickerViewModel({ currentUserId, users }) {
+	const currentUser = users.find(user => user.id === currentUserId) ?? null;
+
 	return {
 		id: "profile-picker",
 		eyebrow: "Profiles",
@@ -35,6 +37,32 @@ export default function createProfilePickerViewModel({ currentUserId, users }) {
 			accessibleLabel: "Create a new profile",
 			modalId: "createUserModal",
 			icon: "plus",
+		},
+		clearSelectionAction: {
+			isVisible: currentUser !== null,
+			label: "Use as guest",
+			accessibleLabel: currentUser
+				? `Stop using ${currentUser.name}'s profile and use the app as a guest`
+				: "Use the app as a guest",
+			modal: {
+				id: "clear-profile-selection-modal",
+				title: "Use the app without a profile?",
+			},
+			form: {
+				id: "clear-profile-selection-form",
+				action: "/profile/clear-selection",
+				method: "POST",
+				heading: "Use the app without a profile?",
+				description: currentUser
+					? `${currentUser.name} will no longer be the active profile on this device. No programs, sessions, or workout history will be deleted.`
+					: "No active profile will be used on this device.",
+				actions: {
+					cancel: {
+						label: currentUser ? `Keep ${currentUser.name} active` : "Cancel",
+					},
+					submit: { label: "Use as guest" },
+				},
+			},
 		},
 	};
 }
