@@ -1,14 +1,7 @@
-document.addEventListener("click", event => {
-	const button = event.target.closest(
-		"[data-modal-open='deleteExerciseModal']",
-	);
-	if (!button) return;
-
-	const modalId = button.dataset.modalOpen;
-	const modal = document.getElementById(modalId);
-
-	const exerciseId = button.dataset.exerciseId;
-
-	const form = modal?.querySelector("form") ?? {};
-	form.action = `/exerciseTemplates/${exerciseId}?_method=DELETE`;
-});
+export function initializeDeleteExerciseForm(root, form) {
+	root.addEventListener("click", event => {
+		const button = event.target.closest("[data-exercise-id]");
+		if (!button) return;
+		form.action = `/exerciseTemplates/${button.dataset.exerciseId}?_method=DELETE`;
+	});
+}

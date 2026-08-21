@@ -1,26 +1,12 @@
-<%
-	const currProgram = locals?.appState?.program ?? null;
-	const currTrainingDay = locals?.appState?.trainingDay ?? null;
-	const cycleArr = locals.data?.cycles?.items ?? [];
-	const filteredCycleArr = cycleArr.filter(cycle => cycle.id === currTrainingDay?.cycle_id);
-	const currCycle = filteredCycleArr.length > 0 ? filteredCycleArr[0] : null;
-%>
-
-<% if( currTrainingDay !== null){ %>
-	<div class="program-banner-container">
-		<p>CURRENT PROGRAM</p>
-		<h1><%= currProgram.name %></h1>
+<header class="dashboard-program <%= programBanner.isOutsideProgram ? 'dashboard-program--outside' : '' %>">
+	<div class="dashboard-program__primary">
+		<p class="dashboard-eyebrow">Current program</p>
+		<h1><%= programBanner.isOutsideProgram ? "Outside the scope of the program" : programBanner.programName %></h1>
 	</div>
-<% } else { %>
-	<div class="outside-scope-banner-container">
-		<p>CURRENT PROGRAM</p>
-		<h1>Outside the scope of the program</h1>
-	</div>
-<% } %>
-
-<% if( currCycle !== null){ %>
-	<div class="cycle-banner-container">
-		<p>CURRENT CYCLE</p>
-		<h1><%= currCycle?.name %></h1>
-	</div>
-<% } %>
+	<% if (programBanner.cycleName) { %>
+		<div class="dashboard-program__cycle">
+			<p class="dashboard-eyebrow">Current cycle</p>
+			<p class="dashboard-program__cycle-name"><%= programBanner.cycleName %></p>
+		</div>
+	<% } %>
+</header>

@@ -15,3 +15,5 @@
  * @typedef {object} LocalsProfilePageState
  * @property {User["id"] | null} userId
  */
+
+export {};

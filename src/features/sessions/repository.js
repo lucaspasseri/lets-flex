@@ -7,6 +7,11 @@ import * as queries from "./queries.js";
  * @typedef {import("./sessions.types.js").SessionRow} SessionRow
  */
 
+/**
+ * @param {*} db
+ * @returns {Promise<SessionRow[]>}
+ */
+
 export async function findAll(db = pool) {
 	const { rows } = await db.query(queries.findAllQuery());
 	return rows;

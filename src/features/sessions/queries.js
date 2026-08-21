@@ -25,11 +25,12 @@ export function findAllQuery() {
 										'movement_pattern_name', mp.name,
 										'equipment_name', eq.name,
 										'equipment_category', eq.category,
-										'muscles', (
-											SELECT COALESCE(
-												json_agg(
-													json_build_object(
-														'common_name', m.common_name,
+								'muscles', (
+									SELECT COALESCE(
+										json_agg(
+											json_build_object(
+												'id', m.id,
+												'common_name', m.common_name,
 														'scientific_name', m.scientific_name,
 														'body_region', m.body_region,
 														'reference_url', m.reference_url

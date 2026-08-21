@@ -1,7 +1,7 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getLibraryPageData from "../../features/library/getLibraryPageData.js";
-import createLibraryPageViewModel from "../../features/library/createLibraryPageViewModel.js";
+import createLibraryPageViewModel from "../../../views/viewModels/libraryPage/createLibraryPageViewModel.js";
 
 /**
  * @typedef {import("express").Request} Request

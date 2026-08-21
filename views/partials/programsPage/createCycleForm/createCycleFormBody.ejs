@@ -1,0 +1,9 @@
+<% const { fields } = locals.createCycleForm; %>
+
+<%- include("../../shared/components/form/field", { field: fields[0] }) %>
+
+<div class="form-grid form-grid--two-columns">
+	<% fields.slice(1).forEach(field => { %>
+		<%- include("../../shared/components/form/field", { field }) %>
+	<% }) %>
+</div>

@@ -1,26 +1,36 @@
-<% 
-	const switcherData = locals?.features?.userSwitcher ?? {};
+<%
+		const { profilePicker, createUserForm } = locals.components;
+		const { clearSelectionAction } = profilePicker;
 %>
 
 <main class="main profile">
-	<%- include("partials/profilePage/entitySwitcher", {switcherData}) 
-	%>
+	<%- include("partials/profilePage/profilePicker/profilePicker", { profilePicker }) %>
 </main>
 
 <%- contentFor("overlays") %>
-
-<%- include("partials/shared/components/modal/modal", { modal: { 
-	id: switcherData?.addAction?.modalId ?? "createUserModal", 
-	title: switcherData?.addAction?.label ?? "Create User", 
-	showTitle: true,
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: createUserForm.modal.id,
+	title: createUserForm.modal.title,
+	showTitle: false,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
-		id: "resetUserForm",
-		heading: switcherData?.addAction?.label ?? "Create User",
-		description: "Reset profile selection",
-		action: "/users",
+		...createUserForm.form,
 		slots: {
-						body: include("partials/profilePage/createUserFormBody"),
-						footer: include("partials/profilePage/createUserFormFooter", { modalId: switcherData?.addAction?.modalId ?? "createUserModal" })
-		}}})
+			body: include("partials/profilePage/createUserForm/createUserFormBody", { createUserForm }),
+			footer: include("partials/profilePage/createUserForm/createUserFormFooter", { createUserForm })
+		}
 	}})
-%>
+	} }) %>
+
+<% if (clearSelectionAction.isVisible) { %>
+	<%- include("partials/shared/components/modal/modal", { modal: {
+		id: clearSelectionAction.modal.id,
+		title: clearSelectionAction.modal.title,
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", { form: {
+			...clearSelectionAction.form,
+			slots: {
+				footer: include("partials/profilePage/clearProfileSelectionFormFooter", { clearSelectionAction })
+			}
+		}})
+	} }) %>
+<% } %>

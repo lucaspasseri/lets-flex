@@ -73,10 +73,6 @@
 		rgba(0, 0, 0, 0.07) 0px -4px 4px, rgba(0, 0, 0, 0.07) 0px -8px 8px,
 		rgba(0, 0, 0, 0.07) 0px -16px 16px;
 
-	--header-spacing: 6.4em;
-	--footer-spacing: 4.2em;
-	--header-margin-top: 0.2em;
-
 	--horizontal-margin: 2rem;
 
 	--dashed-line-color: var(--color-text);
@@ -144,11 +140,10 @@ input:-webkit-autofill:active {
 
 body {
 	display: grid;
-	grid-template-rows: auto 1fr auto;
+	grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 body > .content {
-	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
 	scroll-behavior: smooth;
@@ -156,33 +151,10 @@ body > .content {
 
 main {
 	color: var(--color-text);
-	height: calc(100dvh - var(--header-spacing) - var(--footer-spacing));
-	margin-top: calc(var(--header-spacing) + var(--header-margin-top));
-	overflow-y: auto;
+	min-height: 100%;
 }
 
-footer.footer {
-	view-transition-name: footer;
-}
-
-.footer-indicator {
-	display: block;
-	height: 0.1em;
-	width: 100%;
-	border-radius: 50%;
-}
-
-.footer-indicator.isActive {
-	view-transition-name: active-tab-indicator;
-	background-color: var(--color-stitch);
-}
-
-::view-transition-old(active-tab-indicator),
-::view-transition-new(active-tab-indicator) {
-	animation-duration: 160ms;
-}
-
-#profilePageUserSwitcher .entity-switcher__item.is-active {
+#profile-picker .profile-card--current {
 	view-transition-name: profile-page-user-switcher-item-selected;
 }
 
@@ -194,49 +166,17 @@ footer.footer {
 	view-transition-name: library-page-session-details;
 }
 
-.main.programs {
-	.basic-line[data-id="programsBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: programs-basic-line-item-selected;
-		}
-	}
-}
-
-.main.programs {
-	.basic-line[data-id="cyclesBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: cycles-basic-line-item-selected;
-		}
-	}
-}
-
-.main.day {
-	.basic-line[data-id="dayPageSessionBasicLine"] {
-		.selectItemButton.selected {
-			view-transition-name: sessions-basic-line-item-selected;
-		}
-	}
-}
-
 input[type="date"]::-webkit-calendar-picker-indicator {
 	filter: invert(1);
 }
 
 @media screen and (width < 818px) {
-	.basic-line {
-		font-size: 0.9em;
-	}
-
 	.main .current-day-container {
 		font-size: 0.9em;
 	}
 }
 
 @media screen and (width < 665px) {
-	.basic-line {
-		font-size: 0.7em;
-	}
-
 	.main .current-day-container {
 		font-size: 0.7em;
 	}

@@ -1,0 +1,11 @@
+<%- include("../shared/components/button/button", { button: {
+	type: "button",
+	label: "Keep session",
+	variant: "secondary",
+	attributes: { "data-modal-close": modalId },
+} }) %>
+<%- include("../shared/components/button/button", { button: {
+	type: "submit",
+	label: form.submitLabel,
+	variant: "danger",
+} }) %>

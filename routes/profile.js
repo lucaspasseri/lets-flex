@@ -9,6 +9,7 @@ const router = Router();
 router.use(getUrlAndPath);
 router.use(getSessionState);
 
+router.post("/clear-selection", profileController.clearSelection);
 router.get("/", profileController.show);
 
 export default router;

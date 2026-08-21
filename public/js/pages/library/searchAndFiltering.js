@@ -1,49 +1,27 @@
-const searchInput = document.getElementById("library-search");
+export function initializeSearchAndFiltering(root) {
+	const searchInput = root.querySelector("[data-library-search]");
+	const sessionCount = root.querySelector(".session-summaries__count");
+	const exerciseCount = root.querySelector(".exercise-templates__count");
+	if (!searchInput || !sessionCount || !exerciseCount) return;
 
-const searchSessionItemArr = Array.from(
-	document.querySelectorAll("[data-search-session-item]"),
-);
-const searchExerciseItemArr = Array.from(
-	document.querySelectorAll("[data-search-exercise-item]"),
-);
+	const sessionItems = Array.from(root.querySelectorAll("[data-search-session-item]"));
+	const exerciseItems = Array.from(root.querySelectorAll("[data-search-exercise-item]"));
 
-const sessionArrSizeIndication = document.querySelector(
-	".session-summaries__count",
-);
-const exerciseArrSizeIndication = document.querySelector(
-	".exercise-templates__count",
-);
-
-searchInput.addEventListener("input", ev => {
-	const queryText = ev.target.value.trim().toLowerCase();
-
-	let sessionArrSize = searchSessionItemArr.length;
-	let exerciseArrSize = searchExerciseItemArr.length;
-
-	searchSessionItemArr.forEach(item => {
-		const searchText = item.dataset.searchKeyWord ?? "";
-
-		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
-
-		item.closest("li").hidden = shouldBeHidden;
-
-		if (shouldBeHidden) {
-			sessionArrSize -= 1;
-		}
+	searchInput.addEventListener("input", event => {
+		const query = event.target.value.trim().toLowerCase();
+		sessionCount.textContent = String(filterItems(sessionItems, query));
+		exerciseCount.textContent = `${filterItems(exerciseItems, query)} TEMPLATES`;
 	});
+}
 
-	searchExerciseItemArr.forEach(item => {
+function filterItems(items, query) {
+	let visibleCount = 0;
+	items.forEach(item => {
 		const searchText = item.dataset.searchKeyWord ?? "";
-
-		const shouldBeHidden = !searchText.toLowerCase().includes(queryText);
-
-		item.closest("li").hidden = shouldBeHidden;
-
-		if (shouldBeHidden) {
-			exerciseArrSize -= 1;
-		}
+		const listItem = item.matches("li") ? item : item.closest("li");
+		const hidden = !searchText.toLowerCase().includes(query);
+		if (listItem) listItem.hidden = hidden;
+		if (!hidden) visibleCount += 1;
 	});
-
-	sessionArrSizeIndication.textContent = `${sessionArrSize}`;
-	exerciseArrSizeIndication.textContent = `${exerciseArrSize} TEMPLATES`;
-});
+	return visibleCount;
+}

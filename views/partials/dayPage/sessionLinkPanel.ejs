@@ -1,0 +1,17 @@
+<aside class="day-panel day-panel--link" aria-labelledby="session-link-title">
+	<div class="day-panel__header">
+		<p class="day-panel__eyebrow">Plan the day</p>
+		<h2 id="session-link-title">Link a session template</h2>
+		<p>Choose an available template to add another workout to this training day.</p>
+	</div>
+
+	<%- include("../shared/components/form/form", { form: {
+		action: sessionLinkForm.action,
+		method: sessionLinkForm.method,
+		attributes: { "data-session-link-form": true },
+		slots: {
+			body: include("sessionLinkFormBody", { sessionLinkForm }),
+			footer: include("sessionLinkFormFooter", { sessionLinkForm }),
+		},
+	} }) %>
+</aside>

@@ -1,0 +1,45 @@
+<%
+	const { id, eyebrow, heading, description, items, emptyState, createAction } =
+		locals.entitySwitcher;
+	const variant = locals.variant ?? "entity";
+%>
+
+<section
+	class="entity-switcher entity-switcher--<%= variant %>"
+	id="<%= id %>"
+	aria-labelledby="<%= id %>-heading"
+>
+	<header class="entity-switcher__header">
+		<div>
+			<p class="entity-switcher__eyebrow"><%= eyebrow %></p>
+			<h2 id="<%= id %>-heading"><%= heading %></h2>
+			<p class="entity-switcher__description"><%= description %></p>
+		</div>
+		<% if (items.length > 0) { %>
+			<%- include("../../shared/components/button/button", { button: {
+				label: createAction.label,
+				variant: "secondary",
+				disabled: createAction.disabled ?? false,
+				renderIcon: () => include("../../icons/plus"),
+				attributes: {
+					"data-modal-open": createAction.modalId,
+					"aria-label": createAction.accessibleLabel
+				}
+			} }) %>
+		<% } %>
+	</header>
+
+	<% if (items.length === 0) { %>
+		<%- include("entitySwitcherEmptyState", {
+			entitySwitcherEmptyState: { ...emptyState, createAction }
+		}) %>
+	<% } else { %>
+		<ul class="entity-switcher__list" aria-label="Available <%= eyebrow.toLowerCase() %>">
+			<% items.forEach(entityCard => { %>
+				<li class="entity-switcher__list-item">
+					<%- include("entitySwitcherCard", { entityCard }) %>
+				</li>
+			<% }) %>
+		</ul>
+	<% } %>
+</section>

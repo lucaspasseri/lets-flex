@@ -19,6 +19,12 @@ const finishedCountArr = stringifyFinishedCountArr
 	: [];
 
 if (canvas) {
+	const styles = getComputedStyle(document.documentElement);
+	const textColor = styles.getPropertyValue("--color-text-muted").trim();
+	const borderColor = styles.getPropertyValue("--color-border").trim();
+	const actionColor = styles.getPropertyValue("--color-action").trim();
+	const successColor = styles.getPropertyValue("--color-success").trim();
+
 	new Chart(canvas, {
 		type: "bar",
 		data: {
@@ -27,20 +33,32 @@ if (canvas) {
 				{
 					label: "Scheduled",
 					data: scheduledCountArr,
-					backgroundColor: "#60a5fa",
+					backgroundColor: actionColor,
+					borderRadius: 6,
 				},
 				{
 					label: "Finished",
 					data: finishedCountArr,
-					backgroundColor: "#22c55e",
+					backgroundColor: successColor,
+					borderRadius: 6,
 				},
 			],
 		},
 		options: {
+			maintainAspectRatio: false,
+			plugins: {
+				legend: { labels: { color: textColor, usePointStyle: true } },
+			},
 			scales: {
+				x: {
+					grid: { display: false },
+					ticks: { color: textColor },
+				},
 				y: {
 					beginAtZero: true,
+					grid: { color: borderColor },
 					ticks: {
+						color: textColor,
 						precision: 0,
 					},
 				},

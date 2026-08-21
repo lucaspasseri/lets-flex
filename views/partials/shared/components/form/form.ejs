@@ -1,9 +1,10 @@
 <%
-	const { heading = "Welcome!", description = null, action="/", slots = {}, attributes = {}} = locals?.form ?? {};
+	const { id = null, heading = null, description = null, action="/", method="POST", slots = {}, attributes = {}} = locals?.form ?? {};
 %>
 
 <form 
-	method="POST" 
+	<% if (id) { %>id="<%= id %>"<% } %>
+	method="<%= method %>"
 	action="<%= action %>" 
 	class="form"
 	<% Object.entries(attributes).forEach(([name, value]) => { %>
@@ -14,14 +15,12 @@
 		<% } %>
 	<% }) %>
 	>
-	<div class="form-header">
-		<h3>
-			<%= heading %>
-		</h3>
-		<% if(description) { %>
-			<span><%= description %></span>
-		<% } %>
-	</div>
+	<% if (heading || description) { %>
+		<div class="form-header">
+			<% if (heading) { %><h3><%= heading %></h3><% } %>
+			<% if (description) { %><span><%= description %></span><% } %>
+		</div>
+	<% } %>
 	<% if (slots.body) { %>
 		<div class="form-body">
 			<%- slots.body %>

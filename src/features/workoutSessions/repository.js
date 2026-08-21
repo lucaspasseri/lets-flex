@@ -1,6 +1,16 @@
 import pool from "../../../db/pool.js";
 import * as queries from "./queries.js";
 
+/**
+ * @typedef {import("../trainingDays/trainingDays.types.js").TrainingDayRow } TrainingDayRow
+ * @typedef {import("./workoutSessions.types.js").WorkoutSessionRow } WorkoutSessionRow
+ */
+
+/**
+ * @typedef {object} FindAllByTrainingDayIdInput
+ * @property {TrainingDayRow["id"]} trainingDayId
+ */
+
 export async function create(
 	{ sessionId, trainingDayId, workoutSessionOrder, notes },
 	db = pool,
@@ -40,8 +50,15 @@ export async function findById({ workoutSessionId }, db = pool) {
 		[workoutSessionId],
 	);
 
+	console.log({ ws: rows?.[0] });
+
 	return rows[0] ?? null;
 }
+
+/**
+ * @param {FindAllByTrainingDayIdInput} input
+ * @returns {Promise<WorkoutSessionRow[]>}
+ */
 
 export async function findAllByTrainingDayId({ trainingDayId }, db = pool) {
 	const { rows } = await db.query(queries.findAll(), [trainingDayId]);

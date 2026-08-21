@@ -2,7 +2,7 @@ import toCapitalizedString from "../../../utils/toCapitalizedString.js";
 
 /**
  * @typedef {import("./movementPatterns.types.js").MovementPatternRow} movementPatternRow
- * @typedef {import("./movementPatterns.types.js").MovementPatternViewModel} MovementPatternViewModel
+ * @typedef {import("./movementPatterns.types.js").MovementPatternMapper} MovementPatternViewModel
  */
 
 /**

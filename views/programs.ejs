@@ -1,133 +1,66 @@
-<% 
-const {formatDate, addDays} = locals.helpers;
-
-const currUserId = locals?.appState?.user?.id ?? null;
-const currProgramId = locals?.appState?.program?.id ?? null;
-const currCycleId = locals?.appState?.cycle?.id ?? null;
-const currSessionId = locals?.appState?.session?.id ?? null;
-const currDayId = locals?.appState?.day?.id ?? null;
-
-const currProgram = locals?.appState?.program ?? {};
-
-const programArr = locals?.data?.programs?.items ?? [];
-const cycleArr = locals?.data?.cycles?.items ?? [];
-const trainingDayArr = locals?.data?.trainingDays?.items ?? [];
-
-const programBasicLineId = "programsPageProgramBasicLine";
-const programBasicLineEntity = "program";
-const createProgramModalId = "createProgramModal";
-const chosenProgramPath = "/programs?programId=";
-
-const cycleBasicLineId = "cyclesPageCycleBasicLine";
-const cycleBasicLineEntity = "cycle";
-const createCycleModalId = "createCycleModal";
-const chosenCyclePath = `/programs?programId=${currProgramId}&cycleId=`;
-
-const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
-
-const getClassName = (index, trainingDay, currCycleId) => {
-	let className = "";
-
-	if(index === 0){
-		className += "startDate ";
-	}
-
-	if(trainingDay.cycle_id === null){
-		className += "no-cycle";
-		return className;
-	}
-
-	if(trainingDay.cycle_id === currCycleId){
-		className += "day-selected";
-		return className;
-	}
-
-	className += "cycle-not-selected";
-	return className;
-}
-
-const dayArr = trainingDayArr.map((trainingDay, index) => {
-	const hasCycleSelected = currCycleId === trainingDay.cycle_id && currCycleId !== null;
-	const date =formatDate && addDays && formatDate(addDays(startDate, index ), "dd/MM");
-	const className = getClassName(index, trainingDay, currCycleId);
-	const href = `/programs/day?dayId=${trainingDay.training_day_id}`;
-
-	return {
-		id: index,
-		trainingDayId: trainingDay.training_day_id,
-		hasCycleSelected,
-		date, 
-		className,
-		href
-	}
-});
+<%
+	const {
+		programSwitcher,
+		cycleSwitcher,
+		calendarNavigation,
+		createProgramForm,
+		createCycleForm,
+		noActiveUser
+	} = locals.components;
 %>
 
-<main class="main programs">
-	<div class="main-header">
-		<% if(currUserId){ %>
-			<h1>CHOOSE THE ACTIVE PROGRAM</h1>
-				<%- include("partials/basicLine", {line: { basicLineId: programBasicLineId, entity: programBasicLineEntity, arr: programArr, modalId: createProgramModalId, currentItemId: currProgramId, path: chosenProgramPath }}) %>
-			<% if(currProgramId) { %>
-				<h2>Cycles</h2>
-				<%- include("partials/basicLine", {line: { basicLineId: cycleBasicLineId, entity: cycleBasicLineEntity, arr: cycleArr, modalId: createCycleModalId, currentItemId: currCycleId, path: chosenCyclePath }}) %>
-			<% } %>
-		<% } else { %>
-			<div class="no-active-program-container">
-				<div class="content">
-					<div class="image-container">
-						<img src="../compasso.png" width="40" height="40" alt="compasso icon" />
-					</div>
-					<h2>NO ACTIVE USER</h2>
-					<p>Your training architecture starts here. Create and activate your profile to enjoy the best features.</p>
-					<a href="/profile">
-						<%- include("partials/icons/plus") %>
-						<p>CREATE YOUR USER PROFILE</p>
-					</a>
-				</div>
-			</div>
-		<% } %>
-	</div>
+<main class="main programs" data-programs-page>
+	<% if (noActiveUser.isVisible) { %>
+		<%- include("partials/programsPage/noActiveUser", { noActiveUser }) %>
+	<% } else { %>
+		<%- include("partials/programsPage/entitySwitcher/entitySwitcher", {
+			entitySwitcher: programSwitcher,
+			variant: "program"
+		}) %>
 
-	<% if(currUserId) { %>
-		<div class="basic-calendar"> 
-			<ul class="list">
-				<% dayArr.forEach((day) => { %>
-					<li class="training-day-item <%= day.className %>" data-calendar-day-id="<%= day.trainingDayId %>"> 
-						<div class="container">
-							<% if(day?.hasCycleSelected) { %>
-								<a data-calendar-day-date="<%= day.date %>"  href="<%= day.href %>">
-									<p>	<%= day.date %></p>
-								</a>
-							<% } else { %>
-								<p >
-									<%= day.date %>
-								</p>
-							<% } %>
-						</div>
-					</li>
-				<% }) %>
-			</ul>
-		</div>
+		<% if (cycleSwitcher.isVisible) { %>
+			<%- include("partials/programsPage/entitySwitcher/entitySwitcher", {
+				entitySwitcher: cycleSwitcher,
+				variant: "cycle"
+			}) %>
+		<% } %>
+
+		<% if (calendarNavigation.isVisible) { %>
+			<%- include("partials/programsPage/calendarNavigation/calendarNavigation", {
+				calendarNavigation
+			}) %>
+		<% } %>
 	<% } %>
 </main>
 
 <%- contentFor("overlays") %>
 
-<%- include("partials/basicModal", {
-	modal: {
-		id: createProgramModalId,
-		title: "Create program",
-		description: "Fill in the program information below.",
-		renderContent: () => include("partials/newProgramForm")
-	}
-}) %>
+<% if (!noActiveUser.isVisible) { %>
+	<%- include("partials/shared/components/modal/modal", { modal: {
+		id: createProgramForm.modal.id,
+		title: createProgramForm.modal.title,
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", { form: {
+			...createProgramForm.form,
+			slots: {
+				body: include("partials/programsPage/createProgramForm/createProgramFormBody", { createProgramForm }),
+				footer: include("partials/programsPage/createProgramForm/createProgramFormFooter", { createProgramForm })
+			}
+		}})
+	} }) %>
+<% } %>
 
-<%- include("partials/basicModal", {
-	modal: {
-		id: createCycleModalId,
-		title: "Create cycle",
-		description: "Fill in the cycle information below.",
-		renderContent: () => include("partials/cycleForm")
-	}
-}) %>
+<% if (cycleSwitcher.isVisible) { %>
+	<%- include("partials/shared/components/modal/modal", { modal: {
+		id: createCycleForm.modal.id,
+		title: createCycleForm.modal.title,
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", { form: {
+			...createCycleForm.form,
+			slots: {
+				body: include("partials/programsPage/createCycleForm/createCycleFormBody", { createCycleForm }),
+				footer: include("partials/programsPage/createCycleForm/createCycleFormFooter", { createCycleForm })
+			}
+		}})
+	} }) %>
+<% } %>

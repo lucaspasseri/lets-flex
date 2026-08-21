@@ -1,0 +1,26 @@
+<section class="day-panel day-panel--workouts" aria-labelledby="workout-list-title">
+	<div class="day-panel__header day-panel__header--workouts">
+		<div>
+			<p class="day-panel__eyebrow">Workout plan</p>
+			<h2 id="workout-list-title">Linked sessions</h2>
+		</div>
+		<% if (!workoutSessionList.emptyState.isVisible) { %>
+			<span class="day-panel__count"><%= workoutSessionList.count %></span>
+		<% } %>
+	</div>
+
+	<% if (workoutSessionList.emptyState.isVisible) { %>
+		<div class="day-empty-state">
+			<div class="day-empty-state__mark" aria-hidden="true">+</div>
+			<h3><%= workoutSessionList.emptyState.title %></h3>
+			<p><%= workoutSessionList.emptyState.description %></p>
+		</div>
+	<% } else { %>
+		<p class="day-panel__summary"><%= workoutSessionList.countLabel %></p>
+		<ul class="workout-session-list">
+			<% workoutSessionList.items.forEach(card => { %>
+				<li><%- include("../session/sessionCard", { card }) %></li>
+			<% }) %>
+		</ul>
+	<% } %>
+</section>

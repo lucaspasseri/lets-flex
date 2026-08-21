@@ -1,19 +1,20 @@
 <%
-	const modalId = locals?.modalId ?? null;
+	const { modal, actions } = locals.createExerciseForm;
 %>
 
 
 <%- include("../../shared/components/button/button",  {button: {
-		label: "Cancel",
+		label: actions.cancel.label,
+		type: "button",
 		variant: "secondary",
 		attributes: {
-			"data-modal-close" : modalId
+			"data-modal-close" : modal.id
 		}
 	}}) 
 %> 
 <%-
 include("../../shared/components/button/button", {button: {
-		label: "Create exercise",
+		label: actions.submit.label,
 		variant: "primary",
 		type: "submit"
 	}}) 

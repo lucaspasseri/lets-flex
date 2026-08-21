@@ -30,7 +30,12 @@ function createExerciseTemplates({ exerciseTemplateArr = [] }) {
 		count: exerciseTemplateCount,
 		countLabel: `${exerciseTemplateCount} templates`,
 
-		emptyState: "(empty)",
+		emptyState: {
+			title: "No exercise templates yet",
+			description:
+				"Create your first exercise template to start building reusable training sessions.",
+			icon: "dumbbell",
+		},
 
 		items,
 

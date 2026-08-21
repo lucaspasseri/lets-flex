@@ -1,124 +1,30 @@
 <%
-const currDayId = locals?.appState?.day?.id ?? null;
-const trainingDayArr = locals?.data?.days?.items ?? [];
-const sessionArr = locals?.data?.sessions?.notArchivedItems ?? [];
-const workoutSessionArr = locals?.data?.workoutSessions?.notCancelledItems ?? [];
-
-const backUrl = locals.page?.backUrl ?? "";
-const { formatDate, addDays } = locals.helpers;
-
-const currProgram = locals?.appState?.program ?? {};
-const currTrainingDay = locals?.appState?.day ?? null;
-
-const formattedScheduledDate = currTrainingDay?.scheduled_date ? (formatDate && formatDate(currTrainingDay.scheduled_date, "dd/MM/yyyy")) : "Date outside the programs's boundaries";
-
-const startDate = currProgram?.start_date && new Date(currProgram.start_date) || new Date();
-
-const getScheduledDate = (trainingDay) => {
-	const date = formatDate && formatDate(trainingDay.scheduled_date, "dd/MM/yyyy");
-	return date;
-}
-
-const getNavLinkHref = (dayId) => {
-	return `/programs/day?dayId=${dayId}`;
-}
-
-const trainingDayIdArr = trainingDayArr.map( day => day.training_day_id);
-
-const baseNameModalId = "deleteWorkoutSessionId";
+	const { dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
 %>
-<main class="main day">
 
-	<div class="current-day-container session-selected" data-calendar-day-id="<%= currDayId %>">
-		<h1><%= formattedScheduledDate %></h1>
+<main class="main day-page" data-day-page>
+	<header class="day-page__hero" data-calendar-day-id="<%= dayHeader.dayId ?? "" %>">
+		<p class="day-page__eyebrow">Training day</p>
+		<h1><%= dayHeader.dateLabel %></h1>
+		<p class="day-page__intro">Review the plan, link a session template, and manage this day’s workouts.</p>
+	</header>
+
+	<%- include("partials/dayPage/dayNavigation", { dayNavigation }) %>
+
+	<div class="day-page__content">
+		<%- include("partials/dayPage/sessionLinkPanel", { sessionLinkForm }) %>
+		<%- include("partials/dayPage/workoutSessionList", { workoutSessionList }) %>
 	</div>
-
-	<% if(trainingDayArr.length > 0){ %>
-		<nav class="day-rail-wrapper">
-			<% if(trainingDayIdArr.includes(currDayId-1)) {%>
-				<a href="<%= getNavLinkHref(currDayId - 1) %>" class="day-arrow" data-scroll-left><span><</span></a>
-			<% } %>
-			<ul class="day-rail" id="dayRail">
-				<% trainingDayArr.forEach((trainingDay) => { %>
-					<li><a href="<%= getNavLinkHref(trainingDay?.training_day_id) %>" class="day-card <%= currDayId === trainingDay.training_day_id ? 'active' : '' %>"><%= getScheduledDate(trainingDay) %></a></li>
-				<% }) %>
-			</ul>
-			<% if(trainingDayIdArr.includes(currDayId+1)) {%>
-				<a href="<%= getNavLinkHref(currDayId + 1) %>" class="day-arrow" data-scroll-right><span>></span></a>
-			<% } %>
-		</nav>
-	<% } %>
-
-
-
-	<div class="link-training-day-with-session-container">
-		<% if(workoutSessionArr.length === 0) { %>
-			<div class="no-session">
-				<h2> The current day does not yet have any training sessions associated with it.</h2>
-				<p>You can link a session template here.</p>
-			</div>
-		<% } else { %>
-			<div class="at-least-one-session">
-				<h2> <%= `The current day has ${workoutSessionArr.length} workout session(s) linked to it.` %> </h2>
-			</div>
-		<% } %>
-
-		<form action="/workout_sessions" method="POST" class="forms">
-			<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
-			<%- include("partials/select", { data: { id: "sessionSelect", label: "Session template", name: "sessionId", required: true, 
-			options: sessionArr, getOptionLabel: (session) => session.name, getOptionValue: (session) => session.id  } }); %>
-
-			<%- include('partials/simpleButton', { data: { text: "Submit", type: "submit" } }); %>
-		</form>
-	</div>
-
-	<% if(workoutSessionArr.length > 0 ) { %>
-		<div class="workout-session-list-container">
-			<ul>
-				<% workoutSessionArr.forEach( wSession => { %>
-					<li>
-							<%- include("partials/session/sessionCard", {session: wSession, modalId: `${baseNameModalId}-${wSession.id}` }) %>
-					</li>
-				<% }) %>
-			</ul>
-		</div>
-	<% } %>
-
-
 </main>
 
-<script>
-	const rail = document.getElementById("dayRail");
-	const activeDay = rail?.querySelector(".day-card.active");
-
-	activeDay?.scrollIntoView({
-		behavior: "instant",
-		inline: "center",
-		block: "nearest",
-	});
-
-	document.querySelector("[data-scroll-left]")?.addEventListener("click", () => {
-		rail.scrollBy({ left: -240, behavior: "smooth" });
-	});
-
-	document.querySelector("[data-scroll-right]")?.addEventListener("click", () => {
-		rail.scrollBy({ left: 240, behavior: "smooth" });
-	});
-</script>
-
 <%- contentFor("overlays") %>
-
-
-
-<% workoutSessionArr.forEach( (wSession) => { %>
-
-	<%- include("partials/basicModal", {
-		modal: {
-			id: `${baseNameModalId}-${wSession.id}`,
-			title: "Delete the workout session",
-			description: "",
-			renderContent: () => include("partials/deleteSessionWorkoutForm", {currWorkoutSessionId: wSession.id})
-		}
-	}) %>
-	
+<% workoutSessionList.cancelModals.forEach(cancelModal => { %>
+	<%- include("partials/shared/components/modal/modal", { modal: {
+		id: cancelModal.id,
+		title: cancelModal.title,
+		renderContent: () => include("partials/deleteSessionWorkoutForm", { form: cancelModal.form, modalId: cancelModal.id }),
+	} }) %>
 <% }) %>
+
+<%- contentFor("scripts") %>
+<script type="module" src="/js/pages/day/index.js"></script>

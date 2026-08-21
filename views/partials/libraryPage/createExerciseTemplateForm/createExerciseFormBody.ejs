@@ -1,12 +1,13 @@
-	<%
-		const { movementPatterns = {}, equipments = {}, muscles = {}, muscleRoles={}} = locals?.data ?? {};
+<%
+	const {
+		movementPatternOptions,
+		equipmentOptions,
+		muscleOptions,
+		muscleRoleOptions
+	} = locals.createExerciseForm.fields;
+%>
 
-		const movementPatternArr = movementPatterns?.items ?? [];
-		const equipmentArr = equipments?.items ?? [];
-		const muscleArr = muscles?.items ?? [];
-		const muscleRoleArr = muscleRoles?.items ?? [];
-	%>
-
+<div class="form-grid form-grid--two-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
 			id: "name-input",
@@ -31,10 +32,7 @@
 			control: "select",
 			required: true,
 			hint: "Choose a movement pattern for the exercise template.",
-			options: movementPatternArr.map(movement => ({
-				label: movement.name,
-				value: movement.id
-			})),
+			options: movementPatternOptions,
 			attributes: {
 				autocomplete: "off"
 			}
@@ -49,17 +47,23 @@
 			control: "select",
 			required: true,
 			hint: "Choose an equipment for the exercise template.",
-			options: equipmentArr.map(equipment => ({
-				label: equipment.name,
-				value: equipment.id
-			})),
+			options: equipmentOptions,
 			attributes: {
 				autocomplete: "off"
 			}
 		}
 	}) %>
+</div>
 
-	<div class="muscle-section">
+<section class="form-section" aria-labelledby="exercise-muscles-heading">
+	<div class="form-section__header">
+		<div>
+			<h4 id="exercise-muscles-heading">Muscle roles</h4>
+			<p>Associate one or more muscles with their role in the exercise.</p>
+		</div>
+	</div>
+
+	<div class="form-grid form-grid--two-columns">
 		<%- include("../../shared/components/form/field", {
 			field: {
 				id: "muscle-select",
@@ -68,10 +72,7 @@
 				control: "select",
 				required: true,
 				hint: "Choose a muscle for the exercise template.",
-				options: muscleArr.map(muscle => ({
-					label:`${muscle.commonName} (${muscle.scientificName})`,
-					value: muscle.id
-				})),
+				options: muscleOptions,
 				attributes: {
 					autocomplete: "off"
 				}}
@@ -86,24 +87,28 @@
 				control: "select",
 				required: true,
 				hint: "Choose a muscle role for the exercise template.",
-				options: muscleRoleArr.map(role => ({
-					label: role.name,
-					value: role.id
-				})),
+				options: muscleRoleOptions,
 				attributes: {
 					autocomplete: "off"
 				}}
 			}) 
 		%>
 
-		<%- include("../../shared/components/button/button",  {button: {
-				id: "add-muscle-role-relation",
-				label: "Add muscle",
-				variant: "primary",
-			}}) 
-		%> 
 	</div>
 
-	<p id="muscle-role-list-message">No muscle relation found</p>
-	<ul id="muscle-role-list">
-	</ul>
+	<div class="form-section__actions">
+		<%- include("../../shared/components/button/button", {button: {
+				id: "add-muscle-role-relation",
+				label: locals.createExerciseForm.actions.addMuscle.label,
+				variant: "primary",
+			}}) 
+		%>
+	</div>
+
+	<div class="form-collection" aria-live="polite">
+		<p id="muscle-role-list-message" class="form-collection__empty">
+			No muscles added yet.
+		</p>
+		<ul id="muscle-role-list" class="form-collection__list"></ul>
+	</div>
+</section>

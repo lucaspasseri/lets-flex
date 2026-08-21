@@ -1,0 +1,18 @@
+<% const profileCard = locals.profileCard; %>
+<a
+	class="profile-card<%= profileCard.isCurrent ? " profile-card--current" : "" %>"
+	href="<%= profileCard.href %>"
+	aria-label="<%= profileCard.accessibleLabel %>"
+	<% if (profileCard.isCurrent) { %>aria-current="page"<% } %>
+>
+	<span class="profile-card__avatar" aria-hidden="true"><%= profileCard.initials %></span>
+	<span class="profile-card__content">
+		<strong class="profile-card__name"><%= profileCard.name %></strong>
+		<% if (profileCard.statusLabel) { %>
+			<span class="profile-card__status">
+				<%- include("../../icons/check-circle") %>
+				<%= profileCard.statusLabel %>
+			</span>
+		<% } %>
+	</span>
+</a>

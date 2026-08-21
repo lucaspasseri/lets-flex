@@ -1,51 +1,24 @@
-import {
-	addDays,
-	startOfWeek,
-	differenceInCalendarDays,
-	format,
-	isSameDay,
-	getWeek,
-} from "date-fns";
-import range from "../../../utils/range.js";
+import { addDays, startOfWeek, format, isSameWeek } from "date-fns";
 
-function getBarChartData(startDate, cycleArr, workoutSessionArr) {
-	const totalDaysInTheProgram = cycleArr.reduce((acc, curr) => {
-		acc += curr.cycle_size;
+/**
+ * @param {string | Date | null} startDate
+ * @param {import("../cycles/cycles.types.js").Cycle[]} cycles
+ * @param {import("../workoutSessions/workoutSessions.types.js").WorkoutSession[]} workoutSessions
+ */
+export default function getBarChartData(startDate, cycles, workoutSessions) {
+	if (!startDate) return [];
 
-		return acc;
-	}, 0);
+	const totalDays = cycles.reduce((sum, cycle) => sum + cycle.size, 0);
+	return Array.from({ length: Math.ceil(totalDays / 7) }, (_, index) => {
+		const date = startOfWeek(addDays(startDate, index * 7));
+		/** @param {string | Date | null | undefined} value */
+		const inWeek = value => Boolean(value && isSameWeek(date, value));
 
-	let daysLeft = totalDaysInTheProgram;
-	let currDay = startDate;
-	const weekDayArr = [];
-
-	while (daysLeft > 0) {
-		const firstDayOfTheWeek = startOfWeek(currDay);
-
-		weekDayArr.push(firstDayOfTheWeek);
-		currDay = addDays(currDay, 7);
-		daysLeft -= 7;
-	}
-
-	const scheduledCountArr = [];
-	const finishedCountArr = [];
-	const formattedWeekDayArr = [];
-
-	weekDayArr.forEach(date => {
-		const workoutSessionScheduledInTheCurrentWeek = workoutSessionArr.filter(
-			ws => getWeek(date) === getWeek(ws.scheduled_date),
-		);
-
-		const workoutSessionFinishedInTheCurrentWeek = workoutSessionArr.filter(
-			ws => getWeek(date) === getWeek(ws.finished_at),
-		);
-
-		scheduledCountArr.push(workoutSessionScheduledInTheCurrentWeek.length);
-		finishedCountArr.push(workoutSessionFinishedInTheCurrentWeek.length);
-		formattedWeekDayArr.push(format(date, "dd/MM"));
+		return {
+			date,
+			label: format(date, "dd/MM"),
+			scheduledCount: workoutSessions.filter(session => inWeek(session.scheduledDate)).length,
+			finishedCount: workoutSessions.filter(session => inWeek(session.finishedAt)).length,
+		};
 	});
-
-	return { weekArr: formattedWeekDayArr, scheduledCountArr, finishedCountArr };
 }
-
-export default getBarChartData;

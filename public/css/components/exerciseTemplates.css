@@ -214,6 +214,11 @@
 	line-height: 1;
 }
 
+.exercise-template__empty-value {
+	color: var(--template-muted);
+	font-size: 0.8rem;
+}
+
 /* ======================================================
    Variants
    ====================================================== */

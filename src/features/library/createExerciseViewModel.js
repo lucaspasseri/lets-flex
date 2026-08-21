@@ -16,7 +16,7 @@ import createMuscles from "./createMuscleViewModel.js";
  */
 
 function createExercise({ exerciseTemplate }) {
-	const { movementPattern, equipment, variant, muscles } = exerciseTemplate;
+	const { id, movementPattern, equipment, variant, muscles } = exerciseTemplate;
 
 	const movementPatternLabel = movementPattern?.name
 		? movementPattern?.notes
@@ -58,7 +58,7 @@ function createExercise({ exerciseTemplate }) {
 			remove: {
 				label: `Delete ${variant?.name}`,
 				modalId: "deleteExerciseModal",
-				value: variant?.id,
+				value: id,
 			},
 		},
 	};

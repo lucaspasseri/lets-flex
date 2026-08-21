@@ -1,82 +1,66 @@
-<% 
-	const sessionWorkspace = locals?.features?.sessionWorkspace ?? {};
-	const exerciseTemplates = locals?.features?.exerciseTemplates ?? {};
+<%
+	const {
+		sessionWorkspace,
+		exerciseTemplates,
+		createSessionForm,
+		createExerciseForm,
+		deleteExerciseForm
+	} = locals.components;
 %>
 
-<main class="main library">
+<main class="main library" data-library-page>
 	<div class="main-header">
 		<div class="title-container">
 			<p>ASSET MANAGER</p>
 			<h1>Library</h1>
 		</div>
 	</div>
-
 	<%- include("partials/libraryPage/librarySearch") %>
-
-	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace}) %>
-
-	<%- include("partials/libraryPage/exerciseTemplates", {exerciseTemplates }) %>
-
+	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace }) %>
+	<%- include("partials/libraryPage/exerciseTemplates", { exerciseTemplates }) %>
 </main>
 
 <%- contentFor("overlays") %>
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: createSessionForm.modal.id,
+	title: createSessionForm.modal.title,
+	showTitle: false,
+	renderContent: () => include("partials/shared/components/form/form", { form: {
+		...createSessionForm.form,
+		attributes: { "data-create-session-form": true },
+		slots: {
+			body: include("partials/libraryPage/createSessionForm/createSessionFormBody", { createSessionForm }),
+			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { createSessionForm })
+		}
+	}})
+} }) %>
 
-<%- include("partials/shared/components/modal/modal", { modal: { 
-		id: sessionWorkspace.createAction.modalId ?? "createSessionModal", 
-		title: sessionWorkspace.createAction.label ?? "Create session template", 
-		showTitle: false,
-		renderContent: () => include("partials/shared/components/form/form", {form: {
-			id: "create-session-template-form",
-			heading: "Create session template",
-			description: "Define a reusable session template.",
-			action: "/sessions",
-			attributes: {
-				"data-create-session-form": null
-			},
-			slots: {
-				body: include("partials/libraryPage/createSessionForm/createSessionFormBody"),
-				footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", {modalId: sessionWorkspace?.createAction?.modalId ?? "createSessionModal"}),
-			}			
-	}})}})
-%>
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: deleteExerciseForm.modal.id,
+	title: deleteExerciseForm.modal.title,
+	showTitle: false,
+	renderContent: () => include("partials/shared/components/form/form", { form: {
+		...deleteExerciseForm.form,
+		attributes: { "data-delete-exercise-form": true },
+		slots: {
+			footer: include("partials/libraryPage/deleteExerciseTemplateForm/deleteExerciseFormFooter", { deleteExerciseForm })
+		}
+	}})
+} }) %>
 
-// hard coded values
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: createExerciseForm.modal.id,
+	title: createExerciseForm.modal.title,
+	showTitle: false,
+	renderContent: () => include("partials/shared/components/form/form", { form: {
+		...createExerciseForm.form,
+		attributes: { "data-create-exercise-form": true },
+		slots: {
+			body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody", { createExerciseForm }),
+			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { createExerciseForm })
+		}
+	}})
+} }) %>
 
-<%- include("partials/shared/components/modal/modal", { modal: { 
-		id: exerciseTemplates?.actions?.delete?.modalId ?? "deleteExerciseModal", 
-		title: exerciseTemplates?.actions?.delete?.label ?? "Delete exercise template", 
-		showTitle: false,
-		renderContent: () => include("partials/shared/components/form/form", {form: {
-			id: "delete-exercise-template-form",
-			heading: "Delete exercise template",
-			description: "Are you sure to continue?",
-			action: "/exerciseTemplates",
-			slots: {
-				footer: include("partials/libraryPage/deleteExerciseTemplateForm/deleteExerciseFormFooter", {modalId: exerciseTemplates?.actions?.delete?.modalId ?? "deleteExerciseModal"}),
-			}			
-	}})}})
-%>
-
-// hard coded values
-
-<%- include("partials/shared/components/modal/modal", { modal: { 
-		id: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModal", 
-		title: exerciseTemplates?.actions?.create?.label ?? "Create exercise template", 
-		showTitle: false,
-		renderContent: () => include("partials/shared/components/form/form", {form: {
-			id: "create-exercise-template-form",
-			heading: "Create exercise template",
-			description: "Define a reusable exercise template.",
-			action: "/exerciseTemplates",
-			slots: {
-				body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody"),
-				footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", {modalId: exerciseTemplates?.actions?.create?.modalId ?? "createExerciseModal"}),
-			}			
-	}})}})
-%>
-
-<script type="module" src="/js/pages/library/searchAndFiltering.js"></script>
-<script type="module" src="/js/pages/library/manageSessionStepsFormField.js"></script>
-<script type="module" src="/js/pages/library/manageMuscleRoleFormField.js"></script>
-<script type="module" src="/js/pages/library/configureDeleteExerciseFormAction.js"></script>
-
+<%- contentFor("scripts") %>
+<script type="module" src="/js/pages/library/index.js"></script>

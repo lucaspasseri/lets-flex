@@ -1,17 +1,11 @@
-<%
-const {currWorkoutSessionId} = locals;
-const action = `/workout_sessions/${currWorkoutSessionId}?_method=PATCH`;
-const currDayId = locals?.appState?.day?.id ?? null;
-%>
-
-<form
-  id="deleteSessionForm"
-	method="POST"
-  action="<%= action %>"
-	class="forms"
->
-  <p>Are you sure?</p>
-	<input hidden type="text" name="trainingDayId" value="<%= currDayId %>" />
-  <%- include('simpleButton', { data: { text: "Confirm delete", type: "submit" } }); %>
-</form>
-
+<%- include("shared/components/form/form", { form: {
+	action: form.action,
+	method: form.method,
+	heading: "Cancel this workout session?",
+	description: "You can link the template again later if plans change.",
+	attributes: { "data-cancel-workout-form": true },
+	slots: {
+		body: include("dayPage/cancelWorkoutSessionFormBody", { form }),
+		footer: include("dayPage/cancelWorkoutSessionFormFooter", { form, modalId: locals.modalId }),
+	},
+} }) %>

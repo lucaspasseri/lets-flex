@@ -1,21 +1,23 @@
-import getDashboardPage from "../../features/dashboard/getDashboardPage.js";
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
+import toNullableNumber from "../../../utils/toNullableNumber.js";
+import getDashboardPageData from "../../features/dashboard/getDashboardPageData.js";
+import createDashboardPageViewModel from "../../../views/viewModels/dashboardPage/createDashboardPageViewModel.js";
 
+/** @param {import("express").Request} req @param {import("express").Response} res */
 async function show(req, res) {
-	const { pageState, appState, data } = await getDashboardPage({
-		query: req.query,
-		sessionState: res.locals.sessionState,
-	});
-
-	const dashboard = {
+	const userId = toNullableNumber(res.locals.sessionState?.userId);
+	const programId = toNullableNumber(res.locals.sessionState?.programId);
+	const daysDifference = toNullableNumber(req.query?.daysDifference);
+	const workoutSessionId = toNullableNumber(req.query?.workoutSessionId);
+	const data = await getDashboardPageData({ userId, programId, daysDifference, workoutSessionId });
+	const dashboard = createDashboardPageViewModel({
 		page: {
 			...res.locals.page,
 			title: "Let's Flex!",
 		},
-		pageState,
-		appState,
 		data,
-	};
+		pageState: { userId, programId, daysDifference, workoutSessionId },
+	});
 
 	res.render("index", dashboard);
 }

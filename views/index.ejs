@@ -1,28 +1,23 @@
-<% 
-	const currProgramId = locals?.appState?.program?.id ?? null; 
-%>
-
-<main class="main dashboard">
-	<%- include("partials/dashboardPage/noActiveProgramSection"); %>
-
-	<% if( currProgramId) { %>
-
-		<%- include("partials/dashboardPage/currentProgramBanner"); %>
-
-		<%- include("partials/dashboardPage/dateSection"); %>
-
-		<%- include("partials/dashboardPage/currentWorkoutSession") %>
- 	<% } %>
-
-
-	<%- include("partials/dashboardPage/heatMap") %>
-
-	<%- include("partials/dashboardPage/barChart") %>
-
-	<%- contentFor("overlays") %>
-
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@date-fns/cdn@4.4.0/cdn.min.js"></script>
-	<script src="/js/barChartCanvas.js"></script>
-
+<% const { status, programBanner, dateNavigation, currentWorkout, heatmap, barChart } = locals.components; %>
+<main class="main dashboard" data-dashboard-page>
+	<%- include("partials/dashboardPage/noActiveProgramSection", { status }) %>
+	<% if (programBanner.isVisible) { %>
+		<div class="dashboard__active-program">
+			<%- include("partials/dashboardPage/currentProgramBanner", { programBanner }) %>
+			<%- include("partials/dashboardPage/dateSection", { dateNavigation }) %>
+			<%- include("partials/dashboardPage/currentWorkoutSession", { currentWorkout }) %>
+		</div>
+	<% } %>
+	<% if (heatmap.isVisible || barChart.isVisible) { %>
+		<div class="dashboard__metrics">
+			<%- include("partials/dashboardPage/heatMap", { heatmap }) %>
+			<%- include("partials/dashboardPage/barChart", { barChart }) %>
+		</div>
+	<% } %>
 </main>
+<%- contentFor("overlays") %>
+<%- contentFor("scripts") %>
+<% if (barChart.isVisible) { %>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="/js/barChartCanvas.js"></script>
+<% } %>

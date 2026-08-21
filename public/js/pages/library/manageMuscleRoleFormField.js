@@ -1,66 +1,57 @@
-export function initializeMuscleRoleForm(root = document) {
-	const addButton = root.querySelector("#add-muscle-role-relation");
-	const list = root.querySelector("#muscle-role-list");
-	const muscleSelect = root.querySelector("#muscle-select");
-	const muscleRoleSelect = root.querySelector("#muscle-role-select");
-	const muscleMessage = root.querySelector("#muscle-role-list-message");
-
-	if (
-		!addButton ||
-		!list ||
-		!muscleSelect ||
-		!muscleRoleSelect ||
-		!muscleMessage
-	) {
-		return;
-	}
+export function initializeMuscleRoleForm(form) {
+	const addButton = form.querySelector("#add-muscle-role-relation");
+	const list = form.querySelector("#muscle-role-list");
+	const muscleSelect = form.querySelector("#muscle-select");
+	const roleSelect = form.querySelector("#muscle-role-select");
+	const message = form.querySelector("#muscle-role-list-message");
+	if (!addButton || !list || !muscleSelect || !roleSelect || !message) return;
 
 	addButton.addEventListener("click", () => {
-		const index = Array.from(list.querySelectorAll("li")).length;
-
-		const muscleId = muscleSelect.value;
-		const muscleName = muscleSelect.options[muscleSelect.selectedIndex].text;
-
-		const muscleRoleId = muscleRoleSelect.value;
-		const muscleRoleName =
-			muscleRoleSelect.options[muscleRoleSelect.selectedIndex].text;
-
-		if (!muscleId || !muscleRoleId) return;
-
+		if (!muscleSelect.value || !roleSelect.value) return;
 		const item = document.createElement("li");
-		item.className = "musclePerformingListItem";
-
-		muscleMessage.textContent = `${index + 1} muscle relation(s) added`;
-
+		item.className = "form-collection__item";
 		const summary = document.createElement("p");
-		summary.textContent = `${muscleName} (${muscleRoleName})`;
-
-		const muscleInput = document.createElement("input");
-		muscleInput.type = "hidden";
-		muscleInput.name = `muscleGroup[${index}][muscleId]`;
-		muscleInput.value = muscleId;
-
-		const roleInput = document.createElement("input");
-		roleInput.type = "hidden";
-		roleInput.name = `muscleGroup[${index}][muscleRoleId]`;
-		roleInput.value = muscleRoleId;
-
-		const removeButton = document.createElement("button");
-		removeButton.type = "button";
-		removeButton.textContent = "X";
-		removeButton.className = "simple-button";
-		removeButton.addEventListener("click", () => {
-			item.remove();
-			const listSize = Array.from(list.querySelectorAll("li")).length;
-			muscleMessage.textContent =
-				listSize === 0
-					? "No muscle relation found"
-					: `${Array.from(list.querySelectorAll("li")).length} muscle relation(s) added`;
-		});
-
-		item.append(summary, muscleInput, roleInput, removeButton);
-		list.appendChild(item);
+		summary.textContent = `${selectedLabel(muscleSelect)} (${selectedLabel(roleSelect)})`;
+		item.append(
+			summary,
+			createHiddenInput("muscleId", muscleSelect.value),
+			createHiddenInput("muscleRoleId", roleSelect.value),
+			createRemoveButton(() => { item.remove(); updateList(); }),
+		);
+		list.append(item);
+		updateList();
 	});
+
+	function updateList() {
+		const items = Array.from(list.querySelectorAll("li"));
+		items.forEach((item, index) => {
+			item.querySelectorAll("[data-muscle-field]").forEach(input => {
+				input.name = `muscleGroup[${index}][${input.dataset.muscleField}]`;
+			});
+		});
+		message.textContent = items.length === 0
+			? "No muscle relation found"
+			: `${items.length} muscle relation(s) added`;
+	}
 }
 
-initializeMuscleRoleForm();
+function createHiddenInput(field, value) {
+	const input = document.createElement("input");
+	input.type = "hidden";
+	input.dataset.muscleField = field;
+	input.value = value;
+	return input;
+}
+
+function createRemoveButton(remove) {
+	const button = document.createElement("button");
+	button.type = "button";
+	button.textContent = "Remove";
+	button.className = "form-collection__remove";
+	button.addEventListener("click", remove);
+	return button;
+}
+
+function selectedLabel(select) {
+	return select.options[select.selectedIndex]?.text ?? "";
+}

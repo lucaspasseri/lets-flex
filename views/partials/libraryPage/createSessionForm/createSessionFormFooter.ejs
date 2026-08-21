@@ -1,21 +1,21 @@
 <%
-	const modalId = locals?.modalId ?? null;
+	const { modal, actions } = locals.createSessionForm;
 %>
 
 <%- include("../../shared/components/button/button", {
 	button: {
-		label: "Cancel",
+		label: actions.cancel.label,
 		variant: "secondary",
 		type: "button",
 		attributes: {
-			"data-modal-close": modalId
+			"data-modal-close": modal.id
 		}
 	}
 }) %>
 
 <%- include("../../shared/components/button/button", {
 	button: {
-		label: "Create session",
+		label: actions.submit.label,
 		variant: "primary",
 		type: "submit"
 	}

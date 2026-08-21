@@ -1,0 +1,21 @@
+<% const entityCard = locals.entityCard; %>
+<a
+	class="entity-card<%= entityCard.isCurrent ? " entity-card--current" : "" %>"
+	href="<%= entityCard.href %>"
+	aria-label="<%= entityCard.accessibleLabel %>"
+	<% if (entityCard.isCurrent) { %>aria-current="true"<% } %>
+>
+	<span class="entity-card__badge" aria-hidden="true"><%= entityCard.badgeLabel %></span>
+	<span class="entity-card__content">
+		<strong class="entity-card__name"><%= entityCard.name %></strong>
+		<% if (entityCard.metaLabel) { %>
+			<span class="entity-card__meta"><%= entityCard.metaLabel %></span>
+		<% } %>
+		<% if (entityCard.statusLabel) { %>
+			<span class="entity-card__status">
+				<%- include("../../icons/check-circle") %>
+				<%= entityCard.statusLabel %>
+			</span>
+		<% } %>
+	</span>
+</a>

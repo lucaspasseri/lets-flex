@@ -1,0 +1,29 @@
+<% if (dayNavigation.isVisible) { %>
+	<nav class="day-navigation" aria-label="Training days">
+		<div class="day-navigation__header">
+			<div>
+				<p class="day-navigation__eyebrow">Program timeline</p>
+				<h2>Choose a training day</h2>
+			</div>
+			<div class="day-navigation__controls" aria-label="Timeline controls">
+				<% if (dayNavigation.previous) { %>
+					<a class="day-navigation__arrow" href="<%= dayNavigation.previous.href %>" data-scroll-left aria-label="Previous training day">←</a>
+				<% } %>
+				<% if (dayNavigation.next) { %>
+					<a class="day-navigation__arrow" href="<%= dayNavigation.next.href %>" data-scroll-right aria-label="Next training day">→</a>
+				<% } %>
+			</div>
+		</div>
+
+		<ul class="day-navigation__rail" id="dayRail">
+			<% dayNavigation.items.forEach(day => { %>
+				<li>
+					<a href="<%= day.href %>" class="day-navigation__item<%= day.isCurrent ? " day-navigation__item--current" : "" %>"<% if (day.isCurrent) { %> aria-current="date"<% } %>>
+						<span class="day-navigation__item-label"><%= day.label %></span>
+						<span class="day-navigation__item-status"><%= day.isCurrent ? "Selected" : "Open day" %></span>
+					</a>
+				</li>
+			<% }) %>
+		</ul>
+	</nav>
+<% } %>

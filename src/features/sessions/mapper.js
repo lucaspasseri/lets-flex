@@ -19,7 +19,7 @@ export function toSessionMapperSeed(session) {
 		name: session.name,
 		notes: session.notes,
 		isArchived: session.is_archived,
-		steps: session.steps?.map(toSessionMapperStepSeed),
+		steps: (session.steps ?? []).map(toSessionMapperStepSeed),
 	};
 }
 
@@ -28,7 +28,7 @@ export function toSessionMapperSeed(session) {
  * @returns { SessionMapperStep}
  */
 
-function toSessionMapperStepSeed(step) {
+export function toSessionMapperStepSeed(step) {
 	return {
 		id: step.id,
 		name: step.name,
@@ -53,6 +53,6 @@ function toSessionMapperStepSeed(step) {
 				" ",
 			),
 		},
-		muscles: step.muscles.map(toMuscle),
+		muscles: (step.muscles ?? []).map(toMuscle),
 	};
 }

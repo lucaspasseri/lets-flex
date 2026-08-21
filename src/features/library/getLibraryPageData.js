@@ -18,6 +18,8 @@ import * as stepTypeMapper from "../stepTypes/mapper.js";
 /**
  * @typedef {import("../users/users.types.js").User} User
  * @typedef {import("../sessions/sessions.types.js").SessionRow} SessionRow
+ * @typedef {import("../sessions/sessions.types.js").SessionMapper} Session
+ * @typedef {import("./libraryPageData.types.js").LibraryPageData} LibraryPageData
  */
 
 /**
@@ -28,6 +30,7 @@ import * as stepTypeMapper from "../stepTypes/mapper.js";
 
 /**
  * @param {GetLibraryPageData} input
+ * @returns {Promise<LibraryPageData>}
  */
 
 async function getLibraryPageData({ userId, sessionId }) {
@@ -51,33 +54,25 @@ async function getLibraryPageData({ userId, sessionId }) {
 		stepTypesRepository.findAll(),
 	]);
 
-	return {
-		user: user && userMapper.toLoggedUser(user),
-		session: sessionArr.length
-			? sessionArr
-					.map(sessionMapper.toSessionMapperSeed)
-					.filter(session => session.id === sessionId)?.[0]
-			: null,
-		sessionArr: sessionArr.length
-			? sessionArr.map(sessionMapper.toSessionMapperSeed)
-			: [],
-		equipmentArr: equipmentArr.length
-			? equipmentArr.map(equipmentMapper.toEquipment)
-			: [],
-		movementPatternArr: movementPatternArr.length
-			? movementPatternArr.map(movementPatternMapper.toMovementPattern)
-			: [],
+	const sessions = /** @type {Session[]} */ (
+		sessionArr.map(sessionMapper.toSessionMapperSeed)
+	);
 
-		muscleArr: muscleArr.length ? muscleArr.map(muscleMapper.toMuscle) : [],
-		muscleRoleArr: muscleRoleArr.length
-			? muscleRoleArr.map(muscleRoleMapper.toMuscleRole)
-			: [],
-		exerciseTemplateArr: exerciseTemplateArr.length
-			? exerciseTemplateArr.map(exerciseTemplateMapper.toExerciseTemplateSeed)
-			: [],
-		stepTypeArr: stepTypeArr.length
-			? stepTypeArr.map(stepTypeMapper.toStepType)
-			: [],
+	return {
+		user: user ? userMapper.toLoggedUser(user) : null,
+		activeSession:
+			sessions.find(session => session.id === sessionId) ?? null,
+		sessions,
+		equipments: equipmentArr.map(equipmentMapper.toEquipment),
+		movementPatterns: movementPatternArr.map(
+			movementPatternMapper.toMovementPattern,
+		),
+		muscles: muscleArr.map(muscleMapper.toMuscle),
+		muscleRoles: muscleRoleArr.map(muscleRoleMapper.toMuscleRole),
+		exerciseTemplates: exerciseTemplateArr.map(
+			exerciseTemplateMapper.toExerciseTemplateSeed,
+		),
+		stepTypes: stepTypeArr.map(stepTypeMapper.toStepType),
 	};
 }
 
