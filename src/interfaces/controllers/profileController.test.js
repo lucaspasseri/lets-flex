@@ -10,6 +10,7 @@ test("clearing profile selection preserves unrelated session state", () => {
 	});
 	let redirectPath = null;
 	const response = /** @type {*} */ ({
+		/** @param {string} path */
 		redirect(path) {
 			redirectPath = path;
 		},

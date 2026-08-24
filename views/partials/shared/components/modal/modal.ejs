@@ -1,10 +1,11 @@
 <%
-	const {id = null, title="Generic modal", showTitle = true, renderContent} = locals?.modal;
+	const {id = null, title="Generic modal", showTitle = true, openOnLoad = false, renderContent} = locals?.modal;
 	const titleId = `${id}-title`;
 %>
 
 <div 
 	data-modal
+	<% if (openOnLoad) { %>data-modal-open-on-load<% } %>
 	<%= `id=${id}` %>
 	hidden
 	role="dialog"

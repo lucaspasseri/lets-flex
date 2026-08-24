@@ -77,3 +77,39 @@ test("profile template renders populated and empty picker states", async () => {
 		assert.equal(html.includes("Use as guest"), data.showsGuestAction);
 	}
 });
+
+test("invalid profile creation reuses the page model with values and field errors", async () => {
+	const viewModel = createProfilePageViewModel({
+		page,
+		pageState: { userId: 2 },
+		data: { currentUser: users[1], users },
+		createUserFormState: {
+			open: true,
+			values: {
+				name: "Ada",
+				dob: "",
+				anamnesis: "Previous injury",
+			},
+			errors: {
+				fieldErrors: { dob: "Enter a date of birth." },
+				formErrors: [],
+			},
+		},
+	});
+	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
+		ejs.renderFile
+	);
+	/** @type {(name: string) => string} */
+	const contentFor = name => `<!-- section:${name} -->`;
+	const html = await renderFile(path.resolve("views/profile.ejs"), {
+		...viewModel,
+		contentFor,
+	});
+
+	assert.equal(viewModel.components.createUserForm.modal.openOnLoad, true);
+	assert.match(html, /data-modal-open-on-load/);
+	assert.match(html, /value="Ada"/);
+	assert.match(html, />Previous injury<\/textarea>/);
+	assert.match(html, /Enter a date of birth\./);
+	assert.match(html, /aria-invalid="true"/);
+});
