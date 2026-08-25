@@ -97,6 +97,61 @@ test("Programs page exposes safe empty component states", () => {
 	assert.equal(result.components.createCycleForm.actions.submit.disabled, true);
 });
 
+test("Programs page preserves invalid values and exposes field and form errors", async () => {
+	const result = createProgramsPageViewModel({
+		page,
+		pageState: { userId: 1, programId: 10, cycleId: 20 },
+		data: {
+			currentUser,
+			programs: { current: program, items: [program] },
+			cycles: { current: cycle, items: [cycle] },
+			trainingDays: [],
+			goals: [{ id: 2, name: "Build strength" }],
+		},
+		programFormState: {
+			open: true,
+			values: { name: "  attempted name  ", goalId: "2", startDate: "bad-date" },
+			errors: {
+				fieldErrors: { startDate: "Enter a valid start date." },
+				formErrors: ["Review the program details."],
+			},
+		},
+		cycleFormState: {
+			open: true,
+			values: { name: "Attempted cycle", cycleSize: "0", cycleOrder: "1" },
+			errors: {
+				fieldErrors: { cycleSize: "Number of days must be at least 1." },
+				formErrors: [],
+			},
+		},
+	});
+
+	assert.equal(result.components.createProgramForm.modal.openOnLoad, true);
+	assert.equal(
+		result.components.createProgramForm.fields[0].value,
+		"  attempted name  ",
+	);
+	assert.equal(result.components.createProgramForm.fields[1].value, "2");
+	assert.equal(
+		result.components.createProgramForm.fields[2].error,
+		"Enter a valid start date.",
+	);
+	assert.deepEqual(result.components.createProgramForm.formErrors, [
+		"Review the program details.",
+	]);
+	assert.equal(result.components.createCycleForm.modal.openOnLoad, true);
+	assert.equal(result.components.createCycleForm.fields[1].value, "0");
+
+	const html = await ejs.renderFile(path.resolve("views/programs.ejs"), {
+		...result,
+		contentFor: () => "",
+	});
+	assert.match(html, /data-modal-open-on-load/);
+	assert.ok(html.includes('value="  attempted name  "'));
+	assert.match(html, /aria-invalid="true"/);
+	assert.match(html, /Review the program details\./);
+});
+
 test("Programs template renders populated and no-profile component states", async () => {
 	const renderFile =
 		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);

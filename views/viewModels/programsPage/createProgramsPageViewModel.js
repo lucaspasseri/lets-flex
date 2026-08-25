@@ -13,7 +13,13 @@ import createCycleFormViewModel from "./createCycleFormViewModel.js";
  * @param {CreateProgramsPageViewModelInput} input
  * @returns {ProgramsPageViewModel}
  */
-export default function createProgramsPageViewModel({ page, pageState, data }) {
+export default function createProgramsPageViewModel({
+	page,
+	pageState,
+	data,
+	programFormState,
+	cycleFormState,
+}) {
 	const { currentUser, programs, cycles, trainingDays, goals } = data;
 
 	return {
@@ -39,10 +45,14 @@ export default function createProgramsPageViewModel({ page, pageState, data }) {
 				currentCycle: cycles.current,
 				trainingDays,
 			}),
-			createProgramForm: createProgramFormViewModel({ goals }),
+			createProgramForm: createProgramFormViewModel({
+				goals,
+				state: programFormState,
+			}),
 			createCycleForm: createCycleFormViewModel({
 				currentProgram: programs.current,
 				cycles: cycles.items,
+				state: cycleFormState,
 			}),
 			noActiveUser: {
 				isVisible: currentUser === null,

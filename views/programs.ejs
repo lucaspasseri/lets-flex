@@ -40,6 +40,7 @@
 		id: createProgramForm.modal.id,
 		title: createProgramForm.modal.title,
 		showTitle: false,
+		openOnLoad: createProgramForm.modal.openOnLoad,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createProgramForm.form,
 			slots: {
@@ -55,6 +56,7 @@
 		id: createCycleForm.modal.id,
 		title: createCycleForm.modal.title,
 		showTitle: false,
+		openOnLoad: createCycleForm.modal.openOnLoad,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createCycleForm.form,
 			slots: {

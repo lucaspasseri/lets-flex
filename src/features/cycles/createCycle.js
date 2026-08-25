@@ -5,6 +5,13 @@ import * as trainingDaysRepository from "../trainingDays/repository.js";
 import { addDays } from "date-fns";
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 
+export class CycleOrderOutOfRangeError extends Error {
+	constructor(maximumOrder) {
+		super(`Cycle order must be between 1 and ${maximumOrder}.`);
+		this.name = "CycleOrderOutOfRangeError";
+	}
+}
+
 async function createCycle({ programId, name, cycleSize, cycleOrder }) {
 	const client = await pool.connect();
 
@@ -28,9 +35,7 @@ async function createCycle({ programId, name, cycleSize, cycleOrder }) {
 			numericCycleOrder < 1 ||
 			numericCycleOrder > cycles.length + 1
 		) {
-			throw new Error(
-				`Cycle order must be an integer between 1 and ${cycles.length + 1}`,
-			);
+			throw new CycleOrderOutOfRangeError(cycles.length + 1);
 		}
 
 		if (

@@ -5,7 +5,7 @@ import createProgramsPageViewModel from "../../../views/viewModels/programsPage/
 import { getProgramsPageData } from "../../features/programs/getProgramsPageData.js";
 
 /**
- * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}}} Request
+ * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
  * @typedef {import("express").Response} Response
  */
 
@@ -15,6 +15,15 @@ import { getProgramsPageData } from "../../features/programs/getProgramsPageData
  */
 
 async function show(req, res) {
+	await renderPrograms(req, res);
+}
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @param {{programFormState?: Record<string, any>, cycleFormState?: Record<string, any>}} [formState]
+ */
+export async function renderPrograms(req, res, formState = {}) {
 	const sessionState = res.locals?.sessionState;
 	const userId = toNullableNumber(sessionState?.userId);
 	const programIdSelection =
@@ -42,7 +51,12 @@ async function show(req, res) {
 
 	const page = { ...res.locals.page, title: "Let's Flex!" };
 	const pageState = { userId, programId, cycleId };
-	const programsPage = createProgramsPageViewModel({ page, pageState, data });
+	const programsPage = createProgramsPageViewModel({
+		page,
+		pageState,
+		data,
+		...formState,
+	});
 
 	res.render("programs", programsPage);
 }
@@ -54,17 +68,29 @@ async function show(req, res) {
 
 async function create(req, res) {
 	const userId = toNullableNumber(res.locals?.sessionState?.userId);
-	const { name, goalId, startDate } = req.body;
 
 	if (userId === null) {
-		throw new Error("An active profile is required to create a program");
+		res.status(422);
+		await renderPrograms(req, res, {
+			programFormState: {
+				open: true,
+				values: req.body,
+				errors: {
+					fieldErrors: {},
+					formErrors: ["Choose an active profile before creating a program."],
+				},
+			},
+		});
+		return;
 	}
 
+	const validatedBody =
+		/** @type {{name: string, goalId: number, startDate: string}} */ (
+			req.validatedBody
+		);
 	const program = await createProgram({
-		name,
+		...validatedBody,
 		userId,
-		goalId,
-		startDate,
 	});
 
 	req.session.state = {
@@ -75,7 +101,20 @@ async function create(req, res) {
 	res.redirect("/programs");
 }
 
+async function showCreateErrors(req, res, { errors, submittedValues }) {
+	res.status(422);
+	await renderPrograms(req, res, {
+		programFormState: {
+			open: true,
+			values:
+				submittedValues && typeof submittedValues === "object" ? submittedValues : {},
+			errors,
+		},
+	});
+}
+
 export const programsController = {
 	show: asyncHandler(show),
 	create: asyncHandler(create),
+	showCreateErrors,
 };

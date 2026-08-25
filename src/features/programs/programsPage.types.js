@@ -45,6 +45,8 @@
  * @property {LocalsPage} page
  * @property {PageState} pageState
  * @property {ProgramsPageData} data
+ * @property {Record<string, any>} [programFormState]
+ * @property {Record<string, any>} [cycleFormState]
  */
 
 export {};
