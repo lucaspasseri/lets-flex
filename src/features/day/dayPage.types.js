@@ -43,6 +43,7 @@
  * @property {LocalsPage} page
  * @property {PageState} pageState
  * @property {DayPageData} data
+ * @property {Record<string, any>} [sessionLinkFormState]
  */
 
 /**

@@ -6,6 +6,8 @@ import { programsController } from "../src/interfaces/controllers/programControl
 import { dayController } from "../src/interfaces/controllers/dayController.js";
 import validateRequestBody from "../middlewares/validateRequestBody.js";
 import { createProgramSchema } from "../src/interfaces/validation/programSchemas.js";
+import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import { dayPageQuerySchema } from "../src/interfaces/validation/daySchemas.js";
 
 const router = express.Router();
 
@@ -23,6 +25,6 @@ router.get("/", programsController.show);
 
 router.delete("/:programId", programsController.delete);
 
-router.get("/day", dayController.show);
+router.get("/day", validateRequestQuery(dayPageQuerySchema), dayController.show);
 
 export default router;

@@ -7,7 +7,12 @@ import formatDayPageDate from "./formatDayPageDate.js";
  * @typedef {import("../../../src/features/day/dayPage.types.js").CreateDayPageViewModelInput} CreateDayPageViewModelInput
  * @param {CreateDayPageViewModelInput} input
  */
-export default function createDayPageViewModel({ page, pageState, data }) {
+export default function createDayPageViewModel({
+	page,
+	pageState,
+	data,
+	sessionLinkFormState,
+}) {
 	const { currentUser, days, sessions, workoutSessions } = data;
 	const currentDayId = days.current?.id ?? null;
 
@@ -29,6 +34,7 @@ export default function createDayPageViewModel({ page, pageState, data }) {
 			sessionLinkForm: createSessionLinkFormViewModel({
 				currentDayId,
 				sessions: sessions.items,
+				state: sessionLinkFormState,
 			}),
 			workoutSessionList: createWorkoutSessionListViewModel({
 				currentDayId,
