@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+old/
+views/partialsOld/
+db/*/
+db/populatedb*.js
+package-lock.json
+public/images/

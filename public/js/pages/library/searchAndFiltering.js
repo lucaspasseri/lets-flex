@@ -5,9 +5,11 @@ export function initializeSearchAndFiltering(root) {
 	if (!searchInput || !sessionCount || !exerciseCount) return;
 
 	const sessionItems = Array.from(root.querySelectorAll("[data-search-session-item]"));
-	const exerciseItems = Array.from(root.querySelectorAll("[data-search-exercise-item]"));
+	const exerciseItems = Array.from(
+		root.querySelectorAll("[data-search-exercise-item]"),
+	);
 
-	searchInput.addEventListener("input", event => {
+	searchInput.addEventListener("input", (event) => {
 		const query = event.target.value.trim().toLowerCase();
 		sessionCount.textContent = String(filterItems(sessionItems, query));
 		exerciseCount.textContent = `${filterItems(exerciseItems, query)} TEMPLATES`;
@@ -16,7 +18,7 @@ export function initializeSearchAndFiltering(root) {
 
 function filterItems(items, query) {
 	let visibleCount = 0;
-	items.forEach(item => {
+	items.forEach((item) => {
 		const searchText = item.dataset.searchKeyWord ?? "";
 		const listItem = item.matches("li") ? item : item.closest("li");
 		const hidden = !searchText.toLowerCase().includes(query);

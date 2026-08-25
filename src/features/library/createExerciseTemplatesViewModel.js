@@ -18,7 +18,7 @@ import createExercise from "./createExerciseViewModel.js";
 
 function createExerciseTemplates({ exerciseTemplateArr = [] }) {
 	const exerciseTemplateCount = exerciseTemplateArr.length;
-	const items = exerciseTemplateArr.map(exerciseTemplate =>
+	const items = exerciseTemplateArr.map((exerciseTemplate) =>
 		createExercise({ exerciseTemplate }),
 	);
 

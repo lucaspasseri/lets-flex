@@ -1,5 +1,11 @@
 <% const { fields } = locals.createCycleForm; %>
 
+<% if (locals.createCycleForm.formErrors.length) { %>
+	<div class="form-errors" role="alert">
+		<% locals.createCycleForm.formErrors.forEach(error => { %><p><%= error %></p><% }) %>
+	</div>
+<% } %>
+
 <%- include("../../shared/components/form/field", { field: fields[0] }) %>
 
 <div class="form-grid form-grid--two-columns">

@@ -55,8 +55,8 @@
  * @property {number} session_id
  * @property {number} workout_session_order
  * @property {string} status
- * @property {string} started_at
- * @property {string} finished_at
+ * @property {string | null} started_at
+ * @property {string | null} finished_at
  * @property {string} notes
  * @property {string} name
  * @property {boolean} is_archived

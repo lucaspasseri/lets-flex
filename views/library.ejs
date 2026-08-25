@@ -3,8 +3,11 @@
 		sessionWorkspace,
 		exerciseTemplates,
 		createSessionForm,
+		updateSessionForm,
 		createExerciseForm,
-		deleteExerciseForm
+		updateExerciseForm,
+		deleteExerciseForm,
+		archiveSessionForm
 	} = locals.components;
 %>
 
@@ -29,8 +32,51 @@
 		...createSessionForm.form,
 		attributes: { "data-create-session-form": true },
 		slots: {
-			body: include("partials/libraryPage/createSessionForm/createSessionFormBody", { createSessionForm }),
-			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { createSessionForm })
+			body: include("partials/libraryPage/createSessionForm/createSessionFormBody", { sessionForm: createSessionForm }),
+			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: createSessionForm })
+		}
+	}})
+} }) %>
+
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: archiveSessionForm.modal.id,
+	title: archiveSessionForm.modal.title,
+	showTitle: false,
+	renderContent: () => include("partials/shared/components/form/form", { form: {
+		...archiveSessionForm.form,
+		attributes: { "data-archive-session-form": true },
+		slots: {
+			footer: include("partials/libraryPage/archiveSessionTemplateForm/archiveSessionFormFooter", { archiveSessionForm })
+		}
+	}})
+} }) %>
+
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: updateSessionForm.modal.id,
+	title: updateSessionForm.modal.title,
+	showTitle: false,
+	openOnLoad: updateSessionForm.modal.openOnLoad,
+	renderContent: () => include("partials/shared/components/form/form", { form: {
+		...updateSessionForm.form,
+		attributes: { "data-update-session-form": true },
+		slots: {
+			body: include("partials/libraryPage/createSessionForm/createSessionFormBody", { sessionForm: updateSessionForm }),
+			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: updateSessionForm })
+		}
+	}})
+} }) %>
+
+<%- include("partials/shared/components/modal/modal", { modal: {
+	id: updateExerciseForm.modal.id,
+	title: updateExerciseForm.modal.title,
+	showTitle: false,
+	openOnLoad: updateExerciseForm.modal.openOnLoad,
+	renderContent: () => include("partials/shared/components/form/form", { form: {
+		...updateExerciseForm.form,
+		attributes: { "data-update-exercise-form": true },
+		slots: {
+			body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody", { exerciseForm: updateExerciseForm }),
+			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: updateExerciseForm })
 		}
 	}})
 } }) %>
@@ -56,8 +102,8 @@
 		...createExerciseForm.form,
 		attributes: { "data-create-exercise-form": true },
 		slots: {
-			body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody", { createExerciseForm }),
-			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { createExerciseForm })
+			body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody", { exerciseForm: createExerciseForm }),
+			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: createExerciseForm })
 		}
 	}})
 } }) %>

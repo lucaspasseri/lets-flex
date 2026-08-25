@@ -14,11 +14,17 @@ import createDayPageViewModel from "../../../views/viewModels/dayPage/createDayP
  */
 
 async function show(req, res) {
+	await renderDay(req, res);
+}
+
+export async function renderDay(req, res, formState = {}) {
 	const sessionState = res.locals?.sessionState;
 	const userId = toNullableNumber(sessionState?.userId);
 	const programId = toNullableNumber(sessionState?.programId);
+	const validatedQuery = req.validatedQuery ?? {};
 	const dayId =
-		toNullableNumber(req?.query?.dayId) ??
+		toNullableNumber(formState.dayId) ??
+		toNullableNumber(validatedQuery.dayId) ??
 		toNullableNumber(sessionState?.dayId);
 
 	const data = await getDayPageData({ userId, programId, dayId });
@@ -33,7 +39,7 @@ async function show(req, res) {
 	const page = { ...res.locals.page, title: "Let's Flex!" };
 	const pageState = { userId, programId, dayId };
 
-	const dayPage = createDayPageViewModel({ page, pageState, data });
+	const dayPage = createDayPageViewModel({ page, pageState, data, ...formState });
 
 	res.render("day", dayPage);
 }

@@ -1,4 +1,9 @@
 <input type="hidden" name="trainingDayId" value="<%= sessionLinkForm.fields.trainingDayId ?? "" %>">
+<% if (sessionLinkForm.formErrors.length) { %>
+	<div class="form-errors" role="alert">
+		<% sessionLinkForm.formErrors.forEach(error => { %><p><%= error %></p><% }) %>
+	</div>
+<% } %>
 <%- include("../shared/components/form/field", { field: {
 	...sessionLinkForm.fields.session,
 	control: "select",

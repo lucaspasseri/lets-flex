@@ -1,9 +1,11 @@
 const canvas = document.getElementById("bar-chart-canvas");
+const Chart = /** @type {any} */ (globalThis).Chart;
 
-const canvasContainerElement = document.querySelector(".canvas-container");
+const canvasContainerElement = /** @type {HTMLElement | null} */ (
+	document.querySelector(".canvas-container")
+);
 
-const stringifyWeekArr =
-	canvasContainerElement?.dataset?.barChartWeekArr ?? null;
+const stringifyWeekArr = canvasContainerElement?.dataset?.barChartWeekArr ?? null;
 const weekArr = stringifyWeekArr ? JSON.parse(stringifyWeekArr) : [];
 
 const stringifyScheduledCountArr =

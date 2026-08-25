@@ -3,7 +3,13 @@
 %>
 
 <main class="main day-page" data-day-page>
-	<header class="day-page__hero" data-calendar-day-id="<%= dayHeader.dayId ?? "" %>">
+	<header
+		class="day-page__hero"
+		data-calendar-day-id="<%= dayHeader.dayId ?? "" %>"
+		<% if (dayHeader.viewTransitionName) { %>
+			style="view-transition-name: <%= dayHeader.viewTransitionName %>; view-transition-class: program-calendar-day"
+		<% } %>
+	>
 		<p class="day-page__eyebrow">Training day</p>
 		<h1><%= dayHeader.dateLabel %></h1>
 		<p class="day-page__intro">Review the plan, link a session template, and manage this day’s workouts.</p>

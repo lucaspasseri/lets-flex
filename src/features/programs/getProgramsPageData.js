@@ -3,11 +3,13 @@ import * as programsRepository from "./repository.js";
 import * as cyclesRepository from "../cycles/repository.js";
 import * as trainingDaysRepository from "../trainingDays/repository.js";
 import * as goalsRepository from "../goals/repository.js";
+import * as workoutSessionsRepository from "../workoutSessions/repository.js";
 import * as userMapper from "../users/mapper.js";
 import * as programMapper from "./mapper.js";
 import * as cycleMapper from "../cycles/mapper.js";
 import * as trainingDayMapper from "../trainingDays/mapper.js";
 import * as goalMapper from "../goals/mapper.js";
+import * as workoutSessionMapper from "../workoutSessions/mapper.js";
 import resolveProgramsPageSelection from "./resolveProgramsPageSelection.js";
 
 /**
@@ -23,9 +25,7 @@ import resolveProgramsPageSelection from "./resolveProgramsPageSelection.js";
 export async function getProgramsPageData({ userId, programId, cycleId }) {
 	const [userRow, programRows, cycleRows, goalRows] = await Promise.all([
 		usersRepository.findById({ userId }),
-		userId
-			? programsRepository.findAllByUserId({ userId })
-			: Promise.resolve([]),
+		userId ? programsRepository.findAllByUserId({ userId }) : Promise.resolve([]),
 		userId ? cyclesRepository.findAllByUserId({ userId }) : Promise.resolve([]),
 		goalsRepository.findAll(),
 	]);
@@ -35,16 +35,20 @@ export async function getProgramsPageData({ userId, programId, cycleId }) {
 	const allUserCycles = cycleRows.map(cycleMapper.toCycle);
 	const goals = goalRows.map(goalMapper.toGoal);
 
-	const { currentProgram, currentCycle, programCycles } =
-		resolveProgramsPageSelection({
-			programId,
-			cycleId,
-			programs,
-			allUserCycles,
-		});
+	const { currentProgram, currentCycle, programCycles } = resolveProgramsPageSelection({
+		programId,
+		cycleId,
+		programs,
+		allUserCycles,
+	});
 
 	const trainingDayRows = currentProgram
 		? await trainingDaysRepository.findAllByProgramId({
+				programId: currentProgram.id,
+			})
+		: [];
+	const workoutSessionRows = currentProgram
+		? await workoutSessionsRepository.findAllByProgramId({
 				programId: currentProgram.id,
 			})
 		: [];
@@ -60,6 +64,7 @@ export async function getProgramsPageData({ userId, programId, cycleId }) {
 			items: programCycles,
 		},
 		trainingDays: trainingDayRows.map(trainingDayMapper.toTrainingDay),
+		workoutSessions: workoutSessionRows.map(workoutSessionMapper.toWorkoutSession),
 		goals,
 	};
 }

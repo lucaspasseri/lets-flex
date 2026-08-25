@@ -63,32 +63,60 @@
 }
 
 .entity-card {
+	position: relative;
+	display: block;
+	min-height: 6.5rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.9rem;
+	background: var(--color-surface);
+	transition:
+		border-color 160ms ease,
+		background-color 160ms ease,
+		box-shadow 160ms ease;
+}
+
+.entity-card__select {
 	display: grid;
 	grid-template-columns: auto minmax(0, 1fr);
 	align-items: center;
 	gap: 0.8rem;
 	min-height: 6.5rem;
 	padding: 0.9rem;
-	border: 1px solid var(--color-border);
-	border-radius: 0.9rem;
+	padding-right: 3.25rem;
 	color: var(--color-text);
-	background: var(--color-surface);
 	text-decoration: none;
-	transition: transform 160ms ease, border-color 160ms ease,
-		background-color 160ms ease, box-shadow 160ms ease;
 }
 
 .entity-card:hover {
-	transform: translateY(-2px);
 	border-color: var(--color-text-muted);
 	background: var(--color-surface-subtle);
 }
 
 .entity-card:focus-visible,
+.entity-card__select:focus-visible,
 .programs-empty-state__action:focus-visible,
 .calendar-navigation__item:focus-visible {
 	outline: 3px solid color-mix(in srgb, var(--color-focus) 58%, transparent);
 	outline-offset: 3px;
+}
+
+.entity-card__delete {
+	position: absolute;
+	top: 0.65rem;
+	right: 0.7rem;
+	width: 2.35rem;
+	min-height: 2.35rem;
+	border-radius: 0.65rem;
+}
+
+.entity-card__delete:hover:not(:disabled),
+.entity-card__delete:active:not(:disabled) {
+	transform: none;
+}
+
+.entity-card__delete svg {
+	width: 1rem;
+	height: 1rem;
 }
 
 .entity-card--current {
@@ -264,7 +292,10 @@
 	color: var(--color-text-muted);
 	background: var(--color-surface);
 	text-decoration: none;
-	transition: transform 160ms ease, color 160ms ease, border-color 160ms ease,
+	transition:
+		transform 160ms ease,
+		color 160ms ease,
+		border-color 160ms ease,
 		background-color 160ms ease;
 }
 
@@ -273,6 +304,10 @@
 	border-color: var(--color-text-muted);
 	color: var(--color-text);
 	background: var(--color-surface-subtle);
+}
+
+.calendar-navigation__item[style*="view-transition-name"] {
+	transform: none;
 }
 
 .calendar-navigation__item--current-cycle {
@@ -298,6 +333,10 @@
 	font-size: 0.72rem;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.calendar-navigation__item .session-status-markers {
+	justify-content: flex-start;
 }
 
 .calendar-navigation__empty {
@@ -357,5 +396,11 @@
 	.entity-card,
 	.calendar-navigation__item {
 		transition: none;
+	}
+}
+
+@media (forced-colors: active) {
+	.entity-card__delete {
+		border-color: ButtonText;
 	}
 }

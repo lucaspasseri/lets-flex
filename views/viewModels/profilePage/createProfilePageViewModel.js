@@ -6,13 +6,19 @@ import createUserFormViewModel from "./createUserFormViewModel.js";
  * @typedef {import("../../../src/types/profilePage.types.js").LocalsProfilePageState} ProfilePageState
  * @typedef {import("../../../src/features/profile/profilePageData.types.js").ProfilePageData} ProfilePageData
  * @typedef {import("./profilePage.types.js").ProfilePageViewModel} ProfilePageViewModel
+ * @typedef {import("./createUserFormViewModel.js").CreateUserFormState} CreateUserFormState
  */
 
 /**
- * @param {{page: LocalsPage, pageState: ProfilePageState, data: ProfilePageData}} input
+ * @param {{page: LocalsPage, pageState: ProfilePageState, data: ProfilePageData, createUserFormState?: CreateUserFormState}} input
  * @returns {ProfilePageViewModel}
  */
-export default function createProfilePageViewModel({ page, pageState, data }) {
+export default function createProfilePageViewModel({
+	page,
+	pageState,
+	data,
+	createUserFormState,
+}) {
 	return {
 		page,
 		pageState,
@@ -25,7 +31,7 @@ export default function createProfilePageViewModel({ page, pageState, data }) {
 				currentUserId: data.currentUser?.id ?? null,
 				users: data.users,
 			}),
-			createUserForm: createUserFormViewModel(),
+			createUserForm: createUserFormViewModel(createUserFormState),
 		},
 	};
 }

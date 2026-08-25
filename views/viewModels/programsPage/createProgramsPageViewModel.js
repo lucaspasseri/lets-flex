@@ -3,6 +3,7 @@ import createCycleSwitcherViewModel from "./createCycleSwitcherViewModel.js";
 import createCalendarNavigationViewModel from "./createCalendarNavigationViewModel.js";
 import createProgramFormViewModel from "./createProgramFormViewModel.js";
 import createCycleFormViewModel from "./createCycleFormViewModel.js";
+import createDeleteEntityFormViewModel from "./createDeleteEntityFormViewModel.js";
 
 /**
  * @typedef {import("../../../src/features/programs/programsPage.types.js").CreateProgramsPageViewModelInput} CreateProgramsPageViewModelInput
@@ -13,8 +14,21 @@ import createCycleFormViewModel from "./createCycleFormViewModel.js";
  * @param {CreateProgramsPageViewModelInput} input
  * @returns {ProgramsPageViewModel}
  */
-export default function createProgramsPageViewModel({ page, pageState, data }) {
-	const { currentUser, programs, cycles, trainingDays, goals } = data;
+export default function createProgramsPageViewModel({
+	page,
+	pageState,
+	data,
+	programFormState,
+	cycleFormState,
+}) {
+	const {
+		currentUser,
+		programs,
+		cycles,
+		trainingDays,
+		workoutSessions = [],
+		goals,
+	} = data;
 
 	return {
 		page,
@@ -38,17 +52,23 @@ export default function createProgramsPageViewModel({ page, pageState, data }) {
 				currentProgram: programs.current,
 				currentCycle: cycles.current,
 				trainingDays,
+				workoutSessions,
 			}),
-			createProgramForm: createProgramFormViewModel({ goals }),
+			createProgramForm: createProgramFormViewModel({
+				goals,
+				state: programFormState,
+			}),
 			createCycleForm: createCycleFormViewModel({
 				currentProgram: programs.current,
 				cycles: cycles.items,
+				state: cycleFormState,
 			}),
+			deleteProgramForm: createDeleteEntityFormViewModel("program"),
+			deleteCycleForm: createDeleteEntityFormViewModel("cycle"),
 			noActiveUser: {
 				isVisible: currentUser === null,
 				title: "No active profile",
-				description:
-					"Create or select a profile before managing training programs.",
+				description: "Create or select a profile before managing training programs.",
 				action: { label: "Choose a profile", href: "/profile", icon: "plus" },
 			},
 		},

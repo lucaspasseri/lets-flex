@@ -108,6 +108,33 @@
 	overflow: clip;
 }
 
+::view-transition-group(.program-calendar-day) {
+	z-index: 2;
+	animation-duration: 420ms;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(.program-calendar-day),
+::view-transition-new(.program-calendar-day) {
+	height: 100%;
+	overflow: clip;
+	border-radius: inherit;
+	animation-duration: inherit;
+	animation-timing-function: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	@view-transition {
+		navigation: none;
+	}
+
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
+
 html,
 body {
 	height: 100%;

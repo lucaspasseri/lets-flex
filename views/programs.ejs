@@ -5,6 +5,8 @@
 		calendarNavigation,
 		createProgramForm,
 		createCycleForm,
+		deleteProgramForm,
+		deleteCycleForm,
 		noActiveUser
 	} = locals.components;
 %>
@@ -40,6 +42,7 @@
 		id: createProgramForm.modal.id,
 		title: createProgramForm.modal.title,
 		showTitle: false,
+		openOnLoad: createProgramForm.modal.openOnLoad,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createProgramForm.form,
 			slots: {
@@ -55,6 +58,7 @@
 		id: createCycleForm.modal.id,
 		title: createCycleForm.modal.title,
 		showTitle: false,
+		openOnLoad: createCycleForm.modal.openOnLoad,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createCycleForm.form,
 			slots: {
@@ -64,3 +68,21 @@
 		}})
 	} }) %>
 <% } %>
+
+<% [deleteProgramForm, deleteCycleForm].forEach(deleteForm => { %>
+	<%- include("partials/shared/components/modal/modal", { modal: {
+		id: deleteForm.modal.id,
+		title: deleteForm.modal.title,
+		showTitle: false,
+		renderContent: () => include("partials/shared/components/form/form", { form: {
+			...deleteForm.form,
+			attributes: { "data-delete-entity-form": true },
+			slots: {
+				footer: include("partials/programsPage/deleteEntityForm/deleteEntityFormFooter", { deleteForm })
+			}
+		}})
+	} }) %>
+<% }) %>
+
+<%- contentFor("scripts") %>
+<script type="module" src="/js/pages/programs/index.js"></script>

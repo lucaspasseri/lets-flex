@@ -43,8 +43,7 @@ function createSummary({ session, activeSessionId }) {
 		movementPatternsLabel:
 			movements.length > 0 ? movements.join(", ") : "No movement pattern",
 		musclesLabel: muscles.length > 0 ? muscles.join(", ") : "No muscle",
-		equipmentsLabel:
-			equipments.length > 0 ? equipments.join(", ") : "No equipment",
+		equipmentsLabel: equipments.length > 0 ? equipments.join(", ") : "No equipment",
 		searchKeyWord,
 	};
 }

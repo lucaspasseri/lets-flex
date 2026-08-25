@@ -4,26 +4,30 @@ import asyncHandler from "../../../utils/asyncControllerHandler.js";
 /**
  * @typedef {import("express").Request} Request
  * @typedef {import("express").Response} Response
+ * @typedef {import("../../features/users/users.types.js").CreateUserInput} CreateUserInput
+ * @typedef {import("../../features/users/users.types.js").User} User
+ * @typedef {Request & {validatedBody: CreateUserInput}} ValidatedCreateUserRequest
+ * @typedef {(input: CreateUserInput) => Promise<{id: User["id"]} | null>} CreateUserAccount
  */
 
 /**
- * @param {Request} req
- * @param {Response} res
+ * Creates the successful-path HTTP handler. Dependency injection keeps the
+ * controller behavior testable without coupling tests to the repository.
+ *
+ * @param {CreateUserAccount} [createUserAccount]
+ * @returns {(req: ValidatedCreateUserRequest, res: Response) => Promise<void>}
  */
+export function buildCreateUserHandler(createUserAccount = createUser) {
+	return async function create(req, res) {
+		const user = await createUserAccount(req.validatedBody);
 
-async function create(req, res) {
-	const { name, dob, anamnesis } = req.body;
-
-	const user = await createUser({
-		name,
-		dateOfBirth: dob,
-		anamnesis,
-	});
-
-	// @ts-ignore
-	req.session.state = { userId: user?.id ?? null };
-	res.redirect("/profile");
+		// @ts-ignore
+		req.session.state = { userId: user?.id ?? null };
+		res.redirect("/profile");
+	};
 }
+
+const create = buildCreateUserHandler();
 
 /**
  * @param {Request} req

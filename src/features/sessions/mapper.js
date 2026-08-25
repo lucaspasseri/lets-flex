@@ -33,6 +33,8 @@ export function toSessionMapperStepSeed(step) {
 		id: step.id,
 		name: step.name,
 		order: step.step_order,
+		stepTypeId: step.step_type_id,
+		exerciseVariantId: step.exercise_variant_id,
 		type: toCapitalizedString(step.step_type_name).replace("_", " "),
 		sets: step.sets,
 		reps: step.reps,
@@ -48,10 +50,7 @@ export function toSessionMapperStepSeed(step) {
 		},
 		equipment: {
 			name: step.equipment_name,
-			category: toCapitalizedString(step.equipment_category).replaceAll(
-				"_",
-				" ",
-			),
+			category: toCapitalizedString(step.equipment_category).replaceAll("_", " "),
 		},
 		muscles: (step.muscles ?? []).map(toMuscle),
 	};

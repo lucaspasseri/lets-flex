@@ -1,5 +1,11 @@
 <% const { fields } = locals.createProgramForm; %>
 
+<% if (locals.createProgramForm.formErrors.length) { %>
+	<div class="form-errors" role="alert">
+		<% locals.createProgramForm.formErrors.forEach(error => { %><p><%= error %></p><% }) %>
+	</div>
+<% } %>
+
 <%- include("../../shared/components/form/field", { field: fields[0] }) %>
 
 <div class="form-grid form-grid--two-columns">

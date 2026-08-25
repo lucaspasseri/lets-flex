@@ -12,5 +12,8 @@ test("profile picker creates meaningful card content", () => {
 	assert.equal(result.items[1].isCurrent, true);
 	assert.equal(result.items[1].statusLabel, "Active profile");
 	assert.equal(result.clearSelectionAction.isVisible, true);
-	assert.equal(result.clearSelectionAction.form.actions.cancel.label, "Keep Maria active");
+	assert.equal(
+		result.clearSelectionAction.form.actions.cancel.label,
+		"Keep Maria active",
+	);
 });

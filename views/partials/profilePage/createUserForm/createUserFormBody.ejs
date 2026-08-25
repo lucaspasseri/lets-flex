@@ -1,4 +1,14 @@
-<% const { fields } = locals.createUserForm; %>
+<% const { fields, formErrors } = locals.createUserForm; %>
+
+<% if (formErrors.length > 0) { %>
+	<div class="form-field__error" role="alert">
+		<ul>
+			<% formErrors.forEach(error => { %>
+				<li><%= error %></li>
+			<% }) %>
+		</ul>
+	</div>
+<% } %>
 
 <div class="form-grid form-grid--two-columns">
 	<% fields.slice(0, 2).forEach(field => { %>

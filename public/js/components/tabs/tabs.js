@@ -5,7 +5,7 @@ function createTabs(root) {
 	const tabs = Array.from(tabList.querySelectorAll("[data-tab]"));
 	const panels = Array.from(root.querySelectorAll("[data-tab-panel]"));
 
-	tabs.forEach(tab => {
+	tabs.forEach((tab) => {
 		tab.addEventListener("click", handleTabSelection);
 		tab.addEventListener("keydown", handleKeydown);
 	});
@@ -15,7 +15,7 @@ function createTabs(root) {
 	}
 
 	function selectTab(selectedTab) {
-		tabs.forEach(tab => {
+		tabs.forEach((tab) => {
 			const selected = tab === selectedTab;
 
 			tab.setAttribute("aria-selected", String(selected));
@@ -24,7 +24,7 @@ function createTabs(root) {
 
 		const controlledPanelId = selectedTab.getAttribute("aria-controls");
 
-		panels.forEach(panel => {
+		panels.forEach((panel) => {
 			const selected = panel.id === controlledPanelId;
 
 			panel.hidden = !selected;

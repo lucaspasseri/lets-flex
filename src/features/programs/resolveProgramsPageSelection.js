@@ -14,13 +14,11 @@ export default function resolveProgramsPageSelection({
 	programs,
 	allUserCycles,
 }) {
-	const currentProgram =
-		programs.find(program => program.id === programId) ?? null;
+	const currentProgram = programs.find((program) => program.id === programId) ?? null;
 	const programCycles = currentProgram
-		? allUserCycles.filter(cycle => cycle.programId === currentProgram.id)
+		? allUserCycles.filter((cycle) => cycle.programId === currentProgram.id)
 		: [];
-	const currentCycle =
-		programCycles.find(cycle => cycle.id === cycleId) ?? null;
+	const currentCycle = programCycles.find((cycle) => cycle.id === cycleId) ?? null;
 
 	return { currentProgram, currentCycle, programCycles };
 }

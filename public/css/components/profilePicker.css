@@ -67,7 +67,11 @@
 	border: 1px solid var(--color-border);
 	border-radius: 1rem;
 	text-decoration: none;
-	transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+	transition:
+		background-color 160ms ease,
+		border-color 160ms ease,
+		box-shadow 160ms ease,
+		transform 160ms ease;
 }
 
 .profile-card:hover {
@@ -155,8 +159,13 @@
 }
 
 .profile-picker-empty-state h2,
-.profile-picker-empty-state p { margin: 0; }
-.profile-picker-empty-state h2 { color: var(--color-text); font-size: 1.2rem; }
+.profile-picker-empty-state p {
+	margin: 0;
+}
+.profile-picker-empty-state h2 {
+	color: var(--color-text);
+	font-size: 1.2rem;
+}
 .profile-picker-empty-state p {
 	max-width: 32rem;
 	margin-bottom: 0.4rem;
@@ -166,9 +175,17 @@
 }
 
 @media (max-width: 42rem) {
-	.profile-picker { width: 100%; padding-inline: 0; }
-	.profile-picker__header { align-items: start; padding-inline: var(--horizontal-margin); }
-	.profile-picker__header .shared-button { flex-shrink: 0; }
+	.profile-picker {
+		width: 100%;
+		padding-inline: 0;
+	}
+	.profile-picker__header {
+		align-items: start;
+		padding-inline: var(--horizontal-margin);
+	}
+	.profile-picker__header .shared-button {
+		flex-shrink: 0;
+	}
 	.profile-picker__list {
 		display: flex;
 		gap: 0.75rem;
@@ -178,11 +195,22 @@
 		scroll-snap-type: x mandatory;
 		scrollbar-width: thin;
 	}
-	.profile-picker__list-item { flex: 0 0 var(--profile-card-width); scroll-snap-align: start; }
-	.profile-picker-empty-state { margin-inline: var(--horizontal-margin); }
+	.profile-picker__list-item {
+		flex: 0 0 var(--profile-card-width);
+		scroll-snap-align: start;
+	}
+	.profile-picker-empty-state {
+		margin-inline: var(--horizontal-margin);
+	}
 }
 
 @media (max-width: 28rem) {
-	.profile-picker__header { align-items: stretch; flex-direction: column; }
-	.profile-picker__actions { justify-content: flex-start; flex-wrap: wrap; }
+	.profile-picker__header {
+		align-items: stretch;
+		flex-direction: column;
+	}
+	.profile-picker__actions {
+		justify-content: flex-start;
+		flex-wrap: wrap;
+	}
 }

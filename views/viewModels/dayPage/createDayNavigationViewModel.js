@@ -6,11 +6,11 @@ import formatDayPageDate from "./formatDayPageDate.js";
  */
 export default function createDayNavigationViewModel({ currentDay, days }) {
 	const currentIndex = currentDay
-		? days.findIndex(day => day.id === currentDay.id)
+		? days.findIndex((day) => day.id === currentDay.id)
 		: -1;
 
 	/** @param {TrainingDay | undefined} day */
-	const toLink = day =>
+	const toLink = (day) =>
 		day
 			? {
 					id: day.id,
@@ -26,7 +26,7 @@ export default function createDayNavigationViewModel({ currentDay, days }) {
 			currentIndex >= 0 && currentIndex < days.length - 1
 				? toLink(days[currentIndex + 1])
 				: null,
-		items: days.map(day => ({
+		items: days.map((day) => ({
 			...toLink(day),
 			isCurrent: day.id === currentDay?.id,
 		})),

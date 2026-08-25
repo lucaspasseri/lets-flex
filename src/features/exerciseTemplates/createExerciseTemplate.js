@@ -19,16 +19,19 @@ async function createExerciseTemplate({
 			{ name, movementPatternId },
 			client,
 		);
+		if (!exercise) {
+			throw new Error("Exercise could not be created");
+		}
 
 		for (const { muscleId, muscleRoleId } of muscleGroup) {
 			await exerciseMusclesRepository.create(
-				{ exerciseId: exercise?.id, muscleId, muscleRoleId },
+				{ exerciseId: exercise.id, muscleId, muscleRoleId },
 				client,
 			);
 		}
 
 		await exerciseVariantsRepository.create(
-			{ name, exerciseId: exercise?.id, equipmentId },
+			{ name, exerciseId: exercise.id, equipmentId },
 			client,
 		);
 
@@ -36,7 +39,8 @@ async function createExerciseTemplate({
 	} catch (err) {
 		console.log({ err });
 		await client.query("ROLLBACK");
-		throw new Error(`Failed to add new exercise cluster: ${err.message}`);
+		const message = err instanceof Error ? err.message : String(err);
+		throw new Error(`Failed to add new exercise cluster: ${message}`);
 	} finally {
 		client.release();
 	}

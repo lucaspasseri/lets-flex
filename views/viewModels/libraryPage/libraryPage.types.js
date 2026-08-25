@@ -8,6 +8,7 @@
  * @typedef {ReturnType<typeof import("./createSessionFormViewModel.js").default>} CreateSessionFormViewModel
  * @typedef {ReturnType<typeof import("./createExerciseFormViewModel.js").default>} CreateExerciseFormViewModel
  * @typedef {ReturnType<typeof import("./createDeleteExerciseFormViewModel.js").default>} DeleteExerciseFormViewModel
+ * @typedef {ReturnType<typeof import("./createArchiveSessionFormViewModel.js").default>} ArchiveSessionFormViewModel
  */
 
 /**
@@ -17,7 +18,7 @@
  * @property {LocalsPage} page
  * @property {LibraryPageState} pageState
  * @property {{currentUser: User | null, activeSession: Session | null, activeNavigation: "library"}} shell
- * @property {{sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, createSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel}} components
+ * @property {{sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, archiveSessionForm: ArchiveSessionFormViewModel}} components
  */
 
 export {};

@@ -9,6 +9,9 @@ async function createSession({ name, notes, stepRowArr }) {
 		await client.query("BEGIN");
 
 		const session = await sessionsRepository.create({ name, notes }, client);
+		if (!session) {
+			throw new Error("Session could not be created");
+		}
 
 		let returningSteps = [];
 		for (let i = 0; i < stepRowArr?.length; i++) {
@@ -17,7 +20,7 @@ async function createSession({ name, notes, stepRowArr }) {
 
 			const step = await sessionStepsRepository.create(
 				{
-					sessionId: session?.id,
+					sessionId: session.id,
 					stepTypeId,
 					exerciseVariantId,
 					name: `Step ${i + 1}`,
@@ -36,7 +39,8 @@ async function createSession({ name, notes, stepRowArr }) {
 	} catch (err) {
 		console.log({ err });
 		await client.query("ROLLBACK");
-		throw new Error(`Failed to add new session and its steps: ${err.message}`);
+		const message = err instanceof Error ? err.message : String(err);
+		throw new Error(`Failed to add new session and its steps: ${message}`);
 	} finally {
 		client.release();
 	}

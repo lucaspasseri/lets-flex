@@ -1,0 +1,16 @@
+<%
+	const { modal, actions } = locals.archiveSessionForm;
+%>
+
+<%- include("../../shared/components/button/button", {button: {
+	label: actions.cancel.label,
+	type: "button",
+	variant: "secondary",
+	attributes: { "data-modal-close": modal.id }
+}}) %>
+
+<%- include("../../shared/components/button/button", {button: {
+	label: actions.submit.label,
+	type: "submit",
+	variant: "danger"
+}}) %>

@@ -68,6 +68,22 @@
 	background: var(--color-primary-hover);
 }
 
+.shared-button--danger-ghost {
+	border-color: color-mix(in srgb, var(--color-danger) 32%, transparent);
+	color: var(--color-danger);
+	background: color-mix(in srgb, var(--color-danger) 9%, transparent);
+}
+
+.shared-button--danger-ghost:hover:not(:disabled) {
+	border-color: color-mix(in srgb, var(--color-danger) 58%, transparent);
+	color: var(--color-text-on-danger);
+	background: color-mix(in srgb, var(--color-danger) 24%, transparent);
+}
+
+.shared-button--danger-ghost:focus-visible {
+	outline-color: color-mix(in srgb, var(--color-danger) 65%, transparent);
+}
+
 .shared-button--ghost {
 	background: transparent;
 	color: var(--color-text);

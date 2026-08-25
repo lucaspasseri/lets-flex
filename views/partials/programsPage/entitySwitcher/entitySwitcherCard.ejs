@@ -1,10 +1,7 @@
 <% const entityCard = locals.entityCard; %>
-<a
-	class="entity-card<%= entityCard.isCurrent ? " entity-card--current" : "" %>"
-	href="<%= entityCard.href %>"
-	aria-label="<%= entityCard.accessibleLabel %>"
-	<% if (entityCard.isCurrent) { %>aria-current="true"<% } %>
->
+
+<div class="entity-card<%= entityCard.isCurrent ? " entity-card--current" : "" %>">
+	<a class="entity-card__select" href="<%= entityCard.href %>" aria-label="<%= entityCard.accessibleLabel %>" <% if (entityCard.isCurrent) { %>aria-current="true"<% } %>>
 	<span class="entity-card__badge" aria-hidden="true"><%= entityCard.badgeLabel %></span>
 	<span class="entity-card__content">
 		<strong class="entity-card__name"><%= entityCard.name %></strong>
@@ -18,4 +15,17 @@
 			</span>
 		<% } %>
 	</span>
-</a>
+	</a>
+	<%- include("../../shared/components/button/button", { button: {
+		label: entityCard.deleteAction.accessibleLabel,
+		variant: "dangerGhost",
+		iconOnly: true,
+		renderIcon: () => include("../../icons/trash"),
+		alternativeClassname: "entity-card__delete",
+		attributes: {
+			title: entityCard.deleteAction.accessibleLabel,
+			"data-modal-open": entityCard.deleteAction.modalId,
+			"data-delete-entity": JSON.stringify(entityCard.deleteAction.values)
+		}
+	} }) %>
+</div>

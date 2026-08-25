@@ -6,14 +6,20 @@ import createProfilePageViewModel from "../../../views/viewModels/profilePage/cr
 /**
  * @typedef {import("express").Request} Request
  * @typedef {import("express").Response} Response
+ * @typedef {import("../../../middlewares/validateRequestBody.js").InvalidBodyResult} InvalidBodyResult
+ * @typedef {import("../../../views/viewModels/profilePage/createUserFormViewModel.js").CreateUserFormState} CreateUserFormState
  */
 
 /**
+ * Loads and renders the shared profile page for both GET requests and failed
+ * profile-creation submissions.
+ *
  * @param {Request} req
  * @param {Response} res
+ * @param {CreateUserFormState} [createUserFormState]
+ * @returns {Promise<void>}
  */
-
-async function show(req, res) {
+async function renderProfile(req, res, createUserFormState = undefined) {
 	const userId = resolveActiveUserId({
 		query: req?.query,
 		sessionState: res.locals?.sessionState,
@@ -26,7 +32,12 @@ async function show(req, res) {
 		userId,
 	};
 
-	const page = { ...res.locals.page, title: "Let's Flex!" };
+	const page = {
+		...res.locals.page,
+		path: "/",
+		url: "/profile",
+		title: "Let's Flex!",
+	};
 	const pageState = { userId };
 
 	const data = await getProfilePageData({
@@ -37,9 +48,42 @@ async function show(req, res) {
 		page,
 		pageState,
 		data,
+		createUserFormState,
 	});
 
 	res.render("profile", profile);
+}
+
+/**
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Promise<void>}
+ */
+async function show(req, res) {
+	await renderProfile(req, res);
+}
+
+/**
+ * Invalid-body callback supplied to the reusable validation middleware.
+ * Rendering stays here because it is specific to the profile page.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {InvalidBodyResult} result
+ * @returns {Promise<void>}
+ */
+async function showCreateUserErrors(req, res, { errors, submittedValues }) {
+	const values =
+		submittedValues && typeof submittedValues === "object"
+			? /** @type {Record<string, unknown>} */ (submittedValues)
+			: {};
+
+	res.status(400);
+	await renderProfile(req, res, {
+		errors,
+		values,
+		open: true,
+	});
 }
 
 /**
@@ -56,5 +100,6 @@ function clearSelection(req, res) {
 
 export const profileController = {
 	show: asyncHandler(show),
+	showCreateUserErrors,
 	clearSelection,
 };

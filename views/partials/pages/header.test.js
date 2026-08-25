@@ -4,7 +4,9 @@ import path from "node:path";
 import ejs from "ejs";
 
 const headerPath = path.resolve("views/partials/pages/header.ejs");
-const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
+	ejs.renderFile
+);
 
 test("header links a named user to predictable profile selection", async () => {
 	const html = await renderFile(headerPath, {
@@ -12,7 +14,10 @@ test("header links a named user to predictable profile selection", async () => {
 	});
 
 	assert.match(html, /href="\/profile"/);
-	assert.match(html, /aria-label="Choose profile\. Current profile: Lucas &amp; Maria"/);
+	assert.match(
+		html,
+		/aria-label="Choose profile\. Current profile: Lucas &amp; Maria"/,
+	);
 	assert.match(html, /class="page-header__username">Lucas &amp; Maria<\/span>/);
 	assert.match(html, /aria-hidden="true"/);
 	assert.match(html, /focusable="false"/);

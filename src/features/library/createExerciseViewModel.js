@@ -55,6 +55,21 @@ function createExercise({ exerciseTemplate }) {
 		},
 
 		actions: {
+			update: {
+				label: `Edit ${variant?.name}`,
+				modalId: "updateExerciseModal",
+				values: {
+					exerciseId: id,
+					variantId: variant?.id,
+					name: variant?.name,
+					movementPatternId: movementPattern?.id,
+					equipmentId: equipment?.id,
+					muscleGroup: muscles.map((muscle) => ({
+						muscleId: muscle.id,
+						muscleRoleId: muscle.role.id,
+					})),
+				},
+			},
 			remove: {
 				label: `Delete ${variant?.name}`,
 				modalId: "deleteExerciseModal",

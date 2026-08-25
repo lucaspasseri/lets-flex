@@ -3,9 +3,14 @@
  * @typedef {import("../../../src/features/sessions/sessions.types.js").SessionMapperStep} SessionStep
  * @param {{currentDayId: number | null, workoutSessions: WorkoutSession[]}} input
  */
-export default function createWorkoutSessionListViewModel({ currentDayId, workoutSessions }) {
-	const visibleSessions = workoutSessions.filter(session => session.status !== "cancelled");
-	const items = visibleSessions.map(session => ({
+export default function createWorkoutSessionListViewModel({
+	currentDayId,
+	workoutSessions,
+}) {
+	const visibleSessions = workoutSessions.filter(
+		(session) => session.status !== "cancelled",
+	);
+	const items = visibleSessions.map((session) => ({
 		id: session.id,
 		type: "workout",
 		header: {
@@ -20,16 +25,18 @@ export default function createWorkoutSessionListViewModel({ currentDayId, workou
 
 	return {
 		count: items.length,
-		countLabel: items.length === 1
-			? "The current day has 1 workout session linked to it."
-			: `The current day has ${items.length} workout sessions linked to it.`,
+		countLabel:
+			items.length === 1
+				? "The current day has 1 workout session linked to it."
+				: `The current day has ${items.length} workout sessions linked to it.`,
 		emptyState: {
 			isVisible: items.length === 0,
-			title: "The current day does not yet have any training sessions associated with it.",
+			title:
+				"The current day does not yet have any training sessions associated with it.",
 			description: "You can link a session template here.",
 		},
 		items,
-		cancelModals: visibleSessions.map(session => ({
+		cancelModals: visibleSessions.map((session) => ({
 			id: `deleteWorkoutSessionId-${session.id}`,
 			title: "Delete the workout session",
 			form: {
@@ -52,7 +59,9 @@ function toStepViewModel(step) {
 		orderLabel: String(step.order).padStart(2, "0"),
 		title: `${title}:`,
 		prescriptionLabel: `${step.sets} sets × ${step.reps} reps`,
-		loadLabel: hasLoad ? [step.loadValue, step.loadUnit].filter(Boolean).join(" ") : null,
+		loadLabel: hasLoad
+			? [step.loadValue, step.loadUnit].filter(Boolean).join(" ")
+			: null,
 		details: [step.equipment.name, step.movementPattern].filter(Boolean),
 	};
 }

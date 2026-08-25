@@ -5,7 +5,9 @@ import ejs from "ejs";
 
 const footerPath = path.resolve("views/partials/pages/footer.ejs");
 const destinations = ["dashboard", "programs", "library", "profile"];
-const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
+	ejs.renderFile
+);
 
 test("footer identifies exactly one current primary navigation destination", async () => {
 	for (const activeNavigation of destinations) {
@@ -16,9 +18,8 @@ test("footer identifies exactly one current primary navigation destination", asy
 		assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
 		assert.match(html, /<nav class="footer-nav" aria-label="Primary">/);
 
-		const expectedHref = activeNavigation === "dashboard"
-			? "/"
-			: `/${activeNavigation}`;
+		const expectedHref =
+			activeNavigation === "dashboard" ? "/" : `/${activeNavigation}`;
 		assert.match(
 			html,
 			new RegExp(`href="${expectedHref}"[\\s\\S]*?aria-current="page"`),

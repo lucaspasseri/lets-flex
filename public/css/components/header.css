@@ -35,7 +35,9 @@
 	border-radius: 0.75rem;
 	color: var(--color-text-muted);
 	text-decoration: none;
-	transition: color 160ms ease, background-color 160ms ease;
+	transition:
+		color 160ms ease,
+		background-color 160ms ease;
 }
 
 .page-header__avatar {

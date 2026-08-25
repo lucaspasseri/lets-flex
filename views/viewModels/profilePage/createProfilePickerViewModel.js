@@ -6,15 +6,14 @@
  * @param {{currentUserId: User["id"] | null, users: User[]}} input
  */
 export default function createProfilePickerViewModel({ currentUserId, users }) {
-	const currentUser = users.find(user => user.id === currentUserId) ?? null;
+	const currentUser = users.find((user) => user.id === currentUserId) ?? null;
 
 	return {
 		id: "profile-picker",
 		eyebrow: "Profiles",
 		heading: users.length === 0 ? "Create your profile" : "Who is training?",
-		description:
-			"Choose the profile used for programs, sessions, and workout history.",
-		items: users.map(user => ({
+		description: "Choose the profile used for programs, sessions, and workout history.",
+		items: users.map((user) => ({
 			id: user.id,
 			name: user.name,
 			initials: getInitials(user.name),
@@ -28,8 +27,7 @@ export default function createProfilePickerViewModel({ currentUserId, users }) {
 		})),
 		emptyState: {
 			title: "Create your first profile",
-			description:
-				"Profiles keep each person's programs and workout history separate.",
+			description: "Profiles keep each person's programs and workout history separate.",
 			icon: "guestUser",
 		},
 		createAction: {
@@ -69,11 +67,13 @@ export default function createProfilePickerViewModel({ currentUserId, users }) {
 
 /** @param {string} name */
 function getInitials(name) {
-	return name
-		.trim()
-		.split(/\s+/)
-		.filter(Boolean)
-		.slice(0, 2)
-		.map(part => part.charAt(0).toUpperCase())
-		.join("") || "?";
+	return (
+		name
+			.trim()
+			.split(/\s+/)
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((part) => part.charAt(0).toUpperCase())
+			.join("") || "?"
+	);
 }

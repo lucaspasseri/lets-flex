@@ -32,14 +32,13 @@ async function startWorkoutSession({ workoutSessionId }) {
 			client,
 		);
 
-		const workoutStepLogs =
-			await workoutSessionStepLogsRepository.createBySessionSteps(
-				{
-					workoutSessionId,
-					sessionId: updatedWorkoutSession.session_id,
-				},
-				client,
-			);
+		const workoutStepLogs = await workoutSessionStepLogsRepository.createBySessionSteps(
+			{
+				workoutSessionId,
+				sessionId: updatedWorkoutSession.session_id,
+			},
+			client,
+		);
 
 		await client.query("COMMIT");
 

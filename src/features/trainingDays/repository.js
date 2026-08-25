@@ -3,6 +3,7 @@ import pool from "../../../db/pool.js";
 /**
  * @typedef {import("./trainingDays.types.js").ProgramTrainingDayRow} ProgramTrainingDayRow
  * @typedef {import("../programs/programs.types.js").ProgramRow} ProgramRow
+ * @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient
  */
 
 /**
@@ -32,10 +33,8 @@ export async function findAllByProgramId({ programId }, db = pool) {
 	return rows;
 }
 
-export async function create(
-	{ cycleId, dayOrder, label, scheduledDate },
-	db = pool,
-) {
+/** @param {any} input @param {DatabaseClient} [db] */
+export async function create({ cycleId, dayOrder, label, scheduledDate }, db = pool) {
 	const { rows } = await db.query(
 		"INSERT INTO training_days ( cycle_id, day_order, label, scheduled_date) VALUES ($1, $2, $3, $4) RETURNING *",
 		[cycleId, dayOrder, label, scheduledDate],
@@ -44,6 +43,7 @@ export async function create(
 	return rows[0];
 }
 
+/** @param {any} input @param {DatabaseClient} [db] */
 export async function shiftScheduledDates(
 	{ programId, cycleOrder, amountOfDays },
 	db = pool,

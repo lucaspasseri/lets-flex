@@ -12,7 +12,7 @@ import { toMuscleRole } from "../muscleRoles/mapper.js";
  */
 
 export function toExerciseTemplateSeed(exercise) {
-	const muscles = exercise.muscles.map(muscle => {
+	const muscles = exercise.muscles.map((muscle) => {
 		return {
 			...muscle,
 			role: toMuscleRole(muscle.role),

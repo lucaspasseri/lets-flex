@@ -19,7 +19,7 @@ export default function createCycleSwitcherViewModel({
 		description: currentProgram
 			? `Manage the training cycles in ${currentProgram.name}.`
 			: "Choose a program before managing its cycles.",
-		items: cycles.map(cycle => {
+		items: cycles.map((cycle) => {
 			const isCurrent = cycle.id === currentCycleId;
 
 			return {
@@ -33,6 +33,11 @@ export default function createCycleSwitcherViewModel({
 				accessibleLabel: isCurrent
 					? `${cycle.name}, active cycle`
 					: `Select cycle ${cycle.name}`,
+				deleteAction: {
+					modalId: "deleteCycleModal",
+					accessibleLabel: `Delete cycle ${cycle.name}`,
+					values: { id: cycle.id, name: cycle.name, entity: "cycle" },
+				},
 			};
 		}),
 		emptyState: {

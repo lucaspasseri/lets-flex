@@ -4,6 +4,7 @@
 		"checkJs": true,
 		"noEmit": true,
 		"strict": true,
+		"noImplicitAny": false,
 		"skipLibCheck": true,
 		"target": "ES2022",
 		"module": "NodeNext",
@@ -14,7 +15,7 @@
 		"routes/**/*.js",
 		"middlewares/**/*.js",
 		"utils/**/*.js",
-		"db/**/*.js",
+		"db/pool.js",
 		"src/**/*.js",
 		"views/**/*.js"
 	],

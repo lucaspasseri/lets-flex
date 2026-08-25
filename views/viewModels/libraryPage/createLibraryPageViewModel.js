@@ -3,6 +3,7 @@ import createExerciseTemplates from "../../../src/features/library/createExercis
 import createSessionForm from "./createSessionFormViewModel.js";
 import createExerciseForm from "./createExerciseFormViewModel.js";
 import createDeleteExerciseForm from "./createDeleteExerciseFormViewModel.js";
+import createArchiveSessionForm from "./createArchiveSessionFormViewModel.js";
 
 /**
  * @typedef {import("../../../src/types/libraryPage.types.js").LocalsPage} LocalsPage
@@ -12,10 +13,16 @@ import createDeleteExerciseForm from "./createDeleteExerciseFormViewModel.js";
  */
 
 /**
- * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData}} input
+ * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>}} input
  * @returns {LibraryPageViewModel}
  */
-export default function createLibraryPageViewModel({ page, pageState, data }) {
+export default function createLibraryPageViewModel({
+	page,
+	pageState,
+	data,
+	exerciseTemplateFormState,
+	sessionTemplateFormState,
+}) {
 	return {
 		page,
 		pageState,
@@ -36,13 +43,30 @@ export default function createLibraryPageViewModel({ page, pageState, data }) {
 				stepTypes: data.stepTypes,
 				exerciseTemplates: data.exerciseTemplates,
 			}),
+			updateSessionForm: createSessionForm({
+				stepTypes: data.stepTypes,
+				exerciseTemplates: data.exerciseTemplates,
+				state:
+					sessionTemplateFormState?.mode === "update" ? sessionTemplateFormState : {},
+				mode: "update",
+			}),
 			createExerciseForm: createExerciseForm({
 				equipments: data.equipments,
 				movementPatterns: data.movementPatterns,
 				muscles: data.muscles,
 				muscleRoles: data.muscleRoles,
 			}),
+			updateExerciseForm: createExerciseForm({
+				equipments: data.equipments,
+				movementPatterns: data.movementPatterns,
+				muscles: data.muscles,
+				muscleRoles: data.muscleRoles,
+				state:
+					exerciseTemplateFormState?.mode === "update" ? exerciseTemplateFormState : {},
+				mode: "update",
+			}),
 			deleteExerciseForm: createDeleteExerciseForm(),
+			archiveSessionForm: createArchiveSessionForm(),
 		},
 	};
 }

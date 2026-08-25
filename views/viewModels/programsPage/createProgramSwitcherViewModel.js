@@ -13,7 +13,7 @@ export default function createProgramSwitcherViewModel({
 	programs,
 	goals,
 }) {
-	const goalsById = new Map(goals.map(goal => [goal.id, goal]));
+	const goalsById = new Map(goals.map((goal) => [goal.id, goal]));
 
 	return {
 		id: "program-switcher",
@@ -39,6 +39,11 @@ export default function createProgramSwitcherViewModel({
 				accessibleLabel: isCurrent
 					? `${program.name}, active program`
 					: `Select program ${program.name}`,
+				deleteAction: {
+					modalId: "deleteProgramModal",
+					accessibleLabel: `Delete program ${program.name}`,
+					values: { id: program.id, name: program.name, entity: "program" },
+				},
 			};
 		}),
 		emptyState: {

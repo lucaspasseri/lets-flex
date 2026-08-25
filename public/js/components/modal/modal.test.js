@@ -52,7 +52,10 @@ class FakeElement {
 	}
 
 	removeEventListener(type, listener) {
-		this.listeners.set(type, (this.listeners.get(type) ?? []).filter(item => item !== listener));
+		this.listeners.set(
+			type,
+			(this.listeners.get(type) ?? []).filter((item) => item !== listener),
+		);
 	}
 
 	dispatch(type, event = {}) {
@@ -105,11 +108,12 @@ function createHarness() {
 
 	root.id = "test-modal";
 	root.hidden = true;
-	root.querySelector = selector => ({
-		"[data-modal-backdrop]": backdrop,
-		"[data-modal-content]": content,
-		"[data-modal-close-button]": closeButton,
-	})[selector] ?? null;
+	root.querySelector = (selector) =>
+		({
+			"[data-modal-backdrop]": backdrop,
+			"[data-modal-content]": content,
+			"[data-modal-close-button]": closeButton,
+		})[selector] ?? null;
 	root.querySelectorAll = () => [closeButton];
 	pageContent.contains = () => false;
 
@@ -132,16 +136,31 @@ function createHarness() {
 			scrollCalls.push([x, y]);
 		},
 	};
-	globalThis.requestAnimationFrame = callback => callback();
-	globalThis.getComputedStyle = () => ({ transitionDuration: "0s", transitionDelay: "0s" });
+	globalThis.requestAnimationFrame = (callback) => callback();
+	globalThis.getComputedStyle = () => ({
+		transitionDuration: "0s",
+		transitionDelay: "0s",
+	});
 
-	return { root, backdrop, content, closeButton, openButton, pageContent, body, scrollCalls };
+	return {
+		root,
+		backdrop,
+		content,
+		closeButton,
+		openButton,
+		pageContent,
+		body,
+		scrollCalls,
+	};
 }
 
 const settleTransition = () => Promise.resolve();
 
 test("a closed modal is removed from layout and does not restrict the page", () => {
-	const css = fs.readFileSync(new URL("../../../css/components/modal.css", import.meta.url), "utf8");
+	const css = fs.readFileSync(
+		new URL("../../../css/components/modal.css", import.meta.url),
+		"utf8",
+	);
 	const { root, pageContent, body } = createHarness();
 	createModal(root);
 
@@ -168,7 +187,8 @@ test("opening activates the backdrop and restricts background interaction", asyn
 });
 
 test("closing restores page interaction, scroll position, and focus", async () => {
-	const { root, backdrop, openButton, closeButton, pageContent, body, scrollCalls } = createHarness();
+	const { root, backdrop, openButton, closeButton, pageContent, body, scrollCalls } =
+		createHarness();
 	createModal(root);
 
 	openButton.dispatch("click");
@@ -186,7 +206,16 @@ test("closing restores page interaction, scroll position, and focus", async () =
 });
 
 test("repeated open and close cycles leave modal and page state clean", async () => {
-	const { root, backdrop, content, openButton, closeButton, pageContent, body, scrollCalls } = createHarness();
+	const {
+		root,
+		backdrop,
+		content,
+		openButton,
+		closeButton,
+		pageContent,
+		body,
+		scrollCalls,
+	} = createHarness();
 	createModal(root);
 
 	for (let cycle = 0; cycle < 3; cycle += 1) {
