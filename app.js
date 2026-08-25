@@ -23,46 +23,47 @@ import playgroundRouter from "./routes/playground.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
-const port = process.env.PORT || 3000;
+export function createApp() {
+	const app = express();
 
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-app.use(expressEjsLayouts);
-app.set("layout", "./layouts/pageShell");
+	app.set("view engine", "ejs");
+	app.set("views", path.join(__dirname, "views"));
+	app.use(expressEjsLayouts);
+	app.set("layout", "./layouts/pageShell");
 
-app.use(
-	session({
-		secret: "your-secret-key",
-		resave: false,
-		saveUninitialized: false,
-	}),
-);
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(process.cwd(), "public")));
-app.use(express.json());
-app.use(methodOverride("_method"));
+	app.use(
+		session({
+			secret: process.env.SESSION_SECRET || "your-secret-key",
+			resave: false,
+			saveUninitialized: false,
+		}),
+	);
+	app.use(express.urlencoded({ extended: true }));
+	app.use(express.static(path.join(__dirname, "public")));
+	app.use(express.json());
+	app.use(methodOverride("_method"));
 
-app.use("/", indexRouter);
-app.use("/profile", profileRouter);
-app.use("/library", libraryRouter);
+	app.use("/", indexRouter);
+	app.use("/profile", profileRouter);
+	app.use("/library", libraryRouter);
 
-app.use("/programs", programsRouter);
+	app.use("/programs", programsRouter);
 
-app.use("/users", usersRouter);
-app.use("/cycles", cyclesRouter);
-app.use("/sessions", sessionRouter);
-app.use("/exerciseTemplates", exerciseTemplatesRouter);
-app.use("/workout_sessions", workoutSessionsRouter);
-app.use("/workout_step_logs", workoutStepLogRouter);
+	app.use("/users", usersRouter);
+	app.use("/cycles", cyclesRouter);
+	app.use("/sessions", sessionRouter);
+	app.use("/exerciseTemplates", exerciseTemplatesRouter);
+	app.use("/workout_sessions", workoutSessionsRouter);
+	app.use("/workout_step_logs", workoutStepLogRouter);
 
-app.use("/playground", playgroundRouter);
+	app.use("/playground", playgroundRouter);
 
-app.use((err, _req, res, _next) => {
-	console.error(err.stack);
-	res.status(500).send("Something broke!");
-});
+	app.use((err, _req, res, _next) => {
+		console.error(err.stack);
+		res.status(500).send("Something broke!");
+	});
 
-app.listen(port, () => {
-	console.log("Listen on http://localhost:" + port);
-});
+	return app;
+}
+
+export default createApp();

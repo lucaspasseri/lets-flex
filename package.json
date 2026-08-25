@@ -13,10 +13,10 @@
 	"license": "ISC",
 	"author": "",
 	"type": "module",
-	"main": "app.js",
+	"main": "server.js",
 	"scripts": {
-		"start": "node app.js",
-		"dev": "node --env-file-if-exists=.env --watch app.js",
+		"start": "node server.js",
+		"dev": "node --env-file-if-exists=.env --watch server.js",
 		"seed": "node --env-file-if-exists=.env db/populatedb.js",
 		"check:types": "tsc --project jsconfig.json --noEmit",
 		"check:browser-types": "tsc --project public/jsconfig.json --noEmit",
@@ -24,8 +24,9 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"verify": "npm run format:check && npm run lint && npm run check:types && npm run check:browser-types && npm test",
-		"test": "node --test",
-		"test:watch": "node --test --watch"
+		"test": "node --env-file-if-exists=.env.test --test",
+		"test:http": "node --env-file=.env.test --test test/http/applicationPages.test.js",
+		"test:watch": "node --env-file-if-exists=.env.test --test --watch"
 	},
 	"dependencies": {
 		"date-fns": "^4.1.0",
