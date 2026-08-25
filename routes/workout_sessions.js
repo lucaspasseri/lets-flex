@@ -7,6 +7,11 @@ import {
 	cancelWorkoutSessionSchema,
 	createWorkoutSessionSchema,
 } from "../src/interfaces/validation/daySchemas.js";
+import validateRequestParams from "../middlewares/validateRequestParams.js";
+import {
+	dashboardActionBodySchema,
+	workoutSessionActionParamsSchema,
+} from "../src/interfaces/validation/dashboardSchemas.js";
 
 const router = express.Router();
 
@@ -22,8 +27,24 @@ router.post(
 	workoutSessionController.create,
 );
 
-router.post("/:workoutSessionId/start", workoutSessionController.start);
-router.post("/:workoutSessionId/finish", workoutSessionController.finish);
+router.post(
+	"/:workoutSessionId/start",
+	validateRequestParams(workoutSessionActionParamsSchema),
+	validateRequestBody(
+		dashboardActionBodySchema,
+		workoutSessionController.showActionErrors,
+	),
+	workoutSessionController.start,
+);
+router.post(
+	"/:workoutSessionId/finish",
+	validateRequestParams(workoutSessionActionParamsSchema),
+	validateRequestBody(
+		dashboardActionBodySchema,
+		workoutSessionController.showActionErrors,
+	),
+	workoutSessionController.finish,
+);
 router.patch(
 	"/:workoutSessionId",
 	validateRequestBody(

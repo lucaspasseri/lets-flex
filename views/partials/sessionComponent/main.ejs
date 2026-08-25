@@ -13,6 +13,7 @@
 			</section>
 		<% } else if (workout.showFinish) { %>
 			<div class="finish-workout-session-button-container"><form method="POST" action="<%= workout.finishForm.action %>"><input type="hidden" name="daysDifference" value="<%= workout.finishForm.daysDifference ?? 0 %>">
+				<% if (workout.finishForm.errors?.fieldErrors?.daysDifference) { %><p class="form-field__error"><%= workout.finishForm.errors.fieldErrors.daysDifference %></p><% } %>
 				<%- include('../shared/components/button/button', { button: { label: "Finish session", type: "submit" } }) %>
 			</form></div>
 		<% } else if (workout.showMissingLogs) { %><div class="no-session-step-container"><span aria-hidden="true">!</span><p>Workout logs could not be created.</p></div><% } %>
@@ -21,6 +22,7 @@
 			<li><div class="session-step-list-item"><span class="step-order"><%= step.orderLabel %></span><p class="step-name"><%= step.title %></p><div class="step-status planned"><%- include('../shared/components/icons/statusCircle', { status: "planned", icon: { attributes: { "aria-hidden": true } } }) %></div></div></li>
 		<% }) %></ul></div>
 		<% if (workout.showStart) { %><div class="button-container"><form method="POST" action="<%= workout.startForm.action %>"><input type="hidden" name="daysDifference" value="<%= workout.startForm.daysDifference ?? 0 %>">
+			<% if (workout.startForm.errors?.fieldErrors?.daysDifference) { %><p class="form-field__error"><%= workout.startForm.errors.fieldErrors.daysDifference %></p><% } %>
 			<%- include('../shared/components/button/button', { button: { label: "Start workout session", type: "submit", iconOnly: true, alternativeClassname: "session-start-button", renderIcon: () => include("../shared/components/icons/playCircle", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
 		</form></div><% } %></div>
 	<% } %>

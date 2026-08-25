@@ -5,6 +5,7 @@ import startWorkoutSession from "../../features/workoutSessions/startWorkoutSess
 import { finishWorkoutSession } from "../../features/workoutSessions/finishWorkoutSession.js";
 import { renderDay } from "./dayController.js";
 import { workoutSessionParamsSchema } from "../validation/daySchemas.js";
+import { renderDashboard } from "./dashboardController.js";
 
 async function create(req, res) {
 	const { sessionId, trainingDayId } = req.validatedBody;
@@ -44,9 +45,8 @@ async function showCancelErrors(_req, res, { errors }) {
 }
 
 async function start(req, res) {
-	const { workoutSessionId } = req.params;
-	const daysDifference =
-		req.body.daysDifference ?? res.locals.sessionState.daysDifference;
+	const { workoutSessionId } = req.validatedParams;
+	const { daysDifference } = req.validatedBody;
 
 	const { workoutSession } = await startWorkoutSession({ workoutSessionId });
 
@@ -55,15 +55,23 @@ async function start(req, res) {
 	);
 }
 async function finish(req, res) {
-	const { workoutSessionId } = req.params;
-	const daysDifference =
-		req.body.daysDifference ?? res.locals.sessionState.daysDifference;
+	const { workoutSessionId } = req.validatedParams;
+	const { daysDifference } = req.validatedBody;
 
 	const workoutSession = await finishWorkoutSession({ workoutSessionId });
 
 	res.redirect(
 		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
 	);
+}
+
+async function showActionErrors(req, res, { errors, submittedValues }) {
+	res.status(422);
+	await renderDashboard(req, res, {
+		daysDifference: submittedValues?.daysDifference,
+		workoutSessionId: req.validatedParams?.workoutSessionId,
+		actionFormState: { errors, values: submittedValues },
+	});
 }
 
 export const workoutSessionController = {
@@ -73,4 +81,5 @@ export const workoutSessionController = {
 	finish: asyncHandler(finish),
 	showCreateErrors,
 	showCancelErrors,
+	showActionErrors,
 };

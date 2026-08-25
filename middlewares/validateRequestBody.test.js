@@ -44,3 +44,16 @@ test("invalid body middleware delegates a stable error shape and preserves value
 		submittedValues: request.body,
 	});
 });
+
+test("body middleware returns nested field paths for repeatable form rows", async () => {
+	let invalidResult;
+	const request = /** @type {*} */ ({ body: { rows: [{ reps: "bad" }] } });
+	await validateRequestBody(
+		z.object({ rows: z.array(z.object({ reps: z.coerce.number() })) }),
+		(_req, _res, result) => (invalidResult = result),
+	)(request, /** @type {*} */ ({}), () => assert.fail("must not continue"));
+
+	assert.deepEqual(invalidResult.errors.fieldErrors, {
+		"rows.0.reps": "Invalid input: expected number, received NaN",
+	});
+});

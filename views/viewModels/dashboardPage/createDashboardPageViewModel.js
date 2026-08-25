@@ -5,8 +5,14 @@ import createWorkoutSessionViewModel from "./createWorkoutSessionViewModel.js";
 import createHeatmapViewModel from "./createHeatmapViewModel.js";
 import createBarChartViewModel from "./createBarChartViewModel.js";
 
-/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData}} input */
-export default function createDashboardPageViewModel({ page, pageState, data }) {
+/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any}} input */
+export default function createDashboardPageViewModel({
+	page,
+	pageState,
+	data,
+	workoutLogFormState,
+	actionFormState,
+}) {
 	const components = {
 		status: createDashboardStatusViewModel(data),
 		programBanner: createProgramBannerViewModel(data),
@@ -18,6 +24,8 @@ export default function createDashboardPageViewModel({ page, pageState, data }) 
 			session: data.selectedWorkoutSession,
 			sessions: data.currentDayWorkoutSessions,
 			daysDifference: pageState.daysDifference,
+			workoutLogFormState,
+			actionFormState,
 		}),
 		heatmap: createHeatmapViewModel(data),
 		barChart: createBarChartViewModel(data),

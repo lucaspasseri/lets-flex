@@ -21,9 +21,9 @@ export function formatValidationErrors(error) {
 	const formErrors = [];
 
 	for (const issue of error.issues) {
-		const fieldName = issue.path[0];
+		const fieldName = issue.path.map(String).join(".");
 
-		if (typeof fieldName === "string") {
+		if (fieldName) {
 			fieldErrors[fieldName] ??= issue.message;
 		} else {
 			formErrors.push(issue.message);
