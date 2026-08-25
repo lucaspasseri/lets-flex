@@ -4,6 +4,7 @@
  * @typedef {import("../cycles/cycles.types.js").Cycle} Cycle
  * @typedef {import("../trainingDays/trainingDays.types.js").TrainingDay} TrainingDay
  * @typedef {import("../goals/goals.types.js").Goal} Goal
+ * @typedef {import("../workoutSessions/workoutSessions.types.js").WorkoutSession} WorkoutSession
  */
 
 /**
@@ -37,6 +38,7 @@
  * @property {{ current: Program | null, items: Program[] }} programs
  * @property {{ current: Cycle | null, items: Cycle[] }} cycles
  * @property {TrainingDay[]} trainingDays
+ * @property {WorkoutSession[]} workoutSessions
  * @property {Goal[]} goals
  */
 

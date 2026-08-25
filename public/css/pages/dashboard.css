@@ -288,24 +288,6 @@
 	border-color: var(--color-text-muted);
 	background: var(--color-border);
 }
-.dashboard-calendar__indicators {
-	display: flex;
-	justify-content: center;
-	gap: 0.2rem;
-	min-height: 0.35rem;
-	margin: 0.2rem 0 0;
-	padding: 0;
-}
-.dashboard-calendar__indicators li {
-	width: 0.35rem;
-	height: 0.35rem;
-	border-radius: 50%;
-	background: var(--color-text-disabled);
-}
-.dashboard-calendar__indicators li.is-in-progress {
-	background: var(--color-success);
-}
-
 .dashboard-workout {
 	overflow: hidden;
 }

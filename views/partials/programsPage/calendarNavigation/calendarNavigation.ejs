@@ -33,6 +33,7 @@
 						<span class="calendar-navigation__cycle">Cycle <%= item.cycleOrder %></span>
 						<strong><%= item.dateLabel %></strong>
 						<span class="calendar-navigation__label"><%= item.label %></span>
+						<%- include("../../shared/components/sessionStatusMarkers/sessionStatusMarkers", { statusMarkers: item.statusMarkers }) %>
 					</a>
 				</li>
 			<% }) %>

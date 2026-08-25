@@ -35,6 +35,21 @@ const cycle = {
 	order: 1,
 };
 
+const workoutSession = {
+	id: 40,
+	trainingDayId: 30,
+	sessionId: 50,
+	order: 1,
+	status: "finished",
+	startedAt: null,
+	finishedAt: null,
+	notes: null,
+	name: "Push",
+	sessionNotes: null,
+	isArchived: false,
+	steps: [],
+};
+
 test("Programs page creates presentation-ready component contracts", () => {
 	const result = createProgramsPageViewModel({
 		page,
@@ -54,6 +69,7 @@ test("Programs page creates presentation-ready component contracts", () => {
 					label: "Day 1",
 				},
 			],
+			workoutSessions: [workoutSession],
 			goals: [{ id: 2, name: "Build strength" }],
 		},
 	});
@@ -74,6 +90,10 @@ test("Programs page creates presentation-ready component contracts", () => {
 		"/programs/day?dayId=30",
 	);
 	assert.equal(result.components.calendarNavigation.items[0].dateLabel, "18/08");
+	assert.equal(
+		result.components.calendarNavigation.items[0].statusMarkers.items[0].label,
+		"Finished",
+	);
 	assert.deepEqual(result.components.createProgramForm.fields[1].options, [
 		{ label: "Build strength", value: 2 },
 	]);
@@ -92,6 +112,7 @@ test("Programs page exposes safe empty component states", () => {
 			programs: { current: null, items: [] },
 			cycles: { current: null, items: [] },
 			trainingDays: [],
+			workoutSessions: [],
 			goals: [],
 		},
 	});
@@ -111,6 +132,7 @@ test("Programs page preserves invalid values and exposes field and form errors",
 			programs: { current: program, items: [program] },
 			cycles: { current: cycle, items: [cycle] },
 			trainingDays: [],
+			workoutSessions: [],
 			goals: [{ id: 2, name: "Build strength" }],
 		},
 		programFormState: {
@@ -178,6 +200,7 @@ test("Programs template renders populated and no-profile component states", asyn
 					label: "Day 1",
 				},
 			],
+			workoutSessions: [{ ...workoutSession, status: "cancelled" }],
 			goals: [{ id: 2, name: "Build strength" }],
 		},
 	});
@@ -189,6 +212,7 @@ test("Programs template renders populated and no-profile component states", asyn
 			programs: { current: null, items: [] },
 			cycles: { current: null, items: [] },
 			trainingDays: [],
+			workoutSessions: [],
 			goals: [],
 		},
 	});
@@ -206,6 +230,8 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.match(populatedHtml, /id="program-switcher"/);
 	assert.match(populatedHtml, /id="cycle-switcher"/);
 	assert.match(populatedHtml, /href="\/programs\/day\?dayId=30"/);
+	assert.match(populatedHtml, /session-status-marker--cancelled/);
+	assert.match(populatedHtml, /Workout session: Cancelled/);
 	assert.match(populatedHtml, /id="create-program-form"/);
 	assert.match(populatedHtml, /id="create-cycle-form"/);
 	assert.match(populatedHtml, /id="delete-program-form"/);

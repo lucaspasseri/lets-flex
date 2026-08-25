@@ -335,6 +335,10 @@
 	white-space: nowrap;
 }
 
+.calendar-navigation__item .session-status-markers {
+	justify-content: flex-start;
+}
+
 .calendar-navigation__empty {
 	padding-block: 2.5rem;
 }

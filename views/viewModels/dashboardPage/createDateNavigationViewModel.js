@@ -1,4 +1,5 @@
 import { addDays, format, isSameDay } from "date-fns";
+import createSessionStatusMarkersViewModel from "../shared/createSessionStatusMarkersViewModel.js";
 
 /** @param {Pick<import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, "selectedDate" | "workoutSessions"> & {daysDifference: number | null}} input */
 export default function createDateNavigationViewModel({
@@ -17,15 +18,12 @@ export default function createDateNavigationViewModel({
 				weekdayLabel: format(date, "EEE").toUpperCase(),
 				dayLabel: format(date, "dd"),
 				isActive: index === 3,
-				indicators: workoutSessions
-					.filter(
+				statusMarkers: createSessionStatusMarkersViewModel(
+					workoutSessions.filter(
 						(session) =>
 							session.scheduledDate && isSameDay(session.scheduledDate, date),
-					)
-					.map((session) => ({
-						id: session.id,
-						isInProgress: session.status === "in_progress",
-					})),
+					),
+				),
 			};
 		}),
 	};

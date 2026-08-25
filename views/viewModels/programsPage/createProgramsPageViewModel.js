@@ -21,7 +21,14 @@ export default function createProgramsPageViewModel({
 	programFormState,
 	cycleFormState,
 }) {
-	const { currentUser, programs, cycles, trainingDays, goals } = data;
+	const {
+		currentUser,
+		programs,
+		cycles,
+		trainingDays,
+		workoutSessions = [],
+		goals,
+	} = data;
 
 	return {
 		page,
@@ -45,6 +52,7 @@ export default function createProgramsPageViewModel({
 				currentProgram: programs.current,
 				currentCycle: cycles.current,
 				trainingDays,
+				workoutSessions,
 			}),
 			createProgramForm: createProgramFormViewModel({
 				goals,

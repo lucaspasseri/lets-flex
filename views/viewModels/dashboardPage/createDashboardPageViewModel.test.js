@@ -117,6 +117,10 @@ test("dashboard page exposes explicit component contracts and renders without le
 	assert.equal(result.pageState.workoutSessionId, 5);
 	assert.equal(result.components.programBanner.programName, "Strength");
 	assert.equal(result.components.dateNavigation.days.length, 7);
+	assert.equal(
+		result.components.dateNavigation.days[3].statusMarkers.items[0].label,
+		"In progress",
+	);
 	assert.equal(result.components.currentWorkout.performedPercentage, 0);
 	assert.equal(
 		result.components.currentWorkout.session?.steps[0].title,
@@ -140,6 +144,8 @@ test("dashboard page exposes explicit component contracts and renders without le
 	assert.match(html, /CURRENT WORKOUT SESSION/);
 	assert.match(html, /action="\/workout_step_logs\/8\/perform"/);
 	assert.match(html, /shared-button/);
+	assert.match(html, /session-status-marker--in-progress/);
+	assert.match(html, /Workout session: In progress/);
 	assert.doesNotMatch(html, /training_day_id|scheduled_date|finished_at|cycle_id/);
 });
 

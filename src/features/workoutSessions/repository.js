@@ -52,8 +52,6 @@ export async function findById({ workoutSessionId }, db = pool) {
 		[workoutSessionId],
 	);
 
-	console.log({ ws: rows?.[0] });
-
 	return rows[0] ?? null;
 }
 

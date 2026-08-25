@@ -1,0 +1,10 @@
+<ul class="session-status-markers" aria-label="<%= statusMarkers.accessibleLabel %>">
+	<% statusMarkers.items.forEach(marker => { %>
+		<li
+			class="<%= marker.className %>"
+			aria-label="<%= marker.title %>"
+			title="<%= marker.title %>"
+		></li>
+	<% }) %>
+</ul>
+

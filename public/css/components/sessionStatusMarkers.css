@@ -1,0 +1,32 @@
+.session-status-markers {
+	display: flex;
+	justify-content: center;
+	gap: 0.2rem;
+	min-height: 0.35rem;
+	margin: 0.2rem 0 0;
+	padding: 0;
+}
+
+.session-status-marker {
+	width: 0.35rem;
+	height: 0.35rem;
+	border-radius: 50%;
+	background: var(--color-text-disabled);
+}
+
+.session-status-marker--in-progress {
+	background: var(--color-action);
+}
+
+.session-status-marker--finished {
+	background: var(--color-success);
+}
+
+.session-status-marker--cancelled {
+	background: var(--color-danger);
+}
+
+.session-status-marker--unknown {
+	border: 1px solid var(--color-text-disabled);
+	background: transparent;
+}

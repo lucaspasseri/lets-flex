@@ -11,9 +11,7 @@
 			<li class="dashboard-calendar__day <%= day.isActive ? 'dashboard-calendar__day--active' : '' %>" <%- day.isActive ? 'aria-current="date"' : '' %>>
 				<span class="dashboard-calendar__weekday"><%= day.weekdayLabel %></span>
 				<span class="dashboard-calendar__date"><%= day.dayLabel %></span>
-				<ul class="dashboard-calendar__indicators" aria-label="<%= day.indicators.length %> workout sessions">
-					<% day.indicators.forEach(indicator => { %><li class="<%= indicator.isInProgress ? 'is-in-progress' : '' %>"></li><% }) %>
-				</ul>
+				<%- include("../shared/components/sessionStatusMarkers/sessionStatusMarkers", { statusMarkers: day.statusMarkers }) %>
 			</li>
 		<% }) %>
 	</ol>
