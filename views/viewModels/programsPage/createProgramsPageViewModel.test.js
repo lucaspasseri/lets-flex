@@ -210,6 +210,12 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.match(populatedHtml, /id="create-cycle-form"/);
 	assert.match(populatedHtml, /id="delete-program-form"/);
 	assert.match(populatedHtml, /Delete program Strength/);
+	assert.match(
+		populatedHtml,
+		/class="shared-button shared-button--danger-ghost shared-button--icon-only entity-card__delete"/,
+	);
+	assert.match(populatedHtml, /aria-label="Delete program Strength"/);
+	assert.match(populatedHtml, /title="Delete program Strength"/);
 	assert.doesNotMatch(populatedHtml, /basic-line|basicModal/);
 	assert.match(noProfileHtml, /id="programs-empty-state-title"/);
 	assert.doesNotMatch(noProfileHtml, /id="create-program-form"/);

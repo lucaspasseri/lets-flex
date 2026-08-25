@@ -18,11 +18,12 @@
 	</a>
 	<%- include("../../shared/components/button/button", { button: {
 		label: entityCard.deleteAction.accessibleLabel,
-		variant: "danger",
+		variant: "dangerGhost",
 		iconOnly: true,
 		renderIcon: () => include("../../icons/trash"),
 		alternativeClassname: "entity-card__delete",
 		attributes: {
+			title: entityCard.deleteAction.accessibleLabel,
 			"data-modal-open": entityCard.deleteAction.modalId,
 			"data-delete-entity": JSON.stringify(entityCard.deleteAction.values)
 		}

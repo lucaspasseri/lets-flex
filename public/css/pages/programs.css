@@ -70,7 +70,6 @@
 	border-radius: 0.9rem;
 	background: var(--color-surface);
 	transition:
-		transform 160ms ease,
 		border-color 160ms ease,
 		background-color 160ms ease,
 		box-shadow 160ms ease;
@@ -89,7 +88,6 @@
 }
 
 .entity-card:hover {
-	transform: translateY(-2px);
 	border-color: var(--color-text-muted);
 	background: var(--color-surface-subtle);
 }
@@ -104,9 +102,16 @@
 
 .entity-card__delete {
 	position: absolute;
-	top: 50%;
+	top: 0.65rem;
 	right: 0.7rem;
-	transform: translateY(-50%);
+	width: 2.35rem;
+	min-height: 2.35rem;
+	border-radius: 0.65rem;
+}
+
+.entity-card__delete:hover:not(:disabled),
+.entity-card__delete:active:not(:disabled) {
+	transform: none;
 }
 
 .entity-card__delete svg {
@@ -383,5 +388,11 @@
 	.entity-card,
 	.calendar-navigation__item {
 		transition: none;
+	}
+}
+
+@media (forced-colors: active) {
+	.entity-card__delete {
+		border-color: ButtonText;
 	}
 }
