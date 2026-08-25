@@ -1,0 +1,17 @@
+<%
+	const statusLabel = step.status === "performed"
+		? "Completed"
+		: step.status === "skipped"
+			? "Skipped"
+			: "Planned";
+%>
+<li class="session-step session-step--<%= step.status %> <%= step.isCurrent ? 'session-step--current' : '' %>">
+	<span class="session-step__order" aria-hidden="true"><%= step.orderLabel %></span>
+	<div class="session-step__content">
+		<p class="session-step__name"><%= step.title %></p>
+		<% if (step.isCurrent) { %><span class="session-step__current-label">Current step</span><% } %>
+	</div>
+	<span class="session-step__status" aria-label="<%= statusLabel %>" title="<%= statusLabel %>">
+		<%- include('../shared/components/icons/statusCircle', { status: step.status, icon: { attributes: { "aria-hidden": true } } }) %>
+	</span>
+</li>

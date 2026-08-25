@@ -126,6 +126,7 @@ test("dashboard page exposes explicit component contracts and renders without le
 		result.components.currentWorkout.session?.steps[0].title,
 		"PRESS (Barbell)",
 	);
+	assert.equal(result.components.currentWorkout.session?.steps[0].isCurrent, true);
 	assert.deepEqual(result.components.barChart.labels, ["17/08"]);
 	assert.equal(
 		result.components.heatmap.cycles[0].days[0].cellClass,
@@ -143,6 +144,8 @@ test("dashboard page exposes explicit component contracts and renders without le
 	assert.match(html, /data-dashboard-page/);
 	assert.match(html, /CURRENT WORKOUT SESSION/);
 	assert.match(html, /action="\/workout_step_logs\/8\/perform"/);
+	assert.match(html, /session-step--current/);
+	assert.match(html, /aria-label="Planned"/);
 	assert.match(html, /shared-button/);
 	assert.match(html, /session-status-marker--in-progress/);
 	assert.match(html, /Workout session: In progress/);

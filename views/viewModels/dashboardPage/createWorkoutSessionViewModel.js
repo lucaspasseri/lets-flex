@@ -25,6 +25,10 @@ export default function createWorkoutSessionViewModel({
 	const performedPercentage = percentage(steps);
 	const currentStep =
 		steps.find((step) => step.stepLog?.id && step.status === "planned") ?? null;
+	const presentedSteps = steps.map((step) => ({
+		...step,
+		isCurrent: step.id === currentStep?.id,
+	}));
 	const hasWorkoutLogs = steps.some((step) => step.stepLog?.id);
 	const status = session?.status ?? null;
 	const showWorkoutLogs = Boolean(
@@ -58,7 +62,7 @@ export default function createWorkoutSessionViewModel({
 											? "SESSION CANCELLED"
 											: "NO STATUS",
 					},
-					steps,
+					steps: presentedSteps,
 					isEmpty: steps.length === 0,
 					showWorkoutLogs,
 					showStart: status === "planned",
