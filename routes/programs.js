@@ -21,6 +21,8 @@ router.post(
 
 router.get("/", programsController.show);
 
+router.delete("/:programId", programsController.delete);
+
 router.get("/day", dayController.show);
 
 export default router;

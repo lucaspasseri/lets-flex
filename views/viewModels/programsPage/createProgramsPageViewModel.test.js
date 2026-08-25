@@ -60,6 +60,11 @@ test("Programs page creates presentation-ready component contracts", () => {
 
 	assert.deepEqual(Object.keys(result), ["page", "pageState", "shell", "components"]);
 	assert.equal(result.components.programSwitcher.items[0].isCurrent, true);
+	assert.deepEqual(result.components.programSwitcher.items[0].deleteAction.values, {
+		id: 10,
+		name: "Strength",
+		entity: "program",
+	});
 	assert.equal(
 		result.components.cycleSwitcher.items[0].href,
 		"/programs?programId=10&cycleId=20",
@@ -203,6 +208,8 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.match(populatedHtml, /href="\/programs\/day\?dayId=30"/);
 	assert.match(populatedHtml, /id="create-program-form"/);
 	assert.match(populatedHtml, /id="create-cycle-form"/);
+	assert.match(populatedHtml, /id="delete-program-form"/);
+	assert.match(populatedHtml, /Delete program Strength/);
 	assert.doesNotMatch(populatedHtml, /basic-line|basicModal/);
 	assert.match(noProfileHtml, /id="programs-empty-state-title"/);
 	assert.doesNotMatch(noProfileHtml, /id="create-program-form"/);

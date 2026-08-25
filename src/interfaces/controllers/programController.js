@@ -3,6 +3,9 @@ import toNullableNumber from "../../../utils/toNullableNumber.js";
 import createProgram from "../../features/programs/createProgram.js";
 import createProgramsPageViewModel from "../../../views/viewModels/programsPage/createProgramsPageViewModel.js";
 import { getProgramsPageData } from "../../features/programs/getProgramsPageData.js";
+import deleteProgram, {
+	ProgramNotFoundError,
+} from "../../features/programs/deleteProgram.js";
 
 /**
  * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
@@ -101,6 +104,34 @@ async function create(req, res) {
 	res.redirect("/programs");
 }
 
+async function destroy(req, res) {
+	const programId = toNullableNumber(req.params.programId);
+	const userId = toNullableNumber(res.locals?.sessionState?.userId);
+	if (programId === null || !Number.isInteger(programId) || programId <= 0) {
+		res.status(400).send("Invalid program ID");
+		return;
+	}
+	if (userId === null || !Number.isInteger(userId) || userId <= 0) {
+		res.status(403).send("Choose an active profile before deleting a program");
+		return;
+	}
+
+	try {
+		await deleteProgram({ programId, userId });
+	} catch (error) {
+		if (error instanceof ProgramNotFoundError) {
+			res.status(404).send("Program not found");
+			return;
+		}
+		throw error;
+	}
+
+	if (toNullableNumber(req.session.state?.programId) === programId) {
+		req.session.state = { ...req.session.state, programId: null, cycleId: null };
+	}
+	res.redirect("/programs");
+}
+
 async function showCreateErrors(req, res, { errors, submittedValues }) {
 	res.status(422);
 	await renderPrograms(req, res, {
@@ -116,5 +147,6 @@ async function showCreateErrors(req, res, { errors, submittedValues }) {
 export const programsController = {
 	show: asyncHandler(show),
 	create: asyncHandler(create),
+	delete: asyncHandler(destroy),
 	showCreateErrors,
 };

@@ -57,3 +57,12 @@ export async function create({ name, userId, goalId, startDate }, db = pool) {
 	);
 	return rows[0] ?? null;
 }
+
+/** Deletes only a program owned by the active user. Cascading foreign keys remove its hierarchy. */
+export async function deleteByIdForUser({ programId, userId }, db = pool) {
+	const { rows } = await db.query(
+		"DELETE FROM programs WHERE id = $1 AND user_id = $2 RETURNING *",
+		[programId, userId],
+	);
+	return rows[0] ?? null;
+}

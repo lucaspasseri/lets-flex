@@ -82,3 +82,30 @@ export async function create({ programId, name, cycleSize, cycleOrder }, db = po
 
 	return rows[0];
 }
+
+/** Deletes only a cycle whose program belongs to the active user. */
+export async function deleteByIdForUser({ cycleId, userId }, db = pool) {
+	const { rows } = await db.query(
+		`DELETE FROM cycles AS c
+		 WHERE c.id = $1
+		   AND EXISTS (
+		     SELECT 1 FROM programs AS p
+		     WHERE p.id = c.program_id AND p.user_id = $2
+		   )
+		 RETURNING c.*`,
+		[cycleId, userId],
+	);
+	return rows[0] ?? null;
+}
+
+/** Closes the ordering gap without violating the unique program/order constraint. */
+export async function closeCycleOrderGap({ programId, cycleOrder }, db = pool) {
+	await db.query(
+		"UPDATE cycles SET cycle_order = cycle_order + 1000 WHERE program_id = $1 AND cycle_order > $2",
+		[programId, cycleOrder],
+	);
+	await db.query(
+		"UPDATE cycles SET cycle_order = cycle_order - 1001 WHERE program_id = $1 AND cycle_order > $2 + 1000",
+		[programId, cycleOrder],
+	);
+}

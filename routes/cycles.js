@@ -20,4 +20,6 @@ router.post(
 	cycleController.create,
 );
 
+router.delete("/:cycleId", cycleController.delete);
+
 export default router;

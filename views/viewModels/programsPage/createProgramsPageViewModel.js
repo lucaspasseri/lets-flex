@@ -3,6 +3,7 @@ import createCycleSwitcherViewModel from "./createCycleSwitcherViewModel.js";
 import createCalendarNavigationViewModel from "./createCalendarNavigationViewModel.js";
 import createProgramFormViewModel from "./createProgramFormViewModel.js";
 import createCycleFormViewModel from "./createCycleFormViewModel.js";
+import createDeleteEntityFormViewModel from "./createDeleteEntityFormViewModel.js";
 
 /**
  * @typedef {import("../../../src/features/programs/programsPage.types.js").CreateProgramsPageViewModelInput} CreateProgramsPageViewModelInput
@@ -54,6 +55,8 @@ export default function createProgramsPageViewModel({
 				cycles: cycles.items,
 				state: cycleFormState,
 			}),
+			deleteProgramForm: createDeleteEntityFormViewModel("program"),
+			deleteCycleForm: createDeleteEntityFormViewModel("cycle"),
 			noActiveUser: {
 				isVisible: currentUser === null,
 				title: "No active profile",

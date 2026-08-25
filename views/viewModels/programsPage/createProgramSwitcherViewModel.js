@@ -39,6 +39,11 @@ export default function createProgramSwitcherViewModel({
 				accessibleLabel: isCurrent
 					? `${program.name}, active program`
 					: `Select program ${program.name}`,
+				deleteAction: {
+					modalId: "deleteProgramModal",
+					accessibleLabel: `Delete program ${program.name}`,
+					values: { id: program.id, name: program.name, entity: "program" },
+				},
 			};
 		}),
 		emptyState: {

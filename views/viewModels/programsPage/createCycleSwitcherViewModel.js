@@ -33,6 +33,11 @@ export default function createCycleSwitcherViewModel({
 				accessibleLabel: isCurrent
 					? `${cycle.name}, active cycle`
 					: `Select cycle ${cycle.name}`,
+				deleteAction: {
+					modalId: "deleteCycleModal",
+					accessibleLabel: `Delete cycle ${cycle.name}`,
+					values: { id: cycle.id, name: cycle.name, entity: "cycle" },
+				},
 			};
 		}),
 		emptyState: {
