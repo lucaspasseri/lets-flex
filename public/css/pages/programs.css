@@ -306,6 +306,10 @@
 	background: var(--color-surface-subtle);
 }
 
+.calendar-navigation__item[style*="view-transition-name"] {
+	transform: none;
+}
+
 .calendar-navigation__item--current-cycle {
 	border-color: color-mix(in srgb, var(--color-action) 58%, transparent);
 	color: var(--color-text);

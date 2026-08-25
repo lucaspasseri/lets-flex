@@ -1,4 +1,5 @@
 import formatProgramsPageDate from "./formatProgramsPageDate.js";
+import createDayViewTransitionName from "../shared/createDayViewTransitionName.js";
 
 /**
  * @typedef {import("../../../src/features/programs/programs.types.js").Program} Program
@@ -26,6 +27,7 @@ export default function createCalendarNavigationViewModel({
 
 			return {
 				id: day.id,
+				viewTransitionName: createDayViewTransitionName(day.id),
 				label: day.label ?? `Day ${day.dayOrder}`,
 				dateLabel: formatProgramsPageDate(day.scheduledDate) ?? "Date pending",
 				href: `/programs/day?dayId=${day.id}`,

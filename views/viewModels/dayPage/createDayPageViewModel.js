@@ -2,6 +2,7 @@ import createDayNavigationViewModel from "./createDayNavigationViewModel.js";
 import createSessionLinkFormViewModel from "./createSessionLinkFormViewModel.js";
 import createWorkoutSessionListViewModel from "./createWorkoutSessionListViewModel.js";
 import formatDayPageDate from "./formatDayPageDate.js";
+import createDayViewTransitionName from "../shared/createDayViewTransitionName.js";
 
 /**
  * @typedef {import("../../../src/features/day/dayPage.types.js").CreateDayPageViewModelInput} CreateDayPageViewModelInput
@@ -23,6 +24,7 @@ export default function createDayPageViewModel({
 		components: {
 			dayHeader: {
 				dayId: currentDayId,
+				viewTransitionName: createDayViewTransitionName(currentDayId),
 				dateLabel:
 					formatDayPageDate(days.current?.scheduledDate ?? null) ??
 					"Date outside the program's boundaries",

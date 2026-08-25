@@ -27,6 +27,8 @@
 						class="<%= item.className %>"
 						href="<%= item.href %>"
 						aria-label="<%= item.accessibleLabel %>"
+						data-calendar-day-id="<%= item.id %>"
+						data-view-transition-name="<%= item.viewTransitionName %>"
 					>
 						<span class="calendar-navigation__cycle">Cycle <%= item.cycleOrder %></span>
 						<strong><%= item.dateLabel %></strong>
