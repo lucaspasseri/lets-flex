@@ -4,6 +4,7 @@ import * as queries from "./queries.js";
 /**
  * @typedef {import("../trainingDays/trainingDays.types.js").TrainingDayRow } TrainingDayRow
  * @typedef {import("./workoutSessions.types.js").WorkoutSessionRow } WorkoutSessionRow
+ * @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient
  */
 
 /**
@@ -38,6 +39,7 @@ export async function cancelById({ workoutSessionId }, db = pool) {
 	return rows[0];
 }
 
+/** @param {any} input @param {DatabaseClient} [db] */
 export async function findById({ workoutSessionId }, db = pool) {
 	const { rows } = await db.query(
 		`
@@ -70,6 +72,7 @@ export async function findAllByProgramId({ programId }, db = pool) {
 	return rows;
 }
 
+/** @param {any} input @param {DatabaseClient} [db] */
 export async function startById({ workoutSessionId }, db = pool) {
 	const { rows } = await db.query(
 		`

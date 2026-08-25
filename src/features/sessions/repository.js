@@ -8,7 +8,7 @@ import * as queries from "./queries.js";
  */
 
 /**
- * @param {*} db
+ * @param {import("pg").Pool | import("pg").PoolClient} [db]
  * @returns {Promise<SessionRow[]>}
  */
 
@@ -19,7 +19,8 @@ export async function findAll(db = pool) {
 
 /**
  * @param {CreateSessionInput} input
- * @returns {Promise<SessionRow>}
+ * @param {import("pg").Pool | import("pg").PoolClient} [db]
+ * @returns {Promise<SessionRow | null>}
  */
 
 export async function create({ name, notes }, db = pool) {
@@ -56,9 +57,7 @@ export async function archive({ sessionId }, db = pool) {
  */
 
 export async function findById({ sessionId }, db = pool) {
-	const { rows } = await db.query("SELECT * FROM sessions WHERE id = $1", [
-		sessionId,
-	]);
+	const { rows } = await db.query("SELECT * FROM sessions WHERE id = $1", [sessionId]);
 
 	return rows[0] ?? null;
 }

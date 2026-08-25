@@ -1,4 +1,5 @@
 import * as usersRepository from "./repository.js";
+import { toLoggedUser } from "./mapper.js";
 
 /**
  * @typedef {import("./users.types.js").User} User
@@ -16,8 +17,11 @@ async function createUser({ name, dateOfBirth, anamnesis }) {
 		dateOfBirth,
 		anamnesis,
 	});
+	if (!user) {
+		throw new Error("User could not be created");
+	}
 
-	return user;
+	return toLoggedUser(user);
 }
 
 export default createUser;

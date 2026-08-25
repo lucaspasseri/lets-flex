@@ -9,7 +9,12 @@ async function show(req, res) {
 	const programId = toNullableNumber(res.locals.sessionState?.programId);
 	const daysDifference = toNullableNumber(req.query?.daysDifference);
 	const workoutSessionId = toNullableNumber(req.query?.workoutSessionId);
-	const data = await getDashboardPageData({ userId, programId, daysDifference, workoutSessionId });
+	const data = await getDashboardPageData({
+		userId,
+		programId,
+		daysDifference,
+		workoutSessionId,
+	});
 	const dashboard = createDashboardPageViewModel({
 		page: {
 			...res.locals.page,

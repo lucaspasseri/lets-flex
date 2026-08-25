@@ -17,10 +17,7 @@ async function createCycle({ programId, name, cycleSize, cycleOrder }) {
 			throw new Error(`Program with ID ${programId} was not found`);
 		}
 
-		const cycles = await cyclesRepository.findAllByProgramId(
-			{ programId },
-			client,
-		);
+		const cycles = await cyclesRepository.findAllByProgramId({ programId }, client);
 
 		const numericCycleOrder = toNullableNumber(cycleOrder);
 		const numericCycleSize = toNullableNumber(cycleSize);
@@ -45,13 +42,10 @@ async function createCycle({ programId, name, cycleSize, cycleOrder }) {
 		}
 
 		const daysBeforeNewCycle = cycles
-			.filter(cycle => cycle.cycle_order < numericCycleOrder)
+			.filter((cycle) => cycle.cycle_order < numericCycleOrder)
 			.reduce((sum, cycle) => sum + Number(cycle.cycle_size), 0);
 
-		const currCycleBaseScheduledDate = addDays(
-			program.start_date,
-			daysBeforeNewCycle,
-		);
+		const currCycleBaseScheduledDate = addDays(program.start_date, daysBeforeNewCycle);
 
 		if (numericCycleOrder <= cycles.length) {
 			await cyclesRepository.shiftCycleOrder(

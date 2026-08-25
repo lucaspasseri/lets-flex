@@ -1,7 +1,11 @@
 import { addDays, format, isSameDay } from "date-fns";
 
 /** @param {Pick<import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, "selectedDate" | "workoutSessions"> & {daysDifference: number | null}} input */
-export default function createDateNavigationViewModel({ selectedDate, daysDifference, workoutSessions }) {
+export default function createDateNavigationViewModel({
+	selectedDate,
+	daysDifference,
+	workoutSessions,
+}) {
 	const offset = daysDifference ?? 0;
 	return {
 		previousHref: `/?daysDifference=${offset - 1}`,
@@ -13,7 +17,15 @@ export default function createDateNavigationViewModel({ selectedDate, daysDiffer
 				weekdayLabel: format(date, "EEE").toUpperCase(),
 				dayLabel: format(date, "dd"),
 				isActive: index === 3,
-				indicators: workoutSessions.filter(session => session.scheduledDate && isSameDay(session.scheduledDate, date)).map(session => ({ id: session.id, isInProgress: session.status === "in_progress" })),
+				indicators: workoutSessions
+					.filter(
+						(session) =>
+							session.scheduledDate && isSameDay(session.scheduledDate, date),
+					)
+					.map((session) => ({
+						id: session.id,
+						isInProgress: session.status === "in_progress",
+					})),
 			};
 		}),
 	};

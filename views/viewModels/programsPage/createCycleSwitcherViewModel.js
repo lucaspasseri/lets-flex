@@ -19,7 +19,7 @@ export default function createCycleSwitcherViewModel({
 		description: currentProgram
 			? `Manage the training cycles in ${currentProgram.name}.`
 			: "Choose a program before managing its cycles.",
-		items: cycles.map(cycle => {
+		items: cycles.map((cycle) => {
 			const isCurrent = cycle.id === currentCycleId;
 
 			return {

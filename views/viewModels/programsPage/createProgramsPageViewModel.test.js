@@ -60,8 +60,14 @@ test("Programs page creates presentation-ready component contracts", () => {
 
 	assert.deepEqual(Object.keys(result), ["page", "pageState", "shell", "components"]);
 	assert.equal(result.components.programSwitcher.items[0].isCurrent, true);
-	assert.equal(result.components.cycleSwitcher.items[0].href, "/programs?programId=10&cycleId=20");
-	assert.equal(result.components.calendarNavigation.items[0].href, "/programs/day?dayId=30");
+	assert.equal(
+		result.components.cycleSwitcher.items[0].href,
+		"/programs?programId=10&cycleId=20",
+	);
+	assert.equal(
+		result.components.calendarNavigation.items[0].href,
+		"/programs/day?dayId=30",
+	);
 	assert.equal(result.components.calendarNavigation.items[0].dateLabel, "18/08");
 	assert.deepEqual(result.components.createProgramForm.fields[1].options, [
 		{ label: "Build strength", value: 2 },
@@ -92,9 +98,8 @@ test("Programs page exposes safe empty component states", () => {
 });
 
 test("Programs template renders populated and no-profile component states", async () => {
-	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
-		ejs.renderFile
-	);
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	const populated = createProgramsPageViewModel({
 		page,
 		pageState: { userId: 1, programId: 10, cycleId: 20 },
@@ -129,7 +134,7 @@ test("Programs template renders populated and no-profile component states", asyn
 	});
 
 	const [populatedHtml, noProfileHtml] = await Promise.all(
-		[populated, noProfile].map(viewModel =>
+		[populated, noProfile].map((viewModel) =>
 			renderFile(path.resolve("views/programs.ejs"), {
 				...viewModel,
 				contentFor: () => "",

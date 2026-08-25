@@ -13,7 +13,7 @@ export default function createProgramSwitcherViewModel({
 	programs,
 	goals,
 }) {
-	const goalsById = new Map(goals.map(goal => [goal.id, goal]));
+	const goalsById = new Map(goals.map((goal) => [goal.id, goal]));
 
 	return {
 		id: "program-switcher",

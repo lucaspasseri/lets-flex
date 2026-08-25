@@ -21,9 +21,7 @@ export async function findAll(db = pool) {
  */
 
 export async function findById({ userId }, db = pool) {
-	const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [
-		userId,
-	]);
+	const { rows } = await db.query("SELECT * FROM users WHERE id = $1", [userId]);
 
 	return rows[0] ?? null;
 }

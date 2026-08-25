@@ -15,15 +15,20 @@ test("create user controller uses only validated input on the successful path", 
 	});
 	let receivedInput;
 	let redirectPath;
-	const handler = buildCreateUserHandler(async input => {
+	const handler = buildCreateUserHandler(async (input) => {
 		receivedInput = input;
 		return { id: 42 };
 	});
 
-	await handler(request, /** @type {*} */ ({
-		/** @param {string} path */
-		redirect(path) { redirectPath = path; },
-	}));
+	await handler(
+		request,
+		/** @type {*} */ ({
+			/** @param {string} path */
+			redirect(path) {
+				redirectPath = path;
+			},
+		}),
+	);
 
 	assert.equal(receivedInput, validatedBody);
 	assert.deepEqual(request.session.state, { userId: 42 });

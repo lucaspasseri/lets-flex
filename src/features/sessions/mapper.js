@@ -50,10 +50,7 @@ export function toSessionMapperStepSeed(step) {
 		},
 		equipment: {
 			name: step.equipment_name,
-			category: toCapitalizedString(step.equipment_category).replaceAll(
-				"_",
-				" ",
-			),
+			category: toCapitalizedString(step.equipment_category).replaceAll("_", " "),
 		},
 		muscles: (step.muscles ?? []).map(toMuscle),
 	};

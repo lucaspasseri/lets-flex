@@ -26,7 +26,7 @@ async function archive(req, res) {
 	const { sessionId } = req.params;
 
 	try {
-		await archiveSession(sessionId);
+		await archiveSession(Number(sessionId));
 	} catch (error) {
 		if (error instanceof SessionTemplateNotArchivableError) {
 			res.status(404).send("Session template not found or already archived");
@@ -62,9 +62,7 @@ async function showUpdateErrors(req, res, { errors, submittedValues }) {
 			open: true,
 			sessionId: req.params.sessionId,
 			values:
-				submittedValues && typeof submittedValues === "object"
-					? submittedValues
-					: {},
+				submittedValues && typeof submittedValues === "object" ? submittedValues : {},
 			errors,
 		},
 	});

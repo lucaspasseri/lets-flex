@@ -1,5 +1,5 @@
 export function initializeUpdateSessionForm(root, form) {
-	root.addEventListener("click", event => {
+	root.addEventListener("click", (event) => {
 		const button = event.target.closest("[data-update-session-template]");
 		if (!button) return;
 		let values;
@@ -11,7 +11,9 @@ export function initializeUpdateSessionForm(root, form) {
 		form.action = `/sessions/${values.sessionId}?_method=PATCH`;
 		setValue(form, "name", values.name);
 		setValue(form, "notes", values.notes);
-		/** @type {any} */ (form).populateSessionSteps?.(Array.isArray(values.stepRow) ? values.stepRow : []);
+		/** @type {any} */ (form).populateSessionSteps?.(
+			Array.isArray(values.stepRow) ? values.stepRow : [],
+		);
 	});
 }
 

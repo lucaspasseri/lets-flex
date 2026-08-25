@@ -72,7 +72,7 @@ function createDetails({ session }) {
 					sessionId: session.id,
 					name: session.name,
 					notes: session.notes ?? "",
-					stepRow: steps.map(step => ({
+					stepRow: steps.map((step) => ({
 						stepId: step.id,
 						stepTypeId: step.stepTypeId,
 						exerciseVariantId: step.exerciseVariantId,
@@ -86,10 +86,10 @@ function createDetails({ session }) {
 			archive: session.isArchived
 				? null
 				: {
-					label: "Archive session",
-					modalId: "archiveSessionModal",
-					values: { sessionId: session.id, name: session.name },
-				},
+						label: "Archive session",
+						modalId: "archiveSessionModal",
+						values: { sessionId: session.id, name: session.name },
+					},
 		},
 	};
 }

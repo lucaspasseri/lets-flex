@@ -64,9 +64,7 @@ async function showUpdateErrors(req, res, { errors, submittedValues }) {
 			exerciseId: req.params.exerciseId,
 			variantId: req.params.variantId,
 			values:
-				submittedValues && typeof submittedValues === "object"
-					? submittedValues
-					: {},
+				submittedValues && typeof submittedValues === "object" ? submittedValues : {},
 			errors,
 		},
 	});

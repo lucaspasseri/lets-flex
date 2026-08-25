@@ -19,7 +19,11 @@
 		"dev": "node --env-file-if-exists=.env --watch app.js",
 		"seed": "node --env-file-if-exists=.env db/populatedb.js",
 		"check:types": "tsc --project jsconfig.json --noEmit",
-		"typecheck": "tsc --project jsconfig.json",
+		"check:browser-types": "tsc --project public/jsconfig.json --noEmit",
+		"lint": "eslint .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"verify": "npm run format:check && npm run lint && npm run check:types && npm run check:browser-types && npm test",
 		"test": "node --test",
 		"test:watch": "node --test --watch"
 	},
@@ -34,7 +38,19 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.39.5",
+		"@types/ejs": "^3.1.5",
 		"@types/express": "^5.0.6",
+		"@types/express-ejs-layouts": "^2.5.4",
+		"@types/express-session": "^1.19.0",
+		"@types/method-override": "^3.0.0",
+		"@types/node": "^26.3.0",
+		"@types/pg": "^8.23.1",
+		"eslint": "^9.39.5",
+		"eslint-plugin-import": "^2.32.0",
+		"eslint-plugin-promise": "^7.3.0",
+		"globals": "^17.11.0",
+		"prettier": "^3.9.6",
 		"typescript": "^7.0.2"
 	}
 }

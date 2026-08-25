@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** @param {string} label */
-const requiredId = label =>
+const requiredId = (label) =>
 	z.coerce
 		.number({ error: `Choose ${label}.` })
 		.int()

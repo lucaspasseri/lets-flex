@@ -8,17 +8,20 @@ export function initializeMuscleRoleForm(form) {
 
 	addButton.addEventListener("click", () => {
 		if (!muscleSelect.value || !roleSelect.value) return;
-		const item = createRelationItem({
-			muscleId: muscleSelect.value,
-			muscleLabel: selectedLabel(muscleSelect),
-			muscleRoleId: roleSelect.value,
-			roleLabel: selectedLabel(roleSelect),
-		}, updateList);
+		const item = createRelationItem(
+			{
+				muscleId: muscleSelect.value,
+				muscleLabel: selectedLabel(muscleSelect),
+				muscleRoleId: roleSelect.value,
+				roleLabel: selectedLabel(roleSelect),
+			},
+			updateList,
+		);
 		list.append(item);
 		updateList();
 	});
 
-	list.querySelectorAll("[data-remove-muscle-relation]").forEach(button => {
+	list.querySelectorAll("[data-remove-muscle-relation]").forEach((button) => {
 		button.addEventListener("click", () => {
 			button.closest("li")?.remove();
 			updateList();
@@ -28,27 +31,33 @@ export function initializeMuscleRoleForm(form) {
 	function updateList(clearError = true) {
 		const items = Array.from(list.querySelectorAll("li"));
 		items.forEach((item, index) => {
-			item.querySelectorAll("[data-muscle-field]").forEach(input => {
+			item.querySelectorAll("[data-muscle-field]").forEach((input) => {
 				input.name = `muscleGroup[${index}][${input.dataset.muscleField}]`;
 			});
 		});
 		if (!clearError && message.hasAttribute("data-muscle-error")) return;
 		message.removeAttribute("data-muscle-error");
 		message.removeAttribute("role");
-		message.textContent = items.length === 0
-			? "No muscle relation found"
-			: `${items.length} muscle relation(s) added`;
+		message.textContent =
+			items.length === 0
+				? "No muscle relation found"
+				: `${items.length} muscle relation(s) added`;
 	}
 
 	/** @param {Array<{muscleId: string | number, muscleRoleId: string | number}>} relations */
-	const populateMuscleRelations = relations => {
+	const populateMuscleRelations = (relations) => {
 		list.replaceChildren();
 		for (const relation of relations) {
-			list.append(createRelationItem({
-				...relation,
-				muscleLabel: optionLabel(muscleSelect, relation.muscleId),
-				roleLabel: optionLabel(roleSelect, relation.muscleRoleId),
-			}, updateList));
+			list.append(
+				createRelationItem(
+					{
+						...relation,
+						muscleLabel: optionLabel(muscleSelect, relation.muscleId),
+						roleLabel: optionLabel(roleSelect, relation.muscleRoleId),
+					},
+					updateList,
+				),
+			);
 		}
 		updateList();
 	};
@@ -66,7 +75,10 @@ function createRelationItem(relation, updateList) {
 		summary,
 		createHiddenInput("muscleId", relation.muscleId),
 		createHiddenInput("muscleRoleId", relation.muscleRoleId),
-		createRemoveButton(() => { item.remove(); updateList(); }),
+		createRemoveButton(() => {
+			item.remove();
+			updateList();
+		}),
 	);
 	return item;
 }
@@ -90,7 +102,10 @@ function createRemoveButton(remove) {
 }
 
 function optionLabel(select, value) {
-	return Array.from(select.options).find(option => String(option.value) === String(value))?.text ?? "Unknown";
+	return (
+		Array.from(select.options).find((option) => String(option.value) === String(value))
+			?.text ?? "Unknown"
+	);
 }
 
 function selectedLabel(select) {

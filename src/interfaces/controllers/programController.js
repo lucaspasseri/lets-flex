@@ -21,8 +21,7 @@ async function show(req, res) {
 		toNullableNumber(req?.query?.programId) ??
 		toNullableNumber(sessionState?.programId);
 	const cycleIdSelection =
-		toNullableNumber(req?.query?.cycleId) ??
-		toNullableNumber(sessionState?.cycleId);
+		toNullableNumber(req?.query?.cycleId) ?? toNullableNumber(sessionState?.cycleId);
 
 	const data = await getProgramsPageData({
 		userId,

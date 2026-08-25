@@ -74,8 +74,11 @@
 	color: var(--color-text);
 	background: var(--color-surface);
 	text-decoration: none;
-	transition: transform 160ms ease, border-color 160ms ease,
-		background-color 160ms ease, box-shadow 160ms ease;
+	transition:
+		transform 160ms ease,
+		border-color 160ms ease,
+		background-color 160ms ease,
+		box-shadow 160ms ease;
 }
 
 .entity-card:hover {
@@ -264,7 +267,10 @@
 	color: var(--color-text-muted);
 	background: var(--color-surface);
 	text-decoration: none;
-	transition: transform 160ms ease, color 160ms ease, border-color 160ms ease,
+	transition:
+		transform 160ms ease,
+		color 160ms ease,
+		border-color 160ms ease,
 		background-color 160ms ease;
 }
 

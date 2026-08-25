@@ -34,27 +34,27 @@ test("profile page exposes its template-boundary contract", () => {
 		data: { currentUser: users[1], users },
 	});
 
-	assert.deepEqual(Object.keys(result), [
-		"page",
-		"pageState",
-		"shell",
-		"components",
-	]);
+	assert.deepEqual(Object.keys(result), ["page", "pageState", "shell", "components"]);
 	assert.equal(result.shell.currentUser, users[1]);
 	assert.equal(result.components.profilePicker.items[1].isCurrent, true);
 	assert.equal(result.components.profilePicker.clearSelectionAction.isVisible, true);
-	assert.equal(result.components.profilePicker.clearSelectionAction.form.action, "/profile/clear-selection");
-	assert.match(result.components.profilePicker.clearSelectionAction.form.description, /No programs, sessions, or workout history will be deleted/);
+	assert.equal(
+		result.components.profilePicker.clearSelectionAction.form.action,
+		"/profile/clear-selection",
+	);
+	assert.match(
+		result.components.profilePicker.clearSelectionAction.form.description,
+		/No programs, sessions, or workout history will be deleted/,
+	);
 	assert.equal(result.components.createUserForm.form.action, "/users");
 	assert.equal("layout" in result, false);
 });
 
 test("profile template renders populated and empty picker states", async () => {
-	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
-		ejs.renderFile
-	);
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	/** @type {(name: string) => string} */
-	const contentFor = name => `<!-- section:${name} -->`;
+	const contentFor = (name) => `<!-- section:${name} -->`;
 
 	for (const data of [
 		{ currentUser: users[1], users, showsGuestAction: true },
@@ -96,11 +96,10 @@ test("invalid profile creation reuses the page model with values and field error
 			},
 		},
 	});
-	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
-		ejs.renderFile
-	);
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	/** @type {(name: string) => string} */
-	const contentFor = name => `<!-- section:${name} -->`;
+	const contentFor = (name) => `<!-- section:${name} -->`;
 	const html = await renderFile(path.resolve("views/profile.ejs"), {
 		...viewModel,
 		contentFor,

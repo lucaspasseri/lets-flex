@@ -4,8 +4,8 @@
  */
 export default function createSessionLinkFormViewModel({ currentDayId, sessions }) {
 	const options = sessions
-		.filter(session => !session.isArchived)
-		.map(session => ({ label: session.name, value: session.id }));
+		.filter((session) => !session.isArchived)
+		.map((session) => ({ label: session.name, value: session.id }));
 	const disabled = currentDayId === null || options.length === 0;
 
 	return {

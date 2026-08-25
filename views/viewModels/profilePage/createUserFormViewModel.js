@@ -22,10 +22,10 @@ export default function createUserFormViewModel({
 	/** @type {Record<string, unknown>} */
 	const submittedValues = values && typeof values === "object" ? values : {};
 	/** @param {string} name */
-	const valueFor = name =>
+	const valueFor = (name) =>
 		typeof submittedValues[name] === "string" ? submittedValues[name] : "";
 	/** @param {string} name */
-	const errorFor = name => errors.fieldErrors?.[name] ?? null;
+	const errorFor = (name) => errors.fieldErrors?.[name] ?? null;
 
 	return {
 		modal: {

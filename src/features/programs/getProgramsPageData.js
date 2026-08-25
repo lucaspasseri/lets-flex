@@ -23,9 +23,7 @@ import resolveProgramsPageSelection from "./resolveProgramsPageSelection.js";
 export async function getProgramsPageData({ userId, programId, cycleId }) {
 	const [userRow, programRows, cycleRows, goalRows] = await Promise.all([
 		usersRepository.findById({ userId }),
-		userId
-			? programsRepository.findAllByUserId({ userId })
-			: Promise.resolve([]),
+		userId ? programsRepository.findAllByUserId({ userId }) : Promise.resolve([]),
 		userId ? cyclesRepository.findAllByUserId({ userId }) : Promise.resolve([]),
 		goalsRepository.findAll(),
 	]);
@@ -35,13 +33,12 @@ export async function getProgramsPageData({ userId, programId, cycleId }) {
 	const allUserCycles = cycleRows.map(cycleMapper.toCycle);
 	const goals = goalRows.map(goalMapper.toGoal);
 
-	const { currentProgram, currentCycle, programCycles } =
-		resolveProgramsPageSelection({
-			programId,
-			cycleId,
-			programs,
-			allUserCycles,
-		});
+	const { currentProgram, currentCycle, programCycles } = resolveProgramsPageSelection({
+		programId,
+		cycleId,
+		programs,
+		allUserCycles,
+	});
 
 	const trainingDayRows = currentProgram
 		? await trainingDaysRepository.findAllByProgramId({

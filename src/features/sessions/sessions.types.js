@@ -14,9 +14,9 @@
  * @property {number} load_value
  * @property {string} load_unit
  * @property {number} step_order
- * @property {number} step_type_id
+ * @property {number} [step_type_id]
  * @property {string} step_type_name
- * @property {number} exercise_variant_id
+ * @property {number} [exercise_variant_id]
  * @property {string} exercise_variant_name
  * @property {string} exercise_variant_setup_description
  * @property {string} exercise_variant_environment

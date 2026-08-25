@@ -4,11 +4,7 @@ import { workoutStepLogController } from "../src/interfaces/controllers/workoutS
 
 const router = express.Router();
 
-router.post(
-	"/:workoutStepLogId/skip",
-	getSessionState,
-	workoutStepLogController.skip,
-);
+router.post("/:workoutStepLogId/skip", getSessionState, workoutStepLogController.skip);
 
 router.post(
 	"/:workoutStepLogId/perform",

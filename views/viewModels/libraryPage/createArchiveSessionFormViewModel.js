@@ -7,7 +7,8 @@ export default function createArchiveSessionFormViewModel() {
 		form: {
 			id: "archive-session-template-form",
 			heading: "Archive session template",
-			description: "Archive this session template? It will remain in existing workout history.",
+			description:
+				"Archive this session template? It will remain in existing workout history.",
 			action: "/sessions",
 		},
 		actions: {

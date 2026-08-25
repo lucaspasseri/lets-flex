@@ -32,7 +32,7 @@ test("Programs page mappers isolate database column names", () => {
 			cycle_size: 7,
 			cycle_order: 1,
 		}),
-		{id: 4, programId: 1, name: "Foundation", size: 7, order: 1},
+		{ id: 4, programId: 1, name: "Foundation", size: 7, order: 1 },
 	);
 
 	assert.deepEqual(
@@ -64,12 +64,12 @@ test("Programs page mappers isolate database column names", () => {
 
 test("Programs page selection rejects a cycle from another program", () => {
 	const programs = [
-		{id: 1, userId: 1, goalId: null, name: "A", startDate: "2026-08-18"},
-		{id: 2, userId: 1, goalId: null, name: "B", startDate: "2026-09-01"},
+		{ id: 1, userId: 1, goalId: null, name: "A", startDate: "2026-08-18" },
+		{ id: 2, userId: 1, goalId: null, name: "B", startDate: "2026-09-01" },
 	];
 	const allUserCycles = [
-		{id: 10, programId: 1, name: "A1", size: 7, order: 1},
-		{id: 20, programId: 2, name: "B1", size: 7, order: 1},
+		{ id: 10, programId: 1, name: "A1", size: 7, order: 1 },
+		{ id: 20, programId: 2, name: "B1", size: 7, order: 1 },
 	];
 
 	const selection = resolveProgramsPageSelection({
@@ -81,5 +81,8 @@ test("Programs page selection rejects a cycle from another program", () => {
 
 	assert.equal(selection.currentProgram?.id, 1);
 	assert.equal(selection.currentCycle, null);
-	assert.deepEqual(selection.programCycles.map(cycle => cycle.id), [10]);
+	assert.deepEqual(
+		selection.programCycles.map((cycle) => cycle.id),
+		[10],
+	);
 });

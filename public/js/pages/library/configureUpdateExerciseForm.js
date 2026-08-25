@@ -1,5 +1,5 @@
 export function initializeUpdateExerciseForm(root, form) {
-	root.addEventListener("click", event => {
+	root.addEventListener("click", (event) => {
 		const button = event.target.closest("[data-update-exercise-template]");
 		if (!button) return;
 

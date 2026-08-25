@@ -60,13 +60,10 @@ async function getLibraryPageData({ userId, sessionId }) {
 
 	return {
 		user: user ? userMapper.toLoggedUser(user) : null,
-		activeSession:
-			sessions.find(session => session.id === sessionId) ?? null,
+		activeSession: sessions.find((session) => session.id === sessionId) ?? null,
 		sessions,
 		equipments: equipmentArr.map(equipmentMapper.toEquipment),
-		movementPatterns: movementPatternArr.map(
-			movementPatternMapper.toMovementPattern,
-		),
+		movementPatterns: movementPatternArr.map(movementPatternMapper.toMovementPattern),
 		muscles: muscleArr.map(muscleMapper.toMuscle),
 		muscleRoles: muscleRoleArr.map(muscleRoleMapper.toMuscleRole),
 		exerciseTemplates: exerciseTemplateArr.map(

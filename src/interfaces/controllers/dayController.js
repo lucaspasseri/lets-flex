@@ -18,8 +18,7 @@ async function show(req, res) {
 	const userId = toNullableNumber(sessionState?.userId);
 	const programId = toNullableNumber(sessionState?.programId);
 	const dayId =
-		toNullableNumber(req?.query?.dayId) ??
-		toNullableNumber(sessionState?.dayId);
+		toNullableNumber(req?.query?.dayId) ?? toNullableNumber(sessionState?.dayId);
 
 	const data = await getDayPageData({ userId, programId, dayId });
 

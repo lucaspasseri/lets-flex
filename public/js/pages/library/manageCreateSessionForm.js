@@ -9,7 +9,19 @@ export function initializeSessionForm(form) {
 	const reps = form.elements.namedItem("draftReps");
 	const load = form.elements.namedItem("draftLoadValue");
 	const loadUnit = form.elements.namedItem("draftLoadUnit");
-	if (!addButton || !list || !emptyMessage || !errorMessage || !stepType || !exercise || !sets || !reps || !load || !loadUnit) return;
+	if (
+		!addButton ||
+		!list ||
+		!emptyMessage ||
+		!errorMessage ||
+		!stepType ||
+		!exercise ||
+		!sets ||
+		!reps ||
+		!load ||
+		!loadUnit
+	)
+		return;
 
 	addButton.addEventListener("click", () => {
 		if (!stepType.value || !exercise.value) {
@@ -18,26 +30,35 @@ export function initializeSessionForm(form) {
 			return;
 		}
 		errorMessage.hidden = true;
-		list.append(createStepItem({
-			stepTypeId: stepType.value,
-			exerciseVariantId: exercise.value,
-			sets: sets.value || "0",
-			reps: reps.value || "0",
-			loadValue: load.value || "0",
-			loadUnit: loadUnit.value || "Kilograms",
-			stepTypeLabel: selectedLabel(stepType),
-			exerciseLabel: selectedLabel(exercise),
-		}, updateList));
+		list.append(
+			createStepItem(
+				{
+					stepTypeId: stepType.value,
+					exerciseVariantId: exercise.value,
+					sets: sets.value || "0",
+					reps: reps.value || "0",
+					loadValue: load.value || "0",
+					loadUnit: loadUnit.value || "Kilograms",
+					stepTypeLabel: selectedLabel(stepType),
+					exerciseLabel: selectedLabel(exercise),
+				},
+				updateList,
+			),
+		);
 		updateList();
-		[stepType, exercise, sets, reps, load, loadUnit].forEach(field => { field.value = ""; });
+		[stepType, exercise, sets, reps, load, loadUnit].forEach((field) => {
+			field.value = "";
+		});
 	});
 
-	list.querySelectorAll(".session-step-draft").forEach(item => bindActions(item, updateList));
+	list
+		.querySelectorAll(".session-step-draft")
+		.forEach((item) => bindActions(item, updateList));
 
 	function updateList(clearError = true) {
 		const items = Array.from(list.querySelectorAll(".session-step-draft"));
 		items.forEach((item, index) => {
-			item.querySelectorAll("[data-step-field]").forEach(input => {
+			item.querySelectorAll("[data-step-field]").forEach((input) => {
 				input.name = `stepRow[${index}][${input.dataset.stepField}]`;
 			});
 			const up = item.querySelector("[data-move-step-up]");
@@ -48,18 +69,24 @@ export function initializeSessionForm(form) {
 		if (!clearError && emptyMessage.hasAttribute("data-step-error")) return;
 		emptyMessage.removeAttribute("data-step-error");
 		emptyMessage.removeAttribute("role");
-		emptyMessage.textContent = items.length === 0 ? "No steps added yet." : `${items.length} step(s) added.`;
+		emptyMessage.textContent =
+			items.length === 0 ? "No steps added yet." : `${items.length} step(s) added.`;
 		emptyMessage.hidden = false;
 	}
 
-	const populateSteps = steps => {
+	const populateSteps = (steps) => {
 		list.replaceChildren();
 		for (const step of steps) {
-			list.append(createStepItem({
-				...step,
-				stepTypeLabel: optionLabel(stepType, step.stepTypeId),
-				exerciseLabel: optionLabel(exercise, step.exerciseVariantId),
-			}, updateList));
+			list.append(
+				createStepItem(
+					{
+						...step,
+						stepTypeLabel: optionLabel(stepType, step.stepTypeId),
+						exerciseLabel: optionLabel(exercise, step.exerciseVariantId),
+					},
+					updateList,
+				),
+			);
 		}
 		updateList();
 	};
@@ -76,7 +103,14 @@ function createStepItem(step, updateList) {
 	summary.textContent = `${step.stepTypeLabel} — ${step.exerciseLabel}`;
 	const fields = [];
 	if (step.stepId != null) fields.push(createHiddenInput("stepId", step.stepId));
-	fields.push(createHiddenInput("stepTypeId", step.stepTypeId), createHiddenInput("exerciseVariantId", step.exerciseVariantId), createHiddenInput("sets", step.sets ?? 0), createHiddenInput("reps", step.reps ?? 0), createHiddenInput("loadValue", step.loadValue ?? 0), createHiddenInput("loadUnit", step.loadUnit || "Kilograms"));
+	fields.push(
+		createHiddenInput("stepTypeId", step.stepTypeId),
+		createHiddenInput("exerciseVariantId", step.exerciseVariantId),
+		createHiddenInput("sets", step.sets ?? 0),
+		createHiddenInput("reps", step.reps ?? 0),
+		createHiddenInput("loadValue", step.loadValue ?? 0),
+		createHiddenInput("loadUnit", step.loadUnit || "Kilograms"),
+	);
 	const actions = document.createElement("div");
 	actions.className = "form-collection__actions";
 	actions.append(
@@ -90,7 +124,10 @@ function createStepItem(step, updateList) {
 }
 
 function bindActions(item, updateList) {
-	item.querySelector("[data-remove-session-step]")?.addEventListener("click", () => { item.remove(); updateList(); });
+	item.querySelector("[data-remove-session-step]")?.addEventListener("click", () => {
+		item.remove();
+		updateList();
+	});
 	item.querySelector("[data-move-step-up]")?.addEventListener("click", () => {
 		const previous = item.previousElementSibling;
 		if (previous) item.parentElement.insertBefore(item, previous);
@@ -115,7 +152,10 @@ function actionButton(label, dataName) {
 	const button = document.createElement("button");
 	button.type = "button";
 	button.textContent = label;
-	button.className = dataName === "removeSessionStep" ? "form-collection__remove" : "form-collection__move";
+	button.className =
+		dataName === "removeSessionStep"
+			? "form-collection__remove"
+			: "form-collection__move";
 	button.dataset[dataName] = "";
 	return button;
 }
@@ -125,5 +165,8 @@ function selectedLabel(select) {
 }
 
 function optionLabel(select, value) {
-	return Array.from(select.options).find(option => String(option.value) === String(value))?.text ?? "Unknown";
+	return (
+		Array.from(select.options).find((option) => String(option.value) === String(value))
+			?.text ?? "Unknown"
+	);
 }

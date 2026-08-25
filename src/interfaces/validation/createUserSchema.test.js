@@ -26,7 +26,7 @@ test("create user validation rejects empty, impossible, and oversized values", (
 
 	assert.equal(result.success, false);
 	assert.deepEqual(
-		new Set(result.error.issues.map(issue => issue.path[0])),
+		new Set(result.error.issues.map((issue) => issue.path[0])),
 		new Set(["name", "dob", "anamnesis"]),
 	);
 });

@@ -1,15 +1,30 @@
+/** @param {HTMLElement} root */
 function createModal(root) {
-	const pageContent = document.querySelector("[data-page-content]");
-	const backdrop = root.querySelector("[data-modal-backdrop]");
-	const content = root.querySelector("[data-modal-content]");
-	const closeButton = root.querySelector("[data-modal-close-button]");
-	const closeTrigger =
-		root.id && document.querySelector(`[data-modal-close="${root.id}"]`);
+	const pageContent = /** @type {HTMLElement | null} */ (
+		document.querySelector("[data-page-content]")
+	);
+	const backdrop = /** @type {HTMLElement} */ (
+		root.querySelector("[data-modal-backdrop]")
+	);
+	const content = /** @type {HTMLElement} */ (
+		root.querySelector("[data-modal-content]")
+	);
+	const closeButton = /** @type {HTMLElement} */ (
+		root.querySelector("[data-modal-close-button]")
+	);
+	const closeTrigger = root.id
+		? document.querySelector(`[data-modal-close="${root.id}"]`)
+		: null;
 
-	const openTriggerArr =
-		root.id && document.querySelectorAll(`[data-modal-open="${root.id}"]`);
+	const openTriggerArr = root.id
+		? document.querySelectorAll(`[data-modal-open="${root.id}"]`)
+		: [];
 
-	if (!backdrop || !content || !closeButton) {
+	if (
+		!(backdrop instanceof HTMLElement) ||
+		!(content instanceof HTMLElement) ||
+		!(closeButton instanceof HTMLElement)
+	) {
 		throw new Error("Invalid modal structure");
 	}
 
@@ -20,10 +35,11 @@ function createModal(root) {
 	}
 
 	let state = root.hidden ? "closed" : "open";
+	/** @type {Element | null} */
 	let previouslyFocusedElement = null;
 	let scrollPosition = 0;
 
-	openTriggerArr.forEach(trigger => {
+	openTriggerArr.forEach((trigger) => {
 		trigger.addEventListener("click", open);
 	});
 
@@ -95,14 +111,19 @@ function createModal(root) {
 	}
 
 	function restoreFocus() {
-		const focusTarget = isValidFocusTarget(previouslyFocusedElement)
-			? previouslyFocusedElement
-			: openTriggerArr[0];
+		const focusTarget =
+			previouslyFocusedElement instanceof HTMLElement &&
+			isValidFocusTarget(previouslyFocusedElement)
+				? previouslyFocusedElement
+				: openTriggerArr[0] instanceof HTMLElement
+					? openTriggerArr[0]
+					: null;
 
 		focusTarget?.focus({ preventScroll: true });
 		previouslyFocusedElement = null;
 	}
 
+	/** @param {Element | null} element */
 	function isValidFocusTarget(element) {
 		return (
 			element instanceof HTMLElement &&
@@ -111,9 +132,11 @@ function createModal(root) {
 		);
 	}
 
+	/** @param {{element: HTMLElement, property: string, start: () => void, complete: () => void}} options */
 	function waitForTransition({ element, property, start, complete }) {
 		let hasCompleted = false;
-		let fallbackTimer = null;
+		/** @type {number | undefined} */
+		let fallbackTimer;
 
 		function finish() {
 			if (hasCompleted) return;
@@ -164,6 +187,7 @@ function createModal(root) {
 		fallbackTimer = setTimeout(finish, transitionTime + 50);
 	}
 
+	/** @param {HTMLElement} element */
 	function getMaximumTransitionTime(element) {
 		const styles = getComputedStyle(element);
 
@@ -183,8 +207,9 @@ function createModal(root) {
 		return maximumTime;
 	}
 
+	/** @param {string} value */
 	function parseTimeList(value) {
-		return value.split(",").map(time => {
+		return value.split(",").map((time) => {
 			const normalizedTime = time.trim();
 			const numericValue = Number.parseFloat(normalizedTime);
 
@@ -205,8 +230,10 @@ function createModal(root) {
 		];
 
 		return Array.from(
-			root.querySelectorAll(focusableSelectors.join(",")),
-		).filter(element => {
+			/** @type {NodeListOf<HTMLElement>} */ (
+				root.querySelectorAll(focusableSelectors.join(","))
+			),
+		).filter((element) => {
 			return (
 				!element.closest("[hidden], [inert]") &&
 				element.getAttribute("aria-hidden") !== "true" &&
@@ -215,6 +242,7 @@ function createModal(root) {
 		});
 	}
 
+	/** @param {KeyboardEvent} event */
 	function handleKeyDown(event) {
 		if (event.key === "Escape") {
 			event.preventDefault();
@@ -235,26 +263,27 @@ function createModal(root) {
 		const firstElement = focusableElements[0];
 		const lastElement = focusableElements.at(-1);
 		const activeElement = document.activeElement;
-		const focusIsInsideList = focusableElements.includes(activeElement);
+		const focusIsInsideList =
+			activeElement instanceof HTMLElement && focusableElements.includes(activeElement);
 
 		if (!focusIsInsideList) {
 			event.preventDefault();
 
 			const focusTarget = event.shiftKey ? lastElement : firstElement;
 
-			focusTarget.focus();
+			focusTarget?.focus();
 			return;
 		}
 
 		if (event.shiftKey && activeElement === firstElement) {
 			event.preventDefault();
-			lastElement.focus();
+			lastElement?.focus();
 			return;
 		}
 
 		if (!event.shiftKey && activeElement === lastElement) {
 			event.preventDefault();
-			firstElement.focus();
+			firstElement?.focus();
 		}
 	}
 

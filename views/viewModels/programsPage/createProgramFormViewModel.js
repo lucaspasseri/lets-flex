@@ -32,7 +32,7 @@ export default function createProgramFormViewModel({ goals }) {
 				label: "Goal",
 				control: "select",
 				required: true,
-				options: goals.map(goal => ({ label: goal.name, value: goal.id })),
+				options: goals.map((goal) => ({ label: goal.name, value: goal.id })),
 			},
 			{
 				id: "program-start-date-input",

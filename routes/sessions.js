@@ -13,10 +13,7 @@ router.use(getSessionState);
 router.post("/", sessionController.create);
 router.patch(
 	"/:sessionId",
-	validateRequestBody(
-		updateSessionTemplateSchema,
-		sessionController.showUpdateErrors,
-	),
+	validateRequestBody(updateSessionTemplateSchema, sessionController.showUpdateErrors),
 	sessionController.update,
 );
 router.patch("/:sessionId/archive", sessionController.archive);

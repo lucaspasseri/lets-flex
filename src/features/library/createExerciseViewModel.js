@@ -64,7 +64,7 @@ function createExercise({ exerciseTemplate }) {
 					name: variant?.name,
 					movementPatternId: movementPattern?.id,
 					equipmentId: equipment?.id,
-					muscleGroup: muscles.map(muscle => ({
+					muscleGroup: muscles.map((muscle) => ({
 						muscleId: muscle.id,
 						muscleRoleId: muscle.role.id,
 					})),

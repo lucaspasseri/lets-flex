@@ -18,7 +18,7 @@ import createDetails from "./createDetailsViewModel.js";
  */
 
 function createSessionWorkspace({ sessionArr = [], activeSession }) {
-	const summaryArr = sessionArr.map(session =>
+	const summaryArr = sessionArr.map((session) =>
 		createSummary({ session, activeSessionId: activeSession?.id ?? null }),
 	);
 

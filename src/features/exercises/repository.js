@@ -4,10 +4,12 @@ import pool from "../../../db/pool.js";
  * @typedef { import("./exercises.types.js").CreateExerciseInput} CreateExerciseInput
  * @typedef { import("./exercises.types.js").ExerciseRow} ExerciseRow
  * @typedef { import("./exercises.types.js").DeleteExerciseInput} DeleteExerciseInput
+ * @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient
  */
 
 /**
  * @param {CreateExerciseInput} input
+ * @param {DatabaseClient} [db]
  * @returns {Promise<ExerciseRow | null>}
  */
 

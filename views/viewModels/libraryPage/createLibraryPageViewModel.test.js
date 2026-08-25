@@ -38,14 +38,8 @@ test("library page exposes one explicit component contract", () => {
 		"components",
 	]);
 	assert.equal("layout" in viewModel, false);
-	assert.equal(
-		viewModel.components.createSessionForm.form.action,
-		"/sessions",
-	);
-	assert.equal(
-		viewModel.components.createExerciseForm.modal.id,
-		"createExerciseModal",
-	);
+	assert.equal(viewModel.components.createSessionForm.form.action, "/sessions");
+	assert.equal(viewModel.components.createExerciseForm.modal.id, "createExerciseModal");
 });
 
 test("library template renders from its page ViewModel", async () => {
@@ -56,18 +50,14 @@ test("library template renders from its page ViewModel", async () => {
 	});
 
 	/** @type {(name: string) => string} */
-	const contentFor = name => `<!-- section:${name} -->`;
+	const contentFor = (name) => `<!-- section:${name} -->`;
 
-	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
-		ejs.renderFile
-	);
-	const html = await renderFile(
-		path.resolve("views/library.ejs"),
-		{
-			...viewModel,
-			contentFor,
-		},
-	);
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const html = await renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		contentFor,
+	});
 
 	assert.match(html, /data-library-page/);
 	assert.match(html, /data-create-session-form/);
@@ -80,7 +70,15 @@ test("invalid update renders submitted values, errors, and the selected modal", 
 		...data,
 		equipments: [{ id: 3, name: "Barbell" }],
 		movementPatterns: [{ id: 2, name: "Push", notes: null }],
-		muscles: [{ id: 4, commonName: "Chest", scientificName: "Pectoralis", bodyRegion: "torso", referenceUrl: null }],
+		muscles: [
+			{
+				id: 4,
+				commonName: "Chest",
+				scientificName: "Pectoralis",
+				bodyRegion: "torso",
+				referenceUrl: null,
+			},
+		],
 		muscleRoles: [{ id: 1, name: "primary", description: null }],
 	};
 	const viewModel = createLibraryPageViewModel({
@@ -101,7 +99,8 @@ test("invalid update renders submitted values, errors, and the selected modal", 
 			errors: { fieldErrors: { name: "Name error" }, formErrors: ["Form error"] },
 		},
 	});
-	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	const html = await renderFile(path.resolve("views/library.ejs"), {
 		...viewModel,
 		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
@@ -119,7 +118,16 @@ test("invalid session update preserves its aggregate and reopens the update moda
 	const populatedData = {
 		...data,
 		stepTypes: [{ id: 1, name: "Exercise" }],
-		exerciseTemplates: [{ id: 2, name: "Press", movementPattern: {}, equipment: {}, muscles: [], variant: { id: 4, name: "Press" } }],
+		exerciseTemplates: [
+			{
+				id: 2,
+				name: "Press",
+				movementPattern: {},
+				equipment: {},
+				muscles: [],
+				variant: { id: 4, name: "Press" },
+			},
+		],
 	};
 	const viewModel = createLibraryPageViewModel({
 		page,
@@ -129,12 +137,33 @@ test("invalid session update preserves its aggregate and reopens the update moda
 			mode: "update",
 			open: true,
 			sessionId: "5",
-			values: { name: "Submitted session", notes: "Keep notes", stepRow: [{ stepId: "8", stepTypeId: "1", exerciseVariantId: "4", sets: "3", reps: "8", loadValue: "20", loadUnit: "Kilograms" }] },
-			errors: { fieldErrors: { name: "Session name error", stepRow: "Step error" }, formErrors: ["Form error"] },
+			values: {
+				name: "Submitted session",
+				notes: "Keep notes",
+				stepRow: [
+					{
+						stepId: "8",
+						stepTypeId: "1",
+						exerciseVariantId: "4",
+						sets: "3",
+						reps: "8",
+						loadValue: "20",
+						loadUnit: "Kilograms",
+					},
+				],
+			},
+			errors: {
+				fieldErrors: { name: "Session name error", stepRow: "Step error" },
+				formErrors: ["Form error"],
+			},
 		},
 	});
-	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
-	const html = await renderFile(path.resolve("views/library.ejs"), { ...viewModel, contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->` });
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const html = await renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
+	});
 	assert.match(html, /data-modal-open-on-load[\s\S]{0,80}id=updateSessionModal/);
 	assert.match(html, /action="\/sessions\/5\?_method=PATCH"/);
 	assert.match(html, /value="Submitted session"/);

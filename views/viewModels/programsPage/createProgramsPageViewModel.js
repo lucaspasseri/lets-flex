@@ -47,8 +47,7 @@ export default function createProgramsPageViewModel({ page, pageState, data }) {
 			noActiveUser: {
 				isVisible: currentUser === null,
 				title: "No active profile",
-				description:
-					"Create or select a profile before managing training programs.",
+				description: "Create or select a profile before managing training programs.",
 				action: { label: "Choose a profile", href: "/profile", icon: "plus" },
 			},
 		},

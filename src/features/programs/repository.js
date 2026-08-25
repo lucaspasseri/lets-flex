@@ -3,6 +3,7 @@ import pool from "../../../db/pool.js";
 /**
  * @typedef {import("./programs.types.js").ProgramRow} ProgramRow
  * @typedef {import("../users/users.types.js").UserRow} UserRow
+ * @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient
  */
 
 /**
@@ -17,13 +18,12 @@ import pool from "../../../db/pool.js";
 
 /**
  * @param {findByIdInput} input
+ * @param {DatabaseClient} [db]
  * @returns {Promise<ProgramRow | null>}
  */
 
 export async function findById({ programId }, db = pool) {
-	const { rows } = await db.query("SELECT * FROM programs WHERE id = $1", [
-		programId,
-	]);
+	const { rows } = await db.query("SELECT * FROM programs WHERE id = $1", [programId]);
 
 	return rows[0] ?? null;
 }

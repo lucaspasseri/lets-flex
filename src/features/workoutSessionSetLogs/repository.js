@@ -1,5 +1,8 @@
 import pool from "../../../db/pool.js";
 
+/** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
+
+/** @param {any} input @param {DatabaseClient} [db] */
 export async function create(
 	{ workoutStepLogId, setOrder, reps, loadValue, loadUnit },
 	db = pool,

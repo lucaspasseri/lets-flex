@@ -6,9 +6,9 @@ import { z } from "zod";
  *
  * @param {string} message
  */
-const requiredTrimmedString = message =>
+const requiredTrimmedString = (message) =>
 	z.preprocess(
-		value => (typeof value === "string" ? value : ""),
+		(value) => (typeof value === "string" ? value : ""),
 		z.string().trim().min(1, message),
 	);
 
@@ -61,13 +61,10 @@ export const createUserSchema = z
 			.refine(isNotInFuture, "Date of birth cannot be in the future."),
 		anamnesis: z
 			.preprocess(
-				value => (typeof value === "string" ? value : ""),
-				z
-					.string()
-					.trim()
-					.max(1000, "Health notes must be 1000 characters or fewer."),
+				(value) => (typeof value === "string" ? value : ""),
+				z.string().trim().max(1000, "Health notes must be 1000 characters or fewer."),
 			)
-			.transform(value => value || null),
+			.transform((value) => value || null),
 	})
 	.transform(({ name, dob, anamnesis }) => ({
 		name,

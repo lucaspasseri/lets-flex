@@ -1,5 +1,5 @@
 export function initializeArchiveSessionForm(root, form) {
-	root.addEventListener("click", event => {
+	root.addEventListener("click", (event) => {
 		const button = event.target.closest("[data-archive-session-template]");
 		if (!button) return;
 		let values;

@@ -32,7 +32,7 @@ async function getDayPageData({ userId, programId, dayId }) {
 	]);
 
 	const days = dayArr.map(trainingDayMapper.toTrainingDay);
-	const day = days.find(day => day.id === dayId) ?? null;
+	const day = days.find((day) => day.id === dayId) ?? null;
 
 	return {
 		currentUser: user ? userMapper.toLoggedUser(user) : null,

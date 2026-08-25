@@ -6,10 +6,20 @@ import resolveDashboardSelection from "./resolveDashboardSelection.js";
 
 const cycles = [{ id: 1, programId: 2, name: "Base", size: 8, order: 1 }];
 /** @param {number} id */
-const session = id => ({
-	id, trainingDayId: 10, sessionId: 20, order: id, status: "finished",
-	startedAt: null, finishedAt: new Date(2026, 7, 20), scheduledDate: new Date(2026, 7, 20),
-	notes: null, name: `Session ${id}`, sessionNotes: null, isArchived: false, steps: [],
+const session = (id) => ({
+	id,
+	trainingDayId: 10,
+	sessionId: 20,
+	order: id,
+	status: "finished",
+	startedAt: null,
+	finishedAt: new Date(2026, 7, 20),
+	scheduledDate: new Date(2026, 7, 20),
+	notes: null,
+	name: `Session ${id}`,
+	sessionNotes: null,
+	isArchived: false,
+	steps: [],
 });
 
 test("dashboard metrics consume mapped domain objects and handle missing dates", () => {
@@ -28,8 +38,21 @@ test("dashboard metrics consume mapped domain objects and handle missing dates",
 
 test("dashboard selection falls back predictably to the first session", () => {
 	const sessions = [session(1), session(2)];
-	const trainingDay = { id: 10, cycleId: 1, programId: 2, cycleOrder: 1, dayOrder: 1, scheduledDate: new Date(), label: null };
-	const selected = resolveDashboardSelection({ workoutSessionId: 999, trainingDay, cycles, workoutSessions: sessions });
+	const trainingDay = {
+		id: 10,
+		cycleId: 1,
+		programId: 2,
+		cycleOrder: 1,
+		dayOrder: 1,
+		scheduledDate: new Date(),
+		label: null,
+	};
+	const selected = resolveDashboardSelection({
+		workoutSessionId: 999,
+		trainingDay,
+		cycles,
+		workoutSessions: sessions,
+	});
 
 	assert.equal(selected.currentCycle?.id, 1);
 	assert.equal(selected.selectedWorkoutSession?.id, 1);

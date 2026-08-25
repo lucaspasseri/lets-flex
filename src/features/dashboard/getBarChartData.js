@@ -12,13 +12,15 @@ export default function getBarChartData(startDate, cycles, workoutSessions) {
 	return Array.from({ length: Math.ceil(totalDays / 7) }, (_, index) => {
 		const date = startOfWeek(addDays(startDate, index * 7));
 		/** @param {string | Date | null | undefined} value */
-		const inWeek = value => Boolean(value && isSameWeek(date, value));
+		const inWeek = (value) => Boolean(value && isSameWeek(date, value));
 
 		return {
 			date,
 			label: format(date, "dd/MM"),
-			scheduledCount: workoutSessions.filter(session => inWeek(session.scheduledDate)).length,
-			finishedCount: workoutSessions.filter(session => inWeek(session.finishedAt)).length,
+			scheduledCount: workoutSessions.filter((session) => inWeek(session.scheduledDate))
+				.length,
+			finishedCount: workoutSessions.filter((session) => inWeek(session.finishedAt))
+				.length,
 		};
 	});
 }

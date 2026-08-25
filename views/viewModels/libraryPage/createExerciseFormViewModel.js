@@ -21,14 +21,14 @@ export default function createExerciseFormViewModel({
 	const isUpdate = mode === "update";
 	const idPrefix = isUpdate ? "update-exercise" : "create-exercise";
 	/** @param {string} name */
-	const stringValue = name =>
+	const stringValue = (name) =>
 		typeof values[name] === "string" || typeof values[name] === "number"
 			? String(values[name])
 			: "";
 	const muscleGroup = Array.isArray(values.muscleGroup)
 		? values.muscleGroup
-			.filter((/** @type {any} */ item) => item && typeof item === "object")
-			.map((/** @type {any} */ item) => ({
+				.filter((/** @type {any} */ item) => item && typeof item === "object")
+				.map((/** @type {any} */ item) => ({
 					muscleId: String(item.muscleId ?? ""),
 					muscleRoleId: String(item.muscleRoleId ?? ""),
 				}))
@@ -57,19 +57,19 @@ export default function createExerciseFormViewModel({
 			},
 			errors: errors.fieldErrors ?? {},
 			formErrors: errors.formErrors ?? [],
-			movementPatternOptions: movementPatterns.map(item => ({
+			movementPatternOptions: movementPatterns.map((item) => ({
 				label: item.name,
 				value: item.id,
 			})),
-			equipmentOptions: equipments.map(item => ({
+			equipmentOptions: equipments.map((item) => ({
 				label: item.name,
 				value: item.id,
 			})),
-			muscleOptions: muscles.map(item => ({
+			muscleOptions: muscles.map((item) => ({
 				label: `${item.commonName} (${item.scientificName})`,
 				value: item.id,
 			})),
-			muscleRoleOptions: muscleRoles.map(item => ({
+			muscleRoleOptions: muscleRoles.map((item) => ({
 				label: item.name,
 				value: item.id,
 			})),

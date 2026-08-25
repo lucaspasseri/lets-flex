@@ -19,7 +19,11 @@ if (createExerciseForm) initializeMuscleRoleForm(createExerciseForm);
 if (updateExerciseForm) initializeMuscleRoleForm(updateExerciseForm);
 if (createSessionForm) initializeCreateSessionForm(createSessionForm);
 if (updateSessionForm) initializeCreateSessionForm(updateSessionForm);
-if (libraryPage && deleteExerciseForm) initializeDeleteExerciseForm(libraryPage, deleteExerciseForm);
-if (libraryPage && updateExerciseForm) initializeUpdateExerciseForm(libraryPage, updateExerciseForm);
-if (libraryPage && updateSessionForm) initializeUpdateSessionForm(libraryPage, updateSessionForm);
-if (libraryPage && archiveSessionForm) initializeArchiveSessionForm(libraryPage, archiveSessionForm);
+if (libraryPage && deleteExerciseForm)
+	initializeDeleteExerciseForm(libraryPage, deleteExerciseForm);
+if (libraryPage && updateExerciseForm)
+	initializeUpdateExerciseForm(libraryPage, updateExerciseForm);
+if (libraryPage && updateSessionForm)
+	initializeUpdateSessionForm(libraryPage, updateSessionForm);
+if (libraryPage && archiveSessionForm)
+	initializeArchiveSessionForm(libraryPage, archiveSessionForm);

@@ -36,7 +36,10 @@ export async function updateSessionTemplate(input, dependencies = defaultDepende
 				if (!updated) throw new SessionTemplateNotFoundError();
 				retainedStepIds.push(step.stepId);
 			} else {
-				const created = await dependencies.sessionStepsRepository.create(values, client);
+				const created = await dependencies.sessionStepsRepository.create(
+					values,
+					client,
+				);
 				if (!created?.id) throw new Error("Failed to create session step");
 				retainedStepIds.push(created.id);
 			}

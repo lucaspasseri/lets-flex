@@ -21,7 +21,10 @@ const defaultDependencies = {
  * @param {{exerciseId: number, variantId: number, name: string, movementPatternId: number, equipmentId: number, muscleGroup: Array<{muscleId: number, muscleRoleId: number}>}} input
  * @param {any} dependencies
  */
-export async function updateExerciseTemplate(input, dependencies = defaultDependencies) {
+export async function updateExerciseTemplate(
+	input,
+	dependencies = defaultDependencies,
+) {
 	const {
 		pool: databasePool,
 		exercisesRepository: exercises,

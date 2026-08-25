@@ -18,12 +18,22 @@ export default function createDayPageViewModel({ page, pageState, data }) {
 		components: {
 			dayHeader: {
 				dayId: currentDayId,
-				dateLabel: formatDayPageDate(days.current?.scheduledDate ?? null) ??
+				dateLabel:
+					formatDayPageDate(days.current?.scheduledDate ?? null) ??
 					"Date outside the program's boundaries",
 			},
-			dayNavigation: createDayNavigationViewModel({ currentDay: days.current, days: days.items }),
-			sessionLinkForm: createSessionLinkFormViewModel({ currentDayId, sessions: sessions.items }),
-			workoutSessionList: createWorkoutSessionListViewModel({ currentDayId, workoutSessions: workoutSessions.items }),
+			dayNavigation: createDayNavigationViewModel({
+				currentDay: days.current,
+				days: days.items,
+			}),
+			sessionLinkForm: createSessionLinkFormViewModel({
+				currentDayId,
+				sessions: sessions.items,
+			}),
+			workoutSessionList: createWorkoutSessionListViewModel({
+				currentDayId,
+				workoutSessions: workoutSessions.items,
+			}),
 		},
 	};
 }

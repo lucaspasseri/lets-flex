@@ -1,5 +1,8 @@
 import pool from "../../../db/pool.js";
 
+/** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
+
+/** @param {any} input @param {DatabaseClient} [db] */
 export async function create(
 	{
 		sessionId,
@@ -34,10 +37,9 @@ export async function create(
 
 /** @param {{sessionId: number}} input @param {any} db */
 export async function moveOrdersOutOfWay({ sessionId }, db = pool) {
-	await db.query(
-		"UPDATE session_steps SET step_order = -id WHERE session_id = $1",
-		[sessionId],
-	);
+	await db.query("UPDATE session_steps SET step_order = -id WHERE session_id = $1", [
+		sessionId,
+	]);
 }
 
 /** @param {any} input @param {any} db */
@@ -81,9 +83,7 @@ export async function update(
 /** @param {{sessionId: number, stepIds: number[]}} input @param {any} db */
 export async function deleteExcept({ sessionId, stepIds }, db = pool) {
 	if (stepIds.length === 0) {
-		await db.query("DELETE FROM session_steps WHERE session_id = $1", [
-			sessionId,
-		]);
+		await db.query("DELETE FROM session_steps WHERE session_id = $1", [sessionId]);
 		return;
 	}
 	await db.query(

@@ -17,7 +17,9 @@ export default function createSessionFormViewModel({
 	const errors = state.errors ?? { fieldErrors: {}, formErrors: [] };
 	const idPrefix = isUpdate ? "update-session" : "create-session";
 	const stepRow = Array.isArray(values.stepRow)
-		? values.stepRow.filter((/** @type {any} */ item) => item && typeof item === "object")
+		? values.stepRow.filter(
+				(/** @type {any} */ item) => item && typeof item === "object",
+			)
 		: [];
 	return {
 		modal: {
@@ -29,9 +31,7 @@ export default function createSessionFormViewModel({
 			id: `${idPrefix}-template-form`,
 			heading: isUpdate ? "Update session template" : "Create session template",
 			description: "Define a reusable session template.",
-			action: isUpdate
-				? `/sessions/${state.sessionId}?_method=PATCH`
-				: "/sessions",
+			action: isUpdate ? `/sessions/${state.sessionId}?_method=PATCH` : "/sessions",
 		},
 		fields: {
 			idPrefix,
@@ -42,11 +42,11 @@ export default function createSessionFormViewModel({
 			},
 			errors: errors.fieldErrors ?? {},
 			formErrors: errors.formErrors ?? [],
-			stepTypeOptions: stepTypes.map(stepType => ({
+			stepTypeOptions: stepTypes.map((stepType) => ({
 				label: stepType.name,
 				value: stepType.id,
 			})),
-			exerciseOptions: exerciseTemplates.map(exercise => ({
+			exerciseOptions: exerciseTemplates.map((exercise) => ({
 				label: exercise.name,
 				value: exercise.variant.id,
 			})),

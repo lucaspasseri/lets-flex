@@ -2,11 +2,7 @@ import pool from "../../../db/pool.js";
 import * as workoutSessionStepLogsRepository from "./repository.js";
 import * as workoutSessionSetLogsRepository from "../workoutSessionSetLogs/repository.js";
 
-async function performWorkoutStepLog({
-	workoutStepLogId,
-	status,
-	logFormRows,
-}) {
+async function performWorkoutStepLog({ workoutStepLogId, status, logFormRows }) {
 	const client = await pool.connect();
 
 	try {
