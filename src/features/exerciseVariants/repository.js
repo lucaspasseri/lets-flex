@@ -14,3 +14,17 @@ export async function create({ name, exerciseId, equipmentId }, db = pool) {
 		[name, exerciseId, equipmentId],
 	);
 }
+
+/** @param {{variantId: number, exerciseId: number, name: string, equipmentId: number}} input @param {any} db */
+export async function update(
+	{ variantId, exerciseId, name, equipmentId },
+	db = pool,
+) {
+	const { rowCount } = await db.query(
+		`UPDATE exercise_variants
+		 SET name = $3, equipment_id = $4
+		 WHERE id = $1 AND exercise_id = $2`,
+		[variantId, exerciseId, name, equipmentId],
+	);
+	return rowCount > 0;
+}

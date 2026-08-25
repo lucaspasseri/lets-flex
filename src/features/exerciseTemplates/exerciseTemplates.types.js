@@ -99,6 +99,7 @@
 
 /**
  * @typedef {object} ExerciseTemplateItemActions
+ * @property {*} update
  * @property {*} remove
  */
 

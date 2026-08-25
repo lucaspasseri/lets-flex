@@ -71,5 +71,74 @@ test("library template renders from its page ViewModel", async () => {
 
 	assert.match(html, /data-library-page/);
 	assert.match(html, /data-create-session-form/);
+	assert.match(html, /data-archive-session-form/);
 	assert.match(html, /\/js\/pages\/library\/index\.js/);
+});
+
+test("invalid update renders submitted values, errors, and the selected modal", async () => {
+	const populatedData = {
+		...data,
+		equipments: [{ id: 3, name: "Barbell" }],
+		movementPatterns: [{ id: 2, name: "Push", notes: null }],
+		muscles: [{ id: 4, commonName: "Chest", scientificName: "Pectoralis", bodyRegion: "torso", referenceUrl: null }],
+		muscleRoles: [{ id: 1, name: "primary", description: null }],
+	};
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: null, sessionId: null },
+		data: /** @type {any} */ (populatedData),
+		exerciseTemplateFormState: {
+			mode: "update",
+			open: true,
+			exerciseId: "7",
+			variantId: "11",
+			values: {
+				name: "Submitted press",
+				movementPatternId: "2",
+				equipmentId: "3",
+				muscleGroup: [{ muscleId: "4", muscleRoleId: "1" }],
+			},
+			errors: { fieldErrors: { name: "Name error" }, formErrors: ["Form error"] },
+		},
+	});
+	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const html = await renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
+	});
+
+	assert.match(html, /data-modal-open-on-load[\s\S]{0,80}id=updateExerciseModal/);
+	assert.match(html, /action="\/exerciseTemplates\/7\/variants\/11\?_method=PATCH"/);
+	assert.match(html, /value="Submitted press"/);
+	assert.match(html, /Name error/);
+	assert.match(html, /Form error/);
+	assert.match(html, /muscleGroup\[0\]\[muscleId\]/);
+});
+
+test("invalid session update preserves its aggregate and reopens the update modal", async () => {
+	const populatedData = {
+		...data,
+		stepTypes: [{ id: 1, name: "Exercise" }],
+		exerciseTemplates: [{ id: 2, name: "Press", movementPattern: {}, equipment: {}, muscles: [], variant: { id: 4, name: "Press" } }],
+	};
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: null, sessionId: null },
+		data: /** @type {any} */ (populatedData),
+		sessionTemplateFormState: {
+			mode: "update",
+			open: true,
+			sessionId: "5",
+			values: { name: "Submitted session", notes: "Keep notes", stepRow: [{ stepId: "8", stepTypeId: "1", exerciseVariantId: "4", sets: "3", reps: "8", loadValue: "20", loadUnit: "Kilograms" }] },
+			errors: { fieldErrors: { name: "Session name error", stepRow: "Step error" }, formErrors: ["Form error"] },
+		},
+	});
+	const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const html = await renderFile(path.resolve("views/library.ejs"), { ...viewModel, contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->` });
+	assert.match(html, /data-modal-open-on-load[\s\S]{0,80}id=updateSessionModal/);
+	assert.match(html, /action="\/sessions\/5\?_method=PATCH"/);
+	assert.match(html, /value="Submitted session"/);
+	assert.match(html, /Session name error/);
+	assert.match(html, /Step error/);
+	assert.match(html, /stepRow\[0\]\[stepId\]/);
 });

@@ -4,24 +4,44 @@
  */
 
 /**
- * @param {{stepTypes: StepType[], exerciseTemplates: ExerciseTemplate[]}} input
+ * @param {{stepTypes: StepType[], exerciseTemplates: ExerciseTemplate[], state?: Record<string, any>, mode?: "create" | "update"}} input
  */
 export default function createSessionFormViewModel({
 	stepTypes,
 	exerciseTemplates,
+	state = {},
+	mode = "create",
 }) {
+	const isUpdate = mode === "update";
+	const values = state.values ?? {};
+	const errors = state.errors ?? { fieldErrors: {}, formErrors: [] };
+	const idPrefix = isUpdate ? "update-session" : "create-session";
+	const stepRow = Array.isArray(values.stepRow)
+		? values.stepRow.filter((/** @type {any} */ item) => item && typeof item === "object")
+		: [];
 	return {
 		modal: {
-			id: "createSessionModal",
-			title: "Create session template",
+			id: isUpdate ? "updateSessionModal" : "createSessionModal",
+			title: isUpdate ? "Update session template" : "Create session template",
+			openOnLoad: Boolean(state.open),
 		},
 		form: {
-			id: "create-session-template-form",
-			heading: "Create session template",
+			id: `${idPrefix}-template-form`,
+			heading: isUpdate ? "Update session template" : "Create session template",
 			description: "Define a reusable session template.",
-			action: "/sessions",
+			action: isUpdate
+				? `/sessions/${state.sessionId}?_method=PATCH`
+				: "/sessions",
 		},
 		fields: {
+			idPrefix,
+			values: {
+				name: typeof values.name === "string" ? values.name : "",
+				notes: typeof values.notes === "string" ? values.notes : "",
+				stepRow,
+			},
+			errors: errors.fieldErrors ?? {},
+			formErrors: errors.formErrors ?? [],
 			stepTypeOptions: stepTypes.map(stepType => ({
 				label: stepType.name,
 				value: stepType.id,
@@ -37,7 +57,7 @@ export default function createSessionFormViewModel({
 		},
 		actions: {
 			cancel: { label: "Cancel" },
-			submit: { label: "Create session" },
+			submit: { label: isUpdate ? "Update session" : "Create session" },
 			addStep: { label: "Add step" },
 		},
 	};

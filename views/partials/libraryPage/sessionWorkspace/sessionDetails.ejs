@@ -43,15 +43,30 @@
 				<% } %>
 			</div>
 
-			<%  if(actions?.edit) { %>
-				<a
-					class="button button--secondary"
-					href="<%= actions.edit?.href %>"
-				>
-					<i data-lucide="pencil" aria-hidden="true"></i>
-					<span><%= actions.edit?.label %></span>
-				</a>
-			<% } %>
+			<div class="session-details__actions">
+				<% if (actions?.edit) { %>
+					<%- include("../../shared/components/button/button", {button: {
+						label: actions.edit.label,
+						variant: "secondary",
+						type: "button",
+						attributes: {
+							"data-modal-open": actions.edit.modalId,
+							"data-update-session-template": JSON.stringify(actions.edit.values)
+						}
+					}}) %>
+				<% } %>
+				<% if (actions?.archive) { %>
+					<%- include("../../shared/components/button/button", {button: {
+						label: actions.archive.label,
+						variant: "danger",
+						type: "button",
+						attributes: {
+							"data-modal-open": actions.archive.modalId,
+							"data-archive-session-template": JSON.stringify(actions.archive.values)
+						}
+					}}) %>
+				<% } %>
+			</div>
 		</header>
 
 		<dl class="session-stats">

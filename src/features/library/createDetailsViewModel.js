@@ -65,14 +65,31 @@ function createDetails({ session }) {
 		],
 
 		actions: {
-			// edit: {
-			// 	label: "Edit session",
-			// 	href: `/sessions/${session.id}/edit`,
-			// },
-			archive: {
-				label: "Archive session",
-				action: `/sessions/${session.id}/archive`,
+			edit: {
+				label: "Edit session",
+				modalId: "updateSessionModal",
+				values: {
+					sessionId: session.id,
+					name: session.name,
+					notes: session.notes ?? "",
+					stepRow: steps.map(step => ({
+						stepId: step.id,
+						stepTypeId: step.stepTypeId,
+						exerciseVariantId: step.exerciseVariantId,
+						sets: step.sets,
+						reps: step.reps,
+						loadValue: step.loadValue,
+						loadUnit: step.loadUnit,
+					})),
+				},
 			},
+			archive: session.isArchived
+				? null
+				: {
+					label: "Archive session",
+					modalId: "archiveSessionModal",
+					values: { sessionId: session.id, name: session.name },
+				},
 		},
 	};
 }

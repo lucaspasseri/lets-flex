@@ -2,19 +2,31 @@
 	const {
 		stepTypeOptions,
 		exerciseOptions,
-		loadUnitOptions
-	} = locals.createSessionForm.fields;
+		loadUnitOptions,
+		idPrefix,
+		values,
+		errors,
+		formErrors
+	} = locals.sessionForm.fields;
 %>
+
+<% if (formErrors.length) { %>
+	<div class="form-errors" role="alert">
+		<% formErrors.forEach(error => { %><p><%= error %></p><% }) %>
+	</div>
+<% } %>
 
 <div class="form-grid form-grid--two-columns">
 <%- include("../../shared/components/form/field", {
 	field: {
-		id: "session-name-input",
+		id: `${idPrefix}-name-input`,
 		name: "name",
 		label: "Session name",
 		control: "input",
 		type: "text",
 		required: true,
+		value: values.name,
+		error: errors.name,
 		hint: "Enter a name for the session template.",
 		attributes: {
 			autocomplete: "off",
@@ -25,10 +37,12 @@
 
 <%- include("../../shared/components/form/field", {
 	field: {
-		id: "session-notes-input",
+		id: `${idPrefix}-notes-input`,
 		name: "notes",
 		label: "Notes",
 		control: "textarea",
+		value: values.notes,
+		error: errors.notes,
 		hint: "Add any general instructions for this session.",
 		attributes: {
 			rows: 3,
@@ -38,10 +52,10 @@
 }) %>
 </div>
 
-<section class="form-section" aria-labelledby="session-step-heading">
+<section class="form-section" aria-labelledby="<%= idPrefix %>-step-heading">
 	<div class="form-section__header">
 		<div>
-			<h4 id="session-step-heading">Add a step</h4>
+			<h4 id="<%= idPrefix %>-step-heading">Add a step</h4>
 			<p>Configure an exercise prescription, then add it to the session.</p>
 		</div>
 	</div>
@@ -49,7 +63,7 @@
 	<div class="form-grid form-grid--two-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "session-step-type-select",
+			id: `${idPrefix}-step-type-select`,
 			name: "draftStepTypeId",
 			label: "Step type",
 			control: "select",
@@ -61,7 +75,7 @@
 
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "session-exercise-variant-select",
+			id: `${idPrefix}-exercise-variant-select`,
 			name: "draftExerciseVariantId",
 			label: "Exercise",
 			control: "select",
@@ -75,7 +89,7 @@
 	<div class="form-grid form-grid--four-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "session-step-sets-input",
+			id: `${idPrefix}-step-sets-input`,
 			name: "draftSets",
 			label: "Sets",
 			control: "input",
@@ -90,7 +104,7 @@
 
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "session-step-reps-input",
+			id: `${idPrefix}-step-reps-input`,
 			name: "draftReps",
 			label: "Repetitions",
 			control: "input",
@@ -105,7 +119,7 @@
 
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "session-step-load-input",
+			id: `${idPrefix}-step-load-input`,
 			name: "draftLoadValue",
 			label: "Load",
 			control: "input",
@@ -120,7 +134,7 @@
 
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "session-step-load-unit-select",
+			id: `${idPrefix}-step-load-unit-select`,
 			name: "draftLoadUnit",
 			label: "Load unit",
 			control: "select",
@@ -131,35 +145,58 @@
 	</div>
 
 	<p
-		id="session-step-draft-error"
+		id="<%= idPrefix %>-step-draft-error"
 		class="form-field__error"
+		data-session-step-draft-error
 		hidden
 	></p>
 
 	<div class="form-section__actions">
 	<%- include("../../shared/components/button/button", {
 		button: {
-			id: "add-session-step",
-			label: locals.createSessionForm.actions.addStep.label,
+			id: `${idPrefix}-add-session-step`,
+			label: locals.sessionForm.actions.addStep.label,
 			variant: "secondary",
-			type: "button"
+			type: "button",
+			attributes: { "data-add-session-step": true }
 		}
 	}) %>
 	</div>
 </section>
 
-<section class="form-section" aria-labelledby="session-step-list-heading">
+<section class="form-section" aria-labelledby="<%= idPrefix %>-step-list-heading">
 	<div class="form-section__header">
 		<div>
-			<h4 id="session-step-list-heading">Session steps</h4>
+			<h4 id="<%= idPrefix %>-step-list-heading">Session steps</h4>
 			<p>Steps will be performed in the order shown here.</p>
 		</div>
 	</div>
 
 	<div class="form-collection" aria-live="polite">
-		<p id="session-step-list-message" class="form-collection__empty">
-			No steps added yet.
+		<p id="<%= idPrefix %>-step-list-message" class="form-collection__empty" data-session-step-list-message <% if (errors.stepRow) { %>data-step-error role="alert"<% } %>>
+			<%= errors.stepRow || "No steps added yet." %>
 		</p>
-		<ol id="session-step-list" class="form-collection__list"></ol>
+		<ol id="<%= idPrefix %>-step-list" class="form-collection__list" data-session-step-list>
+			<% values.stepRow.forEach((step, index) => {
+				const stepType = stepTypeOptions.find(option => String(option.value) === String(step.stepTypeId));
+				const exercise = exerciseOptions.find(option => String(option.value) === String(step.exerciseVariantId));
+			%>
+				<li class="form-collection__item session-step-draft">
+					<p><%= stepType?.label ?? "Unknown step type" %> — <%= exercise?.label ?? "Unknown exercise" %></p>
+					<% if (step.stepId) { %><input type="hidden" data-step-field="stepId" name="stepRow[<%= index %>][stepId]" value="<%= step.stepId %>"><% } %>
+					<input type="hidden" data-step-field="stepTypeId" name="stepRow[<%= index %>][stepTypeId]" value="<%= step.stepTypeId %>">
+					<input type="hidden" data-step-field="exerciseVariantId" name="stepRow[<%= index %>][exerciseVariantId]" value="<%= step.exerciseVariantId %>">
+					<input type="hidden" data-step-field="sets" name="stepRow[<%= index %>][sets]" value="<%= step.sets %>">
+					<input type="hidden" data-step-field="reps" name="stepRow[<%= index %>][reps]" value="<%= step.reps %>">
+					<input type="hidden" data-step-field="loadValue" name="stepRow[<%= index %>][loadValue]" value="<%= step.loadValue %>">
+					<input type="hidden" data-step-field="loadUnit" name="stepRow[<%= index %>][loadUnit]" value="<%= step.loadUnit %>">
+					<div class="form-collection__actions">
+						<button type="button" class="form-collection__move" data-move-step-up>Move up</button>
+						<button type="button" class="form-collection__move" data-move-step-down>Move down</button>
+						<button type="button" class="form-collection__remove" data-remove-session-step>Remove</button>
+					</div>
+				</li>
+			<% }) %>
+		</ol>
 	</div>
 </section>

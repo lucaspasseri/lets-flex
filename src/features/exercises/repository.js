@@ -27,3 +27,12 @@ export async function create({ name, movementPatternId }, db = pool) {
 export async function deleteById({ exerciseId }, db = pool) {
 	await db.query("DELETE FROM exercises WHERE id = $1", [exerciseId]);
 }
+
+/** @param {{exerciseId: number, name: string, movementPatternId: number}} input @param {any} db */
+export async function update({ exerciseId, name, movementPatternId }, db = pool) {
+	const { rowCount } = await db.query(
+		"UPDATE exercises SET name = $2, movement_pattern_id = $3 WHERE id = $1",
+		[exerciseId, name, movementPatternId],
+	);
+	return rowCount > 0;
+}

@@ -75,6 +75,16 @@
 
 		<div class="exercise-template__actions">
 			<%- include("../shared/components/button/button",  {button: {
+					label: "Edit",
+					variant: "secondary",
+					type: "button",
+					attributes: {
+						"data-modal-open": actions?.update?.modalId,
+						"data-update-exercise-template": JSON.stringify(actions?.update?.values ?? {})
+					}
+				}})
+			%>
+			<%- include("../shared/components/button/button",  {button: {
 					label: "Delete",
 					variant: "danger",
 					attributes: {

@@ -3,19 +3,31 @@
 		movementPatternOptions,
 		equipmentOptions,
 		muscleOptions,
-		muscleRoleOptions
-	} = locals.createExerciseForm.fields;
+		muscleRoleOptions,
+		idPrefix,
+		values,
+		errors,
+		formErrors
+	} = locals.exerciseForm.fields;
 %>
+
+<% if (formErrors.length) { %>
+	<div class="form-errors" role="alert">
+		<% formErrors.forEach(error => { %><p><%= error %></p><% }) %>
+	</div>
+<% } %>
 
 <div class="form-grid form-grid--two-columns">
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "name-input",
+			id: `${idPrefix}-name-input`,
 			name: "name",
 			label: "Exercise's name",
 			control: "input",
 			type: "text",
 			required: true,
+			value: values.name,
+			error: errors.name,
 			hint: "Enter the name for the exercise template.",
 			attributes: {
 				autocomplete: "on",
@@ -26,11 +38,13 @@
 
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "movement-pattern-select",
+			id: `${idPrefix}-movement-pattern-select`,
 			name: "movementPatternId",
 			label: "Movement pattern",
 			control: "select",
 			required: true,
+			value: values.movementPatternId,
+			error: errors.movementPatternId,
 			hint: "Choose a movement pattern for the exercise template.",
 			options: movementPatternOptions,
 			attributes: {
@@ -41,11 +55,13 @@
 
 	<%- include("../../shared/components/form/field", {
 		field: {
-			id: "equipment-select",
+			id: `${idPrefix}-equipment-select`,
 			name: "equipmentId",
 			label: "Equipment",
 			control: "select",
 			required: true,
+			value: values.equipmentId,
+			error: errors.equipmentId,
 			hint: "Choose an equipment for the exercise template.",
 			options: equipmentOptions,
 			attributes: {
@@ -55,10 +71,10 @@
 	}) %>
 </div>
 
-<section class="form-section" aria-labelledby="exercise-muscles-heading">
+<section class="form-section" aria-labelledby="<%= idPrefix %>-muscles-heading">
 	<div class="form-section__header">
 		<div>
-			<h4 id="exercise-muscles-heading">Muscle roles</h4>
+			<h4 id="<%= idPrefix %>-muscles-heading">Muscle roles</h4>
 			<p>Associate one or more muscles with their role in the exercise.</p>
 		</div>
 	</div>
@@ -66,11 +82,11 @@
 	<div class="form-grid form-grid--two-columns">
 		<%- include("../../shared/components/form/field", {
 			field: {
-				id: "muscle-select",
+				id: `${idPrefix}-muscle-select`,
 				name: "muscleId",
 				label: "Performing muscle",
 				control: "select",
-				required: true,
+				required: false,
 				hint: "Choose a muscle for the exercise template.",
 				options: muscleOptions,
 				attributes: {
@@ -81,11 +97,11 @@
 
 		<%- include("../../shared/components/form/field", {
 			field: {
-				id: "muscle-role-select",
+				id: `${idPrefix}-muscle-role-select`,
 				name: "muscleRoleId",
 				label: "Performed role",
 				control: "select",
-				required: true,
+				required: false,
 				hint: "Choose a muscle role for the exercise template.",
 				options: muscleRoleOptions,
 				attributes: {
@@ -98,17 +114,31 @@
 
 	<div class="form-section__actions">
 		<%- include("../../shared/components/button/button", {button: {
-				id: "add-muscle-role-relation",
-				label: locals.createExerciseForm.actions.addMuscle.label,
+				id: `${idPrefix}-add-muscle-role-relation`,
+				label: locals.exerciseForm.actions.addMuscle.label,
 				variant: "primary",
+				type: "button",
+				attributes: { "data-add-muscle-relation": true },
 			}}) 
 		%>
 	</div>
 
-	<div class="form-collection" aria-live="polite">
-		<p id="muscle-role-list-message" class="form-collection__empty">
-			No muscles added yet.
+	<div class="form-collection" aria-live="polite" data-muscle-collection>
+		<p id="<%= idPrefix %>-muscle-role-list-message" class="form-collection__empty" data-muscle-list-message <% if (errors.muscleGroup) { %>data-muscle-error role="alert"<% } %>>
+			<%= errors.muscleGroup || "No muscles added yet." %>
 		</p>
-		<ul id="muscle-role-list" class="form-collection__list"></ul>
+		<ul id="<%= idPrefix %>-muscle-role-list" class="form-collection__list" data-muscle-list>
+			<% values.muscleGroup.forEach((relation, index) => {
+				const muscle = muscleOptions.find(option => String(option.value) === String(relation.muscleId));
+				const role = muscleRoleOptions.find(option => String(option.value) === String(relation.muscleRoleId));
+			%>
+				<li class="form-collection__item">
+					<p><%= muscle?.label ?? "Unknown muscle" %> (<%= role?.label ?? "Unknown role" %>)</p>
+					<input type="hidden" data-muscle-field="muscleId" name="muscleGroup[<%= index %>][muscleId]" value="<%= relation.muscleId %>">
+					<input type="hidden" data-muscle-field="muscleRoleId" name="muscleGroup[<%= index %>][muscleRoleId]" value="<%= relation.muscleRoleId %>">
+					<button type="button" class="form-collection__remove" data-remove-muscle-relation>Remove</button>
+				</li>
+			<% }) %>
+		</ul>
 	</div>
 </section>
