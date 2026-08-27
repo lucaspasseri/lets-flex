@@ -1,7 +1,7 @@
 import { z } from "zod";
+import { positiveId as id } from "./idSchemas.js";
 
-const positiveId = (message) =>
-	z.coerce.number({ error: message }).int(message).positive(message);
+const positiveId = id;
 
 const optionalPositiveId = (message) =>
 	z.preprocess(

@@ -42,6 +42,8 @@ export default function createLibraryPageViewModel({
 			createSessionForm: createSessionForm({
 				stepTypes: data.stepTypes,
 				exerciseTemplates: data.exerciseTemplates,
+				state:
+					sessionTemplateFormState?.mode === "create" ? sessionTemplateFormState : {},
 			}),
 			updateSessionForm: createSessionForm({
 				stepTypes: data.stepTypes,
@@ -55,6 +57,8 @@ export default function createLibraryPageViewModel({
 				movementPatterns: data.movementPatterns,
 				muscles: data.muscles,
 				muscleRoles: data.muscleRoles,
+				state:
+					exerciseTemplateFormState?.mode === "create" ? exerciseTemplateFormState : {},
 			}),
 			updateExerciseForm: createExerciseForm({
 				equipments: data.equipments,

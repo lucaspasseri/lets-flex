@@ -141,8 +141,8 @@ integration("application pages and HTTP actions", { concurrency: false }, () => 
 		assert.equal(result.response.status, 400);
 		assert.match(result.text, /Choose a valid training day/);
 		result = await request("/playground/does-not-exist");
-		assert.equal(result.response.status, 500);
-		assert.equal(result.text, "Something broke!");
+		assert.equal(result.response.status, 404);
+		assert.equal(result.text, "Not found");
 	});
 
 	test("profile creation, selection, clearing, validation, and missing selection", async () => {
@@ -251,6 +251,13 @@ integration("application pages and HTTP actions", { concurrency: false }, () => 
 
 		result = await request("/exerciseTemplates", {
 			method: "POST",
+			form: { name: "", movementPatternId: "bad", equipmentId: "" },
+		});
+		assert.equal(result.response.status, 422);
+		assert.match(result.text, /Enter an exercise name/);
+
+		result = await request("/exerciseTemplates", {
+			method: "POST",
 			form: {
 				name: "Goblet Squat",
 				movementPatternId: "3",
@@ -294,6 +301,13 @@ integration("application pages and HTTP actions", { concurrency: false }, () => 
 			(await db.query("SELECT 1 FROM sessions WHERE name = 'Empty Recovery'")).rowCount,
 			1,
 		);
+		result = await request("/sessions", {
+			method: "POST",
+			form: { name: "", notes: "preserved note" },
+		});
+		assert.equal(result.response.status, 422);
+		assert.match(result.text, /Enter a session name/);
+		assert.match(result.text, /preserved note/);
 
 		result = await request(`/sessions/${ids.session_id}`, {
 			method: "PATCH",

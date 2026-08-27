@@ -4,7 +4,6 @@ import cancelWorkoutSession from "../../features/workoutSessions/cancelWorkoutSe
 import startWorkoutSession from "../../features/workoutSessions/startWorkoutSession.js";
 import { finishWorkoutSession } from "../../features/workoutSessions/finishWorkoutSession.js";
 import { renderDay } from "./dayController.js";
-import { workoutSessionParamsSchema } from "../validation/daySchemas.js";
 import { renderDashboard } from "./dashboardController.js";
 
 async function create(req, res) {
@@ -16,12 +15,7 @@ async function create(req, res) {
 }
 
 async function cancel(req, res) {
-	const params = workoutSessionParamsSchema.safeParse(req.params);
-	if (!params.success) {
-		res.status(400).send("Invalid workout session ID");
-		return;
-	}
-	const { workoutSessionId } = params.data;
+	const { workoutSessionId } = req.validatedParams;
 	const { trainingDayId } = req.validatedBody;
 
 	await cancelWorkoutSession({ workoutSessionId });

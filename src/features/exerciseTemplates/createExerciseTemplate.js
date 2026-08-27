@@ -13,8 +13,6 @@ async function createExerciseTemplate({
 	try {
 		await client.query("BEGIN");
 
-		// ESTA CORRETO CRIAR UM NOVO EXERCíCIO TODA VEZ OU AS VARIANTS TERIAM ESSE PAPEL???????
-
 		const exercise = await exercisesRepository.create(
 			{ name, movementPatternId },
 			client,
@@ -37,10 +35,8 @@ async function createExerciseTemplate({
 
 		await client.query("COMMIT");
 	} catch (err) {
-		console.log({ err });
 		await client.query("ROLLBACK");
-		const message = err instanceof Error ? err.message : String(err);
-		throw new Error(`Failed to add new exercise cluster: ${message}`);
+		throw new Error("Failed to create exercise template", { cause: err });
 	} finally {
 		client.release();
 	}

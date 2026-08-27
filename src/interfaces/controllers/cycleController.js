@@ -63,7 +63,7 @@ async function create(req, res) {
 }
 
 async function destroy(req, res) {
-	const cycleId = toNullableNumber(req.params.cycleId);
+	const cycleId = toNullableNumber(req.validatedParams?.cycleId ?? req.params.cycleId);
 	const userId = toNullableNumber(res.locals?.sessionState?.userId);
 	if (cycleId === null || !Number.isInteger(cycleId) || cycleId <= 0) {
 		res.status(400).send("Invalid cycle ID");

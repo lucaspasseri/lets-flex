@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { updateSessionTemplateSchema } from "./sessionTemplateSchemas.js";
+import {
+	createSessionTemplateSchema,
+	updateSessionTemplateSchema,
+} from "./sessionTemplateSchemas.js";
 
 test("session update validation normalizes an ordered session aggregate", () => {
 	const value = updateSessionTemplateSchema.parse({
@@ -63,4 +66,25 @@ test("session update validation permits removing every step", () => {
 		stepRow: undefined,
 	});
 	assert.deepEqual(value, { name: "Recovery", notes: null, stepRow: [] });
+});
+
+test("session creation strips submitted step identities", () => {
+	const value = createSessionTemplateSchema.parse({
+		name: "Strength",
+		notes: "",
+		stepRow: [
+			{
+				stepId: "99",
+				stepTypeId: "1",
+				exerciseVariantId: "4",
+				sets: "3",
+				reps: "5",
+				loadValue: "80",
+				loadUnit: "Kilograms",
+			},
+		],
+	});
+
+	assert.equal(Object.hasOwn(value.stepRow[0], "stepId"), false);
+	assert.equal(value.notes, null);
 });

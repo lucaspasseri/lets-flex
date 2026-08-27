@@ -47,6 +47,7 @@ router.post(
 );
 router.patch(
 	"/:workoutSessionId",
+	validateRequestParams(workoutSessionActionParamsSchema),
 	validateRequestBody(
 		cancelWorkoutSessionSchema,
 		workoutSessionController.showCancelErrors,

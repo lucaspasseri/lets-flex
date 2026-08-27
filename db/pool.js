@@ -1,10 +1,10 @@
 import { Pool } from "pg";
 
+const useSsl = process.env.DATABASE_SSL === "true";
+
 const pool = new Pool({
 	connectionString: process.env.DATABASE_URL,
-	ssl: process.env.DATABASE_URL?.includes("neondb")
-		? { rejectUnauthorized: false }
-		: false,
+	ssl: useSsl ? { rejectUnauthorized: true } : false,
 });
 
 export default pool;

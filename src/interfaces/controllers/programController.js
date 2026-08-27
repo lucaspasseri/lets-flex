@@ -105,7 +105,9 @@ async function create(req, res) {
 }
 
 async function destroy(req, res) {
-	const programId = toNullableNumber(req.params.programId);
+	const programId = toNullableNumber(
+		req.validatedParams?.programId ?? req.params.programId,
+	);
 	const userId = toNullableNumber(res.locals?.sessionState?.userId);
 	if (programId === null || !Number.isInteger(programId) || programId <= 0) {
 		res.status(400).send("Invalid program ID");

@@ -28,6 +28,7 @@
 	id: createSessionForm.modal.id,
 	title: createSessionForm.modal.title,
 	showTitle: false,
+	openOnLoad: createSessionForm.modal.openOnLoad,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...createSessionForm.form,
 		attributes: { "data-create-session-form": true },
@@ -98,6 +99,7 @@
 	id: createExerciseForm.modal.id,
 	title: createExerciseForm.modal.title,
 	showTitle: false,
+	openOnLoad: createExerciseForm.modal.openOnLoad,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...createExerciseForm.form,
 		attributes: { "data-create-exercise-form": true },

@@ -6,13 +6,13 @@ import updateExerciseTemplate, {
 } from "../../features/exerciseTemplates/updateExerciseTemplate.js";
 import { renderLibrary } from "./libraryController.js";
 
-/** @typedef {import("express").Request} Request */
+/** @typedef {import("express").Request & {validatedBody?: any, validatedParams?: any}} Request */
 /** @typedef {import("express").Response} Response */
 /** @typedef {import("../../../middlewares/validateRequestBody.js").InvalidBodyResult} InvalidBodyResult */
 
-/** @param {Request} req @param {Response} res */
+/** @param {Request & {validatedBody?: any}} req @param {Response} res */
 async function create(req, res) {
-	const { name, movementPatternId, equipmentId, muscleGroup } = req.body;
+	const { name, movementPatternId, equipmentId, muscleGroup } = req.validatedBody;
 
 	await createExerciseTemplate({
 		name,
@@ -24,9 +24,23 @@ async function create(req, res) {
 	res.redirect("/library");
 }
 
+/** @param {Request} req @param {Response} res @param {InvalidBodyResult} result */
+async function showCreateErrors(req, res, { errors, submittedValues }) {
+	res.status(422);
+	await renderLibrary(req, res, {
+		exerciseTemplateFormState: {
+			mode: "create",
+			open: true,
+			values:
+				submittedValues && typeof submittedValues === "object" ? submittedValues : {},
+			errors,
+		},
+	});
+}
+
 /** @param {Request} req @param {Response} res */
 async function destroy(req, res) {
-	const { exerciseId } = req.params;
+	const { exerciseId } = req.validatedParams;
 	await deleteExerciseTemplate(exerciseId);
 
 	res.redirect("/library");
@@ -34,8 +48,7 @@ async function destroy(req, res) {
 
 /** @param {Request & {validatedBody?: any}} req @param {Response} res */
 async function update(req, res) {
-	const exerciseId = Number(req.params.exerciseId);
-	const variantId = Number(req.params.variantId);
+	const { exerciseId, variantId } = req.validatedParams;
 
 	try {
 		await updateExerciseTemplate({
@@ -72,6 +85,7 @@ async function showUpdateErrors(req, res, { errors, submittedValues }) {
 
 export const exerciseTemplateController = {
 	create: asyncHandler(create),
+	showCreateErrors,
 	update: asyncHandler(update),
 	showUpdateErrors,
 	delete: asyncHandler(destroy),

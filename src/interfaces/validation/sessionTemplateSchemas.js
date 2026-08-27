@@ -1,11 +1,8 @@
 import { z } from "zod";
+import { positiveId as id } from "./idSchemas.js";
 
 /** @param {string} label */
-const positiveId = (label) =>
-	z.coerce
-		.number({ error: `Choose ${label}.` })
-		.int()
-		.positive();
+const positiveId = (label) => id(`Choose ${label}.`);
 
 const optionalStepId = z.preprocess(
 	(value) => (value === "" || value == null ? undefined : value),
@@ -21,6 +18,8 @@ const sessionStepSchema = z.object({
 	loadValue: z.coerce.number().nonnegative(),
 	loadUnit: z.enum(["Kilograms", "Pounds"]),
 });
+
+const createSessionStepSchema = sessionStepSchema.omit({ stepId: true });
 
 const stepRows = z.preprocess(
 	(value) => (value == null ? [] : value),
@@ -48,4 +47,15 @@ export const updateSessionTemplateSchema = z.object({
 		.max(500)
 		.transform((value) => value || null),
 	stepRow: stepRows,
+});
+
+export const createSessionTemplateSchema = updateSessionTemplateSchema.extend({
+	stepRow: z.preprocess(
+		(value) => (value == null ? [] : value),
+		z.array(createSessionStepSchema),
+	),
+});
+
+export const sessionTemplateParamsSchema = z.object({
+	sessionId: id("Choose a valid session template."),
 });

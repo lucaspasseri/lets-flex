@@ -25,6 +25,13 @@ const __dirname = path.dirname(__filename);
 
 export function createApp() {
 	const app = express();
+	const sessionSecret = process.env.SESSION_SECRET;
+	if (!sessionSecret) {
+		throw new Error("SESSION_SECRET is required");
+	}
+	if (process.env.NODE_ENV === "production") {
+		app.set("trust proxy", 1);
+	}
 
 	app.set("view engine", "ejs");
 	app.set("views", path.join(__dirname, "views"));
@@ -33,9 +40,14 @@ export function createApp() {
 
 	app.use(
 		session({
-			secret: process.env.SESSION_SECRET || "your-secret-key",
+			secret: sessionSecret,
 			resave: false,
 			saveUninitialized: false,
+			cookie: {
+				httpOnly: true,
+				sameSite: "lax",
+				secure: process.env.NODE_ENV === "production",
+			},
 		}),
 	);
 	app.use(express.urlencoded({ extended: true }));
@@ -56,10 +68,16 @@ export function createApp() {
 	app.use("/workout_sessions", workoutSessionsRouter);
 	app.use("/workout_step_logs", workoutStepLogRouter);
 
-	app.use("/playground", playgroundRouter);
+	if (process.env.NODE_ENV !== "production") {
+		app.use("/playground", playgroundRouter);
+	}
+
+	app.use((_req, res) => {
+		res.status(404).send("Not found");
+	});
 
 	app.use((err, _req, res, _next) => {
-		console.error(err.stack);
+		console.error(err instanceof Error ? err.stack : err);
 		res.status(500).send("Something broke!");
 	});
 

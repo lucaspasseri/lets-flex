@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { positiveId as id } from "./idSchemas.js";
 
 const requiredTrimmedString = (message) =>
 	z.preprocess(
@@ -6,11 +7,7 @@ const requiredTrimmedString = (message) =>
 		z.string().trim().min(1, message),
 	);
 
-const positiveId = (label) =>
-	z.coerce
-		.number({ error: `Choose ${label}.` })
-		.int()
-		.positive(`Choose ${label}.`);
+const positiveId = (label) => id(`Choose ${label}.`);
 
 function isCalendarDate(value) {
 	if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
@@ -54,4 +51,12 @@ export const createCycleSchema = z.object({
 		.number({ error: "Choose a position." })
 		.int("Choose a valid position.")
 		.positive("Choose a valid position."),
+});
+
+export const programParamsSchema = z.object({
+	programId: id("Choose a valid program."),
+});
+
+export const cycleParamsSchema = z.object({
+	cycleId: id("Choose a valid cycle."),
 });

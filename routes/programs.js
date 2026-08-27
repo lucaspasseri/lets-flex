@@ -5,8 +5,12 @@ import { getSessionState } from "../middlewares/getSessionState.js";
 import { programsController } from "../src/interfaces/controllers/programController.js";
 import { dayController } from "../src/interfaces/controllers/dayController.js";
 import validateRequestBody from "../middlewares/validateRequestBody.js";
-import { createProgramSchema } from "../src/interfaces/validation/programSchemas.js";
+import {
+	createProgramSchema,
+	programParamsSchema,
+} from "../src/interfaces/validation/programSchemas.js";
 import validateRequestQuery from "../middlewares/validateRequestQuery.js";
+import validateRequestParams from "../middlewares/validateRequestParams.js";
 import { dayPageQuerySchema } from "../src/interfaces/validation/daySchemas.js";
 
 const router = express.Router();
@@ -23,7 +27,11 @@ router.post(
 
 router.get("/", programsController.show);
 
-router.delete("/:programId", programsController.delete);
+router.delete(
+	"/:programId",
+	validateRequestParams(programParamsSchema),
+	programsController.delete,
+);
 
 router.get("/day", validateRequestQuery(dayPageQuerySchema), dayController.show);
 

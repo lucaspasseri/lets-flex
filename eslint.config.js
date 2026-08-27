@@ -5,14 +5,7 @@ import promise from "eslint-plugin-promise";
 
 export default [
 	{
-		ignores: [
-			"node_modules/**",
-			"coverage/**",
-			"old/**",
-			"views/partialsOld/**",
-			"db/*/**",
-			"db/populatedb*.js",
-		],
+		ignores: ["node_modules/**", "coverage/**"],
 	},
 	js.configs.recommended,
 	{

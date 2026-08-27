@@ -1,11 +1,15 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 
+const components = new Set(["accordion", "button", "form", "modal", "tabs", "test"]);
+
 async function show(req, res) {
-	const { component } = req.params;
+	const component = req.params.component ?? "test";
+	if (!components.has(component)) {
+		res.status(404).send("Not found");
+		return;
+	}
 
-	const path = "playground/";
-
-	res.render(component ? path + component : path + "test", {
+	res.render(`playground/${component}`, {
 		layout: "./layouts/playgroundShell",
 	});
 }

@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { updateExerciseTemplateSchema } from "./exerciseTemplateSchemas.js";
+import {
+	createExerciseTemplateSchema,
+	updateExerciseTemplateSchema,
+} from "./exerciseTemplateSchemas.js";
 
 test("update exercise template validation normalizes valid form values", () => {
 	const result = updateExerciseTemplateSchema.parse({
@@ -31,4 +34,21 @@ test("update exercise template validation rejects missing fields and muscles", (
 	assert.ok(fields.movementPatternId);
 	assert.ok(fields.equipmentId);
 	assert.ok(fields.muscleGroup);
+});
+
+test("create exercise template validation strips unexpected fields", () => {
+	const result = createExerciseTemplateSchema.parse({
+		name: "  Squat  ",
+		movementPatternId: "3",
+		equipmentId: "2",
+		muscleGroup: [{ muscleId: "19", muscleRoleId: "1" }],
+		isAdmin: true,
+	});
+
+	assert.deepEqual(result, {
+		name: "Squat",
+		movementPatternId: 3,
+		equipmentId: 2,
+		muscleGroup: [{ muscleId: 19, muscleRoleId: 1 }],
+	});
 });

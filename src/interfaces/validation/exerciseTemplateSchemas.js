@@ -1,11 +1,8 @@
 import { z } from "zod";
+import { positiveId } from "./idSchemas.js";
 
 /** @param {string} label */
-const requiredId = (label) =>
-	z.coerce
-		.number({ error: `Choose ${label}.` })
-		.int()
-		.positive(`Choose ${label}.`);
+const requiredId = (label) => positiveId(`Choose ${label}.`);
 
 const muscleRelationSchema = z.object({
 	muscleId: requiredId("a muscle"),
@@ -37,3 +34,11 @@ const exerciseTemplateFields = {
 
 export const createExerciseTemplateSchema = z.object(exerciseTemplateFields);
 export const updateExerciseTemplateSchema = z.object(exerciseTemplateFields);
+
+export const exerciseTemplateParamsSchema = z.object({
+	exerciseId: positiveId("Choose a valid exercise template."),
+});
+
+export const exerciseTemplateVariantParamsSchema = exerciseTemplateParamsSchema.extend({
+	variantId: positiveId("Choose a valid exercise variant."),
+});

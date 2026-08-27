@@ -13,12 +13,11 @@ async function createSession({ name, notes, stepRowArr }) {
 			throw new Error("Session could not be created");
 		}
 
-		let returningSteps = [];
 		for (let i = 0; i < stepRowArr?.length; i++) {
 			const { stepTypeId, exerciseVariantId, sets, reps, loadValue, loadUnit } =
 				stepRowArr[i];
 
-			const step = await sessionStepsRepository.create(
+			await sessionStepsRepository.create(
 				{
 					sessionId: session.id,
 					stepTypeId,
@@ -32,15 +31,11 @@ async function createSession({ name, notes, stepRowArr }) {
 				},
 				client,
 			);
-
-			returningSteps.push(step);
 		}
 		await client.query("COMMIT");
 	} catch (err) {
-		console.log({ err });
 		await client.query("ROLLBACK");
-		const message = err instanceof Error ? err.message : String(err);
-		throw new Error(`Failed to add new session and its steps: ${message}`);
+		throw new Error("Failed to create session template", { cause: err });
 	} finally {
 		client.release();
 	}

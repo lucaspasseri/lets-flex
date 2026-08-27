@@ -26,7 +26,7 @@
 			<% } %>
 			<% if (status.programEmptyState.isVisible) { %>
 				<article class="dashboard-onboarding-card">
-					<div class="dashboard-onboarding-card__icon"><img src="/compasso.png" width="32" height="32" alt="" /></div>
+					<div class="dashboard-onboarding-card__icon"><%- include("../shared/components/icons/draftingCompass", { icon: { attributes: { "aria-hidden": true } } }) %></div>
 					<div><p class="dashboard-eyebrow">Build your plan</p><h2>NO ACTIVE PROGRAM</h2></div>
 					<p>Build a custom program or choose a template to begin your progression.</p>
 					<a class="dashboard-action-link" href="<%= status.programEmptyState.href %>"><%- include("../shared/components/icons/plusCircle", { icon: { attributes: { "aria-hidden": true } } }) %><span>Create your first program</span></a>

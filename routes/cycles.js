@@ -4,7 +4,11 @@ import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
 import { getHelpers } from "../middlewares/getHelpers.js";
 import { getSessionState } from "../middlewares/getSessionState.js";
 import validateRequestBody from "../middlewares/validateRequestBody.js";
-import { createCycleSchema } from "../src/interfaces/validation/programSchemas.js";
+import {
+	createCycleSchema,
+	cycleParamsSchema,
+} from "../src/interfaces/validation/programSchemas.js";
+import validateRequestParams from "../middlewares/validateRequestParams.js";
 
 const router = express.Router();
 
@@ -12,14 +16,16 @@ router.use(getUrlAndPath);
 router.use(getHelpers);
 router.use(getSessionState);
 
-// router.get("/:programId", getCyclesByProgramId);
-
 router.post(
 	"/",
 	validateRequestBody(createCycleSchema, cycleController.showCreateErrors),
 	cycleController.create,
 );
 
-router.delete("/:cycleId", cycleController.delete);
+router.delete(
+	"/:cycleId",
+	validateRequestParams(cycleParamsSchema),
+	cycleController.delete,
+);
 
 export default router;
