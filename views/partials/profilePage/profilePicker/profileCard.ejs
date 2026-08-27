@@ -10,7 +10,7 @@
 		<strong class="profile-card__name"><%= profileCard.name %></strong>
 		<% if (profileCard.statusLabel) { %>
 			<span class="profile-card__status">
-				<%- include("../../icons/check-circle") %>
+				<%- include("../../shared/components/icons/namedIcon", { name: "check-circle" }) %>
 				<%= profileCard.statusLabel %>
 			</span>
 		<% } %>

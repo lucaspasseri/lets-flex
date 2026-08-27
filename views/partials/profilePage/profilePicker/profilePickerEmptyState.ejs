@@ -8,7 +8,7 @@
 	<%- include("../../shared/components/button/button", { button: {
 		label: createAction.label,
 		variant: "primary",
-		renderIcon: () => include("../../icons/plus"),
+		renderIcon: () => include("../../shared/components/icons/namedIcon", { name: "plus-circle" }),
 		attributes: { "data-modal-open": createAction.modalId, "aria-label": createAction.accessibleLabel }
 	} }) %>
 </div>

@@ -7,7 +7,7 @@
 
 <div class="session-summaries__empty">
 	<div class="session-summaries__empty-icon-container" aria-hidden="true">
-		<i data-lucide="<%= icon %>"></i>
+		<%- include("../../shared/components/icons/namedIcon", { name: icon }) %>
 	</div>
 	<p><%= message %></p>
 </div>
