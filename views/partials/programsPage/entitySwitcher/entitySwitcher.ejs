@@ -20,7 +20,7 @@
 				label: createAction.label,
 				variant: "secondary",
 				disabled: createAction.disabled ?? false,
-				renderIcon: () => include("../../icons/plus"),
+				renderIcon: () => include("../../shared/components/icons/namedIcon", { name: "plus-circle" }),
 				attributes: {
 					"data-modal-open": createAction.modalId,
 					"aria-label": createAction.accessibleLabel

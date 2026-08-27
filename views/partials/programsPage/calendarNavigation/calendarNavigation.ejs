@@ -15,7 +15,7 @@
 
 	<% if (items.length === 0) { %>
 		<div class="calendar-navigation__empty">
-			<i data-lucide="calendar-x" aria-hidden="true"></i>
+			<%- include("../../shared/components/icons/namedIcon", { name: "calendar-x" }) %>
 			<h3><%= emptyState.title %></h3>
 			<p><%= emptyState.description %></p>
 		</div>

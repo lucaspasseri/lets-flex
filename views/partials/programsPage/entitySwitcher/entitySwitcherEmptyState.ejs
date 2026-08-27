@@ -4,7 +4,7 @@
 %>
 <div class="entity-switcher-empty-state">
 	<div class="entity-switcher-empty-state__icon" aria-hidden="true">
-		<i data-lucide="<%= icon %>"></i>
+		<%- include("../../shared/components/icons/namedIcon", { name: icon }) %>
 	</div>
 	<h3><%= title %></h3>
 	<p><%= description %></p>
@@ -12,7 +12,7 @@
 		label: createAction.label,
 		variant: "primary",
 		disabled: createAction.disabled ?? false,
-		renderIcon: () => include("../../icons/plus"),
+		renderIcon: () => include("../../shared/components/icons/namedIcon", { name: "plus-circle" }),
 		attributes: {
 			"data-modal-open": createAction.modalId,
 			"aria-label": createAction.accessibleLabel

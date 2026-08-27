@@ -10,7 +10,7 @@
 		<% } %>
 		<% if (entityCard.statusLabel) { %>
 			<span class="entity-card__status">
-				<%- include("../../icons/check-circle") %>
+				<%- include("../../shared/components/icons/namedIcon", { name: "check-circle" }) %>
 				<%= entityCard.statusLabel %>
 			</span>
 		<% } %>
@@ -20,7 +20,7 @@
 		label: entityCard.deleteAction.accessibleLabel,
 		variant: "dangerGhost",
 		iconOnly: true,
-		renderIcon: () => include("../../icons/trash"),
+		renderIcon: () => include("../../shared/components/icons/namedIcon", { name: "trash" }),
 		alternativeClassname: "entity-card__delete",
 		attributes: {
 			title: entityCard.deleteAction.accessibleLabel,

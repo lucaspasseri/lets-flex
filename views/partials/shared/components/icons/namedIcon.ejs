@@ -1,0 +1,41 @@
+<%
+	const shapes = {
+		activity: "activity",
+		"calendar-range": "calendar-range",
+		"calendar-x": "calendar-x",
+		"check-circle": "check-circle",
+		"chevron-down": "chevron-down",
+		"chevron-right": "chevron-right",
+		circle: "circle",
+		dumbbell: "dumbbell",
+		layers: "layers",
+		"list-ordered": "list-ordered",
+		"minus-circle": "minus-circle",
+		"notebook-pen": "notebook-pen",
+		"play-circle": "play-circle",
+		"plus-circle": "plus-circle",
+		"repeat-2": "repeat-2",
+		search: "search",
+		"square-mouse-pointer": "square-mouse-pointer",
+		trash: "trash",
+		"user-round": "user-round",
+		"user-round-x": "user-round-x",
+		wrench: "wrench",
+		x: "x"
+	};
+	const shape = shapes[locals.name];
+	if (!shape) throw new Error(`Unknown shared icon: ${locals.name}`);
+%>
+<%- include("icon", {
+	icon: {
+		attributes: {
+			class: "icon",
+			width: 24,
+			height: 24,
+			"stroke-width": 2,
+			...locals.icon?.attributes
+		},
+		label: locals.icon?.label,
+		content: include(`shapes/${shape}`)
+	}
+}) %>

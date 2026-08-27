@@ -1,7 +1,8 @@
 <%
 	const {
 		attributes: providedAttributes = {},
-		content = ""
+		content = "",
+		label = null
 	} = locals.icon ?? {};
 
 	const defaultAttributes = {
@@ -16,6 +17,9 @@
 
 	const attributes = {
 		...defaultAttributes,
+		...(label
+			? { role: "img", "aria-label": label }
+			: { "aria-hidden": true }),
 		...providedAttributes
 	};
 

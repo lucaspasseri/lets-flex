@@ -7,7 +7,7 @@
 <% if (!session) { %>
 	<section class="session-details session-details--empty">
 		<div class="icon-container">
-			<i data-lucide="square-mouse-pointer" aria-hidden="true"></i>
+			<%- include("../../shared/components/icons/namedIcon", { name: "square-mouse-pointer" }) %>
 		</div>
 		<h3>Select a session</h3>
 		<p>Choose a session to inspect its exercises and prescription.</p>
@@ -72,7 +72,7 @@
 		<dl class="session-stats">
 			<% stats.forEach((stat) => { %>
 				<div class="session-stat">
-					<i data-lucide="<%= stat.icon %>" aria-hidden="true"></i>
+					<%- include("../../shared/components/icons/namedIcon", { name: stat.icon }) %>
 
 					<div>
 						<dt><%= stat.label %></dt>
@@ -87,7 +87,7 @@
 				class="session-details__notes"
 				aria-labelledby="session-notes-title"
 			>
-				<i data-lucide="notebook-pen" aria-hidden="true"></i>
+				<%- include("../../shared/components/icons/namedIcon", { name: "notebook-pen" }) %>
 
 				<div>
 					<h4 id="session-notes-title">Coach notes</h4>
