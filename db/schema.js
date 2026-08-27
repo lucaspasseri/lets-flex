@@ -1,5 +1,3 @@
-import { Client } from "pg";
-
 export const schemaSql = `
 DROP TABLE IF EXISTS workout_set_logs CASCADE;
 DROP TABLE IF EXISTS workout_step_logs CASCADE;
@@ -345,30 +343,3 @@ INSERT INTO "muscle_roles" ("name", "description") VALUES
   ('dynamic_stabilizer', 'Provides stability while also contributing to movement'),
   ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
 `;
-
-export async function seedDatabase(connectionString = process.env.DATABASE_URL) {
-	console.log("Seeding database...");
-
-	const client = new Client({
-		connectionString,
-		ssl: connectionString?.includes("neon")
-			? { rejectUnauthorized: false }
-			: false,
-	});
-
-	try {
-		await client.connect();
-		await client.query(schemaSql);
-
-		console.log("Database seeded successfully.");
-	} catch (err) {
-		console.error("Error while seeding database:", err);
-	} finally {
-		await client.end();
-		console.log("Connection closed.");
-	}
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-	await seedDatabase();
-}

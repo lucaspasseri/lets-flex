@@ -12,10 +12,11 @@
 	},
 	"include": [
 		"app.js",
+		"server.js",
 		"routes/**/*.js",
 		"middlewares/**/*.js",
 		"utils/**/*.js",
-		"db/pool.js",
+		"db/**/*.js",
 		"src/**/*.js",
 		"views/**/*.js"
 	],

@@ -17,7 +17,7 @@
 	"scripts": {
 		"start": "node server.js",
 		"dev": "node --env-file-if-exists=.env --watch server.js",
-		"seed": "node --env-file-if-exists=.env db/populatedb.js",
+		"seed": "node --env-file-if-exists=.env db/seed.js",
 		"check:types": "tsc --project jsconfig.json --noEmit",
 		"check:browser-types": "tsc --project public/jsconfig.json --noEmit",
 		"lint": "eslint .",

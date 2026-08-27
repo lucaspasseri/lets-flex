@@ -16,6 +16,12 @@ Copy `.env.sample` to `.env` for local development and set:
 
 The component playground is available outside production only.
 
+## Database
+
+`db/schema.js` is the authoritative database schema and reference-data definition.
+Run `npm run seed` to reset `DATABASE_URL` to that definition. This command drops
+and recreates the application tables, so it is destructive to existing data.
+
 ## Tests
 
 Run the complete suite with `npm test`. HTTP integration tests require a disposable

@@ -15,8 +15,8 @@ import usersRouter from "./routes/users.js";
 import cyclesRouter from "./routes/cycles.js";
 import sessionRouter from "./routes/sessions.js";
 import exerciseTemplatesRouter from "./routes/exerciseTemplates.js";
-import workoutSessionsRouter from "./routes/workout_sessions.js";
-import workoutStepLogRouter from "./routes/workout_step_logs.js";
+import workoutSessionsRouter from "./routes/workoutSessions.js";
+import workoutStepLogRouter from "./routes/workoutStepLogs.js";
 
 import playgroundRouter from "./routes/playground.js";
 
@@ -83,5 +83,3 @@ export function createApp() {
 
 	return app;
 }
-
-export default createApp();

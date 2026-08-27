@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
 import { Client } from "pg";
-import { schemaSql } from "../../db/populatedb.js";
+import { schemaSql } from "../../db/schema.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const databaseIsSafe = (() => {
