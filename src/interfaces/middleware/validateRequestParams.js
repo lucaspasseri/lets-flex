@@ -1,7 +1,7 @@
 import { formatValidationErrors } from "./validateRequestBody.js";
 
 /**
- * Validates route parameters and exposes only parsed schema fields.
+ * Middleware that validates route parameters and exposes parsed schema fields.
  *
  * @param {import("zod").ZodType} schema
  * @returns {import("express").RequestHandler}

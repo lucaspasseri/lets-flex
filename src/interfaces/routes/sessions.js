@@ -1,14 +1,14 @@
 import { Router } from "express";
-import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { getSessionState } from "../middlewares/getSessionState.js";
-import validateRequestBody from "../middlewares/validateRequestBody.js";
-import validateRequestParams from "../middlewares/validateRequestParams.js";
-import { sessionController } from "../src/interfaces/controllers/sessionController.js";
+import { getUrlAndPath } from "../middleware/getUrlAndPath.js";
+import { getSessionState } from "../middleware/getSessionState.js";
+import validateRequestBody from "../middleware/validateRequestBody.js";
+import validateRequestParams from "../middleware/validateRequestParams.js";
+import { sessionController } from "../controllers/sessionController.js";
 import {
 	createSessionTemplateSchema,
 	sessionTemplateParamsSchema,
 	updateSessionTemplateSchema,
-} from "../src/interfaces/validation/sessionTemplateSchemas.js";
+} from "../validation/sessionTemplateSchemas.js";
 
 const router = Router();
 

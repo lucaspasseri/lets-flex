@@ -8,7 +8,7 @@
  */
 
 /**
- * Converts Zod issues into a small, predictable structure for rendering.
+ * Converts Zod issues into a predictable structure for rendering.
  * Only the first message for each field is exposed to the form.
  *
  * @param {ZodError} error

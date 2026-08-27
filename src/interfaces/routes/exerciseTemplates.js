@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { getSessionState } from "../middlewares/getSessionState.js";
-import validateRequestBody from "../middlewares/validateRequestBody.js";
-import validateRequestParams from "../middlewares/validateRequestParams.js";
-import { exerciseTemplateController } from "../src/interfaces/controllers/exerciseTemplateController.js";
+import { getUrlAndPath } from "../middleware/getUrlAndPath.js";
+import { getSessionState } from "../middleware/getSessionState.js";
+import validateRequestBody from "../middleware/validateRequestBody.js";
+import validateRequestParams from "../middleware/validateRequestParams.js";
+import { exerciseTemplateController } from "../controllers/exerciseTemplateController.js";
 import {
 	createExerciseTemplateSchema,
 	exerciseTemplateParamsSchema,
 	exerciseTemplateVariantParamsSchema,
 	updateExerciseTemplateSchema,
-} from "../src/interfaces/validation/exerciseTemplateSchemas.js";
+} from "../validation/exerciseTemplateSchemas.js";
 
 const router = Router();
 

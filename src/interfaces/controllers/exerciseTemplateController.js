@@ -8,7 +8,7 @@ import { renderLibrary } from "./libraryController.js";
 
 /** @typedef {import("express").Request & {validatedBody?: any, validatedParams?: any}} Request */
 /** @typedef {import("express").Response} Response */
-/** @typedef {import("../../../middlewares/validateRequestBody.js").InvalidBodyResult} InvalidBodyResult */
+/** @typedef {import("../middleware/validateRequestBody.js").InvalidBodyResult} InvalidBodyResult */
 
 /** @param {Request & {validatedBody?: any}} req @param {Response} res */
 async function create(req, res) {

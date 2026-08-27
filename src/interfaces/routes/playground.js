@@ -1,5 +1,5 @@
 import express from "express";
-import { playgroundController } from "../src/interfaces/controllers/playgroundController.js";
+import { playgroundController } from "../controllers/playgroundController.js";
 
 const router = express.Router();
 

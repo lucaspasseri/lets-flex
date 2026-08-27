@@ -1,17 +1,17 @@
 import express from "express";
-import { getSessionState } from "../middlewares/getSessionState.js";
-import { getUrlAndPath } from "../middlewares/getUrlAndPath.js";
-import { workoutSessionController } from "../src/interfaces/controllers/workoutSessionController.js";
-import validateRequestBody from "../middlewares/validateRequestBody.js";
+import { getSessionState } from "../middleware/getSessionState.js";
+import { getUrlAndPath } from "../middleware/getUrlAndPath.js";
+import { workoutSessionController } from "../controllers/workoutSessionController.js";
+import validateRequestBody from "../middleware/validateRequestBody.js";
 import {
 	cancelWorkoutSessionSchema,
 	createWorkoutSessionSchema,
-} from "../src/interfaces/validation/daySchemas.js";
-import validateRequestParams from "../middlewares/validateRequestParams.js";
+} from "../validation/daySchemas.js";
+import validateRequestParams from "../middleware/validateRequestParams.js";
 import {
 	dashboardActionBodySchema,
 	workoutSessionActionParamsSchema,
-} from "../src/interfaces/validation/dashboardSchemas.js";
+} from "../validation/dashboardSchemas.js";
 
 const router = express.Router();
 

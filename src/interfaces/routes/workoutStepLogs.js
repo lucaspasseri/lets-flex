@@ -1,13 +1,13 @@
 import express from "express";
-import { getSessionState } from "../middlewares/getSessionState.js";
-import { workoutStepLogController } from "../src/interfaces/controllers/workoutStepLogController.js";
-import validateRequestBody from "../middlewares/validateRequestBody.js";
-import validateRequestParams from "../middlewares/validateRequestParams.js";
+import { getSessionState } from "../middleware/getSessionState.js";
+import { workoutStepLogController } from "../controllers/workoutStepLogController.js";
+import validateRequestBody from "../middleware/validateRequestBody.js";
+import validateRequestParams from "../middleware/validateRequestParams.js";
 import {
 	dashboardStepActionBodySchema,
 	performWorkoutStepLogBodySchema,
 	workoutStepLogActionParamsSchema,
-} from "../src/interfaces/validation/dashboardSchemas.js";
+} from "../validation/dashboardSchemas.js";
 
 const router = express.Router();
 

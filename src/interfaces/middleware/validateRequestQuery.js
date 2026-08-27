@@ -1,7 +1,7 @@
 import { formatValidationErrors } from "./validateRequestBody.js";
 
 /**
- * Validates and sanitizes an HTTP query object, storing only schema-defined,
+ * Middleware that sanitizes an HTTP query object, storing only schema-defined,
  * parsed values for downstream handlers.
  *
  * @param {import("zod").ZodType} schema

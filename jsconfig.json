@@ -13,8 +13,6 @@
 	"include": [
 		"app.js",
 		"server.js",
-		"routes/**/*.js",
-		"middlewares/**/*.js",
 		"utils/**/*.js",
 		"db/**/*.js",
 		"src/**/*.js",

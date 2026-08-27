@@ -1,4 +1,4 @@
-const getUrlAndPath = async (req, res, next) => {
+export async function getUrlAndPath(req, res, next) {
 	const referer = req.get("Referer");
 	let backUrl = "/";
 
@@ -20,6 +20,4 @@ const getUrlAndPath = async (req, res, next) => {
 		backUrlWithoutParams: new URL(backUrl, "http://localhost").pathname,
 	};
 	next();
-};
-
-export { getUrlAndPath };
+}

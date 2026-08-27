@@ -5,20 +5,20 @@ import session from "express-session";
 import expressEjsLayouts from "express-ejs-layouts";
 import methodOverride from "method-override";
 
-import libraryRouter from "./routes/library.js";
-import indexRouter from "./routes/index.js";
-import profileRouter from "./routes/profile.js";
+import libraryRouter from "./src/interfaces/routes/library.js";
+import indexRouter from "./src/interfaces/routes/index.js";
+import profileRouter from "./src/interfaces/routes/profile.js";
 
-import programsRouter from "./routes/programs.js";
+import programsRouter from "./src/interfaces/routes/programs.js";
 
-import usersRouter from "./routes/users.js";
-import cyclesRouter from "./routes/cycles.js";
-import sessionRouter from "./routes/sessions.js";
-import exerciseTemplatesRouter from "./routes/exerciseTemplates.js";
-import workoutSessionsRouter from "./routes/workoutSessions.js";
-import workoutStepLogRouter from "./routes/workoutStepLogs.js";
+import usersRouter from "./src/interfaces/routes/users.js";
+import cyclesRouter from "./src/interfaces/routes/cycles.js";
+import sessionRouter from "./src/interfaces/routes/sessions.js";
+import exerciseTemplatesRouter from "./src/interfaces/routes/exerciseTemplates.js";
+import workoutSessionsRouter from "./src/interfaces/routes/workoutSessions.js";
+import workoutStepLogRouter from "./src/interfaces/routes/workoutStepLogs.js";
 
-import playgroundRouter from "./routes/playground.js";
+import playgroundRouter from "./src/interfaces/routes/playground.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

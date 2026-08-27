@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../../../middlewares/validateRequestBody.js").ValidationErrors} ValidationErrors
+ * @typedef {import("../../../src/interfaces/middleware/validateRequestBody.js").ValidationErrors} ValidationErrors
  *
  * @typedef {object} CreateUserFormState
  * @property {Record<string, unknown>} [values] Submitted HTTP field values.

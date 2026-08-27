@@ -6,7 +6,7 @@ import createProfilePageViewModel from "../../../views/viewModels/profilePage/cr
 /**
  * @typedef {import("express").Request} Request
  * @typedef {import("express").Response} Response
- * @typedef {import("../../../middlewares/validateRequestBody.js").InvalidBodyResult} InvalidBodyResult
+ * @typedef {import("../middleware/validateRequestBody.js").InvalidBodyResult} InvalidBodyResult
  * @typedef {import("../../../views/viewModels/profilePage/createUserFormViewModel.js").CreateUserFormState} CreateUserFormState
  */
 
