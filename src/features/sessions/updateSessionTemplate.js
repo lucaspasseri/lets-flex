@@ -1,6 +1,7 @@
 import pool from "../../../db/pool.js";
 import * as sessionsRepository from "./repository.js";
 import * as sessionStepsRepository from "../sessionSteps/repository.js";
+import * as exerciseVariantsRepository from "../exerciseVariants/repository.js";
 
 export class SessionTemplateNotFoundError extends Error {
 	constructor() {
@@ -9,7 +10,12 @@ export class SessionTemplateNotFoundError extends Error {
 	}
 }
 
-const defaultDependencies = { pool, sessionsRepository, sessionStepsRepository };
+const defaultDependencies = {
+	pool,
+	sessionsRepository,
+	sessionStepsRepository,
+	exerciseVariantsRepository,
+};
 
 /** @param {any} input @param {any} dependencies */
 export async function updateSessionTemplate(input, dependencies = defaultDependencies) {
@@ -22,6 +28,12 @@ export async function updateSessionTemplate(input, dependencies = defaultDepende
 		await dependencies.sessionStepsRepository.moveOrdersOutOfWay(input, client);
 		const retainedStepIds = [];
 		for (const [index, step] of input.stepRow.entries()) {
+			const canUseVariant =
+				await dependencies.exerciseVariantsRepository.isVisibleToUser(
+					{ variantId: step.exerciseVariantId, userId: input.ownerUserId },
+					client,
+				);
+			if (!canUseVariant) throw new SessionTemplateNotFoundError();
 			const values = {
 				...step,
 				sessionId: input.sessionId,

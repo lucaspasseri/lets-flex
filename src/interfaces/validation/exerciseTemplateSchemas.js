@@ -42,3 +42,19 @@ export const exerciseTemplateParamsSchema = z.object({
 export const exerciseTemplateVariantParamsSchema = exerciseTemplateParamsSchema.extend({
 	variantId: positiveId("Choose a valid exercise variant."),
 });
+
+export const privateVariantParamsSchema = z.object({
+	variantId: positiveId("Choose a valid exercise variant."),
+});
+
+export const createPrivateVariantParamsSchema = z.object({
+	exerciseId: positiveId("Choose a valid exercise."),
+});
+
+export const privateVariantBodySchema = z.object({
+	name: z.string().trim().min(1, "Enter a variant name.").max(100),
+	equipmentId: z.preprocess(
+		(value) => (value === "" || value == null ? null : value),
+		z.coerce.number().int().positive().nullable(),
+	),
+});

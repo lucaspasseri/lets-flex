@@ -19,7 +19,8 @@ async function show(req, res) {
 
 export async function renderDay(req, res, formState = {}) {
 	const sessionState = res.locals?.sessionState;
-	const userId = toNullableNumber(sessionState?.userId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 	const programId = toNullableNumber(sessionState?.programId);
 	const validatedQuery = req.validatedQuery ?? {};
 	const dayId =

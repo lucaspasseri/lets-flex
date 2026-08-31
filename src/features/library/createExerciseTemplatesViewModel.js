@@ -8,6 +8,8 @@ import createExercise from "./createExerciseViewModel.js";
 /**
  * @typedef {object} CreateExerciseTemplateInput
  * @property {ExerciseTemplateMapper[]} exerciseTemplateArr
+ * @property {number | null} actorUserId
+ * @property {boolean} managementMode
  */
 
 /**
@@ -16,10 +18,14 @@ import createExercise from "./createExerciseViewModel.js";
  * @returns {ExerciseTemplatesViewModel}
  */
 
-function createExerciseTemplates({ exerciseTemplateArr = [] }) {
+function createExerciseTemplates({
+	exerciseTemplateArr = [],
+	actorUserId = null,
+	managementMode = false,
+}) {
 	const exerciseTemplateCount = exerciseTemplateArr.length;
 	const items = exerciseTemplateArr.map((exerciseTemplate) =>
-		createExercise({ exerciseTemplate }),
+		createExercise({ exerciseTemplate, actorUserId, managementMode }),
 	);
 
 	return {
@@ -41,6 +47,7 @@ function createExerciseTemplates({ exerciseTemplateArr = [] }) {
 
 		actions: {
 			create: {
+				isVisible: managementMode,
 				label: "Create exercise template",
 				modalId: "createExerciseModal",
 			},

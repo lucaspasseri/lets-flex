@@ -7,9 +7,12 @@ export class SessionTemplateNotArchivableError extends Error {
 	}
 }
 
-/** @param {number} sessionId @param {any} repository */
-async function archiveSession(sessionId, repository = sessionRepository) {
-	const archived = await repository.archive({ sessionId });
+/** @param {{sessionId: number, ownerUserId: number}} input @param {any} repository */
+async function archiveSession(
+	{ sessionId, ownerUserId },
+	repository = sessionRepository,
+) {
+	const archived = await repository.archive({ sessionId, ownerUserId });
 	if (!archived) throw new SessionTemplateNotArchivableError();
 }
 

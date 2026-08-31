@@ -5,7 +5,7 @@ import archiveSession, { SessionTemplateNotArchivableError } from "./archiveSess
 test("archive session delegates the selected identity to the repository", async () => {
 	let received;
 	await archiveSession(
-		7,
+		{ sessionId: 7, ownerUserId: 3 },
 		/** @type {any} */ ({
 			async archive(/** @type {any} */ input) {
 				received = input;
@@ -13,13 +13,13 @@ test("archive session delegates the selected identity to the repository", async 
 			},
 		}),
 	);
-	assert.deepEqual(received, { sessionId: 7 });
+	assert.deepEqual(received, { sessionId: 7, ownerUserId: 3 });
 });
 
 test("archive session reports a missing or already archived template", async () => {
 	await assert.rejects(
 		archiveSession(
-			99,
+			{ sessionId: 99, ownerUserId: 3 },
 			/** @type {any} */ ({
 				async archive() {
 					return false;

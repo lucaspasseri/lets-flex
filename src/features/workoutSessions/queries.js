@@ -74,7 +74,7 @@ export function findAll() {
 					ON ev.exercise_id = ex.id
 				JOIN movement_patterns AS mp
 					ON ex.movement_pattern_id = mp.id
-				JOIN equipments AS eq
+				LEFT JOIN equipments AS eq
 					ON ev.equipment_id = eq.id
 
 				LEFT JOIN workout_step_logs AS wsl

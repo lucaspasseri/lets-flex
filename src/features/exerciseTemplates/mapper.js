@@ -37,6 +37,8 @@ export function toExerciseTemplateSeed(exercise) {
 
 		variant: {
 			id: exercise.exercise_variant_id,
+			ownerUserId: exercise.exercise_variant_owner_user_id ?? null,
+			isArchived: exercise.exercise_variant_is_archived ?? false,
 			name: exercise.exercise_variant_name,
 			setupDescription: exercise.exercise_variant_setup_description,
 			environment: exercise.exercise_variant_environment,

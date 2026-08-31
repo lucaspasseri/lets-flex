@@ -1,4 +1,6 @@
 export const schemaSql = `
+DROP TABLE IF EXISTS "session" CASCADE;
+DROP TABLE IF EXISTS guest_creation_limits CASCADE;
 DROP TABLE IF EXISTS workout_set_logs CASCADE;
 DROP TABLE IF EXISTS workout_step_logs CASCADE;
 DROP TABLE IF EXISTS workout_sessions CASCADE;
@@ -21,13 +23,40 @@ DROP TABLE IF EXISTS users CASCADE;
 
 DROP TYPE IF EXISTS workout_step_log_status CASCADE;
 DROP TYPE IF EXISTS workout_session_status CASCADE;
+DROP TYPE IF EXISTS user_role CASCADE;
+
+CREATE TYPE user_role AS ENUM ('user', 'admin', 'guest');
 
 CREATE TABLE users (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	name VARCHAR,
+	email VARCHAR(254),
+	password_hash TEXT,
+	role user_role NOT NULL DEFAULT 'user',
+	name VARCHAR(100) NOT NULL,
 	date_of_birth DATE,
-	anamnesis TEXT
+	anamnesis TEXT,
+	is_active BOOLEAN NOT NULL DEFAULT TRUE,
+	guest_expires_at TIMESTAMPTZ,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+	CONSTRAINT users_email_normalized CHECK (
+		email IS NULL OR email = LOWER(BTRIM(email))
+	),
+	CONSTRAINT users_credentials_by_role CHECK (
+		(role IN ('user', 'admin') AND email IS NOT NULL AND password_hash IS NOT NULL AND guest_expires_at IS NULL)
+		OR
+		(role = 'guest' AND email IS NULL AND password_hash IS NULL AND guest_expires_at IS NOT NULL AND date_of_birth IS NULL AND anamnesis IS NULL)
+	)
 );
+
+CREATE UNIQUE INDEX users_email_unique
+ON users (email)
+WHERE email IS NOT NULL;
+
+CREATE INDEX users_expired_guests_idx
+ON users (guest_expires_at, id)
+WHERE role = 'guest';
 
 CREATE TABLE goals (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -82,25 +111,50 @@ CREATE TABLE equipments (
 CREATE TABLE exercises (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	name VARCHAR NOT NULL,
-	movement_pattern_id INTEGER REFERENCES movement_patterns(id)
+	movement_pattern_id INTEGER REFERENCES movement_patterns(id),
+	is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+	created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE exercise_variants (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
+	owner_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
 	equipment_id INTEGER REFERENCES equipments(id) ON DELETE SET NULL,
 	name VARCHAR NOT NULL,
 	setup_description TEXT,
 	environment VARCHAR,
-	notes TEXT
+	notes TEXT,
+	is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	CONSTRAINT exercise_variants_trimmed_name CHECK (name = BTRIM(name) AND name <> '')
 );
+
+CREATE UNIQUE INDEX exercise_variants_private_name_unique
+ON exercise_variants (exercise_id, owner_user_id, LOWER(name))
+WHERE owner_user_id IS NOT NULL;
+
+CREATE UNIQUE INDEX exercise_variants_global_name_unique
+ON exercise_variants (exercise_id, LOWER(name))
+WHERE owner_user_id IS NULL;
+
+CREATE INDEX exercise_variants_owner_idx
+ON exercise_variants (owner_user_id, exercise_id);
 
 CREATE TABLE sessions (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	owner_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
 	name VARCHAR NOT NULL,
 	notes TEXT,
-	is_archived BOOLEAN NOT NULL DEFAULT FALSE
+	is_archived BOOLEAN NOT NULL DEFAULT FALSE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX sessions_owner_idx ON sessions (owner_user_id, is_archived);
 
 CREATE TABLE session_steps (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -253,6 +307,24 @@ CREATE TABLE exercise_muscles (
 	UNIQUE (exercise_id, muscle_id, muscle_role_id)
 );
 
+CREATE TABLE "session" (
+	"sid" VARCHAR NOT NULL PRIMARY KEY,
+	"sess" JSON NOT NULL,
+	"expire" TIMESTAMP(6) NOT NULL
+);
+
+CREATE INDEX session_expire_idx ON "session" ("expire");
+
+CREATE TABLE guest_creation_limits (
+	key_hash VARCHAR(64) NOT NULL,
+	window_started_at TIMESTAMPTZ NOT NULL,
+	attempts INTEGER NOT NULL DEFAULT 1,
+	PRIMARY KEY (key_hash, window_started_at)
+);
+
+CREATE INDEX guest_creation_limits_window_idx
+ON guest_creation_limits (window_started_at);
+
 INSERT INTO "step_types" ("name")
 VALUES
   ('exercise'),
@@ -342,4 +414,32 @@ INSERT INTO "muscle_roles" ("name", "description") VALUES
   ('fixator', 'Stabilizes the origin of the prime mover'),
   ('dynamic_stabilizer', 'Provides stability while also contributing to movement'),
   ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
+
+INSERT INTO exercises (name, movement_pattern_id)
+SELECT 'Push Up', id FROM movement_patterns WHERE name = 'push';
+
+INSERT INTO exercises (name, movement_pattern_id)
+SELECT 'Squat', id FROM movement_patterns WHERE name = 'squat';
+
+INSERT INTO exercise_variants (exercise_id, equipment_id, name, setup_description, environment, notes)
+SELECT e.id, NULL, 'Bodyweight Push Up', 'Hands beneath shoulders with a braced trunk.', 'gym_or_home', 'Global sample variant.'
+FROM exercises e WHERE e.name = 'Push Up';
+
+INSERT INTO exercise_variants (exercise_id, equipment_id, name, setup_description, environment, notes)
+SELECT e.id, eq.id, 'Barbell Back Squat', 'Barbell supported across the upper back.', 'gym', 'Global sample variant.'
+FROM exercises e
+JOIN equipments eq ON eq.name = 'Barbell'
+WHERE e.name = 'Squat';
+
+INSERT INTO sessions (name, notes)
+VALUES ('Sample Full Body Session', 'A read-only global session template.');
+
+INSERT INTO session_steps (
+	session_id, step_type_id, exercise_variant_id, name, sets, reps, step_order
+)
+SELECT s.id, st.id, ev.id, 'Push ups', 3, 10, 1
+FROM sessions s
+JOIN step_types st ON st.name = 'exercise'
+JOIN exercise_variants ev ON ev.name = 'Bodyweight Push Up'
+WHERE s.name = 'Sample Full Body Session';
 `;

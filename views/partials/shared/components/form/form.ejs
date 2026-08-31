@@ -15,6 +15,9 @@
 		<% } %>
 	<% }) %>
 	>
+	<% if (locals.csrfToken) { %>
+		<input type="hidden" name="_csrf" value="<%= locals.csrfToken %>" />
+	<% } %>
 	<% if (heading || description) { %>
 		<div class="form-header">
 			<% if (heading) { %><h3><%= heading %></h3><% } %>

@@ -13,10 +13,10 @@ import pool from "../../../db/pool.js";
  * @returns {Promise<ExerciseRow | null>}
  */
 
-export async function create({ name, movementPatternId }, db = pool) {
+export async function create({ name, movementPatternId, createdByUserId }, db = pool) {
 	const { rows } = await db.query(
-		"INSERT INTO exercises (name, movement_pattern_id) VALUES ($1, $2) RETURNING *",
-		[name, movementPatternId],
+		"INSERT INTO exercises (name, movement_pattern_id, created_by_user_id) VALUES ($1, $2, $3) RETURNING *",
+		[name, movementPatternId, createdByUserId],
 	);
 
 	return rows[0] ?? null;
@@ -27,7 +27,10 @@ export async function create({ name, movementPatternId }, db = pool) {
  */
 
 export async function deleteById({ exerciseId }, db = pool) {
-	await db.query("DELETE FROM exercises WHERE id = $1", [exerciseId]);
+	await db.query(
+		"UPDATE exercises SET is_archived = TRUE, updated_at = NOW() WHERE id = $1",
+		[exerciseId],
+	);
 }
 
 /** @param {{exerciseId: number, name: string, movementPatternId: number}} input @param {any} db */

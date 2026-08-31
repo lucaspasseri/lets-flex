@@ -45,12 +45,12 @@ async function getLibraryPageData({ userId, sessionId }) {
 		stepTypeArr,
 	] = await Promise.all([
 		usersRepository.findById({ userId }),
-		sessionsRepository.findAll(),
+		sessionsRepository.findVisibleForUser({ userId }),
 		equipmentsRepository.findAll(),
 		movementPatternsRepository.findAll(),
 		musclesRepository.findAll(),
 		muscleRolesRepository.findAll(),
-		exerciseTemplatesRepository.findAll(),
+		exerciseTemplatesRepository.findAllForUser({ userId }),
 		stepTypesRepository.findAll(),
 	]);
 

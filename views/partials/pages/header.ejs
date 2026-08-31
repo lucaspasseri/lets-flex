@@ -1,6 +1,6 @@
 <%
-	const username = locals?.shell?.currentUser?.name ?? "Guest";
-	const profileAccessibleLabel = locals?.shell?.currentUser
+	const username = locals?.shell?.currentUser?.name ?? locals?.authUser?.name ?? "Guest";
+	const profileAccessibleLabel = locals?.shell?.currentUser || locals?.authUser
 		? `Choose profile. Current profile: ${username}`
 		: "Choose a profile";
 %>
@@ -28,3 +28,6 @@
 		<span class="page-header__username"><%= username %></span>
 	</a>
 </header>
+<% if ((locals?.shell?.currentUser?.role ?? locals?.authUser?.role) === "guest") { %>
+	<p role="status">Guest data is temporary and expires 15 days after entry.</p>
+<% } %>

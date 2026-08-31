@@ -74,6 +74,7 @@
 		</section>
 
 		<div class="exercise-template__actions">
+			<% if (actions?.canManageGlobal) { %>
 			<%- include("../shared/components/button/button",  {button: {
 					label: "Edit",
 					variant: "secondary",
@@ -85,7 +86,7 @@
 				}})
 			%>
 			<%- include("../shared/components/button/button",  {button: {
-					label: "Delete",
+					label: "Archive",
 					variant: "danger",
 					attributes: {
 						"data-modal-open": actions?.remove?.modalId,
@@ -93,6 +94,19 @@
 					}
 				}}) 
 			%> 
+			<% } %>
+			<% if (actions?.canManagePrivate) { %>
+				<form method="POST" action="/exercise-variants/<%= id %>?_method=PATCH">
+					<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+					<input type="hidden" name="equipmentId" value="<%= details?.variant?.equipment?.id ?? '' %>">
+					<label>Variant name <input name="name" value="<%= details?.variant?.name %>" maxlength="100" required></label>
+					<button type="submit">Update my variant</button>
+				</form>
+				<form method="POST" action="/exercise-variants/<%= id %>/archive">
+					<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+					<button type="submit">Archive my variant</button>
+				</form>
+			<% } %>
 		</div>
 	</div>
 </div>

@@ -5,6 +5,7 @@ export function findAllQuery() {
 						se.name,
 						se.notes,
 						se.is_archived,
+						se.owner_user_id,
 						(
 							SELECT COALESCE(
 								json_agg(
@@ -59,7 +60,7 @@ export function findAllQuery() {
 								ON ev.exercise_id = ex.id
 							JOIN movement_patterns AS mp
 								ON ex.movement_pattern_id = mp.id
-							JOIN equipments AS eq
+							LEFT JOIN equipments AS eq
 								ON ev.equipment_id = eq.id
 							WHERE ss.session_id = se.id
 						) AS steps

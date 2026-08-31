@@ -8,6 +8,8 @@ import createMuscles from "./createMuscleViewModel.js";
 /**
  * @typedef {object} CreateExerciseInput
  * @property {ExerciseTemplateMapper} exerciseTemplate
+ * @property {number | null} actorUserId
+ * @property {boolean} managementMode
  */
 
 /**
@@ -15,7 +17,11 @@ import createMuscles from "./createMuscleViewModel.js";
  * @returns {ExerciseTemplateItemViewModel}
  */
 
-function createExercise({ exerciseTemplate }) {
+function createExercise({
+	exerciseTemplate,
+	actorUserId = null,
+	managementMode = false,
+}) {
 	const { id, movementPattern, equipment, variant, muscles } = exerciseTemplate;
 
 	const movementPatternLabel = movementPattern?.name
@@ -30,7 +36,9 @@ function createExercise({ exerciseTemplate }) {
 
 	return {
 		id: variant?.id,
+		exerciseId: id,
 		name: variant?.name,
+		isPrivateOwner: variant?.ownerUserId === actorUserId,
 		searchKeyWord,
 
 		summary: {
@@ -55,6 +63,8 @@ function createExercise({ exerciseTemplate }) {
 		},
 
 		actions: {
+			canManageGlobal: managementMode && variant?.ownerUserId == null,
+			canManagePrivate: variant?.ownerUserId === actorUserId,
 			update: {
 				label: `Edit ${variant?.name}`,
 				modalId: "updateExerciseModal",

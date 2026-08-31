@@ -34,6 +34,7 @@ test("library page exposes one explicit component contract", () => {
 	assert.deepEqual(Object.keys(viewModel), [
 		"page",
 		"pageState",
+		"managementMode",
 		"shell",
 		"components",
 	]);
@@ -57,6 +58,7 @@ test("library template renders from its page ViewModel", async () => {
 	const html = await renderFile(path.resolve("views/library.ejs"), {
 		...viewModel,
 		contentFor,
+		csrfToken: "test-token",
 	});
 
 	assert.match(html, /data-library-page/);
@@ -98,16 +100,21 @@ test("invalid update renders submitted values, errors, and the selected modal", 
 			},
 			errors: { fieldErrors: { name: "Name error" }, formErrors: ["Form error"] },
 		},
+		managementMode: true,
 	});
 	const renderFile =
 		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	const html = await renderFile(path.resolve("views/library.ejs"), {
 		...viewModel,
+		csrfToken: "test-token",
 		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
 	});
 
 	assert.match(html, /data-modal-open-on-load[\s\S]{0,80}id=updateExerciseModal/);
-	assert.match(html, /action="\/exerciseTemplates\/7\/variants\/11\?_method=PATCH"/);
+	assert.match(
+		html,
+		/action="\/admin\/library\/exercises\/7\/variants\/11\?_method=PATCH"/,
+	);
 	assert.match(html, /value="Submitted press"/);
 	assert.match(html, /Name error/);
 	assert.match(html, /Form error/);
@@ -162,6 +169,7 @@ test("invalid session update preserves its aggregate and reopens the update moda
 		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	const html = await renderFile(path.resolve("views/library.ejs"), {
 		...viewModel,
+		csrfToken: "test-token",
 		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
 	});
 	assert.match(html, /data-modal-open-on-load[\s\S]{0,80}id=updateSessionModal/);

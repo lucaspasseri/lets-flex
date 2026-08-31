@@ -8,13 +8,14 @@ async function createExerciseTemplate({
 	movementPatternId,
 	equipmentId,
 	muscleGroup,
+	createdByUserId,
 }) {
 	const client = await pool.connect();
 	try {
 		await client.query("BEGIN");
 
 		const exercise = await exercisesRepository.create(
-			{ name, movementPatternId },
+			{ name, movementPatternId, createdByUserId },
 			client,
 		);
 		if (!exercise) {

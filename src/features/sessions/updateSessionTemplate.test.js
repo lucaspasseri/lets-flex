@@ -6,6 +6,7 @@ import updateSessionTemplate, {
 
 const input = {
 	sessionId: 5,
+	ownerUserId: 3,
 	name: "Updated session",
 	notes: null,
 	stepRow: [
@@ -56,6 +57,11 @@ function createDependencies({
 				async update(/** @type {any} */ received, /** @type {any} */ db) {
 					calls.push(["session", received, db]);
 					return sessionExists;
+				},
+			},
+			exerciseVariantsRepository: {
+				async isVisibleToUser() {
+					return true;
 				},
 			},
 			sessionStepsRepository: {

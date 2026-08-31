@@ -14,8 +14,10 @@ import deleteCycle, { CycleNotFoundError } from "../../features/cycles/deleteCyc
 /** @param {Request} req @param {Response} res */
 async function create(req, res) {
 	const programId = toNullableNumber(req.session?.state?.programId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 
-	if (programId === null) {
+	if (programId === null || userId === null) {
 		res.status(422);
 		await renderPrograms(req, res, {
 			cycleFormState: {
@@ -38,6 +40,7 @@ async function create(req, res) {
 			);
 		cycleId = await createCycle({
 			programId,
+			userId,
 			...validatedBody,
 		});
 	} catch (error) {
@@ -64,7 +67,8 @@ async function create(req, res) {
 
 async function destroy(req, res) {
 	const cycleId = toNullableNumber(req.validatedParams?.cycleId ?? req.params.cycleId);
-	const userId = toNullableNumber(res.locals?.sessionState?.userId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 	if (cycleId === null || !Number.isInteger(cycleId) || cycleId <= 0) {
 		res.status(400).send("Invalid cycle ID");
 		return;

@@ -16,15 +16,12 @@ import pool from "../../../db/pool.js";
  * @property {UserRow["id"]} userId
  */
 
-/**
- * @param {findByIdInput} input
- * @param {DatabaseClient} [db]
- * @returns {Promise<ProgramRow | null>}
- */
-
-export async function findById({ programId }, db = pool) {
-	const { rows } = await db.query("SELECT * FROM programs WHERE id = $1", [programId]);
-
+/** @param {{programId: number, userId: number}} input @param {DatabaseClient} [db] */
+export async function findByIdForUser({ programId, userId }, db = pool) {
+	const { rows } = await db.query(
+		"SELECT * FROM programs WHERE id = $1 AND user_id = $2",
+		[programId, userId],
+	);
 	return rows[0] ?? null;
 }
 

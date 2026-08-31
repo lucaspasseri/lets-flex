@@ -19,6 +19,7 @@ export function toSessionMapperSeed(session) {
 		name: session.name,
 		notes: session.notes,
 		isArchived: session.is_archived,
+		ownerUserId: session.owner_user_id ?? null,
 		steps: (session.steps ?? []).map(toSessionMapperStepSeed),
 	};
 }

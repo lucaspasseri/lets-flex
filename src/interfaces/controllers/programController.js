@@ -28,7 +28,8 @@ async function show(req, res) {
  */
 export async function renderPrograms(req, res, formState = {}) {
 	const sessionState = res.locals?.sessionState;
-	const userId = toNullableNumber(sessionState?.userId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 	const programIdSelection =
 		toNullableNumber(req?.query?.programId) ??
 		toNullableNumber(sessionState?.programId);
@@ -70,7 +71,8 @@ export async function renderPrograms(req, res, formState = {}) {
  */
 
 async function create(req, res) {
-	const userId = toNullableNumber(res.locals?.sessionState?.userId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 
 	if (userId === null) {
 		res.status(422);
@@ -108,7 +110,8 @@ async function destroy(req, res) {
 	const programId = toNullableNumber(
 		req.validatedParams?.programId ?? req.params.programId,
 	);
-	const userId = toNullableNumber(res.locals?.sessionState?.userId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 	if (programId === null || !Number.isInteger(programId) || programId <= 0) {
 		res.status(400).send("Invalid program ID");
 		return;

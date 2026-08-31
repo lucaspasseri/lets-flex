@@ -13,6 +13,7 @@
  * @typedef {object} CreateExerciseInput
  * @property {string} name
  * @property {MovementPatternRow["id"]} movementPatternId
+ * @property {number} createdByUserId
  */
 
 /**

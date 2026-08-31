@@ -9,6 +9,8 @@
 		deleteExerciseForm,
 		archiveSessionForm
 	} = locals.components;
+	const managementMode = Boolean(locals.managementMode);
+	const privateVariantForm = locals.components.privateVariantForm;
 %>
 
 <main class="main library" data-library-page>
@@ -21,10 +23,35 @@
 	<%- include("partials/libraryPage/librarySearch") %>
 	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace }) %>
 	<%- include("partials/libraryPage/exerciseTemplates", { exerciseTemplates }) %>
+	<% if (!managementMode) { %>
+		<section aria-labelledby="create-private-variant-heading">
+			<h2 id="create-private-variant-heading">Create your own exercise variant</h2>
+			<p>Your variant is private to this account.</p>
+			<form class="form" method="POST" action="/exercises/0/variants" data-private-variant-form>
+				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+				<label>Exercise<select name="exerciseId" required><option value="">Choose exercise</option><% privateVariantForm.exercises.forEach(exercise => { %><option value="<%= exercise.id %>"><%= exercise.name %></option><% }) %></select></label>
+				<label>Variant name<input name="name" maxlength="100" required></label>
+				<label>Equipment<select name="equipmentId"><option value="">None</option><% privateVariantForm.equipments.forEach(equipment => { %><option value="<%= equipment.id %>"><%= equipment.name %></option><% }) %></select></label>
+				<button type="submit">Create private variant</button>
+			</form>
+		</section>
+	<% } %>
+	<% if (managementMode) { %>
+		<section aria-labelledby="create-global-variant-heading">
+			<h2 id="create-global-variant-heading">Create global variant</h2>
+			<form class="form" method="POST" action="/admin/library/exercises/0/variants" data-global-variant-form>
+				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+				<label>Exercise<select name="exerciseId" required><option value="">Choose exercise</option><% privateVariantForm.exercises.forEach(exercise => { %><option value="<%= exercise.id %>"><%= exercise.name %></option><% }) %></select></label>
+				<label>Variant name<input name="name" maxlength="100" required></label>
+				<label>Equipment<select name="equipmentId"><option value="">None</option><% privateVariantForm.equipments.forEach(equipment => { %><option value="<%= equipment.id %>"><%= equipment.name %></option><% }) %></select></label>
+				<button type="submit">Create global variant</button>
+			</form>
+		</section>
+	<% } %>
 </main>
 
 <%- contentFor("overlays") %>
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: createSessionForm.modal.id,
 	title: createSessionForm.modal.title,
 	showTitle: false,
@@ -37,9 +64,9 @@
 			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: createSessionForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: archiveSessionForm.modal.id,
 	title: archiveSessionForm.modal.title,
 	showTitle: false,
@@ -50,9 +77,9 @@
 			footer: include("partials/libraryPage/archiveSessionTemplateForm/archiveSessionFormFooter", { archiveSessionForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: updateSessionForm.modal.id,
 	title: updateSessionForm.modal.title,
 	showTitle: false,
@@ -65,9 +92,9 @@
 			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: updateSessionForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: updateExerciseForm.modal.id,
 	title: updateExerciseForm.modal.title,
 	showTitle: false,
@@ -80,9 +107,9 @@
 			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: updateExerciseForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: deleteExerciseForm.modal.id,
 	title: deleteExerciseForm.modal.title,
 	showTitle: false,
@@ -93,9 +120,9 @@
 			footer: include("partials/libraryPage/deleteExerciseTemplateForm/deleteExerciseFormFooter", { deleteExerciseForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: createExerciseForm.modal.id,
 	title: createExerciseForm.modal.title,
 	showTitle: false,
@@ -108,7 +135,9 @@
 			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: createExerciseForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
 <%- contentFor("scripts") %>
 <script type="module" src="/js/pages/library/index.js"></script>
+<script>document.querySelector('[data-private-variant-form]')?.addEventListener('submit', event => { const form = event.currentTarget; form.action = `/exercises/${form.elements.exerciseId.value}/variants`; });</script>
+<script>document.querySelector('[data-global-variant-form]')?.addEventListener('submit', event => { const form = event.currentTarget; form.action = `/admin/library/exercises/${form.elements.exerciseId.value}/variants`; });</script>

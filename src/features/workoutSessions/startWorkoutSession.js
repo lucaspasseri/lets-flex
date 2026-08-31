@@ -1,8 +1,9 @@
 import pool from "../../../db/pool.js";
 import * as workoutSessionsRepository from "./repository.js";
 import * as workoutSessionStepLogsRepository from "../workoutSessionStepLogs/repository.js";
+import ResourceNotFoundError from "../shared/ResourceNotFoundError.js";
 
-async function startWorkoutSession({ workoutSessionId }) {
+async function startWorkoutSession({ workoutSessionId, userId }) {
 	const client = await pool.connect();
 
 	try {
@@ -10,24 +11,26 @@ async function startWorkoutSession({ workoutSessionId }) {
 
 		const workoutSession =
 			workoutSessionId &&
-			(await workoutSessionsRepository.findById(
+			(await workoutSessionsRepository.findByIdForUser(
 				{
 					workoutSessionId,
+					userId,
 				},
 				client,
 			));
 
 		if (!workoutSession) {
-			throw new Error("Workout session not found");
+			throw new ResourceNotFoundError();
 		}
 
 		if (workoutSession.status !== "planned") {
 			throw new Error("Only planned workout sessions can be started");
 		}
 
-		const updatedWorkoutSession = await workoutSessionsRepository.startById(
+		const updatedWorkoutSession = await workoutSessionsRepository.startByIdForUser(
 			{
 				workoutSessionId,
+				userId,
 			},
 			client,
 		);

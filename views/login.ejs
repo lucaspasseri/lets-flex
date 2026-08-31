@@ -1,0 +1,25 @@
+<main class="main profile">
+	<div class="main-header">
+		<div class="title-container">
+			<p>LET'S FLEX</p>
+			<h1>Sign in</h1>
+		</div>
+	</div>
+	<section>
+		<% if (errors.length) { %>
+			<div class="form-errors" role="alert"><% errors.forEach(error => { %><p><%= error %></p><% }) %></div>
+		<% } %>
+		<form class="form" method="POST" action="/auth/login">
+			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+			<input type="hidden" name="returnTo" value="<%= returnTo %>" />
+			<label class="form-field">Email<input name="email" type="email" autocomplete="username" value="<%= email %>" required /></label>
+			<label class="form-field">Password<input name="password" type="password" autocomplete="current-password" required /></label>
+			<button type="submit">Sign in</button>
+		</form>
+		<form class="form" method="POST" action="/auth/guest">
+			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+			<p>Continue without an account. Guest data is private to this session but expires after 15 days.</p>
+			<button type="submit">Continue as guest</button>
+		</form>
+	</section>
+</main>

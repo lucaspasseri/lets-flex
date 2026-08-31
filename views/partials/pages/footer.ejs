@@ -5,6 +5,7 @@
 		{ id: "programs", href: "/programs", label: "Programs" },
 		{ id: "library", href: "/library", label: "Library" },
 		{ id: "profile", href: "/profile", label: "Profile" },
+		...(locals?.isAdmin ? [{ id: "admin-exercises", href: "/admin/library/exercises", label: "Manage exercises" }] : []),
 	];
 %>
 

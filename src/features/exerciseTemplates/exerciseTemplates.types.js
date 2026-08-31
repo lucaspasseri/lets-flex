@@ -22,6 +22,8 @@
  * @property {string} setupDescription
  * @property {string} environment
  * @property {string} notes
+ * @property {number | null} ownerUserId
+ * @property {boolean} isArchived
  */
 
 /**
@@ -41,6 +43,8 @@
  * @property {string} exercise_variant_setup_description
  * @property {string} exercise_variant_environment
  * @property {string} exercise_variant_notes
+ * @property {number | null} exercise_variant_owner_user_id
+ * @property {boolean} exercise_variant_is_archived
  * @property {ExerciseTemplateMuscleMapper[]} muscles
  */
 
@@ -101,12 +105,16 @@
  * @typedef {object} ExerciseTemplateItemActions
  * @property {*} update
  * @property {*} remove
+ * @property {boolean} canManageGlobal
+ * @property {boolean} canManagePrivate
  */
 
 /**
  * @typedef {object} ExerciseTemplateItemViewModel
  * @property {ExerciseTemplateRow["id"]} id
+ * @property {ExerciseTemplateRow["id"]} exerciseId
  * @property {string} name
+ * @property {boolean} isPrivateOwner
  * @property {string} searchKeyWord
  * @property {ExerciseTemplateItemSummary} summary
  * @property {ExerciseTemplateItemDetails} details

@@ -17,8 +17,9 @@
  * @typedef {object} LibraryPageViewModel
  * @property {LocalsPage} page
  * @property {LibraryPageState} pageState
+ * @property {boolean} managementMode
  * @property {{currentUser: User | null, activeSession: Session | null, activeNavigation: "library"}} shell
- * @property {{sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, archiveSessionForm: ArchiveSessionFormViewModel}} components
+ * @property {{sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, privateVariantForm: {exercises: Array<{id: number, name: string}>, equipments: any[]}, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, archiveSessionForm: ArchiveSessionFormViewModel}} components
  */
 
 export {};

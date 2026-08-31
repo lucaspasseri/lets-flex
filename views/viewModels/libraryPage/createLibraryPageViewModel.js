@@ -13,7 +13,7 @@ import createArchiveSessionForm from "./createArchiveSessionFormViewModel.js";
  */
 
 /**
- * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>}} input
+ * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, managementMode?: boolean}} input
  * @returns {LibraryPageViewModel}
  */
 export default function createLibraryPageViewModel({
@@ -22,10 +22,12 @@ export default function createLibraryPageViewModel({
 	data,
 	exerciseTemplateFormState,
 	sessionTemplateFormState,
+	managementMode = false,
 }) {
 	return {
 		page,
 		pageState,
+		managementMode,
 		shell: {
 			currentUser: data.user,
 			activeSession: data.activeSession,
@@ -35,10 +37,24 @@ export default function createLibraryPageViewModel({
 			sessionWorkspace: createSessionWorkspace({
 				sessionArr: data.sessions,
 				activeSession: data.activeSession,
+				actorUserId: pageState.userId,
 			}),
 			exerciseTemplates: createExerciseTemplates({
 				exerciseTemplateArr: data.exerciseTemplates,
+				actorUserId: pageState.userId,
+				managementMode,
 			}),
+			privateVariantForm: {
+				exercises: [
+					...new Map(
+						data.exerciseTemplates.map((item) => [
+							item.id,
+							{ id: item.id, name: item.name },
+						]),
+					).values(),
+				],
+				equipments: data.equipments,
+			},
 			createSessionForm: createSessionForm({
 				stepTypes: data.stepTypes,
 				exerciseTemplates: data.exerciseTemplates,

@@ -8,13 +8,20 @@ import {
 	createExerciseTemplateSchema,
 	exerciseTemplateParamsSchema,
 	exerciseTemplateVariantParamsSchema,
+	createPrivateVariantParamsSchema,
+	privateVariantBodySchema,
 	updateExerciseTemplateSchema,
 } from "../validation/exerciseTemplateSchemas.js";
+import { libraryController } from "../controllers/libraryController.js";
+import { requireAdmin } from "../middleware/auth.js";
 
 const router = Router();
 
 router.use(getUrlAndPath);
 router.use(getSessionState);
+router.use(requireAdmin);
+
+router.get("/", libraryController.showAdmin);
 
 router.post(
 	"/",
@@ -23,6 +30,14 @@ router.post(
 		exerciseTemplateController.showCreateErrors,
 	),
 	exerciseTemplateController.create,
+);
+router.post(
+	"/:exerciseId/variants",
+	validateRequestParams(createPrivateVariantParamsSchema),
+	validateRequestBody(privateVariantBodySchema, (_req, res, { errors }) =>
+		res.status(422).json(errors),
+	),
+	exerciseTemplateController.createGlobalVariant,
 );
 router.patch(
 	"/:exerciseId/variants/:variantId",
@@ -33,8 +48,8 @@ router.patch(
 	),
 	exerciseTemplateController.update,
 );
-router.delete(
-	"/:exerciseId",
+router.post(
+	"/:exerciseId/archive",
 	validateRequestParams(exerciseTemplateParamsSchema),
 	exerciseTemplateController.delete,
 );

@@ -1,37 +1,16 @@
-<%
-		const { profilePicker, createUserForm } = locals.components;
-		const { clearSelectionAction } = profilePicker;
-%>
-
 <main class="main profile">
-	<%- include("partials/profilePage/profilePicker/profilePicker", { profilePicker }) %>
+	<div class="main-header">
+		<div class="title-container"><p>ACCOUNT</p><h1><%= currentUser.name %></h1></div>
+	</div>
+	<section>
+		<p>Role: <%= currentUser.role %></p>
+		<% if (currentUser.email) { %><p>Email: <%= currentUser.email %></p><% } %>
+		<% if (currentUser.role === "guest") { %>
+			<p role="status">This guest workspace is temporary and expires on <%= new Date(currentUser.guestExpiresAt).toLocaleDateString() %>.</p>
+		<% } %>
+		<form method="POST" action="/auth/logout">
+			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+			<button type="submit">Sign out</button>
+		</form>
+	</section>
 </main>
-
-<%- contentFor("overlays") %>
-<%- include("partials/shared/components/modal/modal", { modal: {
-	id: createUserForm.modal.id,
-	title: createUserForm.modal.title,
-	openOnLoad: createUserForm.modal.openOnLoad,
-	showTitle: false,
-	renderContent: () => include("partials/shared/components/form/form", { form: {
-		...createUserForm.form,
-		slots: {
-			body: include("partials/profilePage/createUserForm/createUserFormBody", { createUserForm }),
-			footer: include("partials/profilePage/createUserForm/createUserFormFooter", { createUserForm })
-		}
-	}})
-	} }) %>
-
-<% if (clearSelectionAction.isVisible) { %>
-	<%- include("partials/shared/components/modal/modal", { modal: {
-		id: clearSelectionAction.modal.id,
-		title: clearSelectionAction.modal.title,
-		showTitle: false,
-		renderContent: () => include("partials/shared/components/form/form", { form: {
-			...clearSelectionAction.form,
-			slots: {
-				footer: include("partials/profilePage/clearProfileSelectionFormFooter", { clearSelectionAction })
-			}
-		}})
-	} }) %>
-<% } %>
