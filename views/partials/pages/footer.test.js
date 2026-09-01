@@ -33,3 +33,22 @@ test("footer has no false current destination when its contract is absent", asyn
 	assert.doesNotMatch(html, /aria-current="page"/);
 	assert.equal((html.match(/class="footer-nav__link"/g) ?? []).length, 4);
 });
+
+test("footer exposes and identifies the administrator catalog only for admins", async () => {
+	const adminHtml = await renderFile(footerPath, {
+		isAdmin: true,
+		shell: { activeNavigation: "admin-exercises" },
+	});
+	const memberHtml = await renderFile(footerPath, {
+		isAdmin: false,
+		shell: { activeNavigation: "library" },
+	});
+
+	assert.equal((adminHtml.match(/class="footer-nav__link"/g) ?? []).length, 5);
+	assert.match(
+		adminHtml,
+		/href="\/admin\/library\/exercises"[\s\S]*?aria-current="page"/,
+	);
+	assert.match(adminHtml, /footer-nav__list--admin/);
+	assert.doesNotMatch(memberHtml, /\/admin\/library\/exercises/);
+});

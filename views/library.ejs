@@ -9,22 +9,33 @@
 		deleteExerciseForm,
 		archiveSessionForm
 	} = locals.components;
+	const managementMode = Boolean(locals.managementMode);
+	const privateVariantForm = locals.components.privateVariantForm;
+	const pageHeading = locals.components.pageHeading;
 %>
 
-<main class="main library" data-library-page>
-	<div class="main-header">
-		<div class="title-container">
-			<p>ASSET MANAGER</p>
-			<h1>Library</h1>
-		</div>
-	</div>
-	<%- include("partials/libraryPage/librarySearch") %>
-	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace }) %>
+<main class="main library<%= managementMode ? ' library--admin' : '' %>" data-library-page data-library-mode="<%= managementMode ? 'admin' : 'personal' %>">
+	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
+
+	<% if (managementMode) { %>
+		<aside class="library-admin-scope" aria-label="Administrator access scope">
+			<span class="library-admin-scope__icon" aria-hidden="true"><%- include("partials/shared/components/icons/namedIcon", { name: "wrench" }) %></span>
+			<div><strong>Global catalog access</strong><p>This view does not expose member or guest profiles, sessions, or private variants.</p></div>
+			<a href="/library">Return to personal Library</a>
+		</aside>
+	<% } %>
+
+	<%- include("partials/libraryPage/librarySearch", {
+		searchLabel: managementMode ? "Search global exercises" : "Search sessions and exercises",
+		searchPlaceholder: managementMode ? "Search global exercises" : "Search sessions and exercises"
+	}) %>
+	<% if (!managementMode) { %><%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace }) %><% } %>
+	<%- include("partials/libraryPage/createVariantForm", { variantForm: privateVariantForm }) %>
 	<%- include("partials/libraryPage/exerciseTemplates", { exerciseTemplates }) %>
 </main>
 
 <%- contentFor("overlays") %>
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: createSessionForm.modal.id,
 	title: createSessionForm.modal.title,
 	showTitle: false,
@@ -37,9 +48,9 @@
 			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: createSessionForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: archiveSessionForm.modal.id,
 	title: archiveSessionForm.modal.title,
 	showTitle: false,
@@ -50,9 +61,9 @@
 			footer: include("partials/libraryPage/archiveSessionTemplateForm/archiveSessionFormFooter", { archiveSessionForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: updateSessionForm.modal.id,
 	title: updateSessionForm.modal.title,
 	showTitle: false,
@@ -65,9 +76,9 @@
 			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: updateSessionForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: updateExerciseForm.modal.id,
 	title: updateExerciseForm.modal.title,
 	showTitle: false,
@@ -80,9 +91,9 @@
 			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: updateExerciseForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: deleteExerciseForm.modal.id,
 	title: deleteExerciseForm.modal.title,
 	showTitle: false,
@@ -93,9 +104,9 @@
 			footer: include("partials/libraryPage/deleteExerciseTemplateForm/deleteExerciseFormFooter", { deleteExerciseForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
-<%- include("partials/shared/components/modal/modal", { modal: {
+<% if (managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
 	id: createExerciseForm.modal.id,
 	title: createExerciseForm.modal.title,
 	showTitle: false,
@@ -108,7 +119,7 @@
 			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: createExerciseForm })
 		}
 	}})
-} }) %>
+} }) %><% } %>
 
 <%- contentFor("scripts") %>
 <script type="module" src="/js/pages/library/index.js"></script>

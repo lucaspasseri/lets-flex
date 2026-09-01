@@ -7,7 +7,6 @@
 	background: var(--color-surface);
 	border: 1px solid var(--color-border);
 	border-radius: 0.75rem;
-	margin: 2em var(--horizontal-margin);
 }
 
 .library-search:focus-within {

@@ -1,8 +1,9 @@
 <%
-	const username = locals?.shell?.currentUser?.name ?? "Guest";
-	const profileAccessibleLabel = locals?.shell?.currentUser
-		? `Choose profile. Current profile: ${username}`
-		: "Choose a profile";
+	const username = locals?.shell?.currentUser?.name ?? locals?.authUser?.name ?? "Guest";
+	const currentUser = locals?.shell?.currentUser ?? locals?.authUser ?? null;
+	const profileAccessibleLabel = currentUser
+		? `View profile for ${username}`
+		: "View profile";
 %>
 
 <header class="page-header">
@@ -25,6 +26,9 @@
 				}})
 			%>
 		</span>
-		<span class="page-header__username"><%= username %></span>
+		<span class="page-header__identity">
+			<span class="page-header__username"><%= username %></span>
+			<% if (currentUser?.role === "guest") { %><span class="page-header__status">Temporary workspace</span><% } %>
+		</span>
 	</a>
 </header>

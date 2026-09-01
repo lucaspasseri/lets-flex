@@ -9,7 +9,8 @@ async function show(req, res) {
 }
 
 export async function renderDashboard(req, res, formState = {}) {
-	const userId = toNullableNumber(res.locals.sessionState?.userId);
+	// @ts-ignore -- application Passport principal.
+	const userId = toNullableNumber(req.user?.id);
 	const programId = toNullableNumber(res.locals.sessionState?.programId);
 	const query = req.validatedQuery ?? {};
 	const daysDifference =

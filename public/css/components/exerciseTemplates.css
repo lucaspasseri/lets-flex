@@ -15,7 +15,6 @@
 
 	display: grid;
 	gap: 1rem;
-	margin: 1em var(--horizontal-margin);
 }
 
 /* ======================================================
@@ -315,10 +314,32 @@
 
 .exercise-template__actions {
 	display: flex;
+	align-items: flex-end;
 	justify-content: flex-end;
+	flex-wrap: wrap;
 	gap: 0.65rem;
 	padding-top: 1rem;
 	border-top: 1px solid var(--template-border);
+}
+
+.exercise-template__private-actions {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: end;
+	gap: 0.75rem;
+	width: 100%;
+}
+
+.exercise-template__inline-form {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: end;
+	gap: 0.75rem;
+}
+
+.exercise-template__inline-form .shared-button,
+.exercise-template__archive-form .shared-button {
+	min-height: 2.75rem;
 }
 
 /* ======================================================
@@ -391,6 +412,11 @@
 	.exercise-template__actions .shared-button {
 		justify-content: center;
 		width: 100%;
+	}
+
+	.exercise-template__private-actions,
+	.exercise-template__inline-form {
+		grid-template-columns: 1fr;
 	}
 }
 

@@ -5,12 +5,13 @@
 		{ id: "programs", href: "/programs", label: "Programs" },
 		{ id: "library", href: "/library", label: "Library" },
 		{ id: "profile", href: "/profile", label: "Profile" },
+		...(locals?.isAdmin ? [{ id: "admin-exercises", href: "/admin/library/exercises", label: "Manage exercises" }] : []),
 	];
 %>
 
 <footer class="footer">
 	<nav class="footer-nav" aria-label="Primary">
-		<ul class="footer-nav__list">
+		<ul class="footer-nav__list<%= locals?.isAdmin ? ' footer-nav__list--admin' : '' %>">
 			<% navigationItems.forEach(item => { %>
 				<% const isActive = item.id === activeNavigation; %>
 				<li class="footer-nav__item">

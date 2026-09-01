@@ -4,7 +4,6 @@
 
 	display: grid;
 	gap: 1.5rem;
-	margin: 2em var(--horizontal-margin);
 }
 
 .session-workspace__header {

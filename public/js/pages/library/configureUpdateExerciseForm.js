@@ -10,7 +10,7 @@ export function initializeUpdateExerciseForm(root, form) {
 			return;
 		}
 
-		form.action = `/exerciseTemplates/${values.exerciseId}/variants/${values.variantId}?_method=PATCH`;
+		form.action = `/admin/library/exercises/${values.exerciseId}/variants/${values.variantId}?_method=PATCH`;
 		setValue(form, "name", values.name);
 		setValue(form, "movementPatternId", values.movementPatternId);
 		setValue(form, "equipmentId", values.equipmentId);

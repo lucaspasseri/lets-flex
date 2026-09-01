@@ -1,0 +1,63 @@
+<% const { idPrefix, title, eyebrow, description, submitLabel, actionPrefix, exercises, equipments } = locals.variantForm; %>
+
+<section class="library-action-panel" aria-labelledby="<%= idPrefix %>-heading">
+	<header class="library-action-panel__header">
+		<div class="library-action-panel__icon" aria-hidden="true">
+			<%- include("../shared/components/icons/namedIcon", { name: "plus-circle" }) %>
+		</div>
+		<div>
+			<p class="library-action-panel__eyebrow"><%= eyebrow %></p>
+			<h2 id="<%= idPrefix %>-heading"><%= title %></h2>
+			<p><%= description %></p>
+		</div>
+	</header>
+
+	<form
+		class="form library-variant-form"
+		method="POST"
+		action="<%= actionPrefix %>/0/variants"
+		data-variant-create-form
+		data-action-prefix="<%= actionPrefix %>"
+	>
+		<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+		<div class="form-grid form-grid--three-columns">
+			<%- include("../shared/components/form/field", { field: {
+				id: `${idPrefix}-exercise`,
+				name: "exerciseId",
+				label: "Exercise",
+				control: "select",
+				required: true,
+				hint: "Choose the global exercise this variation belongs to.",
+				defaultOption: { label: "Choose exercise", value: "" },
+				options: exercises.map(exercise => ({ value: exercise.id, label: exercise.name }))
+			} }) %>
+			<%- include("../shared/components/form/field", { field: {
+				id: `${idPrefix}-name`,
+				name: "name",
+				label: "Variant name",
+				control: "input",
+				type: "text",
+				required: true,
+				hint: "Use a short name that describes the variation.",
+				attributes: { maxlength: 100, autocomplete: "off" }
+			} }) %>
+			<%- include("../shared/components/form/field", { field: {
+				id: `${idPrefix}-equipment`,
+				name: "equipmentId",
+				label: "Equipment",
+				control: "select",
+				required: false,
+				hint: "Leave empty for a bodyweight variation.",
+				defaultOption: { label: "No equipment", value: "" },
+				options: equipments.map(equipment => ({ value: equipment.id, label: equipment.name }))
+			} }) %>
+		</div>
+		<div class="library-variant-form__footer">
+			<%- include("../shared/components/button/button", { button: {
+				label: submitLabel,
+				type: "submit",
+				variant: "primary"
+			} }) %>
+		</div>
+	</form>
+</section>

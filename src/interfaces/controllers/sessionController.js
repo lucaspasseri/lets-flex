@@ -16,7 +16,13 @@ import { renderLibrary } from "./libraryController.js";
 async function create(req, res) {
 	const { name, notes, stepRow } = req.validatedBody;
 
-	await createSession({ name, notes, stepRowArr: stepRow });
+	await createSession({
+		name,
+		notes,
+		stepRowArr: stepRow,
+		// @ts-ignore -- authenticated route principal.
+		ownerUserId: req.user.id,
+	});
 
 	res.redirect("/library");
 }
@@ -40,7 +46,8 @@ async function archive(req, res) {
 	const { sessionId } = req.validatedParams;
 
 	try {
-		await archiveSession(sessionId);
+		// @ts-ignore -- authenticated route principal.
+		await archiveSession({ sessionId, ownerUserId: req.user.id });
 	} catch (error) {
 		if (error instanceof SessionTemplateNotArchivableError) {
 			res.status(404).send("Session template not found or already archived");
@@ -56,7 +63,12 @@ async function archive(req, res) {
 async function update(req, res) {
 	const { sessionId } = req.validatedParams;
 	try {
-		await updateSessionTemplate({ ...req.validatedBody, sessionId });
+		await updateSessionTemplate({
+			...req.validatedBody,
+			sessionId,
+			// @ts-ignore -- authenticated route principal.
+			ownerUserId: req.user.id,
+		});
 	} catch (error) {
 		if (error instanceof SessionTemplateNotFoundError) {
 			res.status(404).send("Session template not found");

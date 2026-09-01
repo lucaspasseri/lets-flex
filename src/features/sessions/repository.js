@@ -7,13 +7,17 @@ import * as queries from "./queries.js";
  * @typedef {import("./sessions.types.js").SessionRow} SessionRow
  */
 
-/**
- * @param {import("pg").Pool | import("pg").PoolClient} [db]
- * @returns {Promise<SessionRow[]>}
- */
-
-export async function findAll(db = pool) {
-	const { rows } = await db.query(queries.findAllQuery());
+/** @param {{userId: number | null}} input @param {any} db */
+export async function findVisibleForUser({ userId }, db = pool) {
+	const { rows } = await db.query(
+		queries
+			.findAllQuery()
+			.replace(
+				"ORDER BY se.id;",
+				"WHERE se.is_archived = FALSE AND (se.owner_user_id IS NULL OR se.owner_user_id = $1) ORDER BY se.id;",
+			),
+		[userId],
+	);
 	return rows;
 }
 
@@ -23,10 +27,10 @@ export async function findAll(db = pool) {
  * @returns {Promise<SessionRow | null>}
  */
 
-export async function create({ name, notes }, db = pool) {
+export async function create({ name, notes, ownerUserId }, db = pool) {
 	const { rows } = await db.query(
-		"INSERT INTO sessions (name, notes) VALUES ($1, $2) RETURNING id",
-		[name, notes],
+		"INSERT INTO sessions (name, notes, owner_user_id) VALUES ($1, $2, $3) RETURNING id",
+		[name, notes, ownerUserId],
 	);
 
 	return rows[0] ?? null;
@@ -38,35 +42,23 @@ export async function create({ name, notes }, db = pool) {
  * @param {*} db
  */
 
-export async function archive({ sessionId }, db = pool) {
+export async function archive({ sessionId, ownerUserId }, db = pool) {
 	const { rowCount } = await db.query(
 		`
 			UPDATE sessions
 			SET is_archived = TRUE
-			WHERE id = $1 AND is_archived = FALSE;
+			WHERE id = $1 AND owner_user_id = $2 AND is_archived = FALSE;
 		`,
-		[sessionId],
+		[sessionId, ownerUserId],
 	);
 	return rowCount > 0;
 }
 
-/**
- *
- * @param {FindByIdInput} input
- * @returns {Promise<SessionRow>}
- */
-
-export async function findById({ sessionId }, db = pool) {
-	const { rows } = await db.query("SELECT * FROM sessions WHERE id = $1", [sessionId]);
-
-	return rows[0] ?? null;
-}
-
-/** @param {{sessionId: number, name: string, notes: string | null}} input @param {any} db */
-export async function update({ sessionId, name, notes }, db = pool) {
+/** @param {{sessionId: number, name: string, notes: string | null, ownerUserId: number}} input @param {any} db */
+export async function update({ sessionId, name, notes, ownerUserId }, db = pool) {
 	const { rowCount } = await db.query(
-		"UPDATE sessions SET name = $2, notes = $3 WHERE id = $1",
-		[sessionId, name, notes],
+		"UPDATE sessions SET name = $2, notes = $3, updated_at = NOW() WHERE id = $1 AND owner_user_id = $4",
+		[sessionId, name, notes, ownerUserId],
 	);
 	return rowCount > 0;
 }

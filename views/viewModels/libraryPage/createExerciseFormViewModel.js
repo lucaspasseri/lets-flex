@@ -44,8 +44,8 @@ export default function createExerciseFormViewModel({
 			heading: isUpdate ? "Update exercise template" : "Create exercise template",
 			description: "Define a reusable exercise template.",
 			action: isUpdate
-				? `/exerciseTemplates/${state.exerciseId}/variants/${state.variantId}?_method=PATCH`
-				: "/exerciseTemplates",
+				? `/admin/library/exercises/${state.exerciseId}/variants/${state.variantId}?_method=PATCH`
+				: "/admin/library/exercises",
 		},
 		fields: {
 			idPrefix,

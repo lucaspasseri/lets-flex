@@ -12,46 +12,41 @@ import * as queries from "./queries.js";
  * @property {TrainingDayRow["id"]} trainingDayId
  */
 
-export async function create(
-	{ sessionId, trainingDayId, workoutSessionOrder, notes },
+/** @param {{sessionId: number, trainingDayId: number, userId: number, notes: string}} input @param {DatabaseClient} [db] */
+export async function createForUser(
+	{ sessionId, trainingDayId, userId, notes },
 	db = pool,
 ) {
 	const { rows } = await db.query(
-		"INSERT INTO workout_sessions (session_id, training_day_id, workout_session_order, notes) VALUES ($1, $2, $3, $4) RETURNING *",
-		[sessionId, trainingDayId, workoutSessionOrder, notes],
+		`INSERT INTO workout_sessions
+		 (session_id, training_day_id, workout_session_order, notes)
+		 SELECT s.id, td.id,
+		        COALESCE((SELECT MAX(ws.workout_session_order) + 1 FROM workout_sessions ws WHERE ws.training_day_id = td.id), 1),
+		        $4
+		 FROM sessions s, training_days td
+		 JOIN cycles c ON c.id = td.cycle_id
+		 JOIN programs p ON p.id = c.program_id
+		 WHERE s.id = $1 AND td.id = $2 AND p.user_id = $3
+		   AND s.is_archived = FALSE
+		   AND (s.owner_user_id IS NULL OR s.owner_user_id = $3)
+		 RETURNING *`,
+		[sessionId, trainingDayId, userId, notes],
 	);
-
 	return rows[0] ?? null;
 }
 
-export async function cancelById({ workoutSessionId }, db = pool) {
+/** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
+export async function findByIdForUser({ workoutSessionId, userId }, db = pool) {
 	const { rows } = await db.query(
-		`
-		UPDATE workout_sessions
-		SET
-			status = 'cancelled'
-		WHERE id = $1
-		RETURNING *
-		`,
-		[workoutSessionId],
+		`SELECT ws.*, s.name, s.notes AS session_notes
+		 FROM workout_sessions ws
+		 JOIN sessions s ON s.id = ws.session_id
+		 JOIN training_days td ON td.id = ws.training_day_id
+		 JOIN cycles c ON c.id = td.cycle_id
+		 JOIN programs p ON p.id = c.program_id
+		 WHERE ws.id = $1 AND p.user_id = $2`,
+		[workoutSessionId, userId],
 	);
-
-	return rows[0];
-}
-
-/** @param {any} input @param {DatabaseClient} [db] */
-export async function findById({ workoutSessionId }, db = pool) {
-	const { rows } = await db.query(
-		`
-		SELECT workoutSessions.*, sessionsTemplate.name, sessionsTemplate.notes AS session_notes
-		FROM workout_sessions AS workoutSessions
-		JOIN sessions AS sessionsTemplate
-		ON workoutSessions.session_id = sessionsTemplate.id
-		WHERE workoutSessions.id = $1
-		`,
-		[workoutSessionId],
-	);
-
 	return rows[0] ?? null;
 }
 
@@ -70,36 +65,42 @@ export async function findAllByProgramId({ programId }, db = pool) {
 	return rows;
 }
 
-/** @param {any} input @param {DatabaseClient} [db] */
-export async function startById({ workoutSessionId }, db = pool) {
+/** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
+export async function startByIdForUser({ workoutSessionId, userId }, db = pool) {
 	const { rows } = await db.query(
-		`
-		UPDATE workout_sessions
-		SET
-			status = 'in_progress',
-			started_at = NOW()
-		WHERE id = $1
-			AND status = 'planned'
-		RETURNING *
-		`,
-		[workoutSessionId],
+		`UPDATE workout_sessions ws SET status = 'in_progress', started_at = NOW()
+		 FROM training_days td, cycles c, programs p
+		 WHERE ws.id = $1 AND ws.status = 'planned'
+		   AND td.id = ws.training_day_id AND c.id = td.cycle_id
+		   AND p.id = c.program_id AND p.user_id = $2
+		 RETURNING ws.*`,
+		[workoutSessionId, userId],
 	);
-
 	return rows[0] ?? null;
 }
 
-export async function finishById({ workoutSessionId }, db = pool) {
+/** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
+export async function finishByIdForUser({ workoutSessionId, userId }, db = pool) {
 	const { rows } = await db.query(
-		`
-		UPDATE workout_sessions
-		SET
-			status = 'finished',
-			finished_at = NOW()
-		WHERE id = $1
-		RETURNING *
-		`,
-		[workoutSessionId],
+		`UPDATE workout_sessions ws SET status = 'finished', finished_at = NOW()
+		 FROM training_days td, cycles c, programs p
+		 WHERE ws.id = $1 AND td.id = ws.training_day_id
+		   AND c.id = td.cycle_id AND p.id = c.program_id AND p.user_id = $2
+		 RETURNING ws.*`,
+		[workoutSessionId, userId],
 	);
+	return rows[0] ?? null;
+}
 
+/** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
+export async function cancelByIdForUser({ workoutSessionId, userId }, db = pool) {
+	const { rows } = await db.query(
+		`UPDATE workout_sessions ws SET status = 'cancelled'
+		 FROM training_days td, cycles c, programs p
+		 WHERE ws.id = $1 AND td.id = ws.training_day_id
+		   AND c.id = td.cycle_id AND p.id = c.program_id AND p.user_id = $2
+		 RETURNING ws.*`,
+		[workoutSessionId, userId],
+	);
 	return rows[0] ?? null;
 }

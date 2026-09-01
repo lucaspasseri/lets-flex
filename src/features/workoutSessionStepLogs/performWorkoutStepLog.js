@@ -1,20 +1,28 @@
 import pool from "../../../db/pool.js";
 import * as workoutSessionStepLogsRepository from "./repository.js";
 import * as workoutSessionSetLogsRepository from "../workoutSessionSetLogs/repository.js";
+import ResourceNotFoundError from "../shared/ResourceNotFoundError.js";
 
-async function performWorkoutStepLog({ workoutStepLogId, status, logFormRows }) {
+async function performWorkoutStepLog({
+	workoutStepLogId,
+	status,
+	logFormRows,
+	userId,
+}) {
 	const client = await pool.connect();
 
 	try {
 		await client.query("BEGIN");
 
-		const workoutStepLog = await workoutSessionStepLogsRepository.updateById(
+		const workoutStepLog = await workoutSessionStepLogsRepository.updateByIdForUser(
 			{
 				workoutStepLogId,
 				status,
+				userId,
 			},
 			client,
 		);
+		if (!workoutStepLog) throw new ResourceNotFoundError();
 
 		for (const [index, formRow] of logFormRows.entries()) {
 			const { performedReps, performedLoadValue, performedLoadUnit } = formRow;

@@ -20,6 +20,9 @@ export function findAllQuery() {
 				AS exercise_variant_environment,
 			exercise_variants.notes
 				AS exercise_variant_notes,
+			exercise_variants.owner_user_id AS exercise_variant_owner_user_id,
+			exercise_variants.is_archived AS exercise_variant_is_archived,
+			exercises.is_archived AS exercise_is_archived,
 
 			COALESCE(
 				(
@@ -60,6 +63,10 @@ export function findAllQuery() {
 
 		LEFT JOIN equipments
 			ON equipments.id = exercise_variants.equipment_id
+
+		WHERE exercises.is_archived = FALSE
+			AND exercise_variants.is_archived = FALSE
+			AND (exercise_variants.owner_user_id IS NULL OR exercise_variants.owner_user_id = $1)
 
 		ORDER BY
 			exercises.name,

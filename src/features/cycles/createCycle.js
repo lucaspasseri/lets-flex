@@ -12,13 +12,16 @@ export class CycleOrderOutOfRangeError extends Error {
 	}
 }
 
-async function createCycle({ programId, name, cycleSize, cycleOrder }) {
+async function createCycle({ programId, userId, name, cycleSize, cycleOrder }) {
 	const client = await pool.connect();
 
 	try {
 		await client.query("BEGIN");
 
-		const program = await programsRepository.findById({ programId }, client);
+		const program = await programsRepository.findByIdForUser(
+			{ programId, userId },
+			client,
+		);
 
 		if (!program) {
 			throw new Error(`Program with ID ${programId} was not found`);

@@ -9,12 +9,13 @@ function session(isArchived) {
 		name: "Upper body",
 		notes: "",
 		isArchived,
+		ownerUserId: 3,
 		steps: [],
 	};
 }
 
 test("active session details expose a presentation-safe archive action", () => {
-	const details = createDetails({ session: session(false) });
+	const details = createDetails({ session: session(false), actorUserId: 3 });
 	assert.ok(details);
 	assert.deepEqual(details.actions.archive, {
 		label: "Archive session",
@@ -24,7 +25,7 @@ test("active session details expose a presentation-safe archive action", () => {
 });
 
 test("archived session details do not offer the archive action again", () => {
-	const details = createDetails({ session: session(true) });
+	const details = createDetails({ session: session(true), actorUserId: 3 });
 	assert.ok(details);
 	assert.equal(details.actions.archive, null);
 });

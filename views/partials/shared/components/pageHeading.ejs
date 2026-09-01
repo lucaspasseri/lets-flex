@@ -1,0 +1,17 @@
+<%
+	const {
+		eyebrow = "",
+		title = "",
+		description = "",
+		meta = null
+	} = locals?.heading ?? {};
+%>
+
+<header class="page-heading">
+	<div class="page-heading__copy">
+		<% if (eyebrow) { %><p class="page-heading__eyebrow"><%= eyebrow %></p><% } %>
+		<h1><%= title %></h1>
+		<% if (description) { %><p class="page-heading__description"><%= description %></p><% } %>
+	</div>
+	<% if (meta) { %><span class="page-heading__meta"><%= meta %></span><% } %>
+</header>

@@ -13,6 +13,7 @@ import createDetailsStepViewModel from "./createDetailsStepViewModel.js";
 /**
  * @typedef {object} CreateDetailsInput
  * @property { SessionMapper | null} session
+ * @property {number | null} [actorUserId]
  */
 
 /**
@@ -20,7 +21,7 @@ import createDetailsStepViewModel from "./createDetailsStepViewModel.js";
  * @returns {DetailsViewModel | null}
  */
 
-function createDetails({ session }) {
+function createDetails({ session, actorUserId = null }) {
 	if (!session) {
 		return null;
 	}
@@ -64,33 +65,36 @@ function createDetails({ session }) {
 			},
 		],
 
-		actions: {
-			edit: {
-				label: "Edit session",
-				modalId: "updateSessionModal",
-				values: {
-					sessionId: session.id,
-					name: session.name,
-					notes: session.notes ?? "",
-					stepRow: steps.map((step) => ({
-						stepId: step.id,
-						stepTypeId: step.stepTypeId,
-						exerciseVariantId: step.exerciseVariantId,
-						sets: step.sets,
-						reps: step.reps,
-						loadValue: step.loadValue,
-						loadUnit: step.loadUnit,
-					})),
-				},
-			},
-			archive: session.isArchived
-				? null
-				: {
-						label: "Archive session",
-						modalId: "archiveSessionModal",
-						values: { sessionId: session.id, name: session.name },
-					},
-		},
+		actions:
+			session.ownerUserId === actorUserId
+				? {
+						edit: {
+							label: "Edit session",
+							modalId: "updateSessionModal",
+							values: {
+								sessionId: session.id,
+								name: session.name,
+								notes: session.notes ?? "",
+								stepRow: steps.map((step) => ({
+									stepId: step.id,
+									stepTypeId: step.stepTypeId,
+									exerciseVariantId: step.exerciseVariantId,
+									sets: step.sets,
+									reps: step.reps,
+									loadValue: step.loadValue,
+									loadUnit: step.loadUnit,
+								})),
+							},
+						},
+						archive: session.isArchived
+							? null
+							: {
+									label: "Archive session",
+									modalId: "archiveSessionModal",
+									values: { sessionId: session.id, name: session.name },
+								},
+					}
+				: { edit: null, archive: null },
 	};
 }
 

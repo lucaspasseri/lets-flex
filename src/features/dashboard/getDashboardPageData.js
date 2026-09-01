@@ -22,21 +22,26 @@ export default async function getDashboardPageData({
 	now = new Date(),
 }) {
 	const selectedDate = addDays(now, daysDifference ?? 0);
+	const ownedProgram =
+		programId && userId
+			? await programsRepository.findByIdForUser({ programId, userId })
+			: null;
+	const ownedProgramId = ownedProgram?.id ?? null;
 	const [userRow, programRow, trainingDayRow, cycleRows, workoutSessionRows] =
 		await Promise.all([
 			userId ? usersRepository.findById({ userId }) : Promise.resolve(null),
-			programId ? programsRepository.findById({ programId }) : Promise.resolve(null),
-			programId
+			Promise.resolve(ownedProgram),
+			ownedProgramId
 				? trainingDaysRepository.findByProgramIdAndScheduledDate({
-						programId,
+						programId: ownedProgramId,
 						scheduledDate: selectedDate,
 					})
 				: Promise.resolve(null),
-			programId
-				? cyclesRepository.findAllByProgramId({ programId })
+			ownedProgramId
+				? cyclesRepository.findAllByProgramId({ programId: ownedProgramId })
 				: Promise.resolve([]),
-			programId
-				? workoutSessionsRepository.findAllByProgramId({ programId })
+			ownedProgramId
+				? workoutSessionsRepository.findAllByProgramId({ programId: ownedProgramId })
 				: Promise.resolve([]),
 		]);
 
@@ -52,10 +57,10 @@ export default async function getDashboardPageData({
 		? trainingDayMapper.toTrainingDay(trainingDayRow)
 		: null;
 	const currentTrainingDay =
-		mappedTrainingDay && programId !== null
+		mappedTrainingDay && ownedProgramId !== null
 			? {
 					...mappedTrainingDay,
-					programId,
+					programId: ownedProgramId,
 					cycleOrder:
 						cycles.find(
 							/** @param {import("../cycles/cycles.types.js").Cycle} cycle */ (cycle) =>

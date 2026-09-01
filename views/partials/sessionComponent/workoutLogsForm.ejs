@@ -1,6 +1,7 @@
 <div class="logs-form-container">
 	<div class="sets-container">
 		<form method="POST" action="<%= workoutLogForm.performAction %>" id="log-form" class="workout-log-form">
+			<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 			<input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>">
 			<input type="hidden" name="workoutSessionId" value="<%= workoutLogForm.workoutSessionId %>">
 			<% if (workoutLogForm.errors?.fieldErrors?.daysDifference || workoutLogForm.errors?.fieldErrors?.workoutSessionId) { %><p class="form-field__error"><%= workoutLogForm.errors.fieldErrors.daysDifference ?? workoutLogForm.errors.fieldErrors.workoutSessionId %></p><% } %>
@@ -11,7 +12,7 @@
 	</div>
 	<div class="step-log-button-container">
 		<%- include('../shared/components/button/button', { button: { label: "Complete step", type: "submit", attributes: { form: "log-form" }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "performed", icon: { attributes: { "aria-hidden": true } } }) } }) %>
-		<form method="POST" action="<%= workoutLogForm.skipAction %>"><input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>"><input type="hidden" name="workoutSessionId" value="<%= workoutLogForm.workoutSessionId %>"><%- include('../shared/components/button/button', { button: { label: "Skip step", type: "submit", variant: "secondary", renderIcon: () => include("../shared/components/icons/statusCircle", { status: "skipped", icon: { attributes: { "aria-hidden": true } } }) } }) %></form>
+		<form method="POST" action="<%= workoutLogForm.skipAction %>"><input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>"><input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>"><input type="hidden" name="workoutSessionId" value="<%= workoutLogForm.workoutSessionId %>"><%- include('../shared/components/button/button', { button: { label: "Skip step", type: "submit", variant: "secondary", renderIcon: () => include("../shared/components/icons/statusCircle", { status: "skipped", icon: { attributes: { "aria-hidden": true } } }) } }) %></form>
 	</div>
 	<template id="set-row-template"><%- include("workoutLogsFormRow", { row: workoutLogForm.templateRow }) %></template>
 </div>

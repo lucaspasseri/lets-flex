@@ -10,6 +10,7 @@ import createDetails from "./createDetailsViewModel.js";
  * @typedef {object} CreateSessionWorkspaceInput
  * @property {SessionMapper[]} sessionArr
  * @property {SessionMapper | null} activeSession
+ * @property {number | null} actorUserId
  */
 
 /**
@@ -17,12 +18,16 @@ import createDetails from "./createDetailsViewModel.js";
  * @returns {SessionWorkspaceViewModel}
  */
 
-function createSessionWorkspace({ sessionArr = [], activeSession }) {
+function createSessionWorkspace({
+	sessionArr = [],
+	activeSession,
+	actorUserId = null,
+}) {
 	const summaryArr = sessionArr.map((session) =>
 		createSummary({ session, activeSessionId: activeSession?.id ?? null }),
 	);
 
-	const details = createDetails({ session: activeSession });
+	const details = createDetails({ session: activeSession, actorUserId });
 
 	return {
 		id: "session-workspace",

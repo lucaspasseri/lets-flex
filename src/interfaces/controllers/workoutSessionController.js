@@ -9,7 +9,7 @@ import { renderDashboard } from "./dashboardController.js";
 async function create(req, res) {
 	const { sessionId, trainingDayId } = req.validatedBody;
 
-	await createWorkoutSession({ sessionId, trainingDayId });
+	await createWorkoutSession({ sessionId, trainingDayId, userId: req.user.id });
 
 	res.redirect(`/programs/day?dayId=${trainingDayId}`);
 }
@@ -18,7 +18,7 @@ async function cancel(req, res) {
 	const { workoutSessionId } = req.validatedParams;
 	const { trainingDayId } = req.validatedBody;
 
-	await cancelWorkoutSession({ workoutSessionId });
+	await cancelWorkoutSession({ workoutSessionId, userId: req.user.id });
 
 	res.redirect(`/programs/day?dayId=${trainingDayId}`);
 }
@@ -42,7 +42,10 @@ async function start(req, res) {
 	const { workoutSessionId } = req.validatedParams;
 	const { daysDifference } = req.validatedBody;
 
-	const { workoutSession } = await startWorkoutSession({ workoutSessionId });
+	const { workoutSession } = await startWorkoutSession({
+		workoutSessionId,
+		userId: req.user.id,
+	});
 
 	res.redirect(
 		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
@@ -52,7 +55,10 @@ async function finish(req, res) {
 	const { workoutSessionId } = req.validatedParams;
 	const { daysDifference } = req.validatedBody;
 
-	const workoutSession = await finishWorkoutSession({ workoutSessionId });
+	const workoutSession = await finishWorkoutSession({
+		workoutSessionId,
+		userId: req.user.id,
+	});
 
 	res.redirect(
 		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,

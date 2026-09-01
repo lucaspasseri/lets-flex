@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
 import { Client } from "pg";
 import { schemaSql } from "../../db/schema.js";
+import { hashPassword } from "../../src/features/auth/passwordService.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const databaseIsSafe = (() => {
@@ -12,17 +13,19 @@ const databaseIsSafe = (() => {
 		return false;
 	}
 })();
-
 const integration = databaseIsSafe ? describe : describe.skip;
 
-integration("application pages and HTTP actions", { concurrency: false }, () => {
+integration("authentication and authorization", { concurrency: false }, () => {
 	let db;
 	let server;
 	let origin;
+	let passwordHash;
 
 	before(async () => {
 		process.env.DATABASE_URL = testDatabaseUrl;
 		process.env.SESSION_SECRET = "http-integration-test-secret";
+		process.env.GUEST_TTL_DAYS = "15";
+		passwordHash = await hashPassword("correct horse battery staple");
 		db = new Client({ connectionString: testDatabaseUrl });
 		await db.connect();
 		const { createApp } = await import("../../app.js");
@@ -36,6 +39,13 @@ integration("application pages and HTTP actions", { concurrency: false }, () => 
 
 	beforeEach(async () => {
 		await db.query(schemaSql);
+		await db.query(
+			`INSERT INTO users (email, password_hash, role, name) VALUES
+			 ('admin@example.com', $1, 'admin', 'Admin'),
+			 ('user-one@example.com', $1, 'user', 'User One'),
+			 ('user-two@example.com', $1, 'user', 'User Two')`,
+			[passwordHash],
+		);
 	});
 
 	after(async () => {
@@ -49,7 +59,7 @@ integration("application pages and HTTP actions", { concurrency: false }, () => 
 
 	function agent() {
 		let cookie = "";
-		return async (path, options = {}) => {
+		const request = async (path, options = {}) => {
 			const headers = new Headers(options.headers);
 			if (cookie) headers.set("cookie", cookie);
 			if (options.form) {
@@ -65,370 +75,405 @@ integration("application pages and HTTP actions", { concurrency: false }, () => 
 			if (setCookie) cookie = setCookie.split(";", 1)[0];
 			return { response, text: await response.text() };
 		};
+		return { request, cookie: () => cookie };
 	}
 
-	async function fixture() {
-		const { rows } = await db.query(`
-			WITH new_user AS (
-				INSERT INTO users (name, date_of_birth, anamnesis)
-				VALUES ('Ada Athlete', '1990-01-02', 'Healthy') RETURNING id
-			), new_program AS (
-				INSERT INTO programs (user_id, goal_id, name, start_date)
-				SELECT id, 1, 'Strength Base', CURRENT_DATE FROM new_user RETURNING id, user_id
-			), new_cycle AS (
-				INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
-				SELECT id, 'Foundation', 2, 1 FROM new_program RETURNING id, program_id
-			), new_day AS (
-				INSERT INTO training_days (cycle_id, day_order, scheduled_date, label)
-				SELECT id, 1, CURRENT_DATE, 'Upper Day' FROM new_cycle RETURNING id, cycle_id
-			), new_exercise AS (
-				INSERT INTO exercises (name, movement_pattern_id)
-				VALUES ('Bench Press', 1) RETURNING id
-			), new_variant AS (
-				INSERT INTO exercise_variants (exercise_id, equipment_id, name)
-				SELECT id, 1, 'Barbell Bench Press' FROM new_exercise RETURNING id, exercise_id
-			), new_relation AS (
-				INSERT INTO exercise_muscles (exercise_id, muscle_id, muscle_role_id)
-				SELECT exercise_id, 1, 1 FROM new_variant
-			), new_session AS (
-				INSERT INTO sessions (name, notes) VALUES ('Push Session', 'Controlled reps')
-				RETURNING id
-			), new_step AS (
-				INSERT INTO session_steps
-					(session_id, step_type_id, exercise_variant_id, name, step_order, sets, reps, load_value, load_unit)
-				SELECT new_session.id, 1, new_variant.id, 'Bench sets', 1, 3, 8, 60, 'Kilograms'
-				FROM new_session, new_variant RETURNING id, session_id
-			), new_workout AS (
-				INSERT INTO workout_sessions (training_day_id, session_id, workout_session_order, notes)
-				SELECT new_day.id, new_session.id, 1, '' FROM new_day, new_session RETURNING id
-			)
-			SELECT new_user.id AS user_id, new_program.id AS program_id,
-				new_cycle.id AS cycle_id, new_day.id AS day_id,
-				new_exercise.id AS exercise_id, new_variant.id AS variant_id,
-				new_session.id AS session_id, new_step.id AS step_id,
-				new_workout.id AS workout_id
-			FROM new_user, new_program, new_cycle, new_day, new_exercise,
-				new_variant, new_session, new_step, new_workout
-		`);
-		return rows[0];
+	function csrfFrom(html) {
+		const match = html.match(/name="_csrf" value="([^"]+)"/);
+		assert.ok(match, "response should contain a CSRF token");
+		return match[1];
 	}
 
-	async function selectProfile(request, userId) {
-		const result = await request(`/profile?userId=${userId}`);
+	async function login(client, email = "user-one@example.com") {
+		const page = await client.request("/auth/login");
+		const oldCookie = client.cookie();
+		const result = await client.request("/auth/login", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				email,
+				password: "correct horse battery staple",
+				returnTo: "/",
+			},
+		});
+		assert.equal(result.response.status, 302);
+		assert.notEqual(client.cookie(), oldCookie, "login must rotate the session ID");
+		return result;
+	}
+
+	async function enterGuest(client) {
+		const page = await client.request("/auth/login");
+		const result = await client.request("/auth/guest", {
+			method: "POST",
+			form: { _csrf: csrfFrom(page.text) },
+		});
+		assert.equal(result.response.status, 302);
+	}
+
+	test("authentication is the entry point and CSRF protects mutations", async () => {
+		const client = agent();
+		let result = await client.request("/");
+		assert.equal(result.response.status, 302);
+		assert.match(result.response.headers.get("location"), /^\/auth\/login/);
+
+		result = await client.request("/auth/login");
 		assert.equal(result.response.status, 200);
-	}
+		assert.match(result.text, /Sign in/);
+		assert.match(result.text, /Your training workspace/);
+		assert.match(result.text, /action="\/auth\/login"/);
+		assert.match(result.text, /action="\/auth\/register"/);
+		assert.match(result.text, /action="\/auth\/guest"/);
+		assert.match(result.text, /role="tablist"/);
 
-	test("anonymous page rendering and malformed page queries", async () => {
-		const request = agent();
-		for (const [path, content] of [
-			["/", "Let&#39;s Flex!"],
-			["/profile", "Profiles"],
-			["/library", "Library"],
-			["/programs", "active profile"],
-			["/programs/day", "Date outside the program"],
-			["/playground", "Playground"],
-			["/playground/button", "button"],
-		]) {
-			const result = await request(path);
-			assert.equal(result.response.status, 200, path);
-			assert.match(result.text, new RegExp(content, "i"), path);
-		}
-
-		let result = await request("/?daysDifference=not-a-number");
-		assert.equal(result.response.status, 400);
-		assert.match(result.text, /Invalid query parameters/);
-		result = await request("/programs/day?dayId=0");
-		assert.equal(result.response.status, 400);
-		assert.match(result.text, /Choose a valid training day/);
-		result = await request("/playground/does-not-exist");
-		assert.equal(result.response.status, 404);
-		assert.equal(result.text, "Not found");
-	});
-
-	test("profile creation, selection, clearing, validation, and missing selection", async () => {
-		const request = agent();
-		let result = await request("/users", {
-			method: "POST",
-			form: { name: "  Grace Hopper  ", dob: "1906-12-09", anamnesis: "" },
-		});
-		assert.equal(result.response.status, 302);
-		assert.equal(result.response.headers.get("location"), "/profile");
-		const created = await db.query("SELECT * FROM users WHERE name = 'Grace Hopper'");
-		assert.equal(created.rowCount, 1);
-
-		result = await request("/profile");
-		assert.match(result.text, /Grace Hopper/);
-		result = await request("/profile/clear-selection", { method: "POST" });
-		assert.equal(result.response.status, 302);
-		assert.equal(result.response.headers.get("location"), "/profile");
-
-		result = await request("/users", {
-			method: "POST",
-			form: { name: "", dob: "2999-99-99", anamnesis: "kept value" },
-		});
-		assert.equal(result.response.status, 400);
-		assert.match(result.text, /Enter a name/);
-		assert.match(result.text, /Enter a valid date of birth/);
-		assert.match(result.text, /kept value/);
-
-		result = await request("/profile?userId=999999");
-		assert.equal(result.response.status, 200);
-		assert.doesNotMatch(result.text, /Grace Hopper.*selected/i);
-	});
-
-	test("program and cycle forms enforce session state, validate, persist, and delete", async () => {
-		const ids = await fixture();
-		const anonymous = agent();
-		let result = await anonymous("/programs", {
-			method: "POST",
-			form: { name: "No Owner", goalId: "1", startDate: "2026-01-01" },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /No active profile/);
-
-		const request = agent();
-		await selectProfile(request, ids.user_id);
-		result = await request("/programs", {
-			method: "POST",
-			form: { name: "", goalId: "bad", startDate: "2026-02-31" },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Enter a program name/);
-
-		result = await request("/programs", {
-			method: "POST",
-			form: { name: "Hypertrophy Block", goalId: "1", startDate: "2026-01-01" },
-		});
-		assert.equal(result.response.status, 302);
+		result = await client.request("/auth/guest", { method: "POST", form: {} });
+		assert.equal(result.response.status, 403);
 		assert.equal(
-			(await db.query("SELECT count(*)::int AS count FROM programs")).rows[0].count,
-			2,
-		);
-
-		result = await request("/cycles", {
-			method: "POST",
-			form: { name: "Build", cycleSize: "3", cycleOrder: "1" },
-		});
-		assert.equal(result.response.status, 302);
-		assert.equal(
-			(await db.query("SELECT count(*)::int AS count FROM training_days")).rows[0]
-				.count,
-			4,
-		);
-
-		result = await request("/cycles", {
-			method: "POST",
-			form: { name: "Bad", cycleSize: "0", cycleOrder: "99" },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Number of days must be at least 1/);
-		result = await request("/cycles/not-an-id", { method: "DELETE" });
-		assert.equal(result.response.status, 400);
-		result = await request("/cycles/999999", { method: "DELETE" });
-		assert.equal(result.response.status, 404);
-
-		result = await request("/programs/not-an-id", { method: "DELETE" });
-		assert.equal(result.response.status, 400);
-		result = await request("/programs/999999", { method: "DELETE" });
-		assert.equal(result.response.status, 404);
-		result = await request(`/programs/${ids.program_id}`, { method: "DELETE" });
-		assert.equal(result.response.status, 302);
-		assert.equal(
-			(await db.query("SELECT 1 FROM programs WHERE id = $1", [ids.program_id]))
-				.rowCount,
+			(await db.query("SELECT count(*)::int AS count FROM users WHERE role = 'guest'"))
+				.rows[0].count,
 			0,
 		);
 	});
 
-	test("library renders fixtures and supports exercise/session create, update, archive, and errors", async () => {
-		const ids = await fixture();
-		const request = agent();
-		await selectProfile(request, ids.user_id);
-		let result = await request(`/library?sessionId=${ids.session_id}`);
-		assert.equal(result.response.status, 200);
-		assert.match(result.text, /Push Session/);
-		assert.match(result.text, /Barbell Bench Press/);
-
-		result = await request("/exerciseTemplates", {
-			method: "POST",
-			form: { name: "", movementPatternId: "bad", equipmentId: "" },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Enter an exercise name/);
-
-		result = await request("/exerciseTemplates", {
+	test("public registration validates, creates a regular user, and starts a session", async () => {
+		const client = agent();
+		let page = await client.request("/auth/login?returnTo=/library&tab=signup");
+		let result = await client.request("/auth/register", {
 			method: "POST",
 			form: {
-				name: "Goblet Squat",
-				movementPatternId: "3",
-				equipmentId: "2",
-				"muscleGroup[0][muscleId]": "19",
-				"muscleGroup[0][muscleRoleId]": "1",
+				_csrf: csrfFrom(page.text),
+				email: "  NEW.MEMBER@EXAMPLE.COM ",
+				password: "correct horse battery staple",
+				role: "admin",
+				returnTo: "/library",
 			},
 		});
 		assert.equal(result.response.status, 302);
-		assert.equal(
-			(await db.query("SELECT 1 FROM exercises WHERE name = 'Goblet Squat'")).rowCount,
-			1,
-		);
-		result = await request(
-			`/exerciseTemplates/${ids.exercise_id}/variants/${ids.variant_id}`,
-			{
-				method: "PATCH",
-				form: { name: "", movementPatternId: "bad", equipmentId: "", muscleGroup: "" },
-			},
-		);
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Enter an exercise name/);
-		result = await request("/exerciseTemplates/999999/variants/999999", {
-			method: "PATCH",
+		assert.equal(result.response.headers.get("location"), "/library");
+		const account = (
+			await db.query(
+				"SELECT email, password_hash, role FROM users WHERE email = 'new.member@example.com'",
+			)
+		).rows[0];
+		assert.equal(account.email, "new.member@example.com");
+		assert.equal(account.role, "user");
+		assert.notEqual(account.password_hash, "correct horse battery staple");
+		assert.equal((await client.request("/library")).response.status, 200);
+
+		const invalid = agent();
+		page = await invalid.request("/auth/login?tab=signup");
+		result = await invalid.request("/auth/register", {
+			method: "POST",
 			form: {
-				name: "Missing Exercise",
-				movementPatternId: "1",
-				equipmentId: "1",
-				"muscleGroup[0][muscleId]": "1",
-				"muscleGroup[0][muscleRoleId]": "1",
+				_csrf: csrfFrom(page.text),
+				email: "not-an-email",
+				password: "short",
 			},
 		});
-		assert.equal(result.response.status, 404);
-
-		result = await request("/sessions", {
-			method: "POST",
-			form: { name: "Empty Recovery", notes: "Easy day" },
-		});
-		assert.equal(result.response.status, 302);
-		assert.equal(
-			(await db.query("SELECT 1 FROM sessions WHERE name = 'Empty Recovery'")).rowCount,
-			1,
-		);
-		result = await request("/sessions", {
-			method: "POST",
-			form: { name: "", notes: "preserved note" },
-		});
 		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Enter a session name/);
-		assert.match(result.text, /preserved note/);
-
-		result = await request(`/sessions/${ids.session_id}`, {
-			method: "PATCH",
-			form: { name: "", notes: "still here" },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Enter a session name/);
-
-		result = await request(`/sessions/${ids.session_id}`, {
-			method: "PATCH",
-			form: { name: "Updated Push", notes: "Updated" },
-		});
-		assert.equal(result.response.status, 302);
-		assert.equal(
-			(await db.query("SELECT name FROM sessions WHERE id = $1", [ids.session_id]))
-				.rows[0].name,
-			"Updated Push",
+		assert.match(
+			result.text,
+			/id="auth-signup-tab"[\s\S]*?aria-selected="true"[\s\S]*?>Sign up/,
 		);
-
-		result = await request(`/sessions/${ids.session_id}/archive`, { method: "PATCH" });
-		assert.equal(result.response.status, 302);
-		result = await request(`/sessions/${ids.session_id}/archive`, { method: "PATCH" });
-		assert.equal(result.response.status, 404);
-		result = await request("/sessions/999999", {
-			method: "PATCH",
-			form: { name: "Missing", notes: "" },
-		});
-		assert.equal(result.response.status, 404);
+		assert.match(result.text, /Enter a valid email address/);
+		assert.match(result.text, /at least 12 characters/);
+		assert.doesNotMatch(result.text, /value="short"/);
 	});
 
-	test("day and dashboard workout flow validates, redirects, and changes persisted state", async () => {
-		const ids = await fixture();
-		const request = agent();
-		await selectProfile(request, ids.user_id);
-		await request(`/programs?programId=${ids.program_id}&cycleId=${ids.cycle_id}`);
-
-		let result = await request(`/programs/day?dayId=${ids.day_id}`);
-		assert.equal(result.response.status, 200);
-		assert.match(result.text, /Training day/);
-		assert.match(result.text, /Push Session/);
-
-		result = await request("/workout_sessions", {
-			method: "POST",
-			form: { sessionId: "bad", trainingDayId: ids.day_id },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Choose a valid session template/);
-		result = await request(`/workout_sessions/${ids.workout_id}`, {
-			method: "PATCH",
-			form: { trainingDayId: "bad" },
-		});
-		assert.equal(result.response.status, 400);
-		assert.match(result.text, /Choose a valid training day/);
-
-		result = await request(`/workout_sessions/${ids.workout_id}/start`, {
-			method: "POST",
-			form: { daysDifference: "0" },
-		});
-		assert.equal(result.response.status, 302);
-		assert.match(result.response.headers.get("location"), /workoutSessionId=/);
-		assert.equal(
-			(
-				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
-					ids.workout_id,
-				])
-			).rows[0].status,
-			"in_progress",
-		);
-		const log = (
-			await db.query("SELECT id FROM workout_step_logs WHERE workout_session_id = $1", [
-				ids.workout_id,
-			])
-		).rows[0];
-
-		result = await request(`/workout_step_logs/${log.id}/perform`, {
-			method: "POST",
-			form: { daysDifference: "0", workoutSessionId: ids.workout_id },
-		});
-		assert.equal(result.response.status, 422);
-		assert.match(result.text, /Add at least one set/);
-
-		result = await request(`/workout_step_logs/${log.id}/perform`, {
+	test("registration handles case-insensitive duplicate emails without changing roles", async () => {
+		const client = agent();
+		const page = await client.request("/auth/login?tab=signup");
+		const result = await client.request("/auth/register", {
 			method: "POST",
 			form: {
-				daysDifference: "0",
-				workoutSessionId: ids.workout_id,
-				"logFormRows[0][performedReps]": "8",
-				"logFormRows[0][performedLoadValue]": "62.5",
-				"logFormRows[0][performedLoadUnit]": "Kilograms",
+				_csrf: csrfFrom(page.text),
+				email: " USER-ONE@EXAMPLE.COM ",
+				password: "correct horse battery staple",
+				role: "admin",
+			},
+		});
+		assert.equal(result.response.status, 409);
+		assert.match(result.text, /already exists/);
+		assert.doesNotMatch(result.text, /correct horse battery staple/);
+		assert.equal(
+			(await db.query("SELECT role FROM users WHERE email = 'user-one@example.com'"))
+				.rows[0].role,
+			"user",
+		);
+	});
+
+	test("local login normalizes email, rotates the session, and logout destroys it", async () => {
+		const client = agent();
+		const page = await client.request("/auth/login");
+		const result = await client.request("/auth/login", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				email: "  USER-ONE@EXAMPLE.COM ",
+				password: "correct horse battery staple",
+				returnTo: "//evil.example",
 			},
 		});
 		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/");
+
+		const profile = await client.request("/profile");
+		assert.equal(profile.response.status, 200);
+		assert.match(profile.text, /User One/);
+		const oldCookie = client.cookie();
+		const logout = await client.request("/auth/logout", {
+			method: "POST",
+			form: { _csrf: csrfFrom(profile.text) },
+		});
+		assert.equal(logout.response.status, 302);
+		assert.notEqual(client.cookie(), oldCookie);
+		assert.equal((await client.request("/")).response.status, 302);
+	});
+
+	test("generated guests are distinct, minimal, private, and expire in fifteen days", async () => {
+		const first = agent();
+		const second = agent();
+		await enterGuest(first);
+		await enterGuest(second);
+		const { rows } = await db.query(
+			"SELECT * FROM users WHERE role = 'guest' ORDER BY id",
+		);
+		assert.equal(rows.length, 2);
+		assert.notEqual(rows[0].id, rows[1].id);
+		for (const guest of rows) {
+			assert.equal(guest.email, null);
+			assert.equal(guest.password_hash, null);
+			assert.equal(guest.date_of_birth, null);
+			assert.equal(guest.anamnesis, null);
+			const lifetime = new Date(guest.guest_expires_at) - new Date(guest.created_at);
+			assert.ok(lifetime >= 14.99 * 24 * 60 * 60 * 1000);
+		}
+		const profile = await first.request("/profile");
+		assert.match(profile.text, /temporary/i);
+		assert.match(profile.text, /data-profile-role="guest"/);
+		assert.doesNotMatch(profile.text, /Manage exercise catalog/);
+		const library = await first.request("/library");
+		assert.match(library.text, /data-library-mode="personal"/);
+		assert.match(library.text, /removed when the workspace expires/);
+		assert.doesNotMatch(library.text, /\/admin\/library\/exercises/);
+	});
+
+	test("canonical exercise management requires admin role", async () => {
+		const standard = agent();
+		await login(standard);
+		assert.equal(
+			(await standard.request("/admin/library/exercises")).response.status,
+			403,
+		);
+
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const page = await admin.request("/admin/library/exercises");
+		assert.equal(page.response.status, 200);
+		assert.match(page.text, /data-library-mode="admin"/);
+		assert.match(page.text, /Global catalog access/);
+		assert.match(
+			page.text,
+			/href="\/admin\/library\/exercises"[\s\S]*?aria-current="page"/,
+		);
+		assert.doesNotMatch(page.text, /data-create-session-form/);
+		assert.doesNotMatch(page.text, /Create your variant/);
+		const adminProfile = await admin.request("/profile");
+		assert.match(adminProfile.text, /Manage exercise catalog/);
+		const created = await admin.request("/admin/library/exercises", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				name: "Deadlift",
+				movementPatternId: "4",
+				equipmentId: "1",
+				"muscleGroup[0][muscleId]": "20",
+				"muscleGroup[0][muscleRoleId]": "1",
+			},
+		});
+		assert.equal(created.response.status, 302);
 		assert.equal(
 			(
 				await db.query(
-					"SELECT count(*)::int AS count FROM workout_set_logs WHERE workout_step_log_id = $1",
-					[log.id],
+					"SELECT count(*)::int AS count FROM exercises WHERE name = 'Deadlift'",
 				)
 			).rows[0].count,
 			1,
 		);
+		const exercise = (
+			await db.query("SELECT id FROM exercises WHERE name = 'Deadlift'")
+		).rows[0];
+		const globalVariant = await admin.request(
+			`/admin/library/exercises/${exercise.id}/variants`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(page.text),
+					name: "Trap Bar Deadlift",
+					equipmentId: "1",
+				},
+			},
+		);
+		assert.equal(globalVariant.response.status, 302);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT owner_user_id FROM exercise_variants WHERE name = 'Trap Bar Deadlift'",
+				)
+			).rows[0].owner_user_id,
+			null,
+		);
+		const archived = await admin.request(
+			`/admin/library/exercises/${exercise.id}/archive`,
+			{ method: "POST", form: { _csrf: csrfFrom(page.text) } },
+		);
+		assert.equal(archived.response.status, 302);
+		assert.equal(
+			(await db.query("SELECT is_archived FROM exercises WHERE id = $1", [exercise.id]))
+				.rows[0].is_archived,
+			true,
+		);
+	});
 
-		result = await request(`/workout_sessions/${ids.workout_id}/finish`, {
+	test("private variants are owner-scoped and uniqueness is scoped per owner", async () => {
+		const first = agent();
+		const second = agent();
+		await login(first, "user-one@example.com");
+		await login(second, "user-two@example.com");
+		const exercise = (await db.query("SELECT id FROM exercises WHERE name = 'Squat'"))
+			.rows[0];
+
+		for (const client of [first, second]) {
+			const library = await client.request("/library");
+			assert.match(library.text, /data-library-mode="personal"/);
+			assert.match(library.text, /Create your variant/);
+			assert.doesNotMatch(library.text, /Global catalog access/);
+			const result = await client.request(`/exercises/${exercise.id}/variants`, {
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(library.text),
+					name: "  Tempo Squat  ",
+					equipmentId: "1",
+				},
+			});
+			assert.equal(result.response.status, 302);
+		}
+
+		const variants = await db.query(
+			"SELECT id, owner_user_id, name FROM exercise_variants WHERE name = 'Tempo Squat' ORDER BY id",
+		);
+		assert.equal(variants.rowCount, 2);
+		assert.notEqual(variants.rows[0].owner_user_id, variants.rows[1].owner_user_id);
+
+		let library = await first.request("/library");
+		let result = await first.request(`/exercises/${exercise.id}/variants`, {
 			method: "POST",
-			form: { daysDifference: "0" },
+			form: { _csrf: csrfFrom(library.text), name: "tempo squat", equipmentId: "1" },
 		});
-		assert.equal(result.response.status, 302);
+		assert.equal(result.response.status, 409);
+
+		library = await second.request("/library");
+		result = await second.request(
+			`/exercise-variants/${variants.rows[0].id}?_method=PATCH`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(library.text),
+					name: "Stolen",
+					equipmentId: "1",
+				},
+			},
+		);
+		assert.equal(result.response.status, 404);
+		assert.equal(
+			(
+				await db.query("SELECT name FROM exercise_variants WHERE id = $1", [
+					variants.rows[0].id,
+				])
+			).rows[0].name,
+			"Tempo Squat",
+		);
+
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const adminProfile = await admin.request("/profile");
+		result = await admin.request(
+			`/exercise-variants/${variants.rows[0].id}?_method=PATCH`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(adminProfile.text),
+					name: "Admin override",
+					equipmentId: "1",
+				},
+			},
+		);
+		assert.equal(result.response.status, 404);
+	});
+
+	test("workout actions cannot cross the owning program boundary", async () => {
+		const { rows } = await db.query(`
+			WITH owner AS (
+				SELECT id FROM users WHERE email = 'user-one@example.com'
+			), program AS (
+				INSERT INTO programs (user_id, name) SELECT id, 'Private' FROM owner RETURNING id
+			), cycle AS (
+				INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+				SELECT id, 'Cycle', 1, 1 FROM program RETURNING id
+			), day AS (
+				INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+				SELECT id, 1, CURRENT_DATE FROM cycle RETURNING id
+			), template AS (
+				SELECT id FROM sessions WHERE owner_user_id IS NULL LIMIT 1
+			)
+			INSERT INTO workout_sessions (training_day_id, session_id, workout_session_order)
+			SELECT day.id, template.id, 1 FROM day, template RETURNING id
+		`);
+		const attacker = agent();
+		await login(attacker, "user-two@example.com");
+		const profile = await attacker.request("/profile");
+		const result = await attacker.request(`/workout_sessions/${rows[0].id}/start`, {
+			method: "POST",
+			form: { _csrf: csrfFrom(profile.text), daysDifference: "0" },
+		});
+		assert.equal(result.response.status, 404);
 		assert.equal(
 			(
 				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
-					ids.workout_id,
+					rows[0].id,
 				])
 			).rows[0].status,
-			"finished",
+			"planned",
 		);
+	});
 
-		result = await request("/workout_sessions/not-a-number/start", {
-			method: "POST",
-			form: { daysDifference: "0" },
-		});
-		assert.equal(result.response.status, 400);
+	test("expired guest cleanup is bounded and never deletes registered users", async () => {
+		const { rows } = await db.query(
+			`INSERT INTO users (name, role, guest_expires_at) VALUES
+			 ('Expired A', 'guest', NOW() - INTERVAL '1 day'),
+			 ('Expired B', 'guest', NOW() - INTERVAL '1 day'),
+			 ('Active', 'guest', NOW() + INTERVAL '1 day') RETURNING id`,
+		);
+		await db.query(
+			"INSERT INTO exercise_variants (exercise_id, owner_user_id, name) SELECT id, $1, 'Temporary' FROM exercises LIMIT 1",
+			[rows[0].id],
+		);
+		const { default: cleanupExpiredGuests } =
+			await import("../../src/features/guests/cleanupExpiredGuests.js");
+		const result = await cleanupExpiredGuests({ batchSize: 1 }, db);
+		assert.equal(result.deletedCount, 1);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM users WHERE role IN ('user', 'admin')",
+				)
+			).rows[0].count,
+			3,
+		);
+		assert.equal(
+			(await db.query("SELECT count(*)::int AS count FROM users WHERE role = 'guest'"))
+				.rows[0].count,
+			2,
+		);
 	});
 });
 

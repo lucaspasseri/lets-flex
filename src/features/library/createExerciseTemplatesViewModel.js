@@ -8,6 +8,8 @@ import createExercise from "./createExerciseViewModel.js";
 /**
  * @typedef {object} CreateExerciseTemplateInput
  * @property {ExerciseTemplateMapper[]} exerciseTemplateArr
+ * @property {number | null} actorUserId
+ * @property {boolean} managementMode
  */
 
 /**
@@ -16,16 +18,22 @@ import createExercise from "./createExerciseViewModel.js";
  * @returns {ExerciseTemplatesViewModel}
  */
 
-function createExerciseTemplates({ exerciseTemplateArr = [] }) {
+function createExerciseTemplates({
+	exerciseTemplateArr = [],
+	actorUserId = null,
+	managementMode = false,
+}) {
 	const exerciseTemplateCount = exerciseTemplateArr.length;
 	const items = exerciseTemplateArr.map((exerciseTemplate) =>
-		createExercise({ exerciseTemplate }),
+		createExercise({ exerciseTemplate, actorUserId, managementMode }),
 	);
 
 	return {
 		id: "exercise-templates",
-		label: "Exercise templates",
-		description: "Reusable exercises and their available equipment variations.",
+		label: managementMode ? "Global exercise catalog" : "Available exercises",
+		description: managementMode
+			? "Only global exercises and sample variants are shown in this administrator view."
+			: "Global exercises are available to everyone; variants you create remain private to you.",
 
 		count: exerciseTemplateCount,
 		countLabel: `${exerciseTemplateCount} templates`,
@@ -41,6 +49,7 @@ function createExerciseTemplates({ exerciseTemplateArr = [] }) {
 
 		actions: {
 			create: {
+				isVisible: managementMode,
 				label: "Create exercise template",
 				modalId: "createExerciseModal",
 			},

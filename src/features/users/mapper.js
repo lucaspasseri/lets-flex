@@ -13,7 +13,11 @@ import { format } from "date-fns";
 export function toLoggedUser(row) {
 	return {
 		id: row.id,
+		email: row.email ?? null,
+		role: row.role ?? "user",
 		name: row.name,
+		isActive: row.is_active ?? true,
+		guestExpiresAt: row.guest_expires_at ?? null,
 		dateOfBirth:
 			row?.date_of_birth instanceof Date
 				? format(row.date_of_birth, "dd/MM/yyyy")

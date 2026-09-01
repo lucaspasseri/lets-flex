@@ -1,37 +1,84 @@
 <%
-		const { profilePicker, createUserForm } = locals.components;
-		const { clearSelectionAction } = profilePicker;
+	const roleLabels = { admin: "Administrator", user: "Member", guest: "Guest" };
+	const roleLabel = roleLabels[currentUser.role] ?? "Member";
+	const isGuest = currentUser.role === "guest";
+	const isAdmin = currentUser.role === "admin";
+	const expirationLabel = isGuest && currentUser.guestExpiresAt
+		? new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(new Date(currentUser.guestExpiresAt))
+		: null;
 %>
 
-<main class="main profile">
-	<%- include("partials/profilePage/profilePicker/profilePicker", { profilePicker }) %>
+<main class="main profile" data-profile-page data-profile-role="<%= currentUser.role %>">
+	<%- include("partials/shared/components/pageHeading", { heading: {
+		eyebrow: "Account",
+		title: "Profile",
+		description: "Review the identity and access level attached to this workspace.",
+		meta: roleLabel
+	} }) %>
+
+	<div class="profile-layout">
+		<section class="profile-identity" aria-labelledby="profile-identity-heading">
+			<div class="profile-identity__avatar" aria-hidden="true">
+				<%- include("partials/shared/components/icons/namedIcon", { name: "user-round" }) %>
+			</div>
+			<div class="profile-identity__copy">
+				<p class="profile-card__eyebrow">Current identity</p>
+				<h2 id="profile-identity-heading"><%= currentUser.name %></h2>
+				<p><%= isGuest ? "Temporary workspace" : currentUser.email %></p>
+			</div>
+			<dl class="profile-facts">
+				<div><dt>Access</dt><dd><%= roleLabel %></dd></div>
+				<div><dt>Storage</dt><dd><%= isGuest ? "Temporary" : "Persistent" %></dd></div>
+			</dl>
+		</section>
+
+		<div class="profile-stack">
+			<% if (isGuest) { %>
+				<section class="profile-card profile-card--notice" aria-labelledby="guest-workspace-heading">
+					<div class="profile-card__icon" aria-hidden="true">
+						<%- include("partials/shared/components/icons/namedIcon", { name: "calendar-x" }) %>
+					</div>
+					<div>
+						<p class="profile-card__eyebrow">Temporary data</p>
+						<h2 id="guest-workspace-heading">Guest workspace</h2>
+						<p>Your programs, sessions, and private variants remain isolated from other guests, but they are automatically removed after expiration.</p>
+						<% if (expirationLabel) { %><p class="profile-card__status" role="status">Expires <strong><%= expirationLabel %></strong></p><% } %>
+					</div>
+				</section>
+			<% } %>
+
+			<% if (isAdmin) { %>
+				<section class="profile-card" aria-labelledby="admin-tools-heading">
+					<div class="profile-card__icon" aria-hidden="true">
+						<%- include("partials/shared/components/icons/namedIcon", { name: "wrench" }) %>
+					</div>
+					<div>
+						<p class="profile-card__eyebrow">Administrator</p>
+						<h2 id="admin-tools-heading">Exercise catalog tools</h2>
+						<p>Your administrator access is limited to managing global exercises and sample variants.</p>
+						<a class="profile-card__link" href="/admin/library/exercises">Manage exercise catalog</a>
+					</div>
+				</section>
+			<% } %>
+
+			<section class="profile-card" aria-labelledby="session-controls-heading">
+				<div class="profile-card__icon" aria-hidden="true">
+					<%- include("partials/shared/components/icons/namedIcon", { name: "user-round-x" }) %>
+				</div>
+				<div>
+					<p class="profile-card__eyebrow">Session</p>
+					<h2 id="session-controls-heading">Sign out safely</h2>
+					<p>End this browser session. Signing out does not grant access to or remove another account's private data.</p>
+					<form method="POST" action="/auth/logout">
+						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+						<%- include("partials/shared/components/button/button", { button: {
+							label: "Sign out",
+							type: "submit",
+							variant: "dangerGhost"
+						} }) %>
+					</form>
+				</div>
+			</section>
+		</div>
+	</div>
 </main>
-
-<%- contentFor("overlays") %>
-<%- include("partials/shared/components/modal/modal", { modal: {
-	id: createUserForm.modal.id,
-	title: createUserForm.modal.title,
-	openOnLoad: createUserForm.modal.openOnLoad,
-	showTitle: false,
-	renderContent: () => include("partials/shared/components/form/form", { form: {
-		...createUserForm.form,
-		slots: {
-			body: include("partials/profilePage/createUserForm/createUserFormBody", { createUserForm }),
-			footer: include("partials/profilePage/createUserForm/createUserFormFooter", { createUserForm })
-		}
-	}})
-	} }) %>
-
-<% if (clearSelectionAction.isVisible) { %>
-	<%- include("partials/shared/components/modal/modal", { modal: {
-		id: clearSelectionAction.modal.id,
-		title: clearSelectionAction.modal.title,
-		showTitle: false,
-		renderContent: () => include("partials/shared/components/form/form", { form: {
-			...clearSelectionAction.form,
-			slots: {
-				footer: include("partials/profilePage/clearProfileSelectionFormFooter", { clearSelectionAction })
-			}
-		}})
-	} }) %>
-<% } %>

@@ -3,9 +3,13 @@
  *
  * @typedef {object} UserRow
  * @property {number} id
+ * @property {string | null} [email]
+ * @property {"user" | "admin" | "guest"} [role]
  * @property {string} name
  * @property {string | Date | null} date_of_birth
  * @property {string | null} anamnesis
+ * @property {boolean} [is_active]
+ * @property {Date | string | null} [guest_expires_at]
  */
 
 /**
@@ -13,18 +17,13 @@
  *
  * @typedef {object} User
  * @property {number} id
+ * @property {string | null} [email]
+ * @property {"user" | "admin" | "guest"} [role]
  * @property {string} name
  * @property {string | null} dateOfBirth
  * @property {string | null} anamnesis
- */
-
-/**
- * Values required to create a user.
- *
- * @typedef {object} CreateUserInput
- * @property {string} name
- * @property {string | null} dateOfBirth
- * @property {string | null} anamnesis
+ * @property {boolean} [isActive]
+ * @property {Date | string | null} [guestExpiresAt]
  */
 
 /**

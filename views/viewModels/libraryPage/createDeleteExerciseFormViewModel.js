@@ -6,13 +6,13 @@ export default function createDeleteExerciseFormViewModel() {
 		},
 		form: {
 			id: "delete-exercise-template-form",
-			heading: "Delete exercise template",
-			description: "Are you sure you want to continue?",
-			action: "/exerciseTemplates",
+			heading: "Archive exercise",
+			description: "Archive this exercise? Existing plans and history are preserved.",
+			action: "/admin/library/exercises",
 		},
 		actions: {
 			cancel: { label: "Cancel" },
-			submit: { label: "Delete exercise" },
+			submit: { label: "Archive exercise" },
 		},
 	};
 }

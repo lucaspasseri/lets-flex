@@ -36,6 +36,7 @@
  * @property {string} name
  * @property {string} notes
  * @property {boolean} is_archived
+ * @property {number | null} [owner_user_id]
  * @property {SessionQueryStepRow[]} steps
  */
 
@@ -43,6 +44,7 @@
  * @typedef {object} CreateSessionInput
  * @property {string} name
  * @property {string} notes
+ * @property {number} ownerUserId
  */
 
 /**
@@ -99,6 +101,7 @@
  * @property {string} name
  * @property {string} notes
  * @property {boolean} isArchived
+ * @property {number | null} [ownerUserId]
  * @property {SessionMapperStep[]} steps
  */
 

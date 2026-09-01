@@ -10,6 +10,7 @@ async function skip(req, res) {
 	const workoutStepLog = await skipWorkoutStepLog({
 		workoutStepLogId,
 		status: "skipped",
+		userId: req.user.id,
 	});
 
 	const search = new URLSearchParams({
@@ -28,6 +29,7 @@ async function perform(req, res) {
 		workoutStepLogId,
 		status: "performed",
 		logFormRows,
+		userId: req.user.id,
 	});
 
 	const search = new URLSearchParams({
