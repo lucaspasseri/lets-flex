@@ -1,5 +1,6 @@
 import passportPackage from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import * as authIdentitiesRepository from "../features/auth/authIdentitiesRepository.js";
 import normalizeEmail from "../features/auth/normalizeEmail.js";
 import { verifyPassword } from "../features/auth/passwordService.js";
 import * as usersRepository from "../features/users/repository.js";
@@ -29,7 +30,7 @@ export function createPassport() {
 			{ usernameField: "email", passwordField: "password" },
 			async (email, password, done) => {
 				try {
-					const account = await usersRepository.findForAuthenticationByEmail({
+					const account = await authIdentitiesRepository.findLocalByEmail({
 						email: normalizeEmail(email),
 					});
 					if (

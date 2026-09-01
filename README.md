@@ -36,6 +36,12 @@ Each guest entry creates a distinct, minimal database identity that expires afte
 15 days. Run `npm run guests:cleanup` from a daily scheduled job to remove one
 bounded batch of expired guest identities and their owned data.
 
+Application users and sign-in methods are stored separately. `users` is the
+principal referenced by roles and owned resources; `auth_identities` contains
+provider-scoped credentials. Local identities use the normalized account email as
+their subject. Future Google identities must use Google's stable `sub` value and
+must not be linked or merged based only on matching email addresses.
+
 ## Authentication and production deployment
 
 The app uses Passport LocalStrategy, `express-session`, and PostgreSQL-backed

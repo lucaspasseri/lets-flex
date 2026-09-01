@@ -38,11 +38,13 @@ export async function seedDatabase(connectionString = process.env.DATABASE_URL) 
 		await client.query("BEGIN");
 		await client.query(schemaSql);
 		await client.query(
-			`INSERT INTO users (email, password_hash, role, name)
-			 VALUES ($1, $2, 'admin', 'Administrator')
-			 ON CONFLICT (email) WHERE email IS NOT NULL
-			 DO UPDATE SET password_hash = EXCLUDED.password_hash,
-			               role = 'admin', is_active = TRUE, updated_at = NOW()`,
+			`WITH administrator AS (
+				INSERT INTO users (email, role, name)
+				VALUES ($1, 'admin', 'Administrator')
+				RETURNING id
+			)
+			INSERT INTO auth_identities (user_id, provider, provider_subject, password_hash)
+			SELECT id, 'local', $1, $2 FROM administrator`,
 			[adminEmail, passwordHash],
 		);
 		await client.query("COMMIT");

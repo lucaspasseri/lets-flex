@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS muscle_roles CASCADE;
 DROP TABLE IF EXISTS equipments CASCADE;
 DROP TABLE IF EXISTS step_types CASCADE;
 DROP TABLE IF EXISTS goals CASCADE;
+DROP TABLE IF EXISTS auth_identities CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
 DROP TYPE IF EXISTS workout_step_log_status CASCADE;
@@ -30,7 +31,6 @@ CREATE TYPE user_role AS ENUM ('user', 'admin', 'guest');
 CREATE TABLE users (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	email VARCHAR(254),
-	password_hash TEXT,
 	role user_role NOT NULL DEFAULT 'user',
 	name VARCHAR(100) NOT NULL,
 	date_of_birth DATE,
@@ -43,10 +43,10 @@ CREATE TABLE users (
 	CONSTRAINT users_email_normalized CHECK (
 		email IS NULL OR email = LOWER(BTRIM(email))
 	),
-	CONSTRAINT users_credentials_by_role CHECK (
-		(role IN ('user', 'admin') AND email IS NOT NULL AND password_hash IS NOT NULL AND guest_expires_at IS NULL)
+	CONSTRAINT users_profile_by_role CHECK (
+		(role IN ('user', 'admin') AND email IS NOT NULL AND guest_expires_at IS NULL)
 		OR
-		(role = 'guest' AND email IS NULL AND password_hash IS NULL AND guest_expires_at IS NOT NULL AND date_of_birth IS NULL AND anamnesis IS NULL)
+		(role = 'guest' AND email IS NULL AND guest_expires_at IS NOT NULL AND date_of_birth IS NULL AND anamnesis IS NULL)
 	)
 );
 
@@ -57,6 +57,37 @@ WHERE email IS NOT NULL;
 CREATE INDEX users_expired_guests_idx
 ON users (guest_expires_at, id)
 WHERE role = 'guest';
+
+CREATE TABLE auth_identities (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	provider VARCHAR(50) NOT NULL,
+	provider_subject TEXT NOT NULL,
+	password_hash TEXT,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+	CONSTRAINT auth_identities_provider_normalized CHECK (
+		provider = LOWER(BTRIM(provider)) AND provider <> ''
+	),
+	CONSTRAINT auth_identities_subject_present CHECK (
+		provider_subject = BTRIM(provider_subject) AND provider_subject <> ''
+	),
+	CONSTRAINT auth_identities_local_subject_normalized CHECK (
+		provider <> 'local' OR provider_subject = LOWER(provider_subject)
+	),
+	CONSTRAINT auth_identities_credentials_by_provider CHECK (
+		(provider = 'local' AND password_hash IS NOT NULL)
+		OR (provider <> 'local' AND password_hash IS NULL)
+	),
+	UNIQUE (provider, provider_subject)
+);
+
+CREATE UNIQUE INDEX auth_identities_one_local_per_user
+ON auth_identities (user_id)
+WHERE provider = 'local';
+
+CREATE INDEX auth_identities_user_idx ON auth_identities (user_id);
 
 CREATE TABLE goals (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

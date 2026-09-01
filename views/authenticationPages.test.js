@@ -66,6 +66,7 @@ test("profile presents role-specific guest and administrator states", async () =
 	assert.match(guestHtml, /data-profile-role="guest"/);
 	assert.match(guestHtml, /Guest workspace/);
 	assert.match(guestHtml, /automatically removed after expiration/);
+	assert.match(guestHtml, /Create a permanent account/);
 	assert.doesNotMatch(guestHtml, /Manage exercise catalog/);
 	assert.match(adminHtml, /data-profile-role="admin"/);
 	assert.match(adminHtml, /href="\/admin\/library\/exercises"/);

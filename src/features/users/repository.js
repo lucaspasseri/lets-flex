@@ -23,16 +23,6 @@ export async function findById({ userId }, db = pool) {
 	return rows[0] ?? null;
 }
 
-/** @param {{email: string}} input @param {any} db */
-export async function findForAuthenticationByEmail({ email }, db = pool) {
-	const { rows } = await db.query(
-		`SELECT id, email, password_hash, role, name, is_active, guest_expires_at
-		 FROM users WHERE email = $1`,
-		[email],
-	);
-	return rows[0] ?? null;
-}
-
 /** @param {{userId: number}} input @param {any} db */
 export async function findPrincipalById({ userId }, db = pool) {
 	const { rows } = await db.query(
@@ -54,15 +44,29 @@ export async function createGuest({ name, expiresAt }, db = pool) {
 	return rows[0] ?? null;
 }
 
-/** @param {{email: string, passwordHash: string, name: string}} input @param {any} db */
-export async function createRegisteredUser({ email, passwordHash, name }, db = pool) {
+/** @param {{email: string, name: string}} input @param {any} db */
+export async function createRegisteredUser({ email, name }, db = pool) {
 	const { rows } = await db.query(
-		`INSERT INTO users (email, password_hash, name, role)
-		 VALUES ($1, $2, $3, 'user')
+		`INSERT INTO users (email, name, role)
+		 VALUES ($1, $2, 'user')
 		 RETURNING id, email, role, name, is_active, guest_expires_at`,
-		[email, passwordHash, name],
+		[email, name],
 	);
 	return rows[0];
+}
+
+/** @param {{userId: number, email: string, name: string}} input @param {any} db */
+export async function convertActiveGuest({ userId, email, name }, db = pool) {
+	const { rows } = await db.query(
+		`UPDATE users
+		 SET email = $2, name = $3, role = 'user', guest_expires_at = NULL,
+		     updated_at = NOW()
+		 WHERE id = $1 AND role = 'guest' AND is_active = TRUE
+		   AND guest_expires_at > NOW()
+		 RETURNING id, email, role, name, is_active, guest_expires_at`,
+		[userId, email, name],
+	);
+	return rows[0] ?? null;
 }
 
 /** @param {{userId: number}} input @param {any} db */

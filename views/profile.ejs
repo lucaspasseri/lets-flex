@@ -43,6 +43,7 @@
 						<h2 id="guest-workspace-heading">Guest workspace</h2>
 						<p>Your programs, sessions, and private variants remain isolated from other guests, but they are automatically removed after expiration.</p>
 						<% if (expirationLabel) { %><p class="profile-card__status" role="status">Expires <strong><%= expirationLabel %></strong></p><% } %>
+						<a class="profile-card__link" href="/auth/login?tab=signup&amp;returnTo=/profile">Create a permanent account</a>
 					</div>
 				</section>
 			<% } %>

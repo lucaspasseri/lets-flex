@@ -40,10 +40,15 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	beforeEach(async () => {
 		await db.query(schemaSql);
 		await db.query(
-			`INSERT INTO users (email, password_hash, role, name) VALUES
-			 ('admin@example.com', $1, 'admin', 'Admin'),
-			 ('user-one@example.com', $1, 'user', 'User One'),
-			 ('user-two@example.com', $1, 'user', 'User Two')`,
+			`WITH accounts AS (
+				INSERT INTO users (email, role, name) VALUES
+				 ('admin@example.com', 'admin', 'Admin'),
+				 ('user-one@example.com', 'user', 'User One'),
+				 ('user-two@example.com', 'user', 'User Two')
+				RETURNING id, email
+			)
+			INSERT INTO auth_identities (user_id, provider, provider_subject, password_hash)
+			SELECT id, 'local', email, $1 FROM accounts`,
 			[passwordHash],
 		);
 	});
@@ -149,13 +154,19 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		});
 		assert.equal(result.response.status, 302);
 		assert.equal(result.response.headers.get("location"), "/library");
+		assert.notEqual(client.cookie(), "", "registration must establish a session");
 		const account = (
 			await db.query(
-				"SELECT email, password_hash, role FROM users WHERE email = 'new.member@example.com'",
+				`SELECT u.email, u.role, ai.provider, ai.provider_subject, ai.password_hash
+				 FROM users u
+				 JOIN auth_identities ai ON ai.user_id = u.id
+				 WHERE u.email = 'new.member@example.com'`,
 			)
 		).rows[0];
 		assert.equal(account.email, "new.member@example.com");
 		assert.equal(account.role, "user");
+		assert.equal(account.provider, "local");
+		assert.equal(account.provider_subject, "new.member@example.com");
 		assert.notEqual(account.password_hash, "correct horse battery staple");
 		assert.equal((await client.request("/library")).response.status, 200);
 
@@ -177,6 +188,22 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(result.text, /Enter a valid email address/);
 		assert.match(result.text, /at least 12 characters/);
 		assert.doesNotMatch(result.text, /value="short"/);
+	});
+
+	test("local login rejects an invalid password without authenticating", async () => {
+		const client = agent();
+		const page = await client.request("/auth/login");
+		const result = await client.request("/auth/login", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				email: "user-one@example.com",
+				password: "this password is incorrect",
+			},
+		});
+		assert.equal(result.response.status, 401);
+		assert.match(result.text, /Invalid email or password/);
+		assert.equal((await client.request("/profile")).response.status, 302);
 	});
 
 	test("registration handles case-insensitive duplicate emails without changing roles", async () => {
@@ -241,7 +268,6 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.notEqual(rows[0].id, rows[1].id);
 		for (const guest of rows) {
 			assert.equal(guest.email, null);
-			assert.equal(guest.password_hash, null);
 			assert.equal(guest.date_of_birth, null);
 			assert.equal(guest.anamnesis, null);
 			const lifetime = new Date(guest.guest_expires_at) - new Date(guest.created_at);
@@ -255,6 +281,222 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(library.text, /data-library-mode="personal"/);
 		assert.match(library.text, /removed when the workspace expires/);
 		assert.doesNotMatch(library.text, /\/admin\/library\/exercises/);
+
+		const exercise = (await db.query("SELECT id FROM exercises WHERE name = 'Squat'"))
+			.rows[0];
+		for (const client of [first, second]) {
+			const guestLibrary = await client.request("/library");
+			const created = await client.request(`/exercises/${exercise.id}/variants`, {
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(guestLibrary.text),
+					name: "Guest Tempo Squat",
+					equipmentId: "1",
+				},
+			});
+			assert.equal(created.response.status, 302);
+		}
+		const privateVariants = await db.query(
+			"SELECT owner_user_id FROM exercise_variants WHERE name = 'Guest Tempo Squat' ORDER BY owner_user_id",
+		);
+		assert.equal(privateVariants.rowCount, 2);
+		assert.notEqual(
+			privateVariants.rows[0].owner_user_id,
+			privateVariants.rows[1].owner_user_id,
+		);
+	});
+
+	test("an active guest converts in place and retains owned data", async () => {
+		const client = agent();
+		await enterGuest(client);
+		const guest = (
+			await db.query(
+				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
+			)
+		).rows[0];
+		const owned = (
+			await db.query(
+				"INSERT INTO programs (user_id, name) VALUES ($1, 'Guest plan') RETURNING id",
+				[guest.id],
+			)
+		).rows[0];
+		const variant = (
+			await db.query(
+				`INSERT INTO exercise_variants (exercise_id, owner_user_id, name)
+				 SELECT id, $1, 'Guest-owned variant' FROM exercises WHERE name = 'Squat'
+				 RETURNING id`,
+				[guest.id],
+			)
+		).rows[0];
+
+		const profile = await client.request("/profile");
+		assert.match(profile.text, /Create a permanent account/);
+		const signup = await client.request("/auth/login?tab=signup&returnTo=/profile");
+		assert.equal(signup.response.status, 200);
+		const oldCookie = client.cookie();
+		const result = await client.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(signup.text),
+				email: " Converted.Guest@Example.com ",
+				password: "correct horse battery staple",
+				returnTo: "/profile",
+			},
+		});
+
+		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/profile");
+		assert.notEqual(
+			client.cookie(),
+			oldCookie,
+			"conversion must rotate the session ID",
+		);
+		const converted = (
+			await db.query(
+				`SELECT u.id, u.email, u.role, u.guest_expires_at,
+				        ai.provider, ai.provider_subject, ai.password_hash
+				 FROM users u JOIN auth_identities ai ON ai.user_id = u.id
+				 WHERE u.id = $1`,
+				[guest.id],
+			)
+		).rows[0];
+		assert.equal(converted.id, guest.id);
+		assert.equal(converted.email, "converted.guest@example.com");
+		assert.equal(converted.role, "user");
+		assert.equal(converted.guest_expires_at, null);
+		assert.equal(converted.provider, "local");
+		assert.equal(converted.provider_subject, "converted.guest@example.com");
+		assert.notEqual(converted.password_hash, "correct horse battery staple");
+		assert.equal(
+			(await db.query("SELECT user_id FROM programs WHERE id = $1", [owned.id])).rows[0]
+				.user_id,
+			guest.id,
+		);
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM exercise_variants WHERE id = $1", [
+					variant.id,
+				])
+			).rows[0].owner_user_id,
+			guest.id,
+		);
+		const convertedProfile = await client.request("/profile");
+		assert.equal(convertedProfile.response.status, 200);
+		assert.match(convertedProfile.text, /converted\.guest@example\.com/);
+		assert.doesNotMatch(convertedProfile.text, /Temporary workspace/);
+	});
+
+	test("duplicate email leaves a guest and its data unchanged", async () => {
+		const client = agent();
+		await enterGuest(client);
+		const guest = (
+			await db.query(
+				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
+			)
+		).rows[0];
+		await db.query("INSERT INTO programs (user_id, name) VALUES ($1, 'Keep me')", [
+			guest.id,
+		]);
+		const signup = await client.request("/auth/login?tab=signup");
+		const result = await client.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(signup.text),
+				email: " USER-ONE@EXAMPLE.COM ",
+				password: "correct horse battery staple",
+			},
+		});
+
+		assert.equal(result.response.status, 409);
+		assert.match(result.text, /already exists/);
+		const unchanged = (
+			await db.query(
+				`SELECT u.role, u.email, u.guest_expires_at,
+				        COUNT(ai.id)::int AS identity_count,
+				        COUNT(p.id)::int AS program_count
+				 FROM users u
+				 LEFT JOIN auth_identities ai ON ai.user_id = u.id
+				 LEFT JOIN programs p ON p.user_id = u.id
+				 WHERE u.id = $1
+				 GROUP BY u.id`,
+				[guest.id],
+			)
+		).rows[0];
+		assert.equal(unchanged.role, "guest");
+		assert.equal(unchanged.email, null);
+		assert.ok(unchanged.guest_expires_at);
+		assert.equal(unchanged.identity_count, 0);
+		assert.equal(unchanged.program_count, 1);
+		assert.equal((await client.request("/profile")).response.status, 200);
+	});
+
+	test("expired guests stop deserializing from their existing session", async () => {
+		const client = agent();
+		await enterGuest(client);
+		await db.query(
+			"UPDATE users SET guest_expires_at = NOW() - INTERVAL '1 minute' WHERE role = 'guest'",
+		);
+		const result = await client.request("/");
+		assert.equal(result.response.status, 302);
+		assert.match(result.response.headers.get("location"), /^\/auth\/login/);
+	});
+
+	test("identity subjects are unique and passwordless users are valid principals", async () => {
+		assert.equal(
+			(
+				await db.query(
+					`SELECT count(*)::int AS count FROM information_schema.columns
+					 WHERE table_schema = 'public' AND table_name = 'users'
+					   AND column_name = 'password_hash'`,
+				)
+			).rows[0].count,
+			0,
+		);
+		const passwordless = (
+			await db.query(
+				"INSERT INTO users (email, role, name) VALUES ('google-only@example.com', 'user', 'Google User') RETURNING id",
+			)
+		).rows[0];
+		const second = (
+			await db.query(
+				"INSERT INTO users (email, role, name) VALUES ('second-google@example.com', 'user', 'Second Google User') RETURNING id",
+			)
+		).rows[0];
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM auth_identities WHERE user_id = $1",
+					[passwordless.id],
+				)
+			).rows[0].count,
+			0,
+		);
+		const { findPrincipalById } =
+			await import("../../src/features/users/repository.js");
+		const { findPrincipalByProviderSubject } =
+			await import("../../src/features/auth/authIdentitiesRepository.js");
+		const { isUsablePrincipal } = await import("../../src/config/passport.js");
+		const principal = await findPrincipalById({ userId: passwordless.id }, db);
+		assert.equal(principal.email, "google-only@example.com");
+		assert.equal(isUsablePrincipal(principal), true);
+
+		await db.query(
+			"INSERT INTO auth_identities (user_id, provider, provider_subject) VALUES ($1, 'google', 'google-sub-123')",
+			[passwordless.id],
+		);
+		const googlePrincipal = await findPrincipalByProviderSubject(
+			{ provider: "google", providerSubject: "google-sub-123" },
+			db,
+		);
+		assert.equal(googlePrincipal.id, passwordless.id);
+		assert.equal(googlePrincipal.email, "google-only@example.com");
+		await assert.rejects(
+			db.query(
+				"INSERT INTO auth_identities (user_id, provider, provider_subject) VALUES ($1, 'google', 'google-sub-123')",
+				[second.id],
+			),
+			(error) => error?.code === "23505",
+		);
 	});
 
 	test("canonical exercise management requires admin role", async () => {

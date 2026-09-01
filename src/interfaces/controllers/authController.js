@@ -1,7 +1,10 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import createGuest from "../../features/auth/createGuest.js";
-import registerUser from "../../features/auth/registerUser.js";
+import registerUser, {
+	GuestConversionUnavailableError,
+} from "../../features/auth/registerUser.js";
 import * as usersRepository from "../../features/users/repository.js";
+import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
 import {
 	loginSchema,
 	registrationSchema,
@@ -17,20 +20,6 @@ function renderLogin(req, res, state = {}) {
 		email: state.email ?? "",
 		errors: state.errors ?? [],
 		activeTab: state.activeTab ?? (req.query?.tab === "signup" ? "signup" : "signin"),
-	});
-}
-
-/** @param {any} req @param {any} res @param {any} next @param {any} user @param {string} returnTo */
-function establishSession(req, res, next, user, returnTo) {
-	req.session.regenerate((regenerateError) => {
-		if (regenerateError) return next(regenerateError);
-		req.login(user, (loginError) => {
-			if (loginError) return next(loginError);
-			req.session.save((saveError) => {
-				if (saveError) return next(saveError);
-				res.redirect(safeReturnTo(returnTo));
-			});
-		});
 	});
 }
 
@@ -53,7 +42,7 @@ export function buildLoginHandler(passport) {
 			return;
 		}
 
-		passport.authenticate("local", (error, user, info) => {
+		passport.authenticate("local", async (error, user, info) => {
 			if (error) return next(error);
 			if (!user) {
 				res.status(401);
@@ -64,13 +53,18 @@ export function buildLoginHandler(passport) {
 				});
 				return;
 			}
-			establishSession(req, res, next, user, parsed.data.returnTo);
+			try {
+				await establishAuthenticatedSession(req, user);
+				res.redirect(safeReturnTo(parsed.data.returnTo));
+			} catch (sessionError) {
+				next(sessionError);
+			}
 		})(req, res, next);
 	};
 }
 
-/** @param {any} req @param {any} res @param {any} next */
-async function register(req, res, next) {
+/** @param {any} req @param {any} res */
+async function register(req, res) {
 	const parsed = registrationSchema.safeParse(req.body);
 	if (!parsed.success) {
 		res.status(422);
@@ -84,8 +78,14 @@ async function register(req, res, next) {
 	}
 
 	try {
-		const user = await registerUser(parsed.data);
-		establishSession(req, res, next, user, parsed.data.returnTo);
+		const principal = /** @type {any} */ (req.user);
+		const guestUserId =
+			principal?.role === "guest" && Number.isInteger(principal.id)
+				? principal.id
+				: null;
+		const user = await registerUser({ ...parsed.data, guestUserId });
+		await establishAuthenticatedSession(req, user);
+		res.redirect(safeReturnTo(parsed.data.returnTo));
 	} catch (error) {
 		if (
 			error &&
@@ -102,33 +102,30 @@ async function register(req, res, next) {
 			});
 			return;
 		}
+		if (error instanceof GuestConversionUnavailableError) {
+			res.status(409);
+			renderLogin(req, res, {
+				activeTab: "signup",
+				email: parsed.data.email,
+				returnTo: parsed.data.returnTo,
+				errors: [error.message],
+			});
+			return;
+		}
 		throw error;
 	}
 }
 
-/** @param {any} req @param {any} res @param {any} next */
-async function enterGuest(req, res, next) {
+/** @param {any} req @param {any} res */
+async function enterGuest(req, res) {
 	const guest = await createGuest();
-	req.session.regenerate((regenerateError) => {
-		if (regenerateError) {
-			usersRepository
-				.deleteGuestById({ userId: guest.id })
-				.finally(() => next(regenerateError));
-			return;
-		}
-		req.login(guest, (loginError) => {
-			if (loginError) {
-				usersRepository
-					.deleteGuestById({ userId: guest.id })
-					.finally(() => next(loginError));
-				return;
-			}
-			req.session.save((saveError) => {
-				if (saveError) return next(saveError);
-				res.redirect("/");
-			});
-		});
-	});
+	try {
+		await establishAuthenticatedSession(req, guest);
+		res.redirect("/");
+	} catch (error) {
+		await usersRepository.deleteGuestById({ userId: guest.id });
+		throw error;
+	}
 }
 
 /** @param {any} req @param {any} res @param {any} next */
