@@ -196,6 +196,43 @@
 	min-height: 2.9rem;
 }
 
+.auth-google {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
+	min-height: 2.9rem;
+	padding: 0.7rem 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.7rem;
+	background: var(--color-surface-subtle);
+	color: var(--color-text);
+	font-weight: 750;
+	text-decoration: none;
+}
+
+.auth-google:hover {
+	border-color: var(--color-action);
+	background: var(--color-page);
+}
+
+.auth-google:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 2px;
+}
+
+.auth-google__mark {
+	display: grid;
+	width: 1.5rem;
+	height: 1.5rem;
+	place-items: center;
+	border-radius: 50%;
+	background: var(--color-text);
+	color: var(--color-surface);
+	font-size: 0.8rem;
+	font-weight: 850;
+}
+
 .auth-errors {
 	display: grid;
 	gap: 0.4rem;

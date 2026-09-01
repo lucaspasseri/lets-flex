@@ -18,6 +18,16 @@ export function requireAnonymous(req, res, next) {
 }
 
 /** @type {import("express").RequestHandler} */
+export function requireAnonymousOrGuest(req, res, next) {
+	// @ts-ignore -- application Passport principal.
+	if (!req.isAuthenticated?.() || req.user?.role === "guest") {
+		next();
+		return;
+	}
+	res.redirect("/");
+}
+
+/** @type {import("express").RequestHandler} */
 export function requireAdmin(req, res, next) {
 	if (!req.isAuthenticated?.() || !req.user) {
 		res.status(401).send("Authentication required");

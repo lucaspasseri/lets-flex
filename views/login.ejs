@@ -23,6 +23,13 @@
 				<h2 id="sign-in-heading">Continue to Let's Flex</h2>
 			</header>
 
+			<a class="auth-google" href="<%= googleAuthUrl %>">
+				<span class="auth-google__mark" aria-hidden="true">G</span>
+				<span>Continue with Google</span>
+			</a>
+
+			<div class="auth-divider"><span>or use email</span></div>
+
 			<div class="auth-tab-list" data-tab-list role="tablist" aria-label="Account access">
 				<button id="auth-signin-tab" data-tab type="button" role="tab" aria-controls="auth-signin-panel" aria-selected="<%= activeTab === 'signin' %>" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>">Sign in</button>
 				<button id="auth-signup-tab" data-tab type="button" role="tab" aria-controls="auth-signup-panel" aria-selected="<%= activeTab === 'signup' %>" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>">Sign up</button>

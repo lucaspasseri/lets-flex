@@ -1,7 +1,14 @@
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
+import {
+	GoogleEmailConflictError,
+	GoogleProfileError,
+} from "../../features/auth/authenticateGoogleUser.js";
+import { GuestConversionUnavailableError } from "../../features/auth/createOrConvertRegisteredUser.js";
 import createGuest from "../../features/auth/createGuest.js";
 import registerUser from "../../features/auth/registerUser.js";
 import * as usersRepository from "../../features/users/repository.js";
+import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
 import {
 	loginSchema,
 	registrationSchema,
@@ -10,33 +17,145 @@ import {
 
 /** @param {any} req @param {any} res @param {Record<string, any>} [state] */
 function renderLogin(req, res, state = {}) {
+	const returnTo = safeReturnTo(state.returnTo ?? req.query?.returnTo);
 	res.render("login", {
 		layout: "./layouts/authShell",
 		page: { title: "Sign in · Let's Flex!" },
-		returnTo: safeReturnTo(state.returnTo ?? req.query?.returnTo),
+		returnTo,
+		googleAuthUrl: `/auth/google?returnTo=${encodeURIComponent(returnTo)}`,
 		email: state.email ?? "",
 		errors: state.errors ?? [],
 		activeTab: state.activeTab ?? (req.query?.tab === "signup" ? "signup" : "signin"),
 	});
 }
 
-/** @param {any} req @param {any} res @param {any} next @param {any} user @param {string} returnTo */
-function establishSession(req, res, next, user, returnTo) {
-	req.session.regenerate((regenerateError) => {
-		if (regenerateError) return next(regenerateError);
-		req.login(user, (loginError) => {
-			if (loginError) return next(loginError);
-			req.session.save((saveError) => {
-				if (saveError) return next(saveError);
-				res.redirect(safeReturnTo(returnTo));
-			});
-		});
-	});
-}
-
 /** @param {any} req @param {any} res */
 function show(req, res) {
 	renderLogin(req, res);
+}
+
+/** @param {any} req */
+function saveSession(req) {
+	return new Promise((resolve, reject) => {
+		req.session.save((error) => (error ? reject(error) : resolve(undefined)));
+	});
+}
+
+/** @param {unknown} actual @param {unknown} expected */
+function oauthStatesMatch(actual, expected) {
+	if (typeof actual !== "string" || typeof expected !== "string") return false;
+	const actualBuffer = Buffer.from(actual);
+	const expectedBuffer = Buffer.from(expected);
+	return (
+		actualBuffer.length === expectedBuffer.length &&
+		timingSafeEqual(actualBuffer, expectedBuffer)
+	);
+}
+
+/** @param {any} req */
+async function consumeGoogleOAuthState(req) {
+	const stored = req.session.googleOAuth;
+	delete req.session.googleOAuth;
+	await saveSession(req);
+	return {
+		valid: oauthStatesMatch(req.query?.state, stored?.state),
+		returnTo: safeReturnTo(stored?.returnTo),
+	};
+}
+
+/** @param {any} req @param {any} res @param {{status?: number, message: string, returnTo?: string}} state */
+function renderGoogleFailure(req, res, { status = 401, message, returnTo = "/" }) {
+	res.status(status);
+	renderLogin(req, res, { errors: [message], returnTo });
+}
+
+/** @param {unknown} error */
+function isOAuthProviderError(error) {
+	return (
+		error instanceof Error &&
+		new Set(["AuthorizationError", "TokenError", "InternalOAuthError"]).has(error.name)
+	);
+}
+
+/** @param {any} passport */
+export function buildGoogleStartHandler(passport) {
+	return asyncHandler(async (req, res, next) => {
+		const state = randomBytes(32).toString("hex");
+		req.session.googleOAuth = {
+			state,
+			returnTo: safeReturnTo(req.query?.returnTo),
+		};
+		await saveSession(req);
+		passport.authenticate("google", {
+			scope: ["profile", "email"],
+			state,
+		})(req, res, next);
+	});
+}
+
+/** @param {any} passport */
+export function buildGoogleCallbackHandler(passport) {
+	return asyncHandler(async (req, res, next) => {
+		const oauthState = await consumeGoogleOAuthState(req);
+		if (!oauthState.valid) {
+			renderGoogleFailure(req, res, {
+				status: 403,
+				message: "Google sign-in could not be verified. Please try again.",
+			});
+			return;
+		}
+		if (req.query?.error || typeof req.query?.code !== "string") {
+			renderGoogleFailure(req, res, {
+				message: "Google sign-in was cancelled or could not be completed.",
+				returnTo: oauthState.returnTo,
+			});
+			return;
+		}
+
+		passport.authenticate("google", { session: false }, async (error, user) => {
+			if (error instanceof GoogleEmailConflictError) {
+				renderGoogleFailure(req, res, {
+					status: 409,
+					message: error.message,
+					returnTo: oauthState.returnTo,
+				});
+				return;
+			}
+			if (
+				error instanceof GoogleProfileError ||
+				error instanceof GuestConversionUnavailableError
+			) {
+				renderGoogleFailure(req, res, {
+					status: 422,
+					message: error.message,
+					returnTo: oauthState.returnTo,
+				});
+				return;
+			}
+			if (isOAuthProviderError(error)) {
+				renderGoogleFailure(req, res, {
+					message: "Google sign-in could not be completed. Please try again.",
+					returnTo: oauthState.returnTo,
+				});
+				return;
+			}
+			if (error) return next(error);
+			if (!user) {
+				renderGoogleFailure(req, res, {
+					message: "Google sign-in could not be completed. Please try again.",
+					returnTo: oauthState.returnTo,
+				});
+				return;
+			}
+
+			try {
+				await establishAuthenticatedSession(req, user);
+				res.redirect(safeReturnTo(oauthState.returnTo));
+			} catch (sessionError) {
+				next(sessionError);
+			}
+		})(req, res, next);
+	});
 }
 
 /** @param {any} passport */
@@ -53,7 +172,7 @@ export function buildLoginHandler(passport) {
 			return;
 		}
 
-		passport.authenticate("local", (error, user, info) => {
+		passport.authenticate("local", async (error, user, info) => {
 			if (error) return next(error);
 			if (!user) {
 				res.status(401);
@@ -64,13 +183,18 @@ export function buildLoginHandler(passport) {
 				});
 				return;
 			}
-			establishSession(req, res, next, user, parsed.data.returnTo);
+			try {
+				await establishAuthenticatedSession(req, user);
+				res.redirect(safeReturnTo(parsed.data.returnTo));
+			} catch (sessionError) {
+				next(sessionError);
+			}
 		})(req, res, next);
 	};
 }
 
-/** @param {any} req @param {any} res @param {any} next */
-async function register(req, res, next) {
+/** @param {any} req @param {any} res */
+async function register(req, res) {
 	const parsed = registrationSchema.safeParse(req.body);
 	if (!parsed.success) {
 		res.status(422);
@@ -84,8 +208,14 @@ async function register(req, res, next) {
 	}
 
 	try {
-		const user = await registerUser(parsed.data);
-		establishSession(req, res, next, user, parsed.data.returnTo);
+		const principal = /** @type {any} */ (req.user);
+		const guestUserId =
+			principal?.role === "guest" && Number.isInteger(principal.id)
+				? principal.id
+				: null;
+		const user = await registerUser({ ...parsed.data, guestUserId });
+		await establishAuthenticatedSession(req, user);
+		res.redirect(safeReturnTo(parsed.data.returnTo));
 	} catch (error) {
 		if (
 			error &&
@@ -102,33 +232,30 @@ async function register(req, res, next) {
 			});
 			return;
 		}
+		if (error instanceof GuestConversionUnavailableError) {
+			res.status(409);
+			renderLogin(req, res, {
+				activeTab: "signup",
+				email: parsed.data.email,
+				returnTo: parsed.data.returnTo,
+				errors: [error.message],
+			});
+			return;
+		}
 		throw error;
 	}
 }
 
-/** @param {any} req @param {any} res @param {any} next */
-async function enterGuest(req, res, next) {
+/** @param {any} req @param {any} res */
+async function enterGuest(req, res) {
 	const guest = await createGuest();
-	req.session.regenerate((regenerateError) => {
-		if (regenerateError) {
-			usersRepository
-				.deleteGuestById({ userId: guest.id })
-				.finally(() => next(regenerateError));
-			return;
-		}
-		req.login(guest, (loginError) => {
-			if (loginError) {
-				usersRepository
-					.deleteGuestById({ userId: guest.id })
-					.finally(() => next(loginError));
-				return;
-			}
-			req.session.save((saveError) => {
-				if (saveError) return next(saveError);
-				res.redirect("/");
-			});
-		});
-	});
+	try {
+		await establishAuthenticatedSession(req, guest);
+		res.redirect("/");
+	} catch (error) {
+		await usersRepository.deleteGuestById({ userId: guest.id });
+		throw error;
+	}
 }
 
 /** @param {any} req @param {any} res @param {any} next */
@@ -149,3 +276,5 @@ export const authController = {
 	enterGuest: asyncHandler(enterGuest),
 	logout,
 };
+
+export { consumeGoogleOAuthState, isOAuthProviderError, oauthStatesMatch };

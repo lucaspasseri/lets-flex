@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import normalizeEmail from "./normalizeEmail.js";
+import {
+	GoogleProfileError,
+	readProviderSubject,
+	readRegistrationProfile,
+} from "./authenticateGoogleUser.js";
 import { hashPassword, verifyPassword } from "./passwordService.js";
+import { readGoogleConfiguration } from "../../config/passport.js";
 import {
 	registrationSchema,
 	safeReturnTo,
@@ -41,5 +47,51 @@ test("registration normalizes email, rejects weak passwords, and strips extra fi
 		registrationSchema.safeParse({ email: "person@example.com", password: "short" })
 			.success,
 		false,
+	);
+});
+
+test("Google profiles use sub and require a verified usable email for registration", () => {
+	const profile = {
+		id: "google-sub-123",
+		displayName: "  Google Member  ",
+		emails: [{ value: "  MEMBER@EXAMPLE.COM ", verified: true }],
+	};
+	assert.equal(readProviderSubject(profile), "google-sub-123");
+	assert.deepEqual(readRegistrationProfile(profile), {
+		email: "member@example.com",
+		name: "Google Member",
+	});
+	assert.throws(
+		() =>
+			readRegistrationProfile({
+				id: "google-sub-456",
+				emails: [{ value: "member@example.com", verified: false }],
+			}),
+		GoogleProfileError,
+	);
+});
+
+test("Google OAuth configuration is required and callback URLs must be absolute", () => {
+	assert.deepEqual(
+		readGoogleConfiguration({
+			GOOGLE_CLIENT_ID: "client-id",
+			GOOGLE_CLIENT_SECRET: "client-secret",
+			GOOGLE_CALLBACK_URL: "http://localhost:3000/auth/google/callback",
+		}),
+		{
+			clientID: "client-id",
+			clientSecret: "client-secret",
+			callbackURL: "http://localhost:3000/auth/google/callback",
+		},
+	);
+	assert.throws(() => readGoogleConfiguration({}), /are required/);
+	assert.throws(
+		() =>
+			readGoogleConfiguration({
+				GOOGLE_CLIENT_ID: "client-id",
+				GOOGLE_CLIENT_SECRET: "client-secret",
+				GOOGLE_CALLBACK_URL: "/auth/google/callback",
+			}),
+		/absolute HTTP\(S\) URL/,
 	);
 });
