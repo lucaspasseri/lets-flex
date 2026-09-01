@@ -54,6 +54,17 @@ export async function createGuest({ name, expiresAt }, db = pool) {
 	return rows[0] ?? null;
 }
 
+/** @param {{email: string, passwordHash: string, name: string}} input @param {any} db */
+export async function createRegisteredUser({ email, passwordHash, name }, db = pool) {
+	const { rows } = await db.query(
+		`INSERT INTO users (email, password_hash, name, role)
+		 VALUES ($1, $2, $3, 'user')
+		 RETURNING id, email, role, name, is_active, guest_expires_at`,
+		[email, passwordHash, name],
+	);
+	return rows[0];
+}
+
 /** @param {{userId: number}} input @param {any} db */
 export async function deleteGuestById({ userId }, db = pool) {
 	await db.query("DELETE FROM users WHERE id = $1 AND role = 'guest'", [userId]);

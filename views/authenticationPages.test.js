@@ -13,15 +13,34 @@ test("login explains the application and presents both authentication paths", as
 		returnTo: "/library",
 		email: "member@example.com",
 		errors: [],
+		activeTab: "signin",
 	});
 
 	assert.match(html, /Your training workspace/);
 	assert.match(html, /action="\/auth\/login"/);
+	assert.match(html, /action="\/auth\/register"/);
 	assert.match(html, /action="\/auth\/guest"/);
 	assert.match(html, /Guest data expires after 15 days/);
-	assert.match(html, /New permanent accounts are not available/);
+	assert.match(html, /role="tablist"/);
+	assert.match(html, /aria-controls="auth-signup-panel"/);
+	assert.match(html, /autocomplete="new-password"/);
 	assert.match(html, /class="form-input"/);
 	assert.match(html, /class="shared-button shared-button--primary auth-form__submit"/);
+});
+
+test("login preserves the sign-up tab and safe email after an error", async () => {
+	const html = await renderFile(path.resolve("views/login.ejs"), {
+		csrfToken: "test-token",
+		returnTo: "/library",
+		email: "member@example.com",
+		errors: ["Password must contain at least 12 characters."],
+		activeTab: "signup",
+	});
+
+	assert.match(html, /id="auth-signup-tab"[\s\S]*?aria-selected="true"/);
+	assert.match(html, /id="auth-signin-panel"[\s\S]*?hidden/);
+	assert.match(html, /value="member@example.com"/);
+	assert.doesNotMatch(html, /value="Password must/);
 });
 
 test("profile presents role-specific guest and administrator states", async () => {

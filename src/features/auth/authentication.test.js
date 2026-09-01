@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import normalizeEmail from "./normalizeEmail.js";
 import { hashPassword, verifyPassword } from "./passwordService.js";
-import { safeReturnTo } from "../../interfaces/validation/authSchemas.js";
+import {
+	registrationSchema,
+	safeReturnTo,
+} from "../../interfaces/validation/authSchemas.js";
 
 test("email normalization is stable", () => {
 	assert.equal(normalizeEmail("  Person@Example.COM "), "person@example.com");
@@ -21,4 +24,22 @@ test("post-authentication redirects stay local", () => {
 	assert.equal(safeReturnTo("/programs?programId=2"), "/programs?programId=2");
 	assert.equal(safeReturnTo("//evil.example"), "/");
 	assert.equal(safeReturnTo("https://evil.example"), "/");
+});
+
+test("registration normalizes email, rejects weak passwords, and strips extra fields", () => {
+	const valid = registrationSchema.parse({
+		email: "  Person@Example.COM ",
+		password: "a sufficiently long password",
+		role: "admin",
+	});
+	assert.deepEqual(valid, {
+		email: "person@example.com",
+		password: "a sufficiently long password",
+		returnTo: "/",
+	});
+	assert.equal(
+		registrationSchema.safeParse({ email: "person@example.com", password: "short" })
+			.success,
+		false,
+	);
 });

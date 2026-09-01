@@ -121,8 +121,9 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(result.text, /Sign in/);
 		assert.match(result.text, /Your training workspace/);
 		assert.match(result.text, /action="\/auth\/login"/);
+		assert.match(result.text, /action="\/auth\/register"/);
 		assert.match(result.text, /action="\/auth\/guest"/);
-		assert.match(result.text, /New permanent accounts are not available/);
+		assert.match(result.text, /role="tablist"/);
 
 		result = await client.request("/auth/guest", { method: "POST", form: {} });
 		assert.equal(result.response.status, 403);
@@ -130,6 +131,73 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			(await db.query("SELECT count(*)::int AS count FROM users WHERE role = 'guest'"))
 				.rows[0].count,
 			0,
+		);
+	});
+
+	test("public registration validates, creates a regular user, and starts a session", async () => {
+		const client = agent();
+		let page = await client.request("/auth/login?returnTo=/library&tab=signup");
+		let result = await client.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				email: "  NEW.MEMBER@EXAMPLE.COM ",
+				password: "correct horse battery staple",
+				role: "admin",
+				returnTo: "/library",
+			},
+		});
+		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/library");
+		const account = (
+			await db.query(
+				"SELECT email, password_hash, role FROM users WHERE email = 'new.member@example.com'",
+			)
+		).rows[0];
+		assert.equal(account.email, "new.member@example.com");
+		assert.equal(account.role, "user");
+		assert.notEqual(account.password_hash, "correct horse battery staple");
+		assert.equal((await client.request("/library")).response.status, 200);
+
+		const invalid = agent();
+		page = await invalid.request("/auth/login?tab=signup");
+		result = await invalid.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				email: "not-an-email",
+				password: "short",
+			},
+		});
+		assert.equal(result.response.status, 422);
+		assert.match(
+			result.text,
+			/id="auth-signup-tab"[\s\S]*?aria-selected="true"[\s\S]*?>Sign up/,
+		);
+		assert.match(result.text, /Enter a valid email address/);
+		assert.match(result.text, /at least 12 characters/);
+		assert.doesNotMatch(result.text, /value="short"/);
+	});
+
+	test("registration handles case-insensitive duplicate emails without changing roles", async () => {
+		const client = agent();
+		const page = await client.request("/auth/login?tab=signup");
+		const result = await client.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				email: " USER-ONE@EXAMPLE.COM ",
+				password: "correct horse battery staple",
+				role: "admin",
+			},
+		});
+		assert.equal(result.response.status, 409);
+		assert.match(result.text, /already exists/);
+		assert.doesNotMatch(result.text, /correct horse battery staple/);
+		assert.equal(
+			(await db.query("SELECT role FROM users WHERE email = 'user-one@example.com'"))
+				.rows[0].role,
+			"user",
 		);
 	});
 

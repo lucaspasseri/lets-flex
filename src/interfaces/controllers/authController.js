@@ -1,7 +1,12 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import createGuest from "../../features/auth/createGuest.js";
+import registerUser from "../../features/auth/registerUser.js";
 import * as usersRepository from "../../features/users/repository.js";
-import { loginSchema, safeReturnTo } from "../validation/authSchemas.js";
+import {
+	loginSchema,
+	registrationSchema,
+	safeReturnTo,
+} from "../validation/authSchemas.js";
 
 /** @param {any} req @param {any} res @param {Record<string, any>} [state] */
 function renderLogin(req, res, state = {}) {
@@ -11,6 +16,21 @@ function renderLogin(req, res, state = {}) {
 		returnTo: safeReturnTo(state.returnTo ?? req.query?.returnTo),
 		email: state.email ?? "",
 		errors: state.errors ?? [],
+		activeTab: state.activeTab ?? (req.query?.tab === "signup" ? "signup" : "signin"),
+	});
+}
+
+/** @param {any} req @param {any} res @param {any} next @param {any} user @param {string} returnTo */
+function establishSession(req, res, next, user, returnTo) {
+	req.session.regenerate((regenerateError) => {
+		if (regenerateError) return next(regenerateError);
+		req.login(user, (loginError) => {
+			if (loginError) return next(loginError);
+			req.session.save((saveError) => {
+				if (saveError) return next(saveError);
+				res.redirect(safeReturnTo(returnTo));
+			});
+		});
 	});
 }
 
@@ -44,18 +64,46 @@ export function buildLoginHandler(passport) {
 				});
 				return;
 			}
-			req.session.regenerate((regenerateError) => {
-				if (regenerateError) return next(regenerateError);
-				req.login(user, (loginError) => {
-					if (loginError) return next(loginError);
-					req.session.save((saveError) => {
-						if (saveError) return next(saveError);
-						res.redirect(safeReturnTo(parsed.data.returnTo));
-					});
-				});
-			});
+			establishSession(req, res, next, user, parsed.data.returnTo);
 		})(req, res, next);
 	};
+}
+
+/** @param {any} req @param {any} res @param {any} next */
+async function register(req, res, next) {
+	const parsed = registrationSchema.safeParse(req.body);
+	if (!parsed.success) {
+		res.status(422);
+		renderLogin(req, res, {
+			activeTab: "signup",
+			email: typeof req.body?.email === "string" ? req.body.email : "",
+			returnTo: req.body?.returnTo,
+			errors: parsed.error.issues.map((issue) => issue.message),
+		});
+		return;
+	}
+
+	try {
+		const user = await registerUser(parsed.data);
+		establishSession(req, res, next, user, parsed.data.returnTo);
+	} catch (error) {
+		if (
+			error &&
+			typeof error === "object" &&
+			"code" in error &&
+			error.code === "23505"
+		) {
+			res.status(409);
+			renderLogin(req, res, {
+				activeTab: "signup",
+				email: parsed.data.email,
+				returnTo: parsed.data.returnTo,
+				errors: ["An account with that email address already exists."],
+			});
+			return;
+		}
+		throw error;
+	}
 }
 
 /** @param {any} req @param {any} res @param {any} next */
@@ -97,6 +145,7 @@ function logout(req, res, next) {
 
 export const authController = {
 	show,
+	register: asyncHandler(register),
 	enterGuest: asyncHandler(enterGuest),
 	logout,
 };

@@ -7,6 +7,7 @@ export default function createAuthRouter(passport) {
 	const router = Router();
 	router.get("/login", requireAnonymous, authController.show);
 	router.post("/login", requireAnonymous, buildLoginHandler(passport));
+	router.post("/register", requireAnonymous, authController.register);
 	router.post(
 		"/guest",
 		requireAnonymous,

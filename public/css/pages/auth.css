@@ -143,6 +143,53 @@
 	gap: 1.1rem;
 }
 
+.auth-tab-list {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.35rem;
+	padding: 0.3rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.8rem;
+	background: var(--color-page);
+}
+
+.auth-tab-list [data-tab] {
+	padding: 0.7rem 1rem;
+	border: 0;
+	border-radius: 0.55rem;
+	background: transparent;
+	color: var(--color-text-muted);
+	font: inherit;
+	font-weight: 750;
+	cursor: pointer;
+}
+
+.auth-tab-list [data-tab][aria-selected="true"] {
+	background: var(--color-surface);
+	color: var(--color-text);
+	box-shadow: 0 0.15rem 0.55rem rgb(0 0 0 / 18%);
+}
+
+.auth-tab-list [data-tab]:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 2px;
+}
+
+.auth-tab-panel {
+	display: grid;
+	gap: 1rem;
+}
+
+.auth-tab-panel[hidden] {
+	display: none;
+}
+
+.auth-tab-panel__intro {
+	color: var(--color-text-muted);
+	font-size: 0.86rem;
+	line-height: 1.5;
+}
+
 .auth-form__submit,
 .auth-guest__button {
 	width: 100%;

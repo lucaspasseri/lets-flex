@@ -17,51 +17,38 @@
 			</ul>
 		</div>
 
-		<div class="auth-actions">
+		<div class="auth-actions" data-tabs>
 			<header class="auth-actions__header">
-				<p class="auth-eyebrow">Welcome back</p>
-				<h2 id="sign-in-heading">Sign in</h2>
-				<p>Use your administrator or member account to continue to your saved workspace.</p>
+				<p class="auth-eyebrow">Your account</p>
+				<h2 id="sign-in-heading">Continue to Let's Flex</h2>
 			</header>
 
-			<% if (errors.length) { %>
-				<div class="form-errors auth-errors" role="alert" aria-live="polite">
-					<p class="auth-errors__title">We couldn't sign you in</p>
-					<ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul>
-				</div>
-			<% } %>
+			<div class="auth-tab-list" data-tab-list role="tablist" aria-label="Account access">
+				<button id="auth-signin-tab" data-tab type="button" role="tab" aria-controls="auth-signin-panel" aria-selected="<%= activeTab === 'signin' %>" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>">Sign in</button>
+				<button id="auth-signup-tab" data-tab type="button" role="tab" aria-controls="auth-signup-panel" aria-selected="<%= activeTab === 'signup' %>" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>">Sign up</button>
+			</div>
 
-			<form class="form auth-form" method="POST" action="/auth/login">
-				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-				<input type="hidden" name="returnTo" value="<%= returnTo %>" />
-				<%- include("partials/shared/components/form/field", { field: {
-					id: "login-email",
-					name: "email",
-					label: "Email address",
-					control: "input",
-					type: "email",
-					required: true,
-					value: email,
-					hint: "Use the email assigned to your account.",
-					attributes: { autocomplete: "username", autofocus: true }
-				} }) %>
-				<%- include("partials/shared/components/form/field", { field: {
-					id: "login-password",
-					name: "password",
-					label: "Password",
-					control: "input",
-					type: "password",
-					required: true,
-					hint: "Passwords are case-sensitive.",
-					attributes: { autocomplete: "current-password" }
-				} }) %>
-				<%- include("partials/shared/components/button/button", { button: {
-					label: "Sign in to Let's Flex",
-					type: "submit",
-					variant: "primary",
-					alternativeClassname: "auth-form__submit"
-				} }) %>
-			</form>
+			<section id="auth-signin-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signin-tab" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>" <%= activeTab === 'signin' ? '' : 'hidden' %>>
+				<p class="auth-tab-panel__intro">Use your administrator or member account to continue.</p>
+				<% if (errors.length && activeTab === "signin") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title">We couldn't sign you in</p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
+				<form class="form auth-form" method="POST" action="/auth/login">
+					<input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input type="hidden" name="returnTo" value="<%= returnTo %>" />
+					<%- include("partials/shared/components/form/field", { field: { id: "login-email", name: "email", label: "Email address", control: "input", type: "email", required: true, value: activeTab === "signin" ? email : "", hint: "Use the email assigned to your account.", attributes: { autocomplete: "username", autofocus: activeTab === "signin" } } }) %>
+					<%- include("partials/shared/components/form/field", { field: { id: "login-password", name: "password", label: "Password", control: "input", type: "password", required: true, hint: "Passwords are case-sensitive.", attributes: { autocomplete: "current-password" } } }) %>
+					<%- include("partials/shared/components/button/button", { button: { label: "Sign in to Let's Flex", type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
+				</form>
+			</section>
+
+			<section id="auth-signup-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signup-tab" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>" <%= activeTab === 'signup' ? '' : 'hidden' %>>
+				<p class="auth-tab-panel__intro">Create a permanent personal training workspace.</p>
+				<% if (errors.length && activeTab === "signup") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title">We couldn't create your account</p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
+				<form class="form auth-form" method="POST" action="/auth/register">
+					<input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input type="hidden" name="returnTo" value="<%= returnTo %>" />
+					<%- include("partials/shared/components/form/field", { field: { id: "registration-email", name: "email", label: "Email address", control: "input", type: "email", required: true, value: activeTab === "signup" ? email : "", hint: "You'll use this email to sign in.", attributes: { autocomplete: "username", autofocus: activeTab === "signup" } } }) %>
+					<%- include("partials/shared/components/form/field", { field: { id: "registration-password", name: "password", label: "Password", control: "input", type: "password", required: true, hint: "Use at least 12 characters.", attributes: { autocomplete: "new-password", minlength: 12 } } }) %>
+					<%- include("partials/shared/components/button/button", { button: { label: "Create account", type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
+				</form>
+			</section>
 
 			<div class="auth-divider"><span>or explore first</span></div>
 
@@ -80,7 +67,6 @@
 					} }) %>
 				</form>
 			</div>
-			<p class="auth-registration-note">New permanent accounts are not available during this phase.</p>
 		</div>
 	</section>
 </main>
