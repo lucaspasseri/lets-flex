@@ -26,16 +26,22 @@ export async function renderLibrary(req, res, formState = {}) {
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
 	const sessionId = toNullableNumber(req?.query?.sessionId);
+	const managementMode = Boolean(formState.managementMode);
 
 	const data = await getLibraryPageData({ userId, sessionId });
-	const page = { ...res.locals.page, title: "Let's Flex!" };
+	const page = {
+		...res.locals.page,
+		title: managementMode
+			? "Manage exercise catalog · Let's Flex!"
+			: "Library · Let's Flex!",
+	};
 	const pageState = { userId, sessionId };
 
 	const library = createLibraryPageViewModel({
 		page,
 		pageState,
 		data,
-		managementMode: Boolean(formState.managementMode),
+		managementMode,
 		...formState,
 	});
 

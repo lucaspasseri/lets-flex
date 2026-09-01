@@ -11,7 +11,7 @@
 
 <footer class="footer">
 	<nav class="footer-nav" aria-label="Primary">
-		<ul class="footer-nav__list">
+		<ul class="footer-nav__list<%= locals?.isAdmin ? ' footer-nav__list--admin' : '' %>">
 			<% navigationItems.forEach(item => { %>
 				<% const isActive = item.id === activeNavigation; %>
 				<li class="footer-nav__item">

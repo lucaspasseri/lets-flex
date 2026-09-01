@@ -20,6 +20,23 @@
 	width: min(100%, 25rem);
 }
 
+.footer-nav__list--admin {
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	width: min(100%, 36rem);
+}
+
+@media (max-width: 34rem) {
+	.footer-nav__list--admin .footer-nav__link {
+		font-size: 0.74rem;
+	}
+}
+
+@media (max-width: 25rem) {
+	.footer-nav__list--admin .footer-nav__link {
+		font-size: 0.68rem;
+	}
+}
+
 .footer-nav__link {
 	display: flex;
 	min-height: 2.75rem;

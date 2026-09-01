@@ -11,43 +11,27 @@
 	} = locals.components;
 	const managementMode = Boolean(locals.managementMode);
 	const privateVariantForm = locals.components.privateVariantForm;
+	const pageHeading = locals.components.pageHeading;
 %>
 
-<main class="main library" data-library-page>
-	<div class="main-header">
-		<div class="title-container">
-			<p>ASSET MANAGER</p>
-			<h1>Library</h1>
-		</div>
-	</div>
-	<%- include("partials/libraryPage/librarySearch") %>
-	<%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace }) %>
-	<%- include("partials/libraryPage/exerciseTemplates", { exerciseTemplates }) %>
-	<% if (!managementMode) { %>
-		<section aria-labelledby="create-private-variant-heading">
-			<h2 id="create-private-variant-heading">Create your own exercise variant</h2>
-			<p>Your variant is private to this account.</p>
-			<form class="form" method="POST" action="/exercises/0/variants" data-private-variant-form>
-				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-				<label>Exercise<select name="exerciseId" required><option value="">Choose exercise</option><% privateVariantForm.exercises.forEach(exercise => { %><option value="<%= exercise.id %>"><%= exercise.name %></option><% }) %></select></label>
-				<label>Variant name<input name="name" maxlength="100" required></label>
-				<label>Equipment<select name="equipmentId"><option value="">None</option><% privateVariantForm.equipments.forEach(equipment => { %><option value="<%= equipment.id %>"><%= equipment.name %></option><% }) %></select></label>
-				<button type="submit">Create private variant</button>
-			</form>
-		</section>
-	<% } %>
+<main class="main library<%= managementMode ? ' library--admin' : '' %>" data-library-page data-library-mode="<%= managementMode ? 'admin' : 'personal' %>">
+	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
+
 	<% if (managementMode) { %>
-		<section aria-labelledby="create-global-variant-heading">
-			<h2 id="create-global-variant-heading">Create global variant</h2>
-			<form class="form" method="POST" action="/admin/library/exercises/0/variants" data-global-variant-form>
-				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-				<label>Exercise<select name="exerciseId" required><option value="">Choose exercise</option><% privateVariantForm.exercises.forEach(exercise => { %><option value="<%= exercise.id %>"><%= exercise.name %></option><% }) %></select></label>
-				<label>Variant name<input name="name" maxlength="100" required></label>
-				<label>Equipment<select name="equipmentId"><option value="">None</option><% privateVariantForm.equipments.forEach(equipment => { %><option value="<%= equipment.id %>"><%= equipment.name %></option><% }) %></select></label>
-				<button type="submit">Create global variant</button>
-			</form>
-		</section>
+		<aside class="library-admin-scope" aria-label="Administrator access scope">
+			<span class="library-admin-scope__icon" aria-hidden="true"><%- include("partials/shared/components/icons/namedIcon", { name: "wrench" }) %></span>
+			<div><strong>Global catalog access</strong><p>This view does not expose member or guest profiles, sessions, or private variants.</p></div>
+			<a href="/library">Return to personal Library</a>
+		</aside>
 	<% } %>
+
+	<%- include("partials/libraryPage/librarySearch", {
+		searchLabel: managementMode ? "Search global exercises" : "Search sessions and exercises",
+		searchPlaceholder: managementMode ? "Search global exercises" : "Search sessions and exercises"
+	}) %>
+	<% if (!managementMode) { %><%- include("partials/libraryPage/sessionWorkspace/base", { sessionWorkspace }) %><% } %>
+	<%- include("partials/libraryPage/createVariantForm", { variantForm: privateVariantForm }) %>
+	<%- include("partials/libraryPage/exerciseTemplates", { exerciseTemplates }) %>
 </main>
 
 <%- contentFor("overlays") %>
@@ -139,5 +123,3 @@
 
 <%- contentFor("scripts") %>
 <script type="module" src="/js/pages/library/index.js"></script>
-<script>document.querySelector('[data-private-variant-form]')?.addEventListener('submit', event => { const form = event.currentTarget; form.action = `/exercises/${form.elements.exerciseId.value}/variants`; });</script>
-<script>document.querySelector('[data-global-variant-form]')?.addEventListener('submit', event => { const form = event.currentTarget; form.action = `/admin/library/exercises/${form.elements.exerciseId.value}/variants`; });</script>

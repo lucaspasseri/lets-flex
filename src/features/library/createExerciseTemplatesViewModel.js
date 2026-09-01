@@ -30,8 +30,10 @@ function createExerciseTemplates({
 
 	return {
 		id: "exercise-templates",
-		label: "Exercise templates",
-		description: "Reusable exercises and their available equipment variations.",
+		label: managementMode ? "Global exercise catalog" : "Available exercises",
+		description: managementMode
+			? "Only global exercises and sample variants are shown in this administrator view."
+			: "Global exercises are available to everyone; variants you create remain private to you.",
 
 		count: exerciseTemplateCount,
 		countLabel: `${exerciseTemplateCount} templates`,

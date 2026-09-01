@@ -119,6 +119,10 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		result = await client.request("/auth/login");
 		assert.equal(result.response.status, 200);
 		assert.match(result.text, /Sign in/);
+		assert.match(result.text, /Your training workspace/);
+		assert.match(result.text, /action="\/auth\/login"/);
+		assert.match(result.text, /action="\/auth\/guest"/);
+		assert.match(result.text, /New permanent accounts are not available/);
 
 		result = await client.request("/auth/guest", { method: "POST", form: {} });
 		assert.equal(result.response.status, 403);
@@ -177,6 +181,12 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		}
 		const profile = await first.request("/profile");
 		assert.match(profile.text, /temporary/i);
+		assert.match(profile.text, /data-profile-role="guest"/);
+		assert.doesNotMatch(profile.text, /Manage exercise catalog/);
+		const library = await first.request("/library");
+		assert.match(library.text, /data-library-mode="personal"/);
+		assert.match(library.text, /removed when the workspace expires/);
+		assert.doesNotMatch(library.text, /\/admin\/library\/exercises/);
 	});
 
 	test("canonical exercise management requires admin role", async () => {
@@ -191,6 +201,16 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		await login(admin, "admin@example.com");
 		const page = await admin.request("/admin/library/exercises");
 		assert.equal(page.response.status, 200);
+		assert.match(page.text, /data-library-mode="admin"/);
+		assert.match(page.text, /Global catalog access/);
+		assert.match(
+			page.text,
+			/href="\/admin\/library\/exercises"[\s\S]*?aria-current="page"/,
+		);
+		assert.doesNotMatch(page.text, /data-create-session-form/);
+		assert.doesNotMatch(page.text, /Create your variant/);
+		const adminProfile = await admin.request("/profile");
+		assert.match(adminProfile.text, /Manage exercise catalog/);
 		const created = await admin.request("/admin/library/exercises", {
 			method: "POST",
 			form: {
@@ -256,6 +276,9 @@ integration("authentication and authorization", { concurrency: false }, () => {
 
 		for (const client of [first, second]) {
 			const library = await client.request("/library");
+			assert.match(library.text, /data-library-mode="personal"/);
+			assert.match(library.text, /Create your variant/);
+			assert.doesNotMatch(library.text, /Global catalog access/);
 			const result = await client.request(`/exercises/${exercise.id}/variants`, {
 				method: "POST",
 				form: {

@@ -1,25 +1,86 @@
-<main class="main profile">
-	<div class="main-header">
-		<div class="title-container">
-			<p>LET'S FLEX</p>
-			<h1>Sign in</h1>
+<main class="auth-page">
+	<section class="auth-panel" aria-labelledby="sign-in-heading">
+		<div class="auth-introduction">
+			<a class="auth-introduction__brand" href="/auth/login" aria-label="Let's Flex sign in">
+				<span class="auth-introduction__logo"><%- include("partials/pages/logo") %></span>
+				<span>LET'S FLEX</span>
+			</a>
+			<div class="auth-introduction__copy">
+				<p class="auth-eyebrow">Your training workspace</p>
+				<h1>Plan with purpose.<br>Train with clarity.</h1>
+				<p>Build reusable sessions, organize training cycles, and keep each workout in one focused place.</p>
+			</div>
+			<ul class="auth-feature-list" aria-label="Application features">
+				<li><span aria-hidden="true">01</span> Build a personal exercise library</li>
+				<li><span aria-hidden="true">02</span> Plan programs and training days</li>
+				<li><span aria-hidden="true">03</span> Record each workout as you go</li>
+			</ul>
 		</div>
-	</div>
-	<section>
-		<% if (errors.length) { %>
-			<div class="form-errors" role="alert"><% errors.forEach(error => { %><p><%= error %></p><% }) %></div>
-		<% } %>
-		<form class="form" method="POST" action="/auth/login">
-			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-			<input type="hidden" name="returnTo" value="<%= returnTo %>" />
-			<label class="form-field">Email<input name="email" type="email" autocomplete="username" value="<%= email %>" required /></label>
-			<label class="form-field">Password<input name="password" type="password" autocomplete="current-password" required /></label>
-			<button type="submit">Sign in</button>
-		</form>
-		<form class="form" method="POST" action="/auth/guest">
-			<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-			<p>Continue without an account. Guest data is private to this session but expires after 15 days.</p>
-			<button type="submit">Continue as guest</button>
-		</form>
+
+		<div class="auth-actions">
+			<header class="auth-actions__header">
+				<p class="auth-eyebrow">Welcome back</p>
+				<h2 id="sign-in-heading">Sign in</h2>
+				<p>Use your administrator or member account to continue to your saved workspace.</p>
+			</header>
+
+			<% if (errors.length) { %>
+				<div class="form-errors auth-errors" role="alert" aria-live="polite">
+					<p class="auth-errors__title">We couldn't sign you in</p>
+					<ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul>
+				</div>
+			<% } %>
+
+			<form class="form auth-form" method="POST" action="/auth/login">
+				<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+				<input type="hidden" name="returnTo" value="<%= returnTo %>" />
+				<%- include("partials/shared/components/form/field", { field: {
+					id: "login-email",
+					name: "email",
+					label: "Email address",
+					control: "input",
+					type: "email",
+					required: true,
+					value: email,
+					hint: "Use the email assigned to your account.",
+					attributes: { autocomplete: "username", autofocus: true }
+				} }) %>
+				<%- include("partials/shared/components/form/field", { field: {
+					id: "login-password",
+					name: "password",
+					label: "Password",
+					control: "input",
+					type: "password",
+					required: true,
+					hint: "Passwords are case-sensitive.",
+					attributes: { autocomplete: "current-password" }
+				} }) %>
+				<%- include("partials/shared/components/button/button", { button: {
+					label: "Sign in to Let's Flex",
+					type: "submit",
+					variant: "primary",
+					alternativeClassname: "auth-form__submit"
+				} }) %>
+			</form>
+
+			<div class="auth-divider"><span>or explore first</span></div>
+
+			<div class="auth-guest">
+				<div>
+					<h3>Continue as a guest</h3>
+					<p>Start with a private temporary workspace. Guest data expires after 15 days and cannot be recovered.</p>
+				</div>
+				<form method="POST" action="/auth/guest">
+					<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+					<%- include("partials/shared/components/button/button", { button: {
+						label: "Enter temporary workspace",
+						type: "submit",
+						variant: "secondary",
+						alternativeClassname: "auth-guest__button"
+					} }) %>
+				</form>
+			</div>
+			<p class="auth-registration-note">New permanent accounts are not available during this phase.</p>
+		</div>
 	</section>
 </main>

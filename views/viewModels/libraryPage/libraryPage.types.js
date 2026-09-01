@@ -18,8 +18,8 @@
  * @property {LocalsPage} page
  * @property {LibraryPageState} pageState
  * @property {boolean} managementMode
- * @property {{currentUser: User | null, activeSession: Session | null, activeNavigation: "library"}} shell
- * @property {{sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, privateVariantForm: {exercises: Array<{id: number, name: string}>, equipments: any[]}, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, archiveSessionForm: ArchiveSessionFormViewModel}} components
+ * @property {{currentUser: User | null, activeSession: Session | null, activeNavigation: "library" | "admin-exercises"}} shell
+ * @property {{pageHeading: {eyebrow: string, title: string, description: string, meta?: string}, sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, privateVariantForm: {idPrefix: string, title: string, eyebrow: string, description: string, submitLabel: string, actionPrefix: string, isGuest: boolean, exercises: Array<{id: number, name: string}>, equipments: any[]}, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, archiveSessionForm: ArchiveSessionFormViewModel}} components
  */
 
 export {};

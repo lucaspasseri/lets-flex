@@ -96,16 +96,36 @@
 			%> 
 			<% } %>
 			<% if (actions?.canManagePrivate) { %>
-				<form method="POST" action="/exercise-variants/<%= id %>?_method=PATCH">
-					<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-					<input type="hidden" name="equipmentId" value="<%= details?.variant?.equipment?.id ?? '' %>">
-					<label>Variant name <input name="name" value="<%= details?.variant?.name %>" maxlength="100" required></label>
-					<button type="submit">Update my variant</button>
-				</form>
-				<form method="POST" action="/exercise-variants/<%= id %>/archive">
-					<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-					<button type="submit">Archive my variant</button>
-				</form>
+				<div class="exercise-template__private-actions">
+					<form class="form exercise-template__inline-form" method="POST" action="/exercise-variants/<%= id %>?_method=PATCH">
+						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+						<input type="hidden" name="equipmentId" value="<%= details?.variant?.equipment?.id ?? '' %>">
+						<%- include("../shared/components/form/field", { field: {
+							id: `private-variant-${id}-name`,
+							name: "name",
+							label: "Variant name",
+							control: "input",
+							type: "text",
+							required: true,
+							value: details?.variant?.name,
+							hint: "Only you can update this private variant.",
+							attributes: { maxlength: 100, autocomplete: "off" }
+						} }) %>
+						<%- include("../shared/components/button/button", { button: {
+							label: "Save variant",
+							type: "submit",
+							variant: "primary"
+						} }) %>
+					</form>
+					<form class="exercise-template__archive-form" method="POST" action="/exercise-variants/<%= id %>/archive">
+						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+						<%- include("../shared/components/button/button", { button: {
+							label: "Archive private variant",
+							type: "submit",
+							variant: "dangerGhost"
+						} }) %>
+					</form>
+				</div>
 			<% } %>
 		</div>
 	</div>
