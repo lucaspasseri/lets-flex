@@ -19,12 +19,17 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	let db;
 	let server;
 	let origin;
+	let oauthServer;
+	let oauthOrigin;
 	let passwordHash;
 
 	before(async () => {
 		process.env.DATABASE_URL = testDatabaseUrl;
 		process.env.SESSION_SECRET = "http-integration-test-secret";
 		process.env.GUEST_TTL_DAYS = "15";
+		process.env.GOOGLE_CLIENT_ID = "google-test-client-id";
+		process.env.GOOGLE_CLIENT_SECRET = "google-test-client-secret";
+		process.env.GOOGLE_CALLBACK_URL = "http://localhost:3000/auth/google/callback";
 		passwordHash = await hashPassword("correct horse battery staple");
 		db = new Client({ connectionString: testDatabaseUrl });
 		await db.connect();
@@ -35,6 +40,61 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			server.once("error", reject);
 		});
 		origin = `http://127.0.0.1:${server.address().port}`;
+
+		const { createPassport, isUsablePrincipal, toPrincipal } =
+			await import("../../src/config/passport.js");
+		const { default: authenticateGoogleUser } =
+			await import("../../src/features/auth/authenticateGoogleUser.js");
+		const fakePassport = createPassport();
+		fakePassport.unuse("google");
+		fakePassport.use("google", {
+			name: "google",
+			authenticate(req, options = {}) {
+				if (typeof options.state === "string") {
+					this.redirect(
+						`/auth/google/callback?code=fake-code&state=${encodeURIComponent(options.state)}`,
+					);
+					return;
+				}
+				if (req.query?.providerError === "true") {
+					const error = new Error("Simulated provider exchange failure");
+					error.name = "InternalOAuthError";
+					this.error(error);
+					return;
+				}
+				const email = typeof req.query?.email === "string" ? req.query.email : null;
+				const profile = {
+					id: req.query?.sub,
+					displayName: req.query?.name,
+					emails: email
+						? [{ value: email, verified: req.query?.verified === "true" }]
+						: [],
+				};
+				const principal = req.user;
+				authenticateGoogleUser({
+					profile,
+					guestUserId:
+						principal?.role === "guest" && Number.isInteger(principal.id)
+							? principal.id
+							: null,
+				}).then(
+					(account) => {
+						if (account.role === "guest" || !isUsablePrincipal(account)) {
+							this.fail({ message: "This account is not available." });
+							return;
+						}
+						this.success(toPrincipal(account));
+					},
+					(error) => this.error(error),
+				);
+			},
+		});
+		oauthServer = createApp({ passport: fakePassport }).listen(0, "127.0.0.1");
+		await new Promise((resolve, reject) => {
+			oauthServer.once("listening", resolve);
+			oauthServer.once("error", reject);
+		});
+		oauthOrigin = `http://127.0.0.1:${oauthServer.address().port}`;
 	});
 
 	beforeEach(async () => {
@@ -54,15 +114,20 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	});
 
 	after(async () => {
-		await new Promise((resolve, reject) =>
-			server.close((error) => (error ? reject(error) : resolve())),
+		await Promise.all(
+			[server, oauthServer].map(
+				(activeServer) =>
+					new Promise((resolve, reject) =>
+						activeServer.close((error) => (error ? reject(error) : resolve())),
+					),
+			),
 		);
 		await db.end();
 		const { default: pool } = await import("../../db/pool.js");
 		await pool.end();
 	});
 
-	function agent() {
+	function agent(baseOrigin = origin) {
 		let cookie = "";
 		const request = async (path, options = {}) => {
 			const headers = new Headers(options.headers);
@@ -71,7 +136,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				headers.set("content-type", "application/x-www-form-urlencoded");
 				options.body = new URLSearchParams(options.form);
 			}
-			const response = await fetch(origin + path, {
+			const response = await fetch(baseOrigin + path, {
 				...options,
 				headers,
 				redirect: "manual",
@@ -115,6 +180,36 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(result.response.status, 302);
 	}
 
+	async function beginGoogle(client, returnTo = "/") {
+		const result = await client.request(
+			`/auth/google?returnTo=${encodeURIComponent(returnTo)}`,
+		);
+		assert.equal(result.response.status, 302);
+		const location = result.response.headers.get("location");
+		assert.ok(location);
+		return {
+			callback: new URL(location, oauthOrigin),
+			stateSessionCookie: client.cookie(),
+		};
+	}
+
+	async function completeGoogle(client, flow, profile = {}) {
+		for (const [key, value] of Object.entries(profile)) {
+			if (value !== undefined && value !== null) {
+				flow.callback.searchParams.set(key, String(value));
+			}
+		}
+		return client.request(flow.callback.pathname + flow.callback.search);
+	}
+
+	async function assertGoogleStateCleared() {
+		const { rows } = await db.query(`SELECT sess FROM "session"`);
+		assert.equal(
+			rows.some((row) => JSON.stringify(row.sess).includes("googleOAuth")),
+			false,
+		);
+	}
+
 	test("authentication is the entry point and CSRF protects mutations", async () => {
 		const client = agent();
 		let result = await client.request("/");
@@ -128,7 +223,18 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(result.text, /action="\/auth\/login"/);
 		assert.match(result.text, /action="\/auth\/register"/);
 		assert.match(result.text, /action="\/auth\/guest"/);
+		assert.match(result.text, /Continue with Google/);
 		assert.match(result.text, /role="tablist"/);
+
+		const google = await client.request("/auth/google?returnTo=/library");
+		assert.equal(google.response.status, 302);
+		const googleLocation = new URL(google.response.headers.get("location"));
+		assert.equal(googleLocation.hostname, "accounts.google.com");
+		assert.ok(googleLocation.searchParams.get("state"));
+		assert.deepEqual(
+			new Set(googleLocation.searchParams.get("scope").split(" ")),
+			new Set(["profile", "email"]),
+		);
 
 		result = await client.request("/auth/guest", { method: "POST", form: {} });
 		assert.equal(result.response.status, 403);
@@ -254,6 +360,248 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(logout.response.status, 302);
 		assert.notEqual(client.cookie(), oldCookie);
 		assert.equal((await client.request("/")).response.status, 302);
+	});
+
+	test("an existing Google subject resolves the same provider-neutral user", async () => {
+		await db.query(
+			`INSERT INTO auth_identities (user_id, provider, provider_subject)
+			 SELECT id, 'google', 'existing-google-sub' FROM users
+			 WHERE email = 'user-one@example.com'`,
+		);
+		const client = agent(oauthOrigin);
+		const flow = await beginGoogle(client, "/profile");
+		const result = await completeGoogle(client, flow, {
+			sub: "existing-google-sub",
+		});
+
+		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/profile");
+		assert.notEqual(client.cookie(), flow.stateSessionCookie);
+		const profile = await client.request("/profile");
+		assert.equal(profile.response.status, 200);
+		assert.match(profile.text, /User One/);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM auth_identities WHERE provider = 'google' AND provider_subject = 'existing-google-sub'",
+				)
+			).rows[0].count,
+			1,
+		);
+		await assertGoogleStateCleared();
+	});
+
+	test("a new verified Google profile creates one user keyed by sub, not email", async () => {
+		const client = agent(oauthOrigin);
+		const flow = await beginGoogle(client, "//evil.example/phish");
+		const result = await completeGoogle(client, flow, {
+			sub: "stable-google-sub-101",
+			email: " New.Google@Example.COM ",
+			verified: true,
+			name: "Google Member",
+		});
+
+		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/");
+		assert.notEqual(client.cookie(), flow.stateSessionCookie);
+		const created = (
+			await db.query(
+				`SELECT u.id, u.email, u.name, u.role, ai.provider_subject, ai.password_hash
+				 FROM users u JOIN auth_identities ai ON ai.user_id = u.id
+				 WHERE ai.provider = 'google' AND ai.provider_subject = 'stable-google-sub-101'`,
+			)
+		).rows[0];
+		assert.equal(created.email, "new.google@example.com");
+		assert.equal(created.name, "Google Member");
+		assert.equal(created.role, "user");
+		assert.equal(created.provider_subject, "stable-google-sub-101");
+		assert.notEqual(created.provider_subject, created.email);
+		assert.equal(created.password_hash, null);
+
+		const repeat = agent(oauthOrigin);
+		const repeatFlow = await beginGoogle(repeat, "/profile");
+		const repeated = await completeGoogle(repeat, repeatFlow, {
+			sub: "stable-google-sub-101",
+		});
+		assert.equal(repeated.response.status, 302);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM users WHERE email = 'new.google@example.com'",
+				)
+			).rows[0].count,
+			1,
+		);
+		assert.match((await repeat.request("/profile")).text, /Google Member/);
+		await assertGoogleStateCleared();
+	});
+
+	test("Google converts an active guest in place and retains owned data", async () => {
+		const client = agent(oauthOrigin);
+		await enterGuest(client);
+		const guest = (
+			await db.query(
+				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
+			)
+		).rows[0];
+		const program = (
+			await db.query(
+				"INSERT INTO programs (user_id, name) VALUES ($1, 'Google guest plan') RETURNING id",
+				[guest.id],
+			)
+		).rows[0];
+		const variant = (
+			await db.query(
+				`INSERT INTO exercise_variants (exercise_id, owner_user_id, name)
+				 SELECT id, $1, 'Google guest variant' FROM exercises WHERE name = 'Squat'
+				 RETURNING id`,
+				[guest.id],
+			)
+		).rows[0];
+
+		const flow = await beginGoogle(client, "/profile");
+		const result = await completeGoogle(client, flow, {
+			sub: "converted-guest-google-sub",
+			email: "google.converted@example.com",
+			verified: true,
+			name: "Converted with Google",
+		});
+
+		assert.equal(result.response.status, 302);
+		const converted = (
+			await db.query(
+				`SELECT u.id, u.email, u.role, u.guest_expires_at, ai.provider_subject
+				 FROM users u JOIN auth_identities ai ON ai.user_id = u.id
+				 WHERE u.id = $1 AND ai.provider = 'google'`,
+				[guest.id],
+			)
+		).rows[0];
+		assert.equal(converted.id, guest.id);
+		assert.equal(converted.email, "google.converted@example.com");
+		assert.equal(converted.role, "user");
+		assert.equal(converted.guest_expires_at, null);
+		assert.equal(converted.provider_subject, "converted-guest-google-sub");
+		assert.equal(
+			(await db.query("SELECT user_id FROM programs WHERE id = $1", [program.id]))
+				.rows[0].user_id,
+			guest.id,
+		);
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM exercise_variants WHERE id = $1", [
+					variant.id,
+				])
+			).rows[0].owner_user_id,
+			guest.id,
+		);
+		assert.match((await client.request("/profile")).text, /Converted with Google/);
+		await assertGoogleStateCleared();
+	});
+
+	test("Google email collision does not link and rolls guest conversion back", async () => {
+		const client = agent(oauthOrigin);
+		await enterGuest(client);
+		const guest = (
+			await db.query(
+				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
+			)
+		).rows[0];
+		await db.query(
+			"INSERT INTO programs (user_id, name) VALUES ($1, 'Rollback Google plan')",
+			[guest.id],
+		);
+		const flow = await beginGoogle(client, "/profile");
+		const result = await completeGoogle(client, flow, {
+			sub: "unlinked-google-sub",
+			email: "USER-ONE@EXAMPLE.COM",
+			verified: true,
+			name: "Must Not Link",
+		});
+
+		assert.equal(result.response.status, 409);
+		assert.match(result.text, /Sign in using its existing authentication method/);
+		const unchanged = (
+			await db.query(
+				`SELECT u.role, u.email, u.guest_expires_at,
+				        COUNT(ai.id)::int AS identity_count,
+				        COUNT(p.id)::int AS program_count
+				 FROM users u
+				 LEFT JOIN auth_identities ai ON ai.user_id = u.id
+				 LEFT JOIN programs p ON p.user_id = u.id
+				 WHERE u.id = $1 GROUP BY u.id`,
+				[guest.id],
+			)
+		).rows[0];
+		assert.equal(unchanged.role, "guest");
+		assert.equal(unchanged.email, null);
+		assert.ok(unchanged.guest_expires_at);
+		assert.equal(unchanged.identity_count, 0);
+		assert.equal(unchanged.program_count, 1);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM auth_identities WHERE provider = 'google' AND provider_subject = 'unlinked-google-sub'",
+				)
+			).rows[0].count,
+			0,
+		);
+		assert.equal((await client.request("/profile")).response.status, 200);
+		await assertGoogleStateCleared();
+	});
+
+	test("invalid Google profiles and OAuth callbacks create no partial data", async () => {
+		const client = agent(oauthOrigin);
+		let flow = await beginGoogle(client, "/library");
+		let result = await completeGoogle(client, flow, {
+			sub: "unverified-google-sub",
+			email: "unverified@example.com",
+			verified: false,
+		});
+		assert.equal(result.response.status, 422);
+		assert.match(result.text, /usable verified email address/);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM users WHERE email = 'unverified@example.com'",
+				)
+			).rows[0].count,
+			0,
+		);
+		await assertGoogleStateCleared();
+
+		flow = await beginGoogle(client, "/library");
+		flow.callback.searchParams.set("state", "invalid-state");
+		result = await completeGoogle(client, flow, {
+			sub: "invalid-state-sub",
+			email: "invalid-state@example.com",
+			verified: true,
+		});
+		assert.equal(result.response.status, 403);
+		assert.match(result.text, /could not be verified/);
+		await assertGoogleStateCleared();
+
+		flow = await beginGoogle(client, "/library");
+		result = await completeGoogle(client, flow, { providerError: true });
+		assert.equal(result.response.status, 401);
+		assert.match(result.text, /could not be completed/);
+		assert.doesNotMatch(result.text, /Simulated provider exchange failure/);
+		await assertGoogleStateCleared();
+
+		flow = await beginGoogle(client, "/library");
+		flow.callback.searchParams.delete("code");
+		flow.callback.searchParams.set("error", "access_denied");
+		result = await completeGoogle(client, flow);
+		assert.equal(result.response.status, 401);
+		assert.match(result.text, /cancelled or could not be completed/);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM auth_identities WHERE provider = 'google'",
+				)
+			).rows[0].count,
+			0,
+		);
+		await assertGoogleStateCleared();
 	});
 
 	test("generated guests are distinct, minimal, private, and expire in fifteen days", async () => {

@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { authController, buildLoginHandler } from "../controllers/authController.js";
+import {
+	authController,
+	buildGoogleCallbackHandler,
+	buildGoogleStartHandler,
+	buildLoginHandler,
+} from "../controllers/authController.js";
 import {
 	requireAnonymous,
 	requireAnonymousOrGuest,
@@ -12,6 +17,12 @@ export default function createAuthRouter(passport) {
 	router.get("/login", requireAnonymousOrGuest, authController.show);
 	router.post("/login", requireAnonymous, buildLoginHandler(passport));
 	router.post("/register", requireAnonymousOrGuest, authController.register);
+	router.get("/google", requireAnonymousOrGuest, buildGoogleStartHandler(passport));
+	router.get(
+		"/google/callback",
+		requireAnonymousOrGuest,
+		buildGoogleCallbackHandler(passport),
+	);
 	router.post(
 		"/guest",
 		requireAnonymous,

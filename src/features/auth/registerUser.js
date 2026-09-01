@@ -1,14 +1,7 @@
 import pool from "../../../db/pool.js";
 import * as authIdentitiesRepository from "./authIdentitiesRepository.js";
+import createOrConvertRegisteredUser from "./createOrConvertRegisteredUser.js";
 import { hashPassword } from "./passwordService.js";
-import * as usersRepository from "../users/repository.js";
-
-export class GuestConversionUnavailableError extends Error {
-	constructor() {
-		super("The guest workspace is no longer available for conversion.");
-		this.name = "GuestConversionUnavailableError";
-	}
-}
 
 /** @param {{email: string, password: string, guestUserId?: number | null}} input */
 export default async function registerUser({ email, password, guestUserId = null }) {
@@ -18,14 +11,10 @@ export default async function registerUser({ email, password, guestUserId = null
 
 	try {
 		await client.query("BEGIN");
-		const user = guestUserId
-			? await usersRepository.convertActiveGuest(
-					{ userId: guestUserId, email, name },
-					client,
-				)
-			: await usersRepository.createRegisteredUser({ email, name }, client);
-
-		if (!user) throw new GuestConversionUnavailableError();
+		const user = await createOrConvertRegisteredUser(
+			{ email, name, guestUserId },
+			client,
+		);
 		await authIdentitiesRepository.createLocal(
 			{ userId: user.id, email, passwordHash },
 			client,

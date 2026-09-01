@@ -55,3 +55,18 @@ export async function createLocal({ userId, email, passwordHash }, db = pool) {
 	);
 	return rows[0];
 }
+
+/**
+ * @param {{userId: number, providerSubject: string}} input
+ * @param {import("pg").Pool | import("pg").PoolClient} [db]
+ * @returns {Promise<AuthIdentityRow>}
+ */
+export async function createGoogle({ userId, providerSubject }, db = pool) {
+	const { rows } = await db.query(
+		`INSERT INTO auth_identities (user_id, provider, provider_subject)
+		 VALUES ($1, 'google', $2)
+		 RETURNING id, user_id, provider, provider_subject, created_at, updated_at`,
+		[userId, providerSubject],
+	);
+	return rows[0];
+}

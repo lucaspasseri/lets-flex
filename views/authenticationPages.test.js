@@ -11,6 +11,7 @@ test("login explains the application and presents both authentication paths", as
 	const html = await renderFile(path.resolve("views/login.ejs"), {
 		csrfToken: "test-token",
 		returnTo: "/library",
+		googleAuthUrl: "/auth/google?returnTo=%2Flibrary",
 		email: "member@example.com",
 		errors: [],
 		activeTab: "signin",
@@ -20,6 +21,8 @@ test("login explains the application and presents both authentication paths", as
 	assert.match(html, /action="\/auth\/login"/);
 	assert.match(html, /action="\/auth\/register"/);
 	assert.match(html, /action="\/auth\/guest"/);
+	assert.match(html, /href="\/auth\/google\?returnTo=%2Flibrary"/);
+	assert.match(html, /Continue with Google/);
 	assert.match(html, /Guest data expires after 15 days/);
 	assert.match(html, /role="tablist"/);
 	assert.match(html, /aria-controls="auth-signup-panel"/);
@@ -32,6 +35,7 @@ test("login preserves the sign-up tab and safe email after an error", async () =
 	const html = await renderFile(path.resolve("views/login.ejs"), {
 		csrfToken: "test-token",
 		returnTo: "/library",
+		googleAuthUrl: "/auth/google?returnTo=%2Flibrary",
 		email: "member@example.com",
 		errors: ["Password must contain at least 12 characters."],
 		activeTab: "signup",

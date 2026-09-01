@@ -14,6 +14,7 @@ Copy `.env.sample` to `.env` for local development and set:
 - `DATABASE_SSL=true` when the server requires verified TLS.
 - `SESSION_SECRET` to a long, random value. The application will not start without it.
 - `SESSION_MAX_AGE_MS` to the session-cookie lifetime; the default is 15 days.
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_CALLBACK_URL` for Google OAuth.
 - `GUEST_TTL_DAYS=15` and `GUEST_CLEANUP_BATCH_SIZE=100` for generated guests.
 - `ADMIN_EMAIL` and `ADMIN_PASSWORD` when running the explicit database setup.
 - `ALLOW_DATABASE_RESET=true` only when deliberately resetting development data.
@@ -29,8 +30,9 @@ run when `NODE_ENV=production` or unless `ALLOW_DATABASE_RESET=true` is set.
 It is intentionally limited to disposable development and test data.
 
 The administrator email is normalized and its environment-provided password is
-hashed with the same Argon2id service used by Passport authentication. No public
-registration route exists.
+hashed with the same Argon2id service used by Passport authentication. The hash
+is stored on a local authentication identity; no credentials or provider tokens
+are stored in the administrator's user row.
 
 Each guest entry creates a distinct, minimal database identity that expires after
 15 days. Run `npm run guests:cleanup` from a daily scheduled job to remove one
@@ -39,15 +41,25 @@ bounded batch of expired guest identities and their owned data.
 Application users and sign-in methods are stored separately. `users` is the
 principal referenced by roles and owned resources; `auth_identities` contains
 provider-scoped credentials. Local identities use the normalized account email as
-their subject. Future Google identities must use Google's stable `sub` value and
-must not be linked or merged based only on matching email addresses.
+their subject. Google identities use Google's stable `sub` value and are never
+linked or merged based only on matching email addresses.
 
 ## Authentication and production deployment
 
-The app uses Passport LocalStrategy, `express-session`, and PostgreSQL-backed
-sessions through `connect-pg-simple`. Production must use Node 22 and provide
-`DATABASE_URL`, `SESSION_SECRET`, and the other runtime settings from
-`.env.sample`. Keep `trust proxy` enabled on Render so secure cookies work.
+The app uses Passport LocalStrategy and Google OAuth 2.0, `express-session`, and
+PostgreSQL-backed sessions through `connect-pg-simple`. Production must use Node
+22 and provide `DATABASE_URL`, `SESSION_SECRET`, and the other runtime settings
+from `.env.sample`. Keep `trust proxy` enabled on Render so secure cookies work.
+
+Create a Google OAuth web client and register an authorized redirect URI that
+exactly matches `GOOGLE_CALLBACK_URL`:
+
+- Local development: `http://localhost:3000/auth/google/callback`
+- Render: `https://lets-flex.onrender.com/auth/google/callback`
+
+Set the Render environment variable to the HTTPS URL for the deployed service.
+Only the `profile` and `email` scopes are requested. Google access and refresh
+tokens are used only during authentication and are not persisted.
 
 Do not add `ALLOW_DATABASE_RESET` to Render and do not use `npm run db:reset` as
 the service start or pre-deploy command. Use `npm start` for the web service and
