@@ -5,7 +5,13 @@ import {
 	GoogleProfileError,
 } from "../../features/auth/authenticateGoogleUser.js";
 import { GuestConversionUnavailableError } from "../../features/auth/createOrConvertRegisteredUser.js";
+import {
+	GoogleIdentityConflictError,
+	GoogleProviderAlreadyLinkedError,
+	GoogleReplacementUnavailableError,
+} from "../../features/auth/linkGoogleIdentity.js";
 import createGuest from "../../features/auth/createGuest.js";
+import getAuthenticationMethods from "../../features/auth/getAuthenticationMethods.js";
 import registerUser from "../../features/auth/registerUser.js";
 import * as usersRepository from "../../features/users/repository.js";
 import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
@@ -60,6 +66,10 @@ async function consumeGoogleOAuthState(req) {
 	return {
 		valid: oauthStatesMatch(req.query?.state, stored?.state),
 		returnTo: safeReturnTo(stored?.returnTo),
+		purpose: new Set(["link", "replace"]).has(stored?.purpose)
+			? stored.purpose
+			: "login",
+		linkUserId: Number.isInteger(stored?.linkUserId) ? stored.linkUserId : null,
 	};
 }
 
@@ -84,6 +94,7 @@ export function buildGoogleStartHandler(passport) {
 		req.session.googleOAuth = {
 			state,
 			returnTo: safeReturnTo(req.query?.returnTo),
+			purpose: "login",
 		};
 		await saveSession(req);
 		passport.authenticate("google", {
@@ -91,6 +102,52 @@ export function buildGoogleStartHandler(passport) {
 			state,
 		})(req, res, next);
 	});
+}
+
+/** @param {any} passport */
+function buildGoogleManagementStartHandler(passport, purpose) {
+	return asyncHandler(async (req, res, next) => {
+		const principal = /** @type {any} */ (req.user);
+		if (principal?.role === "guest" || !Number.isInteger(principal?.id)) {
+			res.status(403).send("A registered account is required to connect Google.");
+			return;
+		}
+		const methods = await getAuthenticationMethods({ userId: principal.id });
+		if (purpose === "link" && methods.google.connected) {
+			res.redirect("/profile?googleLink=already-connected");
+			return;
+		}
+		if (
+			purpose === "replace" &&
+			(!methods.google.connected || !methods.password.connected)
+		) {
+			res.redirect("/profile?googleLink=replacement-unavailable");
+			return;
+		}
+		const state = randomBytes(32).toString("hex");
+		req.session.googleOAuth = {
+			state,
+			returnTo: "/profile",
+			purpose,
+			linkUserId: principal.id,
+		};
+		await saveSession(req);
+		passport.authenticate("google", {
+			scope: ["profile", "email"],
+			state,
+			prompt: "select_account",
+		})(req, res, next);
+	});
+}
+
+/** @param {any} passport */
+export function buildGoogleLinkStartHandler(passport) {
+	return buildGoogleManagementStartHandler(passport, "link");
+}
+
+/** @param {any} passport */
+export function buildGoogleReplaceStartHandler(passport) {
+	return buildGoogleManagementStartHandler(passport, "replace");
 }
 
 /** @param {any} passport */
@@ -104,6 +161,28 @@ export function buildGoogleCallbackHandler(passport) {
 			});
 			return;
 		}
+		if (new Set(["link", "replace"]).has(oauthState.purpose)) {
+			const principal = /** @type {any} */ (req.user);
+			if (
+				!principal ||
+				principal.id !== oauthState.linkUserId ||
+				principal.role === "guest"
+			) {
+				res.status(403).send("Google linking could not be verified for this account.");
+				return;
+			}
+			// @ts-ignore -- request-local context consumed by the Google strategy.
+			req.googleOAuthContext = {
+				userId: principal.id,
+				intent: oauthState.purpose,
+			};
+		} else {
+			const principal = /** @type {any} */ (req.user);
+			if (principal?.role !== "guest" && principal) {
+				res.status(403).send("Google sign-in cannot replace an authenticated account.");
+				return;
+			}
+		}
 		if (req.query?.error || typeof req.query?.code !== "string") {
 			renderGoogleFailure(req, res, {
 				message: "Google sign-in was cancelled or could not be completed.",
@@ -113,12 +192,32 @@ export function buildGoogleCallbackHandler(passport) {
 		}
 
 		passport.authenticate("google", { session: false }, async (error, user) => {
+			if (
+				error instanceof GoogleIdentityConflictError ||
+				error instanceof GoogleProviderAlreadyLinkedError ||
+				error instanceof GoogleReplacementUnavailableError
+			) {
+				res.redirect(
+					`/profile?googleLink=${
+						error instanceof GoogleIdentityConflictError
+							? "conflict"
+							: error instanceof GoogleReplacementUnavailableError
+								? "replacement-unavailable"
+								: "already-connected"
+					}`,
+				);
+				return;
+			}
 			if (error instanceof GoogleEmailConflictError) {
 				renderGoogleFailure(req, res, {
 					status: 409,
 					message: error.message,
 					returnTo: oauthState.returnTo,
 				});
+				return;
+			}
+			if (error instanceof GoogleProfileError && oauthState.purpose !== "login") {
+				res.redirect("/profile?googleLink=invalid");
 				return;
 			}
 			if (
@@ -150,7 +249,11 @@ export function buildGoogleCallbackHandler(passport) {
 
 			try {
 				await establishAuthenticatedSession(req, user);
-				res.redirect(safeReturnTo(oauthState.returnTo));
+				res.redirect(
+					oauthState.purpose !== "login"
+						? `/profile?googleLink=${oauthState.purpose === "replace" ? "replaced" : "connected"}`
+						: safeReturnTo(oauthState.returnTo),
+				);
 			} catch (sessionError) {
 				next(sessionError);
 			}

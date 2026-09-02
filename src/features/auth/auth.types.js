@@ -7,6 +7,7 @@
  * @property {number} user_id
  * @property {string} provider
  * @property {string} provider_subject
+ * @property {string | null} provider_email
  * @property {string | null} [password_hash]
  * @property {Date | string} created_at
  * @property {Date | string} updated_at

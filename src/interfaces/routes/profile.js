@@ -7,5 +7,6 @@ const router = Router();
 
 router.use(getUrlAndPath);
 router.get("/", profileController.show);
+router.post("/password", profileController.addPassword);
 
 export default router;

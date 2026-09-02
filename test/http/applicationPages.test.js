@@ -45,14 +45,20 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			await import("../../src/config/passport.js");
 		const { default: authenticateGoogleUser } =
 			await import("../../src/features/auth/authenticateGoogleUser.js");
+		const { default: linkGoogleIdentity } =
+			await import("../../src/features/auth/linkGoogleIdentity.js");
 		const fakePassport = createPassport();
 		fakePassport.unuse("google");
 		fakePassport.use("google", {
 			name: "google",
 			authenticate(req, options = {}) {
 				if (typeof options.state === "string") {
+					const prompt =
+						typeof options.prompt === "string"
+							? `&prompt=${encodeURIComponent(options.prompt)}`
+							: "";
 					this.redirect(
-						`/auth/google/callback?code=fake-code&state=${encodeURIComponent(options.state)}`,
+						`/auth/google/callback?code=fake-code&state=${encodeURIComponent(options.state)}${prompt}`,
 					);
 					return;
 				}
@@ -71,13 +77,20 @@ integration("authentication and authorization", { concurrency: false }, () => {
 						: [],
 				};
 				const principal = req.user;
-				authenticateGoogleUser({
-					profile,
-					guestUserId:
-						principal?.role === "guest" && Number.isInteger(principal.id)
-							? principal.id
-							: null,
-				}).then(
+				const authentication = req.googleOAuthContext?.userId
+					? linkGoogleIdentity({
+							userId: req.googleOAuthContext.userId,
+							profile,
+							intent: req.googleOAuthContext.intent,
+						})
+					: authenticateGoogleUser({
+							profile,
+							guestUserId:
+								principal?.role === "guest" && Number.isInteger(principal.id)
+									? principal.id
+									: null,
+						});
+				authentication.then(
 					(account) => {
 						if (account.role === "guest" || !isUsablePrincipal(account)) {
 							this.fail({ message: "This account is not available." });
@@ -200,6 +213,38 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			}
 		}
 		return client.request(flow.callback.pathname + flow.callback.search);
+	}
+
+	async function beginGoogleLink(client) {
+		const profile = await client.request("/profile");
+		const result = await client.request("/auth/google/link", {
+			method: "POST",
+			form: { _csrf: csrfFrom(profile.text) },
+		});
+		assert.equal(result.response.status, 302);
+		const location = result.response.headers.get("location");
+		assert.ok(location);
+		const authorizationUrl = new URL(location, oauthOrigin);
+		return {
+			callback: authorizationUrl,
+			authorizationUrl,
+			stateSessionCookie: client.cookie(),
+		};
+	}
+
+	async function beginGoogleReplace(client) {
+		const profile = await client.request("/profile");
+		const result = await client.request("/auth/google/replace", {
+			method: "POST",
+			form: { _csrf: csrfFrom(profile.text) },
+		});
+		assert.equal(result.response.status, 302);
+		const location = result.response.headers.get("location");
+		assert.ok(location);
+		return {
+			callback: new URL(location, oauthOrigin),
+			stateSessionCookie: client.cookie(),
+		};
 	}
 
 	async function assertGoogleStateCleared() {
@@ -391,6 +436,288 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		await assertGoogleStateCleared();
 	});
 
+	test("an authenticated local user explicitly links Google without changing ownership or creating a user", async () => {
+		const client = agent(oauthOrigin);
+		await login(client);
+		const user = (
+			await db.query("SELECT id FROM users WHERE email = 'user-one@example.com'")
+		).rows[0];
+		const program = (
+			await db.query(
+				"INSERT INTO programs (user_id, name) VALUES ($1, 'Linked plan') RETURNING id",
+				[user.id],
+			)
+		).rows[0];
+		const variant = (
+			await db.query(
+				`INSERT INTO exercise_variants (exercise_id, owner_user_id, name)
+				 SELECT id, $1, 'Linked private variant' FROM exercises WHERE name = 'Squat'
+				 RETURNING id`,
+				[user.id],
+			)
+		).rows[0];
+		const sessionTemplate = (
+			await db.query(
+				"INSERT INTO sessions (owner_user_id, name) VALUES ($1, 'Linked session') RETURNING id",
+				[user.id],
+			)
+		).rows[0];
+		const cycle = (
+			await db.query(
+				"INSERT INTO cycles (program_id, name, cycle_order) VALUES ($1, 'Linked cycle', 1) RETURNING id",
+				[program.id],
+			)
+		).rows[0];
+		const trainingDay = (
+			await db.query(
+				"INSERT INTO training_days (cycle_id, day_order) VALUES ($1, 1) RETURNING id",
+				[cycle.id],
+			)
+		).rows[0];
+		const workout = (
+			await db.query(
+				`INSERT INTO workout_sessions
+				 (training_day_id, session_id, workout_session_order)
+				 VALUES ($1, $2, 1) RETURNING id`,
+				[trainingDay.id, sessionTemplate.id],
+			)
+		).rows[0];
+		const usersBefore = (await db.query("SELECT count(*)::int AS count FROM users"))
+			.rows[0].count;
+		const profileBefore = await client.request("/profile");
+		assert.match(profileBefore.text, /Password[\s\S]*Connected/);
+		assert.match(profileBefore.text, /Google[\s\S]*Link Google account/);
+
+		const flow = await beginGoogleLink(client);
+		const result = await completeGoogle(client, flow, {
+			sub: "linked-google-sub",
+			email: "user-two@example.com",
+			verified: true,
+			name: "Must Not Replace",
+		});
+
+		assert.equal(result.response.status, 302);
+		assert.equal(
+			result.response.headers.get("location"),
+			"/profile?googleLink=connected",
+		);
+		assert.notEqual(
+			client.cookie(),
+			flow.stateSessionCookie,
+			"linking must rotate the session ID",
+		);
+		const identity = (
+			await db.query(
+				"SELECT user_id, provider_email FROM auth_identities WHERE provider = 'google' AND provider_subject = 'linked-google-sub'",
+			)
+		).rows[0];
+		assert.equal(identity.user_id, user.id);
+		assert.equal(identity.provider_email, "user-two@example.com");
+		assert.equal(
+			(await db.query("SELECT email FROM users WHERE id = $1", [user.id])).rows[0]
+				.email,
+			"user-one@example.com",
+		);
+		assert.equal(
+			(await db.query("SELECT user_id FROM programs WHERE id = $1", [program.id]))
+				.rows[0].user_id,
+			user.id,
+		);
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM exercise_variants WHERE id = $1", [
+					variant.id,
+				])
+			).rows[0].owner_user_id,
+			user.id,
+		);
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM sessions WHERE id = $1", [
+					sessionTemplate.id,
+				])
+			).rows[0].owner_user_id,
+			user.id,
+		);
+		assert.equal(
+			(
+				await db.query(
+					`SELECT p.user_id FROM workout_sessions ws
+					 JOIN training_days td ON td.id = ws.training_day_id
+					 JOIN cycles c ON c.id = td.cycle_id
+					 JOIN programs p ON p.id = c.program_id
+					 WHERE ws.id = $1`,
+					[workout.id],
+				)
+			).rows[0].user_id,
+			user.id,
+		);
+		assert.equal(
+			(await db.query("SELECT count(*)::int AS count FROM users")).rows[0].count,
+			usersBefore,
+		);
+		assert.match(
+			(await client.request("/profile?googleLink=connected")).text,
+			/Google is now connected/,
+		);
+		await assertGoogleStateCleared();
+	});
+
+	test("a newly registered password account can immediately link a new Google subject", async () => {
+		const client = agent(oauthOrigin);
+		const signup = await client.request("/auth/login?tab=signup&returnTo=/profile");
+		const registration = await client.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(signup.text),
+				email: "fresh-link@example.com",
+				password: "correct horse battery staple",
+				returnTo: "/profile",
+			},
+		});
+		assert.equal(registration.response.status, 302);
+		assert.equal(registration.response.headers.get("location"), "/profile");
+		const registered = (
+			await db.query("SELECT id FROM users WHERE email = 'fresh-link@example.com'")
+		).rows[0];
+		const passwordOnlyProfile = await client.request("/profile");
+		assert.match(
+			passwordOnlyProfile.text,
+			/<form method="POST" action="\/auth\/google\/link">[\s\S]*data-google-action>Link Google account<\/button>/,
+		);
+		assert.match(passwordOnlyProfile.text, /Password[\s\S]*Connected/);
+		assert.match(passwordOnlyProfile.text, /Google[\s\S]*Not linked/);
+
+		const flow = await beginGoogleLink(client);
+		assert.equal(flow.authorizationUrl.searchParams.get("prompt"), "select_account");
+		const linked = await completeGoogle(client, flow, {
+			sub: "freshly-linked-google-sub",
+			email: "fresh-link@example.com",
+			verified: true,
+		});
+
+		assert.equal(linked.response.status, 302);
+		assert.equal(
+			linked.response.headers.get("location"),
+			"/profile?googleLink=connected",
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT provider, user_id FROM auth_identities WHERE user_id = $1 ORDER BY provider",
+					[registered.id],
+				)
+			).rows,
+			[
+				{ provider: "google", user_id: registered.id },
+				{ provider: "local", user_id: registered.id },
+			],
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM users WHERE email = 'fresh-link@example.com'",
+				)
+			).rows[0].count,
+			1,
+		);
+		const linkedProfile = await client.request("/profile");
+		assert.match(linkedProfile.text, /Google[\s\S]*Connected/);
+		assert.match(
+			linkedProfile.text,
+			/<form method="POST" action="\/auth\/google\/replace">[\s\S]*data-google-action>Change Google account<\/button>/,
+		);
+		assert.doesNotMatch(
+			linkedProfile.text,
+			/<form method="POST" action="\/auth\/google\/link">/,
+		);
+	});
+
+	test("Google linking rejects another user's subject and leaves both accounts unchanged", async () => {
+		const owner = (
+			await db.query("SELECT id FROM users WHERE email = 'user-two@example.com'")
+		).rows[0];
+		await db.query(
+			"INSERT INTO auth_identities (user_id, provider, provider_subject) VALUES ($1, 'google', 'owned-google-sub')",
+			[owner.id],
+		);
+		const client = agent(oauthOrigin);
+		await login(client);
+		const before = await db.query(
+			"SELECT user_id, provider, provider_subject FROM auth_identities ORDER BY id",
+		);
+
+		const flow = await beginGoogleLink(client);
+		const result = await completeGoogle(client, flow, { sub: "owned-google-sub" });
+		assert.equal(result.response.status, 302);
+		assert.equal(
+			result.response.headers.get("location"),
+			"/profile?googleLink=conflict",
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT user_id, provider, provider_subject FROM auth_identities ORDER BY id",
+				)
+			).rows,
+			before.rows,
+		);
+		assert.match(
+			(await client.request("/profile?googleLink=conflict")).text,
+			/already connected to another Let&#39;s Flex account/,
+		);
+	});
+
+	test("replacing Google with the same subject is idempotent", async () => {
+		const user = (
+			await db.query("SELECT id FROM users WHERE email = 'user-one@example.com'")
+		).rows[0];
+		await db.query(
+			"INSERT INTO auth_identities (user_id, provider, provider_subject, provider_email) VALUES ($1, 'google', 'same-google-sub', 'same-google@example.com')",
+			[user.id],
+		);
+		const client = agent(oauthOrigin);
+		await login(client);
+		const before = (
+			await db.query(
+				"SELECT id, created_at, updated_at FROM auth_identities WHERE provider = 'google' AND provider_subject = 'same-google-sub'",
+			)
+		).rows[0];
+		const flow = await beginGoogleReplace(client);
+		const result = await completeGoogle(client, flow, { sub: "same-google-sub" });
+		assert.equal(
+			result.response.headers.get("location"),
+			"/profile?googleLink=replaced",
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM auth_identities WHERE provider = 'google' AND provider_subject = 'same-google-sub'",
+				)
+			).rows[0].count,
+			1,
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT id, created_at, updated_at FROM auth_identities WHERE provider = 'google' AND provider_subject = 'same-google-sub'",
+				)
+			).rows[0],
+			before,
+		);
+	});
+
+	test("unauthenticated users cannot initiate explicit Google linking", async () => {
+		const client = agent(oauthOrigin);
+		const loginPage = await client.request("/auth/login");
+		const result = await client.request("/auth/google/link", {
+			method: "POST",
+			form: { _csrf: csrfFrom(loginPage.text) },
+		});
+		assert.equal(result.response.status, 302);
+		assert.match(result.response.headers.get("location"), /^\/auth\/login/);
+	});
+
 	test("a new verified Google profile creates one user keyed by sub, not email", async () => {
 		const client = agent(oauthOrigin);
 		const flow = await beginGoogle(client, "//evil.example/phish");
@@ -417,6 +744,15 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(created.provider_subject, "stable-google-sub-101");
 		assert.notEqual(created.provider_subject, created.email);
 		assert.equal(created.password_hash, null);
+		const googleOnlyProfile = await client.request("/profile");
+		assert.match(googleOnlyProfile.text, /Password[\s\S]*Not set/);
+		assert.match(googleOnlyProfile.text, /Google[\s\S]*Connected/);
+		assert.match(googleOnlyProfile.text, /new\.google@example\.com/);
+		assert.match(googleOnlyProfile.text, /Add a password/);
+		assert.doesNotMatch(
+			googleOnlyProfile.text,
+			/action="\/auth\/google\/(?:link|replace)"/,
+		);
 
 		const repeat = agent(oauthOrigin);
 		const repeatFlow = await beginGoogle(repeat, "/profile");
@@ -434,6 +770,253 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		);
 		assert.match((await repeat.request("/profile")).text, /Google Member/);
 		await assertGoogleStateCleared();
+	});
+
+	test("a Google-created user adds a password and later authenticates both ways as the same user", async () => {
+		const googleClient = agent(oauthOrigin);
+		const googleFlow = await beginGoogle(googleClient, "/profile");
+		const googleRegistration = await completeGoogle(googleClient, googleFlow, {
+			sub: "lifecycle-google-sub",
+			email: "lifecycle.google@example.com",
+			verified: true,
+			name: "Lifecycle Member",
+		});
+		assert.equal(googleRegistration.response.status, 302);
+		const originalUser = (
+			await db.query(
+				`SELECT u.id, u.email FROM users u
+				 JOIN auth_identities ai ON ai.user_id = u.id
+				 WHERE ai.provider = 'google' AND ai.provider_subject = 'lifecycle-google-sub'`,
+			)
+		).rows[0];
+		const beforePassword = await googleClient.request("/profile");
+		assert.match(beforePassword.text, /Password[\s\S]*Not set/);
+		assert.match(beforePassword.text, /Add a password/);
+
+		let result = await googleClient.request("/profile/password", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(beforePassword.text),
+				password: "short",
+				confirmPassword: "different",
+			},
+		});
+		assert.equal(result.response.status, 422);
+		assert.match(result.text, /at least 12 characters/);
+		assert.match(result.text, /Passwords must match/);
+		assert.doesNotMatch(result.text, /value="short"/);
+
+		const oldCookie = googleClient.cookie();
+		result = await googleClient.request("/profile/password", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(result.text),
+				password: "a newly added secure password",
+				confirmPassword: "a newly added secure password",
+			},
+		});
+		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/profile?password=added");
+		assert.notEqual(
+			googleClient.cookie(),
+			oldCookie,
+			"adding a password must rotate the session",
+		);
+		const identities = (
+			await db.query(
+				`SELECT provider, provider_subject, provider_email, password_hash
+				 FROM auth_identities WHERE user_id = $1 ORDER BY provider`,
+				[originalUser.id],
+			)
+		).rows;
+		assert.equal(identities.length, 2);
+		assert.equal(identities[0].provider, "google");
+		assert.equal(identities[0].provider_email, "lifecycle.google@example.com");
+		assert.equal(identities[1].provider, "local");
+		assert.notEqual(identities[1].password_hash, "a newly added secure password");
+
+		const combinedProfile = await googleClient.request("/profile");
+		result = await googleClient.request("/profile/password", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(combinedProfile.text),
+				password: "another secure password",
+				confirmPassword: "another secure password",
+			},
+		});
+		assert.equal(result.response.status, 409);
+		assert.match(result.text, /password is already set/i);
+
+		const logoutPage = await googleClient.request("/profile");
+		await googleClient.request("/auth/logout", {
+			method: "POST",
+			form: { _csrf: csrfFrom(logoutPage.text) },
+		});
+		const loginPage = await googleClient.request("/auth/login");
+		const localLogin = await googleClient.request("/auth/login", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(loginPage.text),
+				email: originalUser.email,
+				password: "a newly added secure password",
+				returnTo: "/profile",
+			},
+		});
+		assert.equal(localLogin.response.status, 302);
+		assert.match((await googleClient.request("/profile")).text, /Lifecycle Member/);
+
+		const secondLogoutPage = await googleClient.request("/profile");
+		await googleClient.request("/auth/logout", {
+			method: "POST",
+			form: { _csrf: csrfFrom(secondLogoutPage.text) },
+		});
+		const secondGoogleFlow = await beginGoogle(googleClient, "/profile");
+		const secondGoogleLogin = await completeGoogle(googleClient, secondGoogleFlow, {
+			sub: "lifecycle-google-sub",
+		});
+		assert.equal(secondGoogleLogin.response.status, 302);
+		assert.match((await googleClient.request("/profile")).text, /Lifecycle Member/);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM users WHERE email = 'lifecycle.google@example.com'",
+				)
+			).rows[0].count,
+			1,
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT DISTINCT user_id FROM auth_identities WHERE provider_subject IN ('lifecycle-google-sub', 'lifecycle.google@example.com')",
+				)
+			).rows,
+			[{ user_id: originalUser.id }],
+		);
+	});
+
+	test("a password and Google user atomically replaces Google without changing account ownership", async () => {
+		const client = agent(oauthOrigin);
+		await login(client);
+		const user = (
+			await db.query("SELECT id, email FROM users WHERE email = 'user-one@example.com'")
+		).rows[0];
+		const oldIdentity = (
+			await db.query(
+				`INSERT INTO auth_identities
+				 (user_id, provider, provider_subject, provider_email)
+				 VALUES ($1, 'google', 'old-google-sub', 'old.google@example.com')
+				 RETURNING id`,
+				[user.id],
+			)
+		).rows[0];
+		const program = (
+			await db.query(
+				"INSERT INTO programs (user_id, name) VALUES ($1, 'Replacement plan') RETURNING id",
+				[user.id],
+			)
+		).rows[0];
+		const profile = await client.request("/profile");
+		assert.match(profile.text, /old\.google@example\.com/);
+		assert.match(profile.text, /Change Google account/);
+
+		const flow = await beginGoogleReplace(client);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT provider_subject, provider_email FROM auth_identities WHERE id = $1",
+					[oldIdentity.id],
+				)
+			).rows[0],
+			{ provider_subject: "old-google-sub", provider_email: "old.google@example.com" },
+		);
+		const replaced = await completeGoogle(client, flow, {
+			sub: "new-google-sub",
+			email: "new.work@example.com",
+			verified: true,
+		});
+		assert.equal(replaced.response.status, 302);
+		assert.equal(
+			replaced.response.headers.get("location"),
+			"/profile?googleLink=replaced",
+		);
+		assert.notEqual(client.cookie(), flow.stateSessionCookie);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT id, user_id, provider_subject, provider_email FROM auth_identities WHERE id = $1",
+					[oldIdentity.id],
+				)
+			).rows[0],
+			{
+				id: oldIdentity.id,
+				user_id: user.id,
+				provider_subject: "new-google-sub",
+				provider_email: "new.work@example.com",
+			},
+		);
+		assert.equal(
+			(await db.query("SELECT email FROM users WHERE id = $1", [user.id])).rows[0]
+				.email,
+			user.email,
+		);
+		assert.equal(
+			(await db.query("SELECT user_id FROM programs WHERE id = $1", [program.id]))
+				.rows[0].user_id,
+			user.id,
+		);
+	});
+
+	test("Google replacement conflict preserves the old identity and authenticated user", async () => {
+		const users = (
+			await db.query(
+				"SELECT id, email FROM users WHERE email IN ('user-one@example.com', 'user-two@example.com') ORDER BY email",
+			)
+		).rows;
+		await db.query(
+			`INSERT INTO auth_identities (user_id, provider, provider_subject, provider_email)
+			 VALUES ($1, 'google', 'user-a-google-sub', 'a.google@example.com'),
+			        ($2, 'google', 'user-b-google-sub', 'b.google@example.com')`,
+			[users[0].id, users[1].id],
+		);
+		const client = agent(oauthOrigin);
+		await login(client, "user-one@example.com");
+		const before = (
+			await db.query(
+				"SELECT user_id, provider_subject, provider_email FROM auth_identities WHERE provider = 'google' ORDER BY user_id",
+			)
+		).rows;
+		const flow = await beginGoogleReplace(client);
+		const conflict = await completeGoogle(client, flow, { sub: "user-b-google-sub" });
+		assert.equal(
+			conflict.response.headers.get("location"),
+			"/profile?googleLink=conflict",
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT user_id, provider_subject, provider_email FROM auth_identities WHERE provider = 'google' ORDER BY user_id",
+				)
+			).rows,
+			before,
+		);
+		assert.match((await client.request("/profile")).text, /User One/);
+	});
+
+	test("unauthenticated users cannot add a password or replace Google", async () => {
+		const client = agent(oauthOrigin);
+		const loginPage = await client.request("/auth/login");
+		for (const path of ["/profile/password", "/auth/google/replace"]) {
+			const result = await client.request(path, {
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(loginPage.text),
+					password: "a valid password value",
+					confirmPassword: "a valid password value",
+				},
+			});
+			assert.equal(result.response.status, 302);
+			assert.match(result.response.headers.get("location"), /^\/auth\/login/);
+		}
 	});
 
 	test("Google converts an active guest in place and retains owned data", async () => {
@@ -842,6 +1425,13 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			db.query(
 				"INSERT INTO auth_identities (user_id, provider, provider_subject) VALUES ($1, 'google', 'google-sub-123')",
 				[second.id],
+			),
+			(error) => error?.code === "23505",
+		);
+		await assert.rejects(
+			db.query(
+				"INSERT INTO auth_identities (user_id, provider, provider_subject) VALUES ($1, 'google', 'different-google-sub')",
+				[passwordless.id],
 			),
 			(error) => error?.code === "23505",
 		);

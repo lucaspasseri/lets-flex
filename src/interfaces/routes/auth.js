@@ -2,6 +2,8 @@ import { Router } from "express";
 import {
 	authController,
 	buildGoogleCallbackHandler,
+	buildGoogleLinkStartHandler,
+	buildGoogleReplaceStartHandler,
 	buildGoogleStartHandler,
 	buildLoginHandler,
 } from "../controllers/authController.js";
@@ -18,11 +20,17 @@ export default function createAuthRouter(passport) {
 	router.post("/login", requireAnonymous, buildLoginHandler(passport));
 	router.post("/register", requireAnonymousOrGuest, authController.register);
 	router.get("/google", requireAnonymousOrGuest, buildGoogleStartHandler(passport));
-	router.get(
-		"/google/callback",
-		requireAnonymousOrGuest,
-		buildGoogleCallbackHandler(passport),
+	router.post(
+		"/google/link",
+		requireAuthentication,
+		buildGoogleLinkStartHandler(passport),
 	);
+	router.post(
+		"/google/replace",
+		requireAuthentication,
+		buildGoogleReplaceStartHandler(passport),
+	);
+	router.get("/google/callback", buildGoogleCallbackHandler(passport));
 	router.post(
 		"/guest",
 		requireAnonymous,

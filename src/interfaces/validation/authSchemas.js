@@ -13,17 +13,26 @@ export const loginSchema = z.object({
 	returnTo: z.string().optional().default("/"),
 });
 
+export const passwordSchema = z
+	.string()
+	.min(12, "Password must contain at least 12 characters.")
+	.refine(
+		(value) => Buffer.byteLength(value, "utf8") <= MAX_PASSWORD_BYTES,
+		"Password is too long.",
+	);
+
 export const registrationSchema = z.object({
 	email: emailSchema,
-	password: z
-		.string()
-		.min(12, "Password must contain at least 12 characters.")
-		.refine(
-			(value) => Buffer.byteLength(value, "utf8") <= MAX_PASSWORD_BYTES,
-			"Password is too long.",
-		),
+	password: passwordSchema,
 	returnTo: z.string().optional().default("/"),
 });
+
+export const addPasswordSchema = z
+	.object({ password: passwordSchema, confirmPassword: z.string() })
+	.refine((value) => value.password === value.confirmPassword, {
+		message: "Passwords must match.",
+		path: ["confirmPassword"],
+	});
 
 export function safeReturnTo(value) {
 	if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {

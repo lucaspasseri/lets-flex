@@ -40,6 +40,18 @@ export async function findPrincipalByProviderSubject(
 	return rows[0] ?? null;
 }
 
+/** @param {{userId: number}} input @param {import("pg").Pool | import("pg").PoolClient} [db] */
+export async function findByUserId({ userId }, db = pool) {
+	const { rows } = await db.query(
+		`SELECT id, user_id, provider, provider_subject, provider_email, created_at, updated_at
+		 FROM auth_identities
+		 WHERE user_id = $1
+		 ORDER BY provider, id`,
+		[userId],
+	);
+	return rows;
+}
+
 /**
  * @param {{userId: number, email: string, passwordHash: string}} input
  * @param {import("pg").Pool | import("pg").PoolClient} [db]
@@ -57,16 +69,38 @@ export async function createLocal({ userId, email, passwordHash }, db = pool) {
 }
 
 /**
- * @param {{userId: number, providerSubject: string}} input
+ * @param {{userId: number, providerSubject: string, providerEmail: string}} input
  * @param {import("pg").Pool | import("pg").PoolClient} [db]
  * @returns {Promise<AuthIdentityRow>}
  */
-export async function createGoogle({ userId, providerSubject }, db = pool) {
+export async function createGoogle(
+	{ userId, providerSubject, providerEmail },
+	db = pool,
+) {
 	const { rows } = await db.query(
-		`INSERT INTO auth_identities (user_id, provider, provider_subject)
-		 VALUES ($1, 'google', $2)
-		 RETURNING id, user_id, provider, provider_subject, created_at, updated_at`,
-		[userId, providerSubject],
+		`INSERT INTO auth_identities
+		 (user_id, provider, provider_subject, provider_email)
+		 VALUES ($1, 'google', $2, $3)
+		 RETURNING id, user_id, provider, provider_subject, provider_email, created_at, updated_at`,
+		[userId, providerSubject, providerEmail],
 	);
 	return rows[0];
+}
+
+/**
+ * @param {{userId: number, providerSubject: string, providerEmail: string}} input
+ * @param {import("pg").Pool | import("pg").PoolClient} [db]
+ */
+export async function replaceGoogle(
+	{ userId, providerSubject, providerEmail },
+	db = pool,
+) {
+	const { rows } = await db.query(
+		`UPDATE auth_identities
+		 SET provider_subject = $2, provider_email = $3, updated_at = NOW()
+		 WHERE user_id = $1 AND provider = 'google'
+		 RETURNING id, user_id, provider, provider_subject, provider_email, created_at, updated_at`,
+		[userId, providerSubject, providerEmail],
+	);
+	return rows[0] ?? null;
 }

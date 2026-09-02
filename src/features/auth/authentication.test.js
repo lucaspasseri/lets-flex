@@ -9,6 +9,7 @@ import {
 import { hashPassword, verifyPassword } from "./passwordService.js";
 import { readGoogleConfiguration } from "../../config/passport.js";
 import {
+	addPasswordSchema,
 	registrationSchema,
 	safeReturnTo,
 } from "../../interfaces/validation/authSchemas.js";
@@ -16,6 +17,31 @@ import {
 test("email normalization is stable", () => {
 	assert.equal(normalizeEmail("  Person@Example.COM "), "person@example.com");
 	assert.equal(normalizeEmail(null), "");
+});
+
+test("adding a password reuses password requirements and requires confirmation", () => {
+	assert.deepEqual(
+		addPasswordSchema.parse({
+			password: "a sufficiently long password",
+			confirmPassword: "a sufficiently long password",
+		}),
+		{
+			password: "a sufficiently long password",
+			confirmPassword: "a sufficiently long password",
+		},
+	);
+	assert.equal(
+		addPasswordSchema.safeParse({ password: "short", confirmPassword: "short" })
+			.success,
+		false,
+	);
+	assert.equal(
+		addPasswordSchema.safeParse({
+			password: "a sufficiently long password",
+			confirmPassword: "a different long password",
+		}).success,
+		false,
+	);
 });
 
 test("Argon2id hashes verify without exposing plaintext", async () => {

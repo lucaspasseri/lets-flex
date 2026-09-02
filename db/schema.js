@@ -63,6 +63,7 @@ CREATE TABLE auth_identities (
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	provider VARCHAR(50) NOT NULL,
 	provider_subject TEXT NOT NULL,
+	provider_email VARCHAR(254),
 	password_hash TEXT,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -76,16 +77,16 @@ CREATE TABLE auth_identities (
 	CONSTRAINT auth_identities_local_subject_normalized CHECK (
 		provider <> 'local' OR provider_subject = LOWER(provider_subject)
 	),
+	CONSTRAINT auth_identities_provider_email_normalized CHECK (
+		provider_email IS NULL OR provider_email = LOWER(BTRIM(provider_email))
+	),
 	CONSTRAINT auth_identities_credentials_by_provider CHECK (
-		(provider = 'local' AND password_hash IS NOT NULL)
+		(provider = 'local' AND password_hash IS NOT NULL AND provider_email IS NULL)
 		OR (provider <> 'local' AND password_hash IS NULL)
 	),
-	UNIQUE (provider, provider_subject)
+	UNIQUE (provider, provider_subject),
+	UNIQUE (user_id, provider)
 );
-
-CREATE UNIQUE INDEX auth_identities_one_local_per_user
-ON auth_identities (user_id)
-WHERE provider = 'local';
 
 CREATE INDEX auth_identities_user_idx ON auth_identities (user_id);
 

@@ -36,10 +36,7 @@ function readProviderSubject(profile) {
 
 /** @param {any} profile */
 function readRegistrationProfile(profile) {
-	const verifiedEmail = profile?.emails?.find(
-		/** @param {any} entry */ (entry) => entry?.verified === true,
-	);
-	const email = normalizeEmail(verifiedEmail?.value);
+	const email = readProviderEmail(profile);
 	if (!emailSchema.safeParse(email).success) {
 		throw new GoogleProfileError(
 			"Google did not provide a usable verified email address. No account was created.",
@@ -50,6 +47,20 @@ function readRegistrationProfile(profile) {
 		typeof profile?.displayName === "string" ? profile.displayName.trim() : "";
 	const fallbackName = email.slice(0, email.lastIndexOf("@"));
 	return { email, name: (suppliedName || fallbackName).slice(0, 100) };
+}
+
+/** @param {any} profile */
+function readProviderEmail(profile) {
+	const verifiedEmail = profile?.emails?.find(
+		/** @param {any} entry */ (entry) => entry?.verified === true,
+	);
+	const email = normalizeEmail(verifiedEmail?.value);
+	if (!emailSchema.safeParse(email).success) {
+		throw new GoogleProfileError(
+			"Google did not provide a usable verified email address. No account was changed.",
+		);
+	}
+	return email;
 }
 
 /**
@@ -74,7 +85,7 @@ export default async function authenticateGoogleUser({ profile, guestUserId = nu
 			client,
 		);
 		await authIdentitiesRepository.createGoogle(
-			{ userId: user.id, providerSubject },
+			{ userId: user.id, providerSubject, providerEmail: email },
 			client,
 		);
 		await client.query("COMMIT");
@@ -101,4 +112,4 @@ export default async function authenticateGoogleUser({ profile, guestUserId = nu
 	}
 }
 
-export { readProviderSubject, readRegistrationProfile };
+export { readProviderEmail, readProviderSubject, readRegistrationProfile };
