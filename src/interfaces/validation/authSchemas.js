@@ -34,6 +34,15 @@ export const addPasswordSchema = z
 		path: ["confirmPassword"],
 	});
 
+export const passwordResetRequestSchema = z.object({ email: emailSchema });
+
+export const passwordResetSchema = z
+	.object({ token: z.string(), password: passwordSchema, confirmPassword: z.string() })
+	.refine((value) => value.password === value.confirmPassword, {
+		message: "Passwords must match.",
+		path: ["confirmPassword"],
+	});
+
 export function safeReturnTo(value) {
 	if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
 		return "/";

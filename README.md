@@ -15,6 +15,10 @@ Copy `.env.sample` to `.env` for local development and set:
 - `SESSION_SECRET` to a long, random value. The application will not start without it.
 - `SESSION_MAX_AGE_MS` to the session-cookie lifetime; the default is 15 days.
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_CALLBACK_URL` for Google OAuth.
+- `APP_BASE_URL` to the trusted public HTTP(S) origin used to build password-reset links.
+- `PASSWORD_RESET_TTL_MS` to the reset-link lifetime; the default is 30 minutes.
+- `RESEND_API_KEY` to a Resend API key kept only in local or deployment secret storage.
+- `AUTH_EMAIL_FROM=Let’s Flex account@auth.paxeri.dev` to the Resend-verified sender.
 - `GUEST_TTL_DAYS=15` and `GUEST_CLEANUP_BATCH_SIZE=100` for generated guests.
 - `ADMIN_EMAIL` and `ADMIN_PASSWORD` when running the explicit database setup.
 - `ALLOW_DATABASE_RESET=true` only when deliberately resetting development data.
@@ -68,6 +72,21 @@ all existing sessions.
 
 Argon2id is smoke-tested with `npm run check:argon2`; CI runs the same check on
 Ubuntu 22.04 with Node 22 before deployment.
+
+Password reset is available only to accounts that already have a local identity.
+Reset tokens are opaque, stored only as SHA-256 hashes, expire after 30 minutes by
+default, and are single-use. Issuing a link invalidates the identity's earlier
+active link. Completing a reset updates the Argon2id password, consumes every
+active reset token for that identity, and removes that user's PostgreSQL sessions
+in one transaction. Requests are limited to five per IP per 15-minute window.
+
+Password-reset email is sent through Resend. Production startup requires
+`RESEND_API_KEY`, `AUTH_EMAIL_FROM`, and `APP_BASE_URL=https://paxeri.dev`; missing or
+invalid configuration stops startup without printing secrets. Keep open and click
+tracking disabled for the sending domain in Resend. Password-reset messages do not set
+a reply-to address. Delivery failures retain the same non-enumerating public response,
+and no development mode prints tokens or reset URLs. Automated tests inject fake or
+mocked email clients and never contact Resend.
 
 ## Tests
 

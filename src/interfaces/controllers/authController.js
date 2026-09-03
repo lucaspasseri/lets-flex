@@ -13,13 +13,99 @@ import {
 import createGuest from "../../features/auth/createGuest.js";
 import getAuthenticationMethods from "../../features/auth/getAuthenticationMethods.js";
 import registerUser from "../../features/auth/registerUser.js";
+import {
+	InvalidPasswordResetTokenError,
+	isPasswordResetTokenUsable,
+	requestPasswordReset,
+	resetPassword,
+} from "../../features/auth/passwordResetService.js";
 import * as usersRepository from "../../features/users/repository.js";
 import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
 import {
 	loginSchema,
+	passwordResetRequestSchema,
+	passwordResetSchema,
 	registrationSchema,
 	safeReturnTo,
 } from "../validation/authSchemas.js";
+
+const RESET_REQUEST_MESSAGE =
+	"If that email can use password sign-in, we sent a password reset link.";
+
+function renderResetRequest(res, state = {}) {
+	res.render("password-reset-request", {
+		layout: "./layouts/authShell",
+		page: { title: "Reset password · Let's Flex!" },
+		email: state.email ?? "",
+		errors: state.errors ?? [],
+		statusMessage: state.statusMessage ?? "",
+	});
+}
+
+function renderResetPassword(res, state) {
+	res.render("password-reset", {
+		layout: "./layouts/authShell",
+		page: { title: "Choose a new password · Let's Flex!" },
+		token: state.token ?? "",
+		errors: state.errors ?? [],
+	});
+}
+
+export function buildPasswordResetHandlers(emailService) {
+	return {
+		showRequest(_req, res) {
+			renderResetRequest(res);
+		},
+		request: asyncHandler(async (req, res) => {
+			const parsed = passwordResetRequestSchema.safeParse(req.body);
+			try {
+				if (parsed.success)
+					await requestPasswordReset({ email: parsed.data.email, emailService });
+			} catch (error) {
+				// The public response remains indistinguishable; the normal error sink receives no token or URL.
+				console.error(
+					"Password reset request could not be completed",
+					error instanceof Error ? error.message : error,
+				);
+			}
+			renderResetRequest(res, { statusMessage: RESET_REQUEST_MESSAGE });
+		}),
+		showReset: asyncHandler(async (req, res) => {
+			const token = typeof req.query?.token === "string" ? req.query.token : "";
+			if (!(await isPasswordResetTokenUsable(token))) {
+				res.status(400);
+				renderResetPassword(res, {
+					token: "",
+					errors: ["This password reset link is invalid or has expired."],
+				});
+				return;
+			}
+			renderResetPassword(res, { token });
+		}),
+		reset: asyncHandler(async (req, res) => {
+			const parsed = passwordResetSchema.safeParse(req.body);
+			if (!parsed.success) {
+				res.status(422);
+				renderResetPassword(res, {
+					token: typeof req.body?.token === "string" ? req.body.token : "",
+					errors: parsed.error.issues.map((issue) => issue.message),
+				});
+				return;
+			}
+			try {
+				await resetPassword(parsed.data);
+				res.redirect("/auth/login?passwordReset=success");
+			} catch (error) {
+				if (error instanceof InvalidPasswordResetTokenError) {
+					res.status(400);
+					renderResetPassword(res, { token: "", errors: [error.message] });
+					return;
+				}
+				throw error;
+			}
+		}),
+	};
+}
 
 /** @param {any} req @param {any} res @param {Record<string, any>} [state] */
 function renderLogin(req, res, state = {}) {
@@ -31,6 +117,10 @@ function renderLogin(req, res, state = {}) {
 		googleAuthUrl: `/auth/google?returnTo=${encodeURIComponent(returnTo)}`,
 		email: state.email ?? "",
 		errors: state.errors ?? [],
+		statusMessage:
+			req.query?.passwordReset === "success"
+				? "Your password has been reset. Sign in with your new password."
+				: "",
 		activeTab: state.activeTab ?? (req.query?.tab === "signup" ? "signup" : "signin"),
 	});
 }

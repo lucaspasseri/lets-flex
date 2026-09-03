@@ -6,6 +6,7 @@ import {
 	buildGoogleReplaceStartHandler,
 	buildGoogleStartHandler,
 	buildLoginHandler,
+	buildPasswordResetHandlers,
 } from "../controllers/authController.js";
 import {
 	requireAnonymous,
@@ -13,12 +14,23 @@ import {
 	requireAuthentication,
 } from "../middleware/auth.js";
 import rateLimitGuestCreation from "../middleware/rateLimitGuestCreation.js";
+import rateLimitPasswordReset from "../middleware/rateLimitPasswordReset.js";
 
-export default function createAuthRouter(passport) {
+export default function createAuthRouter(passport, { emailService }) {
 	const router = Router();
+	const passwordReset = buildPasswordResetHandlers(emailService);
 	router.get("/login", requireAnonymousOrGuest, authController.show);
 	router.post("/login", requireAnonymous, buildLoginHandler(passport));
 	router.post("/register", requireAnonymousOrGuest, authController.register);
+	router.get("/password-reset/request", requireAnonymous, passwordReset.showRequest);
+	router.post(
+		"/password-reset/request",
+		requireAnonymous,
+		rateLimitPasswordReset,
+		passwordReset.request,
+	);
+	router.get("/password-reset", requireAnonymous, passwordReset.showReset);
+	router.post("/password-reset", requireAnonymous, passwordReset.reset);
 	router.get("/google", requireAnonymousOrGuest, buildGoogleStartHandler(passport));
 	router.post(
 		"/google/link",

@@ -3,6 +3,7 @@ import { after, before, beforeEach, describe, test } from "node:test";
 import { Client } from "pg";
 import { schemaSql } from "../../db/schema.js";
 import { hashPassword } from "../../src/features/auth/passwordService.js";
+import FakeEmailService from "../../src/infrastructure/email/FakeEmailService.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const databaseIsSafe = (() => {
@@ -22,6 +23,8 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	let oauthServer;
 	let oauthOrigin;
 	let passwordHash;
+	let passwordResetDeliveries;
+	let emailService;
 
 	before(async () => {
 		process.env.DATABASE_URL = testDatabaseUrl;
@@ -30,11 +33,15 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		process.env.GOOGLE_CLIENT_ID = "google-test-client-id";
 		process.env.GOOGLE_CLIENT_SECRET = "google-test-client-secret";
 		process.env.GOOGLE_CALLBACK_URL = "http://localhost:3000/auth/google/callback";
+		process.env.APP_BASE_URL = "http://localhost:3000";
+		process.env.PASSWORD_RESET_TTL_MS = "1800000";
+		emailService = new FakeEmailService();
+		passwordResetDeliveries = emailService.deliveries;
 		passwordHash = await hashPassword("correct horse battery staple");
 		db = new Client({ connectionString: testDatabaseUrl });
 		await db.connect();
 		const { createApp } = await import("../../app.js");
-		server = createApp().listen(0, "127.0.0.1");
+		server = createApp({ emailService }).listen(0, "127.0.0.1");
 		await new Promise((resolve, reject) => {
 			server.once("listening", resolve);
 			server.once("error", reject);
@@ -102,7 +109,10 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				);
 			},
 		});
-		oauthServer = createApp({ passport: fakePassport }).listen(0, "127.0.0.1");
+		oauthServer = createApp({ passport: fakePassport, emailService }).listen(
+			0,
+			"127.0.0.1",
+		);
 		await new Promise((resolve, reject) => {
 			oauthServer.once("listening", resolve);
 			oauthServer.once("error", reject);
@@ -111,6 +121,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	});
 
 	beforeEach(async () => {
+		emailService.clear();
 		await db.query(schemaSql);
 		await db.query(
 			`WITH accounts AS (
@@ -214,6 +225,246 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		}
 		return client.request(flow.callback.pathname + flow.callback.search);
 	}
+
+	async function requestPasswordReset(client, email) {
+		const page = await client.request("/auth/password-reset/request");
+		return client.request("/auth/password-reset/request", {
+			method: "POST",
+			form: { _csrf: csrfFrom(page.text), email },
+		});
+	}
+
+	test("a local account can securely request and complete a password reset", async () => {
+		const client = agent();
+		const response = await requestPasswordReset(client, "  USER-ONE@EXAMPLE.COM ");
+		assert.equal(response.response.status, 200);
+		assert.match(response.text, /If that email can use password sign-in/);
+		assert.equal(passwordResetDeliveries.length, 1);
+		const token = new URL(passwordResetDeliveries[0].resetUrl).searchParams.get(
+			"token",
+		);
+		assert.ok(token);
+		const stored = (
+			await db.query("SELECT token_hash, consumed_at FROM password_reset_tokens")
+		).rows[0];
+		assert.notEqual(stored.token_hash, token);
+		assert.equal(stored.consumed_at, null);
+
+		const resetPage = await client.request(
+			`/auth/password-reset?token=${encodeURIComponent(token)}`,
+		);
+		assert.equal(resetPage.response.status, 200);
+		const completed = await client.request("/auth/password-reset", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(resetPage.text),
+				token,
+				password: "a brand new secure password",
+				confirmPassword: "a brand new secure password",
+			},
+		});
+		assert.equal(completed.response.status, 302);
+		assert.equal(
+			completed.response.headers.get("location"),
+			"/auth/login?passwordReset=success",
+		);
+		assert.equal(
+			(await client.request(`/auth/password-reset?token=${encodeURIComponent(token)}`))
+				.response.status,
+			400,
+		);
+
+		const loginPage = await client.request("/auth/login");
+		const oldLogin = await client.request("/auth/login", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(loginPage.text),
+				email: "user-one@example.com",
+				password: "correct horse battery staple",
+			},
+		});
+		assert.equal(oldLogin.response.status, 401);
+		const fresh = agent();
+		const freshPage = await fresh.request("/auth/login");
+		const newLogin = await fresh.request("/auth/login", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(freshPage.text),
+				email: "user-one@example.com",
+				password: "a brand new secure password",
+			},
+		});
+		assert.equal(newLogin.response.status, 302);
+	});
+
+	test("reset requests do not disclose unknown or Google-only accounts", async () => {
+		await db.query(
+			`INSERT INTO users (email, name) VALUES ('google-only@example.com', 'Google')`,
+		);
+		await db.query(`INSERT INTO auth_identities (user_id, provider, provider_subject, provider_email)
+		 SELECT id, 'google', 'google-only-sub', email FROM users WHERE email = 'google-only@example.com'`);
+		const responses = [];
+		for (const email of ["unknown@example.com", "google-only@example.com"]) {
+			const result = await requestPasswordReset(agent(), email);
+			responses.push({ status: result.response.status, text: result.text });
+		}
+		assert.equal(responses[0].status, responses[1].status);
+		assert.equal(
+			responses[0].text.replace(/name="_csrf" value="[^"]+"/, "name=csrf"),
+			responses[1].text.replace(/name="_csrf" value="[^"]+"/, "name=csrf"),
+		);
+		assert.equal(passwordResetDeliveries.length, 0);
+		assert.equal(
+			(await db.query("SELECT COUNT(*)::int AS count FROM password_reset_tokens"))
+				.rows[0].count,
+			0,
+		);
+	});
+
+	test("reset delivery failures retain the neutral public response", async () => {
+		const sendPasswordReset = emailService.sendPasswordReset;
+		const originalConsoleError = console.error;
+		const diagnostics = [];
+		emailService.sendPasswordReset = async () => {
+			throw new Error("Password reset email delivery failed (provider_rejected)");
+		};
+		console.error = (...values) => diagnostics.push(values.join(" "));
+		try {
+			const failed = await requestPasswordReset(agent(), "user-one@example.com");
+			const unknown = await requestPasswordReset(agent(), "unknown@example.com");
+			assert.equal(failed.response.status, unknown.response.status);
+			assert.equal(
+				failed.text.replace(/name="_csrf" value="[^"]+"/, "name=csrf"),
+				unknown.text.replace(/name="_csrf" value="[^"]+"/, "name=csrf"),
+			);
+			assert.equal(diagnostics.length, 1);
+			assert.match(diagnostics[0], /provider_rejected/);
+			assert.doesNotMatch(diagnostics[0], /user-one|password-reset\?token/);
+		} finally {
+			emailService.sendPasswordReset = sendPasswordReset;
+			console.error = originalConsoleError;
+		}
+	});
+
+	test("new requests invalidate old tokens and expired, malformed, and unknown tokens fail safely", async () => {
+		await requestPasswordReset(agent(), "user-one@example.com");
+		const first = new URL(passwordResetDeliveries[0].resetUrl).searchParams.get(
+			"token",
+		);
+		await requestPasswordReset(agent(), "user-one@example.com");
+		const second = new URL(passwordResetDeliveries[1].resetUrl).searchParams.get(
+			"token",
+		);
+		const client = agent();
+		assert.equal(
+			(await client.request(`/auth/password-reset?token=${first}`)).response.status,
+			400,
+		);
+		await db.query(
+			"UPDATE password_reset_tokens SET created_at = NOW() - INTERVAL '2 seconds', expires_at = NOW() - INTERVAL '1 second' WHERE consumed_at IS NULL",
+		);
+		assert.equal(
+			(await client.request(`/auth/password-reset?token=${second}`)).response.status,
+			400,
+		);
+		assert.equal(
+			(await client.request("/auth/password-reset?token=bad")).response.status,
+			400,
+		);
+		assert.equal(
+			(await client.request(`/auth/password-reset?token=${"A".repeat(43)}`)).response
+				.status,
+			400,
+		);
+	});
+
+	test("reset validation enforces password policy and confirmation", async () => {
+		await requestPasswordReset(agent(), "user-one@example.com");
+		const token = new URL(passwordResetDeliveries[0].resetUrl).searchParams.get(
+			"token",
+		);
+		const client = agent();
+		const page = await client.request(`/auth/password-reset?token=${token}`);
+		for (const [password, confirmPassword, message] of [
+			["short", "short", /at least 12/],
+			["a sufficiently long password", "a different long password", /must match/],
+		]) {
+			const result = await client.request("/auth/password-reset", {
+				method: "POST",
+				form: { _csrf: csrfFrom(page.text), token, password, confirmPassword },
+			});
+			assert.equal(result.response.status, 422);
+			assert.match(result.text, message);
+		}
+		assert.equal(
+			(await db.query("SELECT consumed_at FROM password_reset_tokens")).rows[0]
+				.consumed_at,
+			null,
+		);
+	});
+
+	test("concurrent reset submissions consume once and invalidate existing sessions", async () => {
+		const existingSession = agent();
+		await login(existingSession);
+		await requestPasswordReset(agent(), "user-one@example.com");
+		const token = new URL(passwordResetDeliveries[0].resetUrl).searchParams.get(
+			"token",
+		);
+		const clients = [agent(), agent()];
+		const pages = await Promise.all(
+			clients.map((client) => client.request(`/auth/password-reset?token=${token}`)),
+		);
+		const results = await Promise.all(
+			clients.map((client, index) =>
+				client.request("/auth/password-reset", {
+					method: "POST",
+					form: {
+						_csrf: csrfFrom(pages[index].text),
+						token,
+						password: "one concurrent replacement",
+						confirmPassword: "one concurrent replacement",
+					},
+				}),
+			),
+		);
+		assert.deepEqual(
+			results.map((result) => result.response.status).sort(),
+			[302, 400],
+		);
+		assert.equal((await existingSession.request("/")).response.status, 302);
+	});
+
+	test("a failed password update rolls back token consumption", async () => {
+		await requestPasswordReset(agent(), "user-one@example.com");
+		const token = new URL(passwordResetDeliveries[0].resetUrl).searchParams.get(
+			"token",
+		);
+		await db.query(`CREATE FUNCTION fail_password_reset_update() RETURNS trigger LANGUAGE plpgsql AS $$
+		 BEGIN RAISE EXCEPTION 'simulated password update failure'; END $$`);
+		await db.query(`CREATE TRIGGER fail_password_reset_update BEFORE UPDATE OF password_hash ON auth_identities
+		 FOR EACH ROW EXECUTE FUNCTION fail_password_reset_update()`);
+		try {
+			const client = agent();
+			const page = await client.request(`/auth/password-reset?token=${token}`);
+			const result = await client.request("/auth/password-reset", {
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(page.text),
+					token,
+					password: "valid replacement password",
+					confirmPassword: "valid replacement password",
+				},
+			});
+			assert.equal(result.response.status, 500);
+			assert.equal(
+				(await db.query("SELECT consumed_at FROM password_reset_tokens")).rows[0]
+					.consumed_at,
+				null,
+			);
+		} finally {
+			await db.query("DROP FUNCTION fail_password_reset_update() CASCADE");
+		}
+	});
 
 	async function beginGoogleLink(client) {
 		const profile = await client.request("/profile");

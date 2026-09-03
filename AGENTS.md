@@ -103,3 +103,55 @@ When the user says `Approve action plan`, set the first `Pending` action to `Act
 The coding agent may propose goal changes, but must not change user outcomes, scope,
 non-goals, security invariants, confirmed decisions, or completion criteria without
 explicit user approval.
+
+## End-of-response workflow options
+
+When working on an action governed by `current-goal.md` and
+`current-action.md`, end every review or status response with a
+`Next decision` section.
+
+Present only options that are valid for the action's current status.
+Do not continue to another action until the user explicitly chooses
+an option.
+
+### When the action is `Pending approval`
+
+Offer:
+
+- `[Approve action]` — Approve the proposed scope and begin implementation.
+- `[Revise action]` — Keep the action pending and revise its plan.
+- `[Pause goal]` — Stop work without changing the action's status.
+
+### When the action is `Ready for review`
+
+Offer:
+
+- `[Approve changes]` — Accept the implementation, run final verification,
+  mark the action completed if verification passes, and prepare the next
+  action without implementing it.
+- `[Request changes]` — Keep the current action active and address the
+  supplied review findings.
+- `[Mark as incomplete]` — Record that the acceptance criteria have not
+  been satisfied and explain what remains.
+- `[Choose another path]` — Reconsider the current approach without starting
+  unrelated implementation.
+
+### When the action is `Completed`
+
+Offer:
+
+- `[Approve next action]` — Approve and implement the prepared next action.
+- `[Revise next action]` — Change the proposed scope before implementation.
+- `[Pause goal]` — Leave the next action pending.
+
+### Response behavior
+
+- Show the current goal and action status before `Next decision`.
+- Give each option a short description of its effect.
+- Never interpret silence or an unrelated message as approval.
+- Never mark an action `Completed` unless its acceptance criteria have
+  verification evidence.
+- Never implement a newly prepared action in the same response that completes
+  the previous action unless the user explicitly authorized that behavior.
+- If the user supplies custom instructions, treat them as `[Choose another path]`
+  and confirm any resulting status or scope change.

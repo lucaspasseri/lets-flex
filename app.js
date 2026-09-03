@@ -6,6 +6,8 @@ import expressEjsLayouts from "express-ejs-layouts";
 import methodOverride from "method-override";
 import connectPgSimple from "connect-pg-simple";
 import pool from "./db/pool.js";
+import { readPasswordResetConfiguration } from "./src/features/auth/passwordResetService.js";
+import { createResendEmailService } from "./src/infrastructure/email/ResendEmailService.js";
 import { createPassport } from "./src/config/passport.js";
 import createAuthRouter from "./src/interfaces/routes/auth.js";
 import csrfProtection from "./src/interfaces/middleware/csrfProtection.js";
@@ -35,6 +37,16 @@ const __dirname = path.dirname(__filename);
 export function createApp(options = {}) {
 	const app = express();
 	const passport = options.passport ?? createPassport();
+	let emailService = options.emailService;
+	if (!emailService) {
+		if (process.env.NODE_ENV === "production") {
+			const { baseUrl } = readPasswordResetConfiguration();
+			if (new URL(baseUrl).origin !== "https://paxeri.dev") {
+				throw new Error("APP_BASE_URL must be https://paxeri.dev in production");
+			}
+		}
+		emailService = createResendEmailService();
+	}
 	const sessionSecret = process.env.SESSION_SECRET;
 	if (!sessionSecret) {
 		throw new Error("SESSION_SECRET is required");
@@ -85,7 +97,12 @@ export function createApp(options = {}) {
 	app.use(csrfProtection);
 	app.use(exposePrincipal);
 
-	app.use("/auth", createAuthRouter(passport));
+	app.use(
+		"/auth",
+		createAuthRouter(passport, {
+			emailService,
+		}),
+	);
 	app.use(requireAuthentication);
 
 	app.use("/", indexRouter);

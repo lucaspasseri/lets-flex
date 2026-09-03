@@ -4,230 +4,157 @@
 
 Let’s Flex tracks training progress, not only training plans.
 
-This broader milestone demonstrates:
-
-- secure multi-provider authentication;
-- production account recovery;
-- workout-status modeling;
-- analytics and SQL aggregation;
-- data visualization;
-- focused workout-session UX.
+This broader milestone demonstrates secure multi-provider authentication, production
+account recovery, workout-status modeling, analytics and SQL aggregation, data
+visualization, and focused workout-session UX.
 
 ## Current goal
 
-Implement a secure, production-ready password-reset flow for local authentication identities.
+Complete and verify production-ready password-reset email delivery through Resend for
+the existing local-identity password-reset flow.
 
 ## Status
 
-Ready for planning.
+Paused on 2026-09-03 at the user's request. Action 1 is completed; Action 2 remains pending
+approval and no further implementation is active.
 
-External email configuration is partially ready:
+The worktree contains an uncommitted password-reset implementation. It is implementation
+evidence, not an approved or completed action. The next action must preserve it and add
+only the missing production email-delivery configuration and adapter.
 
-- production domain: `https://paxeri.dev`;
-- email provider: Resend;
-- Resend API key: available as a secret;
-- sending-domain verification: must be confirmed;
-- final sender address: must be confirmed.
+## Current implementation state
 
-Do not record the API key in this file.
+The uncommitted implementation currently provides:
 
-## Completed prerequisites
+- request and completion pages, routes, validation, and CSRF protection;
+- a neutral request response for local, unknown, and Google-only emails;
+- cryptographically random, opaque reset tokens with only SHA-256 hashes persisted;
+- a configurable 30-minute default lifetime through `PASSWORD_RESET_TTL_MS`;
+- one active token per local identity, expiry checks, and single-use consumption;
+- atomic password replacement, token invalidation, and PostgreSQL session invalidation;
+- reset links built from a validated `APP_BASE_URL`;
+- database-backed request limiting of five attempts per IP per 15-minute window;
+- an application-owned `sendPasswordReset` boundary, an in-memory fake for tests, and an
+  intentionally failing unconfigured production implementation;
+- HTTP integration coverage for success, non-enumeration, expiry, malformed and unknown
+  tokens, replay/concurrency, password validation, session invalidation, and transaction
+  rollback;
+- UI and README/environment documentation for the implemented flow.
 
-- Users are provider-neutral application principals.
-- Authentication credentials belong to provider-scoped identities.
-- Google OAuth is implemented.
-- Explicit account linking is implemented.
-- A Google-only user can add a password.
-- Adding a password enables local login with the account email while preserving the
-  same application user ID.
-- A password user can link Google.
-- A user with both methods can replace the linked Google identity.
-- Google identities use Google’s stable `sub`, not email.
-- Email equality alone does not merge accounts.
-
-The password-reset implementation must preserve these behaviors.
+This state has not yet been accepted under the active-action workflow. Its full verification
+status must be established separately; the current documentation-only task does not verify
+or modify the implementation.
 
 ## User outcome
 
-A user who has a local password identity can request a password-reset email and use
-a secure, time-limited, single-use link to choose a new password.
+A user with an existing local password identity can request a time-limited, single-use
+password-reset link delivered through Resend, choose a new password, and sign in locally
+with it. A linked Google identity continues to resolve to the same application user and
+data.
 
-After resetting the password, the user can sign in locally with the same account
-email and new password. Any linked Google identity must continue to work and access
-the same application user and data.
+Unknown and Google-only emails receive the same neutral response and do not cause local
+identity creation.
 
-## User stories
+## Remaining scope
 
-### Request a reset
-
-Given a user with a local password identity,
-
-when the user submits the account email on the forgot-password page,
-
-then the application sends a password-reset email and displays a neutral confirmation.
-
-### Unknown email
-
-Given an email that does not identify a local password identity,
-
-when someone submits it,
-
-then the application displays the same neutral confirmation and does not reveal
-whether the account exists.
-
-### Google-only account
-
-Given a user who has only a Google identity and has not added a password,
-
-when someone submits the account email,
-
-then the application displays the same neutral confirmation without automatically
-creating a local identity.
-
-An authenticated Google-only user can add a password through the existing account-linking flow.
-
-### Linked account
-
-Given a user with both local and Google identities,
-
-when the local password is reset,
-
-then only the local credential changes. Google sign-in continues to resolve to the
-same application user ID.
-
-### Complete a reset
-
-Given a valid, unused and unexpired reset link,
-
-when the user submits a valid new password,
-
-then the local password hash is replaced and the reset token can never be used again.
-
-### Invalid link
-
-Given an invalid, expired or previously used reset link,
-
-when it is opened or submitted,
-
-then the application displays a safe error and offers a way to request another link.
-
-## In scope
-
-- forgot-password page;
-- reset-request endpoint;
-- neutral response that prevents account enumeration;
-- cryptographically secure reset-token generation;
-- storage of only the token hash;
-- token expiration;
-- single-use token enforcement;
-- password validation and hashing through existing boundaries;
-- password replacement for an existing local identity;
-- Resend integration behind an application-owned email boundary;
-- password-reset email content;
-- production links using `https://paxeri.dev`;
-- failure handling;
-- reasonable abuse protection;
-- focused unit and HTTP integration tests;
-- environment-variable documentation.
+- implement a Resend adapter behind the existing application-owned email boundary;
+- wire that adapter into normal application startup while preserving dependency injection
+  for automated tests;
+- send a transactional Let’s Flex password-reset message containing the generated reset
+  URL, its expiry, and guidance for an unrequested reset;
+- validate required email configuration without logging or exposing secrets;
+- document safe local and production configuration;
+- handle Resend rejection and transport failures with a neutral user response and
+  useful secret-free server-side diagnostics;
+- verify that automated tests never call Resend;
+- verify delivery from the approved `paxeri.dev` sending identity and that the delivered
+  link uses `https://paxeri.dev`.
 
 ## Out of scope
 
 - email verification during registration;
 - automatically creating a password identity for Google-only users;
-- automatic account merging;
-- changes to account linking;
-- changing the application account email;
-- unlinking authentication methods;
-- redesigning unrelated authentication pages;
-- analytics or dashboard work;
-- marketing emails;
-- newsletters;
-- introducing a general notification system;
-- adopting React Email unless the existing implementation clearly requires it and
-  the addition is separately approved.
+- automatic account merging or changes to account linking;
+- changing account email or unlinking authentication methods;
+- unrelated authentication redesign or refactoring;
+- marketing email, newsletters, or a general notification system;
+- replacing the existing token, request, completion, rate-limit, or session-invalidation
+  implementation unless review or verification finds a correctness or security defect;
+- adopting a general email templating framework unless separately approved.
 
-## Security invariants
+## Security and failure requirements
 
-- Generate reset tokens using a cryptographically secure random source.
-- Send the raw token only to the user.
-- Store only a one-way hash of the token.
-- Never log the raw token.
-- Tokens must expire.
-- Tokens must be single-use.
-- A new request should invalidate or supersede older outstanding tokens for the same
-  local identity.
-- Passwords must use the existing password-hashing boundary.
-- Reset requests must not reveal whether an email or local identity exists.
-- A reset token must resolve to a local authentication identity, not only to an email.
-- Resetting a password must not modify Google identities.
-- Database changes that consume the token and replace the password must be atomic.
-- User-facing errors must not expose provider responses or internal details.
-- Automated tests must not call Resend.
+- Keep `RESEND_API_KEY` only in local/deployment secret storage. Never commit, render,
+  return, or log it.
+- Keep the raw reset token and full reset URL out of logs and provider-error diagnostics.
+- Preserve generic request responses so account existence and provider failures cannot be
+  distinguished by user-visible content.
+- Automated tests must use a fake or mock and must not make network requests to Resend.
+- Validate `APP_BASE_URL` as a trusted absolute HTTP(S) origin; production must use
+  `https://paxeri.dev`.
+- Validate the configured sender before attempting delivery.
+- Treat non-success provider responses and transport failures as delivery failures; expose
+  no provider body or internal details to the requester.
+- Record only secret-free diagnostic context needed to operate the integration, such as a
+  stable error category and provider request ID when safely available.
+- Preserve the existing token guarantees: cryptographically secure generation, hash-only
+  storage, expiration, single use, supersession, local-identity ownership, and atomic
+  password replacement.
+- Do not modify linked Google identities.
+- Automated coverage must include adapter success, provider rejection, transport failure,
+  configuration failure, and request-flow non-enumeration on delivery failure.
+- A real Resend delivery is a deliberate manual production/staging verification, not an
+  automated test.
 
 ## Email configuration
 
-Proposed production configuration:
+Confirmed:
 
-- application URL: `https://paxeri.dev`;
-- sending subdomain: `auth.paxeri.dev`;
-- proposed sender: `Let’s Flex <account@auth.paxeri.dev>`;
 - provider: Resend;
+- owned domain: `paxeri.dev`;
+- production application origin: `https://paxeri.dev`;
 - email type: transactional;
-- open and click tracking: disabled for password-reset emails.
+- a Resend API key is available and must remain outside the repository.
 
-Expected environment variables:
+Required environment variables:
 
-- `APP_BASE_URL`
-- `RESEND_API_KEY`
-- `AUTH_EMAIL_FROM`
+- `APP_BASE_URL` — non-secret public origin; `https://paxeri.dev` in production;
+- `PASSWORD_RESET_TTL_MS` — optional positive lifetime in milliseconds; currently defaults
+  to `1800000` (30 minutes);
+- `RESEND_API_KEY` — required secret for the production adapter;
+- `AUTH_EMAIL_FROM` — required Resend-verified sender in mailbox or display-name format.
 
-Example names and non-secret values may be documented in `.env.example`. The real
-API key must exist only in local and deployment secrets.
+Only placeholders or non-secret examples belong in `.env.sample` and README documentation.
+The real API key belongs in local `.env` and deployment secret configuration and must not
+be pasted into planning documents, commits, logs, tests, or chat.
 
-Before production email can be sent, `auth.paxeri.dev` must be added to Resend and
-its generated DNS records must be added in Cloudflare. Domain ownership alone is
-not sufficient; Resend must show the sending domain as verified.
+## Confirmed implementation decisions and external prerequisites
 
-## Decisions to confirm during planning
-
-### Token lifetime
-
-Recommended default: 30 minutes.
-
-### Session invalidation
-
-Inspect the current session-store capabilities and decide whether a completed reset
-can invalidate the user’s existing authenticated sessions.
-
-Do not expand the implementation substantially without presenting the trade-off first.
-
-### Abuse protection
-
-Inspect the existing application for a rate-limiting mechanism.
-
-Recommend the smallest suitable protection for the request endpoint. Do not add a
-production dependency without approval.
-
-### Sender address
-
-Confirm whether to use:
-
-`Let’s Flex <account@auth.paxeri.dev>`
-
-If replies should be accepted, configure a real reply destination separately.
+- Use the official Resend Node.js SDK as a production dependency.
+- Configure the sender as `Let’s Flex account@auth.paxeri.dev` through `AUTH_EMAIL_FROM`.
+- Do not configure reply-to yet.
+- Keep open and click tracking disabled for password-reset emails.
+- Read the API key from `RESEND_API_KEY`.
+- Fail production startup clearly when required email configuration is missing.
+- Keep automated tests isolated through fake or mocked clients; they must never contact
+  Resend.
+- Preserve neutral public responses for unknown accounts and delivery failures, and keep
+  tokens, API keys, reset URLs, and sensitive account information out of diagnostics.
+- Production reset links use the configured `APP_BASE_URL=https://paxeri.dev` origin.
+- Add the chosen root domain or subdomain to Resend, publish the exact DNS records Resend
+  supplies, and confirm Resend reports it as verified before live delivery testing.
+- Confirm where production is deployed and where its secrets are managed. Existing planning
+  mentions Render, but the repository does not establish that as current fact.
 
 ## Done when
 
-- a local user can request and complete a password reset;
-- unknown and Google-only emails receive the same neutral request response;
-- only hashed reset tokens are stored;
-- expired, invalid and reused tokens are rejected;
-- consuming a token and replacing the password is atomic;
-- the new password works for local login;
-- the old password no longer works;
-- linked Google login continues to access the same user ID;
-- automated tests do not send real email;
-- the email provider can be replaced without changing password-reset business logic;
-- a production reset email contains a valid `https://paxeri.dev` link;
-- relevant checks and integration tests pass;
-- skipped checks and remaining production prerequisites are reported.
+- the existing secure password-reset behavior remains intact and its relevant checks pass;
+- eligible local accounts receive a password-reset email through Resend;
+- unknown and Google-only accounts retain the same neutral response;
+- the Resend implementation remains behind the application-owned email boundary;
+- configuration is environment-based, validated, and documented without secrets;
+- provider and configuration failures are safe, observable, and covered by tests;
+- automated tests make no real Resend calls;
+- a manual delivery from the verified sender succeeds;
+- the delivered reset URL uses `https://paxeri.dev` and successfully completes a reset;
+- skipped checks and remaining deployment prerequisites are reported.

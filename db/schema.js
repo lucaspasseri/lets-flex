@@ -1,6 +1,8 @@
 export const schemaSql = `
 DROP TABLE IF EXISTS "session" CASCADE;
 DROP TABLE IF EXISTS guest_creation_limits CASCADE;
+DROP TABLE IF EXISTS password_reset_request_limits CASCADE;
+DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 DROP TABLE IF EXISTS workout_set_logs CASCADE;
 DROP TABLE IF EXISTS workout_step_logs CASCADE;
 DROP TABLE IF EXISTS workout_sessions CASCADE;
@@ -89,6 +91,24 @@ CREATE TABLE auth_identities (
 );
 
 CREATE INDEX auth_identities_user_idx ON auth_identities (user_id);
+
+CREATE TABLE password_reset_tokens (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	auth_identity_id INTEGER NOT NULL REFERENCES auth_identities(id) ON DELETE CASCADE,
+	token_hash CHAR(64) NOT NULL UNIQUE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	expires_at TIMESTAMPTZ NOT NULL,
+	consumed_at TIMESTAMPTZ,
+	CONSTRAINT password_reset_expiration_valid CHECK (expires_at > created_at)
+);
+
+CREATE UNIQUE INDEX password_reset_one_active_per_identity
+ON password_reset_tokens (auth_identity_id)
+WHERE consumed_at IS NULL;
+
+CREATE INDEX password_reset_token_lookup_idx
+ON password_reset_tokens (token_hash, expires_at)
+WHERE consumed_at IS NULL;
 
 CREATE TABLE goals (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -356,6 +376,16 @@ CREATE TABLE guest_creation_limits (
 
 CREATE INDEX guest_creation_limits_window_idx
 ON guest_creation_limits (window_started_at);
+
+CREATE TABLE password_reset_request_limits (
+	key_hash VARCHAR(64) NOT NULL,
+	window_started_at TIMESTAMPTZ NOT NULL,
+	attempts INTEGER NOT NULL DEFAULT 1,
+	PRIMARY KEY (key_hash, window_started_at)
+);
+
+CREATE INDEX password_reset_request_limits_window_idx
+ON password_reset_request_limits (window_started_at);
 
 INSERT INTO "step_types" ("name")
 VALUES
