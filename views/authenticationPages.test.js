@@ -47,6 +47,43 @@ test("login preserves the sign-up tab and safe email after an error", async () =
 	assert.doesNotMatch(html, /value="Password must/);
 });
 
+test("password-reset request page provides an accessible email form and neutral status", async () => {
+	const html = await renderFile(path.resolve("views/password-reset-request.ejs"), {
+		csrfToken: "test-token",
+		email: "member@example.com",
+		errors: [],
+		statusMessage:
+			"If that email can use password sign-in, we sent a password reset link.",
+	});
+
+	assert.match(html, /<h1 id="reset-request-heading">/);
+	assert.match(html, /role="status" aria-live="polite"/);
+	assert.match(html, /<label[^>]*for="reset-email"/);
+	assert.match(html, /type="email"/);
+	assert.match(html, /autocomplete="email"/);
+	assert.match(html, /action="\/auth\/password-reset\/request"/);
+});
+
+test("password-reset completion page labels both new-password fields and hides invalid tokens", async () => {
+	const validHtml = await renderFile(path.resolve("views/password-reset.ejs"), {
+		csrfToken: "test-token",
+		token: "opaque-token",
+		errors: [],
+	});
+	const invalidHtml = await renderFile(path.resolve("views/password-reset.ejs"), {
+		csrfToken: "test-token",
+		token: "",
+		errors: ["This password reset link is invalid or has expired."],
+	});
+
+	assert.match(validHtml, /<label[^>]*for="reset-password"/);
+	assert.match(validHtml, /<label[^>]*for="reset-confirm-password"/);
+	assert.equal((validHtml.match(/autocomplete="new-password"/g) ?? []).length, 2);
+	assert.match(validHtml, /name="token" value="opaque-token"/);
+	assert.match(invalidHtml, /role="alert" aria-live="polite"/);
+	assert.doesNotMatch(invalidHtml, /<form[^>]*action="\/auth\/password-reset"/);
+});
+
 test("profile presents role-specific guest and administrator states", async () => {
 	const guestHtml = await renderFile(path.resolve("views/profile.ejs"), {
 		csrfToken: "test-token",

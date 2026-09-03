@@ -234,7 +234,12 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		});
 	}
 
-	test("a local account can securely request and complete a password reset", async () => {
+	test("a linked account securely resets its password without changing Google identity", async () => {
+		await db.query(
+			`INSERT INTO auth_identities (user_id, provider, provider_subject)
+			 SELECT id, 'google', 'password-reset-google-sub' FROM users
+			 WHERE email = 'user-one@example.com'`,
+		);
 		const client = agent();
 		const response = await requestPasswordReset(client, "  USER-ONE@EXAMPLE.COM ");
 		assert.equal(response.response.status, 200);
@@ -295,6 +300,25 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			},
 		});
 		assert.equal(newLogin.response.status, 302);
+
+		const googleClient = agent(oauthOrigin);
+		const flow = await beginGoogle(googleClient, "/profile");
+		const googleLogin = await completeGoogle(googleClient, flow, {
+			sub: "password-reset-google-sub",
+		});
+		assert.equal(googleLogin.response.status, 302);
+		assert.equal(googleLogin.response.headers.get("location"), "/profile");
+		const profile = await googleClient.request("/profile");
+		assert.equal(profile.response.status, 200);
+		assert.match(profile.text, /User One/);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT COUNT(*)::int AS count FROM auth_identities WHERE provider = 'google' AND provider_subject = 'password-reset-google-sub'",
+				)
+			).rows[0].count,
+			1,
+		);
 	});
 
 	test("reset requests do not disclose unknown or Google-only accounts", async () => {
@@ -326,7 +350,12 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		const originalConsoleError = console.error;
 		const diagnostics = [];
 		emailService.sendPasswordReset = async () => {
-			throw new Error("Password reset email delivery failed (provider_rejected)");
+			throw Object.assign(
+				new Error(
+					`Rejected user-one@example.com /auth/password-reset?token=secret-token`,
+				),
+				{ category: "provider_rejected", providerRequestId: "request_123" },
+			);
 		};
 		console.error = (...values) => diagnostics.push(values.join(" "));
 		try {
@@ -339,11 +368,27 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			);
 			assert.equal(diagnostics.length, 1);
 			assert.match(diagnostics[0], /provider_rejected/);
-			assert.doesNotMatch(diagnostics[0], /user-one|password-reset\?token/);
+			assert.match(diagnostics[0], /provider_rejected request_123/);
+			assert.doesNotMatch(
+				diagnostics[0],
+				/user-one|password-reset\?token|secret-token/,
+			);
 		} finally {
 			emailService.sendPasswordReset = sendPasswordReset;
 			console.error = originalConsoleError;
 		}
+	});
+
+	test("reset requests are limited per IP without sending additional email", async () => {
+		const client = agent();
+		for (let attempt = 0; attempt < 5; attempt += 1) {
+			const result = await requestPasswordReset(client, "user-one@example.com");
+			assert.equal(result.response.status, 200);
+		}
+		const limited = await requestPasswordReset(client, "user-one@example.com");
+		assert.equal(limited.response.status, 429);
+		assert.match(limited.text, /Too many reset requests/);
+		assert.equal(passwordResetDeliveries.length, 5);
 	});
 
 	test("new requests invalidate old tokens and expired, malformed, and unknown tokens fail safely", async () => {

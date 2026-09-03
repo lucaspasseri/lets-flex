@@ -87,7 +87,6 @@ export async function isPasswordResetTokenUsable(token) {
 
 export async function resetPassword({ token, password }) {
 	if (!validToken(token)) throw new InvalidPasswordResetTokenError();
-	const passwordHash = await hashPassword(password);
 	const client = await pool.connect();
 	try {
 		await client.query("BEGIN");
@@ -96,6 +95,8 @@ export async function resetPassword({ token, password }) {
 			client,
 		);
 		if (!record) throw new InvalidPasswordResetTokenError();
+		// Reject unknown, expired, or consumed tokens before performing expensive Argon2 work.
+		const passwordHash = await hashPassword(password);
 		await repository.updatePassword(
 			{ identityId: record.auth_identity_id, passwordHash },
 			client,

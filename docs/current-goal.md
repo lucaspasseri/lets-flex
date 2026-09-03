@@ -15,16 +15,18 @@ the existing local-identity password-reset flow.
 
 ## Status
 
-Paused on 2026-09-03 at the user's request. Action 1 is completed; Action 2 remains pending
-approval and no further implementation is active.
+Blocked pending the user-controlled application deployment. The user confirmed the
+additive production schema was applied on 2026-09-03. Actions 1 and 2 are completed;
+Action 3 is approved but must not send email, push, deploy, or modify production data until
+the user explicitly authorizes the relevant step.
 
-The worktree contains an uncommitted password-reset implementation. It is implementation
-evidence, not an approved or completed action. The next action must preserve it and add
-only the missing production email-delivery configuration and adapter.
+The password-reset implementation and Resend adapter are committed. Action 2 reviewed and
+verified the complete flow and corrected two security issues without expanding its approved
+behavior.
 
 ## Current implementation state
 
-The uncommitted implementation currently provides:
+The committed implementation currently provides:
 
 - request and completion pages, routes, validation, and CSRF protection;
 - a neutral request response for local, unknown, and Google-only emails;
@@ -34,16 +36,15 @@ The uncommitted implementation currently provides:
 - atomic password replacement, token invalidation, and PostgreSQL session invalidation;
 - reset links built from a validated `APP_BASE_URL`;
 - database-backed request limiting of five attempts per IP per 15-minute window;
-- an application-owned `sendPasswordReset` boundary, an in-memory fake for tests, and an
-  intentionally failing unconfigured production implementation;
+- an application-owned `sendPasswordReset` boundary, an in-memory fake for tests, and the
+  configured Resend production adapter completed in Action 1;
 - HTTP integration coverage for success, non-enumeration, expiry, malformed and unknown
   tokens, replay/concurrency, password validation, session invalidation, and transaction
   rollback;
 - UI and README/environment documentation for the implemented flow.
 
-This state has not yet been accepted under the active-action workflow. Its full verification
-status must be established separately; the current documentation-only task does not verify
-or modify the implementation.
+Actions 1 and 2 are completed. Automated implementation review is finished; live Resend and
+production configuration verification remain in Action 3.
 
 ## User outcome
 
@@ -57,16 +58,6 @@ identity creation.
 
 ## Remaining scope
 
-- implement a Resend adapter behind the existing application-owned email boundary;
-- wire that adapter into normal application startup while preserving dependency injection
-  for automated tests;
-- send a transactional Let’s Flex password-reset message containing the generated reset
-  URL, its expiry, and guidance for an unrequested reset;
-- validate required email configuration without logging or exposing secrets;
-- document safe local and production configuration;
-- handle Resend rejection and transport failures with a neutral user response and
-  useful secret-free server-side diagnostics;
-- verify that automated tests never call Resend;
 - verify delivery from the approved `paxeri.dev` sending identity and that the delivered
   link uses `https://paxeri.dev`.
 
@@ -143,8 +134,12 @@ be pasted into planning documents, commits, logs, tests, or chat.
 - Production reset links use the configured `APP_BASE_URL=https://paxeri.dev` origin.
 - Add the chosen root domain or subdomain to Resend, publish the exact DNS records Resend
   supplies, and confirm Resend reports it as verified before live delivery testing.
-- Confirm where production is deployed and where its secrets are managed. Existing planning
-  mentions Render, but the repository does not establish that as current fact.
+- Production is deployed through Render behind Cloudflare; the user confirmed the required
+  environment variables are present without exposing their values.
+- Use the user-designated controlled mailbox only through untracked
+  `AUTH_EMAIL_TEST_TO`; never hard-code, commit, display, log, or document its value.
+- The user owns pushes and Render deployment. Do not send email, push, deploy, or modify
+  production data without explicit authorization for that step.
 
 ## Done when
 

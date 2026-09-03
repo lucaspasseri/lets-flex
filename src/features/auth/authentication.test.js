@@ -7,6 +7,7 @@ import {
 	readRegistrationProfile,
 } from "./authenticateGoogleUser.js";
 import { hashPassword, verifyPassword } from "./passwordService.js";
+import { readPasswordResetConfiguration } from "./passwordResetService.js";
 import { readGoogleConfiguration } from "../../config/passport.js";
 import {
 	addPasswordSchema,
@@ -119,5 +120,35 @@ test("Google OAuth configuration is required and callback URLs must be absolute"
 				GOOGLE_CALLBACK_URL: "/auth/google/callback",
 			}),
 		/absolute HTTP\(S\) URL/,
+	);
+});
+
+test("password reset configuration requires a trusted HTTP(S) base URL and positive lifetime", () => {
+	assert.deepEqual(
+		readPasswordResetConfiguration({
+			APP_BASE_URL: "https://paxeri.dev",
+			PASSWORD_RESET_TTL_MS: "1800000",
+		}),
+		{ baseUrl: "https://paxeri.dev/", ttlMs: 1800000 },
+	);
+	assert.throws(() => readPasswordResetConfiguration({}), /APP_BASE_URL is required/);
+	assert.throws(
+		() => readPasswordResetConfiguration({ APP_BASE_URL: "ftp://paxeri.dev" }),
+		/trusted absolute HTTP\(S\) URL/,
+	);
+	assert.throws(
+		() =>
+			readPasswordResetConfiguration({
+				APP_BASE_URL: "https://user:password@paxeri.dev",
+			}),
+		/trusted absolute HTTP\(S\) URL/,
+	);
+	assert.throws(
+		() =>
+			readPasswordResetConfiguration({
+				APP_BASE_URL: "https://paxeri.dev",
+				PASSWORD_RESET_TTL_MS: "0",
+			}),
+		/must be positive/,
 	);
 });

@@ -31,6 +31,23 @@ import {
 
 const RESET_REQUEST_MESSAGE =
 	"If that email can use password sign-in, we sent a password reset link.";
+const SAFE_DELIVERY_CATEGORIES = new Set(["provider_rejected", "transport_failure"]);
+
+function reportPasswordResetFailure(error) {
+	const category = SAFE_DELIVERY_CATEGORIES.has(error?.category)
+		? error.category
+		: "internal_failure";
+	const providerRequestId =
+		typeof error?.providerRequestId === "string" &&
+		/^[A-Za-z0-9_-]{1,128}$/.test(error.providerRequestId)
+			? error.providerRequestId
+			: null;
+	console.error(
+		"Password reset request could not be completed",
+		category,
+		...(providerRequestId ? [providerRequestId] : []),
+	);
+}
 
 function renderResetRequest(res, state = {}) {
 	res.render("password-reset-request", {
@@ -62,11 +79,8 @@ export function buildPasswordResetHandlers(emailService) {
 				if (parsed.success)
 					await requestPasswordReset({ email: parsed.data.email, emailService });
 			} catch (error) {
-				// The public response remains indistinguishable; the normal error sink receives no token or URL.
-				console.error(
-					"Password reset request could not be completed",
-					error instanceof Error ? error.message : error,
-				);
+				// Only stable, allow-listed operational context reaches diagnostics.
+				reportPasswordResetFailure(error);
 			}
 			renderResetRequest(res, { statusMessage: RESET_REQUEST_MESSAGE });
 		}),
