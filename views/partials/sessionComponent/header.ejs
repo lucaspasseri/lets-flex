@@ -1,4 +1,4 @@
 <header class="session-header">
-	<div class="session-header-text"><p><%= header.eyebrow %></p><h2><%= header.title %></h2></div>
-	<span class="session-status"><%= header.statusLabel %></span>
+	<div class="session-header-text"><p><%= header.eyebrow %></p><h2 id="current-workout-title"><%= header.title %></h2></div>
+	<span class="session-status session-status--<%= header.statusModifier %>"><%= header.statusLabel %></span>
 </header>

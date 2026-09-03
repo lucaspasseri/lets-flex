@@ -84,7 +84,13 @@ export async function finishByIdForUser({ workoutSessionId, userId }, db = pool)
 	const { rows } = await db.query(
 		`UPDATE workout_sessions ws SET status = 'finished', finished_at = NOW()
 		 FROM training_days td, cycles c, programs p
-		 WHERE ws.id = $1 AND td.id = ws.training_day_id
+		 WHERE ws.id = $1 AND ws.status = 'in_progress'
+		   AND NOT EXISTS (
+		     SELECT 1 FROM workout_step_logs wsl
+		     WHERE wsl.workout_session_id = ws.id
+		       AND wsl.status NOT IN ('performed', 'skipped')
+		   )
+		   AND td.id = ws.training_day_id
 		   AND c.id = td.cycle_id AND p.id = c.program_id AND p.user_id = $2
 		 RETURNING ws.*`,
 		[workoutSessionId, userId],
@@ -97,7 +103,8 @@ export async function cancelByIdForUser({ workoutSessionId, userId }, db = pool)
 	const { rows } = await db.query(
 		`UPDATE workout_sessions ws SET status = 'cancelled'
 		 FROM training_days td, cycles c, programs p
-		 WHERE ws.id = $1 AND td.id = ws.training_day_id
+		 WHERE ws.id = $1 AND ws.status = 'planned'
+		   AND td.id = ws.training_day_id
 		   AND c.id = td.cycle_id AND p.id = c.program_id AND p.user_id = $2
 		 RETURNING ws.*`,
 		[workoutSessionId, userId],

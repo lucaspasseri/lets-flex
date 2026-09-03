@@ -1,7 +1,7 @@
-<div class="form-row">
-	<div class="set-title"><%= row.title %></div>
+<fieldset class="form-row" data-set-row>
+	<legend class="set-title" data-set-title><%= row.title %></legend>
 	<div class="set-reps"><%- include('../shared/components/form/field', { field: row.fields.reps }) %></div>
 	<div class="set-load-value"><%- include('../shared/components/form/field', { field: row.fields.loadValue }) %></div>
 	<div class="set-load-unit"><%- include('../shared/components/form/field', { field: row.fields.loadUnit }) %></div>
-	<%- include('../shared/components/button/button', { button: { label: "Remove set", type: "button", iconOnly: true, variant: "ghost", attributes: { "data-action": "remove-set" }, renderIcon: () => include("../shared/components/icons/close", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
-</div>
+	<%- include('../shared/components/button/button', { button: { label: `Remove ${row.title.toLowerCase()}`, type: "button", iconOnly: true, variant: "ghost", disabled: !row.canRemove, attributes: { "data-action": "remove-set" }, renderIcon: () => include("../shared/components/icons/close", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
+</fieldset>

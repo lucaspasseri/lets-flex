@@ -1,8 +1,98 @@
-.session-component {
+.workout-feedback {
+	display: flex;
+	align-items: start;
+	gap: 0.8rem;
+	margin: 1rem 1rem 0;
+	padding: 0.9rem 1rem;
+	border: 1px solid color-mix(in srgb, var(--color-danger) 48%, var(--color-border));
+	border-radius: 0.8rem;
+	color: var(--color-text);
+	background: color-mix(in srgb, var(--color-danger) 9%, var(--color-page));
+}
+
+.workout-feedback:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 58%, transparent);
+	outline-offset: 3px;
+}
+
+.workout-feedback__mark,
+.session-outcome__mark {
 	display: grid;
-	gap: 1.25rem;
-	padding: clamp(1rem, 3vw, 1.5rem);
-	background: var(--color-surface);
+	flex: 0 0 auto;
+	width: 2rem;
+	aspect-ratio: 1;
+	place-items: center;
+	border-radius: 50%;
+	font-weight: 800;
+}
+
+.workout-feedback__mark {
+	color: var(--color-text-on-danger);
+	background: var(--color-danger);
+}
+
+.workout-feedback strong,
+.workout-feedback p,
+.session-outcome h3,
+.session-outcome p,
+.session-action-panel h3,
+.session-action-panel p {
+	margin: 0;
+}
+
+.workout-feedback strong {
+	font-size: 0.88rem;
+}
+
+.workout-feedback p {
+	margin-top: 0.2rem;
+	color: var(--color-text-muted);
+	font-size: 0.8rem;
+	line-height: 1.45;
+}
+
+.session-component {
+	position: relative;
+	display: grid;
+	gap: 1.5rem;
+	min-width: 0;
+	padding: clamp(1rem, 3vw, 1.75rem);
+	background:
+		linear-gradient(
+			135deg,
+			color-mix(
+				in srgb,
+				var(--session-state-color, var(--color-border)) 5%,
+				transparent
+			),
+			transparent 38%
+		),
+		var(--color-surface);
+}
+
+.session-component::before {
+	position: absolute;
+	inset: 0 0 auto;
+	height: 3px;
+	background: var(--session-state-color, var(--color-border));
+	content: "";
+}
+
+.session-component--planned {
+	--session-state-color: var(--color-text-muted);
+}
+
+.session-component--in-progress {
+	--session-state-color: var(--color-action);
+}
+
+.session-component--finished {
+	--session-state-color: var(--color-success);
+}
+
+.session-component--cancelled,
+.session-component--unknown {
+	--session-state-color: var(--color-danger);
 }
 
 .session-component .session-header {
@@ -15,6 +105,7 @@
 .session-header-text {
 	min-width: 0;
 }
+
 .session-header-text > p,
 .session-section-label {
 	margin: 0;
@@ -24,23 +115,106 @@
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
 }
+
 .session-header-text h2 {
-	margin: 0.25rem 0 0;
+	margin: 0.3rem 0 0;
 	overflow-wrap: anywhere;
-	font-size: clamp(1.35rem, 4vw, 2rem);
-	line-height: 1.1;
+	font-size: clamp(1.5rem, 4vw, 2.25rem);
+	line-height: 1.05;
+	letter-spacing: -0.025em;
 }
+
 .session-status {
+	display: inline-flex;
+	align-items: center;
 	flex-shrink: 0;
-	padding: 0.4rem 0.6rem;
-	border: 1px solid color-mix(in srgb, var(--color-success) 45%, var(--color-border));
+	min-height: 2rem;
+	padding: 0.4rem 0.65rem;
+	border: 1px solid var(--color-border);
 	border-radius: 999px;
-	color: var(--color-success);
-	background: color-mix(in srgb, var(--color-success) 8%, transparent);
+	color: var(--color-text-muted);
+	background: color-mix(in srgb, var(--color-page) 78%, transparent);
 	font-size: 0.65rem;
 	font-weight: 750;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
+}
+
+.session-status--in-progress {
+	border-color: color-mix(in srgb, var(--color-action) 45%, var(--color-border));
+	color: var(--color-action);
+	background: color-mix(in srgb, var(--color-action) 8%, transparent);
+}
+
+.session-status--finished {
+	border-color: color-mix(in srgb, var(--color-success) 45%, var(--color-border));
+	color: var(--color-success);
+	background: color-mix(in srgb, var(--color-success) 8%, transparent);
+}
+
+.session-status--cancelled,
+.session-status--unknown {
+	border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+	color: var(--color-action);
+	background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+}
+
+.session-progress {
+	display: grid;
+	gap: 0.65rem;
+	padding: 1rem;
+	border: 1px solid
+		color-mix(in srgb, var(--session-state-color) 28%, var(--color-border));
+	border-radius: 0.85rem;
+	background: color-mix(in srgb, var(--color-page) 82%, transparent);
+}
+
+.session-progress__summary {
+	display: flex;
+	align-items: end;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.session-progress h3 {
+	margin: 0.2rem 0 0;
+	font-size: 1rem;
+}
+
+.session-progress__summary > strong {
+	color: var(--session-state-color);
+	font-size: 1.4rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.session-progress progress {
+	width: 100%;
+	height: 0.55rem;
+	overflow: hidden;
+	border: 0;
+	border-radius: 999px;
+	background: var(--color-border);
+	accent-color: var(--session-state-color);
+}
+
+.session-progress progress::-webkit-progress-bar {
+	background: var(--color-border);
+}
+
+.session-progress progress::-webkit-progress-value {
+	border-radius: 999px;
+	background: var(--session-state-color);
+}
+
+.session-progress progress::-moz-progress-bar {
+	border-radius: 999px;
+	background: var(--session-state-color);
+}
+
+.session-progress > p {
+	color: var(--color-text-muted);
+	font-size: 0.75rem;
+	line-height: 1.4;
 }
 
 .no-workout-session-container,
@@ -55,18 +229,20 @@
 }
 
 .no-session-step-container {
-	display: grid;
-	justify-items: center;
-	gap: 0.55rem;
-	padding: 2.5rem 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.8rem;
+	padding: clamp(1.5rem, 5vw, 2.5rem) 1rem;
 	border: 1px dashed var(--color-border);
 	border-radius: 0.8rem;
 	color: var(--color-text-muted);
 	background: var(--color-page);
-	text-align: center;
 }
+
 .no-session-step-container > span {
 	display: grid;
+	flex: 0 0 auto;
 	width: 2.5rem;
 	aspect-ratio: 1;
 	place-items: center;
@@ -75,8 +251,21 @@
 	background: color-mix(in srgb, var(--color-action) 12%, transparent);
 	font-weight: 800;
 }
+
+.no-session-step-container h3,
 .no-session-step-container p {
-	font-size: 0.84rem;
+	margin: 0;
+}
+
+.no-session-step-container h3 {
+	color: var(--color-text);
+	font-size: 0.95rem;
+}
+
+.no-session-step-container p {
+	margin-top: 0.2rem;
+	font-size: 0.8rem;
+	line-height: 1.45;
 }
 
 .session-step-list-container ul,
@@ -88,13 +277,14 @@
 	padding: 0;
 	list-style: none;
 }
-.session-step {
+
+.session-component .session-step {
 	position: relative;
 	display: grid;
 	grid-template-columns: auto minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 0.875rem;
-	min-height: 4rem;
+	min-height: 4.25rem;
 	padding: 0.75rem 0.875rem;
 	border: 1px solid var(--color-border);
 	border-radius: 0.8rem;
@@ -103,12 +293,14 @@
 		border-color 160ms ease,
 		background-color 160ms ease;
 }
-.session-step--current {
+
+.session-component .session-step--current {
 	border-color: color-mix(in srgb, var(--color-action) 52%, var(--color-border));
 	background: color-mix(in srgb, var(--color-action) 6%, var(--color-page));
 	box-shadow: inset 3px 0 0 var(--color-action);
 }
-.session-step__order {
+
+.session-component .session-step__order {
 	display: grid;
 	width: 2.25rem;
 	aspect-ratio: 1;
@@ -122,19 +314,31 @@
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0.04em;
 }
-.session-step--current .session-step__order {
+
+.session-component .session-step--current .session-step__order {
 	border-color: color-mix(in srgb, var(--color-action) 35%, var(--color-border));
 	color: var(--color-action);
 	background: color-mix(in srgb, var(--color-action) 10%, var(--color-surface));
 }
-.session-step__content {
+
+.session-component .session-step__content {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 0.35rem 0.65rem;
+	gap: 0.25rem 0.65rem;
 	min-width: 0;
 }
-.session-step__name {
+
+.session-component .session-step__position {
+	flex-basis: 100%;
+	color: var(--color-text-disabled);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+.session-component .session-step__name {
 	margin: 0;
 	overflow-wrap: anywhere;
 	color: var(--color-text);
@@ -143,7 +347,8 @@
 	line-height: 1.35;
 	letter-spacing: 0.005em;
 }
-.session-step__current-label {
+
+.session-component .session-step__current-label {
 	padding: 0.2rem 0.45rem;
 	border-radius: 999px;
 	color: var(--color-action);
@@ -154,76 +359,202 @@
 	line-height: 1.2;
 	text-transform: uppercase;
 }
-.session-step__status {
-	display: grid;
-	width: 2rem;
-	aspect-ratio: 1;
-	place-items: center;
+
+.session-component .session-step__status {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35rem;
+	min-height: 2rem;
+	padding: 0.35rem 0.55rem;
 	border: 1px solid var(--color-border);
-	border-radius: 50%;
+	border-radius: 999px;
 	color: var(--color-text-muted);
 	background: var(--color-surface);
+	font-size: 0.66rem;
+	font-weight: 700;
 }
-.session-step__status svg {
-	width: 1.15rem;
-	height: 1.15rem;
+
+.session-component .session-step__status svg {
+	width: 1rem;
+	height: 1rem;
 }
-.session-step--performed .session-step__status {
+
+.session-component .session-step--performed .session-step__status {
 	border-color: color-mix(in srgb, var(--color-success) 36%, var(--color-border));
 	color: var(--color-success);
 	background: color-mix(in srgb, var(--color-success) 9%, var(--color-surface));
 }
-.session-step--skipped .session-step__status {
+
+.session-component .session-step--skipped .session-step__status {
 	border-color: color-mix(in srgb, var(--color-action) 28%, var(--color-border));
 	color: var(--color-action);
 	background: color-mix(in srgb, var(--color-action) 7%, var(--color-surface));
 }
 
-.current-workout-step-container {
-	padding-top: 1.25rem;
-	border-top: 1px solid var(--color-border);
+.session-outcome {
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	padding: 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.8rem;
+	background: var(--color-page);
 }
+
+.session-outcome__mark {
+	color: var(--color-text);
+	background: var(--color-border);
+}
+
+.session-outcome--success {
+	border-color: color-mix(in srgb, var(--color-success) 34%, var(--color-border));
+	background: color-mix(in srgb, var(--color-success) 7%, var(--color-page));
+}
+
+.session-outcome--success .session-outcome__mark {
+	color: var(--color-page);
+	background: var(--color-success);
+}
+
+.session-outcome--error {
+	border-color: color-mix(in srgb, var(--color-danger) 42%, var(--color-border));
+	background: color-mix(in srgb, var(--color-danger) 8%, var(--color-page));
+}
+
+.session-outcome--error .session-outcome__mark {
+	color: var(--color-text-on-danger);
+	background: var(--color-danger);
+}
+
+.session-outcome h3 {
+	font-size: 0.95rem;
+}
+
+.session-outcome p {
+	margin-top: 0.2rem;
+	color: var(--color-text-muted);
+	font-size: 0.8rem;
+	line-height: 1.45;
+}
+
+.current-workout-step-container {
+	gap: 1.25rem;
+	padding: clamp(1rem, 3vw, 1.25rem);
+	border: 1px solid color-mix(in srgb, var(--color-action) 36%, var(--color-border));
+	border-radius: 0.9rem;
+	background:
+		linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-action) 9%, transparent),
+			transparent 38%
+		),
+		var(--color-page);
+}
+
 .current-workout-step-container header {
 	display: grid;
-	gap: 0.25rem;
+	gap: 0.3rem;
 }
+
 .current-workout-step-container h3 {
 	margin: 0;
-	font-size: 1.15rem;
+	font-size: clamp(1.1rem, 3vw, 1.35rem);
 }
-.workout-log-form {
+
+.current-workout-step-container header > p:last-child {
+	color: var(--color-text-muted);
+	font-size: 0.8rem;
+	line-height: 1.45;
+}
+
+.sets-container__heading {
+	display: flex;
+	align-items: start;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.sets-container__heading h4,
+.sets-container__heading p,
+.sets-container__help {
+	margin: 0;
+}
+
+.sets-container__heading h4 {
+	font-size: 0.95rem;
+}
+
+.sets-container__heading p,
+.sets-container__help {
+	margin-top: 0.2rem;
+	color: var(--color-text-muted);
+	font-size: 0.72rem;
+	line-height: 1.45;
+}
+
+.sets-container__count {
+	flex: 0 0 auto;
+	color: var(--color-action);
+	font-size: 0.68rem;
+	font-weight: 750;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.workout-log-form,
+.workout-log-form__rows {
 	display: grid;
 	gap: 0.75rem;
+	min-width: 0;
+}
+
+.workout-log-form__error {
+	padding: 0.7rem 0.8rem;
+	border: 1px solid color-mix(in srgb, var(--color-danger) 38%, var(--color-border));
+	border-radius: 0.65rem;
+	background: color-mix(in srgb, var(--color-danger) 7%, transparent);
 }
 
 .form-row {
 	display: grid;
-	grid-template-columns: auto repeat(3, minmax(0, 1fr)) auto;
+	grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
 	align-items: end;
 	gap: 0.75rem;
+	min-inline-size: 0;
+	margin: 0;
 	padding: 0.85rem;
 	border: 1px solid var(--color-border);
 	border-radius: 0.75rem;
-	background: var(--color-page);
+	background: var(--color-surface);
 }
+
 .set-title {
 	align-self: center;
 	min-width: 3.5rem;
+	padding: 0;
 	color: var(--color-action);
 	font-size: 0.75rem;
 	font-weight: 750;
 }
+
 .form-row .form-field__label {
 	font-size: 0.72rem;
 }
+
 .form-row .form-field__requirement {
-	display: none;
+	font-size: 0.58rem;
 }
+
 .form-row .shared-button {
 	align-self: center;
+	min-width: 2.75rem;
+	min-height: 2.75rem;
 }
+
 .sets-container > .add-row {
 	width: 100%;
+	min-height: 2.75rem;
 	border-style: dashed;
 }
 
@@ -235,52 +566,88 @@
 	padding-top: 1rem;
 	border-top: 1px solid var(--color-border);
 }
+
 .step-log-button-container form {
 	display: contents;
 }
+
+.step-log-button-container .shared-button {
+	min-height: 2.75rem;
+}
+
 .step-log-button-container svg {
 	width: 1.1rem;
 	height: 1.1rem;
 }
-.finish-workout-session-button-container {
+
+.session-action-panel {
 	display: flex;
-	justify-content: flex-end;
-	padding-top: 1rem;
-	border-top: 1px solid var(--color-border);
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.85rem;
+	background: var(--color-page);
 }
-.session-component .button-container {
-	display: flex;
-	justify-content: flex-end;
+
+.session-action-panel--finish {
+	border-color: color-mix(in srgb, var(--color-success) 30%, var(--color-border));
+	background: color-mix(in srgb, var(--color-success) 6%, var(--color-page));
 }
+
+.session-action-panel h3 {
+	font-size: 0.95rem;
+}
+
+.session-action-panel p {
+	margin-top: 0.2rem;
+	color: var(--color-text-muted);
+	font-size: 0.78rem;
+	line-height: 1.45;
+}
+
+.session-action-panel form {
+	display: grid;
+	flex: 0 0 auto;
+	gap: 0.5rem;
+}
+
+.session-action-panel .shared-button,
 .session-start-button {
-	width: 3rem;
-	min-height: 3rem;
+	min-height: 2.75rem;
 }
+
 .session-start-button svg {
-	width: 1.6rem;
-	height: 1.6rem;
+	width: 1.25rem;
+	height: 1.25rem;
 }
 
 @media (max-width: 46rem) {
 	.form-row {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+
 	.set-title {
 		grid-column: 1;
 		grid-row: 1;
 	}
+
 	.set-reps {
 		grid-column: 1;
 		grid-row: 2;
 	}
+
 	.set-load-value {
 		grid-column: 2;
 		grid-row: 2;
 	}
+
 	.set-load-unit {
 		grid-column: 1 / -1;
 		grid-row: 3;
 	}
+
 	.form-row > .shared-button {
 		grid-column: 2;
 		grid-row: 1;
@@ -289,12 +656,44 @@
 }
 
 @media (max-width: 32rem) {
-	.session-component .session-header {
+	.workout-feedback {
+		margin-inline: 0.75rem;
+	}
+
+	.session-component .session-header,
+	.session-action-panel,
+	.sets-container__heading {
+		align-items: stretch;
 		flex-direction: column;
 	}
+
+	.session-status {
+		align-self: start;
+	}
+
+	.session-progress__summary {
+		align-items: start;
+	}
+
+	.session-progress__summary > strong {
+		font-size: 1.1rem;
+	}
+
+	.session-component .session-step {
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 0.7rem;
+		padding-inline: 0.75rem;
+	}
+
+	.session-component .session-step__status {
+		grid-column: 2;
+		justify-self: start;
+	}
+
 	.form-row {
 		grid-template-columns: 1fr;
 	}
+
 	.set-title,
 	.set-reps,
 	.set-load-value,
@@ -303,27 +702,24 @@
 		grid-column: auto;
 		grid-row: auto;
 	}
+
 	.form-row > .shared-button {
 		justify-self: end;
 	}
+
 	.step-log-button-container {
 		flex-direction: column;
 	}
-	.step-log-button-container .shared-button {
+
+	.step-log-button-container .shared-button,
+	.session-action-panel form,
+	.session-action-panel .shared-button {
 		width: 100%;
-	}
-	.session-step {
-		gap: 0.7rem;
-		padding-inline: 0.75rem;
-	}
-	.session-step__content {
-		display: grid;
-		justify-items: start;
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.session-step {
+	.session-component .session-step {
 		transition: none;
 	}
 }

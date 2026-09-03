@@ -195,6 +195,82 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		return result;
 	}
 
+	async function createWorkoutLifecycleFixture({
+		email = "user-one@example.com",
+		stepCount = 1,
+		workoutCount = 1,
+	} = {}) {
+		const context = (
+			await db.query(
+				`WITH selected_user AS (
+				   SELECT id FROM users WHERE email = $1
+				 ), program AS (
+				   INSERT INTO programs (user_id, name)
+				   SELECT id, 'Lifecycle program' FROM selected_user RETURNING id
+				 ), cycle AS (
+				   INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+				   SELECT id, 'Lifecycle cycle', 1, 1 FROM program RETURNING id
+				 ), training_day AS (
+				   INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+				   SELECT id, 1, CURRENT_DATE FROM cycle RETURNING id
+				 ), template AS (
+				   INSERT INTO sessions (owner_user_id, name)
+				   SELECT id, 'Lifecycle session' FROM selected_user RETURNING id
+				 )
+				 SELECT selected_user.id AS user_id, program.id AS program_id,
+				        training_day.id AS training_day_id, template.id AS session_id
+				 FROM selected_user, program, training_day, template`,
+				[email],
+			)
+		).rows[0];
+
+		for (let index = 0; index < stepCount; index += 1) {
+			await db.query(
+				`INSERT INTO session_steps
+				 (session_id, step_type_id, exercise_variant_id, name, sets, reps, step_order)
+				 SELECT $1, st.id, ev.id, $2, 2, 8, $3
+				 FROM step_types st
+				 CROSS JOIN LATERAL (
+				   SELECT id FROM exercise_variants WHERE is_archived = FALSE ORDER BY id LIMIT 1
+				 ) ev
+				 WHERE st.name = 'exercise'`,
+				[context.session_id, `Lifecycle step ${index + 1}`, index + 1],
+			);
+		}
+
+		const workoutSessionIds = [];
+		for (let index = 0; index < workoutCount; index += 1) {
+			const workoutSession = (
+				await db.query(
+					`INSERT INTO workout_sessions
+					 (training_day_id, session_id, workout_session_order)
+					 VALUES ($1, $2, $3) RETURNING id`,
+					[context.training_day_id, context.session_id, index + 1],
+				)
+			).rows[0];
+			workoutSessionIds.push(workoutSession.id);
+		}
+
+		return { ...context, workoutSessionIds };
+	}
+
+	async function startFixtureWorkout(fixture, index = 0) {
+		const { default: startWorkoutSession } =
+			await import("../../src/features/workoutSessions/startWorkoutSession.js");
+		const workoutSessionId = fixture.workoutSessionIds[index];
+		await startWorkoutSession({
+			workoutSessionId,
+			userId: fixture.user_id,
+		});
+		return (
+			await db.query(
+				`SELECT * FROM workout_step_logs
+				 WHERE workout_session_id = $1 ORDER BY step_order`,
+				[workoutSessionId],
+			)
+		).rows;
+	}
+
 	async function enterGuest(client) {
 		const page = await client.request("/auth/login");
 		const result = await client.request("/auth/guest", {
@@ -1912,6 +1988,25 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			form: { _csrf: csrfFrom(profile.text), daysDifference: "0" },
 		});
 		assert.equal(result.response.status, 404);
+		const csrf = csrfFrom((await attacker.request("/profile")).text);
+		assert.equal(
+			(
+				await attacker.request(`/workout_sessions/${rows[0].id}/finish`, {
+					method: "POST",
+					form: { _csrf: csrf, daysDifference: "0" },
+				})
+			).response.status,
+			404,
+		);
+		assert.equal(
+			(
+				await attacker.request(`/workout_sessions/${rows[0].id}?_method=PATCH`, {
+					method: "POST",
+					form: { _csrf: csrf, trainingDayId: "1" },
+				})
+			).response.status,
+			404,
+		);
 		assert.equal(
 			(
 				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
@@ -1920,6 +2015,704 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			).rows[0].status,
 			"planned",
 		);
+	});
+
+	test("workout sessions enforce ordered transitions and immutable terminal state", async () => {
+		const fixture = await createWorkoutLifecycleFixture({
+			stepCount: 2,
+			workoutCount: 2,
+		});
+		const [workoutSessionId, competingWorkoutSessionId] = fixture.workoutSessionIds;
+		const client = agent();
+		await login(client);
+		await client.request(`/programs?programId=${fixture.program_id}`);
+		const profile = await client.request("/profile");
+		const csrf = csrfFrom(profile.text);
+
+		const started = await client.request(
+			`/workout_sessions/${workoutSessionId}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(started.response.status, 302);
+		const startedState = (
+			await db.query(
+				`SELECT status, started_at, finished_at,
+				        (SELECT count(*)::int FROM workout_step_logs
+				         WHERE workout_session_id = ws.id) AS step_count
+				 FROM workout_sessions ws WHERE id = $1`,
+				[workoutSessionId],
+			)
+		).rows[0];
+		assert.equal(startedState.status, "in_progress");
+		assert.ok(startedState.started_at);
+		assert.equal(startedState.finished_at, null);
+		assert.equal(startedState.step_count, 2);
+
+		const repeatedStart = await client.request(
+			`/workout_sessions/${workoutSessionId}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(repeatedStart.response.status, 409);
+		assert.match(repeatedStart.response.headers.get("content-type"), /text\/html/);
+		assert.match(repeatedStart.text, /can no longer be started/i);
+		assert.match(repeatedStart.text, /role="alert"[^>]*data-workout-feedback/);
+		assert.doesNotMatch(repeatedStart.text, /constraint|workout_sessions/i);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT started_at,
+					        (SELECT count(*)::int FROM workout_step_logs
+					         WHERE workout_session_id = ws.id) AS step_count
+					 FROM workout_sessions ws WHERE id = $1`,
+					[workoutSessionId],
+				)
+			).rows[0],
+			{ started_at: startedState.started_at, step_count: 2 },
+		);
+		const competingStart = await client.request(
+			`/workout_sessions/${competingWorkoutSessionId}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(competingStart.response.status, 409);
+		assert.match(competingStart.text, /another workout session is already active/i);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					competingWorkoutSessionId,
+				])
+			).rows[0].status,
+			"planned",
+		);
+		const activeCancellation = await client.request(
+			`/workout_sessions/${workoutSessionId}?_method=PATCH`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, trainingDayId: fixture.training_day_id },
+			},
+		);
+		assert.equal(activeCancellation.response.status, 409);
+		assert.match(activeCancellation.text, /can no longer be cancelled/i);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					workoutSessionId,
+				])
+			).rows[0].status,
+			"in_progress",
+		);
+
+		const unfinished = await client.request(
+			`/workout_sessions/${workoutSessionId}/finish`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(unfinished.response.status, 409);
+		assert.match(unfinished.text, /complete or skip every workout step/i);
+		assert.match(unfinished.text, /Workout not updated/);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT status, finished_at FROM workout_sessions WHERE id = $1",
+					[workoutSessionId],
+				)
+			).rows[0],
+			{ status: "in_progress", finished_at: null },
+		);
+
+		await db.query(
+			`UPDATE workout_step_logs
+			 SET status = (CASE WHEN step_order = 1 THEN 'performed' ELSE 'skipped' END)::workout_step_log_status,
+			     completed_at = NOW()
+			 WHERE workout_session_id = $1`,
+			[workoutSessionId],
+		);
+		const finished = await client.request(
+			`/workout_sessions/${workoutSessionId}/finish`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(finished.response.status, 302);
+		const finishedState = (
+			await db.query(
+				"SELECT status, started_at, finished_at FROM workout_sessions WHERE id = $1",
+				[workoutSessionId],
+			)
+		).rows[0];
+		assert.equal(finishedState.status, "finished");
+		assert.ok(finishedState.finished_at);
+
+		for (const request of [
+			{
+				path: `/workout_sessions/${workoutSessionId}/start`,
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+			{
+				path: `/workout_sessions/${workoutSessionId}/finish`,
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+			{
+				path: `/workout_sessions/${workoutSessionId}?_method=PATCH`,
+				form: { _csrf: csrf, trainingDayId: fixture.training_day_id },
+			},
+		]) {
+			const result = await client.request(request.path, {
+				method: "POST",
+				form: request.form,
+			});
+			assert.equal(result.response.status, 409);
+		}
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT status, started_at, finished_at FROM workout_sessions WHERE id = $1",
+					[workoutSessionId],
+				)
+			).rows[0],
+			finishedState,
+		);
+	});
+
+	test("planned cancellation is terminal and an empty started session can finish", async () => {
+		const fixture = await createWorkoutLifecycleFixture({
+			stepCount: 0,
+			workoutCount: 2,
+		});
+		const [cancelledId, emptyId] = fixture.workoutSessionIds;
+		const client = agent();
+		await login(client);
+		await client.request(`/programs?programId=${fixture.program_id}`);
+		const csrf = csrfFrom((await client.request("/profile")).text);
+
+		const cancelled = await client.request(
+			`/workout_sessions/${cancelledId}?_method=PATCH`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, trainingDayId: fixture.training_day_id },
+			},
+		);
+		assert.equal(cancelled.response.status, 302);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT status, started_at, finished_at FROM workout_sessions WHERE id = $1",
+					[cancelledId],
+				)
+			).rows[0],
+			{ status: "cancelled", started_at: null, finished_at: null },
+		);
+
+		for (const request of [
+			{
+				path: `/workout_sessions/${cancelledId}?_method=PATCH`,
+				form: { _csrf: csrf, trainingDayId: fixture.training_day_id },
+			},
+			{
+				path: `/workout_sessions/${cancelledId}/start`,
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+			{
+				path: `/workout_sessions/${cancelledId}/finish`,
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		]) {
+			const result = await client.request(request.path, {
+				method: "POST",
+				form: request.form,
+			});
+			assert.equal(result.response.status, 409);
+		}
+
+		assert.equal(
+			(
+				await client.request(`/workout_sessions/${emptyId}/start`, {
+					method: "POST",
+					form: { _csrf: csrf, daysDifference: "0" },
+				})
+			).response.status,
+			302,
+		);
+		const activeEmptyPage = await client.request(
+			`/?daysDifference=0&workoutSessionId=${emptyId}`,
+		);
+		assert.equal(activeEmptyPage.response.status, 200);
+		assert.match(activeEmptyPage.text, /Nothing to log/);
+		assert.match(activeEmptyPage.text, /Finish session/);
+		assert.doesNotMatch(activeEmptyPage.text, /Complete step/);
+		assert.equal(
+			(
+				await client.request(`/workout_sessions/${emptyId}/finish`, {
+					method: "POST",
+					form: { _csrf: csrf, daysDifference: "0" },
+				})
+			).response.status,
+			302,
+		);
+		assert.equal(
+			(await db.query("SELECT status FROM workout_sessions WHERE id = $1", [emptyId]))
+				.rows[0].status,
+			"finished",
+		);
+	});
+
+	test("concurrent starts preserve one active session and one exact step snapshot", async () => {
+		const fixture = await createWorkoutLifecycleFixture({
+			stepCount: 2,
+			workoutCount: 2,
+		});
+		const { default: startWorkoutSession } =
+			await import("../../src/features/workoutSessions/startWorkoutSession.js");
+		const { default: WorkoutSessionLifecycleError } =
+			await import("../../src/features/workoutSessions/WorkoutSessionLifecycleError.js");
+
+		const results = await Promise.allSettled(
+			fixture.workoutSessionIds.map((workoutSessionId) =>
+				startWorkoutSession({ workoutSessionId, userId: fixture.user_id }),
+			),
+		);
+		assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+		const rejected = results.find((result) => result.status === "rejected");
+		assert.ok(rejected);
+		assert.ok(rejected.reason instanceof WorkoutSessionLifecycleError);
+		assert.equal(rejected.reason.reason, "active_session");
+
+		const sessions = (
+			await db.query(
+				`SELECT ws.id, ws.status, count(wsl.id)::int AS step_count
+				 FROM workout_sessions ws
+				 LEFT JOIN workout_step_logs wsl ON wsl.workout_session_id = ws.id
+				 WHERE ws.id = ANY($1::int[])
+				 GROUP BY ws.id ORDER BY ws.id`,
+				[fixture.workoutSessionIds],
+			)
+		).rows;
+		assert.deepEqual(sessions.map((session) => session.status).sort(), [
+			"in_progress",
+			"planned",
+		]);
+		assert.deepEqual(
+			sessions.map((session) => session.step_count).sort((a, b) => a - b),
+			[0, 2],
+		);
+	});
+
+	test("performed and skipped steps persist once with owned parent identity", async () => {
+		const fixture = await createWorkoutLifecycleFixture({
+			stepCount: 2,
+			workoutCount: 2,
+		});
+		const stepLogs = await startFixtureWorkout(fixture);
+		const [performedStep, skippedStep] = stepLogs;
+		const client = agent();
+		await login(client);
+		await client.request(`/programs?programId=${fixture.program_id}`);
+		const csrf = csrfFrom((await client.request("/profile")).text);
+
+		const performed = await client.request(
+			`/workout_step_logs/${performedStep.id}/perform`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: fixture.workoutSessionIds[1],
+					"logFormRows[0][performedReps]": "8",
+					"logFormRows[0][performedLoadValue]": "12.5",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+					"logFormRows[1][performedReps]": "6",
+					"logFormRows[1][performedLoadValue]": "20",
+					"logFormRows[1][performedLoadUnit]": "Libra",
+				},
+			},
+		);
+		assert.equal(performed.response.status, 302);
+		assert.equal(
+			performed.response.headers.get("location"),
+			`/?daysDifference=0&workoutSessionId=${fixture.workoutSessionIds[0]}`,
+		);
+		const performedState = (
+			await db.query(
+				"SELECT status, completed_at FROM workout_step_logs WHERE id = $1",
+				[performedStep.id],
+			)
+		).rows[0];
+		assert.equal(performedState.status, "performed");
+		assert.ok(performedState.completed_at);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT set_order, reps, load_value, load_unit
+					 FROM workout_set_logs WHERE workout_step_log_id = $1
+					 ORDER BY set_order`,
+					[performedStep.id],
+				)
+			).rows,
+			[
+				{ set_order: 1, reps: 8, load_value: 12.5, load_unit: "Kilograms" },
+				{ set_order: 2, reps: 6, load_value: 20, load_unit: "Libra" },
+			],
+		);
+
+		const repeatedPerform = await client.request(
+			`/workout_step_logs/${performedStep.id}/perform`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: fixture.workoutSessionIds[0],
+					"logFormRows[0][performedReps]": "100",
+					"logFormRows[0][performedLoadValue]": "100",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+				},
+			},
+		);
+		assert.equal(repeatedPerform.response.status, 409);
+		assert.match(repeatedPerform.response.headers.get("content-type"), /text\/html/);
+		assert.match(repeatedPerform.text, /can no longer be performed/i);
+		assert.match(repeatedPerform.text, /role="alert"[^>]*data-workout-feedback/);
+		assert.doesNotMatch(repeatedPerform.text, /constraint|workout_set_logs/i);
+		assert.equal(
+			(
+				await client.request(`/workout_step_logs/${performedStep.id}/skip`, {
+					method: "POST",
+					form: {
+						_csrf: csrf,
+						daysDifference: "0",
+						workoutSessionId: fixture.workoutSessionIds[0],
+					},
+				})
+			).response.status,
+			409,
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT status, completed_at FROM workout_step_logs WHERE id = $1",
+					[performedStep.id],
+				)
+			).rows[0],
+			performedState,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM workout_set_logs WHERE workout_step_log_id = $1",
+					[performedStep.id],
+				)
+			).rows[0].count,
+			2,
+		);
+
+		const skipped = await client.request(`/workout_step_logs/${skippedStep.id}/skip`, {
+			method: "POST",
+			form: {
+				_csrf: csrf,
+				daysDifference: "0",
+				workoutSessionId: fixture.workoutSessionIds[1],
+			},
+		});
+		assert.equal(skipped.response.status, 302);
+		assert.equal(
+			skipped.response.headers.get("location"),
+			`/?daysDifference=0&workoutSessionId=${fixture.workoutSessionIds[0]}`,
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT wsl.status, wsl.completed_at,
+					        count(wssl.id)::int AS set_count
+					 FROM workout_step_logs wsl
+					 LEFT JOIN workout_set_logs wssl ON wssl.workout_step_log_id = wsl.id
+					 WHERE wsl.id = $1 GROUP BY wsl.id`,
+					[skippedStep.id],
+				)
+			).rows.map((row) => ({
+				status: row.status,
+				completed: Boolean(row.completed_at),
+				set_count: row.set_count,
+			})),
+			[{ status: "skipped", completed: true, set_count: 0 }],
+		);
+		for (const request of [
+			{
+				path: `/workout_step_logs/${skippedStep.id}/skip`,
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: fixture.workoutSessionIds[0],
+				},
+			},
+			{
+				path: `/workout_step_logs/${skippedStep.id}/perform`,
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: fixture.workoutSessionIds[0],
+					"logFormRows[0][performedReps]": "8",
+					"logFormRows[0][performedLoadValue]": "",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+				},
+			},
+		]) {
+			assert.equal(
+				(
+					await client.request(request.path, {
+						method: "POST",
+						form: request.form,
+					})
+				).response.status,
+				409,
+			);
+		}
+	});
+
+	test("invalid workout sets rerender beside preserved safe values without writes", async () => {
+		const fixture = await createWorkoutLifecycleFixture({ stepCount: 1 });
+		const [step] = await startFixtureWorkout(fixture);
+		const client = agent();
+		await login(client);
+		await client.request(`/programs?programId=${fixture.program_id}`);
+		const csrf = csrfFrom((await client.request("/profile")).text);
+
+		const result = await client.request(`/workout_step_logs/${step.id}/perform`, {
+			method: "POST",
+			form: {
+				_csrf: csrf,
+				daysDifference: "0",
+				workoutSessionId: fixture.workoutSessionIds[0],
+				"logFormRows[0][performedReps]": "-4",
+				"logFormRows[0][performedLoadValue]": "27.5",
+				"logFormRows[0][performedLoadUnit]": "Kilograms",
+			},
+		});
+
+		assert.equal(result.response.status, 422);
+		assert.match(result.text, /role="alert"[^>]*data-workout-feedback/);
+		assert.match(result.text, /Reps cannot be negative/);
+		assert.match(result.text, /value="-4"/);
+		assert.match(result.text, /value="27.5"/);
+		assert.match(result.text, /aria-invalid="true"/);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT wsl.status, wsl.completed_at,
+					        count(wssl.id)::int AS set_count
+					 FROM workout_step_logs wsl
+					 LEFT JOIN workout_set_logs wssl ON wssl.workout_step_log_id = wsl.id
+					 WHERE wsl.id = $1 GROUP BY wsl.id`,
+					[step.id],
+				)
+			).rows[0],
+			{ status: "planned", completed_at: null, set_count: 0 },
+		);
+	});
+
+	test("step actions reject inactive sessions and cross-account identities", async () => {
+		const inactiveFixture = await createWorkoutLifecycleFixture({ stepCount: 1 });
+		const inactiveStep = (
+			await db.query(
+				`INSERT INTO workout_step_logs
+				 (workout_session_id, session_step_id, status, step_order, name)
+				 SELECT $1, id, 'planned', step_order, name
+				 FROM session_steps WHERE session_id = $2 RETURNING id`,
+				[inactiveFixture.workoutSessionIds[0], inactiveFixture.session_id],
+			)
+		).rows[0];
+		const owner = agent();
+		await login(owner);
+		const ownerCsrf = csrfFrom((await owner.request("/profile")).text);
+		for (const request of [
+			{
+				path: `/workout_step_logs/${inactiveStep.id}/skip`,
+				form: {
+					_csrf: ownerCsrf,
+					daysDifference: "0",
+					workoutSessionId: inactiveFixture.workoutSessionIds[0],
+				},
+			},
+			{
+				path: `/workout_step_logs/${inactiveStep.id}/perform`,
+				form: {
+					_csrf: ownerCsrf,
+					daysDifference: "0",
+					workoutSessionId: inactiveFixture.workoutSessionIds[0],
+					"logFormRows[0][performedReps]": "8",
+					"logFormRows[0][performedLoadValue]": "",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+				},
+			},
+		]) {
+			assert.equal(
+				(
+					await owner.request(request.path, {
+						method: "POST",
+						form: request.form,
+					})
+				).response.status,
+				409,
+			);
+		}
+
+		const ownedFixture = await createWorkoutLifecycleFixture({ stepCount: 1 });
+		const [ownedStep] = await startFixtureWorkout(ownedFixture);
+		const attacker = agent();
+		await login(attacker, "user-two@example.com");
+		const attackerCsrf = csrfFrom((await attacker.request("/profile")).text);
+		for (const request of [
+			{
+				path: `/workout_step_logs/${ownedStep.id}/skip`,
+				form: {
+					_csrf: attackerCsrf,
+					daysDifference: "0",
+					workoutSessionId: ownedFixture.workoutSessionIds[0],
+				},
+			},
+			{
+				path: `/workout_step_logs/${ownedStep.id}/perform`,
+				form: {
+					_csrf: attackerCsrf,
+					daysDifference: "0",
+					workoutSessionId: ownedFixture.workoutSessionIds[0],
+					"logFormRows[0][performedReps]": "8",
+					"logFormRows[0][performedLoadValue]": "",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+				},
+			},
+		]) {
+			assert.equal(
+				(
+					await attacker.request(request.path, {
+						method: "POST",
+						form: request.form,
+					})
+				).response.status,
+				404,
+			);
+		}
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT wsl.status, wsl.completed_at,
+					        count(wssl.id)::int AS set_count
+					 FROM workout_step_logs wsl
+					 LEFT JOIN workout_set_logs wssl ON wssl.workout_step_log_id = wsl.id
+					 WHERE wsl.id = $1 GROUP BY wsl.id`,
+					[ownedStep.id],
+				)
+			).rows[0],
+			{ status: "planned", completed_at: null, set_count: 0 },
+		);
+	});
+
+	test("failed set persistence rolls the performed step back completely", async () => {
+		const fixture = await createWorkoutLifecycleFixture({ stepCount: 1 });
+		const [step] = await startFixtureWorkout(fixture);
+		const client = agent();
+		await login(client);
+		const csrf = csrfFrom((await client.request("/profile")).text);
+		await db.query(`
+			CREATE OR REPLACE FUNCTION fail_workout_set_insert() RETURNS trigger AS $$
+			BEGIN
+				RAISE EXCEPTION 'simulated set insert failure';
+			END;
+			$$ LANGUAGE plpgsql;
+			CREATE TRIGGER fail_workout_set_insert
+			BEFORE INSERT ON workout_set_logs
+			FOR EACH ROW EXECUTE FUNCTION fail_workout_set_insert();
+		`);
+
+		try {
+			const result = await client.request(`/workout_step_logs/${step.id}/perform`, {
+				method: "POST",
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: fixture.workoutSessionIds[0],
+					"logFormRows[0][performedReps]": "8",
+					"logFormRows[0][performedLoadValue]": "10",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+				},
+			});
+			assert.equal(result.response.status, 500);
+			assert.deepEqual(
+				(
+					await db.query(
+						`SELECT wsl.status, wsl.completed_at,
+						        count(wssl.id)::int AS set_count
+						 FROM workout_step_logs wsl
+						 LEFT JOIN workout_set_logs wssl ON wssl.workout_step_log_id = wsl.id
+						 WHERE wsl.id = $1 GROUP BY wsl.id`,
+						[step.id],
+					)
+				).rows[0],
+				{ status: "planned", completed_at: null, set_count: 0 },
+			);
+		} finally {
+			await db.query(
+				"DROP TRIGGER IF EXISTS fail_workout_set_insert ON workout_set_logs",
+			);
+			await db.query("DROP FUNCTION IF EXISTS fail_workout_set_insert()");
+		}
+	});
+
+	test("concurrent perform and skip submissions produce one immutable result", async () => {
+		const fixture = await createWorkoutLifecycleFixture({ stepCount: 1 });
+		const [step] = await startFixtureWorkout(fixture);
+		const { default: performWorkoutStepLog } =
+			await import("../../src/features/workoutSessionStepLogs/performWorkoutStepLog.js");
+		const { default: skipWorkoutStepLog } =
+			await import("../../src/features/workoutSessionStepLogs/skipWorkoutStepLog.js");
+		const { default: WorkoutStepLogLifecycleError } =
+			await import("../../src/features/workoutSessionStepLogs/WorkoutStepLogLifecycleError.js");
+
+		const results = await Promise.allSettled([
+			performWorkoutStepLog({
+				workoutStepLogId: step.id,
+				logFormRows: [
+					{
+						performedReps: 8,
+						performedLoadValue: 10,
+						performedLoadUnit: "Kilograms",
+					},
+				],
+				userId: fixture.user_id,
+			}),
+			skipWorkoutStepLog({
+				workoutStepLogId: step.id,
+				userId: fixture.user_id,
+			}),
+		]);
+		assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+		const rejected = results.find((result) => result.status === "rejected");
+		assert.ok(rejected);
+		assert.ok(rejected.reason instanceof WorkoutStepLogLifecycleError);
+
+		const persisted = (
+			await db.query(
+				`SELECT wsl.status, wsl.completed_at,
+				        count(wssl.id)::int AS set_count
+				 FROM workout_step_logs wsl
+				 LEFT JOIN workout_set_logs wssl ON wssl.workout_step_log_id = wsl.id
+				 WHERE wsl.id = $1 GROUP BY wsl.id`,
+				[step.id],
+			)
+		).rows[0];
+		assert.ok(persisted.completed_at);
+		assert.ok(["performed", "skipped"].includes(persisted.status));
+		assert.equal(persisted.set_count, persisted.status === "performed" ? 1 : 0);
 	});
 
 	test("expired guest cleanup is bounded and never deletes registered users", async () => {

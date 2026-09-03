@@ -10,146 +10,179 @@ visualization, and focused workout-session UX.
 
 ## Current goal
 
-Complete and verify production-ready password-reset email delivery through Resend for
-the existing local-identity password-reset flow.
+Complete and verify workout progress tracking and program analytics so an authenticated
+user can safely record performed training, rely on its history, and understand progress
+through polished, consistent, responsive, and accessible dashboard components.
 
 ## Status
 
-Blocked pending the user-controlled application deployment. The user confirmed the
-additive production schema was applied on 2026-09-03. Actions 1 and 2 are completed;
-Action 3 is approved but must not send email, push, deploy, or modify production data until
-the user explicitly authorizes the relevant step.
+Active. Actions 1 through 3 are completed. Action 4 was activated on 2026-09-03 after
+the user approved Action 3; analytics implementation has not started.
 
-The password-reset implementation and Resend adapter are committed. Action 2 reviewed and
-verified the complete flow and corrected two security issues without expanding its approved
-behavior.
+## Revision requested
 
-## Current implementation state
+The user confirmed that this goal must include both:
 
-The committed implementation currently provides:
+- the data collection, aggregation, and components required for workout tracking and
+  analytics; and
+- deliberate visual improvement of the affected workout and analytics pages rather than a
+  merely functional UI.
 
-- request and completion pages, routes, validation, and CSRF protection;
-- a neutral request response for local, unknown, and Google-only emails;
-- cryptographically random, opaque reset tokens with only SHA-256 hashes persisted;
-- a configurable 30-minute default lifetime through `PASSWORD_RESET_TTL_MS`;
-- one active token per local identity, expiry checks, and single-use consumption;
-- atomic password replacement, token invalidation, and PostgreSQL session invalidation;
-- reset links built from a validated `APP_BASE_URL`;
-- database-backed request limiting of five attempts per IP per 15-minute window;
-- an application-owned `sendPasswordReset` boundary, an in-memory fake for tests, and the
-  configured Resend production adapter completed in Action 1;
-- HTTP integration coverage for success, non-enumeration, expiry, malformed and unknown
-  tokens, replay/concurrency, password validation, session invalidation, and transaction
-  rollback;
-- UI and README/environment documentation for the implemented flow.
+The revised plan adds explicit analytics implementation and separate visual-polish actions
+for workout tracking and analytics.
 
-Actions 1 and 2 are completed. Automated implementation review is finished; live Resend and
-production configuration verification remain in Action 3.
+## Existing implementation under review
+
+The repository already contains:
+
+- `planned`, `in_progress`, `finished`, and `cancelled` workout-session states;
+- `planned`, `in_progress`, `performed`, and `skipped` workout-step-log states;
+- session start, finish, and cancellation routes and services;
+- transactional creation of step snapshots when a workout starts;
+- performed-set persistence and step skip/perform routes;
+- ownership-filtered repository writes through training day, cycle, program, and user;
+- dashboard session controls and workout logging forms;
+- program activity heatmap and scheduled-versus-finished weekly chart foundations;
+- initial validation, view-model, unit, and HTTP integration coverage.
+
+This goal reviews and extends that implementation without replacing its modular-monolith
+architecture or established design system.
 
 ## User outcome
 
-A user with an existing local password identity can request a time-limited, single-use
-password-reset link delivered through Resend, choose a new password, and sign in locally
-with it. A linked Google identity continues to resolve to the same application user and
-data.
+An authenticated program owner can start a planned workout, record each exercise as
+performed with its actual sets or skipped, finish the workout, and rely on an immutable
+history. The dashboard turns that history into useful program-level summaries and trends
+presented with strong visual hierarchy and accessible alternatives. Invalid, repeated,
+out-of-order, or cross-account actions fail predictably without partial changes.
 
-Unknown and Google-only emails receive the same neutral response and do not cause local
-identity creation.
+## Proposed workout lifecycle contract
 
-## Remaining scope
+- A session moves from `planned` to `in_progress`, then to `finished`.
+- A planned session may be cancelled; terminal sessions cannot be restarted or rewritten.
+- Step results may be recorded only while their owning session is `in_progress`.
+- A planned step may become `performed` or `skipped`; recorded terminal results are
+  immutable through normal user actions.
+- Performing a step stores the step status and its set rows atomically.
+- Finishing requires every snapshotted step to be terminal; a legitimately empty started
+  session may finish.
+- Ownership is derived server-side. Submitted session or step identifiers must never allow
+  reads or mutations across program owners.
+- Concurrent or repeated submissions must preserve database invariants and return a stable
+  application response instead of leaking raw PostgreSQL errors.
 
-- verify delivery from the approved `paxeri.dev` sending identity and that the delivered
-  link uses `https://paxeri.dev`.
+## Proposed analytics contract
+
+Analytics are scoped to the authenticated user's selected program and derive from persisted
+workout history rather than client-calculated totals.
+
+- Activity: finished workout sessions grouped by their actual completion date.
+- Adherence: scheduled sessions and their finished status grouped by scheduled program
+  week; cancelled sessions remain distinguishable and are not counted as completed.
+- Work performed: performed steps, set count, and completed repetitions derived only from
+  terminal performed step logs and their set rows.
+- Load volume: `reps × load` only when both values exist, grouped by load unit so kilograms
+  and pounds are never summed together.
+- Empty/partial data: missing loads or reps do not become zero-valued performance, and empty
+  programs render an intentional empty state instead of misleading metrics.
+- Ordering and boundaries: program dates and stable database ordering define time buckets;
+  analytics must not leak or aggregate another user's records.
+
+These lifecycle and analytics decisions become approved only with the revised action plan.
+
+## Scope
+
+- review and correct session and step state transitions;
+- make session start, step performance/skip, and finish writes atomic where required;
+- preserve immutable snapshots of planned step data and actual performed sets;
+- enforce ownership and parent-child consistency at every read and mutation boundary;
+- validate numeric set data and bounded form collections using established Zod patterns;
+- implement ownership-scoped SQL aggregation and application data contracts for the
+  approved analytics;
+- create or refine summary, heatmap, adherence, and workload dashboard components;
+- deliberately improve the affected workout and analytics presentation, including visual
+  hierarchy, spacing, typography, grouping, status/progress communication, chart framing,
+  action emphasis, and all relevant UI states;
+- provide semantic, keyboard-accessible, non-color-only, responsive presentations and
+  accessible text summaries or alternatives for visualized data;
+- add focused repository/service, transformation, view-model, rendered-view, browser, and
+  PostgreSQL HTTP integration coverage;
+- document schema and deployment compatibility if database definitions change.
 
 ## Out of scope
 
-- email verification during registration;
-- automatically creating a password identity for Google-only users;
-- automatic account merging or changes to account linking;
-- changing account email or unlinking authentication methods;
-- unrelated authentication redesign or refactoring;
-- marketing email, newsletters, or a general notification system;
-- replacing the existing token, request, completion, rate-limit, or session-invalidation
-  implementation unless review or verification finds a correctness or security defect;
-- adopting a general email templating framework unless separately approved.
+- predictive recommendations, coaching advice, personal-record detection, or comparative
+  social rankings;
+- arbitrary reporting builders, data export, or third-party fitness integrations;
+- changing training-plan, cycle, day, session-template, exercise, or variant authoring
+  except where a confirmed tracking or aggregation defect requires it;
+- timers, rest notifications, live synchronization, offline mode, or autosave;
+- reopening or editing completed workout history;
+- unrelated authentication, profile, email, navigation, or site-wide redesign work.
 
-## Security and failure requirements
+## Correctness and security requirements
 
-- Keep `RESEND_API_KEY` only in local/deployment secret storage. Never commit, render,
-  return, or log it.
-- Keep the raw reset token and full reset URL out of logs and provider-error diagnostics.
-- Preserve generic request responses so account existence and provider failures cannot be
-  distinguished by user-visible content.
-- Automated tests must use a fake or mock and must not make network requests to Resend.
-- Validate `APP_BASE_URL` as a trusted absolute HTTP(S) origin; production must use
-  `https://paxeri.dev`.
-- Validate the configured sender before attempting delivery.
-- Treat non-success provider responses and transport failures as delivery failures; expose
-  no provider body or internal details to the requester.
-- Record only secret-free diagnostic context needed to operate the integration, such as a
-  stable error category and provider request ID when safely available.
-- Preserve the existing token guarantees: cryptographically secure generation, hash-only
-  storage, expiration, single use, supersession, local-identity ownership, and atomic
-  password replacement.
-- Do not modify linked Google identities.
-- Automated coverage must include adapter success, provider rejection, transport failure,
-  configuration failure, and request-flow non-enumeration on delivery failure.
-- A real Resend delivery is a deliberate manual production/staging verification, not an
-  automated test.
+- Every mutation and analytics read must require an authenticated owner and retain
+  applicable CSRF protection for writes.
+- A resource outside the current user's program boundary must behave as not found and must
+  remain excluded from both mutations and aggregates.
+- State-transition predicates must be enforced in the write that performs the transition,
+  not only by a preceding read or UI visibility.
+- Multi-row mutations must use transactions and roll back completely on failure.
+- Finished, cancelled, performed, and skipped records must not be silently rewritten by
+  duplicate or stale form submissions.
+- Timestamps must agree with lifecycle state and remain stable after terminal transitions.
+- Starting a workout must snapshot its template steps exactly once.
+- Recorded set order must be deterministic and unique within a step; invalid numeric data,
+  unsupported units, and excessive row counts must be rejected before persistence.
+- Analytics must define denominators, date attribution, null handling, cancellation
+  handling, and load-unit grouping explicitly and test them at boundary dates.
+- Expected conflicts must map to intentional application behavior without exposing SQL,
+  internal identifiers, or stack details to users.
+- Database constraints should protect durable invariants that cannot safely rely on UI or
+  service code alone.
 
-## Email configuration
+## Visual design and accessibility requirements
 
-Confirmed:
+- Preserve Let’s Flex’s dark, focused, energetic visual language and established palette.
+- Reuse and extend shared EJS components, controls, icons, spacing, typography, and status
+  markers where practical.
+- Give workout progress, the current task, primary actions, and key analytics a clear
+  hierarchy; avoid presenting every card or number with equal visual weight.
+- Treat workout entry, completed states, summaries, charts, empty states, validation,
+  loading, success, stale/conflict, and destructive actions as designed states.
+- Use semantic forms and native controls with clear labels, accessible names, visible
+  focus, adequate target sizes, and validation associated with the relevant fields.
+- Never communicate status, chart series, or intensity through color alone.
+- Give each chart a meaningful heading, explanation, legend where needed, and an accessible
+  textual summary or equivalent data representation.
+- Prevent unavailable transitions through both server enforcement and accurate disabled or
+  absent controls.
+- Ensure set-entry controls and analytics remain readable without horizontal page overflow
+  at representative small and large viewport sizes.
+- Respect reduced-motion preferences for any new or changed motion, and do not make
+  essential behavior depend on animation or external chart-script success.
 
-- provider: Resend;
-- owned domain: `paxeri.dev`;
-- production application origin: `https://paxeri.dev`;
-- email type: transactional;
-- a Resend API key is available and must remain outside the repository.
+## Dependency constraint
 
-Required environment variables:
-
-- `APP_BASE_URL` — non-secret public origin; `https://paxeri.dev` in production;
-- `PASSWORD_RESET_TTL_MS` — optional positive lifetime in milliseconds; currently defaults
-  to `1800000` (30 minutes);
-- `RESEND_API_KEY` — required secret for the production adapter;
-- `AUTH_EMAIL_FROM` — required Resend-verified sender in mailbox or display-name format.
-
-Only placeholders or non-secret examples belong in `.env.sample` and README documentation.
-The real API key belongs in local `.env` and deployment secret configuration and must not
-be pasted into planning documents, commits, logs, tests, or chat.
-
-## Confirmed implementation decisions and external prerequisites
-
-- Use the official Resend Node.js SDK as a production dependency.
-- Configure the sender as `Let’s Flex account@auth.paxeri.dev` through `AUTH_EMAIL_FROM`.
-- Do not configure reply-to yet.
-- Keep open and click tracking disabled for password-reset emails.
-- Read the API key from `RESEND_API_KEY`.
-- Fail production startup clearly when required email configuration is missing.
-- Keep automated tests isolated through fake or mocked clients; they must never contact
-  Resend.
-- Preserve neutral public responses for unknown accounts and delivery failures, and keep
-  tokens, API keys, reset URLs, and sensitive account information out of diagnostics.
-- Production reset links use the configured `APP_BASE_URL=https://paxeri.dev` origin.
-- Add the chosen root domain or subdomain to Resend, publish the exact DNS records Resend
-  supplies, and confirm Resend reports it as verified before live delivery testing.
-- Production is deployed through Render behind Cloudflare; the user confirmed the required
-  environment variables are present without exposing their values.
-- Use the user-designated controlled mailbox only through untracked
-  `AUTH_EMAIL_TEST_TO`; never hard-code, commit, display, log, or document its value.
-- The user owns pushes and Render deployment. Do not send email, push, deploy, or modify
-  production data without explicit authorization for that step.
+Prefer the existing stack and chart foundation. Any new production or browser dependency
+requires explicit user approval before it is added.
 
 ## Done when
 
-- the existing secure password-reset behavior remains intact and its relevant checks pass;
-- eligible local accounts receive a password-reset email through Resend;
-- unknown and Google-only accounts retain the same neutral response;
-- the Resend implementation remains behind the application-owned email boundary;
-- configuration is environment-based, validated, and documented without secrets;
-- provider and configuration failures are safe, observable, and covered by tests;
-- automated tests make no real Resend calls;
-- a manual delivery from the verified sender succeeds;
-- the delivered reset URL uses `https://paxeri.dev` and successfully completes a reset;
-- skipped checks and remaining deployment prerequisites are reported.
+- the approved session and step lifecycle is enforced atomically by the backend;
+- cross-account, stale, repeated, and out-of-order actions cannot alter workout history or
+  contaminate analytics;
+- starting creates one stable step snapshot, performing stores validated ordered sets, and
+  skipping stores no performed sets;
+- a workout cannot finish with unresolved steps, while an empty started workout can finish;
+- completed and cancelled history remains immutable through normal actions;
+- ownership-scoped SQL produces the approved activity, adherence, performed-work, and
+  unit-safe load-volume metrics with explicit, tested semantics;
+- workout and analytics components provide a polished, consistent visual hierarchy and
+  complete responsive states rather than a merely functional presentation;
+- visualizations have accessible names, non-color cues, and text or data alternatives;
+- focused automated tests cover success, ownership, invalid transitions, rollback,
+  repetition/concurrency, aggregation boundaries, null/unit handling, and presentation;
+- the full required verification passes, including representative responsive and keyboard
+  checks, with any deployment implications recorded.
