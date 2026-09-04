@@ -2243,6 +2243,197 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.doesNotMatch(emptyDashboard.text, /data-adherence-chart/);
 	});
 
+	test("an owned workout flows from planned logging into every analytics component", async () => {
+		const fixture = await createWorkoutLifecycleFixture({ stepCount: 2 });
+		const workoutSessionId = fixture.workoutSessionIds[0];
+		const client = agent();
+		await login(client);
+		assert.equal(
+			(await client.request(`/programs?programId=${fixture.program_id}`)).response
+				.status,
+			200,
+		);
+
+		const plannedPage = await client.request(
+			`/?daysDifference=0&workoutSessionId=${workoutSessionId}`,
+		);
+		assert.equal(plannedPage.response.status, 200);
+		assert.match(plannedPage.text, /Ready to start/);
+		assert.match(plannedPage.text, /0 of 1 scheduled sessions finished/);
+		const csrf = csrfFrom(plannedPage.text);
+
+		const started = await client.request(
+			`/workout_sessions/${workoutSessionId}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(started.response.status, 302);
+		const stepLogs = (
+			await db.query(
+				`SELECT id, status, step_order FROM workout_step_logs
+				 WHERE workout_session_id = $1 ORDER BY step_order`,
+				[workoutSessionId],
+			)
+		).rows;
+		assert.deepEqual(
+			stepLogs.map((step) => ({ status: step.status, step_order: step.step_order })),
+			[
+				{ status: "planned", step_order: 1 },
+				{ status: "planned", step_order: 2 },
+			],
+		);
+
+		const performed = await client.request(
+			`/workout_step_logs/${stepLogs[0].id}/perform`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId,
+					"logFormRows[0][performedReps]": "8",
+					"logFormRows[0][performedLoadValue]": "12.5",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+					"logFormRows[1][performedReps]": "6",
+					"logFormRows[1][performedLoadValue]": "20",
+					"logFormRows[1][performedLoadUnit]": "Libra",
+				},
+			},
+		);
+		assert.equal(performed.response.status, 302);
+		assert.equal(
+			(
+				await client.request(`/workout_step_logs/${stepLogs[1].id}/skip`, {
+					method: "POST",
+					form: { _csrf: csrf, daysDifference: "0", workoutSessionId },
+				})
+			).response.status,
+			302,
+		);
+
+		const resolvedPage = await client.request(
+			`/?daysDifference=0&workoutSessionId=${workoutSessionId}`,
+		);
+		assert.match(resolvedPage.text, /2 of 2 steps resolved/);
+		assert.match(resolvedPage.text, /All steps resolved/);
+		assert.equal(
+			(
+				await client.request(`/workout_sessions/${workoutSessionId}/finish`, {
+					method: "POST",
+					form: { _csrf: csrf, daysDifference: "0" },
+				})
+			).response.status,
+			302,
+		);
+
+		const { default: getProgramAnalytics } =
+			await import("../../src/features/programAnalytics/getProgramAnalytics.js");
+		const analytics = await getProgramAnalytics(
+			{ programId: fixture.program_id, userId: fixture.user_id },
+			db,
+		);
+		assert.ok(analytics);
+		assert.equal(analytics.activity.length, 1);
+		assert.equal(analytics.activity[0].finishedCount, 1);
+		assert.deepEqual(
+			analytics.adherence.map((week) => ({
+				scheduledCount: week.scheduledCount,
+				finishedCount: week.finishedCount,
+				cancelledCount: week.cancelledCount,
+				plannedCount: week.plannedCount,
+				inProgressCount: week.inProgressCount,
+				completionRate: week.completionRate,
+			})),
+			[
+				{
+					scheduledCount: 1,
+					finishedCount: 1,
+					cancelledCount: 0,
+					plannedCount: 0,
+					inProgressCount: 0,
+					completionRate: 1,
+				},
+			],
+		);
+		assert.deepEqual(analytics.performedWork, {
+			performedStepCount: 1,
+			recordedSetCount: 2,
+			completedRepetitionCount: 14,
+			setsWithRepetitionsCount: 2,
+		});
+		assert.deepEqual(analytics.loadVolume, [
+			{ unit: "Kilograms", volume: 100, setCount: 1 },
+			{ unit: "Libra", volume: 120, setCount: 1 },
+		]);
+
+		const finishedPage = await client.request(
+			`/?daysDifference=0&workoutSessionId=${workoutSessionId}`,
+		);
+		assert.equal(finishedPage.response.status, 200);
+		assert.match(finishedPage.text, /Workout complete/);
+		assert.match(finishedPage.text, /1 of 1 scheduled sessions finished/);
+		assert.match(finishedPage.text, /1 finished workout across 1 active day/);
+		assert.match(finishedPage.text, /data-chart-scheduled="\[1\]"/);
+		assert.match(finishedPage.text, /data-chart-finished="\[1\]"/);
+		assert.match(finishedPage.text, /data-chart-cancelled="\[0\]"/);
+		assert.match(finishedPage.text, /dashboard-heatmap__cell--one/);
+		assert.match(finishedPage.text, /View activity data/);
+		assert.match(finishedPage.text, /View weekly adherence data/);
+		assert.match(finishedPage.text, /aria-label="100 kilograms"/);
+		assert.match(finishedPage.text, /aria-label="120 pounds"/);
+		assert.doesNotMatch(
+			finishedPage.text,
+			/>Start session<|>Complete step<|>Skip step<|>Finish session</,
+		);
+
+		assert.equal(
+			(
+				await client.request(`/workout_step_logs/${stepLogs[0].id}/perform`, {
+					method: "POST",
+					form: {
+						_csrf: csrf,
+						daysDifference: "0",
+						workoutSessionId,
+						"logFormRows[0][performedReps]": "100",
+						"logFormRows[0][performedLoadValue]": "100",
+						"logFormRows[0][performedLoadUnit]": "Kilograms",
+					},
+				})
+			).response.status,
+			409,
+		);
+		assert.equal(
+			(
+				await client.request(`/workout_sessions/${workoutSessionId}/finish`, {
+					method: "POST",
+					form: { _csrf: csrf, daysDifference: "0" },
+				})
+			).response.status,
+			409,
+		);
+		assert.deepEqual(
+			await getProgramAnalytics(
+				{ programId: fixture.program_id, userId: fixture.user_id },
+				db,
+			),
+			analytics,
+		);
+		assert.equal(
+			await getProgramAnalytics(
+				{
+					programId: fixture.program_id,
+					userId: (
+						await db.query("SELECT id FROM users WHERE email = 'user-two@example.com'")
+					).rows[0].id,
+				},
+				db,
+			),
+			null,
+		);
+	});
+
 	test("workout actions cannot cross the owning program boundary", async () => {
 		const { rows } = await db.query(`
 			WITH owner AS (

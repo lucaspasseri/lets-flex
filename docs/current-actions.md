@@ -5,6 +5,8 @@
 Complete and verify workout progress tracking and program analytics as defined in
 `docs/current-goal.md`.
 
+Goal status: Completed on 2026-09-04 with explicit user approval.
+
 ## Status definitions
 
 - `Pending`: proposed or approved as part of the sequence but not active.
@@ -597,17 +599,19 @@ no CDN request was needed for verification.
 Not performed:
 
 - no production browser, account, deployment, data, email, or external service was used;
-- Action 6's complete workout-to-analytics integration and final goal comparison remain
-  intentionally unstarted.
+- complete workout-to-analytics integration was intentionally reserved for Action 6 rather
+  than performed within Action 5.
 
 Final approval verification on 2026-09-04 repeated `npm run verify` (115 passed), the
 complete PostgreSQL HTTP suite (45 passed), and the source/status inspection; all passed.
 
 ### 6. Verify the complete tracking and analytics outcome
 
-Status: Active
+Status: Completed
 
-Activated on 2026-09-04 after the user approved Action 5. Implementation has not started.
+Activated on 2026-09-04 after the user approved Action 5. Implementation and verification
+finished on 2026-09-04. The user approved and completed the action on 2026-09-04 after
+final verification repeated the full deterministic and PostgreSQL HTTP suites.
 
 Expected outcome:
 
@@ -626,29 +630,122 @@ Constraints:
 - do not push, deploy, reset, reseed, or otherwise modify production systems or data unless
   the user explicitly authorizes that separate step.
 
-## Discoveries to validate
+#### Complete outcome verification
 
-- Current session finish and cancellation writes appear ownership-scoped but do not restrict
-  the prior session status in the mutation itself.
-- Current step updates appear ownership-scoped but do not constrain the parent session or
-  prior step status, so terminal results may be rewritable.
-- Current performed-step persistence is transactional, but repeating it can collide with
-  unique set-order constraints after the step status has already been targeted.
-- Existing heatmap and weekly chart data are derived in application memory from all program
-  sessions; the revised plan must assess correctness and replace that approach with scoped
-  SQL aggregation where appropriate.
-- Existing charts provide a useful foundation, but their metric semantics, accessible
-  alternatives, failure states, and deliberate visual hierarchy require verification.
-- Existing automated coverage exercises some ownership behavior, but complete lifecycle,
-  rollback, repetition/concurrency, aggregation, responsive, and accessibility contracts
-  remain to be established.
+- A new PostgreSQL HTTP scenario exercises one owned workout through the actual application
+  boundary: the planned dashboard, CSRF-protected start, exactly ordered step snapshots, one
+  performed step with two mixed-unit sets, one skipped step with no sets, resolved progress,
+  and the guarded finish transition.
+- The same journey then verifies the persisted history through the ownership-scoped analytics
+  service and rendered dashboard. It produces one completion-date activity event, one of one
+  scheduled sessions finished, one performed step, two recorded sets, 14 repetitions,
+  100 kilogram-volume, and 120 pound-volume without combining units.
+- The rendered result shows the terminal workout state, activity intensity and data table,
+  adherence summary and three-series data contract, and expanded accessible load units. Start,
+  perform, skip, and finish controls are absent once the workout is terminal.
+- A repeated perform with different values and a repeated finish both return intentional
+  conflicts. A fresh aggregate read is byte-for-byte equivalent to the pre-retry result, proving
+  stale requests cannot contaminate analytics. The same program queried as another authenticated
+  user returns no analytics result.
+- Existing focused scenarios continue to prove unresolved-finish rejection, legitimate empty
+  session completion, planned cancellation, transaction rollback, immutable terminal sessions
+  and steps, exact concurrent snapshots, concurrent perform-versus-skip resolution, invalid set
+  rejection, boundary weeks and dates, cancelled-session treatment, null handling, and unit-safe
+  aggregation.
 
-These observations are planning hypotheses, not completed findings. Each action must verify
-them against the repository and tests before changing behavior.
+#### Final goal-criterion comparison
+
+Every `Done when` criterion in `docs/current-goal.md` now has passing evidence:
+
+1. **Atomic lifecycle enforcement — satisfied.** State predicates are enforced by owned writes;
+   start/snapshot and perform/set writes are transactional.
+2. **Cross-account and stale-action isolation — satisfied.** HTTP, repository, concurrency, and
+   integrated analytics checks exclude foreign resources and preserve history on rejected retries.
+3. **Stable snapshots and performed/skipped persistence — satisfied.** Start creates one ordered
+   snapshot, perform stores validated ordered sets, and skip stores none.
+4. **Finish resolution rules — satisfied.** Unresolved steps block finish while a legitimately
+   empty active session can finish.
+5. **Terminal immutability — satisfied.** Finished, cancelled, performed, and skipped results and
+   timestamps remain unchanged through normal repeated or cross-terminal actions.
+6. **Approved SQL analytics — satisfied.** Activity, adherence, performed work, and unit-separated
+   volume have explicit ownership, date, denominator, cancellation, null, boundary, and ordering
+   tests.
+7. **Polished responsive presentation — satisfied.** Workout and analytics surfaces have reviewed
+   visual hierarchy, complete lifecycle/empty/error states, compact stacking, and contained local
+   scrolling.
+8. **Accessible visualizations — satisfied.** Headings, explanations, HTML legends, visible
+   non-color cues, expanded units, focus treatment, summaries, and native data tables remain useful
+   without Chart.js.
+9. **Focused automated coverage — satisfied.** Success, ownership, invalid transitions, rollback,
+   repetition/concurrency, aggregation boundaries, null/unit handling, browser enhancement, and
+   rendered presentation are all exercised.
+10. **Full verification and deployment review — satisfied.** Static, deterministic, PostgreSQL,
+    responsive, keyboard/focus, target-size, contrast, scope, compatibility, and rollback checks
+    passed and are recorded below.
+
+#### Deployment, compatibility, rollback, and deferred work
+
+- A comparison from the pre-goal authentication baseline through Actions 1–5 found no changes to
+  `package.json`, the lockfile, or database definitions. Action 6 adds only integration coverage and
+  tracking evidence. There is no migration, schema-first ordering, reset, reseed, or dependency
+  installation step.
+- The application can be deployed as one code revision against the current schema. Existing and
+  newly recorded workout history use the same durable tables and constraints. Application rollback
+  requires no database rollback, although reverting would remove the strengthened enforcement and
+  analytics presentation.
+- Predictive coaching, personal-record detection, social comparison, reporting builders, exports,
+  and third-party fitness integrations remain intentionally deferred as declared non-goals rather
+  than unmet acceptance criteria.
+- No production browser, account, deployment, data, email, external chart request, reset, or reseed
+  was used. All database mutations occurred only in the explicitly named local test database and
+  were recreated by the test harness.
+
+#### Verification
+
+Passed on 2026-09-04:
+
+- `npm run verify` — formatting, lint, server and browser type checking, and all 115 deterministic
+  database/unit/browser/view tests passed;
+- `TEST_DATABASE_URL=postgresql://localhost/lets_flex_test node --test
+--test-reporter=spec test/http/applicationPages.test.js` — all 46 PostgreSQL HTTP tests passed,
+  including the new complete workout-to-analytics journey;
+- `git diff --check` — passed;
+- local headless Chrome repeated the combined dashboard review at 1440×3200 and 500×4200. The
+  program, schedule, workout state, analytics hierarchy, expanded data table, Chart.js failure
+  fallback, and workload presentation remained visually cohesive at both sizes;
+- computed Chrome checks at 1440px and 500px found no horizontal document or content overflow. The
+  compact heatmap overflow stayed inside its own scroll region. Both analytics disclosures were
+  focusable, toggled successfully, and measured 44 CSS pixels high;
+- the previously approved Action 3 workout-control responsive/keyboard checks and Action 5 empty,
+  contrast, reduced-motion, and successful fake-chart checks remain applicable because Action 6
+  changed no application or presentation code. They were included in the final source and evidence
+  inspection.
+
+The first run of the expanded HTTP suite had one test-only expectation failure: a scheduled but
+unfinished program correctly renders a 0% adherence summary rather than the history-empty overview.
+The expectation was corrected to match the approved denominator contract; no application behavior
+changed. The complete suite then passed.
+
+Final approval verification on 2026-09-04 repeated `npm run verify` (115 passed), the complete
+PostgreSQL HTTP suite (46 passed), and `git diff --check`; all passed.
+
+## Resolved discoveries
+
+- Session finish and cancellation writes now restrict ownership and prior lifecycle state in
+  the mutation itself.
+- Step writes now restrict ownership, parent session state, and prior step state so terminal
+  results cannot be rewritten through normal actions.
+- Performed-step persistence remains transactional, while expected repeat/conflict requests
+  are rejected before unique set-order failures can escape as raw database errors.
+- Heatmap and adherence data now derive from ownership-scoped SQL aggregates rather than
+  loading complete program history for application-side counting.
+- Activity, adherence, and workload semantics, accessible alternatives, failure states, and
+  deliberate visual hierarchy are implemented and verified.
+- Focused and full coverage now exercises lifecycle, rollback, repetition/concurrency,
+  aggregation, responsive, keyboard/focus, and accessibility contracts.
 
 ## Resume here
 
-Implement only Action 6: exercise the complete owned workout-to-analytics path, repeat the
-security, aggregation, fallback, responsive, and repository verification, inspect the
-combined result against every goal criterion, and return Action 6 to `Ready for review`.
-Do not mark the goal completed without explicit user approval.
+The goal is completed. No action is active. Keep these completed goal and action records in
+place until the user explicitly approves a proposed next goal; only then replace them with
+the new approved goal and proposed action sequence.
