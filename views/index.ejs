@@ -1,4 +1,4 @@
-<% const { status, programBanner, dateNavigation, currentWorkout, heatmap, barChart } = locals.components; %>
+<% const { status, programBanner, dateNavigation, currentWorkout, analyticsSummary, heatmap, barChart, workload } = locals.components; %>
 <main class="main dashboard" data-dashboard-page>
 	<%- include("partials/dashboardPage/noActiveProgramSection", { status }) %>
 	<% if (programBanner.isVisible) { %>
@@ -8,16 +8,24 @@
 			<%- include("partials/dashboardPage/currentWorkoutSession", { currentWorkout }) %>
 		</div>
 	<% } %>
-	<% if (heatmap.isVisible || barChart.isVisible) { %>
-		<div class="dashboard__metrics">
-			<%- include("partials/dashboardPage/heatMap", { heatmap }) %>
-			<%- include("partials/dashboardPage/barChart", { barChart }) %>
-		</div>
+	<% if (analyticsSummary.isVisible) { %>
+		<section class="dashboard-analytics" aria-labelledby="<%= analyticsSummary.headingId %>">
+			<header class="dashboard-analytics__heading">
+				<p class="dashboard-eyebrow"><%= analyticsSummary.eyebrow %></p>
+				<h2 id="<%= analyticsSummary.headingId %>"><%= analyticsSummary.title %></h2>
+				<p><%= analyticsSummary.description %></p>
+			</header>
+			<%- include("partials/dashboardPage/analyticsSummary", { analyticsSummary }) %>
+			<div class="dashboard__metrics">
+				<%- include("partials/dashboardPage/heatMap", { heatmap }) %>
+				<%- include("partials/dashboardPage/barChart", { barChart }) %>
+			</div>
+			<%- include("partials/dashboardPage/workload", { workload }) %>
+		</section>
 	<% } %>
 </main>
 <%- contentFor("overlays") %>
 <%- contentFor("scripts") %>
-<% if (barChart.isVisible) { %>
+<% if (barChart.showChart) { %>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script src="/js/barChartCanvas.js"></script>
 <% } %>

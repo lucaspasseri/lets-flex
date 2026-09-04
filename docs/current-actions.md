@@ -377,9 +377,11 @@ applicable because the implementation was unchanged during the approval check.
 
 ### 4. Implement ownership-scoped analytics data and SQL aggregation
 
-Status: Active
+Status: Completed
 
-Activated on 2026-09-03 after the user approved Action 3. Implementation has not started.
+Activated on 2026-09-03 after the user approved Action 3. Implementation and verification
+finished on 2026-09-04. The user approved the verified result on 2026-09-04 after final
+verification repeated the full deterministic and PostgreSQL HTTP suites.
 
 Expected outcome:
 
@@ -396,9 +398,103 @@ Expected outcome:
 - document query assumptions, indexes, and any schema/deployment implications;
 - return Action 4 to `Ready for review` and stop.
 
+#### Implementation and findings
+
+- A dedicated program-analytics boundary now exposes typed activity, adherence,
+  performed-work, and unit-specific load-volume contracts. PostgreSQL JSON and numeric
+  values are normalized once by an application mapper before dashboard consumers receive
+  them.
+- One parameterized query starts from a program-and-user ownership predicate and aggregates
+  only that program's session hierarchy. An unowned program returns no analytics row; an
+  owned empty program returns explicit empty collections and zero work totals.
+- Activity counts only `finished` workout sessions and groups them by the UTC calendar date
+  of `finished_at`. UTC is explicit so the result does not change with the database or
+  application server timezone. Activity dates are retained even when completion occurred
+  outside the scheduled program span.
+- Adherence uses consecutive seven-day buckets beginning on the persisted program start
+  date. The final bucket is capped at the sum of the program's cycle sizes. Only sessions
+  with scheduled dates inside those program boundaries contribute; null or out-of-bound
+  scheduled dates do not distort a bucket.
+- Every scheduled session contributes to the adherence denominator. Finished, cancelled,
+  planned, and in-progress counts remain separate, and a finished session stays attributed
+  to its scheduled program week rather than moving to its completion week. Empty weeks are
+  emitted in chronological order with a null completion rate when their denominator is
+  zero.
+- Performed-work totals count only terminal `performed` step logs and their persisted set
+  rows. Repetition totals ignore null repetitions. Load volume includes only sets with
+  repetitions, load, and a nonblank unit, calculates `reps × load`, and groups by the exact
+  persisted unit so different units are never combined.
+- The heatmap and weekly-chart transformations now consume the aggregate contracts instead
+  of repeatedly filtering complete workout-session history in application memory.
+- The dashboard no longer loads every program workout merely to supply nearby date
+  markers. A separate lightweight, ownership-scoped query fetches only ID, status, and
+  scheduled date for the displayed seven-day window, using explicit ISO date keys to avoid
+  timezone-dependent parameter casts.
+
+#### Correctness, ownership, and scope review
+
+- The analytics and marker queries both bind the selected program ID and authenticated user
+  ID. Another user's program produces no analytics or marker data, even if its dates and
+  units match the selected program.
+- SQL parameters remain separate from query text. No new request input, mutation, CSRF
+  surface, account data, identifier, SQL detail, or error detail is exposed publicly.
+- Dashboard lifecycle selection still uses the existing detailed current-day session query;
+  only the all-history analytics and date-marker data paths changed.
+- Existing heatmap and chart markup remains functionally compatible. Summary, fallback,
+  visual hierarchy, chart accessibility, and responsive presentation work remains reserved
+  for Action 5.
+- The first focused PostgreSQL run exposed that JavaScript `Date` parameters at UTC midnight
+  can cross a local calendar boundary before a database `::date` cast. Marker boundaries
+  now cross the repository boundary as `YYYY-MM-DD` values, and the focused and complete
+  suites passed afterward.
+
+#### Database deployment, indexes, and rollback
+
+- No table, type, constraint, index, seed, dependency, or persisted data contract changed.
+  No migration, reset, reseed, production data operation, or deployment prerequisite is
+  required.
+- The query follows the existing indexed ownership hierarchy: the program primary key,
+  `cycles (program_id, cycle_order)`, `training_days (cycle_id, day_order)`,
+  `workout_sessions (training_day_id, workout_session_order)`,
+  `workout_step_logs (workout_session_id, step_order)`, and
+  `workout_set_logs (workout_step_log_id, set_order)`. Because aggregation begins with one
+  owned program, a new global timestamp or status index is not warranted by this access
+  pattern.
+- Application rollback requires no database rollback. Reverting the code restores the old
+  in-memory metrics without making existing workout history incompatible.
+
+#### Verification
+
+Passed on 2026-09-04:
+
+- focused analytics, dashboard-transformation, and dashboard-render tests — 9 passed;
+- `npm run verify` — formatting, lint, server and browser type checking, and all 110
+  deterministic database/unit/browser/view tests passed;
+- `TEST_DATABASE_URL=postgresql://localhost/lets_flex_test node --test
+--test-reporter=spec test/http/applicationPages.test.js` — all 45 PostgreSQL HTTP tests
+  passed, including the new ownership, empty-program, cancellation, boundary-week,
+  UTC-completion-date, null-value, mixed-unit, bounded-marker, and rendered-dashboard
+  assertions;
+- `git diff --check` — passed before the final tracking update;
+- final scope inspection found no schema, dependency, browser JavaScript, CSS, unrelated
+  page, production, or external-service changes.
+
+Not run in this action:
+
+- browser viewport, keyboard, screen-reader, and visual checks — Action 4 changes data
+  contracts and preserves existing markup; Action 5 owns the analytics presentation and its
+  complete accessibility and responsive verification.
+
+Final approval verification on 2026-09-04 repeated `npm run verify` (110 passed), the
+complete PostgreSQL HTTP suite (45 passed), and `git diff --check`; all passed.
+
 ### 5. Build and polish the analytics presentation
 
-Status: Pending
+Status: Completed
+
+Activated on 2026-09-04 after the user approved Action 4. Implementation and verification
+finished on 2026-09-04. The user approved and completed the action on 2026-09-04 after
+final verification repeated the full deterministic and PostgreSQL HTTP suites.
 
 Expected outcome:
 
@@ -422,9 +518,96 @@ Constraints:
 - do not expand into predictive coaching, personal-record detection, arbitrary reports, or
   unrelated dashboard redesign.
 
+#### Implementation and findings
+
+- The dashboard now introduces program analytics with one deliberately prominent adherence
+  signal followed by supporting finished-workout, active-day, and performed-step metrics.
+  Activity, adherence, and workload remain distinct sections instead of giving every number
+  equal visual weight.
+- The activity component retains the cycle calendar while adding a concise completion
+  summary, visible count markers, named intensity states, striped multi-workout cells, and
+  an exact date/cycle/count table. Its labels state that activity uses actual completion
+  dates rather than implying scheduled-date attribution.
+- The adherence component now consumes the approved server analytics contract directly.
+  It presents scheduled, finished, and cancelled series with different fill, outline,
+  corner, and symbol treatments; concise totals; exact program-week ranges; remaining
+  counts; and a complete weekly table.
+- Chart.js is progressive enhancement only. The server-rendered summary, legend, and weekly
+  table are useful before JavaScript runs and remain available if the existing CDN script
+  is missing, malformed data is encountered, or chart construction fails. The optional
+  canvas is hidden in those cases so failure does not leave an empty chart-sized region.
+- The chart initializer is part of the established browser-component bootstrap, uses no
+  account or request data beyond presentation-ready numeric arrays, catches failures without
+  exposing implementation details, and disables animation when reduced motion is preferred.
+- The workload component separates performed steps, recorded sets, completed repetitions,
+  repetition coverage, and load volume. Kilograms and pounds remain visibly and accessibly
+  separate; partial repetition/load coverage is explained rather than silently treated as
+  zero.
+- Owned programs with no history render coordinated overview, activity, adherence, and
+  workload empty states. No-program behavior remains unchanged, and the chart dependency is
+  not requested when there is no adherence denominator.
+- Responsive composition moves the overview and analytics panels from wide multi-column
+  layouts to single-column/full-bleed compact layouts. Wide heatmap and data-table content
+  scrolls inside its own named region without creating horizontal page overflow.
+
+#### Accessibility, design, and scope review
+
+- The analytics region has a semantic heading hierarchy. Each visual has a meaningful name,
+  explanatory copy, an HTML legend, visible numeric/text cues, and an equivalent native
+  table or summary; color is never the sole indication of series, intensity, or status.
+- Exact data disclosures use native `details`/`summary`, retain a visible focus ring, and
+  meet the 44 CSS-pixel target-height check. Tables use captions and scoped headers, dates
+  use `time`, and load-volume values expose expanded accessible unit names.
+- The new presentation extends the existing dark palette, typography, borders, spacing,
+  semantic colors, and component initialization pattern. It does not redesign workout,
+  authoring, authentication, profile, navigation, or other unrelated surfaces.
+- No dependency, table, type, constraint, index, seed, persisted contract, or production
+  configuration changed. No migration, deployment, reset, reseed, production data action,
+  email, or external-service call was performed.
+
+#### Verification
+
+Passed on 2026-09-04:
+
+- focused analytics view-model, rendered-dashboard, browser-enhancement, fallback, and CSS
+  checks — 10 tests passed;
+- `npm run verify` — formatting, lint, server and browser type checking, and all 115
+  deterministic database/unit/browser/view tests passed;
+- `TEST_DATABASE_URL=postgresql://localhost/lets_flex_test node --test
+--test-reporter=spec test/http/applicationPages.test.js` — all 45 PostgreSQL HTTP tests
+  passed, including populated and owned-empty analytics rendering, distinct cancellation
+  data, activity intensity, and separate kilogram/pound output;
+- `git diff --check` — passed;
+- local headless Chrome rendered and visually inspected the populated presentation at
+  1440×2200 and 500×2600 and the empty presentation at 500×1800. The wide composition,
+  compact stacking, hierarchy, legends, non-color heatmap treatment, fallback chart frame,
+  workload grouping, and all empty states rendered cohesively;
+- computed browser checks at 1440px and 500px found no horizontal page/content overflow.
+  At 500px the heatmap overflow remained contained in its own scroll region. Both data
+  disclosures were focusable, toggled successfully, and measured 44 CSS pixels high;
+- palette contrast calculations produced 15.79:1 for primary text, 7.70:1 for muted text,
+  11.52:1 for action text, 9.02:1 for success, and 4.69:1 for danger against the page;
+  corresponding surface ratios were 14.34:1, 6.99:1, 10.47:1, 8.19:1, and 4.26:1.
+
+The browser visual fixture deliberately withheld Chart.js to verify the complete failure
+presentation. Successful chart construction, three-series configuration, hidden native
+legend, and reduced-motion behavior were verified with a fake browser chart constructor;
+no CDN request was needed for verification.
+
+Not performed:
+
+- no production browser, account, deployment, data, email, or external service was used;
+- Action 6's complete workout-to-analytics integration and final goal comparison remain
+  intentionally unstarted.
+
+Final approval verification on 2026-09-04 repeated `npm run verify` (115 passed), the
+complete PostgreSQL HTTP suite (45 passed), and the source/status inspection; all passed.
+
 ### 6. Verify the complete tracking and analytics outcome
 
-Status: Pending
+Status: Active
+
+Activated on 2026-09-04 after the user approved Action 5. Implementation has not started.
 
 Expected outcome:
 
@@ -465,7 +648,7 @@ them against the repository and tests before changing behavior.
 
 ## Resume here
 
-Implement only Action 4: define analytics contracts, replace in-memory program analytics
-with ownership-scoped SQL aggregations, add focused aggregation coverage, and document
-query and schema implications. Return Action 4 to `Ready for review` and stop. Do not begin
-Action 5 presentation work or Action 6 final integration.
+Implement only Action 6: exercise the complete owned workout-to-analytics path, repeat the
+security, aggregation, fallback, responsive, and repository verification, inspect the
+combined result against every goal criterion, and return Action 6 to `Ready for review`.
+Do not mark the goal completed without explicit user approval.

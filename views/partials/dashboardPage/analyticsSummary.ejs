@@ -1,0 +1,26 @@
+<section class="analytics-summary" aria-label="Program summary">
+	<% if (analyticsSummary.isEmpty) { %>
+		<div class="analytics-empty-state analytics-empty-state--overview">
+			<span class="analytics-empty-state__mark" aria-hidden="true">↗</span>
+			<div>
+				<h3><%= analyticsSummary.emptyState.title %></h3>
+				<p><%= analyticsSummary.emptyState.message %></p>
+			</div>
+		</div>
+	<% } else { %>
+		<div class="analytics-summary__primary">
+			<span><%= analyticsSummary.primaryMetric.label %></span>
+			<strong><%= analyticsSummary.primaryMetric.value %></strong>
+			<p><%= analyticsSummary.primaryMetric.context %></p>
+		</div>
+		<dl class="analytics-summary__metrics">
+			<% analyticsSummary.metrics.forEach(metric => { %>
+				<div class="analytics-summary__metric">
+					<dt><%= metric.label %></dt>
+					<dd><%= metric.value %></dd>
+					<dd class="analytics-summary__context"><%= metric.context %></dd>
+				</div>
+			<% }) %>
+		</dl>
+	<% } %>
+</section>

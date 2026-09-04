@@ -1,6 +1,48 @@
 <% if (barChart.isVisible) { %>
-	<section class="dashboard-metric dashboard-chart">
-		<div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">Volume</p><h2>Weekly sessions</h2></div></div>
-		<div class="canvas-container" data-bar-chart-week-arr="<%= JSON.stringify(barChart.labels) %>" data-bar-chart-scheduled-count-arr="<%= JSON.stringify(barChart.scheduledCounts) %>" data-bar-chart-finished-count-arr="<%= JSON.stringify(barChart.finishedCounts) %>"><canvas id="bar-chart-canvas"></canvas></div>
+	<section class="dashboard-metric analytics-panel dashboard-chart" aria-labelledby="<%= barChart.headingId %>" aria-describedby="<%= barChart.descriptionId %>">
+		<header class="analytics-panel__header">
+			<div>
+				<p class="dashboard-eyebrow"><%= barChart.eyebrow %></p>
+				<h3 id="<%= barChart.headingId %>"><%= barChart.title %></h3>
+			</div>
+			<p id="<%= barChart.descriptionId %>"><%= barChart.description %></p>
+		</header>
+		<p class="analytics-panel__summary"><%= barChart.summary %></p>
+
+		<% if (barChart.isEmpty) { %>
+			<div class="analytics-empty-state">
+				<span class="analytics-empty-state__mark" aria-hidden="true">≡</span>
+				<div>
+					<h4><%= barChart.emptyState.title %></h4>
+					<p><%= barChart.emptyState.message %></p>
+				</div>
+			</div>
+		<% } else { %>
+			<ul class="analytics-legend" aria-label="Adherence chart legend">
+				<% barChart.legend.forEach(item => { %>
+					<li><span class="analytics-legend__marker analytics-legend__marker--<%= item.modifier %>" aria-hidden="true"></span><%= item.label %></li>
+				<% }) %>
+			</ul>
+			<div class="adherence-chart" data-adherence-chart data-chart-labels="<%= JSON.stringify(barChart.labels) %>" data-chart-scheduled="<%= JSON.stringify(barChart.scheduledCounts) %>" data-chart-finished="<%= JSON.stringify(barChart.finishedCounts) %>" data-chart-cancelled="<%= JSON.stringify(barChart.cancelledCounts) %>">
+				<p class="adherence-chart__status" role="status" data-chart-status>Visual chart is optional. Complete weekly data is available below.</p>
+				<div class="adherence-chart__canvas" hidden data-adherence-chart-container>
+					<canvas hidden data-adherence-chart-canvas role="img" aria-labelledby="<%= barChart.headingId %> <%= barChart.descriptionId %>"></canvas>
+				</div>
+			</div>
+			<details class="analytics-data-disclosure">
+				<summary>View weekly adherence data</summary>
+				<div class="analytics-table-scroll">
+					<table>
+						<caption>Scheduled, finished, cancelled, and remaining sessions by program week.</caption>
+						<thead><tr><th scope="col">Program week</th><th scope="col">Scheduled</th><th scope="col">Finished</th><th scope="col">Cancelled</th><th scope="col">Remaining</th></tr></thead>
+						<tbody>
+							<% barChart.rows.forEach(row => { %>
+								<tr><th scope="row"><span><%= row.weekLabel %></span><small><%= row.rangeLabel %> · <%= row.completionLabel %></small></th><td><%= row.scheduledCount %></td><td><%= row.finishedCount %></td><td><%= row.cancelledCount %></td><td><%= row.remainingCount %></td></tr>
+							<% }) %>
+						</tbody>
+					</table>
+				</div>
+			</details>
+		<% } %>
 	</section>
 <% } %>

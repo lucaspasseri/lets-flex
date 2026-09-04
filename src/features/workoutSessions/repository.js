@@ -65,6 +65,31 @@ export async function findAllByProgramId({ programId }, db = pool) {
 	return rows;
 }
 
+/**
+ * Fetches only the lightweight session state needed by dashboard date markers.
+ * The ownership predicate remains part of the read instead of relying on a prior lookup.
+ *
+ * @param {{programId: number, userId: number, startDate: string, endDate: string}} input
+ * @param {DatabaseClient} [db]
+ */
+export async function findMarkersByProgramIdAndDateRangeForUser(
+	{ programId, userId, startDate, endDate },
+	db = pool,
+) {
+	const { rows } = await db.query(
+		`SELECT ws.id, ws.status, td.scheduled_date
+		 FROM programs p
+		 JOIN cycles c ON c.program_id = p.id
+		 JOIN training_days td ON td.cycle_id = c.id
+		 JOIN workout_sessions ws ON ws.training_day_id = td.id
+		 WHERE p.id = $1 AND p.user_id = $2
+		   AND td.scheduled_date BETWEEN $3::date AND $4::date
+		 ORDER BY td.scheduled_date, c.cycle_order, td.day_order, ws.workout_session_order, ws.id`,
+		[programId, userId, startDate, endDate],
+	);
+	return rows;
+}
+
 /** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
 export async function startByIdForUser({ workoutSessionId, userId }, db = pool) {
 	const { rows } = await db.query(

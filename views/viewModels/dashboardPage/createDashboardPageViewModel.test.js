@@ -75,6 +75,43 @@ const workout = {
 		},
 	],
 };
+const analytics = {
+	activity: [{ dateKey: "2026-08-20", finishedCount: 2 }],
+	adherence: [
+		{
+			weekIndex: 0,
+			weekStartDate: "2026-08-17",
+			weekEndDate: "2026-08-23",
+			scheduledCount: 3,
+			finishedCount: 2,
+			cancelledCount: 1,
+			plannedCount: 0,
+			inProgressCount: 0,
+			completionRate: 2 / 3,
+		},
+	],
+	performedWork: {
+		performedStepCount: 4,
+		recordedSetCount: 6,
+		completedRepetitionCount: 42,
+		setsWithRepetitionsCount: 5,
+	},
+	loadVolume: [
+		{ unit: "Kilograms", volume: 360, setCount: 4 },
+		{ unit: "Libra", volume: 120, setCount: 1 },
+	],
+};
+const emptyAnalytics = {
+	activity: [],
+	adherence: [],
+	performedWork: {
+		performedStepCount: 0,
+		recordedSetCount: 0,
+		completedRepetitionCount: 0,
+		setsWithRepetitionsCount: 0,
+	},
+	loadVolume: [],
+};
 
 test("dashboard page exposes explicit component contracts and renders without legacy data", async () => {
 	const result = createDashboardPageViewModel({
@@ -87,9 +124,10 @@ test("dashboard page exposes explicit component contracts and renders without le
 			currentTrainingDay: trainingDay,
 			currentCycle: cycle,
 			cycles: [cycle],
-			workoutSessions: [workout],
+			scheduledWorkoutSessions: [workout],
 			currentDayWorkoutSessions: [workout],
 			selectedWorkoutSession: workout,
+			analytics,
 			heatmap: [
 				{
 					cycleId: 3,
@@ -97,9 +135,11 @@ test("dashboard page exposes explicit component contracts and renders without le
 					days: [
 						{
 							date: new Date(2026, 7, 20),
+							dateKey: "2026-08-20",
 							dateLabel: "20/08",
 							offset: 4,
-							intensity: "one",
+							intensity: "many",
+							finishedCount: 2,
 						},
 					],
 				},
@@ -110,6 +150,8 @@ test("dashboard page exposes explicit component contracts and renders without le
 					label: "17/08",
 					scheduledCount: 1,
 					finishedCount: 0,
+					cancelledCount: 0,
+					completionRate: 0,
 				},
 			],
 		},
@@ -128,11 +170,14 @@ test("dashboard page exposes explicit component contracts and renders without le
 		"PRESS (Barbell)",
 	);
 	assert.equal(result.components.currentWorkout.session?.steps[0].isCurrent, true);
-	assert.deepEqual(result.components.barChart.labels, ["17/08"]);
+	assert.equal(result.components.analyticsSummary.primaryMetric.value, "67%");
+	assert.deepEqual(result.components.barChart.labels, ["W1"]);
 	assert.equal(
 		result.components.heatmap.cycles[0].days[0].cellClass,
-		"one-workout-session",
+		"dashboard-heatmap__cell--many",
 	);
+	assert.equal(result.components.workload.volume.items[0].label, "kg");
+	assert.equal(result.components.workload.volume.items[1].label, "lb");
 	assert.equal("appState" in result, false);
 	assert.equal("data" in result, false);
 
@@ -154,6 +199,13 @@ test("dashboard page exposes explicit component contracts and renders without le
 	assert.match(html, /shared-button/);
 	assert.match(html, /session-status-marker--in-progress/);
 	assert.match(html, /Workout session: In progress/);
+	assert.match(html, /Training at a glance/);
+	assert.match(html, /2 of 3 scheduled sessions finished/);
+	assert.match(html, /data-chart-scheduled="\[3\]"/);
+	assert.match(html, /View weekly adherence data/);
+	assert.match(html, /Dates with finished workouts/);
+	assert.match(html, /360<\/span> kg/);
+	assert.match(html, /5 of 6 sets include repetitions/);
 	assert.doesNotMatch(html, /training_day_id|scheduled_date|finished_at|cycle_id/);
 });
 
@@ -173,9 +225,10 @@ test("dashboard page makes empty states explicit", async () => {
 			currentTrainingDay: null,
 			currentCycle: null,
 			cycles: [],
-			workoutSessions: [],
+			scheduledWorkoutSessions: [],
 			currentDayWorkoutSessions: [],
 			selectedWorkoutSession: null,
+			analytics: emptyAnalytics,
 			heatmap: [],
 			barChart: [],
 		},
@@ -217,9 +270,10 @@ test("workout component exposes lifecycle-safe controls and resolved progress", 
 				currentTrainingDay: trainingDay,
 				currentCycle: cycle,
 				cycles: [cycle],
-				workoutSessions: currentDayWorkoutSessions,
+				scheduledWorkoutSessions: currentDayWorkoutSessions,
 				currentDayWorkoutSessions,
 				selectedWorkoutSession,
+				analytics,
 				heatmap: [],
 				barChart: [],
 			},
@@ -316,9 +370,10 @@ test("workout validation preserves safe set values and presents associated feedb
 			currentTrainingDay: trainingDay,
 			currentCycle: cycle,
 			cycles: [cycle],
-			workoutSessions: [workout],
+			scheduledWorkoutSessions: [workout],
 			currentDayWorkoutSessions: [workout],
 			selectedWorkoutSession: workout,
+			analytics,
 			heatmap: [],
 			barChart: [],
 		},

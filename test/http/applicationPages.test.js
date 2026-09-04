@@ -1962,6 +1962,287 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(result.response.status, 404);
 	});
 
+	test("program analytics aggregate owned history with stable boundaries, null handling, and separate units", async () => {
+		const context = (
+			await db.query(`
+				WITH owner AS (
+					SELECT id AS user_id FROM users WHERE email = 'user-one@example.com'
+				), selected_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT user_id, 'Analytics program', DATE '2026-08-03' FROM owner
+					RETURNING id
+				), empty_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT user_id, 'Empty analytics program', DATE '2026-08-03' FROM owner
+					RETURNING id
+				), cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Boundary cycle', 15, 1 FROM selected_program
+					RETURNING id
+				), template AS (
+					SELECT id FROM sessions WHERE owner_user_id IS NULL ORDER BY id LIMIT 1
+				)
+				SELECT owner.user_id, selected_program.id AS program_id,
+				       empty_program.id AS empty_program_id, cycle.id AS cycle_id,
+				       template.id AS session_id
+				FROM owner, selected_program, empty_program, cycle, template
+			`)
+		).rows[0];
+
+		await db.query(
+			`INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+			 SELECT $1, boundary.day_order, DATE '2026-08-03' + boundary.day_offset
+			 FROM (VALUES (1, 0), (7, 6), (8, 7), (15, 14))
+			      AS boundary(day_order, day_offset)`,
+			[context.cycle_id],
+		);
+		await db.query(
+			`INSERT INTO workout_sessions
+			 (training_day_id, session_id, workout_session_order, status, started_at, finished_at)
+			 SELECT td.id, $2, 1,
+			        (CASE
+			           WHEN td.day_order IN (1, 8) THEN 'finished'
+			           WHEN td.day_order = 7 THEN 'cancelled'
+			           ELSE 'planned'
+			         END)::workout_session_status,
+			        CASE WHEN td.day_order IN (1, 8)
+			             THEN TIMESTAMPTZ '2026-08-03 12:00:00+00' END,
+			        CASE
+			          WHEN td.day_order = 1 THEN TIMESTAMPTZ '2026-08-12 10:00:00+00'
+			          WHEN td.day_order = 8 THEN TIMESTAMPTZ '2026-08-12 10:30:00+00'
+			        END
+			 FROM training_days td
+			 WHERE td.cycle_id = $1`,
+			[context.cycle_id, context.session_id],
+		);
+		const ownedSessions = (
+			await db.query(
+				`SELECT ws.id, td.day_order
+				 FROM workout_sessions ws
+				 JOIN training_days td ON td.id = ws.training_day_id
+				 WHERE td.cycle_id = $1 ORDER BY td.day_order`,
+				[context.cycle_id],
+			)
+		).rows;
+		const sessionByDay = new Map(ownedSessions.map((row) => [row.day_order, row.id]));
+		const performedLogs = (
+			await db.query(
+				`INSERT INTO workout_step_logs
+				 (workout_session_id, status, step_order, completed_at)
+				 VALUES
+				 ($1, 'performed', 1, TIMESTAMPTZ '2026-08-12 09:00:00+00'),
+				 ($1, 'skipped', 2, TIMESTAMPTZ '2026-08-12 09:05:00+00'),
+				 ($2, 'performed', 1, TIMESTAMPTZ '2026-08-12 09:30:00+00')
+				 RETURNING id, workout_session_id, status`,
+				[sessionByDay.get(1), sessionByDay.get(8)],
+			)
+		).rows.filter((row) => row.status === "performed");
+		await db.query(
+			`INSERT INTO workout_set_logs
+			 (workout_step_log_id, set_order, reps, load_value, load_unit)
+			 VALUES
+			 ($1, 1, 8, 10, 'Kilograms'),
+			 ($1, 2, NULL, 20, 'Kilograms'),
+			 ($1, 3, 5, NULL, 'Kilograms'),
+			 ($1, 4, 6, 30, 'Libra'),
+			 ($2, 1, 4, 5, 'Kilograms')`,
+			[performedLogs[0].id, performedLogs[1].id],
+		);
+
+		const foreign = (
+			await db.query(`
+				WITH foreign_owner AS (
+					SELECT id AS user_id FROM users WHERE email = 'user-two@example.com'
+				), foreign_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT user_id, 'Foreign analytics', DATE '2026-08-03' FROM foreign_owner
+					RETURNING id
+				), foreign_cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Foreign cycle', 15, 1 FROM foreign_program RETURNING id
+				), foreign_day AS (
+					INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+					SELECT id, 1, DATE '2026-08-03' FROM foreign_cycle RETURNING id
+				), foreign_session AS (
+					INSERT INTO workout_sessions
+					 (training_day_id, session_id, workout_session_order, status, started_at, finished_at)
+					SELECT foreign_day.id, sessions.id, 1, 'finished',
+					       TIMESTAMPTZ '2026-08-03 10:00:00+00',
+					       TIMESTAMPTZ '2026-08-12 11:00:00+00'
+					FROM foreign_day
+					CROSS JOIN LATERAL (
+						SELECT id FROM sessions WHERE owner_user_id IS NULL ORDER BY id LIMIT 1
+					) sessions
+					RETURNING id
+				), foreign_log AS (
+					INSERT INTO workout_step_logs
+					 (workout_session_id, status, step_order, completed_at)
+					SELECT id, 'performed', 1, TIMESTAMPTZ '2026-08-12 11:00:00+00'
+					FROM foreign_session RETURNING id
+				)
+				SELECT foreign_program.id AS program_id,
+				       foreign_owner.user_id, foreign_log.id AS workout_step_log_id
+				FROM foreign_program, foreign_owner, foreign_log
+			`)
+		).rows[0];
+		await db.query(
+			`INSERT INTO workout_set_logs
+			 (workout_step_log_id, set_order, reps, load_value, load_unit)
+			 VALUES ($1, 1, 1000, 1000, 'Kilograms')`,
+			[foreign.workout_step_log_id],
+		);
+
+		const { default: getProgramAnalytics } =
+			await import("../../src/features/programAnalytics/getProgramAnalytics.js");
+		const analytics = await getProgramAnalytics(
+			{ programId: context.program_id, userId: context.user_id },
+			db,
+		);
+		assert.deepEqual(analytics?.activity, [
+			{ dateKey: "2026-08-12", finishedCount: 2 },
+		]);
+		assert.deepEqual(
+			analytics?.adherence.map((week) => ({
+				weekIndex: week.weekIndex,
+				weekStartDate: week.weekStartDate,
+				weekEndDate: week.weekEndDate,
+				scheduledCount: week.scheduledCount,
+				finishedCount: week.finishedCount,
+				cancelledCount: week.cancelledCount,
+				plannedCount: week.plannedCount,
+				completionRate: week.completionRate,
+			})),
+			[
+				{
+					weekIndex: 0,
+					weekStartDate: "2026-08-03",
+					weekEndDate: "2026-08-09",
+					scheduledCount: 2,
+					finishedCount: 1,
+					cancelledCount: 1,
+					plannedCount: 0,
+					completionRate: 0.5,
+				},
+				{
+					weekIndex: 1,
+					weekStartDate: "2026-08-10",
+					weekEndDate: "2026-08-16",
+					scheduledCount: 1,
+					finishedCount: 1,
+					cancelledCount: 0,
+					plannedCount: 0,
+					completionRate: 1,
+				},
+				{
+					weekIndex: 2,
+					weekStartDate: "2026-08-17",
+					weekEndDate: "2026-08-17",
+					scheduledCount: 1,
+					finishedCount: 0,
+					cancelledCount: 0,
+					plannedCount: 1,
+					completionRate: 0,
+				},
+			],
+		);
+		assert.deepEqual(analytics?.performedWork, {
+			performedStepCount: 2,
+			recordedSetCount: 5,
+			completedRepetitionCount: 23,
+			setsWithRepetitionsCount: 4,
+		});
+		assert.deepEqual(analytics?.loadVolume, [
+			{ unit: "Kilograms", volume: 100, setCount: 2 },
+			{ unit: "Libra", volume: 180, setCount: 1 },
+		]);
+
+		assert.equal(
+			await getProgramAnalytics(
+				{ programId: context.program_id, userId: foreign.user_id },
+				db,
+			),
+			null,
+		);
+		assert.deepEqual(
+			await getProgramAnalytics(
+				{ programId: context.empty_program_id, userId: context.user_id },
+				db,
+			),
+			{
+				activity: [],
+				adherence: [],
+				performedWork: {
+					performedStepCount: 0,
+					recordedSetCount: 0,
+					completedRepetitionCount: 0,
+					setsWithRepetitionsCount: 0,
+				},
+				loadVolume: [],
+			},
+		);
+
+		const workoutSessionsRepository =
+			await import("../../src/features/workoutSessions/repository.js");
+		const markers =
+			await workoutSessionsRepository.findMarkersByProgramIdAndDateRangeForUser(
+				{
+					programId: context.program_id,
+					userId: context.user_id,
+					startDate: "2026-08-03",
+					endDate: "2026-08-09",
+				},
+				db,
+			);
+		assert.deepEqual(
+			markers.map((row) => row.status),
+			["finished", "cancelled"],
+		);
+		assert.deepEqual(
+			await workoutSessionsRepository.findMarkersByProgramIdAndDateRangeForUser(
+				{
+					programId: context.program_id,
+					userId: foreign.user_id,
+					startDate: "2026-08-03",
+					endDate: "2026-08-09",
+				},
+				db,
+			),
+			[],
+		);
+
+		const client = agent();
+		await login(client);
+		assert.equal(
+			(await client.request(`/programs?programId=${context.program_id}`)).response
+				.status,
+			200,
+		);
+		const dashboard = await client.request("/");
+		assert.equal(dashboard.response.status, 200);
+		assert.match(dashboard.text, /Training at a glance/);
+		assert.match(dashboard.text, /data-chart-scheduled="\[2,1,1\]"/);
+		assert.match(dashboard.text, /data-chart-finished="\[1,1,0\]"/);
+		assert.match(dashboard.text, /data-chart-cancelled="\[1,0,0\]"/);
+		assert.match(dashboard.text, /dashboard-heatmap__cell--many/);
+		assert.match(dashboard.text, /View weekly adherence data/);
+		assert.match(dashboard.text, /Recorded workload/);
+		assert.match(dashboard.text, /100<\/span> kg/);
+		assert.match(dashboard.text, /180<\/span> lb/);
+
+		assert.equal(
+			(await client.request(`/programs?programId=${context.empty_program_id}`)).response
+				.status,
+			200,
+		);
+		const emptyDashboard = await client.request("/");
+		assert.equal(emptyDashboard.response.status, 200);
+		assert.match(emptyDashboard.text, /Your progress story starts here/);
+		assert.match(emptyDashboard.text, /No activity in this calendar yet/);
+		assert.match(emptyDashboard.text, /No adherence data yet/);
+		assert.match(emptyDashboard.text, /No workload recorded yet/);
+		assert.doesNotMatch(emptyDashboard.text, /data-adherence-chart/);
+	});
+
 	test("workout actions cannot cross the owning program boundary", async () => {
 		const { rows } = await db.query(`
 			WITH owner AS (
