@@ -2243,6 +2243,492 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.doesNotMatch(emptyDashboard.text, /data-adherence-chart/);
 	});
 
+	test("exercise progress aggregates immutable owned snapshots with stable dates and separate units", async () => {
+		const context = (
+			await db.query(`
+				WITH owners AS (
+					SELECT id, email FROM users
+					WHERE email IN ('user-one@example.com', 'user-two@example.com')
+				), owner_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'Exercise progress', DATE '2026-08-01' FROM owners
+					WHERE email = 'user-one@example.com'
+					RETURNING id, user_id
+				), foreign_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'Foreign progress', DATE '2026-08-01' FROM owners
+					WHERE email = 'user-two@example.com'
+					RETURNING id, user_id
+				), owner_cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Progress cycle', 7, 1 FROM owner_program
+					RETURNING id
+				), foreign_cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Foreign cycle', 1, 1 FROM foreign_program
+					RETURNING id
+				), owner_template AS (
+					INSERT INTO sessions (owner_user_id, name)
+					SELECT user_id, 'Mutable progress template' FROM owner_program
+					RETURNING id
+				), foreign_template AS (
+					INSERT INTO sessions (owner_user_id, name)
+					SELECT user_id, 'Foreign progress template' FROM foreign_program
+					RETURNING id
+				), exercise AS (
+					INSERT INTO exercises (name, created_by_user_id)
+					SELECT 'Mutable squat', user_id FROM owner_program
+					RETURNING id
+				), variant AS (
+					INSERT INTO exercise_variants (exercise_id, owner_user_id, name)
+					SELECT exercise.id, owner_program.user_id, 'Mutable back squat'
+					FROM exercise, owner_program
+					RETURNING id
+				)
+				SELECT
+					owner_program.user_id,
+					owner_program.id AS program_id,
+					foreign_program.user_id AS foreign_user_id,
+					foreign_program.id AS foreign_program_id,
+					owner_cycle.id AS cycle_id,
+					foreign_cycle.id AS foreign_cycle_id,
+					owner_template.id AS template_id,
+					foreign_template.id AS foreign_template_id,
+					exercise.id AS exercise_id,
+					variant.id AS variant_id
+				FROM owner_program, foreign_program, owner_cycle, foreign_cycle,
+					owner_template, foreign_template, exercise, variant
+			`)
+		).rows[0];
+
+		await db.query(
+			`INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+			 SELECT $1, values.day_order, values.scheduled_date
+			 FROM (VALUES
+				(1, DATE '2026-08-15'),
+				(2, DATE '2026-09-01'),
+				(3, DATE '2026-09-01'),
+				(4, DATE '2026-09-02'),
+				(5, DATE '2026-09-03'),
+				(6, DATE '2026-09-04')
+			 ) AS values(day_order, scheduled_date)`,
+			[context.cycle_id],
+		);
+		await db.query(
+			`INSERT INTO workout_sessions
+			 (training_day_id, session_id, workout_session_order, status,
+			  started_at, finished_at, session_name)
+			 SELECT
+				td.id,
+				$2,
+				1,
+				(CASE WHEN td.day_order = 6 THEN 'cancelled' ELSE 'finished' END)::workout_session_status,
+				CASE WHEN td.day_order = 6 THEN NULL
+					ELSE TIMESTAMPTZ '2026-08-15 08:00:00+00' END,
+				CASE td.day_order
+					WHEN 1 THEN TIMESTAMPTZ '2026-08-15 09:00:00+00'
+					WHEN 2 THEN TIMESTAMPTZ '2026-09-01 10:00:00+00'
+					WHEN 3 THEN TIMESTAMPTZ '2026-09-01 12:00:00+00'
+					WHEN 4 THEN TIMESTAMPTZ '2026-09-02 10:00:00+00'
+					WHEN 5 THEN TIMESTAMPTZ '2026-09-03 10:00:00+00'
+				END,
+				CASE td.day_order
+					WHEN 2 THEN 'Morning strength'
+					WHEN 3 THEN 'No-set strength'
+					ELSE 'Progress workout'
+				END
+			 FROM training_days td
+			 WHERE td.cycle_id = $1`,
+			[context.cycle_id, context.template_id],
+		);
+
+		const progressLogs = (
+			await db.query(
+				`INSERT INTO workout_step_logs
+				 (workout_session_id, status, step_order, exercise_variant_id,
+				  exercise_name, exercise_variant_name, completed_at)
+				 SELECT
+					ws.id,
+					'performed',
+					values.step_order,
+					$2,
+					values.exercise_name,
+					values.variant_name,
+					ws.finished_at
+				 FROM workout_sessions ws
+				 JOIN training_days td ON td.id = ws.training_day_id
+				 JOIN (VALUES
+					(1, 1, 'Snapshot squat', 'Snapshot back squat'),
+					(2, 1, 'Snapshot squat', 'Snapshot back squat'),
+					(2, 2, 'Snapshot squat', 'Snapshot back squat'),
+					(3, 1, 'Snapshot squat', 'Snapshot back squat'),
+					(4, 1, 'Snapshot squat', 'Renamed back squat'),
+					(5, 1, NULL, NULL),
+					(6, 1, 'Snapshot squat', 'Snapshot back squat')
+				 ) AS values(day_order, step_order, exercise_name, variant_name)
+					ON values.day_order = td.day_order
+				 WHERE td.cycle_id = $1
+				 RETURNING id, workout_session_id, step_order`,
+				[context.cycle_id, context.variant_id],
+			)
+		).rows;
+		const ownedSessions = (
+			await db.query(
+				`SELECT ws.id, td.day_order
+				 FROM workout_sessions ws
+				 JOIN training_days td ON td.id = ws.training_day_id
+				 WHERE td.cycle_id = $1`,
+				[context.cycle_id],
+			)
+		).rows;
+		const dayBySession = new Map(
+			ownedSessions.map((row) => [Number(row.id), Number(row.day_order)]),
+		);
+		const logByDayAndOrder = new Map(
+			progressLogs.map((row) => [
+				`${dayBySession.get(Number(row.workout_session_id))}:${row.step_order}`,
+				row.id,
+			]),
+		);
+		await db.query(
+			`INSERT INTO workout_set_logs
+			 (workout_step_log_id, set_order, reps, load_value, load_unit)
+			 VALUES
+				($1, 1, 5, 100, 'Kilograms'),
+				($2, 1, 8, 102.5, 'Kilograms'),
+				($2, 2, NULL, 105, 'Kilograms'),
+				($2, 3, 0, 200, 'Kilograms'),
+				($3, 1, 10, NULL, 'Kilograms'),
+				($3, 2, 6, 20, 'Libra'),
+				($3, 3, 10001, 1000001, 'Kilograms'),
+				($4, 1, 4, 500, 'Kilograms')`,
+			[
+				logByDayAndOrder.get("1:1"),
+				logByDayAndOrder.get("2:1"),
+				logByDayAndOrder.get("2:2"),
+				logByDayAndOrder.get("4:1"),
+			],
+		);
+
+		const foreign = (
+			await db.query(
+				`WITH day AS (
+					INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+					VALUES ($1, 1, DATE '2026-09-01') RETURNING id
+				), workout AS (
+					INSERT INTO workout_sessions
+					 (training_day_id, session_id, workout_session_order, status,
+					  started_at, finished_at, session_name)
+					SELECT day.id, $2, 1, 'finished',
+						TIMESTAMPTZ '2026-09-01 08:00:00+00',
+						TIMESTAMPTZ '2026-09-01 09:00:00+00',
+						'Foreign workout'
+					FROM day RETURNING id
+				), step AS (
+					INSERT INTO workout_step_logs
+					 (workout_session_id, status, step_order, exercise_name,
+					  exercise_variant_name, completed_at)
+					SELECT id, 'performed', 1, 'Foreign squat',
+						'Foreign stance', TIMESTAMPTZ '2026-09-01 09:00:00+00'
+					FROM workout RETURNING id
+				)
+				SELECT id AS step_id FROM step`,
+				[context.foreign_cycle_id, context.foreign_template_id],
+			)
+		).rows[0];
+		await db.query(
+			`INSERT INTO workout_set_logs
+			 (workout_step_log_id, set_order, reps, load_value, load_unit)
+			 VALUES ($1, 1, 1000, 1000, 'Kilograms')`,
+			[foreign.step_id],
+		);
+
+		await db.query(
+			`UPDATE exercises SET name = 'Renamed mutable squat', is_archived = TRUE
+			 WHERE id = $1`,
+			[context.exercise_id],
+		);
+		await db.query("DELETE FROM exercise_variants WHERE id = $1", [context.variant_id]);
+
+		const { default: getExerciseProgressChoices } =
+			await import("../../src/features/exerciseProgress/getExerciseProgressChoices.js");
+		const { default: getExerciseProgress } =
+			await import("../../src/features/exerciseProgress/getExerciseProgress.js");
+		const { toExerciseProgressKey } =
+			await import("../../src/features/exerciseProgress/mapper.js");
+
+		const choices = await getExerciseProgressChoices(
+			{ userId: context.user_id, programId: context.program_id },
+			db,
+		);
+		assert.equal(choices.length, 2);
+		const oldIdentity = choices.find(
+			(choice) => choice.exerciseVariantName === "Snapshot back squat",
+		);
+		const renamedIdentity = choices.find(
+			(choice) => choice.exerciseVariantName === "Renamed back squat",
+		);
+		assert.deepEqual(oldIdentity, {
+			key: toExerciseProgressKey("Snapshot squat", "Snapshot back squat"),
+			exerciseName: "Snapshot squat",
+			exerciseVariantName: "Snapshot back squat",
+			occurrenceCount: 3,
+			firstDate: "2026-08-15",
+			lastDate: "2026-09-01",
+		});
+		assert.equal(renamedIdentity?.occurrenceCount, 1);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT COUNT(*)::integer AS count FROM workout_step_logs WHERE exercise_variant_id IS NOT NULL",
+				)
+			).rows[0].count,
+			0,
+		);
+
+		const progress = await getExerciseProgress(
+			{
+				userId: context.user_id,
+				programId: context.program_id,
+				exerciseKey: oldIdentity.key,
+				filters: { fromDate: "2026-09-01", toDate: "2026-09-01" },
+				pointLimit: 10,
+			},
+			db,
+		);
+		assert.equal(progress?.selection.occurrenceCount, 3);
+		assert.deepEqual(progress?.summary, {
+			occurrenceCount: 2,
+			performedStepCount: 3,
+			recordedSetCount: 6,
+			setsWithRepetitionsCount: 4,
+			completedRepetitionCount: 24,
+			setsWithLoadCount: 4,
+			setsWithVolumeCount: 3,
+			units: [
+				{
+					unit: "Kilograms",
+					loadObservationCount: 3,
+					maximumLoad: 200,
+					volumeSetCount: 2,
+					volume: 820,
+				},
+				{
+					unit: "Libra",
+					loadObservationCount: 1,
+					maximumLoad: 20,
+					volumeSetCount: 1,
+					volume: 120,
+				},
+			],
+		});
+		assert.deepEqual(
+			progress?.occurrences.map((occurrence) => [
+				occurrence.workoutSessionId,
+				occurrence.dateKey,
+				occurrence.sessionName,
+				occurrence.performedStepCount,
+				occurrence.recordedSetCount,
+			]),
+			[
+				[
+					ownedSessions.find((row) => row.day_order === 2).id,
+					"2026-09-01",
+					"Morning strength",
+					2,
+					6,
+				],
+				[
+					ownedSessions.find((row) => row.day_order === 3).id,
+					"2026-09-01",
+					"No-set strength",
+					1,
+					0,
+				],
+			],
+		);
+		assert.deepEqual(
+			progress?.series.map((series) => [
+				series.unit,
+				series.points.map((point) => [
+					point.workoutSessionId,
+					point.maximumLoad,
+					point.volume,
+				]),
+			]),
+			[
+				[
+					"Kilograms",
+					[[ownedSessions.find((row) => row.day_order === 2).id, 200, 820]],
+				],
+				["Libra", [[ownedSessions.find((row) => row.day_order === 2).id, 20, 120]]],
+			],
+		);
+		assert.equal(progress?.isTruncated, false);
+
+		const latestOnly = await getExerciseProgress(
+			{
+				userId: context.user_id,
+				programId: context.program_id,
+				exerciseKey: oldIdentity.key,
+				filters: { fromDate: null, toDate: null },
+				pointLimit: 1,
+			},
+			db,
+		);
+		assert.equal(latestOnly?.totalOccurrenceCount, 3);
+		assert.equal(latestOnly?.returnedOccurrenceCount, 1);
+		assert.equal(latestOnly?.isTruncated, true);
+		assert.equal(
+			latestOnly?.occurrences[0].workoutSessionId,
+			ownedSessions.find((row) => row.day_order === 3).id,
+		);
+
+		assert.deepEqual(
+			await getExerciseProgressChoices(
+				{ userId: context.user_id, programId: context.foreign_program_id },
+				db,
+			),
+			[],
+		);
+		assert.equal(
+			await getExerciseProgress(
+				{
+					userId: context.user_id,
+					programId: context.foreign_program_id,
+					exerciseKey: oldIdentity.key,
+					filters: { fromDate: null, toDate: null },
+				},
+				db,
+			),
+			null,
+		);
+
+		const anonymous = agent();
+		const anonymousProgress = await anonymous.request(
+			`/progress?programId=${context.program_id}`,
+		);
+		assert.equal(anonymousProgress.response.status, 302);
+		assert.equal(
+			anonymousProgress.response.headers.get("location"),
+			`/auth/login?returnTo=${encodeURIComponent(
+				`/progress?programId=${context.program_id}`,
+			)}`,
+		);
+
+		const client = agent();
+		await login(client);
+		const firstUse = await client.request("/progress");
+		assert.equal(firstUse.response.status, 200);
+		assert.match(firstUse.text, /Exercise progress/);
+		assert.match(firstUse.text, /data-progress-state="choose-program"/);
+		assert.match(firstUse.text, /aria-current="page"[\s\S]*?<span>Progress<\/span>/);
+
+		const programSelection = await client.request(
+			`/progress?programId=${context.program_id}`,
+		);
+		assert.equal(programSelection.response.status, 200);
+		assert.match(programSelection.text, /Snapshot back squat/);
+		assert.match(programSelection.text, /Renamed back squat/);
+		assert.match(programSelection.text, /data-progress-state="choose-exercise"/);
+		assert.doesNotMatch(programSelection.text, /Foreign squat|Foreign stance/);
+
+		const progressPage = await client.request(
+			`/progress?programId=${context.program_id}&exerciseKey=${encodeURIComponent(
+				oldIdentity.key,
+			)}&fromDate=2026-09-01&toDate=2026-09-01&pointLimit=10`,
+		);
+		assert.equal(progressPage.response.status, 200);
+		assert.match(progressPage.text, /Recorded exercise results by finished workout/);
+		assert.match(progressPage.text, /Snapshot squat — Snapshot back squat/);
+		assert.match(progressPage.text, /4 of 6 recorded sets have a valid load and unit/);
+		assert.match(progressPage.text, /200 Kilograms/);
+		assert.match(progressPage.text, /820 repetitions × Kilograms/);
+		assert.match(progressPage.text, /20 Libra/);
+		assert.match(progressPage.text, /120 repetitions × Libra/);
+		assert.match(
+			progressPage.text,
+			new RegExp(
+				`href="/history/${ownedSessions.find((row) => row.day_order === 2).id}"`,
+			),
+		);
+		assert.match(
+			progressPage.text,
+			new RegExp(
+				`href="/history/${ownedSessions.find((row) => row.day_order === 3).id}"`,
+			),
+		);
+		assert.doesNotMatch(progressPage.text, /Foreign workout|Foreign squat|1000/);
+		assert.doesNotMatch(
+			progressPage.text,
+			/method="POST"|method="PATCH"|method="DELETE"/,
+		);
+
+		const emptyRange = await client.request(
+			`/progress?programId=${context.program_id}&exerciseKey=${encodeURIComponent(
+				oldIdentity.key,
+			)}&fromDate=2027-01-01&toDate=2027-01-31`,
+		);
+		assert.equal(emptyRange.response.status, 200);
+		assert.match(emptyRange.text, /data-progress-state="no-results"/);
+		assert.match(emptyRange.text, /No results in this date range/);
+		assert.doesNotMatch(
+			emptyRange.text,
+			/Recorded exercise results by finished workout/,
+		);
+
+		const unavailableProgram = await client.request(
+			`/progress?programId=${context.foreign_program_id}`,
+		);
+		assert.equal(unavailableProgram.response.status, 200);
+		assert.match(unavailableProgram.text, /data-progress-state="unavailable-program"/);
+		assert.doesNotMatch(unavailableProgram.text, /Foreign progress|Foreign squat/);
+
+		const foreignExerciseKey = toExerciseProgressKey("Foreign squat", "Foreign stance");
+		const unavailableExercise = await client.request(
+			`/progress?programId=${context.program_id}&exerciseKey=${encodeURIComponent(
+				foreignExerciseKey,
+			)}`,
+		);
+		assert.equal(unavailableExercise.response.status, 200);
+		assert.match(
+			unavailableExercise.text,
+			/data-progress-state="unavailable-exercise"/,
+		);
+		assert.match(unavailableExercise.text, /Exercise unavailable/);
+		assert.doesNotMatch(unavailableExercise.text, /Foreign squat|Foreign stance/);
+
+		for (const invalidQuery of [
+			"programId=0",
+			"exerciseKey=not-a-key",
+			"fromDate=2026-02-30",
+			"fromDate=2026-09-02&toDate=2026-09-01",
+			"pointLimit=201",
+		]) {
+			const invalid = await client.request(`/progress?${invalidQuery}`);
+			assert.equal(invalid.response.status, 400);
+			assert.match(invalid.text, /Invalid query parameters/);
+		}
+
+		const terminalCountBefore = (
+			await db.query(
+				"SELECT COUNT(*)::integer AS count FROM workout_sessions WHERE status IN ('finished', 'cancelled')",
+			)
+		).rows[0].count;
+		assert.equal(
+			(await client.request("/progress", { method: "POST" })).response.status,
+			403,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT COUNT(*)::integer AS count FROM workout_sessions WHERE status IN ('finished', 'cancelled')",
+				)
+			).rows[0].count,
+			terminalCountBefore,
+		);
+	});
+
 	test("workout history reads owned terminal snapshots with stable filtering and pagination", async () => {
 		const context = (
 			await db.query(`
@@ -2591,7 +3077,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(outOfRange.text, /Return to the first page/);
 	});
 
-	test("an owned workout flows from planned logging into analytics and history", async () => {
+	test("an owned workout flows from planned logging into analytics, history, and exercise progress", async () => {
 		const fixture = await createWorkoutLifecycleFixture({ stepCount: 2 });
 		const workoutSessionId = fixture.workoutSessionIds[0];
 		const client = agent();
@@ -2763,6 +3249,102 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			/method="POST"|method="PATCH"|method="DELETE"/,
 		);
 
+		const snapshotIdentity = (
+			await db.query(
+				`SELECT
+					wsl.exercise_name,
+					wsl.exercise_variant_name,
+					TO_CHAR((ws.finished_at AT TIME ZONE 'UTC')::date, 'YYYY-MM-DD')
+						AS completion_date
+				 FROM workout_step_logs wsl
+				 JOIN workout_sessions ws ON ws.id = wsl.workout_session_id
+				 WHERE wsl.workout_session_id = $1 AND wsl.status = 'performed'`,
+				[workoutSessionId],
+			)
+		).rows[0];
+		const { toExerciseProgressKey } =
+			await import("../../src/features/exerciseProgress/mapper.js");
+		const { default: getExerciseProgress } =
+			await import("../../src/features/exerciseProgress/getExerciseProgress.js");
+		const exerciseKey = toExerciseProgressKey(
+			snapshotIdentity.exercise_name,
+			snapshotIdentity.exercise_variant_name,
+		);
+		const lifecycleProgress = await getExerciseProgress(
+			{
+				userId: fixture.user_id,
+				programId: fixture.program_id,
+				exerciseKey,
+				filters: {
+					fromDate: snapshotIdentity.completion_date,
+					toDate: snapshotIdentity.completion_date,
+				},
+				pointLimit: 25,
+			},
+			db,
+		);
+		assert.ok(lifecycleProgress);
+		assert.deepEqual(lifecycleProgress.summary, {
+			occurrenceCount: 1,
+			performedStepCount: 1,
+			recordedSetCount: 2,
+			setsWithRepetitionsCount: 2,
+			completedRepetitionCount: 14,
+			setsWithLoadCount: 2,
+			setsWithVolumeCount: 2,
+			units: [
+				{
+					unit: "Kilograms",
+					loadObservationCount: 1,
+					maximumLoad: 12.5,
+					volumeSetCount: 1,
+					volume: 100,
+				},
+				{
+					unit: "Libra",
+					loadObservationCount: 1,
+					maximumLoad: 20,
+					volumeSetCount: 1,
+					volume: 120,
+				},
+			],
+		});
+
+		const progressSelection = await client.request(
+			`/progress?programId=${fixture.program_id}`,
+		);
+		assert.equal(progressSelection.response.status, 200);
+		assert.ok(progressSelection.text.includes(snapshotIdentity.exercise_name));
+		assert.ok(progressSelection.text.includes(snapshotIdentity.exercise_variant_name));
+
+		const progressPath =
+			`/progress?programId=${fixture.program_id}` +
+			`&exerciseKey=${encodeURIComponent(exerciseKey)}` +
+			`&fromDate=${snapshotIdentity.completion_date}` +
+			`&toDate=${snapshotIdentity.completion_date}&pointLimit=25`;
+		const progressPage = await client.request(progressPath);
+		assert.equal(progressPage.response.status, 200);
+		assert.match(progressPage.text, /Recorded exercise results by finished workout/);
+		assert.match(progressPage.text, /2 of 2 recorded sets have valid repetitions/);
+		assert.match(progressPage.text, /12\.5 Kilograms/);
+		assert.match(progressPage.text, /100 repetitions × Kilograms/);
+		assert.match(progressPage.text, /20 Libra/);
+		assert.match(progressPage.text, /120 repetitions × Libra/);
+		assert.match(progressPage.text, new RegExp(`href="/history/${workoutSessionId}"`));
+		assert.match(progressPage.text, /exercise-progress-table-scroll/);
+		assert.doesNotMatch(
+			progressPage.text,
+			/method="POST"|method="PATCH"|method="DELETE"|<canvas/,
+		);
+
+		const emptyProgressPage = await client.request(
+			`/progress?programId=${fixture.program_id}&exerciseKey=${encodeURIComponent(
+				exerciseKey,
+			)}&fromDate=2099-01-01&toDate=2099-01-01`,
+		);
+		assert.equal(emptyProgressPage.response.status, 200);
+		assert.match(emptyProgressPage.text, /data-progress-state="no-results"/);
+
 		assert.equal(
 			(
 				await client.request(`/workout_step_logs/${stepLogs[0].id}/perform`, {
@@ -2794,6 +3376,22 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				db,
 			),
 			analytics,
+		);
+		assert.deepEqual(
+			await getExerciseProgress(
+				{
+					userId: fixture.user_id,
+					programId: fixture.program_id,
+					exerciseKey,
+					filters: {
+						fromDate: snapshotIdentity.completion_date,
+						toDate: snapshotIdentity.completion_date,
+					},
+					pointLimit: 25,
+				},
+				db,
+			),
+			lifecycleProgress,
 		);
 		assert.equal(
 			await getProgramAnalytics(

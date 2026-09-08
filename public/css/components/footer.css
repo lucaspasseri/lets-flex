@@ -16,16 +16,30 @@
 
 .footer-nav__list {
 	display: grid;
-	grid-template-columns: repeat(5, minmax(0, 1fr));
-	width: min(100%, 32rem);
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	width: min(100%, 38rem);
 }
 
 .footer-nav__list--admin {
-	grid-template-columns: repeat(6, minmax(0, 1fr));
-	width: min(100%, 42rem);
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	width: min(100%, 46rem);
 }
 
 @media (max-width: 34rem) {
+	.footer-nav {
+		overflow-x: auto;
+		scrollbar-width: thin;
+	}
+
+	.footer-nav__list,
+	.footer-nav__list--admin {
+		grid-auto-flow: column;
+		grid-template-columns: none;
+		grid-auto-columns: minmax(4.5rem, 1fr);
+		width: max-content;
+		min-width: 100%;
+	}
+
 	.footer-nav__list--admin .footer-nav__link {
 		font-size: 0.74rem;
 	}
