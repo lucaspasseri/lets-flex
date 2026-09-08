@@ -755,6 +755,10 @@
 	text-align: center;
 }
 
+.adherence-chart__status[hidden] {
+	display: none;
+}
+
 .analytics-data-disclosure {
 	border-top: 1px solid var(--color-border);
 }

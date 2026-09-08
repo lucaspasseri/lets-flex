@@ -1,5 +1,5 @@
 <%
-	const {id = null, label="", description="",  countLabel = `0 templates`, items=[], emptyState=null, actions ={}} = locals?.exerciseTemplates ?? {};
+	const {id = null, label="", description="", countLabel="0 variants", items=[], emptyState=null, actions={}} = locals?.exerciseTemplates ?? {};
 %>
 
 <section
@@ -47,6 +47,11 @@
 					<%- include("../shared/components/accordion/accordion", {
 						accordion: {
 							id: template.id,
+							className: "exercise-template",
+							headerClassName: "exercise-template__trigger",
+							panelClassName: "exercise-template__panel",
+							triggerId: `exercise-template-${template.id}-trigger`,
+							panelId: `exercise-template-${template.id}-panel`,
 							renderHeaderContent: () =>
 								include("./exerciseTemplateSummary", { template }),
 							renderPanel: () =>

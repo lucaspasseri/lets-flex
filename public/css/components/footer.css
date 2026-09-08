@@ -1,5 +1,6 @@
 .footer {
 	view-transition-name: footer;
+	min-width: 0;
 	border-top: 0.2em solid var(--color-border);
 	background-color: var(--color-surface);
 	padding: 0.45rem var(--horizontal-margin) max(0.45rem, env(safe-area-inset-bottom));

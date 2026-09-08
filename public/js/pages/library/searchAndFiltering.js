@@ -14,7 +14,8 @@ export function initializeSearchAndFiltering(root) {
 		if (sessionCount) {
 			sessionCount.textContent = String(filterItems(sessionItems, query));
 		}
-		exerciseCount.textContent = `${filterItems(exerciseItems, query)} TEMPLATES`;
+		const visibleExercises = filterItems(exerciseItems, query);
+		exerciseCount.textContent = `${visibleExercises} ${visibleExercises === 1 ? "VARIANT" : "VARIANTS"}`;
 	});
 }
 

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import path from "node:path";
 import ejs from "ejs";
 
@@ -58,4 +59,17 @@ test("footer exposes and identifies the administrator catalog only for admins", 
 	);
 	assert.match(adminHtml, /footer-nav__list--admin/);
 	assert.doesNotMatch(memberHtml, /\/admin\/library\/exercises/);
+});
+
+test("scrollable mobile navigation does not widen the application shell", () => {
+	const css = fs.readFileSync(
+		new URL("../../../public/css/components/footer.css", import.meta.url),
+		"utf8",
+	);
+
+	assert.match(css, /\.footer\s*\{[\s\S]*?min-width: 0;/);
+	assert.match(
+		css,
+		/@media \(max-width: 34rem\)[\s\S]*?\.footer-nav[\s\S]*?overflow-x: auto;/,
+	);
 });

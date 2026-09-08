@@ -67,7 +67,52 @@ test("library template renders from its page ViewModel", async () => {
 	assert.match(html, /data-archive-session-form/);
 	assert.match(html, /data-variant-create-form/);
 	assert.match(html, /Create your variant/);
+	assert.match(html, /exercise-templates-empty-state/);
+	assert.match(html, /No exercise templates yet/);
 	assert.match(html, /\/js\/pages\/library\/index\.js/);
+});
+
+test("personal exercise markup identifies private scope and retains owner actions", async () => {
+	const personalData = {
+		...data,
+		user: { id: 7, name: "Member", role: "user" },
+		exerciseTemplates: [
+			{
+				id: 3,
+				name: "Squat",
+				movementPattern: { id: 2, name: "Squat", notes: "Knee dominant" },
+				equipment: { id: 4, name: "Dumbbell", category: "Free weight" },
+				muscles: [],
+				variant: {
+					id: 12,
+					name: "Tempo Goblet Squat",
+					setupDescription: "Use a controlled lowering phase.",
+					environment: "Home",
+					notes: "",
+					ownerUserId: 7,
+					isArchived: false,
+				},
+			},
+		],
+	};
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: 7, sessionId: null },
+		data: /** @type {any} */ (personalData),
+	});
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const html = await renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		csrfToken: "test-token",
+		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
+	});
+
+	assert.match(html, /Base exercise[\s\S]*Squat/);
+	assert.match(html, /Tempo Goblet Squat[\s\S]*Private/);
+	assert.match(html, /action="\/exercise-variants\/12\?_method=PATCH"/);
+	assert.match(html, /Archive private variant/);
+	assert.doesNotMatch(html, /data-update-exercise-template/);
 });
 
 test("administrator library state is catalog-only and excludes private variants", async () => {
@@ -113,6 +158,18 @@ test("administrator library state is catalog-only and excludes private variants"
 	assert.match(html, /Global catalog access/);
 	assert.match(html, /Create global variant/);
 	assert.match(html, /Global squat/);
+	assert.match(html, /Base exercise/);
+	assert.match(html, /Squat/);
+	assert.match(html, /1 variant/);
+	assert.match(
+		html,
+		/id="exercise-template-10-trigger"[\s\S]*aria-controls="exercise-template-10-panel"[\s\S]*aria-expanded="false"/,
+	);
+	assert.match(
+		html,
+		/id="exercise-template-10-panel"[\s\S]*role="region"[\s\S]*aria-labelledby="exercise-template-10-trigger"/,
+	);
+	assert.equal((html.match(/id="exercise-template-10-panel"/g) ?? []).length, 1);
 	assert.match(html, /Optional\. Choose equipment when this variant requires it\./);
 	assert.match(html, /<option\s+value=""[^>]*>\s*No equipment\s*<\/option>/);
 	assert.doesNotMatch(html, /Admin private squat/);

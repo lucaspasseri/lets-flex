@@ -47,7 +47,7 @@ export default function createSessionFormViewModel({
 				value: stepType.id,
 			})),
 			exerciseOptions: exerciseTemplates.map((exercise) => ({
-				label: exercise.name,
+				label: `${exercise.name} — ${exercise.variant.name}${exercise.variant.ownerUserId == null ? "" : " (Private)"}`,
 				value: exercise.variant.id,
 			})),
 			loadUnitOptions: [

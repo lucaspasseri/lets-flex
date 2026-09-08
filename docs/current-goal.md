@@ -2,185 +2,146 @@
 
 ## Parent milestone
 
-Let’s Flex gives users a useful, trustworthy foundation for building strength-training
-sessions.
+Let’s Flex gives users a coherent, trustworthy, and polished interface for building and
+using strength-training sessions.
 
 ## Current goal
 
-Expand the global exercise-template catalog from its two-sample baseline to a curated,
-non-duplicative foundational strength catalog with well-structured base exercises,
-equipment-specific global variants, conservative muscle metadata, and a safe canonical
-seed.
+Standardize and refine the Library page—especially Exercise Templates—against the visual
+language already established across Dashboard, Programs, Progress, History, Profile, and
+shared components, while repairing duplicated session exercise labels and the Dashboard
+chart status that remains visible after successful enhancement.
 
 ## Status
 
-Completed on 2026-09-08 after explicit user approval.
+Completed on 2026-09-08 after explicit user approval. Both actions are Completed.
 
-## Completion outcome
-
-The application now provides a validated foundational catalog of 18 base exercise families
-and 36 global variants through the canonical reset-first database workflow. The completed
-result includes conservative prime-mover metadata, nullable-equipment administration,
-regular-user browsing and session selection, preserved global/private ownership boundaries,
-strengthened reset safeguards, and verified deterministic and PostgreSQL-backed behavior.
+**Outcome:** Library Exercise Templates now match the application's established visual and
+component language, session exercise choices expose distinct variant-aware labels, and the
+Dashboard chart no longer displays stale loading content after successful enhancement.
 
 ## Approved user outcome
 
-Users can build common resistance-training sessions from a substantially broader global
-catalog without first creating private variants. Catalog entries are consistently named,
-cover meaningful movement and equipment choices, communicate useful setup context, and
-preserve the existing distinction between base exercises, global variants, and owner-scoped
-private variants.
-
-## Why now
-
-- **Verified user priority:** the user explicitly selected exercise-template quantity and
-  usefulness as the next product outcome.
-- **Verified catalog gap:** the authoritative seed and disposable PostgreSQL test database
-  contain 2 active base exercises and 2 active global variants. Only `push` and `squat`
-  are represented, and neither seeded base has a muscle relationship.
-- **Verified reusable foundation:** the schema already provides 8 movement patterns, 24
-  muscles, 23 equipment options, 7 muscle roles, archived states, and separate global and
-  owner-scoped variants. The Library and session builder already render and consume visible
-  variants.
-- **Verified focused repair:** admin base-template create/update validation requires
-  equipment even though the schema and seeded `Bodyweight Push Up` support no-equipment
-  variants.
-- **Verified delivery boundary:** guarded reset is the authoritative synchronization path
-  for the application's disposable-data development phase.
+The Library feels like part of the same application rather than a separate visual system.
+Exercise templates have clear base/variant hierarchy, consistent spacing, typography,
+surfaces, controls, accordion behavior, forms, and responsive states. New-session exercise
+choices are distinct and variant-aware, and the Dashboard does not show a stale chart
+loading placeholder when the chart is ready. Existing functional, ownership, accessibility,
+and fallback behavior is preserved unless directly defective.
 
 ## Delta-first baseline
 
-- **Already satisfied:** catalog tables and relationships, global/private ownership and
-  variant-name indexes, archive behavior, admin authorization, Library rendering/search,
-  private-variant management, and session selection.
-- **Reuse:** existing reference vocabularies, `Push Up`, `Squat`, their global variants,
-  repository/ViewModel boundaries, Library components, reset tests, and PostgreSQL HTTP test
-  infrastructure.
-- **Repair:** allow nullable equipment at the admin base-template create/update validation
-  and presentation boundary.
-- **Add:** an exact reviewed catalog manifest, conservative muscle links, variant
-  setup/environment content, and authoritative canonical seed data.
-- **Unknown:** production catalog contents have not been inspected. No action may assume
-  they match the two-sample repository seed.
+### Already satisfied
 
-## Catalog contract
+- The Library main container uses the same 76rem centered layout and horizontal spacing as
+  Dashboard and Progress.
+- Library uses the shared page heading, button, form-field, modal, icon, and accordion entry
+  points. Shared fields already provide labels, required/optional status, hints, errors,
+  focus states, and responsive form grids.
+- Search, session-workspace, empty-state, private/global ownership, and personal/admin mode
+  behavior already exist; this goal does not replace their product model.
+- Exercise Template facts and actions already have small-screen stacking rules, and the
+  Dashboard always provides complete weekly adherence data in a semantic disclosure/table.
 
-- The managed catalog contains exactly 18 active canonical base exercise families,
-  including `Push Up` and `Squat`, and at least 30 active global variants.
-- Base coverage includes at least 3 `push`, 4 `pull`, 3 `squat`, 3 `hinge`, 3
-  `lunge`, and 2 `rotation` exercises.
-- Covered use cases include horizontal and vertical upper-body work, bilateral and
-  unilateral knee-dominant work, hip hinges and hip extension, and trunk rotation or
-  anti-rotation.
-- Variants use meaningful combinations from existing reference data: no equipment or
-  bodyweight, barbells, dumbbells, kettlebells, cables or bands, and common machines where
-  the base movement remains the same.
-- Every managed base has at least one conservative `prime_mover`. Additional roles are
-  included only where they apply to the base family rather than one equipment variant.
-- Every managed global variant has a distinct canonical name, appropriate nullable
-  equipment, a useful setup description, and an environment value.
-- Exact and normalized names are unique within the manifest. Existing managed entries are
-  enriched rather than duplicated, and semantic near-duplicates are removed during
-  manifest review.
-- Base exercises describe movement families. Equipment/setup implementations remain
-  variants. Global variants retain `owner_user_id IS NULL`; private variants remain owned.
+### Reuse
 
-## Database lifecycle contract
+- Current palette and semantic variables in `public/css/base.css`.
+- Established page-heading, section-heading, surface, card, badge, action, focus, empty-state,
+  and responsive conventions visible in Programs, Dashboard, Progress, History, and Profile.
+- Shared accordion, button, form, modal, and icon components; existing Library ViewModel and
+  server/browser-test boundaries.
+- Variant IDs as the persisted session-step selection identity, and the existing Dashboard
+  chart success/fallback split.
 
-- `db/schema.js` defines the authoritative current schema and `db/seed.js` contains the
-  complete canonical development seed and reset entry point.
-- `npm run db:reset` may run only when `ALLOW_DATABASE_RESET=true`. Missing/false
-  permission and the production refusal remain intact and must never be bypassed. The
-  command also requires a development/test runtime and a local or explicitly named
-  development/test target.
-- Guarded reset recreates the schema and applies the complete seed in one transaction and
-  is the expected synchronization path for disposable development databases.
-- Historical development migrations are not required and no migration runner, catalog
-  command, or synchronization framework is added.
-- No catalog data is applied to production without separate explicit authorization.
+### Repair
 
-## Image-support decision
+- The new/update session form builds one option per exercise variant but labels each option
+  with its base exercise name. The 18-base/36-variant catalog therefore presents repeated
+  labels for different variant IDs. The projection must expose distinct variant-aware labels
+  while preserving variant IDs and submitted session behavior.
+- Successful chart initialization sets the status element's `hidden` property, but
+  `.adherence-chart__status { display: grid; }` overrides the user-agent hidden rule. The
+  last loading text—“Preparing visual chart… Weekly data is available below.”—therefore
+  remains visible even when the canvas is ready.
+- Exercise Template CSS expects `.exercise-template` and `.exercise-template__trigger`
+  hooks that the shared accordion markup does not render. Intended container, expanded,
+  focus, and reduced-motion styling therefore does not consistently apply.
+- The Exercise Template detail region references an `aria-labelledby` trigger ID that is
+  never emitted. Accordion naming and expanded-state semantics must use real IDs/contracts.
 
-Image support is not part of this goal. Repository inspection found no catalog image fields
-or established exercise-image convention. Variant-level imagery is the most accurate
-future option because setup, equipment, environment, and notes already live together
-there, but a coherent implementation would require image metadata, a schema change,
-local assets, UI work, accessibility/fallback behavior, and asset quality/licensing review.
-That would make this catalog increment unnecessarily large.
+### Modify
 
-If separately approved later, prefer versioned local assets under
-`public/images/exercise-variants/` and nullable `image_path`/`image_alt` fields on
-`exercise_variants`. Render images only when metadata exists and preserve the complete
-text card as fallback. Base images can misrepresent variants; muscle illustrations require
-anatomy orientation/highlight and source/license metadata; equipment images lack a verified
-benefit sufficient to justify 23 assets and new detail UI.
+- Replace Exercise Template-local hard-coded/legacy palette aliases with the established
+  semantic variables where compatible.
+- Clarify base exercise versus variant hierarchy without changing the existing ownership,
+  archive, edit, private-variant, or session-selection model.
+- Align Exercise Template section/card rhythm, typography, radii, borders, action placement,
+  focus states, and responsive behavior with established page/card patterns. Refine nearby
+  Library spacing or tokens only where direct comparison shows a mismatch.
 
-## In scope
+### Unknown
 
-- Define and review the exact managed manifest before inserting rows.
-- Reuse and enrich the two existing sample bases and variants.
-- Add the catalog to the authoritative canonical seed and guarded-reset path.
-- Repair no-equipment admin validation and directly affected form copy.
-- Verify Library visibility, session selection, admin global-only management, and private
-  and historical data preservation.
-- Add focused manifest, validation, database, rendered-view, and PostgreSQL-backed coverage.
-- Document the reset-first development workflow and its production safety boundary.
+- No manual browser viewport review has yet been performed for the proposed final styling.
+  Action 2 must verify representative narrow and wide layouts rather than assuming CSS
+  source inspection is sufficient.
+- The report describes duplicated “option values,” while repository evidence proves
+  distinct variant IDs with duplicated base-name labels. If implementation evidence reveals
+  actual repeated IDs too, treat that as a defect in the same action and record its source.
 
-## Out of scope
+## Scope
 
-- Image metadata/assets/generation or Library image presentation.
-- Private-variant redesign or promotion into global data.
-- Carry/gait expansion and duration, distance, pace, heart-rate, or other required metrics.
-- A comprehensive isolation, rehabilitation, mobility, Olympic-lifting, or sport-specific
-  library.
-- Coaching, prescriptions, technique guarantees, medical guidance, video, localization, or
-  external content services.
-- Broad Library redesign, schema normalization, a migration framework, or a new dependency.
-- Push, deployment, production reset/application, or non-disposable database mutation
-  without separate explicit authorization.
+### In scope
 
-## Correctness and security requirements
+- Repair the session exercise-option projection at its ViewModel/data boundary and add
+  focused coverage for multiple variants of one base.
+- Repair Dashboard chart ready/loading/fallback visibility while retaining semantic weekly
+  data and a useful no-JavaScript/unavailable fallback.
+- Refine Exercise Templates markup and styling through existing shared components and
+  variables, including valid accordion naming, hierarchy, actions, and responsive states.
+- Apply small Library-level consistency adjustments only when they directly support the
+  established visual rhythm or remove duplicated legacy styling.
+- Verify personal/admin, populated/empty, interactive/fallback, keyboard/focus,
+  reduced-motion, and representative narrow/wide behavior proportionately to the change.
 
-- Manifest references resolve to approved vocabulary and every entry satisfies the catalog
-  contract before database work.
-- Catalog application creates no exact or normalized managed duplicates.
-- Workout snapshots are never rewritten by application behavior.
-- Private variants remain owner-scoped and unchanged.
-- Admin mutations remain authorization protected and validated.
-- No-equipment support does not weaken name, ID, muscle, ownership, or relationship
-  validation.
-- Reset and seed operations are transactional and honor existing guards.
-- No secrets, sensitive account data, or production catalog content are logged or committed.
+### Out of scope
 
-## Assumptions and approved planning judgments
+- A new design system, palette, framework, dependency, or application-wide redesign.
+- Broad refactoring of Dashboard, Programs, Progress, History, Profile, navigation, or
+  unrelated shared components.
+- Catalog content expansion, ownership changes, session schema changes, or database work.
+- New exercise imagery, charts, product features, or changes to valid user behavior beyond
+  the two identified defects.
+- Push, deployment, or production-data mutation.
 
-- **Unknown:** production applicability requires later inspection or explicit
-  user-authorized execution because production catalog contents are uninspected.
-- **Approved planning judgment:** 18 bases and 30-plus variants are the bounded first
-  increment. Exact content remains subject to Action 1 review before row insertion.
-- **Approved deferral:** variant imagery is a possible separate goal, not an implicit later
-  action in this goal.
-- **Explicitly reconsidered delivery decision:** while the application has no data that must
-  be preserved, guarded reset is the only schema synchronization path and development
-  migrations are removed. A persistent-data workflow requires a later explicit policy
-  change.
+## Correctness and accessibility requirements
+
+- Every rendered session exercise option has a stable variant ID and an unambiguous label;
+  creation/update and preserved invalid-form rows continue selecting the intended variant.
+- A ready Dashboard chart hides loading/status content; unavailable or invalid chart data
+  exposes the useful fallback; the complete server-rendered weekly table remains available.
+- Accordion triggers have valid accessible names, real control relationships, correct
+  `aria-expanded`, keyboard operation, visible focus, and reliable state changes that do not
+  depend solely on a transition event.
+- Changed controls meet established target sizing and contrast, and no state is communicated
+  only through color.
+- Changed layouts remain usable at representative narrow and wide widths. New or changed
+  motion honors reduced-motion preferences.
+- Authorization, CSRF, ownership, validation, archive behavior, and database contents are
+  unaffected.
 
 ## Done when
 
-- The reviewed manifest contains exactly 18 distinct managed bases and at least 30 distinct
-  global variants, including/enriching the existing entries without duplication.
-- Six in-scope patterns, stated use cases, equipment categories, content fields, and
-  prime-mover coverage meet the catalog contract.
-- Manifest validation rejects missing references, invalid metadata, and exact or normalized
-  duplicate names before database work.
-- Guarded reset produces the exact catalog only with `ALLOW_DATABASE_RESET=true`; production,
-  non-development/test runtime, and ambiguous remote-target refusals are verified.
-- No-equipment global templates can be created and updated through the admin boundary
-  without weakening authorization or other validation.
-- Regular users can browse/select expanded global variants while global/private management
-  boundaries remain intact.
-- Focused tests, the deterministic suite, PostgreSQL-backed coverage, and the authorized
-  local development reset pass with the canonical schema and seed path.
-- No image work, dependency, broad redesign, push, deployment, production reset, or
-  production-data mutation occurs.
+- The two defects are reproduced from repository evidence, corrected at their source, and
+  covered by focused tests for success and fallback/preservation behavior.
+- Exercise Templates use a coherent shared-component contract and established semantic
+  tokens; stale class hooks and broken ARIA references are removed or repaired.
+- Library hierarchy, spacing, typography, surfaces, controls, actions, empty/populated
+  states, and responsive behavior visibly align with established application patterns
+  without redesigning unrelated pages.
+- Personal and administrator Library modes preserve their ownership and action boundaries.
+- Relevant rendered, ViewModel, browser, and HTTP tests pass; `npm run verify` and the
+  PostgreSQL HTTP suite pass when required by the implemented delta.
+- A representative narrow/wide manual or equivalent rendered layout review is recorded,
+  along with any remaining visual assumptions.
+- No unrelated redesign, dependency, database change, push, deployment, or production-data
+  mutation occurs.

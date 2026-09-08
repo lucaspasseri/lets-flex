@@ -1,7 +1,4 @@
 .session-workspace {
-	--workspace-border: #2a2d33;
-	--workspace-subtle: #202228;
-
 	display: grid;
 	gap: 1.5rem;
 }
@@ -16,7 +13,7 @@
 .session-workspace__eyebrow,
 .section-heading__eyebrow {
 	margin: 0 0 0.25rem;
-	color: var(--color-stitch);
+	color: var(--color-action);
 	font-size: 0.75rem;
 	font-weight: 700;
 	letter-spacing: 0.1em;
@@ -32,7 +29,7 @@
 
 .session-summaries,
 .session-details {
-	border: 1px solid var(--workspace-border);
+	border: 1px solid var(--color-border);
 	border-radius: 1rem;
 	background: var(--color-surface);
 }
@@ -72,7 +69,7 @@
 	align-items: center;
 	justify-content: space-between;
 	padding: 1rem;
-	border-bottom: 1px solid var(--workspace-border);
+	border-bottom: 1px solid var(--color-border);
 }
 
 .session-summaries__count {
@@ -81,7 +78,7 @@
 	height: 1.75rem;
 	place-items: center;
 	border-radius: 999px;
-	background: var(--workspace-subtle);
+	background: var(--color-surface-subtle);
 	color: var(--color-text-muted);
 	font-size: 0.8rem;
 }
@@ -142,14 +139,14 @@
 }
 
 .session-summary:hover {
-	border-color: var(--workspace-border);
-	background: var(--workspace-subtle);
+	border-color: var(--color-border);
+	background: var(--color-surface-subtle);
 	transform: translateX(2px);
 }
 
 .session-summary--current {
-	border-color: color-mix(in srgb, var(--color-stitch) 45%, transparent);
-	background: color-mix(in srgb, var(--color-stitch) 9%, transparent);
+	border-color: color-mix(in srgb, var(--color-action) 45%, transparent);
+	background: color-mix(in srgb, var(--color-action) 9%, transparent);
 }
 
 .session-summary__body {
@@ -205,8 +202,8 @@
 	display: inline-flex;
 	align-items: center;
 	border-radius: 999px;
-	background: color-mix(in srgb, var(--color-stitch) 13%, transparent);
-	color: var(--color-stitch);
+	background: color-mix(in srgb, var(--color-action) 13%, transparent);
+	color: var(--color-action);
 	font-size: 0.75rem;
 	font-weight: 650;
 }
@@ -233,9 +230,9 @@
 	align-items: center;
 	gap: 0.75rem;
 	padding: 0.875rem;
-	border: 1px solid var(--workspace-border);
+	border: 1px solid var(--color-border);
 	border-radius: 0.75rem;
-	background: var(--workspace-subtle);
+	background: var(--color-surface-subtle);
 }
 
 .session-stat dt {
@@ -254,9 +251,9 @@
 	gap: 0.875rem;
 	margin-bottom: 1.75rem;
 	padding: 1rem;
-	border-left: 3px solid var(--color-stitch);
+	border-left: 3px solid var(--color-action);
 	border-radius: 0.25rem 0.75rem 0.75rem 0.25rem;
-	background: color-mix(in srgb, var(--color-stitch) 7%, transparent);
+	background: color-mix(in srgb, var(--color-action) 7%, transparent);
 }
 
 .session-details__notes h4,
@@ -290,9 +287,9 @@
 	grid-template-columns: auto minmax(0, 1fr);
 	gap: 1rem;
 	padding: 1rem;
-	border: 1px solid var(--workspace-border);
+	border: 1px solid var(--color-border);
 	border-radius: 0.875rem;
-	background: #13151a;
+	background: var(--color-page);
 }
 
 .session-step__order {
@@ -301,8 +298,8 @@
 	height: 2.25rem;
 	place-items: center;
 	border-radius: 0.65rem;
-	background: var(--color-stitch);
-	color: var(--color-stitch-text);
+	background: var(--color-action);
+	color: var(--color-text-on-action);
 	font-weight: 800;
 }
 
@@ -335,8 +332,8 @@
 .session-step__prescription {
 	padding: 0.45rem 0.7rem;
 	border-radius: 0.5rem;
-	background: var(--workspace-subtle);
-	color: var(--color-stitch);
+	background: var(--color-surface-subtle);
+	color: var(--color-action);
 	font-size: 0.85rem;
 	white-space: nowrap;
 }
@@ -392,7 +389,7 @@
 
 .tag {
 	padding: 0.25rem 0.55rem;
-	background: var(--workspace-subtle);
+	background: var(--color-surface-subtle);
 	color: var(--color-text-muted);
 }
 
