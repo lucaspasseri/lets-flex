@@ -117,6 +117,49 @@ Required:
 - Security, authentication, authorization, session, data-integrity, migration, and production
   behavior must not rely on unverified assumptions.
 
+## Next-goal proposal discipline
+
+This section applies when the current goal is reaching completion and the coding agent is
+considering what should come next.
+
+Required:
+
+1. A completed goal does not establish an implied roadmap. Finishing one goal does not make
+   its most obvious continuation the next approved project priority.
+2. Before proposing a next goal, reassess from:
+   - the verified current repository state;
+   - the user's stated higher-level objectives or milestone;
+   - remaining verified gaps;
+   - confirmed constraints and intentionally deferred work;
+   - the user's latest stated priorities.
+3. Do not derive a next goal solely from a previous agent proposal, from what would be a
+   technically natural continuation, or from a chain of earlier recommendations.
+4. Treat every proposed next goal as an unapproved candidate, not as part of an established
+   roadmap. Do not modify goal/action tracking files or begin implementation until the user
+   explicitly approves it.
+5. A next-goal proposal must explain `Why now`:
+   - which stated objective or milestone it advances;
+   - which verified gap it addresses;
+   - which existing capabilities it can reuse;
+   - what assumptions or unknowns remain;
+   - why it is a stronger candidate than other known nearby work, when that comparison is
+     reasonably supported.
+6. Apply the `Evidence and assumptions` rules to roadmap reasoning. Do not present an inferred
+   future need as a verified project requirement.
+7. If no next goal is strongly supported by current evidence and stated priorities, say so and
+   request user direction instead of inventing a continuation.
+8. Keep the planning horizon short:
+   - the current goal is approved work;
+   - the next goal is only a candidate until approved;
+   - later directions are ideas only unless the user explicitly asks for a broader roadmap.
+9. Do not generate a multi-goal roadmap by default. Prefer one recommended next-goal candidate;
+   mention alternatives only when they materially help the user choose.
+10. After any future goal is completed, reassess again from current evidence and user priorities.
+    Do not automatically continue a previously suggested trail of goals.
+
+The coding agent may show initiative by proposing useful work, but initiative does not grant
+roadmap authority. User approval determines project direction.
+
 ## Active-goal workflow
 
 This section applies only when the requested task contributes to the active goal.
@@ -155,8 +198,8 @@ When the user says `Approve current action`:
 1. Confirm that the action is `Ready for review` and its verification evidence is recorded.
 2. If verification is incomplete, explain what remains and do not complete the action.
 3. Otherwise mark it `Completed` and record a concise completion summary.
-4. Promote the next `Pending` action to `Active`, update `Resume here`, and stop without
-   implementing it.
+4. Keep the next action `Pending`, update `Resume here` to identify it as the prepared next
+   action, and stop without activating or implementing it.
 
 When the user requests changes to an action:
 
@@ -171,27 +214,31 @@ After the last action is approved:
 3. Compare the result with every `Done when` criterion.
 4. Identify unmet criteria and intentionally excluded work, then stop for user approval.
 
-When the user says `Approve current goal`, mark it `Completed`, record its completion date
-and outcome, propose the next goal in chat, and do not replace `current-goal.md` yet.
+When the user says `Approve current goal`, mark it `Completed` and record its completion
+date and outcome. Then apply `Next-goal proposal discipline`: propose a next-goal candidate
+only when current evidence and stated priorities support one. Otherwise state that no next goal
+is strongly implied and request user direction. Do not replace `current-goal.md` yet.
 
-When the user says `Approve proposed next goal`, first perform the delta-first planning
-process against the current repository state and completed related work. Then replace
-`docs/current-goal.md` with the approved goal and reset `docs/current-actions.md` with a
-proposed sequence containing only the verified delta. The first action remains `Pending`.
-Stop for planning approval without implementing it.
+When the user says `Approve proposed next goal`, treat that approval as authorization for
+the goal outcome, not for implementation. First perform the delta-first planning process against
+the current repository state and completed related work. Then replace `docs/current-goal.md`
+with the approved goal and reset `docs/current-actions.md` with a proposed sequence containing
+only the verified delta. The first action remains `Pending`. Stop for action-plan approval
+without implementing it.
 
 When the user says `Approve action plan`, set the first `Pending` action to `Active`, update
 `Resume here`, and stop without implementing it.
 
 The coding agent may propose goal changes, but must not change user outcomes, scope,
-non-goals, security invariants, confirmed decisions, or completion criteria without
-explicit user approval. Overlap with previously completed work is not, by itself, approval
-to replace or redesign that work.
+non-goals, security invariants, confirmed decisions, completion criteria, or project direction
+without explicit user approval. Overlap with previously completed work is not, by itself,
+approval to replace or redesign that work, and a sequence of agent proposals must never be
+treated as an approved roadmap.
 
 ## End-of-response workflow options
 
-When working on an action governed by `current-goal.md` and
-`current-action.md`, end every review or status response with a
+When working on an action governed by `docs/current-goal.md` and
+`docs/current-actions.md`, end every review or status response with a
 `Next decision` section.
 
 Present only options that are valid for the action's current status.
