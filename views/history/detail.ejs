@@ -1,0 +1,82 @@
+<main class="main workout-history workout-history-detail" data-workout-history-detail>
+	<a class="history-back-link" href="<%= backHref %>"><span aria-hidden="true">←</span> Back to workout history</a>
+	<%- include("../partials/shared/components/pageHeading", { heading }) %>
+
+	<section class="history-summary" aria-labelledby="history-summary-heading" data-status="<%= summary.status %>">
+		<div class="history-section-heading">
+			<div><p class="history-eyebrow">At a glance</p><h2 id="history-summary-heading">Session summary</h2></div>
+			<span class="history-status" data-status="<%= summary.status %>"><span aria-hidden="true"></span><%= summary.statusLabel %></span>
+		</div>
+		<dl class="history-summary__facts">
+			<div><dt>Status</dt><dd><%= summary.statusLabel %></dd></div>
+			<div>
+				<dt><%= summary.historyDate.context %></dt>
+				<dd><% if (summary.historyDate.value) { %><time datetime="<%= summary.historyDate.value %>"><%= summary.historyDate.label %></time><% } else { %><%= summary.historyDate.label %><% } %></dd>
+			</div>
+			<% if (summary.scheduledDate) { %><div><dt>Originally scheduled</dt><dd><time datetime="<%= summary.scheduledDate.value %>"><%= summary.scheduledDate.label %></time></dd></div><% } %>
+			<% if (summary.startedAt.value) { %><div><dt>Started</dt><dd><time datetime="<%= summary.startedAt.value %>"><%= summary.startedAt.label %></time></dd></div><% } %>
+			<% if (summary.finishedAt.value) { %><div><dt>Finished</dt><dd><time datetime="<%= summary.finishedAt.value %>"><%= summary.finishedAt.label %></time></dd></div><% } %>
+		</dl>
+		<% if (summary.notes) { %><div class="history-note"><h3>Session notes</h3><p><%= summary.notes %></p></div><% } %>
+	</section>
+
+	<section class="history-steps" aria-labelledby="history-steps-heading">
+		<div class="history-section-heading">
+			<div><p class="history-eyebrow">Recorded performance</p><h2 id="history-steps-heading">Exercise results</h2></div>
+			<% if (steps.length) { %><span class="history-results__page"><%= steps.length %> <%= steps.length === 1 ? "step" : "steps" %></span><% } %>
+		</div>
+		<% if (steps.length) { %>
+			<ol class="history-step-list">
+				<% steps.forEach(step => { %>
+					<li>
+						<article class="history-step" data-status="<%= step.statusLabel.toLowerCase() %>">
+							<header class="history-step__header">
+								<div class="history-step__number" aria-hidden="true"><%= step.order %></div>
+								<div class="history-step__title">
+									<p>Step <%= step.order %></p>
+									<h3><%= step.title %></h3>
+									<% if (step.exerciseName) { %><span>Exercise: <%= step.exerciseName %></span><% } %>
+									<% if (step.name) { %><span>Plan label: <%= step.name %></span><% } %>
+								</div>
+								<span class="history-status history-status--step" data-status="<%= step.statusLabel.toLowerCase() %>"><span aria-hidden="true"></span><%= step.statusLabel %></span>
+							</header>
+
+							<div class="history-step__content">
+								<section class="history-prescription" aria-label="Planned prescription">
+									<h4>Planned</h4>
+									<dl>
+										<div><dt>Sets</dt><dd><%= step.planned.sets ?? "—" %></dd></div>
+										<div><dt>Repetitions</dt><dd><%= step.planned.reps ?? "—" %></dd></div>
+										<div><dt>Load</dt><dd><%= step.planned.loadValue ?? "—" %><% if (step.planned.loadValue != null && step.planned.loadUnit) { %> <%= step.planned.loadUnit %><% } %></dd></div>
+										<% if (step.completedAt.value) { %><div class="history-prescription__resolved"><dt>Resolved</dt><dd><time datetime="<%= step.completedAt.value %>"><%= step.completedAt.label %></time></dd></div><% } %>
+									</dl>
+								</section>
+
+								<section class="history-performance" aria-label="Performed sets">
+									<h4>Performed</h4>
+									<% if (step.sets.length) { %>
+										<div class="history-table-scroll" tabindex="0" role="region" aria-label="Performed sets for <%= step.title %>">
+											<table>
+												<caption>Performed sets for <%= step.title %></caption>
+												<thead><tr><th scope="col">Set</th><th scope="col">Repetitions</th><th scope="col">Load</th></tr></thead>
+												<tbody>
+													<% step.sets.forEach(set => { %><tr><th scope="row"><%= set.order %></th><td><%= set.reps ?? "—" %></td><td><%= set.loadValue ?? "—" %><% if (set.loadValue != null && set.loadUnit) { %> <%= set.loadUnit %><% } %></td></tr><% }) %>
+												</tbody>
+											</table>
+										</div>
+									<% } else { %><p class="history-performance__empty">No performed sets were recorded for this step.</p><% } %>
+								</section>
+							</div>
+							<% if (step.notes) { %><div class="history-note history-note--step"><h4>Step notes</h4><p><%= step.notes %></p></div><% } %>
+						</article>
+					</li>
+				<% }) %>
+			</ol>
+		<% } else { %>
+			<div class="history-empty-state history-empty-state--detail">
+				<span class="history-empty-state__mark" aria-hidden="true">—</span>
+				<h3><%= emptySteps.title %></h3><p><%= emptySteps.message %></p>
+			</div>
+		<% } %>
+	</section>
+</main>

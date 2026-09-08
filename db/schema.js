@@ -123,6 +123,8 @@ CREATE TABLE programs (
 	start_date DATE DEFAULT CURRENT_DATE
 );
 
+CREATE INDEX programs_user_idx ON programs (user_id, id);
+
 CREATE TABLE cycles (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	program_id INTEGER NOT NULL REFERENCES programs(id) ON DELETE CASCADE,
@@ -251,6 +253,7 @@ CREATE TABLE workout_sessions (
 
 	status workout_session_status NOT NULL DEFAULT 'planned',
 
+	session_name VARCHAR,
 	notes TEXT,
 
 	UNIQUE (training_day_id, workout_session_order),
@@ -296,6 +299,9 @@ CREATE TABLE workout_step_logs (
 	exercise_variant_id INTEGER REFERENCES exercise_variants(id) ON DELETE SET NULL,
 
 	name VARCHAR,
+	step_type_name VARCHAR,
+	exercise_name VARCHAR,
+	exercise_variant_name VARCHAR,
 
 	-- Snapshot of the original plan
 	planned_sets INTEGER,

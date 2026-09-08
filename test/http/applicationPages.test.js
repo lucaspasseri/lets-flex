@@ -2243,7 +2243,355 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.doesNotMatch(emptyDashboard.text, /data-adherence-chart/);
 	});
 
-	test("an owned workout flows from planned logging into every analytics component", async () => {
+	test("workout history reads owned terminal snapshots with stable filtering and pagination", async () => {
+		const context = (
+			await db.query(`
+				WITH owners AS (
+					SELECT id, email FROM users
+					WHERE email IN ('user-one@example.com', 'user-two@example.com')
+				), owner_program_a AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'History A', DATE '2026-08-01' FROM owners
+					WHERE email = 'user-one@example.com' RETURNING id, user_id
+				), owner_program_b AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'History B', DATE '2026-08-01' FROM owners
+					WHERE email = 'user-one@example.com' RETURNING id
+				), foreign_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'Foreign history', DATE '2026-08-01' FROM owners
+					WHERE email = 'user-two@example.com' RETURNING id, user_id
+				), owner_cycle_a AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'A', 5, 1 FROM owner_program_a RETURNING id
+				), owner_cycle_b AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'B', 5, 1 FROM owner_program_b RETURNING id
+				), foreign_cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Foreign', 5, 1 FROM foreign_program RETURNING id
+				), owner_template AS (
+					INSERT INTO sessions (owner_user_id, name, notes)
+					SELECT user_id, 'Mutable session name', 'Mutable session notes'
+					FROM owner_program_a RETURNING id
+				), foreign_template AS (
+					INSERT INTO sessions (owner_user_id, name)
+					SELECT user_id, 'Foreign session' FROM foreign_program RETURNING id
+				), owner_days AS (
+					INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+					SELECT owner_cycle_a.id, values.day_order, values.scheduled_date
+					FROM owner_cycle_a
+					CROSS JOIN (VALUES
+						(1, DATE '2026-08-01'),
+						(2, DATE '2026-08-03'),
+						(3, DATE '2026-08-04'),
+						(4, DATE '2026-08-05')
+					) AS values(day_order, scheduled_date)
+					RETURNING id, day_order
+				), owner_b_day AS (
+					INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+					SELECT id, 1, DATE '2026-08-06' FROM owner_cycle_b RETURNING id
+				), foreign_day AS (
+					INSERT INTO training_days (cycle_id, day_order, scheduled_date)
+					SELECT id, 1, DATE '2026-08-07' FROM foreign_cycle RETURNING id
+				), owner_sessions AS (
+					INSERT INTO workout_sessions
+						(training_day_id, session_id, workout_session_order, status,
+						 started_at, finished_at, session_name, notes)
+					SELECT days.id, owner_template.id, 1,
+						(CASE
+							WHEN days.day_order IN (1, 3) THEN 'finished'
+							WHEN days.day_order = 2 THEN 'cancelled'
+							ELSE 'planned'
+						END)::workout_session_status,
+						CASE WHEN days.day_order IN (1, 3)
+							THEN TIMESTAMPTZ '2026-08-03 12:00:00+00' END,
+						CASE
+							WHEN days.day_order = 1 THEN TIMESTAMPTZ '2026-09-05 10:00:00+00'
+							WHEN days.day_order = 3 THEN TIMESTAMPTZ '2026-08-03 15:00:00+00'
+						END,
+						'Snapshot session', 'Workout note <safe>'
+					FROM owner_days days CROSS JOIN owner_template
+					RETURNING id, status, training_day_id
+				), owner_b_session AS (
+					INSERT INTO workout_sessions
+						(training_day_id, session_id, workout_session_order, status, session_name)
+					SELECT owner_b_day.id, owner_template.id, 1, 'cancelled', 'Program B session'
+					FROM owner_b_day, owner_template RETURNING id
+				), foreign_session AS (
+					INSERT INTO workout_sessions
+						(training_day_id, session_id, workout_session_order, status,
+						 started_at, finished_at, session_name)
+					SELECT foreign_day.id, foreign_template.id, 1, 'finished',
+						TIMESTAMPTZ '2026-09-06 09:00:00+00',
+						TIMESTAMPTZ '2026-09-06 10:00:00+00', 'Foreign snapshot'
+					FROM foreign_day, foreign_template RETURNING id
+				)
+				SELECT
+					owner_program_a.user_id,
+					owner_program_a.id AS program_a_id,
+					owner_program_b.id AS program_b_id,
+					foreign_program.id AS foreign_program_id,
+					foreign_program.user_id AS foreign_user_id,
+					owner_template.id AS template_id,
+					(SELECT os.id FROM owner_sessions os
+						JOIN owner_days od ON od.id = os.training_day_id
+						WHERE od.day_order = 1) AS finished_id,
+					(SELECT id FROM owner_sessions WHERE status = 'cancelled') AS cancelled_id,
+					(SELECT id FROM owner_sessions WHERE status = 'planned') AS planned_id,
+					foreign_session.id AS foreign_session_id
+				FROM owner_program_a, owner_program_b, foreign_program,
+					owner_template, foreign_session
+			`)
+		).rows[0];
+
+		const stepLogs = (
+			await db.query(
+				`INSERT INTO workout_step_logs
+					(workout_session_id, status, step_order, name, step_type_name,
+					 exercise_name, exercise_variant_name, planned_sets, planned_reps,
+					 planned_load_value, planned_load_unit, completed_at, notes)
+				 VALUES
+					($1, 'performed', 1, 'Primary movement', 'exercise',
+					 'Snapshot squat', 'Snapshot back squat', 2, 8, 100, 'Kilograms',
+					 TIMESTAMPTZ '2026-09-05 09:30:00+00', 'Step note'),
+					($1, 'skipped', 2, 'Accessory', 'exercise',
+					 'Snapshot row', 'Snapshot cable row', 3, 12, NULL, NULL,
+					 TIMESTAMPTZ '2026-09-05 09:40:00+00', NULL)
+				 RETURNING id, step_order`,
+				[context.finished_id],
+			)
+		).rows;
+		await db.query(
+			`INSERT INTO workout_set_logs
+				(workout_step_log_id, set_order, reps, load_value, load_unit)
+			 VALUES ($1, 2, 7, 102.5, 'Kilograms'), ($1, 1, 8, 100, 'Kilograms')`,
+			[stepLogs[0].id],
+		);
+		await db.query(
+			"UPDATE sessions SET name = 'Changed template', is_archived = TRUE WHERE id = $1",
+			[context.template_id],
+		);
+
+		const { default: getWorkoutHistoryPage } =
+			await import("../../src/features/workoutHistory/getWorkoutHistoryPage.js");
+		const { default: getWorkoutHistoryDetail } =
+			await import("../../src/features/workoutHistory/getWorkoutHistoryDetail.js");
+		const unfiltered = await getWorkoutHistoryPage(
+			{
+				userId: context.user_id,
+				filters: { programId: null, fromDate: null, toDate: null },
+				page: 1,
+				pageSize: 2,
+			},
+			db,
+		);
+		assert.equal(unfiltered.totalCount, 4);
+		assert.equal(unfiltered.totalPages, 2);
+		assert.deepEqual(
+			unfiltered.items.map((item) => [item.historyDate, item.sessionName]),
+			[
+				["2026-09-05", "Snapshot session"],
+				["2026-08-06", "Program B session"],
+			],
+		);
+		assert.deepEqual(
+			await getWorkoutHistoryPage(
+				{
+					userId: context.user_id,
+					filters: { programId: null, fromDate: null, toDate: null },
+					page: 99,
+					pageSize: 2,
+				},
+				db,
+			),
+			{ items: [], totalCount: 4, page: 99, pageSize: 2, totalPages: 2 },
+		);
+
+		const filtered = await getWorkoutHistoryPage(
+			{
+				userId: context.user_id,
+				filters: {
+					programId: context.program_a_id,
+					fromDate: "2026-08-03",
+					toDate: "2026-08-03",
+				},
+				page: 1,
+				pageSize: 10,
+			},
+			db,
+		);
+		assert.deepEqual(
+			filtered.items.map((item) => [item.status, item.historyDate]),
+			[
+				["finished", "2026-08-03"],
+				["cancelled", "2026-08-03"],
+			],
+		);
+		assert.equal(
+			(
+				await getWorkoutHistoryPage(
+					{
+						userId: context.foreign_user_id,
+						filters: {
+							programId: context.program_a_id,
+							fromDate: null,
+							toDate: null,
+						},
+					},
+					db,
+				)
+			).totalCount,
+			0,
+		);
+
+		const detail = await getWorkoutHistoryDetail(
+			{ workoutSessionId: context.finished_id, userId: context.user_id },
+			db,
+		);
+		assert.equal(detail?.sessionName, "Snapshot session");
+		assert.equal(detail?.notes, "Workout note <safe>");
+		assert.deepEqual(
+			detail?.steps.map((step) => [
+				step.exerciseName,
+				step.exerciseVariantName,
+				step.plannedSets,
+				step.status,
+			]),
+			[
+				["Snapshot squat", "Snapshot back squat", 2, "performed"],
+				["Snapshot row", "Snapshot cable row", 3, "skipped"],
+			],
+		);
+		assert.deepEqual(
+			detail?.steps[0].sets.map((set) => [
+				set.order,
+				set.reps,
+				set.loadValue,
+				set.loadUnit,
+			]),
+			[
+				[1, 8, 100, "Kilograms"],
+				[2, 7, 102.5, "Kilograms"],
+			],
+		);
+		assert.deepEqual(
+			await getWorkoutHistoryDetail(
+				{ workoutSessionId: context.cancelled_id, userId: context.user_id },
+				db,
+			),
+			{
+				id: context.cancelled_id,
+				status: "cancelled",
+				historyDate: "2026-08-03",
+				scheduledDate: "2026-08-03",
+				startedAt: null,
+				finishedAt: null,
+				programId: context.program_a_id,
+				programName: "History A",
+				sessionName: "Snapshot session",
+				notes: "Workout note <safe>",
+				steps: [],
+			},
+		);
+		assert.equal(
+			await getWorkoutHistoryDetail(
+				{ workoutSessionId: context.planned_id, userId: context.user_id },
+				db,
+			),
+			null,
+		);
+		assert.equal(
+			await getWorkoutHistoryDetail(
+				{ workoutSessionId: context.foreign_session_id, userId: context.user_id },
+				db,
+			),
+			null,
+		);
+
+		const anonymous = agent();
+		const anonymousHistory = await anonymous.request(
+			`/history?programId=${context.program_a_id}`,
+		);
+		assert.equal(anonymousHistory.response.status, 302);
+		assert.equal(
+			anonymousHistory.response.headers.get("location"),
+			`/auth/login?returnTo=${encodeURIComponent(`/history?programId=${context.program_a_id}`)}`,
+		);
+
+		const client = agent();
+		await login(client);
+		const historyPage = await client.request(
+			`/history?programId=${context.program_a_id}&fromDate=2026-08-03&toDate=2026-08-03`,
+		);
+		assert.equal(historyPage.response.status, 200);
+		assert.match(historyPage.text, /Workout history/);
+		assert.match(historyPage.text, /aria-current="page"[\s\S]*?<span>History<\/span>/);
+		assert.match(historyPage.text, /Finished/);
+		assert.match(historyPage.text, /Cancelled/);
+		assert.match(historyPage.text, /datetime="2026-08-03"/);
+		assert.match(
+			historyPage.text,
+			new RegExp(
+				`href="/history/\\d+\\?programId=${context.program_a_id}&amp;fromDate=2026-08-03&amp;toDate=2026-08-03"`,
+			),
+		);
+		assert.doesNotMatch(historyPage.text, /Foreign snapshot/);
+
+		const detailPage = await client.request(
+			`/history/${context.finished_id}?programId=${context.program_a_id}&page=2`,
+		);
+		assert.equal(detailPage.response.status, 200);
+		assert.match(detailPage.text, /Snapshot back squat/);
+		assert.match(detailPage.text, /Snapshot squat/);
+		assert.match(detailPage.text, /100 Kilograms/);
+		assert.match(detailPage.text, /102\.5 Kilograms/);
+		assert.match(detailPage.text, /Workout note &lt;safe&gt;/);
+		assert.doesNotMatch(detailPage.text, /Workout note <safe>/);
+		assert.match(
+			detailPage.text,
+			new RegExp(`href="/history\\?programId=${context.program_a_id}&amp;page=2"`),
+		);
+		assert.doesNotMatch(
+			detailPage.text,
+			/method="POST"|method="PATCH"|method="DELETE"/,
+		);
+
+		const cancelledPage = await client.request(`/history/${context.cancelled_id}`);
+		assert.equal(cancelledPage.response.status, 200);
+		assert.match(cancelledPage.text, /No workout results/);
+
+		let hiddenResponse = null;
+		for (const hiddenId of [context.foreign_session_id, context.planned_id, 999999]) {
+			const hidden = await client.request(`/history/${hiddenId}`);
+			assert.equal(hidden.response.status, 404);
+			assert.match(hidden.text, /Workout not found/);
+			assert.match(hidden.text, /may not exist or may not belong to this account/);
+			if (hiddenResponse === null) hiddenResponse = hidden.text;
+			else assert.equal(hidden.text, hiddenResponse);
+		}
+		assert.equal((await client.request("/history/not-a-session")).response.status, 400);
+		assert.equal(
+			(await client.request("/history?fromDate=2026-09-02&toDate=2026-09-01")).response
+				.status,
+			400,
+		);
+		assert.equal((await client.request("/history?page=10001")).response.status, 400);
+
+		const foreignFilter = await client.request(
+			`/history?programId=${context.foreign_program_id}`,
+		);
+		assert.equal(foreignFilter.response.status, 200);
+		assert.match(foreignFilter.text, /No sessions match these filters/);
+		assert.match(foreignFilter.text, /Unavailable program/);
+		assert.doesNotMatch(foreignFilter.text, /Foreign snapshot/);
+
+		const outOfRange = await client.request(`/history?page=99`);
+		assert.equal(outOfRange.response.status, 200);
+		assert.match(outOfRange.text, /Return to the first page/);
+	});
+
+	test("an owned workout flows from planned logging into analytics and history", async () => {
 		const fixture = await createWorkoutLifecycleFixture({ stepCount: 2 });
 		const workoutSessionId = fixture.workoutSessionIds[0];
 		const client = agent();
@@ -2386,6 +2734,33 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.doesNotMatch(
 			finishedPage.text,
 			/>Start session<|>Complete step<|>Skip step<|>Finish session</,
+		);
+
+		const historyPage = await client.request(
+			`/history?programId=${fixture.program_id}`,
+		);
+		assert.equal(historyPage.response.status, 200);
+		assert.match(historyPage.text, /Lifecycle session/);
+		assert.match(historyPage.text, /Finished/);
+		assert.match(
+			historyPage.text,
+			new RegExp(
+				`href="/history/${workoutSessionId}\\?programId=${fixture.program_id}"`,
+			),
+		);
+
+		const historyDetail = await client.request(
+			`/history/${workoutSessionId}?programId=${fixture.program_id}`,
+		);
+		assert.equal(historyDetail.response.status, 200);
+		assert.match(historyDetail.text, /Lifecycle step 1/);
+		assert.match(historyDetail.text, /Completed/);
+		assert.match(historyDetail.text, /Skipped/);
+		assert.match(historyDetail.text, /12\.5 Kilograms/);
+		assert.match(historyDetail.text, /20 Libra/);
+		assert.doesNotMatch(
+			historyDetail.text,
+			/method="POST"|method="PATCH"|method="DELETE"/,
 		);
 
 		assert.equal(
@@ -2737,6 +3112,39 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				.rows[0].status,
 			"finished",
 		);
+
+		const historyPage = await client.request(
+			`/history?programId=${fixture.program_id}`,
+		);
+		assert.equal(historyPage.response.status, 200);
+		assert.match(historyPage.text, /Cancelled/);
+		assert.match(historyPage.text, /Finished/);
+
+		const cancelledHistory = await client.request(`/history/${cancelledId}`);
+		assert.equal(cancelledHistory.response.status, 200);
+		assert.match(cancelledHistory.text, /No workout results/);
+		assert.match(
+			cancelledHistory.text,
+			/cancelled before exercise results were recorded/,
+		);
+
+		const emptyHistory = await client.request(`/history/${emptyId}`);
+		assert.equal(emptyHistory.response.status, 200);
+		assert.match(emptyHistory.text, /No exercises recorded/);
+		assert.match(emptyHistory.text, /finished without exercise steps/);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT id, status FROM workout_sessions
+					 WHERE id = ANY($1::int[]) ORDER BY id`,
+					[fixture.workoutSessionIds],
+				)
+			).rows,
+			[
+				{ id: cancelledId, status: "cancelled" },
+				{ id: emptyId, status: "finished" },
+			],
+		);
 	});
 
 	test("concurrent starts preserve one active session and one exact step snapshot", async () => {
@@ -2762,7 +3170,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 
 		const sessions = (
 			await db.query(
-				`SELECT ws.id, ws.status, count(wsl.id)::int AS step_count
+				`SELECT ws.id, ws.status, ws.session_name, count(wsl.id)::int AS step_count
 				 FROM workout_sessions ws
 				 LEFT JOIN workout_step_logs wsl ON wsl.workout_session_id = ws.id
 				 WHERE ws.id = ANY($1::int[])
@@ -2777,6 +3185,38 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.deepEqual(
 			sessions.map((session) => session.step_count).sort((a, b) => a - b),
 			[0, 2],
+		);
+		const activeSession = sessions.find((session) => session.status === "in_progress");
+		assert.equal(activeSession.session_name, "Lifecycle session");
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT name, step_type_name, exercise_name, exercise_variant_name,
+					        planned_sets, planned_reps
+					 FROM workout_step_logs
+					 WHERE workout_session_id = $1
+					 ORDER BY step_order`,
+					[activeSession.id],
+				)
+			).rows,
+			[
+				{
+					name: "Lifecycle step 1",
+					step_type_name: "exercise",
+					exercise_name: "Push Up",
+					exercise_variant_name: "Bodyweight Push Up",
+					planned_sets: 2,
+					planned_reps: 8,
+				},
+				{
+					name: "Lifecycle step 2",
+					step_type_name: "exercise",
+					exercise_name: "Push Up",
+					exercise_variant_name: "Bodyweight Push Up",
+					planned_sets: 2,
+					planned_reps: 8,
+				},
+			],
 		);
 	});
 

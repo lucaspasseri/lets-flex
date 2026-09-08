@@ -19,10 +19,10 @@ export async function createForUser(
 ) {
 	const { rows } = await db.query(
 		`INSERT INTO workout_sessions
-		 (session_id, training_day_id, workout_session_order, notes)
+		 (session_id, training_day_id, workout_session_order, session_name, notes)
 		 SELECT s.id, td.id,
 		        COALESCE((SELECT MAX(ws.workout_session_order) + 1 FROM workout_sessions ws WHERE ws.training_day_id = td.id), 1),
-		        $4
+		        s.name, $4
 		 FROM sessions s, training_days td
 		 JOIN cycles c ON c.id = td.cycle_id
 		 JOIN programs p ON p.id = c.program_id
@@ -93,11 +93,13 @@ export async function findMarkersByProgramIdAndDateRangeForUser(
 /** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
 export async function startByIdForUser({ workoutSessionId, userId }, db = pool) {
 	const { rows } = await db.query(
-		`UPDATE workout_sessions ws SET status = 'in_progress', started_at = NOW()
-		 FROM training_days td, cycles c, programs p
+		`UPDATE workout_sessions ws
+		 SET status = 'in_progress', started_at = NOW(),
+		     session_name = COALESCE(ws.session_name, s.name)
+		 FROM training_days td, cycles c, programs p, sessions s
 		 WHERE ws.id = $1 AND ws.status = 'planned'
 		   AND td.id = ws.training_day_id AND c.id = td.cycle_id
-		   AND p.id = c.program_id AND p.user_id = $2
+		   AND p.id = c.program_id AND p.user_id = $2 AND s.id = ws.session_id
 		 RETURNING ws.*`,
 		[workoutSessionId, userId],
 	);
@@ -126,11 +128,13 @@ export async function finishByIdForUser({ workoutSessionId, userId }, db = pool)
 /** @param {{workoutSessionId: number, userId: number}} input @param {DatabaseClient} [db] */
 export async function cancelByIdForUser({ workoutSessionId, userId }, db = pool) {
 	const { rows } = await db.query(
-		`UPDATE workout_sessions ws SET status = 'cancelled'
-		 FROM training_days td, cycles c, programs p
+		`UPDATE workout_sessions ws
+		 SET status = 'cancelled', session_name = COALESCE(ws.session_name, s.name)
+		 FROM training_days td, cycles c, programs p, sessions s
 		 WHERE ws.id = $1 AND ws.status = 'planned'
 		   AND td.id = ws.training_day_id
 		   AND c.id = td.cycle_id AND p.id = c.program_id AND p.user_id = $2
+		   AND s.id = ws.session_id
 		 RETURNING ws.*`,
 		[workoutSessionId, userId],
 	);

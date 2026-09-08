@@ -27,6 +27,7 @@ import sessionRouter from "./src/interfaces/routes/sessions.js";
 import exerciseTemplatesRouter from "./src/interfaces/routes/exerciseTemplates.js";
 import workoutSessionsRouter from "./src/interfaces/routes/workoutSessions.js";
 import workoutStepLogRouter from "./src/interfaces/routes/workoutStepLogs.js";
+import workoutHistoryRouter from "./src/interfaces/routes/workoutHistory.js";
 import exerciseVariantsRouter from "./src/interfaces/routes/exerciseVariants.js";
 
 import playgroundRouter from "./src/interfaces/routes/playground.js";
@@ -117,6 +118,7 @@ export function createApp(options = {}) {
 	app.use("/", exerciseVariantsRouter);
 	app.use("/workout_sessions", workoutSessionsRouter);
 	app.use("/workout_step_logs", workoutStepLogRouter);
+	app.use("/history", workoutHistoryRouter);
 
 	if (process.env.NODE_ENV !== "production") {
 		app.use("/playground", playgroundRouter);

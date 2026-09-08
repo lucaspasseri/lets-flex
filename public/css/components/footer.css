@@ -16,13 +16,13 @@
 
 .footer-nav__list {
 	display: grid;
-	grid-template-columns: repeat(4, minmax(0, 1fr));
-	width: min(100%, 25rem);
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	width: min(100%, 32rem);
 }
 
 .footer-nav__list--admin {
-	grid-template-columns: repeat(5, minmax(0, 1fr));
-	width: min(100%, 36rem);
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	width: min(100%, 42rem);
 }
 
 @media (max-width: 34rem) {
@@ -60,6 +60,10 @@
 	color: var(--color-action);
 }
 
+.footer-nav__link[aria-current="page"] {
+	background: color-mix(in srgb, var(--color-action) 7%, transparent);
+}
+
 .footer-nav__link:focus-visible {
 	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
 	outline-offset: 2px;
@@ -86,5 +90,12 @@
 	::view-transition-old(active-tab-indicator),
 	::view-transition-new(active-tab-indicator) {
 		animation-duration: 0s;
+	}
+}
+
+@media (max-width: 25rem) {
+	.footer-nav__link {
+		padding-inline: 0.2rem;
+		font-size: 0.72rem;
 	}
 }

@@ -4,7 +4,7 @@ import path from "node:path";
 import ejs from "ejs";
 
 const footerPath = path.resolve("views/partials/pages/footer.ejs");
-const destinations = ["dashboard", "programs", "library", "profile"];
+const destinations = ["dashboard", "history", "programs", "library", "profile"];
 const renderFile = /** @type {(filename: string, data: object) => Promise<string>} */ (
 	ejs.renderFile
 );
@@ -31,7 +31,7 @@ test("footer has no false current destination when its contract is absent", asyn
 	const html = await renderFile(footerPath, {});
 
 	assert.doesNotMatch(html, /aria-current="page"/);
-	assert.equal((html.match(/class="footer-nav__link"/g) ?? []).length, 4);
+	assert.equal((html.match(/class="footer-nav__link"/g) ?? []).length, 5);
 });
 
 test("footer exposes and identifies the administrator catalog only for admins", async () => {
@@ -44,7 +44,7 @@ test("footer exposes and identifies the administrator catalog only for admins", 
 		shell: { activeNavigation: "library" },
 	});
 
-	assert.equal((adminHtml.match(/class="footer-nav__link"/g) ?? []).length, 5);
+	assert.equal((adminHtml.match(/class="footer-nav__link"/g) ?? []).length, 6);
 	assert.match(
 		adminHtml,
 		/href="\/admin\/library\/exercises"[\s\S]*?aria-current="page"/,

@@ -2,199 +2,140 @@
 
 ## Parent milestone
 
-Let’s Flex tracks training progress, not only training plans.
-
-This broader milestone demonstrates secure multi-provider authentication, production
-account recovery, workout-status modeling, analytics and SQL aggregation, data
-visualization, and focused workout-session UX.
+Let’s Flex turns durable workout results into history that users can revisit.
 
 ## Current goal
 
-Complete and verify workout progress tracking and program analytics so an authenticated
-user can safely record performed training, rely on its history, and understand progress
-through polished, consistent, responsive, and accessible dashboard components.
+Build and verify a secure, read-only workout-history experience so authenticated users
+can browse their terminal workout sessions, filter results by program and date, and
+inspect immutable workout snapshots and performed results through polished,
+responsive, and accessible pages.
 
 ## Status
 
-Completed on 2026-09-04 with explicit user approval. All six actions and every `Done when`
-criterion have passing evidence.
+Completed on 2026-09-08 with explicit user approval. All four approved actions and every
+`Done when` criterion have passing evidence.
 
 ## Completion outcome
 
-Let’s Flex now enforces an ownership-scoped, atomic, and immutable workout lifecycle from
-planned session through performed or skipped steps and finished history. The dashboard
-derives activity, adherence, performed-work, and unit-safe load-volume analytics from that
-persisted history through ownership-scoped SQL and presents them with polished responsive
-components, accessible alternatives, intentional empty/failure states, and non-color cues.
+Let’s Flex now gives authenticated owners a secure, read-only record of finished and
+cancelled workouts. Users can filter and paginate history, inspect immutable exercise and
+prescription snapshots alongside performed sets, notes, and recorded units, and navigate
+polished responsive pages with intentional empty, sparse, missing, and failure states.
 
-Final verification passed 115 deterministic tests, 46 PostgreSQL HTTP tests, and the
-documented responsive, keyboard/focus, target-size, contrast, fallback, compatibility, and
-rollback checks. No production system or data was changed while completing this goal.
+Ownership is enforced in SQL, missing and cross-account details remain indistinguishable,
+and browsing cannot mutate terminal results. Final verification passed 130 deterministic
+tests, 47 PostgreSQL-backed HTTP tests, the documented desktop/mobile browser checks, and
+the additive migration check without touching production.
 
-## Revision requested
+## Approved user outcome
 
-The user confirmed that this goal must include both:
+Authenticated users can browse completed and cancelled sessions chronologically,
+filter by program and date, and inspect snapshotted exercises, performed sets, notes,
+and units. The experience must preserve ownership isolation and provide stable
+pagination, useful empty states, accessible interaction, responsive layouts, and a
+polished presentation consistent with the existing application.
 
-- the data collection, aggregation, and components required for workout tracking and
-  analytics; and
-- deliberate visual improvement of the affected workout and analytics pages rather than a
-  merely functional UI.
+## History contract
 
-The revised plan adds explicit analytics implementation and separate visual-polish actions
-for workout tracking and analytics.
+- History includes terminal `finished` and `cancelled` sessions only. Planned and
+  in-progress sessions remain part of the dashboard and workout-tracking flow.
+- The first action must define and test one consistent history timestamp, filtering,
+  and ordering contract while preserving visible scheduled and completion context.
+- Historical exercise names and planned prescriptions come from persisted workout
+  snapshots when present, rather than mutable program-template fields.
+- Performed results come from persisted workout set logs, including their recorded
+  values and units.
+- Cancelled sessions may legitimately have no exercise snapshot or performed sets and
+  must still render a useful detail state.
+- Pagination must be deterministic and bounded; the server must not load an account’s
+  full history merely to paginate it in application memory.
+- Invalid, empty, and out-of-range filter or page states must have documented,
+  predictable behavior.
 
-## Existing implementation under review
+## In scope
 
-The repository already contains:
-
-- `planned`, `in_progress`, `finished`, and `cancelled` workout-session states;
-- `planned`, `in_progress`, `performed`, and `skipped` workout-step-log states;
-- session start, finish, and cancellation routes and services;
-- transactional creation of step snapshots when a workout starts;
-- performed-set persistence and step skip/perform routes;
-- ownership-filtered repository writes through training day, cycle, program, and user;
-- dashboard session controls and workout logging forms;
-- program activity heatmap and scheduled-versus-finished weekly chart foundations;
-- initial validation, view-model, unit, and HTTP integration coverage.
-
-This goal reviews and extends that implementation without replacing its modular-monolith
-architecture or established design system.
-
-## User outcome
-
-An authenticated program owner can start a planned workout, record each exercise as
-performed with its actual sets or skipped, finish the workout, and rely on an immutable
-history. The dashboard turns that history into useful program-level summaries and trends
-presented with strong visual hierarchy and accessible alternatives. Invalid, repeated,
-out-of-order, or cross-account actions fail predictably without partial changes.
-
-## Proposed workout lifecycle contract
-
-- A session moves from `planned` to `in_progress`, then to `finished`.
-- A planned session may be cancelled; terminal sessions cannot be restarted or rewritten.
-- Step results may be recorded only while their owning session is `in_progress`.
-- A planned step may become `performed` or `skipped`; recorded terminal results are
-  immutable through normal user actions.
-- Performing a step stores the step status and its set rows atomically.
-- Finishing requires every snapshotted step to be terminal; a legitimately empty started
-  session may finish.
-- Ownership is derived server-side. Submitted session or step identifiers must never allow
-  reads or mutations across program owners.
-- Concurrent or repeated submissions must preserve database invariants and return a stable
-  application response instead of leaking raw PostgreSQL errors.
-
-## Proposed analytics contract
-
-Analytics are scoped to the authenticated user's selected program and derive from persisted
-workout history rather than client-calculated totals.
-
-- Activity: finished workout sessions grouped by their actual completion date.
-- Adherence: scheduled sessions and their finished status grouped by scheduled program
-  week; cancelled sessions remain distinguishable and are not counted as completed.
-- Work performed: performed steps, set count, and completed repetitions derived only from
-  terminal performed step logs and their set rows.
-- Load volume: `reps × load` only when both values exist, grouped by load unit so kilograms
-  and pounds are never summed together.
-- Empty/partial data: missing loads or reps do not become zero-valued performance, and empty
-  programs render an intentional empty state instead of misleading metrics.
-- Ordering and boundaries: program dates and stable database ordering define time buckets;
-  analytics must not leak or aggregate another user's records.
-
-The approved revised action plan adopted these lifecycle and analytics decisions.
-
-## Scope
-
-- review and correct session and step state transitions;
-- make session start, step performance/skip, and finish writes atomic where required;
-- preserve immutable snapshots of planned step data and actual performed sets;
-- enforce ownership and parent-child consistency at every read and mutation boundary;
-- validate numeric set data and bounded form collections using established Zod patterns;
-- implement ownership-scoped SQL aggregation and application data contracts for the
-  approved analytics;
-- create or refine summary, heatmap, adherence, and workload dashboard components;
-- deliberately improve the affected workout and analytics presentation, including visual
-  hierarchy, spacing, typography, grouping, status/progress communication, chart framing,
-  action emphasis, and all relevant UI states;
-- provide semantic, keyboard-accessible, non-color-only, responsive presentations and
-  accessible text summaries or alternatives for visualized data;
-- add focused repository/service, transformation, view-model, rendered-view, browser, and
-  PostgreSQL HTTP integration coverage;
-- document schema and deployment compatibility if database definitions change.
+- Audit the existing schema and workout lifecycle to establish the available terminal
+  session, snapshot, note, and performed-set data.
+- Add typed repository and service contracts for owned history lists and details.
+- Enforce account ownership in the data queries used for both lists and details.
+- Add authenticated, read-only history routes, controllers, validation, and page view
+  models.
+- Support server-side filtering by program and date plus deterministic pagination with
+  stable, shareable URLs.
+- Render history list and detail pages, including navigation needed to discover them.
+- Present statuses, dates, exercises, prescriptions, performed sets, notes, and units
+  clearly without consulting mutable template data for historical snapshots.
+- Polish the affected pages and components for visual hierarchy, consistency,
+  responsiveness, empty states, keyboard use, and assistive technology.
+- Add repository, service, HTTP, view, and browser-level verification in proportion to
+  the behavior and risk.
+- Document any necessary schema or index change and its safe deployment and rollback
+  procedure before it is applied outside local or test environments.
 
 ## Out of scope
 
-- predictive recommendations, coaching advice, personal-record detection, or comparative
-  social rankings;
-- arbitrary reporting builders, data export, or third-party fitness integrations;
-- changing training-plan, cycle, day, session-template, exercise, or variant authoring
-  except where a confirmed tracking or aggregation defect requires it;
-- timers, rest notifications, live synchronization, offline mode, or autosave;
-- reopening or editing completed workout history;
-- unrelated authentication, profile, email, navigation, or site-wide redesign work.
+- Editing, reopening, deleting, or otherwise mutating terminal workout history.
+- Exporting workout history.
+- Redesigning the analytics dashboard or changing its metrics.
+- Coaching recommendations, personal-record detection, social features, or sharing.
+- Third-party workout, health, or fitness integrations.
+- A broad site-wide visual or navigation redesign beyond what is needed for history.
+- New workout-data capture unrelated to making already persisted history correct.
 
 ## Correctness and security requirements
 
-- Every mutation and analytics read must require an authenticated owner and retain
-  applicable CSRF protection for writes.
-- A resource outside the current user's program boundary must behave as not found and must
-  remain excluded from both mutations and aggregates.
-- State-transition predicates must be enforced in the write that performs the transition,
-  not only by a preceding read or UI visibility.
-- Multi-row mutations must use transactions and roll back completely on failure.
-- Finished, cancelled, performed, and skipped records must not be silently rewritten by
-  duplicate or stale form submissions.
-- Timestamps must agree with lifecycle state and remain stable after terminal transitions.
-- Starting a workout must snapshot its template steps exactly once.
-- Recorded set order must be deterministic and unique within a step; invalid numeric data,
-  unsupported units, and excessive row counts must be rejected before persistence.
-- Analytics must define denominators, date attribution, null handling, cancellation
-  handling, and load-unit grouping explicitly and test them at boundary dates.
-- Expected conflicts must map to intentional application behavior without exposing SQL,
-  internal identifiers, or stack details to users.
-- Database constraints should protect durable invariants that cannot safely rely on UI or
-  service code alone.
+- Every history endpoint requires authentication.
+- List and detail ownership constraints are enforced in SQL, not only after rows are
+  loaded.
+- A missing session and another account’s session are indistinguishable at the public
+  detail boundary; list results never reveal another account’s records.
+- Path and query input is validated with bounded pagination and predictable date and
+  program handling.
+- History pages are read-only and do not alter workout, program, or account state.
+- Persisted snapshots remain the historical source of truth even when a program or
+  template later changes or is archived.
+- User-provided notes and labels are escaped in HTML and excluded from sensitive error
+  reporting.
+- Ordering uses a deterministic tie-breaker so records do not jump or repeat across
+  pages.
+- No new production dependency may be added without explicit user authorization.
 
-## Visual design and accessibility requirements
+## Visual and accessibility requirements
 
-- Preserve Let’s Flex’s dark, focused, energetic visual language and established palette.
-- Reuse and extend shared EJS components, controls, icons, spacing, typography, and status
-  markers where practical.
-- Give workout progress, the current task, primary actions, and key analytics a clear
-  hierarchy; avoid presenting every card or number with equal visual weight.
-- Treat workout entry, completed states, summaries, charts, empty states, validation,
-  loading, success, stale/conflict, and destructive actions as designed states.
-- Use semantic forms and native controls with clear labels, accessible names, visible
-  focus, adequate target sizes, and validation associated with the relevant fields.
-- Never communicate status, chart series, or intensity through color alone.
-- Give each chart a meaningful heading, explanation, legend where needed, and an accessible
-  textual summary or equivalent data representation.
-- Prevent unavailable transitions through both server enforcement and accurate disabled or
-  absent controls.
-- Ensure set-entry controls and analytics remain readable without horizontal page overflow
-  at representative small and large viewport sizes.
-- Respect reduced-motion preferences for any new or changed motion, and do not make
-  essential behavior depend on animation or external chart-script success.
-
-## Dependency constraint
-
-Prefer the existing stack and chart foundation. Any new production or browser dependency
-requires explicit user approval before it is added.
+- Preserve the established dark visual language while giving list, filter, status,
+  summary, and detail content a deliberate hierarchy.
+- Make scheduled and completed timing, cancelled status, exercise progression, units,
+  and notes understandable without relying on color alone.
+- Use semantic headings and suitable list, table, definition-list, and time markup.
+- Give filters explicit labels, keyboard-operable controls, visible focus states, and
+  practical touch targets.
+- Provide intentional first-use empty, filtered-no-results, missing-detail, and failure
+  states.
+- Avoid horizontal page overflow on narrow screens and preserve readable result layouts
+  at mobile widths.
+- Respect reduced-motion preferences and avoid decorative motion that obstructs use.
 
 ## Done when
 
-- the approved session and step lifecycle is enforced atomically by the backend;
-- cross-account, stale, repeated, and out-of-order actions cannot alter workout history or
-  contaminate analytics;
-- starting creates one stable step snapshot, performing stores validated ordered sets, and
-  skipping stores no performed sets;
-- a workout cannot finish with unresolved steps, while an empty started workout can finish;
-- completed and cancelled history remains immutable through normal actions;
-- ownership-scoped SQL produces the approved activity, adherence, performed-work, and
-  unit-safe load-volume metrics with explicit, tested semantics;
-- workout and analytics components provide a polished, consistent visual hierarchy and
-  complete responsive states rather than a merely functional presentation;
-- visualizations have accessible names, non-color cues, and text or data alternatives;
-- focused automated tests cover success, ownership, invalid transitions, rollback,
-  repetition/concurrency, aggregation boundaries, null/unit handling, and presentation;
-- the full required verification passes, including representative responsive and keyboard
-  checks, with any deployment implications recorded.
+- An authenticated owner can browse only their finished and cancelled sessions in a
+  stable chronological order.
+- Program and date filters work with deterministic, bounded pagination and retain
+  their state in navigation URLs.
+- An owned history detail shows immutable exercise snapshots, planned prescriptions,
+  performed sets, notes, and units when recorded, and handles cancelled or sparse
+  sessions gracefully.
+- Missing and cross-account detail requests share the same non-disclosing result, and
+  list queries cannot leak another account’s data.
+- Browsing history performs no data mutation and does not depend on mutable templates
+  for snapshot-backed historical content.
+- The affected pages are visually polished, consistent, responsive, keyboard usable,
+  and accessible through semantic markup and non-color status cues.
+- Automated coverage demonstrates ownership isolation, filters, ordering, pagination
+  boundaries, empty and sparse states, snapshot independence, and safe rendering of
+  user-authored text.
+- The complete deterministic verification suite, PostgreSQL-backed HTTP coverage, and
+  focused browser checks pass with evidence recorded in the action tracker.
+- Any schema or index changes have documented deployment and rollback steps; no push,
+  deployment, production reset, or production-data mutation occurs without explicit
+  authorization.
