@@ -21,6 +21,17 @@ Raise security or data-integrity conflicts instead of silently following lower-p
 
 - Before working, read `docs/general-guidelines.md`.
 - Use the repository and tests as the source of truth for the current implementation.
+- Before planning or implementing a goal, compare the requested outcome with the repository's
+  current state and any completed related goals or actions. Plan and implement only the delta:
+  behavior that is missing, changed, broken, or explicitly being reconsidered.
+- Treat completed goals and actions as historical evidence of established behavior. Do not
+  automatically reopen, repeat, replace, or reimplement them merely because a new goal overlaps
+  the same feature area.
+- Reuse compatible existing architecture, services, repositories, helpers, components, tests,
+  and verified behavior instead of creating parallel implementations.
+- If repository evidence conflicts with historical goal/action records, treat the repository
+  and tests as authoritative for what currently exists, and record the discrepancy before
+  planning corrective work.
 - Keep changes cohesive and within the requested scope.
 - Do not silently implement worthwhile but unrelated discoveries. Document or propose them
   as follow-up work unless they are required to make the requested change correct or safe.
@@ -35,6 +46,76 @@ Raise security or data-integrity conflicts instead of silently following lower-p
   workflow. Do not modify active-goal tracking files or apply their approval gates.
 - **Ambiguous applicability:** ask whether the task belongs to the active goal before
   changing goal or action state.
+
+## Delta-first planning
+
+This section applies whenever a new goal, revised goal, or new action overlaps existing behavior.
+
+Required:
+
+1. Establish the current state from the repository, tests, migrations, configuration, and other
+   relevant implementation evidence.
+2. Read completed related goal/action records when they are available and use them as historical
+   context, not as instructions to repeat work.
+3. Compare the requested end state with the verified current state.
+4. Classify each relevant capability as one of:
+   - `Already satisfied` — present and compatible with the new goal;
+   - `Reuse` — existing implementation should be used by the new work;
+   - `Modify` — existing behavior must change to satisfy the new goal;
+   - `Add` — required behavior does not yet exist;
+   - `Repair` — intended behavior exists but is currently broken or incomplete;
+   - `Explicitly reconsider` — the user has asked to revisit a previously completed decision.
+5. Build the proposed action sequence only from `Modify`, `Add`, `Repair`, and
+   `Explicitly reconsider` items. Do not create implementation actions for `Already satisfied`
+   or `Reuse` items unless verification or integration work is genuinely required.
+6. Preserve compatible architectural decisions and security/data-integrity invariants from
+   completed work. A nearby new goal does not implicitly authorize redesign.
+7. If an existing implementation already satisfies part or all of a proposed action, narrow
+   or remove that action instead of executing it again.
+8. Reopen completed work only when at least one of these is true:
+   - the user explicitly requests reconsideration;
+   - the new goal changes its acceptance criteria or required behavior;
+   - repository or test evidence shows the completed behavior is missing, broken, or incompatible;
+   - correctness, security, or data integrity requires a change.
+9. When reopening completed work, record why it is being reopened and what specific delta is
+   required. Do not reset the entire historical goal by default.
+
+For new-goal planning, prefer a concise baseline such as:
+
+- `Existing relevant capabilities`
+- `Verified gaps or changes`
+- `Proposed delta actions`
+
+The purpose of this baseline is to make clear what is being reused and what is actually new.
+
+## Evidence and assumptions
+
+This section applies whenever the coding agent is planning, reviewing, or implementing work.
+
+Required:
+
+- Do not infer implementation details solely from goal summaries, action history, naming,
+  conventions, nearby code, or expected architecture.
+- Verify relevant behavior in the repository, tests, migrations, configuration, or other direct
+  implementation evidence before relying on it in a plan, review, or implementation.
+- Clearly distinguish among:
+  - `Verified` — directly supported by repository or other direct implementation evidence;
+  - `Assumption` — plausible but not yet verified;
+  - `Unknown` — insufficient evidence is available to make a reliable claim.
+- Do not build an action plan on an `Assumption` when the repository can reasonably be inspected
+  to resolve it.
+- Do not promote an assumption to `Verified` merely because it is consistent with prior goals,
+  naming conventions, expected architecture, or nearby implementation patterns.
+- Never invent missing architectural relationships, dependencies, abstractions, database behavior,
+  or control flow to make documentation and implementation appear consistent.
+- If historical documentation and repository evidence disagree, report the discrepancy explicitly
+  rather than silently reconciling them.
+- If verification is not reasonably possible, preserve the uncertainty in the plan and explain what
+  evidence would be needed to resolve it.
+- Prefer narrowing an action because of uncertainty over expanding its scope based on an
+  unverified inference.
+- Security, authentication, authorization, session, data-integrity, migration, and production
+  behavior must not rely on unverified assumptions.
 
 ## Active-goal workflow
 
@@ -93,16 +174,19 @@ After the last action is approved:
 When the user says `Approve current goal`, mark it `Completed`, record its completion date
 and outcome, propose the next goal in chat, and do not replace `current-goal.md` yet.
 
-When the user says `Approve proposed next goal`, replace `docs/current-goal.md` with the
-approved goal, reset `docs/current-actions.md` with a proposed sequence whose first action
-is `Pending`, and stop for planning approval.
+When the user says `Approve proposed next goal`, first perform the delta-first planning
+process against the current repository state and completed related work. Then replace
+`docs/current-goal.md` with the approved goal and reset `docs/current-actions.md` with a
+proposed sequence containing only the verified delta. The first action remains `Pending`.
+Stop for planning approval without implementing it.
 
 When the user says `Approve action plan`, set the first `Pending` action to `Active`, update
 `Resume here`, and stop without implementing it.
 
 The coding agent may propose goal changes, but must not change user outcomes, scope,
 non-goals, security invariants, confirmed decisions, or completion criteria without
-explicit user approval.
+explicit user approval. Overlap with previously completed work is not, by itself, approval
+to replace or redesign that work.
 
 ## End-of-response workflow options
 
