@@ -2,194 +2,182 @@
 
 ## Parent milestone
 
-Let’s Flex turns durable workout history into trustworthy progress insight.
+Let’s Flex gives users a useful, trustworthy foundation for building strength-training
+sessions.
 
 ## Current goal
 
-Build and verify a secure, read-only exercise-progress experience so authenticated users
-can select an exercise from their own immutable workout history, understand how recorded
-performance changes over time, and inspect unit-safe trends through polished, responsive,
-and accessible visual and textual summaries.
+Expand the global exercise-template catalog from its two-sample baseline to a curated,
+non-duplicative foundational strength catalog with well-structured base exercises,
+equipment-specific global variants, conservative muscle metadata, and safe seed/deployment
+artifacts.
 
 ## Status
 
-Completed on 2026-09-08 after explicit user approval. All four approved actions are
-completed.
-
-## Completion outcome
-
-Let’s Flex now provides an authenticated, ownership-scoped, read-only exercise-progress
-experience derived from immutable finished-workout snapshots and performed sets. Users can
-select their own program and historical exercise through stable bounded URLs, inspect exact
-chronological counts and coverage, keep load and volume separated by recorded unit, and
-follow contributing workout-history links. The server-rendered presentation is polished,
-responsive, keyboard usable, and accessible without relying on charts, color, or client
-scripting. All approved automated, PostgreSQL-backed, responsive-browser, security, and
-scope checks passed, with no schema, dependency, deployment, or production-data change.
+Approved on 2026-09-08. The action plan is awaiting approval; no action is active.
 
 ## Approved user outcome
 
-An authenticated user can choose a program and an exercise represented in their completed
-workouts, apply a bounded date range, and review useful trends derived from performed sets.
-The experience clearly distinguishes sets, repetitions, load, and volume; never combines
-incompatible units; explains incomplete data; and remains understandable without relying
-on a chart, color, or pointer interaction.
+Users can build common resistance-training sessions from a substantially broader global
+catalog without first creating private variants. Catalog entries are consistently named,
+cover meaningful movement and equipment choices, communicate useful setup context, and
+preserve the existing distinction between base exercises, global variants, and owner-scoped
+private variants.
 
-## Progress contract
+## Why now
 
-- Progress is read-only and derives from performed step logs and their persisted set rows in
-  owned, finished workout sessions.
-- Progress dates use each workout's actual UTC completion date, consistent with finished
-  workout history.
-- Action 1 must define one stable, testable exercise-identity contract for current, renamed,
-  archived, deleted, and legacy variants using the persisted variant reference and immutable
-  snapshot fields that are actually available.
-- Trend points must have deterministic ordering and documented same-day aggregation
-  semantics.
-- Sets and repetitions are counted only where recorded. Metrics that require repetitions,
-  load, or a unit exclude incomplete rows instead of treating missing values as zero.
-- Load values and `repetitions × load` volume remain separated by recorded unit. The
-  application does not silently convert or combine units.
-- Summary and trend labels must describe recorded observations without presenting coaching,
-  causal claims, or unimplemented personal-record detection.
-- Program, exercise, date-range, and pagination or point-limit inputs must be bounded and
-  represented by stable, shareable URLs.
+- **Verified user priority:** the user explicitly selected exercise-template quantity and
+  usefulness as the next product outcome.
+- **Verified catalog gap:** the authoritative seed and disposable PostgreSQL test database
+  contain 2 active base exercises and 2 active global variants. Only `push` and `squat`
+  are represented, and neither seeded base has a muscle relationship.
+- **Verified reusable foundation:** the schema already provides 8 movement patterns, 24
+  muscles, 23 equipment options, 7 muscle roles, archived states, and separate global and
+  owner-scoped variants. The Library and session builder already render and consume visible
+  variants.
+- **Verified focused repair:** admin base-template create/update validation requires
+  equipment even though the schema and seeded `Bodyweight Push Up` support no-equipment
+  variants.
+- **Verified delivery boundary:** guarded reset is suitable for disposable databases, while
+  the existing manual SQL-migration convention can support one narrow retained-database
+  catalog migration without introducing a migration framework.
+
+## Delta-first baseline
+
+- **Already satisfied:** catalog tables and relationships, global/private ownership and
+  variant-name indexes, archive behavior, admin authorization, Library rendering/search,
+  private-variant management, and session selection.
+- **Reuse:** existing reference vocabularies, `Push Up`, `Squat`, their global variants,
+  repository/ViewModel boundaries, Library components, reset tests, and PostgreSQL HTTP test
+  infrastructure.
+- **Repair:** allow nullable equipment at the admin base-template create/update validation
+  and presentation boundary.
+- **Add:** an exact reviewed catalog manifest, conservative muscle links, variant
+  setup/environment content, authoritative seed data, and one transactional data migration
+  for existing retained databases.
+- **Unknown:** production catalog contents have not been inspected. No action may assume
+  they match the two-sample repository seed.
+
+## Catalog contract
+
+- The managed catalog contains exactly 18 active canonical base exercise families,
+  including `Push Up` and `Squat`, and at least 30 active global variants.
+- Base coverage includes at least 3 `push`, 4 `pull`, 3 `squat`, 3 `hinge`, 3
+  `lunge`, and 2 `rotation` exercises.
+- Covered use cases include horizontal and vertical upper-body work, bilateral and
+  unilateral knee-dominant work, hip hinges and hip extension, and trunk rotation or
+  anti-rotation.
+- Variants use meaningful combinations from existing reference data: no equipment or
+  bodyweight, barbells, dumbbells, kettlebells, cables or bands, and common machines where
+  the base movement remains the same.
+- Every managed base has at least one conservative `prime_mover`. Additional roles are
+  included only where they apply to the base family rather than one equipment variant.
+- Every managed global variant has a distinct canonical name, appropriate nullable
+  equipment, a useful setup description, and an environment value.
+- Exact and normalized names are unique within the manifest. Existing managed entries are
+  enriched rather than duplicated, and semantic near-duplicates are removed during
+  manifest review.
+- Base exercises describe movement families. Equipment/setup implementations remain
+  variants. Global variants retain `owner_user_id IS NULL`; private variants remain owned.
+
+## Database and deployment contract
+
+- `db/schema.js` remains the authoritative fresh-database schema and reference-data seed.
+- `npm run db:reset` may run only when `ALLOW_DATABASE_RESET=true`. Missing/false
+  permission and the production refusal remain intact and must never be bypassed.
+- Guarded reset is sufficient for disposable development and test databases.
+- One narrow, transactional, safely rerunnable data migration follows the existing manual
+  SQL convention for databases that must retain data. No migration runner, catalog command,
+  or synchronization framework is added.
+- The data migration detects compatible managed rows, fails before partial writes on
+  ambiguous conflicts, and preserves unrelated global content, private variants, sessions,
+  and workout snapshots.
+- No catalog data is applied to production without separate explicit authorization.
+
+## Image-support decision
+
+Image support is not part of this goal. Repository inspection found no catalog image fields
+or established exercise-image convention. Variant-level imagery is the most accurate
+future option because setup, equipment, environment, and notes already live together
+there, but a coherent implementation would require image metadata, a schema migration,
+local assets, UI work, accessibility/fallback behavior, and asset quality/licensing review.
+That would make this catalog increment unnecessarily large.
+
+If separately approved later, prefer versioned local assets under
+`public/images/exercise-variants/` and nullable `image_path`/`image_alt` fields on
+`exercise_variants`. Render images only when metadata exists and preserve the complete
+text card as fallback. Base images can misrepresent variants; muscle illustrations require
+anatomy orientation/highlight and source/license metadata; equipment images lack a verified
+benefit sufficient to justify 23 assets and new detail UI.
 
 ## In scope
 
-- Audit existing workout snapshots, performed-set logs, program analytics, history queries,
-  indexes, and UI foundations.
-- Define typed contracts for owned exercise choices, summary totals, data coverage, and
-  chronological trend series.
-- Add ownership-scoped SQL and service boundaries for program/exercise/date-filtered progress
-  data without loading another account's rows into application memory.
-- Add authenticated read-only routes, validation, controllers, page-data orchestration, and
-  view models for the progress experience.
-- Provide program, exercise, and date-range controls with predictable empty, invalid,
-  unavailable, and sparse-data states.
-- Present recorded workout occurrences, sets, repetitions, load, and volume using honest
-  unit-aware summaries and trends where the underlying data supports them.
-- Provide accessible textual or tabular equivalents for every visualization and useful links
-  back to the contributing owned workout-history details.
-- Polish the affected pages and direct navigation for hierarchy, consistency,
-  responsiveness, keyboard use, reduced motion, and assistive technology.
-- Add focused repository, service, validation, view-model, rendered-view, browser, and
-  PostgreSQL-backed HTTP coverage.
-- Document any justified schema or index change with deployment compatibility and rollback
-  guidance before it is applied outside local or test environments.
+- Define and review the exact managed manifest before inserting rows.
+- Reuse and enrich the two existing sample bases and variants.
+- Add the catalog to authoritative guarded-reset seed data.
+- Prepare one narrow retained-database data migration and verify conflict rollback and rerun
+  safety on disposable fixtures.
+- Repair no-equipment admin validation and directly affected form copy.
+- Verify Library visibility, session selection, admin global-only management, and private
+  and historical data preservation.
+- Add focused manifest, validation, database, rendered-view, and PostgreSQL-backed coverage.
+- Document guarded reset, migration preflight, deployment order, and rollback.
 
 ## Out of scope
 
-- Editing, reopening, deleting, or otherwise mutating workout history.
-- Workout recommendations, coaching, forecasting, readiness scoring, or injury guidance.
-- Personal-record badges, rankings, goals, achievements, or automated milestone detection.
-- Comparing users, social features, sharing, public profiles, or leaderboards.
-- Unit conversion or normalization across kilograms, pounds, bodyweight, distance, time, or
-  other measurement systems.
-- Import, export, wearable, health-platform, or third-party fitness integrations.
-- Replacing the existing program-level dashboard analytics or broadly redesigning unrelated
-  application pages.
-- Adding a production or browser dependency without explicit user approval.
+- Image metadata/assets/generation or Library image presentation.
+- Private-variant redesign or promotion into global data.
+- Carry/gait expansion and duration, distance, pace, heart-rate, or other required metrics.
+- A comprehensive isolation, rehabilitation, mobility, Olympic-lifting, or sport-specific
+  library.
+- Coaching, prescriptions, technique guarantees, medical guidance, video, localization, or
+  external content services.
+- Broad Library redesign, schema normalization, a migration framework, or a new dependency.
+- Push, deployment, production reset/application, or non-disposable database mutation
+  without separate explicit authorization.
 
 ## Correctness and security requirements
 
-- Every progress endpoint requires authentication.
-- Program, exercise-choice, contributing-workout, summary, and trend ownership constraints
-  are enforced in SQL.
-- A foreign, missing, archived-only, or otherwise unavailable selection must not reveal
-  another account's program, exercise, workout, or result data.
-- Request input is validated and bounded using the established Zod middleware pattern.
-- Progress queries and pages are read-only and cannot alter workout, program, exercise, or
-  account state.
-- Immutable workout snapshots and performed-set logs are the source of truth; mutable
-  templates must not rewrite historical labels or measurements.
-- Numeric parsing preserves the distinction between zero, missing, invalid, and unavailable
-  data and does not produce `NaN`, infinity, or misleading totals.
-- Trend ordering and same-day grouping use deterministic tie-breakers.
-- User-authored labels and notes are escaped in HTML and excluded from sensitive error
-  reporting.
-- No new production dependency, external service, push, deployment, database reset, or
-  production-data mutation occurs without explicit authorization.
+- Manifest references resolve to approved vocabulary and every entry satisfies the catalog
+  contract before database work.
+- Catalog application creates no exact or normalized managed duplicates.
+- Compatible managed rows retain identity where practical; workout snapshots are never
+  rewritten.
+- Private variants remain owner-scoped and unchanged.
+- Admin mutations remain authorization protected and validated.
+- No-equipment support does not weaken name, ID, muscle, ownership, or relationship
+  validation.
+- Reset and migration operations are transactional and honor existing guards.
+- No secrets, sensitive account data, or production catalog content are logged or committed.
 
-## Visual and accessibility requirements
+## Assumptions and approved planning judgments
 
-- Preserve the established dark, focused visual language and reuse existing controls,
-  cards, typography, status treatments, and navigation patterns where practical.
-- Give the selected exercise, date scope, primary trend, unit context, data coverage, and
-  contributing sessions a clear hierarchy instead of presenting every value equally.
-- Use semantic headings, forms, labels, descriptions, time elements, tables or lists, and
-  links; use ARIA only where native semantics are insufficient.
-- Charts must have accessible names, non-color series cues, readable legends where needed,
-  and an equivalent textual or tabular representation of their values.
-- The core insight and navigation must remain usable if optional chart scripting fails or is
-  unavailable.
-- Empty, partial, mixed-unit, no-load, invalid-filter, missing-selection, loading where
-  applicable, and temporary-failure states must be intentional and honest.
-- All controls must be keyboard operable with visible focus and practical touch targets.
-- Narrow layouts must avoid page-level horizontal overflow while preserving readable labels,
-  tables, charts, and values.
-- New or changed motion must respect reduced-motion preferences and cannot be required for
-  essential behavior.
-
-## Dependency constraint
-
-Prefer server-rendered HTML, existing CSS and browser utilities, and the chart foundation
-already present in the application. Any new production or browser dependency requires
-explicit approval before it is added.
+- **Unknown:** production applicability requires later inspection or explicit
+  user-authorized execution because production catalog contents are uninspected.
+- **Approved planning judgment:** 18 bases and 30-plus variants are the bounded first
+  increment. Exact content remains subject to Action 1 review before row insertion.
+- **Approved deferral:** variant imagery is a possible separate goal, not an implicit later
+  action in this goal.
+- **Approved delivery decision:** prepare the narrow data migration for retained databases;
+  guarded reset remains the only reset path and is used solely under its existing controls.
 
 ## Done when
 
-- An authenticated owner can select only their available program/exercise history and apply
-  a bounded date range through a stable URL.
-- Exercise identity, UTC date attribution, same-day grouping, ordering, null handling, and
-  unit handling are explicitly defined and covered by tests.
-- Owned finished workout data produces accurate chronological occurrences, set and
-  repetition summaries, and separately grouped load and volume trends without combining
-  units or inventing missing measurements.
-- Renamed, archived, deleted, legacy, sparse, mixed-unit, and no-load history has predictable,
-  non-misleading behavior.
-- Foreign and unavailable selections disclose no cross-account data, and links to
-  contributing workouts remain ownership scoped.
-- Browsing progress performs no data mutation and does not depend on mutable templates for
-  snapshot-backed historical content.
-- The affected experience is polished, consistent, responsive, keyboard usable, and
-  accessible, with non-color cues and a textual or tabular equivalent for each chart.
-- Focused automated tests cover ownership, filters, boundaries, deterministic ordering,
-  identity semantics, nulls, zeroes, mixed units, escaping, empty states, and rendering.
-- The complete deterministic suite, PostgreSQL-backed HTTP coverage, and representative
-  small/large viewport and keyboard checks pass with evidence recorded.
-- Any schema or index change has a safe, documented deployment and rollback path; no push,
-  deployment, production reset, or production-data mutation occurs without explicit
-  authorization.
-
-## Final review assessment
-
-- Authenticated owners can select only programs and snapshot-backed exercises represented in
-  their finished history, then apply bounded dates and point limits through stable GET URLs.
-- Canonical exercise identity, UTC attribution, same-day and deterministic ordering, null
-  and zero handling, immutable snapshot behavior, and unit separation are documented and
-  verified.
-- Chronological occurrences and exact performed-step, set, repetition, load, volume, and
-  coverage values are presented without combining units or inventing missing measurements.
-- Renamed, archived, deleted-reference, legacy, sparse, mixed-unit, and no-load histories
-  have predictable tested behavior. Missing, unavailable, and foreign selections disclose
-  no cross-account data, and contributing-history links remain ownership scoped.
-- The read-only server-rendered experience is polished, responsive, keyboard usable, and
-  accessible without depending on color, charts, client scripting, or pointer interaction.
-- Focused coverage includes ownership, filters, boundaries, deterministic ordering,
-  identity, incomplete and zero measurements, mixed units, escaping, empty states, CSS, and
-  rendered output. Representative 390px and 1440px browser checks also cover hierarchy,
-  overflow, keyboard order, visible focus, touch targets, and contrast.
-- No schema or index change was needed, so deployment and rollback requirements are
-  unchanged. No dependency, external service, push, deployment, production reset, reseed,
-  or production-data mutation occurred.
-
-No approved `Done when` criterion remains unmet. Intentionally excluded work remains the
-documented coaching, forecasting, personal-record, goal, social, sharing, unit-conversion,
-integration, export, and unrelated-redesign scope.
-
-Final Action 4 approval verification on 2026-09-08 repeated `npm run verify` (144 tests plus
-all formatting, lint, and server/browser type checks) and the complete PostgreSQL-backed
-HTTP suite (48 tests); both passed. The recorded 390px/1440px visual, overflow, keyboard,
-touch-target, and contrast evidence remains applicable because no implementation changed
-after that inspection.
+- The reviewed manifest contains exactly 18 distinct managed bases and at least 30 distinct
+  global variants, including/enriching the existing entries without duplication.
+- Six in-scope patterns, stated use cases, equipment categories, content fields, and
+  prime-mover coverage meet the catalog contract.
+- Manifest validation rejects missing references, invalid metadata, and exact or normalized
+  duplicate names before database work.
+- Guarded reset produces the exact catalog only with `ALLOW_DATABASE_RESET=true`; its other
+  refusal behavior remains unchanged.
+- The narrow data migration converges on the same catalog, is safely rerunnable, rolls back
+  conflicts, and preserves unrelated/private/historical rows.
+- No-equipment global templates can be created and updated through the admin boundary
+  without weakening authorization or other validation.
+- Regular users can browse/select expanded global variants while global/private management
+  boundaries remain intact.
+- Focused tests, the deterministic suite, and PostgreSQL-backed coverage pass with
+  deployment/rollback evidence recorded.
+- No image work, dependency, broad redesign, push, deployment, production reset, or
+  production-data mutation occurs.
