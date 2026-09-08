@@ -113,6 +113,8 @@ test("administrator library state is catalog-only and excludes private variants"
 	assert.match(html, /Global catalog access/);
 	assert.match(html, /Create global variant/);
 	assert.match(html, /Global squat/);
+	assert.match(html, /Optional\. Choose equipment when this variant requires it\./);
+	assert.match(html, /<option\s+value=""[^>]*>\s*No equipment\s*<\/option>/);
 	assert.doesNotMatch(html, /Admin private squat/);
 	assert.doesNotMatch(html, /data-create-session-form/);
 	assert.doesNotMatch(html, /data-private-variant-form/);

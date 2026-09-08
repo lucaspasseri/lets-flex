@@ -36,6 +36,61 @@ Raise security or data-integrity conflicts instead of silently following lower-p
 - Do not silently implement worthwhile but unrelated discoveries. Document or propose them
   as follow-up work unless they are required to make the requested change correct or safe.
 
+## Database lifecycle policy
+
+### Current phase and source of truth
+
+Required until the user explicitly changes this policy:
+
+- The application is in an active-development, disposable-data phase. Development database
+  contents do not need to be preserved.
+- `db/schema.js` is the authoritative current schema and `db/seed.js` is the canonical seed
+  and reset entry point. A fresh development database must be fully reproducible from those
+  current definitions without replaying historical migrations.
+- Prefer resetting development databases over accumulating migrations. Migration-driven
+  schema evolution is not the default workflow during this phase.
+- Keep one authoritative setup path: create the current schema, then apply the complete
+  canonical development seed. Preserve useful reference, catalog, relationship, and sample
+  data and their foreign-key ordering in that path.
+
+### Schema-change workflow
+
+Required for a development schema change:
+
+1. Update the authoritative schema definition.
+2. Update the canonical seed when the changed schema or development dataset requires it.
+3. If `ALLOW_DATABASE_RESET=true`, confirm that the configured target is the intended local
+   or development database, run `npm run db:reset`, and do not leave that database knowingly
+   behind the repository schema when the reset is safe and executable.
+4. Verify the resulting schema, required seed data, important relationships, and application
+   access, then run the relevant tests.
+
+### Migration policy during this phase
+
+Required:
+
+- Do not create migrations for ordinary development schema changes.
+- A migration is permitted only when the task explicitly requires a non-destructive upgrade
+  path, existing data must be preserved, the user explicitly requests one, or migration
+  behavior itself is being implemented or tested.
+- Before removing a historical development migration, verify that the current schema
+  incorporates its final state and that application startup, tests, deployment, CI, and other
+  tooling do not depend on it. Remove obsolete migration references and migration-only tests
+  together with the file.
+- Do not add a migration runner or preserve migration complexity for a possible future need.
+
+### Production safety boundary
+
+Required:
+
+- Development reset authorization never grants production authorization. Never
+  automatically reset, migrate, or otherwise mutate production data.
+- `ALLOW_DATABASE_RESET=true` authorizes only the specifically confirmed local or
+  development database target. Preserve or strengthen the production refusal and explicit
+  reset opt-in safeguards.
+- Do not implement a speculative migration-first production workflow. When persistent user
+  data must be preserved, the user will explicitly replace this policy.
+
 ## Conditional guidance
 
 - **Active-goal work:** read and follow `docs/current-goal.md` and

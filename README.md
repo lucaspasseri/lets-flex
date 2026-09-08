@@ -10,6 +10,7 @@ You can [see my fitness app](https://lets-flex.onrender.com/) on Render.
 
 Copy `.env.sample` to `.env` for local development and set:
 
+- `NODE_ENV=development` for the local application and guarded database reset.
 - `DATABASE_URL` to the PostgreSQL connection string.
 - `DATABASE_SSL=true` when the server requires verified TLS.
 - `SESSION_SECRET` to a long, random value. The application will not start without it.
@@ -27,11 +28,19 @@ The component playground is available outside production only.
 
 ## Database
 
-`db/schema.js` is the authoritative database schema and reference-data definition.
-`npm run db:reset` drops and recreates every application table, seeds global
-Library samples, and creates the initial administrator. The command refuses to
-run when `NODE_ENV=production` or unless `ALLOW_DATABASE_RESET=true` is set.
-It is intentionally limited to disposable development and test data.
+The application is currently in a disposable-data development phase. `db/schema.js`
+is the authoritative current schema, while `db/seed.js` is the one canonical seed
+and reset entry point for reference data, the exercise catalog, global samples, and
+the initial administrator. `npm run db:reset` applies the current schema and complete
+seed in one transaction, producing a usable database without historical migrations.
+
+The reset command refuses to run when `NODE_ENV=production` or unless
+`ALLOW_DATABASE_RESET=true` is set. It also requires `NODE_ENV=development` or
+`NODE_ENV=test` and a localhost target or database name explicitly marked as development,
+local, or test. Before using that opt-in, verify that `DATABASE_URL` identifies the intended
+disposable database.
+For ordinary development schema changes, update the current schema and canonical
+seed as needed, run the authorized reset, verify the result, and run relevant tests.
 
 The administrator email is normalized and its environment-provided password is
 hashed with the same Argon2id service used by Passport authentication. The hash

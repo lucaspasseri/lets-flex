@@ -59,10 +59,11 @@
 			name: "equipmentId",
 			label: "Equipment",
 			control: "select",
-			required: true,
+			required: false,
 			value: values.equipmentId,
 			error: errors.equipmentId,
-			hint: "Choose an equipment for the exercise template.",
+			hint: "Optional. Choose equipment when this variant requires it.",
+			defaultOption: { label: "No equipment", value: "" },
 			options: equipmentOptions,
 			attributes: {
 				autocomplete: "off"

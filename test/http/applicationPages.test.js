@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, test } from "node:test";
 import { Client } from "pg";
 import { schemaSql } from "../../db/schema.js";
+import { seedSql } from "../../db/seed.js";
 import { hashPassword } from "../../src/features/auth/passwordService.js";
 import FakeEmailService from "../../src/infrastructure/email/FakeEmailService.js";
 
@@ -123,6 +124,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	beforeEach(async () => {
 		emailService.clear();
 		await db.query(schemaSql);
+		await db.query(seedSql);
 		await db.query(
 			`WITH accounts AS (
 				INSERT INTO users (email, role, name) VALUES
@@ -231,7 +233,8 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				 SELECT $1, st.id, ev.id, $2, 2, 8, $3
 				 FROM step_types st
 				 CROSS JOIN LATERAL (
-				   SELECT id FROM exercise_variants WHERE is_archived = FALSE ORDER BY id LIMIT 1
+				   SELECT id FROM exercise_variants
+				   WHERE name = 'Bodyweight Push Up' AND owner_user_id IS NULL AND is_archived = FALSE
 				 ) ev
 				 WHERE st.name = 'exercise'`,
 				[context.session_id, `Lifecycle step ${index + 1}`, index + 1],
@@ -1835,9 +1838,9 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			method: "POST",
 			form: {
 				_csrf: csrfFrom(page.text),
-				name: "Deadlift",
+				name: "Admin Bodyweight Hinge",
 				movementPatternId: "4",
-				equipmentId: "1",
+				equipmentId: "",
 				"muscleGroup[0][muscleId]": "20",
 				"muscleGroup[0][muscleRoleId]": "1",
 			},
@@ -1846,14 +1849,45 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(
 			(
 				await db.query(
-					"SELECT count(*)::int AS count FROM exercises WHERE name = 'Deadlift'",
+					"SELECT count(*)::int AS count FROM exercises WHERE name = 'Admin Bodyweight Hinge'",
 				)
 			).rows[0].count,
 			1,
 		);
-		const exercise = (
-			await db.query("SELECT id FROM exercises WHERE name = 'Deadlift'")
+		const exerciseVariant = (
+			await db.query(`
+				SELECT exercise.id, variant.id AS variant_id, variant.equipment_id
+				FROM exercises exercise
+				JOIN exercise_variants variant ON variant.exercise_id = exercise.id
+				WHERE exercise.name = 'Admin Bodyweight Hinge'
+			`)
 		).rows[0];
+		assert.equal(exerciseVariant.equipment_id, null);
+		const updated = await admin.request(
+			`/admin/library/exercises/${exerciseVariant.id}/variants/${exerciseVariant.variant_id}?_method=PATCH`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(page.text),
+					name: "Admin Bodyweight Hinge Updated",
+					movementPatternId: "4",
+					equipmentId: "",
+					"muscleGroup[0][muscleId]": "20",
+					"muscleGroup[0][muscleRoleId]": "1",
+				},
+			},
+		);
+		assert.equal(updated.response.status, 302);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT name, equipment_id FROM exercise_variants WHERE id = $1",
+					[exerciseVariant.variant_id],
+				)
+			).rows[0],
+			{ name: "Admin Bodyweight Hinge Updated", equipment_id: null },
+		);
+		const exercise = { id: exerciseVariant.id };
 		const globalVariant = await admin.request(
 			`/admin/library/exercises/${exercise.id}/variants`,
 			{
@@ -1883,6 +1917,59 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			(await db.query("SELECT is_archived FROM exercises WHERE id = $1", [exercise.id]))
 				.rows[0].is_archived,
 			true,
+		);
+	});
+
+	test("regular users can browse and select expanded global catalog variants", async () => {
+		const client = agent();
+		await login(client, "user-one@example.com");
+		const library = await client.request("/library");
+
+		assert.equal(library.response.status, 200);
+		assert.match(library.text, /Cable Wood Chop/);
+		assert.match(library.text, /Bodyweight Glute Bridge/);
+		assert.match(library.text, /Single-Leg Press/);
+
+		const references = (
+			await db.query(`
+				SELECT
+					(SELECT id FROM step_types WHERE name = 'exercise') AS step_type_id,
+					(SELECT id FROM exercise_variants
+					 WHERE name = 'Cable Wood Chop' AND owner_user_id IS NULL) AS variant_id
+			`)
+		).rows[0];
+		const created = await client.request("/sessions", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(library.text),
+				name: "Expanded catalog session",
+				notes: "Catalog selection coverage",
+				"stepRow[0][stepTypeId]": String(references.step_type_id),
+				"stepRow[0][exerciseVariantId]": String(references.variant_id),
+				"stepRow[0][sets]": "3",
+				"stepRow[0][reps]": "8",
+				"stepRow[0][loadValue]": "20",
+				"stepRow[0][loadUnit]": "Kilograms",
+			},
+		});
+
+		assert.equal(created.response.status, 302);
+		assert.deepEqual(
+			(
+				await db.query(`
+					SELECT session.owner_user_id, variant.name AS variant_name
+					FROM sessions session
+					JOIN session_steps step ON step.session_id = session.id
+					JOIN exercise_variants variant ON variant.id = step.exercise_variant_id
+					WHERE session.name = 'Expanded catalog session'
+				`)
+			).rows[0],
+			{
+				owner_user_id: (
+					await db.query("SELECT id FROM users WHERE email = 'user-one@example.com'")
+				).rows[0].id,
+				variant_name: "Cable Wood Chop",
+			},
 		);
 	});
 

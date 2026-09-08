@@ -9,12 +9,12 @@ sessions.
 
 Expand the global exercise-template catalog from its two-sample baseline to a curated,
 non-duplicative foundational strength catalog with well-structured base exercises,
-equipment-specific global variants, conservative muscle metadata, and safe seed/deployment
-artifacts.
+equipment-specific global variants, conservative muscle metadata, and a safe canonical
+seed.
 
 ## Status
 
-Approved on 2026-09-08. The action plan is awaiting approval; no action is active.
+Ready for final review on 2026-09-08. All three approved actions are completed.
 
 ## Approved user outcome
 
@@ -38,9 +38,8 @@ private variants.
 - **Verified focused repair:** admin base-template create/update validation requires
   equipment even though the schema and seeded `Bodyweight Push Up` support no-equipment
   variants.
-- **Verified delivery boundary:** guarded reset is suitable for disposable databases, while
-  the existing manual SQL-migration convention can support one narrow retained-database
-  catalog migration without introducing a migration framework.
+- **Verified delivery boundary:** guarded reset is the authoritative synchronization path
+  for the application's disposable-data development phase.
 
 ## Delta-first baseline
 
@@ -53,8 +52,7 @@ private variants.
 - **Repair:** allow nullable equipment at the admin base-template create/update validation
   and presentation boundary.
 - **Add:** an exact reviewed catalog manifest, conservative muscle links, variant
-  setup/environment content, authoritative seed data, and one transactional data migration
-  for existing retained databases.
+  setup/environment content, and authoritative canonical seed data.
 - **Unknown:** production catalog contents have not been inspected. No action may assume
   they match the two-sample repository seed.
 
@@ -80,18 +78,18 @@ private variants.
 - Base exercises describe movement families. Equipment/setup implementations remain
   variants. Global variants retain `owner_user_id IS NULL`; private variants remain owned.
 
-## Database and deployment contract
+## Database lifecycle contract
 
-- `db/schema.js` remains the authoritative fresh-database schema and reference-data seed.
+- `db/schema.js` defines the authoritative current schema and `db/seed.js` contains the
+  complete canonical development seed and reset entry point.
 - `npm run db:reset` may run only when `ALLOW_DATABASE_RESET=true`. Missing/false
-  permission and the production refusal remain intact and must never be bypassed.
-- Guarded reset is sufficient for disposable development and test databases.
-- One narrow, transactional, safely rerunnable data migration follows the existing manual
-  SQL convention for databases that must retain data. No migration runner, catalog command,
-  or synchronization framework is added.
-- The data migration detects compatible managed rows, fails before partial writes on
-  ambiguous conflicts, and preserves unrelated global content, private variants, sessions,
-  and workout snapshots.
+  permission and the production refusal remain intact and must never be bypassed. The
+  command also requires a development/test runtime and a local or explicitly named
+  development/test target.
+- Guarded reset recreates the schema and applies the complete seed in one transaction and
+  is the expected synchronization path for disposable development databases.
+- Historical development migrations are not required and no migration runner, catalog
+  command, or synchronization framework is added.
 - No catalog data is applied to production without separate explicit authorization.
 
 ## Image-support decision
@@ -99,7 +97,7 @@ private variants.
 Image support is not part of this goal. Repository inspection found no catalog image fields
 or established exercise-image convention. Variant-level imagery is the most accurate
 future option because setup, equipment, environment, and notes already live together
-there, but a coherent implementation would require image metadata, a schema migration,
+there, but a coherent implementation would require image metadata, a schema change,
 local assets, UI work, accessibility/fallback behavior, and asset quality/licensing review.
 That would make this catalog increment unnecessarily large.
 
@@ -114,14 +112,12 @@ benefit sufficient to justify 23 assets and new detail UI.
 
 - Define and review the exact managed manifest before inserting rows.
 - Reuse and enrich the two existing sample bases and variants.
-- Add the catalog to authoritative guarded-reset seed data.
-- Prepare one narrow retained-database data migration and verify conflict rollback and rerun
-  safety on disposable fixtures.
+- Add the catalog to the authoritative canonical seed and guarded-reset path.
 - Repair no-equipment admin validation and directly affected form copy.
 - Verify Library visibility, session selection, admin global-only management, and private
   and historical data preservation.
 - Add focused manifest, validation, database, rendered-view, and PostgreSQL-backed coverage.
-- Document guarded reset, migration preflight, deployment order, and rollback.
+- Document the reset-first development workflow and its production safety boundary.
 
 ## Out of scope
 
@@ -141,13 +137,12 @@ benefit sufficient to justify 23 assets and new detail UI.
 - Manifest references resolve to approved vocabulary and every entry satisfies the catalog
   contract before database work.
 - Catalog application creates no exact or normalized managed duplicates.
-- Compatible managed rows retain identity where practical; workout snapshots are never
-  rewritten.
+- Workout snapshots are never rewritten by application behavior.
 - Private variants remain owner-scoped and unchanged.
 - Admin mutations remain authorization protected and validated.
 - No-equipment support does not weaken name, ID, muscle, ownership, or relationship
   validation.
-- Reset and migration operations are transactional and honor existing guards.
+- Reset and seed operations are transactional and honor existing guards.
 - No secrets, sensitive account data, or production catalog content are logged or committed.
 
 ## Assumptions and approved planning judgments
@@ -158,8 +153,10 @@ benefit sufficient to justify 23 assets and new detail UI.
   increment. Exact content remains subject to Action 1 review before row insertion.
 - **Approved deferral:** variant imagery is a possible separate goal, not an implicit later
   action in this goal.
-- **Approved delivery decision:** prepare the narrow data migration for retained databases;
-  guarded reset remains the only reset path and is used solely under its existing controls.
+- **Explicitly reconsidered delivery decision:** while the application has no data that must
+  be preserved, guarded reset is the only schema synchronization path and development
+  migrations are removed. A persistent-data workflow requires a later explicit policy
+  change.
 
 ## Done when
 
@@ -169,15 +166,13 @@ benefit sufficient to justify 23 assets and new detail UI.
   prime-mover coverage meet the catalog contract.
 - Manifest validation rejects missing references, invalid metadata, and exact or normalized
   duplicate names before database work.
-- Guarded reset produces the exact catalog only with `ALLOW_DATABASE_RESET=true`; its other
-  refusal behavior remains unchanged.
-- The narrow data migration converges on the same catalog, is safely rerunnable, rolls back
-  conflicts, and preserves unrelated/private/historical rows.
+- Guarded reset produces the exact catalog only with `ALLOW_DATABASE_RESET=true`; production,
+  non-development/test runtime, and ambiguous remote-target refusals are verified.
 - No-equipment global templates can be created and updated through the admin boundary
   without weakening authorization or other validation.
 - Regular users can browse/select expanded global variants while global/private management
   boundaries remain intact.
-- Focused tests, the deterministic suite, and PostgreSQL-backed coverage pass with
-  deployment/rollback evidence recorded.
+- Focused tests, the deterministic suite, PostgreSQL-backed coverage, and the authorized
+  local development reset pass with the canonical schema and seed path.
 - No image work, dependency, broad redesign, push, deployment, production reset, or
   production-data mutation occurs.
