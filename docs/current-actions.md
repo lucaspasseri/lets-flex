@@ -6,7 +6,8 @@ Expand the global exercise-template catalog to exactly 18 managed base exercise 
 and at least 30 useful global variants while preserving catalog ownership boundaries and
 the guarded database workflow.
 
-**Goal status:** Ready for final review on 2026-09-08. All three actions are completed.
+**Goal status:** Completed on 2026-09-08 after explicit user approval. All three actions are
+completed.
 
 ## Status definitions
 
@@ -363,7 +364,6 @@ alias was removed so `npm run db:reset` is the one obvious database setup comman
 
 ## Resume here
 
-All three actions are **Completed** and the goal is **Ready for final review**. Review the
-completed behavior, verification evidence, done-when comparison, approved exclusions, and
-remaining production gate. Do not mark the goal **Completed** without separate explicit
-approval.
+The goal and all three actions are **Completed**. No next goal is approved or strongly
+implied by the verified repository state and the user's latest stated priorities. Keep
+`docs/current-goal.md` as the completed record until the user selects a new direction.

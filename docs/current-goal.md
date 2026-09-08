@@ -14,7 +14,15 @@ seed.
 
 ## Status
 
-Ready for final review on 2026-09-08. All three approved actions are completed.
+Completed on 2026-09-08 after explicit user approval.
+
+## Completion outcome
+
+The application now provides a validated foundational catalog of 18 base exercise families
+and 36 global variants through the canonical reset-first database workflow. The completed
+result includes conservative prime-mover metadata, nullable-equipment administration,
+regular-user browsing and session selection, preserved global/private ownership boundaries,
+strengthened reset safeguards, and verified deterministic and PostgreSQL-backed behavior.
 
 ## Approved user outcome
 
