@@ -23,6 +23,7 @@
  * @property {MuscleRole[]} muscleRoles
  * @property {ExerciseTemplate[]} exerciseTemplates
  * @property {StepType[]} stepTypes
+ * @property {import("../trainingDays/trainingDays.types.js").TrainingDayContext | null} [sessionCreationContext]
  */
 
 export {};

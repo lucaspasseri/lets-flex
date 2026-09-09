@@ -11,6 +11,7 @@ const optionalPositiveId = (message) =>
 
 export const dayPageQuerySchema = z.object({
 	dayId: optionalPositiveId("Choose a valid training day."),
+	sessionId: optionalPositiveId("Choose a valid session template."),
 });
 
 export const createWorkoutSessionSchema = z.object({

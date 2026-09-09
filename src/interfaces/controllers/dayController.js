@@ -21,24 +21,27 @@ export async function renderDay(req, res, formState = {}) {
 	const sessionState = res.locals?.sessionState;
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
-	const programId = toNullableNumber(sessionState?.programId);
 	const validatedQuery = req.validatedQuery ?? {};
 	const dayId =
 		toNullableNumber(formState.dayId) ??
 		toNullableNumber(validatedQuery.dayId) ??
 		toNullableNumber(sessionState?.dayId);
+	const sessionId = toNullableNumber(validatedQuery.sessionId);
 
-	const data = await getDayPageData({ userId, programId, dayId });
+	const data = await getDayPageData({ userId, dayId });
+	const programId = data.program?.id ?? null;
+	const cycleId = data.cycle?.id ?? null;
 
 	// @ts-ignore
 	req.session.state = {
 		// @ts-ignore
 		...req.session.state,
-		dayId: data?.days?.current?.id ?? null,
+		...(data.days.current ? { programId, cycleId } : {}),
+		dayId: data.days.current?.id ?? null,
 	};
 
 	const page = { ...res.locals.page, title: "Let's Flex!" };
-	const pageState = { userId, programId, dayId };
+	const pageState = { userId, programId, cycleId, dayId, sessionId };
 
 	const dayPage = createDayPageViewModel({ page, pageState, data, ...formState });
 

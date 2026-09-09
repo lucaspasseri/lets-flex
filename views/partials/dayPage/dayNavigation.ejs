@@ -3,7 +3,8 @@
 		<div class="day-navigation__header">
 			<div>
 				<p class="day-navigation__eyebrow">Program timeline</p>
-				<h2>Choose a training day</h2>
+				<h2><%= dayNavigation.heading %></h2>
+				<p class="day-navigation__description"><%= dayNavigation.description %></p>
 			</div>
 			<div class="day-navigation__controls" aria-label="Timeline controls">
 				<% if (dayNavigation.previous) { %>
@@ -19,7 +20,9 @@
 			<% dayNavigation.items.forEach(day => { %>
 				<li>
 					<a href="<%= day.href %>" class="day-navigation__item<%= day.isCurrent ? " day-navigation__item--current" : "" %>"<% if (day.isCurrent) { %> aria-current="date"<% } %>>
+						<strong class="day-navigation__item-name"><%= day.name %></strong>
 						<span class="day-navigation__item-label"><%= day.label %></span>
+						<span class="day-navigation__item-context"><%= day.contextLabel %></span>
 						<span class="day-navigation__item-status"><%= day.isCurrent ? "Selected" : "Open day" %></span>
 					</a>
 				</li>

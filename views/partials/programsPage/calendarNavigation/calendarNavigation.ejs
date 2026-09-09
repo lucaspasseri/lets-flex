@@ -1,5 +1,5 @@
 <%
-	const { id, heading, description, items, emptyState } =
+	const { id, eyebrow, heading, description, items, emptyState } =
 		locals.calendarNavigation;
 %>
 <section
@@ -8,7 +8,7 @@
 	aria-labelledby="<%= id %>-heading"
 >
 	<header class="calendar-navigation__header">
-		<p class="calendar-navigation__eyebrow">Training days</p>
+		<p class="calendar-navigation__eyebrow"><%= eyebrow %></p>
 		<h2 id="<%= id %>-heading"><%= heading %></h2>
 		<p><%= description %></p>
 	</header>

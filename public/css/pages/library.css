@@ -24,6 +24,98 @@
 	background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
 }
 
+.library-planning-context {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid color-mix(in srgb, var(--color-action) 36%, var(--color-border));
+	border-radius: 0.9rem;
+	background: color-mix(in srgb, var(--color-action) 7%, var(--color-surface));
+}
+
+.library-planning-context__icon {
+	display: grid;
+	width: 2.75rem;
+	aspect-ratio: 1;
+	place-items: center;
+	border-radius: 0.75rem;
+	color: var(--color-action);
+	background: var(--color-surface-subtle);
+}
+
+.library-planning-context__icon svg {
+	width: 1.35rem;
+	height: 1.35rem;
+}
+
+.library-planning-context__eyebrow {
+	margin: 0 0 0.2rem;
+	color: var(--color-action);
+	font-size: 0.66rem;
+	font-weight: 750;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.library-planning-context h2,
+.library-planning-context p {
+	margin: 0;
+}
+
+.library-planning-context h2 {
+	font-size: 1rem;
+}
+
+.library-planning-context div > p:not(.library-planning-context__eyebrow) {
+	margin-top: 0.25rem;
+	color: var(--color-text-muted);
+	font-size: 0.76rem;
+	line-height: 1.45;
+}
+
+.library-planning-context a {
+	color: var(--color-action);
+	font-size: 0.75rem;
+	font-weight: 750;
+	text-underline-offset: 0.2rem;
+}
+
+.library-planning-context a:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 3px;
+}
+
+.session-form-context {
+	display: grid;
+	gap: 0.2rem;
+	padding: 0.8rem;
+	border: 1px solid color-mix(in srgb, var(--color-action) 34%, var(--color-border));
+	border-radius: 0.75rem;
+	background: color-mix(in srgb, var(--color-action) 7%, var(--color-page));
+}
+
+.session-form-context span {
+	color: var(--color-action);
+	font-size: 0.62rem;
+	font-weight: 750;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.session-form-context strong {
+	font-size: 0.78rem;
+	line-height: 1.4;
+	overflow-wrap: anywhere;
+}
+
+.session-form-context p {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: 0.72rem;
+}
+
 .library-admin-scope__icon,
 .library-action-panel__icon {
 	display: grid;
@@ -126,6 +218,14 @@
 	}
 
 	.library-admin-scope a {
+		grid-column: 2;
+	}
+
+	.library-planning-context {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+
+	.library-planning-context a {
 		grid-column: 2;
 	}
 }

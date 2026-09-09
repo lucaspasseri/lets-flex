@@ -1,0 +1,27 @@
+<%
+	const { id, heading, description, items } = locals.hierarchyGuide;
+%>
+
+<section class="program-hierarchy" aria-labelledby="<%= id %>-heading">
+	<header class="program-hierarchy__header">
+		<p class="program-hierarchy__eyebrow">Plan structure</p>
+		<h2 id="<%= id %>-heading"><%= heading %></h2>
+		<p><%= description %></p>
+	</header>
+
+	<ol class="program-hierarchy__list" aria-label="Program planning hierarchy">
+		<% items.forEach(item => { %>
+			<li class="program-hierarchy__item<%= item.isSelected ? ' program-hierarchy__item--selected' : '' %>">
+				<div class="program-hierarchy__icon" aria-hidden="true">
+					<%- include("../shared/components/icons/namedIcon", { name: item.icon }) %>
+				</div>
+				<div class="program-hierarchy__copy">
+					<span class="program-hierarchy__level"><%= item.levelLabel %></span>
+					<h3><%= item.name %></h3>
+					<p><%= item.description %></p>
+					<span class="program-hierarchy__state"><%= item.stateLabel %></span>
+				</div>
+			</li>
+		<% }) %>
+	</ol>
+</section>

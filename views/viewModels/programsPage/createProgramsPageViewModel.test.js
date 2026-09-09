@@ -81,7 +81,24 @@ test("Programs page creates presentation-ready component contracts", () => {
 	});
 
 	assert.deepEqual(Object.keys(result), ["page", "pageState", "shell", "components"]);
+	assert.equal(result.components.pageHeading.title, "Programs");
+	assert.deepEqual(
+		result.components.hierarchyGuide.items.map((item) => ({
+			name: item.name,
+			stateLabel: item.stateLabel,
+		})),
+		[
+			{ name: "Program", stateLabel: "Strength" },
+			{ name: "Cycle", stateLabel: "Foundation" },
+			{ name: "Training day", stateLabel: "1 day in selected cycle" },
+			{ name: "Session", stateLabel: "1 assigned session in selected cycle" },
+		],
+	);
 	assert.equal(result.components.programSwitcher.items[0].isCurrent, true);
+	assert.equal(
+		result.components.programSwitcher.items[0].statusLabel,
+		"Selected program",
+	);
 	assert.deepEqual(result.components.programSwitcher.items[0].deleteAction.values, {
 		id: 10,
 		name: "Strength",
@@ -91,6 +108,7 @@ test("Programs page creates presentation-ready component contracts", () => {
 		result.components.cycleSwitcher.items[0].href,
 		"/programs?programId=10&cycleId=20",
 	);
+	assert.equal(result.components.cycleSwitcher.items[0].statusLabel, "Selected cycle");
 	assert.equal(
 		result.components.calendarNavigation.items[0].href,
 		"/programs/day?dayId=30",
@@ -130,6 +148,18 @@ test("Programs page exposes safe empty component states", () => {
 	});
 
 	assert.equal(result.components.noActiveUser.isVisible, true);
+	assert.equal(
+		result.components.hierarchyGuide.items[0].stateLabel,
+		"Choose or create a program",
+	);
+	assert.deepEqual(
+		result.components.hierarchyGuide.items.slice(1).map((item) => item.stateLabel),
+		[
+			"Available after a program",
+			"Available after a cycle",
+			"Available after a training day",
+		],
+	);
 	assert.equal(result.components.cycleSwitcher.isVisible, false);
 	assert.equal(result.components.calendarNavigation.isVisible, false);
 	assert.equal(result.components.createCycleForm.actions.submit.disabled, true);
@@ -243,6 +273,9 @@ test("Programs template renders populated and no-profile component states", asyn
 	);
 
 	assert.match(populatedHtml, /data-programs-page/);
+	assert.match(populatedHtml, /class="page-heading"/);
+	assert.match(populatedHtml, /How your training plan fits together/);
+	assert.match(populatedHtml, /Program[\s\S]*Cycle[\s\S]*Training day[\s\S]*Session/);
 	assert.match(populatedHtml, /id="program-switcher"/);
 	assert.match(populatedHtml, /id="cycle-switcher"/);
 	assert.match(populatedHtml, /href="\/programs\/day\?dayId=30"/);
@@ -266,4 +299,36 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.doesNotMatch(populatedHtml, /basic-line|basicModal/);
 	assert.match(noProfileHtml, /id="programs-empty-state-title"/);
 	assert.doesNotMatch(noProfileHtml, /id="create-program-form"/);
+});
+
+test("Programs cards preserve validated long names in readable selection content", async () => {
+	const longProgramName = "Long program title ".repeat(5).trim().slice(0, 100);
+	const longCycleName = "Long cycle title ".repeat(6).trim().slice(0, 100);
+	const result = createProgramsPageViewModel({
+		page,
+		pageState: { userId: 1, programId: 10, cycleId: 20 },
+		data: {
+			currentUser,
+			programs: {
+				current: { ...program, name: longProgramName },
+				items: [{ ...program, name: longProgramName }],
+			},
+			cycles: {
+				current: { ...cycle, name: longCycleName },
+				items: [{ ...cycle, name: longCycleName }],
+			},
+			trainingDays: [],
+			workoutSessions: [],
+			goals,
+		},
+	});
+	const html = await ejs.renderFile(path.resolve("views/programs.ejs"), {
+		...result,
+		contentFor: () => "",
+	});
+
+	assert.match(html, new RegExp(longProgramName));
+	assert.match(html, new RegExp(longCycleName));
+	assert.match(html, /Selected program/);
+	assert.match(html, /Selected cycle/);
 });

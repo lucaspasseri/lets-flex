@@ -7,6 +7,7 @@ import updateSessionTemplate, {
 	SessionTemplateNotFoundError,
 } from "../../features/sessions/updateSessionTemplate.js";
 import { renderLibrary } from "./libraryController.js";
+import getOwnedTrainingDayContext from "../../features/day/getOwnedTrainingDayContext.js";
 
 /** @typedef {import("express").Request & {validatedBody?: any, validatedParams?: any}} Request */
 /** @typedef {import("express").Response} Response */
@@ -14,28 +15,45 @@ import { renderLibrary } from "./libraryController.js";
 
 /** @param {Request & {validatedBody?: any}} req @param {Response} res */
 async function create(req, res) {
-	const { name, notes, stepRow } = req.validatedBody;
+	const { name, notes, stepRow, contextDayId = null } = req.validatedBody;
+	// @ts-ignore -- authenticated route principal.
+	const ownerUserId = req.user.id;
+	const sessionCreationContext = await getOwnedTrainingDayContext({
+		dayId: contextDayId,
+		userId: ownerUserId,
+	});
+	if (contextDayId !== null && !sessionCreationContext) {
+		res.status(404).send("Training day not found");
+		return;
+	}
 
-	await createSession({
+	const session = await createSession({
 		name,
 		notes,
 		stepRowArr: stepRow,
-		// @ts-ignore -- authenticated route principal.
-		ownerUserId: req.user.id,
+		ownerUserId,
 	});
 
-	res.redirect("/library");
+	res.redirect(
+		sessionCreationContext
+			? `/programs/day?dayId=${sessionCreationContext.day.id}&sessionId=${session.id}`
+			: "/library",
+	);
 }
 
 /** @param {Request} req @param {Response} res @param {InvalidBodyResult} result */
 async function showCreateErrors(req, res, { errors, submittedValues }) {
+	const submittedRecord =
+		submittedValues && typeof submittedValues === "object"
+			? /** @type {Record<string, any>} */ (submittedValues)
+			: {};
 	res.status(422);
 	await renderLibrary(req, res, {
+		sessionCreationDayId: submittedRecord.contextDayId,
 		sessionTemplateFormState: {
 			mode: "create",
 			open: true,
-			values:
-				submittedValues && typeof submittedValues === "object" ? submittedValues : {},
+			values: submittedRecord,
 			errors,
 		},
 	});

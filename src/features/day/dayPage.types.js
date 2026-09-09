@@ -20,19 +20,22 @@
  * @typedef {object} PageState
  * @property {User["id"] | null} userId
  * @property {ProgramRow["id"] | null} programId
+ * @property {import("../cycles/cycles.types.js").CycleRow["id"] | null} cycleId
  * @property {TrainingDayRow["id"] | null} dayId
+ * @property {import("../sessions/sessions.types.js").SessionRow["id"] | null} sessionId
  */
 
 /**
  * @typedef {object} GetDayPageDataInput
  * @property {User["id"] | null} userId
- * @property {ProgramRow["id"] | null} programId
  * @property {TrainingDayRow["id"] | null} dayId
  */
 
 /**
  * @typedef {object} DayPageData
  * @property {User | null} currentUser
+ * @property {import("../programs/programs.types.js").Program | null} program
+ * @property {import("../cycles/cycles.types.js").Cycle | null} cycle
  * @property {{current: TrainingDay | null, items: TrainingDay[]}} days
  * @property {{items: Session[]}} sessions
  * @property {{items: WorkoutSession[]}} workoutSessions

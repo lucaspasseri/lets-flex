@@ -12,10 +12,24 @@
 	const managementMode = Boolean(locals.managementMode);
 	const privateVariantForm = locals.components.privateVariantForm;
 	const pageHeading = locals.components.pageHeading;
+	const planningContext = locals.components.planningContext;
 %>
 
 <main class="main library<%= managementMode ? ' library--admin' : '' %>" data-library-page data-library-mode="<%= managementMode ? 'admin' : 'personal' %>">
 	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
+
+	<% if (planningContext.isVisible) { %>
+		<aside class="library-planning-context" aria-labelledby="library-planning-context-title">
+			<span class="library-planning-context__icon" aria-hidden="true"><%- include("partials/shared/components/icons/namedIcon", { name: "calendar-range" }) %></span>
+			<div>
+				<p class="library-planning-context__eyebrow">Training day context</p>
+				<h2 id="library-planning-context-title"><%= planningContext.title %></h2>
+				<p><%= planningContext.pathLabel %> · <%= planningContext.dateLabel %></p>
+				<p><%= planningContext.description %></p>
+			</div>
+			<a href="<%= planningContext.backHref %>">Return without creating</a>
+		</aside>
+	<% } %>
 
 	<% if (managementMode) { %>
 		<aside class="library-admin-scope" aria-label="Administrator access scope">

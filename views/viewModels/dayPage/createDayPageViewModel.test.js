@@ -12,6 +12,14 @@ const page = {
 	title: "Day",
 };
 const user = { id: 1, name: "Lucas", dateOfBirth: null, anamnesis: null };
+const program = {
+	id: 6,
+	userId: 1,
+	goalId: null,
+	name: "Strength plan",
+	startDate: "2026-08-20",
+};
+const cycle = { id: 5, programId: 6, name: "Foundation", size: 3, order: 1 };
 const days = [1, 2, 3].map((id) => ({
 	id,
 	cycleId: 5,
@@ -45,9 +53,11 @@ const step = {
 test("day page creates predictable navigation, form, cards, and modal contracts", () => {
 	const result = createDayPageViewModel({
 		page,
-		pageState: { userId: 1, programId: 6, dayId: 2 },
+		pageState: { userId: 1, programId: 6, cycleId: 5, dayId: 2, sessionId: 20 },
 		data: {
 			currentUser: user,
+			program,
+			cycle,
 			days: { current: days[1], items: days },
 			sessions: {
 				items: [
@@ -91,11 +101,27 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 	});
 
 	assert.equal(result.components.dayHeader.dateLabel, "21/08/2026");
+	assert.equal(result.components.dayHeader.title, "Day 2");
+	assert.equal(result.components.contextPath.programName, "Strength plan");
+	assert.equal(
+		result.components.contextPath.backHref,
+		"/programs?programId=6&cycleId=5",
+	);
 	assert.equal(result.components.dayNavigation.previous?.id, 1);
 	assert.equal(result.components.dayNavigation.next?.id, 3);
 	assert.deepEqual(result.components.sessionLinkForm.fields.session.options, [
 		{ label: "Available", value: 20 },
 	]);
+	assert.equal(result.components.sessionLinkForm.fields.session.value, "20");
+	assert.equal(
+		result.components.sessionLinkForm.createAction.href,
+		"/library?createSessionForDay=2",
+	);
+	assert.equal(
+		result.components.sessionLinkForm.actions.submit.label,
+		"Assign to this day",
+	);
+	assert.ok(result.components.sessionLinkForm.feedback);
 	assert.equal(result.components.workoutSessionList.count, 1);
 	assert.equal(result.components.workoutSessionList.items[0].header.title, "Available");
 	assert.equal(
@@ -116,9 +142,17 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 test("day page exposes safe empty states for an invalid selection", () => {
 	const result = createDayPageViewModel({
 		page,
-		pageState: { userId: null, programId: null, dayId: 99 },
+		pageState: {
+			userId: null,
+			programId: null,
+			cycleId: null,
+			dayId: 99,
+			sessionId: null,
+		},
 		data: {
 			currentUser: null,
+			program: null,
+			cycle: null,
 			days: { current: null, items: [] },
 			sessions: { items: [] },
 			workoutSessions: { items: [] },
@@ -127,6 +161,7 @@ test("day page exposes safe empty states for an invalid selection", () => {
 
 	assert.equal(result.pageState.dayId, null);
 	assert.equal(result.components.dayNavigation.isVisible, false);
+	assert.equal(result.components.contextPath.isVisible, false);
 	assert.equal(result.components.sessionLinkForm.isEnabled, false);
 	assert.equal(result.components.workoutSessionList.emptyState.isVisible, true);
 });
@@ -134,9 +169,17 @@ test("day page exposes safe empty states for an invalid selection", () => {
 test("day template renders only from its component ViewModels", async () => {
 	const viewModel = createDayPageViewModel({
 		page,
-		pageState: { userId: 1, programId: 6, dayId: 2 },
+		pageState: {
+			userId: 1,
+			programId: 6,
+			cycleId: 5,
+			dayId: 2,
+			sessionId: null,
+		},
 		data: {
 			currentUser: user,
+			program,
+			cycle,
 			days: { current: days[1], items: days },
 			sessions: {
 				items: [
@@ -167,9 +210,17 @@ test("day template renders only from its component ViewModels", async () => {
 		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
 	const emptyViewModel = createDayPageViewModel({
 		page,
-		pageState: { userId: null, programId: null, dayId: null },
+		pageState: {
+			userId: null,
+			programId: null,
+			cycleId: null,
+			dayId: null,
+			sessionId: null,
+		},
 		data: {
 			currentUser: null,
+			program: null,
+			cycle: null,
 			days: { current: null, items: [] },
 			sessions: { items: [] },
 			workoutSessions: { items: [] },
@@ -182,6 +233,8 @@ test("day template renders only from its component ViewModels", async () => {
 	);
 
 	assert.match(html, /data-day-page/);
+	assert.match(html, /Program hierarchy/);
+	assert.match(html, /Strength plan[\s\S]*Foundation[\s\S]*Day 2/);
 	assert.match(html, /21\/08\/2026/);
 	assert.match(html, /href="\/programs\/day\?dayId=1"/);
 	assert.match(html, /day-navigation__item--current[^>]*aria-current="date"/);
@@ -190,12 +243,15 @@ test("day template renders only from its component ViewModels", async () => {
 	assert.match(html, /Barbell:/);
 	assert.match(html, /action="\/workout_sessions\/30\?_method=PATCH"/);
 	assert.match(html, /name="trainingDayId" value="2"/);
+	assert.match(html, /Assign to this day/);
+	assert.match(html, /href="\/library\?createSessionForDay=2"/);
+	assert.match(html, /Sessions assigned to this day/);
 	assert.match(html, /data-modal/);
 	assert.match(html, /shared-button--danger/);
 	assert.match(html, /src="\/js\/pages\/day\/index.js"/);
 	assert.doesNotMatch(html, /training_day_id|scheduled_date|session_notes/);
-	assert.match(emptyHtml, /Date outside the program&#39;s boundaries/);
-	assert.match(emptyHtml, /The current day does not yet have any training sessions/);
+	assert.match(emptyHtml, /Training day unavailable/);
+	assert.match(emptyHtml, /No session assigned yet/);
 	assert.match(emptyHtml, /<select[^>]*disabled/);
 	assert.doesNotMatch(emptyHtml, /workout-card--workout/);
 });

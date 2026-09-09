@@ -16,4 +16,5 @@
  * @typedef {object} LocalsLibraryPageState
  * @property {User["id"] | null} userId
  * @property {SessionRow["id"] | null} sessionId
+ * @property {number | null} [sessionCreationDayId]
  */

@@ -9,8 +9,8 @@
 			<span class="entity-card__meta"><%= entityCard.metaLabel %></span>
 		<% } %>
 		<% if (entityCard.statusLabel) { %>
-			<span class="entity-card__status">
-				<%- include("../../shared/components/icons/namedIcon", { name: "check-circle" }) %>
+			<span class="entity-card__status<%= entityCard.isCurrent ? ' entity-card__status--selected' : '' %>">
+				<%- include("../../shared/components/icons/namedIcon", { name: entityCard.statusIcon }) %>
 				<%= entityCard.statusLabel %>
 			</span>
 		<% } %>

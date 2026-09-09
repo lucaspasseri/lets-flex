@@ -72,6 +72,63 @@ test("library template renders from its page ViewModel", async () => {
 	assert.match(html, /\/js\/pages\/library\/index\.js/);
 });
 
+test("contextual Library entry explains the destination and opens the existing builder", async () => {
+	const contextualData = {
+		...data,
+		user: { id: 7, name: "Member", role: "user" },
+		sessionCreationContext: {
+			program: {
+				id: 3,
+				userId: 7,
+				goalId: null,
+				name: "Strength plan",
+				startDate: "2026-09-01",
+			},
+			cycle: {
+				id: 4,
+				programId: 3,
+				name: "Foundation",
+				size: 2,
+				order: 1,
+			},
+			day: {
+				id: 5,
+				cycleId: 4,
+				programId: 3,
+				cycleOrder: 1,
+				dayOrder: 2,
+				scheduledDate: "2026-09-02",
+				label: "Lower body",
+			},
+		},
+	};
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: 7, sessionId: null, sessionCreationDayId: 5 },
+		data: /** @type {any} */ (contextualData),
+	});
+	const renderFile = /** @type {(name: string, data: object) => Promise<string>} */ (
+		ejs.renderFile
+	);
+	const html = await renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		contentFor: () => "",
+		csrfToken: "test-token",
+	});
+
+	assert.equal(viewModel.components.planningContext.isVisible, true);
+	assert.equal(viewModel.components.createSessionForm.modal.openOnLoad, true);
+	assert.equal(viewModel.components.createSessionForm.fields.contextDayId, 5);
+	assert.match(html, /Training day context/);
+	assert.match(html, /Strength plan · Foundation · Lower body/);
+	assert.match(html, /Create and return/);
+	assert.match(html, /name="contextDayId" value="5"/);
+	assert.match(html, /Return destination/);
+	assert.match(html, /Create a session for Lower body/);
+	assert.match(html, /href="\/programs\/day\?dayId=5"/);
+	assert.match(html, /data-modal-open-on-load/);
+});
+
 test("personal exercise markup identifies private scope and retains owner actions", async () => {
 	const personalData = {
 		...data,

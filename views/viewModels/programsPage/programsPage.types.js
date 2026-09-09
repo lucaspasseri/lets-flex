@@ -8,6 +8,7 @@
  * @typedef {ReturnType<typeof import("./createProgramFormViewModel.js").default>} CreateProgramFormViewModel
  * @typedef {ReturnType<typeof import("./createCycleFormViewModel.js").default>} CreateCycleFormViewModel
  * @typedef {ReturnType<typeof import("./createDeleteEntityFormViewModel.js").default>} DeleteEntityFormViewModel
+ * @typedef {ReturnType<typeof import("./createHierarchyGuideViewModel.js").default>} HierarchyGuideViewModel
  */
 
 /**
@@ -15,7 +16,7 @@
  * @property {LocalsPage} page
  * @property {PageState} pageState
  * @property {{currentUser: User | null, activeNavigation: "programs"}} shell
- * @property {{programSwitcher: ProgramSwitcherViewModel, cycleSwitcher: CycleSwitcherViewModel, calendarNavigation: CalendarNavigationViewModel, createProgramForm: CreateProgramFormViewModel, createCycleForm: CreateCycleFormViewModel, deleteProgramForm: DeleteEntityFormViewModel, deleteCycleForm: DeleteEntityFormViewModel, noActiveUser: {isVisible: boolean, title: string, description: string, action: {label: string, href: string, icon: string}}}} components
+ * @property {{pageHeading: {eyebrow: string, title: string, description: string}, hierarchyGuide: HierarchyGuideViewModel, programSwitcher: ProgramSwitcherViewModel, cycleSwitcher: CycleSwitcherViewModel, calendarNavigation: CalendarNavigationViewModel, createProgramForm: CreateProgramFormViewModel, createCycleForm: CreateCycleFormViewModel, deleteProgramForm: DeleteEntityFormViewModel, deleteCycleForm: DeleteEntityFormViewModel, noActiveUser: {isVisible: boolean, title: string, description: string, action: {label: string, href: string, icon: string}}}} components
  */
 
 export {};

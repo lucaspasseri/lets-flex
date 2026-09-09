@@ -1,8 +1,19 @@
 <%
-	const { dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
+	const { contextPath, dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
 %>
 
 <main class="main day-page" data-day-page>
+	<% if (contextPath.isVisible) { %>
+		<nav class="day-context-path" aria-label="Program hierarchy">
+			<a href="<%= contextPath.backHref %>">Programs</a>
+			<span aria-hidden="true">/</span>
+			<span><%= contextPath.programName %></span>
+			<span aria-hidden="true">/</span>
+			<span><%= contextPath.cycleName %></span>
+			<span aria-hidden="true">/</span>
+			<strong aria-current="page"><%= contextPath.dayName %></strong>
+		</nav>
+	<% } %>
 	<header
 		class="day-page__hero"
 		data-calendar-day-id="<%= dayHeader.dayId ?? "" %>"
@@ -10,9 +21,11 @@
 			style="view-transition-name: <%= dayHeader.viewTransitionName %>; view-transition-class: program-calendar-day"
 		<% } %>
 	>
-		<p class="day-page__eyebrow">Training day</p>
-		<h1><%= dayHeader.dateLabel %></h1>
-		<p class="day-page__intro">Review the plan, link a session template, and manage this day’s workouts.</p>
+		<p class="day-page__eyebrow">Level 3 · Training day</p>
+		<h1><%= dayHeader.title %></h1>
+		<p class="day-page__date"><%= dayHeader.dateLabel %></p>
+		<p class="day-page__status"><%= dayHeader.statusLabel %></p>
+		<p class="day-page__intro"><%= dayHeader.intro %></p>
 	</header>
 
 	<%- include("partials/dayPage/dayNavigation", { dayNavigation }) %>

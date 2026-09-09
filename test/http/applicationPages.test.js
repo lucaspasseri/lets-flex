@@ -197,6 +197,42 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		return result;
 	}
 
+	async function createPlanningFixture() {
+		return (
+			await db.query(`
+				WITH owners AS (
+					SELECT id, email FROM users
+					WHERE email IN ('user-one@example.com', 'user-two@example.com')
+				), owned_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'Direct access plan', DATE '2026-09-01' FROM owners
+					WHERE email = 'user-one@example.com' RETURNING id, user_id
+				), owned_cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Foundation block', 2, 1 FROM owned_program RETURNING id
+				), owned_day AS (
+					INSERT INTO training_days (cycle_id, day_order, label, scheduled_date)
+					SELECT id, 1, 'Lower body day', DATE '2026-09-01' FROM owned_cycle
+					RETURNING id
+				), foreign_program AS (
+					INSERT INTO programs (user_id, name, start_date)
+					SELECT id, 'Private foreign plan', DATE '2026-09-01' FROM owners
+					WHERE email = 'user-two@example.com' RETURNING id
+				), foreign_cycle AS (
+					INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
+					SELECT id, 'Private foreign block', 1, 1 FROM foreign_program RETURNING id
+				), foreign_day AS (
+					INSERT INTO training_days (cycle_id, day_order, label, scheduled_date)
+					SELECT id, 1, 'Private foreign day', DATE '2026-09-01' FROM foreign_cycle
+					RETURNING id
+				)
+				SELECT owned_program.id AS program_id, owned_cycle.id AS cycle_id,
+				       owned_day.id AS day_id, foreign_day.id AS foreign_day_id
+				FROM owned_program, owned_cycle, owned_day, foreign_day
+			`)
+		).rows[0];
+	}
+
 	async function createWorkoutLifecycleFixture({
 		email = "user-one@example.com",
 		stepCount = 1,
@@ -2414,6 +2450,217 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(refreshed.text, /Readable goal plan/);
 		assert.match(refreshed.text, /Weight Loss/);
 		assert.doesNotMatch(refreshed.text, /weight_loss/);
+	});
+
+	test("an owned day resolves its hierarchy directly while foreign and missing days expose none", async () => {
+		const context = await createPlanningFixture();
+		const client = agent();
+		await login(client, "user-one@example.com");
+
+		const direct = await client.request(`/programs/day?dayId=${context.day_id}`);
+		assert.equal(direct.response.status, 200);
+		assert.match(direct.text, /Direct access plan/);
+		assert.match(direct.text, /Foundation block/);
+		assert.match(direct.text, /Lower body day/);
+		assert.match(
+			direct.text,
+			new RegExp(
+				`href="/programs\\?programId=${context.program_id}&amp;cycleId=${context.cycle_id}"`,
+			),
+		);
+		assert.match(direct.text, /Assign to this day/);
+		assert.match(
+			direct.text,
+			new RegExp(`href="/library\\?createSessionForDay=${context.day_id}"`),
+		);
+
+		const synchronized = await client.request("/programs");
+		assert.match(synchronized.text, /Direct access plan, selected program/);
+		assert.match(synchronized.text, /Foundation block, selected cycle/);
+
+		for (const inaccessibleDayId of [context.foreign_day_id, 999999]) {
+			const inaccessible = await client.request(
+				`/programs/day?dayId=${inaccessibleDayId}`,
+			);
+			assert.equal(inaccessible.response.status, 200);
+			assert.match(inaccessible.text, /Training day unavailable/);
+			assert.doesNotMatch(inaccessible.text, /Private foreign/);
+			assert.doesNotMatch(inaccessible.text, /aria-label="Program hierarchy"/);
+		}
+	});
+
+	test("contextual Library creation returns the selected template for explicit assignment", async () => {
+		const context = await createPlanningFixture();
+		const client = agent();
+		await login(client, "user-one@example.com");
+
+		const library = await client.request(
+			`/library?createSessionForDay=${context.day_id}`,
+		);
+		assert.equal(library.response.status, 200);
+		assert.match(library.text, /Training day context/);
+		assert.match(
+			library.text,
+			/Direct access plan · Foundation block · Lower body day/,
+		);
+		assert.match(library.text, /name="contextDayId" value="\d+"/);
+		assert.match(library.text, /data-modal-open-on-load/);
+
+		const invalid = await client.request("/sessions", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(library.text),
+				name: " ",
+				notes: "Keep this context",
+				contextDayId: String(context.day_id),
+			},
+		});
+		assert.equal(invalid.response.status, 422);
+		assert.match(invalid.text, /Enter a session name/);
+		assert.match(invalid.text, /Training day context/);
+		assert.match(
+			invalid.text,
+			new RegExp(`name="contextDayId" value="${context.day_id}"`),
+		);
+		assert.match(invalid.text, /Keep this context/);
+
+		const created = await client.request("/sessions", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(invalid.text),
+				name: "Contextual strength",
+				notes: "Return before assigning",
+				contextDayId: String(context.day_id),
+				returnTo: "https://evil.example/steal",
+			},
+		});
+		assert.equal(created.response.status, 302);
+		const session = (
+			await db.query(
+				"SELECT id, owner_user_id FROM sessions WHERE name = 'Contextual strength'",
+			)
+		).rows[0];
+		assert.equal(
+			created.response.headers.get("location"),
+			`/programs/day?dayId=${context.day_id}&sessionId=${session.id}`,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM workout_sessions WHERE training_day_id = $1",
+					[context.day_id],
+				)
+			).rows[0].count,
+			0,
+		);
+
+		const returned = await client.request(created.response.headers.get("location"));
+		assert.match(returned.text, /Session template created/);
+		assert.match(
+			returned.text,
+			new RegExp(`<option[^>]*value="${session.id}"[^>]*selected`),
+		);
+
+		const assigned = await client.request("/workout_sessions", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(returned.text),
+				sessionId: String(session.id),
+				trainingDayId: String(context.day_id),
+			},
+		});
+		assert.equal(assigned.response.status, 302);
+		assert.equal(
+			assigned.response.headers.get("location"),
+			`/programs/day?dayId=${context.day_id}`,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM workout_sessions WHERE training_day_id = $1 AND session_id = $2",
+					[context.day_id, session.id],
+				)
+			).rows[0].count,
+			1,
+		);
+		const assignedPage = await client.request(`/programs/day?dayId=${context.day_id}`);
+		assert.match(assignedPage.text, /1 session is assigned to this training day/);
+		assert.match(assignedPage.text, /Contextual strength/);
+	});
+
+	test("a day without active templates makes contextual creation the primary next action", async () => {
+		const context = await createPlanningFixture();
+		await db.query("UPDATE sessions SET is_archived = TRUE");
+		const client = agent();
+		await login(client, "user-one@example.com");
+
+		const day = await client.request(`/programs/day?dayId=${context.day_id}`);
+		assert.equal(day.response.status, 200);
+		assert.match(day.text, /No active templates are available/);
+		assert.match(day.text, /<select[\s\S]*?disabled/);
+		assert.match(
+			day.text,
+			new RegExp(
+				`day-panel__create-link--primary[^>]*href="/library\\?createSessionForDay=${context.day_id}"`,
+			),
+		);
+	});
+
+	test("foreign day context cannot control Library state or create a template", async () => {
+		const context = await createPlanningFixture();
+		const client = agent();
+		await login(client, "user-one@example.com");
+
+		const library = await client.request(
+			`/library?createSessionForDay=${context.foreign_day_id}`,
+		);
+		assert.equal(library.response.status, 404);
+		assert.doesNotMatch(library.text, /Private foreign/);
+
+		const ordinaryLibrary = await client.request("/library");
+
+		const created = await client.request("/sessions", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(ordinaryLibrary.text),
+				name: "Safe fallback template",
+				notes: "",
+				contextDayId: String(context.foreign_day_id),
+			},
+		});
+		assert.equal(created.response.status, 404);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM sessions WHERE name = 'Safe fallback template'",
+				)
+			).rows[0].count,
+			0,
+		);
+
+		const globalSession = (
+			await db.query(
+				"SELECT id FROM sessions WHERE owner_user_id IS NULL AND is_archived = FALSE ORDER BY id LIMIT 1",
+			)
+		).rows[0];
+		const crossAccountAssignment = await client.request("/workout_sessions", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(ordinaryLibrary.text),
+				sessionId: String(globalSession.id),
+				trainingDayId: String(context.foreign_day_id),
+			},
+		});
+		assert.equal(crossAccountAssignment.response.status, 404);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM workout_sessions WHERE training_day_id = $1",
+					[context.foreign_day_id],
+				)
+			).rows[0].count,
+			0,
+		);
 	});
 
 	test("program analytics aggregate owned history with stable boundaries, null handling, and separate units", async () => {

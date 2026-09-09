@@ -18,10 +18,11 @@ export default function createProgramSwitcherViewModel({
 
 	return {
 		id: "program-switcher",
-		eyebrow: "Programs",
+		eyebrow: "Level 1 · Programs",
 		heading: programs.length === 0 ? "Create your first program" : "Choose a program",
-		description:
-			"Select the training plan whose cycles and calendar you want to manage.",
+		description: currentProgramId
+			? "Your selected program reveals its cycles and complete training calendar below."
+			: "Start here. Choose the overall training plan you want to organize.",
 		items: programs.map((program, index) => {
 			const isCurrent = program.id === currentProgramId;
 			const goal = program.goalId ? goalsById.get(program.goalId) : null;
@@ -37,9 +38,10 @@ export default function createProgramSwitcherViewModel({
 					.join(" • "),
 				href: `/programs?programId=${program.id}`,
 				isCurrent,
-				statusLabel: isCurrent ? "Active program" : null,
+				statusLabel: isCurrent ? "Selected program" : "Choose program",
+				statusIcon: isCurrent ? "check-circle" : "chevron-right",
 				accessibleLabel: isCurrent
-					? `${program.name}, active program`
+					? `${program.name}, selected program`
 					: `Select program ${program.name}`,
 				deleteAction: {
 					modalId: "deleteProgramModal",
@@ -50,7 +52,8 @@ export default function createProgramSwitcherViewModel({
 		}),
 		emptyState: {
 			title: "Create your first program",
-			description: "Programs organize your training into scheduled cycles and days.",
+			description:
+				"A program defines your overall goal and contains every cycle and training day.",
 			icon: "calendar-range",
 		},
 		createAction: {

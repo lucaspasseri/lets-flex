@@ -7,9 +7,13 @@ import {
 	workoutSessionParamsSchema,
 } from "./daySchemas.js";
 
-test("day query trims its shape and parses a positive integer ID", () => {
-	const result = dayPageQuerySchema.parse({ dayId: "12", ignored: "value" });
-	assert.deepEqual(result, { dayId: 12 });
+test("day query trims its shape and parses positive day and template IDs", () => {
+	const result = dayPageQuerySchema.parse({
+		dayId: "12",
+		sessionId: "8",
+		ignored: "value",
+	});
+	assert.deepEqual(result, { dayId: 12, sessionId: 8 });
 	assert.deepEqual(dayPageQuerySchema.parse({}), {});
 });
 
@@ -17,6 +21,7 @@ test("day query rejects malformed, fractional, and non-positive IDs", () => {
 	for (const dayId of ["abc", "1.5", "0", "-2"]) {
 		assert.equal(dayPageQuerySchema.safeParse({ dayId }).success, false);
 	}
+	assert.equal(dayPageQuerySchema.safeParse({ sessionId: "foreign" }).success, false);
 });
 
 test("workout-session forms parse IDs and remove unexpected fields", () => {

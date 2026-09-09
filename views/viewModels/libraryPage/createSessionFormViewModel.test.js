@@ -68,3 +68,29 @@ test("session exercise choices distinguish variants while preserving their ident
 		form.fields.exerciseOptions.length,
 	);
 });
+
+test("contextual creation preserves only the owned day identity and changes return signposting", () => {
+	const form = createSessionFormViewModel({
+		stepTypes: [],
+		exerciseTemplates: [],
+		creationContext: /** @type {any} */ ({
+			program: { name: "Strength plan" },
+			cycle: { name: "Foundation" },
+			day: {
+				id: 18,
+				dayOrder: 2,
+				label: "Lower body",
+				scheduledDate: "2026-09-02",
+			},
+		}),
+	});
+
+	assert.equal(form.modal.openOnLoad, true);
+	assert.equal(form.fields.contextDayId, 18);
+	assert.equal(form.actions.submit.label, "Create and return");
+	assert.match(form.form.description, /review and assign/);
+	assert.equal(
+		form.fields.creationContext?.pathLabel,
+		"Strength plan · Foundation · Lower body",
+	);
+});

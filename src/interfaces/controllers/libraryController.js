@@ -4,7 +4,7 @@ import getLibraryPageData from "../../features/library/getLibraryPageData.js";
 import createLibraryPageViewModel from "../../../views/viewModels/libraryPage/createLibraryPageViewModel.js";
 
 /**
- * @typedef {import("express").Request} Request
+ * @typedef {import("express").Request & {validatedQuery?: Record<string, any>}} Request
  * @typedef {import("express").Response} Response
  */
 
@@ -20,22 +20,42 @@ async function show(req, res) {
 /**
  * @param {Request} req
  * @param {Response} res
- * @param {{exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, managementMode?: boolean}} [formState]
+ * @param {{exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, sessionCreationDayId?: unknown, managementMode?: boolean}} [formState]
  */
 export async function renderLibrary(req, res, formState = {}) {
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
-	const sessionId = toNullableNumber(req?.query?.sessionId);
+	const validatedQuery = req.validatedQuery ?? {};
+	const sessionId = toNullableNumber(validatedQuery.sessionId);
+	const sessionCreationDayId =
+		toNullableNumber(formState.sessionCreationDayId) ??
+		toNullableNumber(validatedQuery.createSessionForDay);
 	const managementMode = Boolean(formState.managementMode);
 
-	const data = await getLibraryPageData({ userId, sessionId });
+	const data = await getLibraryPageData({
+		userId,
+		sessionId,
+		sessionCreationDayId,
+	});
+	if (
+		!managementMode &&
+		sessionCreationDayId !== null &&
+		!data.sessionCreationContext
+	) {
+		res.status(404).send("Training day not found");
+		return;
+	}
 	const page = {
 		...res.locals.page,
 		title: managementMode
 			? "Manage exercise catalog · Let's Flex!"
 			: "Library · Let's Flex!",
 	};
-	const pageState = { userId, sessionId };
+	const pageState = {
+		userId,
+		sessionId,
+		sessionCreationDayId: data.sessionCreationContext?.day.id ?? null,
+	};
 
 	const library = createLibraryPageViewModel({
 		page,

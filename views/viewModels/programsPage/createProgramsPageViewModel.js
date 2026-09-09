@@ -4,6 +4,7 @@ import createCalendarNavigationViewModel from "./createCalendarNavigationViewMod
 import createProgramFormViewModel from "./createProgramFormViewModel.js";
 import createCycleFormViewModel from "./createCycleFormViewModel.js";
 import createDeleteEntityFormViewModel from "./createDeleteEntityFormViewModel.js";
+import createHierarchyGuideViewModel from "./createHierarchyGuideViewModel.js";
 
 /**
  * @typedef {import("../../../src/features/programs/programsPage.types.js").CreateProgramsPageViewModelInput} CreateProgramsPageViewModelInput
@@ -38,6 +39,18 @@ export default function createProgramsPageViewModel({
 			activeNavigation: "programs",
 		},
 		components: {
+			pageHeading: {
+				eyebrow: "Training plans",
+				title: "Programs",
+				description:
+					"Build from an overall goal down to the session assigned to each training day.",
+			},
+			hierarchyGuide: createHierarchyGuideViewModel({
+				currentProgram: programs.current,
+				currentCycle: cycles.current,
+				trainingDays,
+				workoutSessions,
+			}),
 			programSwitcher: createProgramSwitcherViewModel({
 				currentProgramId: programs.current?.id ?? null,
 				programs: programs.items,

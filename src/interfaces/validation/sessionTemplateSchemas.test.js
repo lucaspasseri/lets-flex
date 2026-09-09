@@ -72,6 +72,7 @@ test("session creation strips submitted step identities", () => {
 	const value = createSessionTemplateSchema.parse({
 		name: "Strength",
 		notes: "",
+		contextDayId: "12",
 		stepRow: [
 			{
 				stepId: "99",
@@ -87,4 +88,16 @@ test("session creation strips submitted step identities", () => {
 
 	assert.equal(Object.hasOwn(value.stepRow[0], "stepId"), false);
 	assert.equal(value.notes, null);
+	assert.equal(value.contextDayId, 12);
+});
+
+test("session creation rejects an invalid contextual day identity", () => {
+	assert.equal(
+		createSessionTemplateSchema.safeParse({
+			name: "Strength",
+			notes: "",
+			contextDayId: "https://evil.example",
+		}).success,
+		false,
+	);
 });

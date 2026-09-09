@@ -21,10 +21,11 @@ export default function createCalendarNavigationViewModel({
 	return {
 		id: "program-calendar",
 		isVisible: currentProgram !== null,
-		heading: currentProgram ? `${currentProgram.name} calendar` : "Program calendar",
+		eyebrow: "Level 3 · Training days",
+		heading: currentProgram ? `${currentProgram.name} training days` : "Training days",
 		description: currentCycle
-			? `${currentCycle.name} is highlighted. Choose any day to manage its workout.`
-			: "Choose a cycle to highlight its training days.",
+			? `${currentCycle.name} is selected. Its days are highlighted in the full program calendar; open one to manage assigned sessions.`
+			: "Choose a cycle above to highlight its days, then open a day to manage assigned sessions.",
 		items: trainingDays.map((day, index) => {
 			const isInCurrentCycle = day.cycleId === currentCycle?.id;
 			const statusMarkers = createSessionStatusMarkersViewModel(
@@ -54,7 +55,8 @@ export default function createCalendarNavigationViewModel({
 		}),
 		emptyState: {
 			title: "No training days yet",
-			description: "Create a cycle to populate this program's calendar.",
+			description:
+				"Create a cycle above to generate its ordered, scheduled training days.",
 		},
 	};
 }

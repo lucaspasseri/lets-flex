@@ -50,6 +50,7 @@ export const updateSessionTemplateSchema = z.object({
 });
 
 export const createSessionTemplateSchema = updateSessionTemplateSchema.extend({
+	contextDayId: optionalStepId,
 	stepRow: z.preprocess(
 		(value) => (value == null ? [] : value),
 		z.array(createSessionStepSchema),

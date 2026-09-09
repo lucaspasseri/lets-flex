@@ -4,6 +4,7 @@ import createSessionForm from "./createSessionFormViewModel.js";
 import createExerciseForm from "./createExerciseFormViewModel.js";
 import createDeleteExerciseForm from "./createDeleteExerciseFormViewModel.js";
 import createArchiveSessionForm from "./createArchiveSessionFormViewModel.js";
+import formatDayPageDate from "../dayPage/formatDayPageDate.js";
 
 /**
  * @typedef {import("../../../src/types/libraryPage.types.js").LocalsPage} LocalsPage
@@ -30,6 +31,11 @@ export default function createLibraryPageViewModel({
 			)
 		: data.exerciseTemplates;
 	const isGuest = data.user?.role === "guest";
+	const sessionCreationContext = data.sessionCreationContext;
+	const dayTitle = sessionCreationContext
+		? sessionCreationContext.day.label?.trim() ||
+			`Day ${sessionCreationContext.day.dayOrder}`
+		: null;
 
 	return {
 		page,
@@ -41,6 +47,19 @@ export default function createLibraryPageViewModel({
 			activeNavigation: managementMode ? "admin-exercises" : "library",
 		},
 		components: {
+			planningContext: sessionCreationContext
+				? {
+						isVisible: true,
+						title: `Create a session for ${dayTitle}`,
+						description:
+							"Build the reusable template here. After creation, you will return to the training day to explicitly assign it.",
+						pathLabel: `${sessionCreationContext.program.name} · ${sessionCreationContext.cycle.name} · ${dayTitle}`,
+						dateLabel:
+							formatDayPageDate(sessionCreationContext.day.scheduledDate) ??
+							"Date not scheduled",
+						backHref: `/programs/day?dayId=${sessionCreationContext.day.id}`,
+					}
+				: { isVisible: false },
 			pageHeading: managementMode
 				? {
 						eyebrow: "Administration",
@@ -94,6 +113,7 @@ export default function createLibraryPageViewModel({
 				exerciseTemplates: data.exerciseTemplates,
 				state:
 					sessionTemplateFormState?.mode === "create" ? sessionTemplateFormState : {},
+				creationContext: sessionCreationContext,
 			}),
 			updateSessionForm: createSessionForm({
 				stepTypes: data.stepTypes,

@@ -42,6 +42,7 @@ async function createSession({ name, notes, stepRowArr, ownerUserId }) {
 			);
 		}
 		await client.query("COMMIT");
+		return session;
 	} catch (err) {
 		await client.query("ROLLBACK");
 		throw new Error("Failed to create session template", { cause: err });

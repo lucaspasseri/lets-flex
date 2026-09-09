@@ -1,5 +1,7 @@
 <%
 	const {
+		pageHeading,
+		hierarchyGuide,
 		programSwitcher,
 		cycleSwitcher,
 		calendarNavigation,
@@ -12,6 +14,9 @@
 %>
 
 <main class="main programs" data-programs-page>
+	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
+	<%- include("partials/programsPage/hierarchyGuide", { hierarchyGuide }) %>
+
 	<% if (noActiveUser.isVisible) { %>
 		<%- include("partials/programsPage/noActiveUser", { noActiveUser }) %>
 	<% } else { %>

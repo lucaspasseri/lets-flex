@@ -1,9 +1,16 @@
 <aside class="day-panel day-panel--link" aria-labelledby="session-link-title">
 	<div class="day-panel__header">
-		<p class="day-panel__eyebrow">Plan the day</p>
-		<h2 id="session-link-title">Link a session template</h2>
-		<p>Choose an available template to add another workout to this training day.</p>
+		<p class="day-panel__eyebrow">Level 4 · Session</p>
+		<h2 id="session-link-title">Assign a session to this day</h2>
+		<p>A template is reusable. Assigning it creates the planned workout for this specific day.</p>
 	</div>
+
+	<% if (sessionLinkForm.feedback) { %>
+		<div class="day-panel__feedback" role="status">
+			<strong><%= sessionLinkForm.feedback.title %></strong>
+			<p><%= sessionLinkForm.feedback.message %></p>
+		</div>
+	<% } %>
 
 	<%- include("../shared/components/form/form", { form: {
 		action: sessionLinkForm.action,
@@ -14,4 +21,9 @@
 			footer: include("sessionLinkFormFooter", { sessionLinkForm }),
 		},
 	} }) %>
+
+	<a class="day-panel__create-link<%= sessionLinkForm.hasTemplates ? '' : ' day-panel__create-link--primary' %>" href="<%= sessionLinkForm.createAction.href %>">
+		<%- include("../shared/components/icons/namedIcon", { name: "plus-circle" }) %>
+		<span><%= sessionLinkForm.createAction.label %></span>
+	</a>
 </aside>

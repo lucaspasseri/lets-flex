@@ -6,9 +6,23 @@
 		idPrefix,
 		values,
 		errors,
-		formErrors
+		formErrors,
+		contextDayId,
+		creationContext
 	} = locals.sessionForm.fields;
 %>
+
+<% if (contextDayId) { %>
+	<input type="hidden" name="contextDayId" value="<%= contextDayId %>">
+<% } %>
+
+<% if (creationContext) { %>
+	<div class="session-form-context" aria-label="Return destination">
+		<span>Return destination</span>
+		<strong><%= creationContext.pathLabel %></strong>
+		<p><%= creationContext.dateLabel %></p>
+	</div>
+<% } %>
 
 <% if (formErrors.length) { %>
 	<div class="form-errors" role="alert">

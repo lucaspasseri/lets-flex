@@ -9,6 +9,8 @@
 	control: "select",
 	disabled: !sessionLinkForm.isEnabled,
 	hint: sessionLinkForm.isEnabled
-		? "Only active session templates are shown."
-		: "Select a training day and create an active template first.",
+		? "Only active global templates and templates owned by you are shown."
+		: sessionLinkForm.createAction.isContextual
+			? "No active templates are available. Create one below, then return here to assign it."
+			: "Choose a training day before assigning a template.",
 } }) %>

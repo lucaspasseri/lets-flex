@@ -2,6 +2,7 @@ import pool from "../../../db/pool.js";
 
 /**
  * @typedef {import("./trainingDays.types.js").ProgramTrainingDayRow} ProgramTrainingDayRow
+ * @typedef {import("./trainingDays.types.js").OwnedTrainingDayContextRow} OwnedTrainingDayContextRow
  * @typedef {import("../programs/programs.types.js").ProgramRow} ProgramRow
  * @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient
  */
@@ -15,6 +16,29 @@ export async function findById({ trainingDayId }, db = pool) {
 	const { rows } = await db.query("SELECT * FROM training_days WHERE id = $1", [
 		trainingDayId,
 	]);
+
+	return rows[0] ?? null;
+}
+
+/**
+ * Resolves a day and its hierarchy with ownership enforced in the query.
+ *
+ * @param {{trainingDayId: number, userId: number}} input
+ * @param {DatabaseClient} [db]
+ * @returns {Promise<OwnedTrainingDayContextRow | null>}
+ */
+export async function findContextByIdForUser({ trainingDayId, userId }, db = pool) {
+	const { rows } = await db.query(
+		`SELECT td.id, td.cycle_id, td.day_order, td.scheduled_date, td.label,
+		        c.name AS cycle_name, c.cycle_size, c.cycle_order, c.program_id,
+		        p.user_id, p.goal_id, p.name AS program_name,
+		        p.start_date AS program_start_date
+		 FROM training_days AS td
+		 JOIN cycles AS c ON c.id = td.cycle_id
+		 JOIN programs AS p ON p.id = c.program_id
+		 WHERE td.id = $1 AND p.user_id = $2`,
+		[trainingDayId, userId],
+	);
 
 	return rows[0] ?? null;
 }

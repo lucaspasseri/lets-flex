@@ -14,6 +14,7 @@ import * as muscleMapper from "../muscles/mapper.js";
 import * as muscleRoleMapper from "../muscleRoles/mapper.js";
 import * as exerciseTemplateMapper from "../exerciseTemplates/mapper.js";
 import * as stepTypeMapper from "../stepTypes/mapper.js";
+import getOwnedTrainingDayContext from "../day/getOwnedTrainingDayContext.js";
 
 /**
  * @typedef {import("../users/users.types.js").User} User
@@ -26,6 +27,7 @@ import * as stepTypeMapper from "../stepTypes/mapper.js";
  * @typedef {object} GetLibraryPageData
  * @property {User["id"] | null} userId
  * @property {SessionRow["id"] | null} sessionId
+ * @property {number | null} [sessionCreationDayId]
  */
 
 /**
@@ -33,7 +35,7 @@ import * as stepTypeMapper from "../stepTypes/mapper.js";
  * @returns {Promise<LibraryPageData>}
  */
 
-async function getLibraryPageData({ userId, sessionId }) {
+async function getLibraryPageData({ userId, sessionId, sessionCreationDayId = null }) {
 	const [
 		user,
 		sessionArr,
@@ -43,6 +45,7 @@ async function getLibraryPageData({ userId, sessionId }) {
 		muscleRoleArr,
 		exerciseTemplateArr,
 		stepTypeArr,
+		sessionCreationContext,
 	] = await Promise.all([
 		usersRepository.findById({ userId }),
 		sessionsRepository.findVisibleForUser({ userId }),
@@ -52,6 +55,7 @@ async function getLibraryPageData({ userId, sessionId }) {
 		muscleRolesRepository.findAll(),
 		exerciseTemplatesRepository.findAllForUser({ userId }),
 		stepTypesRepository.findAll(),
+		getOwnedTrainingDayContext({ dayId: sessionCreationDayId, userId }),
 	]);
 
 	const sessions = /** @type {Session[]} */ (
@@ -70,6 +74,7 @@ async function getLibraryPageData({ userId, sessionId }) {
 			exerciseTemplateMapper.toExerciseTemplateSeed,
 		),
 		stepTypes: stepTypeArr.map(stepTypeMapper.toStepType),
+		sessionCreationContext,
 	};
 }
 

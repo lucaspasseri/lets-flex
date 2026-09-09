@@ -14,10 +14,10 @@ export default function createCycleSwitcherViewModel({
 	return {
 		id: "cycle-switcher",
 		isVisible: currentProgram !== null,
-		eyebrow: "Cycles",
+		eyebrow: "Level 2 · Cycles",
 		heading: cycles.length === 0 ? "Create the first cycle" : "Choose a cycle",
 		description: currentProgram
-			? `Manage the training cycles in ${currentProgram.name}.`
+			? `Cycles break ${currentProgram.name} into focused blocks. Choose one to highlight its days.`
 			: "Choose a program before managing its cycles.",
 		items: cycles.map((cycle) => {
 			const isCurrent = cycle.id === currentCycleId;
@@ -29,9 +29,10 @@ export default function createCycleSwitcherViewModel({
 				metaLabel: `${cycle.size} ${cycle.size === 1 ? "day" : "days"}`,
 				href: `/programs?programId=${currentProgram?.id}&cycleId=${cycle.id}`,
 				isCurrent,
-				statusLabel: isCurrent ? "Active cycle" : null,
+				statusLabel: isCurrent ? "Selected cycle" : "Choose cycle",
+				statusIcon: isCurrent ? "check-circle" : "chevron-right",
 				accessibleLabel: isCurrent
-					? `${cycle.name}, active cycle`
+					? `${cycle.name}, selected cycle`
 					: `Select cycle ${cycle.name}`,
 				deleteAction: {
 					modalId: "deleteCycleModal",
@@ -42,7 +43,8 @@ export default function createCycleSwitcherViewModel({
 		}),
 		emptyState: {
 			title: "Create the first cycle",
-			description: "Cycles divide a program into manageable blocks of training days.",
+			description:
+				"This program has no cycles yet. Creating one also creates its scheduled training days.",
 			icon: "repeat-2",
 		},
 		createAction: {

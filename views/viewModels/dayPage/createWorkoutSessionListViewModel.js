@@ -27,13 +27,13 @@ export default function createWorkoutSessionListViewModel({
 		count: items.length,
 		countLabel:
 			items.length === 1
-				? "The current day has 1 workout session linked to it."
-				: `The current day has ${items.length} workout sessions linked to it.`,
+				? "1 session is assigned to this training day."
+				: `${items.length} sessions are assigned to this training day.`,
 		emptyState: {
 			isVisible: items.length === 0,
-			title:
-				"The current day does not yet have any training sessions associated with it.",
-			description: "You can link a session template here.",
+			title: "No session assigned yet",
+			description:
+				"Assign an existing session template or create one for this training day.",
 		},
 		items,
 		cancelModals: visibleSessions.map((session) => ({

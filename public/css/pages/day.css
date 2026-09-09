@@ -24,6 +24,32 @@
 	text-align: center;
 }
 
+.day-context-path {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.4rem 0.65rem;
+	color: var(--color-text-muted);
+	font-size: 0.76rem;
+	line-height: 1.45;
+}
+
+.day-context-path a {
+	color: var(--color-action);
+	font-weight: 750;
+	text-underline-offset: 0.2rem;
+}
+
+.day-context-path strong {
+	color: var(--color-text);
+}
+
+.day-context-path a:focus-visible,
+.day-panel__create-link:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 58%, transparent);
+	outline-offset: 3px;
+}
+
 .day-page__eyebrow,
 .day-navigation__eyebrow,
 .day-panel__eyebrow,
@@ -42,6 +68,26 @@
 	font-size: clamp(2.25rem, 7vw, 4.5rem);
 	line-height: 1;
 	letter-spacing: -0.045em;
+}
+
+.day-page__date {
+	margin: 0.15rem 0 0;
+	color: var(--color-text);
+	font-size: clamp(1rem, 3vw, 1.35rem);
+	font-weight: 700;
+}
+
+.day-page__status {
+	margin: 0.15rem 0 0;
+	padding: 0.35rem 0.65rem;
+	border: 1px solid color-mix(in srgb, var(--color-accent) 34%, transparent);
+	border-radius: 999px;
+	color: var(--color-accent);
+	background: color-mix(in srgb, var(--color-accent) 9%, transparent);
+	font-size: 0.68rem;
+	font-weight: 750;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 .day-page__intro {
@@ -80,6 +126,14 @@
 	color: var(--color-text);
 	font-size: clamp(1.15rem, 2.5vw, 1.5rem);
 	line-height: 1.2;
+}
+
+.day-navigation__description {
+	max-width: 38rem;
+	margin: 0.35rem 0 0;
+	color: var(--color-text-muted);
+	font-size: 0.76rem;
+	line-height: 1.45;
 }
 
 .day-navigation__controls {
@@ -163,7 +217,18 @@
 }
 
 .day-navigation__item-label {
-	font-size: 0.85rem;
+	font-size: 0.76rem;
+	font-weight: 650;
+}
+
+.day-navigation__item-name {
+	font-size: 0.86rem;
+	overflow-wrap: anywhere;
+}
+
+.day-navigation__item-context {
+	color: var(--color-text-muted);
+	font-size: 0.64rem;
 	font-weight: 700;
 }
 
@@ -231,6 +296,66 @@
 
 .day-panel--link .shared-button {
 	width: 100%;
+}
+
+.day-panel__feedback {
+	display: grid;
+	gap: 0.25rem;
+	padding: 0.85rem;
+	border: 1px solid color-mix(in srgb, var(--color-success) 42%, var(--color-border));
+	border-radius: 0.75rem;
+	background: color-mix(in srgb, var(--color-success) 8%, var(--color-page));
+}
+
+.day-panel__feedback strong {
+	font-size: 0.82rem;
+}
+
+.day-panel__feedback p {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: 0.76rem;
+	line-height: 1.45;
+}
+
+.day-panel__create-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.45rem;
+	min-height: 2.75rem;
+	padding: 0.65rem 0.9rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.7rem;
+	color: var(--color-text);
+	background: var(--color-surface-subtle);
+	font-size: 0.8rem;
+	font-weight: 750;
+	text-decoration: none;
+	transition:
+		border-color 160ms ease,
+		background-color 160ms ease;
+}
+
+.day-panel__create-link:hover {
+	border-color: var(--color-text-muted);
+	background: var(--color-border);
+}
+
+.day-panel__create-link--primary {
+	border-color: var(--color-action);
+	color: var(--color-text-on-action);
+	background: var(--color-action);
+}
+
+.day-panel__create-link--primary:hover {
+	border-color: var(--color-action-hover);
+	background: var(--color-action-hover);
+}
+
+.day-panel__create-link svg {
+	width: 1rem;
+	height: 1rem;
 }
 
 .day-empty-state {
@@ -451,6 +576,10 @@
 		border-radius: 0;
 	}
 
+	.day-context-path {
+		padding-inline: var(--horizontal-margin);
+	}
+
 	.day-navigation__header,
 	.day-panel__header--workouts,
 	.workout-card__header {
@@ -475,7 +604,8 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.day-navigation__arrow,
-	.day-navigation__item {
+	.day-navigation__item,
+	.day-panel__create-link {
 		transition: none;
 	}
 }
