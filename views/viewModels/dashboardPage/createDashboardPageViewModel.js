@@ -4,14 +4,17 @@ import createDateNavigationViewModel from "./createDateNavigationViewModel.js";
 import createWorkoutSessionViewModel from "./createWorkoutSessionViewModel.js";
 import createHeatmapViewModel from "./createHeatmapViewModel.js";
 import createBarChartViewModel from "./createBarChartViewModel.js";
+import createAnalyticsSummaryViewModel from "./createAnalyticsSummaryViewModel.js";
+import createWorkloadViewModel from "./createWorkloadViewModel.js";
 
-/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any}} input */
+/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null}} input */
 export default function createDashboardPageViewModel({
 	page,
 	pageState,
 	data,
 	workoutLogFormState,
 	actionFormState,
+	workoutFeedback,
 }) {
 	const components = {
 		status: createDashboardStatusViewModel(data),
@@ -26,9 +29,12 @@ export default function createDashboardPageViewModel({
 			daysDifference: pageState.daysDifference,
 			workoutLogFormState,
 			actionFormState,
+			workoutFeedback,
 		}),
+		analyticsSummary: createAnalyticsSummaryViewModel(data),
 		heatmap: createHeatmapViewModel(data),
 		barChart: createBarChartViewModel(data),
+		workload: createWorkloadViewModel(data),
 	};
 
 	const resolvedPageState = {

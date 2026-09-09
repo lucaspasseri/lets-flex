@@ -19,6 +19,9 @@
  * @property {string} planned_load_unit
  * @property {number} workout_session_id
  * @property {number} exercise_variant_id
+ * @property {string | null} [step_type_name]
+ * @property {string | null} [exercise_name]
+ * @property {string | null} [exercise_variant_name]
  * @property {string | Date | null} performed_at
  * @property {number | null} performed_sets
  * @property {number | null} performed_reps
@@ -62,7 +65,7 @@
  * @property {boolean} is_archived
  * @property {string} session_notes
  * @property {string | Date | null} [scheduled_date]
- * @property {string} [session_name]
+ * @property {string | null} [session_name]
  * @property {WorkoutSessionStepRow[]} steps
  */
 

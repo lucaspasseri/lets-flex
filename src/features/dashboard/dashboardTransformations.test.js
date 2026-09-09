@@ -24,16 +24,32 @@ const session = (id) => ({
 
 test("dashboard metrics consume mapped domain objects and handle missing dates", () => {
 	assert.deepEqual(getHeatmapArr(null, cycles, []), []);
-	assert.deepEqual(getBarChartData(null, cycles, []), []);
+	assert.deepEqual(getBarChartData([]), []);
 
-	const heatmap = getHeatmapArr(new Date(2026, 7, 20), cycles, [session(1)]);
+	const heatmap = getHeatmapArr(new Date(2026, 7, 20), cycles, [
+		{ dateKey: "2026-08-20", finishedCount: 1 },
+	]);
 	assert.equal(heatmap[0].days[0].intensity, "one");
 	assert.equal(heatmap[0].days[0].dateLabel, "20/08");
 
-	const chart = getBarChartData(new Date(2026, 7, 20), cycles, [session(1)]);
-	assert.equal(chart.length, 2);
-	assert.equal(chart[0].scheduledCount, 1);
+	const chart = getBarChartData([
+		{
+			weekIndex: 0,
+			weekStartDate: "2026-08-20",
+			weekEndDate: "2026-08-26",
+			scheduledCount: 2,
+			finishedCount: 1,
+			cancelledCount: 1,
+			plannedCount: 0,
+			inProgressCount: 0,
+			completionRate: 0.5,
+		},
+	]);
+	assert.equal(chart.length, 1);
+	assert.equal(chart[0].label, "20/08");
+	assert.equal(chart[0].scheduledCount, 2);
 	assert.equal(chart[0].finishedCount, 1);
+	assert.equal(chart[0].cancelledCount, 1);
 });
 
 test("dashboard selection falls back predictably to the first session", () => {

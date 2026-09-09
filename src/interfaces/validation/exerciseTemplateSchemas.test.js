@@ -21,7 +21,18 @@ test("update exercise template validation normalizes valid form values", () => {
 	});
 });
 
-test("update exercise template validation rejects missing fields and muscles", () => {
+test("update exercise template validation allows no equipment", () => {
+	const result = updateExerciseTemplateSchema.parse({
+		name: "Bodyweight squat",
+		movementPatternId: "3",
+		equipmentId: "",
+		muscleGroup: [{ muscleId: "19", muscleRoleId: "1" }],
+	});
+
+	assert.equal(result.equipmentId, null);
+});
+
+test("update exercise template validation rejects missing required fields and muscles", () => {
 	const result = updateExerciseTemplateSchema.safeParse({
 		name: "",
 		movementPatternId: "",
@@ -32,7 +43,7 @@ test("update exercise template validation rejects missing fields and muscles", (
 	const fields = result.error.flatten().fieldErrors;
 	assert.ok(fields.name);
 	assert.ok(fields.movementPatternId);
-	assert.ok(fields.equipmentId);
+	assert.equal(fields.equipmentId, undefined);
 	assert.ok(fields.muscleGroup);
 });
 
@@ -51,4 +62,16 @@ test("create exercise template validation strips unexpected fields", () => {
 		equipmentId: 2,
 		muscleGroup: [{ muscleId: 19, muscleRoleId: 1 }],
 	});
+});
+
+test("create exercise template validation rejects invalid non-empty equipment", () => {
+	const result = createExerciseTemplateSchema.safeParse({
+		name: "Squat",
+		movementPatternId: "3",
+		equipmentId: "not-an-id",
+		muscleGroup: [{ muscleId: "19", muscleRoleId: "1" }],
+	});
+
+	assert.equal(result.success, false);
+	assert.ok(result.error.flatten().fieldErrors.equipmentId);
 });

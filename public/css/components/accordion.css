@@ -23,12 +23,12 @@
 	background: rgb(255 255 255 / 3%);
 }
 
-.shared-accordion .header-base {
-	h3 {
-		font-size: 1.2em;
-		margin-right: auto;
-		height: fit-content;
-	}
+.shared-accordion .header-heading {
+	display: block;
+	margin-right: auto;
+	font-size: 1.2em;
+	font-weight: 700;
+	height: fit-content;
 }
 
 .shared-accordion .panel {

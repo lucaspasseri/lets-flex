@@ -83,3 +83,27 @@ test("perform log schema reports invalid set fields", () => {
 		]),
 	);
 });
+
+test("perform log schema bounds the submitted set collection", () => {
+	const set = {
+		performedReps: "8",
+		performedLoadValue: "10",
+		performedLoadUnit: "Kilograms",
+	};
+	assert.equal(
+		performWorkoutStepLogBodySchema.safeParse({
+			daysDifference: "0",
+			workoutSessionId: "5",
+			logFormRows: [],
+		}).success,
+		false,
+	);
+	assert.equal(
+		performWorkoutStepLogBodySchema.safeParse({
+			daysDifference: "0",
+			workoutSessionId: "5",
+			logFormRows: Array.from({ length: 101 }, () => set),
+		}).success,
+		false,
+	);
+});

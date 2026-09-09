@@ -3,6 +3,13 @@
 	const roleLabel = roleLabels[currentUser.role] ?? "Member";
 	const isGuest = currentUser.role === "guest";
 	const isAdmin = currentUser.role === "admin";
+	const methods = locals.authenticationMethods ?? {
+		password: { label: "Password", status: "Not set", showAddForm: false },
+		google: { label: "Google", status: "Not linked", email: null, action: null }
+	};
+	const linkMessage = locals.googleLinkMessage ?? null;
+	const passwordMessage = locals.passwordMessage ?? null;
+	const passwordErrors = locals.passwordErrors ?? [];
 	const expirationLabel = isGuest && currentUser.guestExpiresAt
 		? new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(new Date(currentUser.guestExpiresAt))
 		: null;
@@ -33,6 +40,53 @@
 		</section>
 
 		<div class="profile-stack">
+			<% if (!isGuest) { %>
+				<section class="profile-card" aria-labelledby="authentication-methods-heading">
+					<div class="profile-card__icon" aria-hidden="true">
+						<%- include("partials/shared/components/icons/namedIcon", { name: "user-round" }) %>
+					</div>
+					<div>
+						<p class="profile-card__eyebrow">Account access</p>
+						<h2 id="authentication-methods-heading">Authentication methods</h2>
+						<p>Connect sign-in methods intentionally. Provider email addresses never merge accounts.</p>
+						<% if (linkMessage) { %>
+							<p class="profile-link-message profile-link-message--<%= linkMessage.type %>" role="status"><%= linkMessage.text %></p>
+						<% } %>
+						<ul class="profile-auth-methods">
+							<li>
+								<span><%= methods.password.label %></span>
+								<strong><%= methods.password.status %></strong>
+							</li>
+							<li>
+								<div>
+									<span><%= methods.google.label %></span>
+									<% if (methods.google.email) { %><small><%= methods.google.email %></small><% } %>
+								</div>
+								<div class="profile-auth-method__state">
+									<strong><%= methods.google.status %></strong>
+									<% if (methods.google.action) { %>
+									<form method="POST" action="<%= methods.google.action.path %>">
+										<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+										<button class="profile-card__link" type="submit" data-google-action><%= methods.google.action.label %></button>
+									</form>
+									<% } %>
+								</div>
+							</li>
+						</ul>
+						<% if (passwordMessage) { %><p class="profile-link-message" role="status"><%= passwordMessage.text %></p><% } %>
+						<% if (passwordErrors.length) { %><div class="form-errors" role="alert"><ul><% passwordErrors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
+						<% if (methods.password.showAddForm) { %>
+							<form class="profile-password-form" method="POST" action="/profile/password">
+								<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+								<%- include("partials/shared/components/form/field", { field: { id: "new-password", name: "password", label: "New password", type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
+								<%- include("partials/shared/components/form/field", { field: { id: "confirm-password", name: "confirmPassword", label: "Confirm password", type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
+								<%- include("partials/shared/components/button/button", { button: { label: "Add a password", type: "submit", variant: "primary" } }) %>
+							</form>
+						<% } %>
+					</div>
+				</section>
+			<% } %>
+
 			<% if (isGuest) { %>
 				<section class="profile-card profile-card--notice" aria-labelledby="guest-workspace-heading">
 					<div class="profile-card__icon" aria-hidden="true">

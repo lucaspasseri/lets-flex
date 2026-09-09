@@ -20,7 +20,6 @@
 	"scripts": {
 		"start": "node server.js",
 		"dev": "node --env-file-if-exists=.env --watch server.js",
-		"seed": "npm run db:reset",
 		"db:reset": "node --env-file-if-exists=.env db/seed.js",
 		"guests:cleanup": "node --env-file-if-exists=.env src/commands/cleanupExpiredGuests.js",
 		"check:argon2": "node src/commands/checkArgon2.js",
@@ -47,6 +46,7 @@
 		"passport-google-oauth20": "^2.0.0",
 		"passport-local": "^1.0.0",
 		"pg": "^8.20.0",
+		"resend": "^6.26.0",
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {

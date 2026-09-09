@@ -2,6 +2,7 @@ import passportPackage from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
 import authenticateGoogleUser from "../features/auth/authenticateGoogleUser.js";
+import linkGoogleIdentity from "../features/auth/linkGoogleIdentity.js";
 import * as authIdentitiesRepository from "../features/auth/authIdentitiesRepository.js";
 import normalizeEmail from "../features/auth/normalizeEmail.js";
 import { verifyPassword } from "../features/auth/passwordService.js";
@@ -82,13 +83,21 @@ export function createPassport() {
 			async (req, _accessToken, _refreshToken, profile, done) => {
 				try {
 					const principal = /** @type {any} */ (req.user);
-					const account = await authenticateGoogleUser({
-						profile,
-						guestUserId:
-							principal?.role === "guest" && Number.isInteger(principal.id)
-								? principal.id
-								: null,
-					});
+					// @ts-ignore -- callback handler supplies verified, request-local link context.
+					const googleManagement = req.googleOAuthContext;
+					const account = googleManagement?.userId
+						? await linkGoogleIdentity({
+								userId: googleManagement.userId,
+								profile,
+								intent: googleManagement.intent,
+							})
+						: await authenticateGoogleUser({
+								profile,
+								guestUserId:
+									principal?.role === "guest" && Number.isInteger(principal.id)
+										? principal.id
+										: null,
+							});
 					if (account.role === "guest" || !isUsablePrincipal(account)) {
 						done(null, false, { message: "This account is not available." });
 						return;

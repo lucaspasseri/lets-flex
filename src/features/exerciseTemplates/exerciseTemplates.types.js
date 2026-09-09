@@ -113,6 +113,7 @@
  * @typedef {object} ExerciseTemplateItemViewModel
  * @property {ExerciseTemplateRow["id"]} id
  * @property {ExerciseTemplateRow["id"]} exerciseId
+ * @property {string} baseName
  * @property {string} name
  * @property {boolean} isPrivateOwner
  * @property {string} searchKeyWord

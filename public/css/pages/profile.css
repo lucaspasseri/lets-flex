@@ -163,7 +163,66 @@
 	color: var(--color-text);
 }
 
+.profile-auth-methods {
+	display: grid;
+	width: 100%;
+	margin: 0.25rem 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.profile-auth-methods li {
+	display: flex;
+	min-height: 3rem;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	border-top: 1px solid var(--color-border);
+	font-size: 0.82rem;
+}
+
+.profile-auth-methods strong {
+	color: var(--color-text-muted);
+}
+
+.profile-auth-methods li > div:first-child {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.profile-auth-methods small {
+	color: var(--color-text-muted);
+}
+
+.profile-auth-methods form {
+	margin: 0;
+}
+
+.profile-auth-method__state {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.profile-password-form {
+	display: grid;
+	width: 100%;
+	gap: 0.8rem;
+	margin-top: 0.5rem;
+}
+
+.profile-link-message {
+	padding: 0.65rem 0.75rem;
+	border-radius: 0.55rem;
+	background: var(--color-surface-subtle);
+}
+
+.profile-link-message--error {
+	color: var(--color-danger);
+}
+
 .profile-card__link {
+	border: 0;
 	display: inline-flex;
 	min-height: 2.4rem;
 	align-items: center;
@@ -180,6 +239,15 @@
 
 .profile-card__link:hover {
 	background: var(--color-action-hover);
+}
+
+.profile-card__link:disabled {
+	cursor: not-allowed;
+	opacity: 0.55;
+}
+
+.profile-card__link:disabled:hover {
+	background: var(--color-action);
 }
 
 .profile-card__link:focus-visible {

@@ -1,0 +1,9 @@
+<main class="main exercise-progress-state" data-exercise-progress-state="<%= state.kind %>">
+	<section class="exercise-progress-state-card" aria-labelledby="exercise-progress-state-title">
+		<span class="exercise-progress-state-mark" aria-hidden="true">!</span>
+		<p class="exercise-progress-eyebrow"><%= state.eyebrow %></p>
+		<h1 id="exercise-progress-state-title"><%= state.title %></h1>
+		<p><%= state.message %></p>
+		<a class="exercise-progress-primary-action" href="<%= state.actionHref %>"><%= state.actionLabel %></a>
+	</section>
+</main>

@@ -1,4 +1,7 @@
-<section class="dashboard-workout <%= currentWorkout.isRestDay ? 'dashboard-workout--rest' : '' %>">
+<section class="dashboard-workout <%= currentWorkout.isRestDay ? 'dashboard-workout--rest' : '' %>" data-workout-tracker>
+	<% if (currentWorkout.feedback) { %>
+		<%- include('../sessionComponent/feedback', { feedback: currentWorkout.feedback }) %>
+	<% } %>
 	<% if (currentWorkout.isRestDay) { %>
 		<div class="dashboard-empty-state">
 			<span class="dashboard-empty-state__mark" aria-hidden="true">—</span>

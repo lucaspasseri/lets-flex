@@ -1,0 +1,9 @@
+<main class="main workout-history-state" data-workout-history-state="<%= state.kind %>">
+	<section class="history-state" aria-labelledby="history-state-title">
+		<div class="history-state__mark" aria-hidden="true"><%= state.kind === "not-found" ? "?" : "!" %></div>
+		<p class="history-eyebrow"><%= state.eyebrow %></p>
+		<h1 id="history-state-title"><%= state.title %></h1>
+		<p><%= state.message %></p>
+		<a class="history-primary-action" href="<%= state.actionHref %>"><%= state.actionLabel %></a>
+	</section>
+</main>

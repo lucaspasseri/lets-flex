@@ -33,6 +33,16 @@ export async function findPrincipalById({ userId }, db = pool) {
 	return rows[0] ?? null;
 }
 
+/** @param {{userId: number}} input @param {any} db */
+export async function findPrincipalByIdForUpdate({ userId }, db) {
+	const { rows } = await db.query(
+		`SELECT id, email, role, name, is_active, guest_expires_at
+		 FROM users WHERE id = $1 FOR UPDATE`,
+		[userId],
+	);
+	return rows[0] ?? null;
+}
+
 /** @param {{name: string, expiresAt: Date}} input @param {any} db */
 export async function createGuest({ name, expiresAt }, db = pool) {
 	const { rows } = await db.query(

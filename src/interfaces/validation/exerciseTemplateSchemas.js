@@ -9,10 +9,15 @@ const muscleRelationSchema = z.object({
 	muscleRoleId: requiredId("a muscle role"),
 });
 
+const nullableEquipmentId = z.preprocess(
+	(value) => (value === "" || value == null ? null : value),
+	z.coerce.number().int().positive("Choose valid equipment.").nullable(),
+);
+
 const exerciseTemplateFields = {
 	name: z.string().trim().min(1, "Enter an exercise name.").max(100),
 	movementPatternId: requiredId("a movement pattern"),
-	equipmentId: requiredId("equipment"),
+	equipmentId: nullableEquipmentId,
 	muscleGroup: z
 		.array(muscleRelationSchema)
 		.min(1, "Add at least one muscle relationship.")

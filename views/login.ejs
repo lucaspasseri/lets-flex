@@ -22,6 +22,7 @@
 				<p class="auth-eyebrow">Your account</p>
 				<h2 id="sign-in-heading">Continue to Let's Flex</h2>
 			</header>
+			<% if (typeof statusMessage !== "undefined" && statusMessage) { %><div class="auth-status" role="status" aria-live="polite"><%= statusMessage %></div><% } %>
 
 			<a class="auth-google" href="<%= googleAuthUrl %>">
 				<span class="auth-google__mark" aria-hidden="true">G</span>
@@ -44,6 +45,7 @@
 					<%- include("partials/shared/components/form/field", { field: { id: "login-password", name: "password", label: "Password", control: "input", type: "password", required: true, hint: "Passwords are case-sensitive.", attributes: { autocomplete: "current-password" } } }) %>
 					<%- include("partials/shared/components/button/button", { button: { label: "Sign in to Let's Flex", type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
 				</form>
+				<p class="auth-form-link"><a href="/auth/password-reset/request">Forgot password?</a></p>
 			</section>
 
 			<section id="auth-signup-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signup-tab" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>" <%= activeTab === 'signup' ? '' : 'hidden' %>>

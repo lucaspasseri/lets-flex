@@ -1,0 +1,94 @@
+<%
+	const username = locals?.shell?.currentUser?.name ?? locals?.authUser?.name ?? "Guest";
+	const currentUser = locals?.shell?.currentUser ?? locals?.authUser ?? null;
+	const activeNavigation = locals?.shell?.activeNavigation ?? null;
+	const profileAccessibleLabel = currentUser
+		? `View profile for ${username}`
+		: "View profile";
+	const navigationItems = [
+		{ id: "dashboard", href: "/", label: "Dashboard" },
+		{ id: "history", href: "/history", label: "History" },
+		{ id: "progress", href: "/progress", label: "Progress" },
+		{ id: "programs", href: "/programs", label: "Programs" },
+		{ id: "library", href: "/library", label: "Library" },
+		...(locals?.isAdmin ? [{ id: "admin-exercises", href: "/admin/library/exercises", label: "Manage exercises" }] : []),
+	];
+%>
+
+<div class="application-chrome" data-application-chrome>
+	<header class="page-header">
+		<a class="page-header__home" href="/" aria-label="Let's Flex home">
+			<%- include("logo"); %>
+		</a>
+		<button
+			type="button"
+			class="page-header__menu-toggle"
+			aria-label="Open navigation menu"
+			aria-expanded="false"
+			aria-controls="application-menu"
+			data-application-menu-toggle
+		>
+			<span class="page-header__menu-icon" aria-hidden="true">
+				<span></span>
+				<span></span>
+				<span></span>
+			</span>
+		</button>
+	</header>
+
+	<div
+		class="application-menu"
+		id="application-menu"
+		aria-hidden="true"
+		data-application-menu
+		inert
+	>
+		<nav class="primary-navigation" aria-label="Primary">
+			<ul class="primary-navigation__list">
+				<% navigationItems.forEach(item => { %>
+					<% const isActive = item.id === activeNavigation; %>
+					<li class="primary-navigation__item">
+						<a
+							class="primary-navigation__link"
+							href="<%= item.href %>"
+							<% if (isActive) { %>aria-current="page"<% } %>
+							data-application-navigation-link
+						>
+							<span><%= item.label %></span>
+							<span
+								class="primary-navigation__indicator<%= isActive ? " is-active" : "" %>"
+								aria-hidden="true"
+							></span>
+						</a>
+					</li>
+				<% }) %>
+			</ul>
+		</nav>
+
+		<footer class="application-chrome__footer">
+			<a
+				class="application-chrome__profile"
+				href="/profile"
+				aria-label="<%= profileAccessibleLabel %>"
+				title="<%= profileAccessibleLabel %>"
+				<% if (activeNavigation === "profile") { %>aria-current="page"<% } %>
+				data-application-navigation-link
+			>
+				<span class="application-chrome__avatar" aria-hidden="true">
+					<%- include("../shared/components/icons/guestUser", {icon: {
+						attributes: {
+								"stroke-width": 3,
+								"aria-hidden": "true",
+								focusable: "false"
+							}
+						}})
+					%>
+				</span>
+				<span class="application-chrome__identity">
+					<span class="application-chrome__username"><%= username %></span>
+					<% if (currentUser?.role === "guest") { %><span class="application-chrome__status">Temporary workspace</span><% } %>
+				</span>
+			</a>
+		</footer>
+	</div>
+</div>

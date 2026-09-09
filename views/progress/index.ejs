@@ -1,0 +1,180 @@
+<main class="main exercise-progress" data-exercise-progress-page>
+	<%- include("../partials/shared/components/pageHeading", { heading }) %>
+
+	<section class="exercise-progress-filters" aria-labelledby="progress-program-heading">
+		<header class="exercise-progress-section-heading">
+			<div>
+				<p class="exercise-progress-eyebrow">Data scope</p>
+				<h2 id="progress-program-heading">Choose progress data</h2>
+			</div>
+			<p>Selections stay in the URL so this exact view can be revisited.</p>
+		</header>
+		<form class="exercise-progress-program-form" method="GET" action="<%= programFilter.action %>">
+			<%- include("../partials/shared/components/form/field", { field: {
+				id: "progress-program", name: "programId", label: "Program", control: "select",
+				value: programFilter.value ?? "", defaultOption: { label: "Choose a program", value: "" },
+				options: programFilter.options, hint: "Loading another program resets the exercise and date selection."
+			} }) %>
+			<%- include("../partials/shared/components/button/button", { button: {
+				label: "Load exercises", type: "submit", variant: "primary"
+			} }) %>
+		</form>
+
+		<% if (analysisFilter.isVisible) { %>
+			<form class="exercise-progress-analysis-form" method="GET" action="<%= analysisFilter.action %>">
+				<input type="hidden" name="programId" value="<%= analysisFilter.programId %>" />
+				<div class="exercise-progress-analysis-fields">
+					<%- include("../partials/shared/components/form/field", { field: {
+						id: "progress-exercise", name: "exerciseKey", label: "Exercise", control: "select",
+						value: analysisFilter.exerciseKey ?? "", required: true,
+						defaultOption: { label: "Choose an exercise", value: "" },
+						options: analysisFilter.exerciseOptions,
+						hint: "Snapshot labels keep past exercises separate when a template is renamed."
+					} }) %>
+					<%- include("../partials/shared/components/form/field", { field: {
+						id: "progress-from-date", name: "fromDate", label: "From date", type: "date",
+						value: analysisFilter.fromDate ?? "", hint: "Include workouts completed on this UTC date."
+					} }) %>
+					<%- include("../partials/shared/components/form/field", { field: {
+						id: "progress-to-date", name: "toDate", label: "To date", type: "date",
+						value: analysisFilter.toDate ?? "", hint: "Include workouts completed on this UTC date."
+					} }) %>
+					<%- include("../partials/shared/components/form/field", { field: {
+						id: "progress-point-limit", name: "pointLimit", label: "Results shown", control: "select",
+						value: analysisFilter.pointLimit, required: true,
+						defaultOption: { label: "Choose a result limit", value: "" },
+						options: analysisFilter.pointLimitOptions,
+						hint: "The summary still covers every matching workout."
+					} }) %>
+				</div>
+				<div class="exercise-progress-filter-actions">
+					<%- include("../partials/shared/components/button/button", { button: {
+						label: "Show progress", type: "submit", variant: "primary"
+					} }) %>
+					<% if (analysisFilter.hasDateFilters && analysisFilter.clearDatesHref) { %>
+						<a class="exercise-progress-text-action" href="<%= analysisFilter.clearDatesHref %>">Clear dates</a>
+					<% } %>
+				</div>
+			</form>
+		<% } %>
+	</section>
+
+	<% if (state) { %>
+		<section class="exercise-progress-empty" data-progress-state="<%= state.kind %>" aria-labelledby="progress-state-heading">
+			<span class="exercise-progress-state-mark" aria-hidden="true">↗</span>
+			<div>
+				<h2 id="progress-state-heading"><%= state.title %></h2>
+				<p><%= state.message %></p>
+				<% if (state.action) { %><a class="exercise-progress-primary-action" href="<%= state.action.href %>"><%= state.action.label %></a><% } %>
+			</div>
+		</section>
+	<% } %>
+
+	<% if (results.isVisible) { %>
+		<section class="exercise-progress-results" aria-labelledby="progress-results-heading">
+			<header class="exercise-progress-results-header">
+				<p class="exercise-progress-eyebrow">Recorded performance</p>
+				<h2 id="progress-results-heading"><%= results.selection.title %></h2>
+				<p class="exercise-progress-context"><%= results.selection.availableContext %></p>
+			</header>
+
+			<dl class="exercise-progress-summary" aria-label="Exercise progress summary">
+				<% results.metrics.forEach((metric, index) => { %>
+					<div class="exercise-progress-summary-card<%= index === 0 ? ' exercise-progress-summary-card--primary' : '' %>">
+						<dt><%= metric.label %></dt><dd><%= metric.value %></dd>
+					</div>
+				<% }) %>
+			</dl>
+
+			<div class="exercise-progress-insights">
+				<section class="exercise-progress-panel" aria-labelledby="progress-coverage-heading">
+					<header class="exercise-progress-panel-heading">
+						<p class="exercise-progress-eyebrow">Completeness</p>
+						<h3 id="progress-coverage-heading">Data coverage</h3>
+					</header>
+					<ul class="exercise-progress-coverage-list">
+						<% results.coverage.forEach((item, index) => { %>
+							<li><span aria-hidden="true"><%= index + 1 %></span><%= item %></li>
+						<% }) %>
+					</ul>
+				</section>
+
+				<section class="exercise-progress-panel" aria-labelledby="progress-units-heading">
+					<header class="exercise-progress-panel-heading">
+						<p class="exercise-progress-eyebrow">Exact measurements</p>
+						<h3 id="progress-units-heading">Load and volume by unit</h3>
+					</header>
+					<% if (results.units.length) { %>
+						<dl class="exercise-progress-units">
+							<% results.units.forEach((unit, index) => { %>
+								<div class="exercise-progress-unit-card">
+									<dt><span aria-hidden="true"><%= index + 1 %></span><%= unit.unit %></dt>
+									<dd><span>Maximum observed load</span><strong><%= unit.maximumLoad %></strong><small><%= unit.loadContext %></small></dd>
+									<dd><span>Recorded volume</span><strong><%= unit.volume %></strong><small><%= unit.volumeContext %></small></dd>
+								</div>
+							<% }) %>
+						</dl>
+					<% } else { %>
+						<p class="exercise-progress-panel-empty">No valid load and unit observations are available in this range.</p>
+					<% } %>
+				</section>
+			</div>
+
+			<section class="exercise-progress-trend" aria-labelledby="progress-trend-heading">
+				<header class="exercise-progress-section-heading">
+					<div>
+						<p class="exercise-progress-eyebrow">Chronological record</p>
+						<h3 id="progress-trend-heading">Workout trend data</h3>
+					</div>
+					<p>Each row is one finished workout. Same-day workouts remain separate and ordered by completion time.</p>
+				</header>
+				<% if (results.truncationMessage) { %><p class="exercise-progress-notice"><%= results.truncationMessage %></p><% } %>
+				<div class="exercise-progress-table-scroll" role="region" aria-label="Exercise progress workout table" tabindex="0">
+					<table>
+						<caption>Recorded exercise results by finished workout</caption>
+						<thead>
+							<tr>
+								<th scope="col">Completion</th>
+								<th scope="col">Workout</th>
+								<th scope="col">Performed work</th>
+								<th scope="col">Load and volume</th>
+							</tr>
+						</thead>
+						<tbody>
+							<% results.occurrences.forEach(occurrence => { %>
+								<tr>
+									<td class="exercise-progress-table-date">
+										<time datetime="<%= occurrence.date.value %>"><%= occurrence.date.label %></time>
+										<span><%= occurrence.finishedAt %></span>
+									</td>
+									<td class="exercise-progress-table-workout"><a href="<%= occurrence.historyHref %>"><%= occurrence.sessionName %></a></td>
+									<td>
+										<%= occurrence.performedStepCount %> performed <%= occurrence.performedStepCount === 1 ? "step" : "steps" %>;
+										<%= occurrence.recordedSetCount %> <%= occurrence.recordedSetCount === 1 ? "set" : "sets" %>;
+										<%= occurrence.completedRepetitionCount %> completed <%= occurrence.completedRepetitionCount === 1 ? "repetition" : "repetitions" %>
+									</td>
+									<td>
+										<% if (occurrence.units.length) { %>
+											<ul>
+												<% occurrence.units.forEach(unit => { %>
+													<li>
+														<strong><%= unit.unit %></strong>:
+														maximum <%= unit.maximumLoad %>;
+														volume <%= unit.volume %>;
+														<%= unit.context %>
+													</li>
+												<% }) %>
+											</ul>
+										<% } else { %>
+											<%= occurrence.emptyUnitMessage %>
+										<% } %>
+									</td>
+								</tr>
+							<% }) %>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		</section>
+	<% } %>
+</main>

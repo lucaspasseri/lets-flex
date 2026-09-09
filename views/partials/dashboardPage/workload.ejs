@@ -1,0 +1,52 @@
+<section class="dashboard-metric analytics-panel analytics-workload" aria-labelledby="<%= workload.headingId %>">
+	<header class="analytics-panel__header">
+		<div>
+			<p class="dashboard-eyebrow"><%= workload.eyebrow %></p>
+			<h3 id="<%= workload.headingId %>"><%= workload.title %></h3>
+		</div>
+		<p><%= workload.description %></p>
+	</header>
+
+	<% if (workload.isEmpty) { %>
+		<div class="analytics-empty-state">
+			<span class="analytics-empty-state__mark" aria-hidden="true">＋</span>
+			<div>
+				<h4><%= workload.emptyState.title %></h4>
+				<p><%= workload.emptyState.message %></p>
+			</div>
+		</div>
+	<% } else { %>
+		<div class="analytics-workload__layout">
+			<div>
+				<dl class="analytics-workload__metrics">
+					<% workload.metrics.forEach(metric => { %>
+						<div>
+							<dt><%= metric.label %></dt>
+							<dd><%= metric.value %></dd>
+						</div>
+					<% }) %>
+				</dl>
+				<p class="analytics-workload__coverage"><%= workload.repetitionCoverage %></p>
+			</div>
+			<div class="analytics-volume" aria-label="Load volume by unit">
+				<div class="analytics-volume__heading">
+					<h4>Load volume</h4>
+					<p>Repetitions × load</p>
+				</div>
+				<% if (workload.volume.isEmpty) { %>
+					<p class="analytics-volume__empty"><%= workload.volume.emptyMessage %></p>
+				<% } else { %>
+					<dl class="analytics-volume__items">
+						<% workload.volume.items.forEach(item => { %>
+							<div>
+								<dt><%= item.unit %></dt>
+								<dd aria-label="<%= item.accessibleValue %>"><span><%= item.value %></span> <%= item.label %></dd>
+								<dd class="analytics-volume__context"><%= item.context %></dd>
+							</div>
+						<% }) %>
+					</dl>
+				<% } %>
+			</div>
+		</div>
+	<% } %>
+</section>

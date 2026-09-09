@@ -3,6 +3,7 @@ import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import cancelWorkoutSession from "../../features/workoutSessions/cancelWorkoutSession.js";
 import startWorkoutSession from "../../features/workoutSessions/startWorkoutSession.js";
 import { finishWorkoutSession } from "../../features/workoutSessions/finishWorkoutSession.js";
+import WorkoutSessionLifecycleError from "../../features/workoutSessions/WorkoutSessionLifecycleError.js";
 import { renderDay } from "./dayController.js";
 import { renderDashboard } from "./dashboardController.js";
 
@@ -14,13 +15,18 @@ async function create(req, res) {
 	res.redirect(`/programs/day?dayId=${trainingDayId}`);
 }
 
-async function cancel(req, res) {
-	const { workoutSessionId } = req.validatedParams;
-	const { trainingDayId } = req.validatedBody;
+async function cancel(req, res, next) {
+	try {
+		const { workoutSessionId } = req.validatedParams;
+		const { trainingDayId } = req.validatedBody;
 
-	await cancelWorkoutSession({ workoutSessionId, userId: req.user.id });
+		await cancelWorkoutSession({ workoutSessionId, userId: req.user.id });
 
-	res.redirect(`/programs/day?dayId=${trainingDayId}`);
+		res.redirect(`/programs/day?dayId=${trainingDayId}`);
+	} catch (error) {
+		if (await respondToLifecycleConflict(req, res, error)) return;
+		next(error);
+	}
 }
 
 async function showCreateErrors(req, res, { errors, submittedValues }) {
@@ -38,31 +44,68 @@ async function showCancelErrors(_req, res, { errors }) {
 	res.status(400).json({ error: messages[0] ?? "Invalid workout session." });
 }
 
-async function start(req, res) {
-	const { workoutSessionId } = req.validatedParams;
-	const { daysDifference } = req.validatedBody;
+async function start(req, res, next) {
+	try {
+		const { workoutSessionId } = req.validatedParams;
+		const { daysDifference } = req.validatedBody;
 
-	const { workoutSession } = await startWorkoutSession({
-		workoutSessionId,
-		userId: req.user.id,
-	});
+		const { workoutSession } = await startWorkoutSession({
+			workoutSessionId,
+			userId: req.user.id,
+		});
 
-	res.redirect(
-		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
-	);
+		res.redirect(
+			`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession.id}`,
+		);
+	} catch (error) {
+		if (await respondToLifecycleConflict(req, res, error)) return;
+		next(error);
+	}
 }
-async function finish(req, res) {
-	const { workoutSessionId } = req.validatedParams;
-	const { daysDifference } = req.validatedBody;
+async function finish(req, res, next) {
+	try {
+		const { workoutSessionId } = req.validatedParams;
+		const { daysDifference } = req.validatedBody;
 
-	const workoutSession = await finishWorkoutSession({
-		workoutSessionId,
-		userId: req.user.id,
+		const workoutSession = await finishWorkoutSession({
+			workoutSessionId,
+			userId: req.user.id,
+		});
+
+		res.redirect(
+			`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession.id}`,
+		);
+	} catch (error) {
+		if (await respondToLifecycleConflict(req, res, error)) return;
+		next(error);
+	}
+}
+
+async function respondToLifecycleConflict(req, res, error) {
+	if (!(error instanceof WorkoutSessionLifecycleError)) return false;
+
+	const message =
+		error.reason === "active_session"
+			? "Another workout session is already active for this training day."
+			: error.reason === "unresolved_steps"
+				? "Complete or skip every workout step before finishing this session."
+				: `This workout session can no longer be ${error.action === "cancel" ? "cancelled" : `${error.action}ed`}.`;
+	if (error.action === "cancel") {
+		res.status(409).send(message);
+		return true;
+	}
+
+	res.status(409);
+	await renderDashboard(req, res, {
+		daysDifference: req.validatedBody?.daysDifference,
+		workoutSessionId: req.validatedParams?.workoutSessionId,
+		workoutFeedback: {
+			tone: "error",
+			title: "Workout not updated",
+			message,
+		},
 	});
-
-	res.redirect(
-		`/?daysDifference=${daysDifference}&workoutSessionId=${workoutSession?.id}`,
-	);
+	return true;
 }
 
 async function showActionErrors(req, res, { errors, submittedValues }) {

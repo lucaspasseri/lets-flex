@@ -27,6 +27,12 @@ const program = {
 	startDate: "2026-08-18",
 };
 
+const goals = [
+	{ id: 1, name: "hypertrophy" },
+	{ id: 2, name: "weight_loss" },
+	{ id: 3, name: "general_fitness" },
+];
+
 const cycle = {
 	id: 20,
 	programId: 10,
@@ -70,7 +76,7 @@ test("Programs page creates presentation-ready component contracts", () => {
 				},
 			],
 			workoutSessions: [workoutSession],
-			goals: [{ id: 2, name: "Build strength" }],
+			goals,
 		},
 	});
 
@@ -95,8 +101,14 @@ test("Programs page creates presentation-ready component contracts", () => {
 		"Finished",
 	);
 	assert.deepEqual(result.components.createProgramForm.fields[1].options, [
-		{ label: "Build strength", value: 2 },
+		{ label: "Hypertrophy", value: 1 },
+		{ label: "Weight Loss", value: 2 },
+		{ label: "General Fitness", value: 3 },
 	]);
+	assert.equal(
+		result.components.programSwitcher.items[0].metaLabel,
+		"Weight Loss • Starts 18/08",
+	);
 	assert.deepEqual(result.components.createCycleForm.fields[2].options, [
 		{ label: "Position 1", value: 1 },
 		{ label: "Position 2", value: 2 },
@@ -133,7 +145,7 @@ test("Programs page preserves invalid values and exposes field and form errors",
 			cycles: { current: cycle, items: [cycle] },
 			trainingDays: [],
 			workoutSessions: [],
-			goals: [{ id: 2, name: "Build strength" }],
+			goals,
 		},
 		programFormState: {
 			open: true,
@@ -177,6 +189,10 @@ test("Programs page preserves invalid values and exposes field and form errors",
 	assert.ok(html.includes('value="  attempted name  "'));
 	assert.match(html, /aria-invalid="true"/);
 	assert.match(html, /Review the program details\./);
+	assert.match(
+		html,
+		/<option\s+value="2"[\s\S]*?selected[\s\S]*?>\s*Weight Loss\s*<\/option>/,
+	);
 });
 
 test("Programs template renders populated and no-profile component states", async () => {
@@ -201,7 +217,7 @@ test("Programs template renders populated and no-profile component states", asyn
 				},
 			],
 			workoutSessions: [{ ...workoutSession, status: "cancelled" }],
-			goals: [{ id: 2, name: "Build strength" }],
+			goals,
 		},
 	});
 	const noProfile = createProgramsPageViewModel({
@@ -233,6 +249,11 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.match(populatedHtml, /session-status-marker--cancelled/);
 	assert.match(populatedHtml, /Workout session: Cancelled/);
 	assert.match(populatedHtml, /id="create-program-form"/);
+	assert.match(populatedHtml, />\s*Hypertrophy\s*<\/option>/);
+	assert.match(populatedHtml, />\s*Weight Loss\s*<\/option>/);
+	assert.match(populatedHtml, />\s*General Fitness\s*<\/option>/);
+	assert.match(populatedHtml, /Weight Loss • Starts 18\/08/);
+	assert.doesNotMatch(populatedHtml, /weight_loss|general_fitness/);
 	assert.match(populatedHtml, /id="create-cycle-form"/);
 	assert.match(populatedHtml, /id="delete-program-form"/);
 	assert.match(populatedHtml, /Delete program Strength/);

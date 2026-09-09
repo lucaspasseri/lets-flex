@@ -5,12 +5,13 @@
 		value = "",
 		required = false,
 		disabled = false,
+		hint = null,
 		error = null,
 		attributes = {}
 	} = locals?.control ?? {};
 
 	const describedBy = [
-		`${id}-hint`,
+		hint ? `${id}-hint` : null,
 		error ? `${id}-error` : null
 	]
 		.filter(Boolean)
@@ -52,7 +53,9 @@
 		aria-invalid="true"
 	<% } %>
 
-	aria-describedby="<%= describedBy %>"
+	<% if (describedBy) { %>
+		aria-describedby="<%= describedBy %>"
+	<% } %>
 
 	<% additionalAttributes.forEach(([attributeName, attributeValue]) => { %>
 		<% if (attributeValue === true) { %>

@@ -1,31 +1,55 @@
 <% 
-	const {id=null, heading="", renderPanel=null, collapsed=true, renderHeaderContent = null} = locals.accordion;
-	const panelId = `accordion-panel-${id}`;
+	const {
+		id = null,
+		heading = "",
+		renderPanel = null,
+		collapsed = true,
+		renderHeaderContent = null,
+		className = "",
+		headerClassName = "",
+		panelClassName = "",
+		triggerId = `accordion-trigger-${id}`,
+		panelId = `accordion-panel-${id}`
+	} = locals.accordion;
 %>
 
-<div class="shared-accordion<%= collapsed ? " collapsed" : "" %>"  data-accordion>
+<div class="shared-accordion<%= className ? ` ${className}` : "" %><%= collapsed ? " collapsed" : "" %>" data-accordion>
 
-	<button class="header" type="button" aria-controls="<%= panelId %>" data-accordion-header>
-		<div class="header-base"> 
+	<button
+		class="header<%= headerClassName ? ` ${headerClassName}` : "" %>"
+		id="<%= triggerId %>"
+		type="button"
+		aria-controls="<%= panelId %>"
+		aria-expanded="<%= collapsed ? "false" : "true" %>"
+		data-accordion-header
+	>
+		<span class="header-base">
 			
 			<% if(heading) { %>
-				<h3><%= heading %></h3>
+				<span class="header-heading"><%= heading %></span>
 			<% } %>
 
 			<% if(renderHeaderContent) { %>
-				<div class="header-content">
+				<span class="header-content">
 					<%- renderHeaderContent() %>
-				</div>
+				</span>
 			<% } %>
 
-		</div>
+		</span>
 
-		<div class="icon">
+		<span class="icon" aria-hidden="true">
 			<%- include("../icons/namedIcon", { name: "chevron-down" }) %>
-		</div>
+		</span>
 	</button>
 
-	<div class="panel" id="<%= panelId%>" <%= collapsed ? "hidden" : "" %> data-accordion-panel>
+	<div
+		class="panel<%= panelClassName ? ` ${panelClassName}` : "" %>"
+		id="<%= panelId %>"
+		role="region"
+		aria-labelledby="<%= triggerId %>"
+		<%= collapsed ? "hidden" : "" %>
+		data-accordion-panel
+	>
 		<div class="panel-content">
 			<%- renderPanel && renderPanel() %>
 		</div>

@@ -32,11 +32,12 @@ function createExercise({
 
 	const muscleTemplates = createMuscles({ muscles });
 
-	const searchKeyWord = `${variant?.name ?? ""} ${movementPattern?.name ?? ""} ${equipment?.name ?? ""}`;
+	const searchKeyWord = `${exerciseTemplate.name} ${variant?.name ?? ""} ${movementPattern?.name ?? ""} ${equipment?.name ?? ""}`;
 
 	return {
 		id: variant?.id,
 		exerciseId: id,
+		baseName: exerciseTemplate.name,
 		name: variant?.name,
 		isPrivateOwner: variant?.ownerUserId === actorUserId,
 		searchKeyWord,

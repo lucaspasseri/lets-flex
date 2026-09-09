@@ -36,7 +36,7 @@ function createExerciseTemplates({
 			: "Global exercises are available to everyone; variants you create remain private to you.",
 
 		count: exerciseTemplateCount,
-		countLabel: `${exerciseTemplateCount} templates`,
+		countLabel: `${exerciseTemplateCount} ${exerciseTemplateCount === 1 ? "variant" : "variants"}`,
 
 		emptyState: {
 			title: "No exercise templates yet",

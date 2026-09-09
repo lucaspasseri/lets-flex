@@ -1,6 +1,8 @@
 export const schemaSql = `
 DROP TABLE IF EXISTS "session" CASCADE;
 DROP TABLE IF EXISTS guest_creation_limits CASCADE;
+DROP TABLE IF EXISTS password_reset_request_limits CASCADE;
+DROP TABLE IF EXISTS password_reset_tokens CASCADE;
 DROP TABLE IF EXISTS workout_set_logs CASCADE;
 DROP TABLE IF EXISTS workout_step_logs CASCADE;
 DROP TABLE IF EXISTS workout_sessions CASCADE;
@@ -63,6 +65,7 @@ CREATE TABLE auth_identities (
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	provider VARCHAR(50) NOT NULL,
 	provider_subject TEXT NOT NULL,
+	provider_email VARCHAR(254),
 	password_hash TEXT,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -76,18 +79,36 @@ CREATE TABLE auth_identities (
 	CONSTRAINT auth_identities_local_subject_normalized CHECK (
 		provider <> 'local' OR provider_subject = LOWER(provider_subject)
 	),
+	CONSTRAINT auth_identities_provider_email_normalized CHECK (
+		provider_email IS NULL OR provider_email = LOWER(BTRIM(provider_email))
+	),
 	CONSTRAINT auth_identities_credentials_by_provider CHECK (
-		(provider = 'local' AND password_hash IS NOT NULL)
+		(provider = 'local' AND password_hash IS NOT NULL AND provider_email IS NULL)
 		OR (provider <> 'local' AND password_hash IS NULL)
 	),
-	UNIQUE (provider, provider_subject)
+	UNIQUE (provider, provider_subject),
+	UNIQUE (user_id, provider)
 );
 
-CREATE UNIQUE INDEX auth_identities_one_local_per_user
-ON auth_identities (user_id)
-WHERE provider = 'local';
-
 CREATE INDEX auth_identities_user_idx ON auth_identities (user_id);
+
+CREATE TABLE password_reset_tokens (
+	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	auth_identity_id INTEGER NOT NULL REFERENCES auth_identities(id) ON DELETE CASCADE,
+	token_hash CHAR(64) NOT NULL UNIQUE,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	expires_at TIMESTAMPTZ NOT NULL,
+	consumed_at TIMESTAMPTZ,
+	CONSTRAINT password_reset_expiration_valid CHECK (expires_at > created_at)
+);
+
+CREATE UNIQUE INDEX password_reset_one_active_per_identity
+ON password_reset_tokens (auth_identity_id)
+WHERE consumed_at IS NULL;
+
+CREATE INDEX password_reset_token_lookup_idx
+ON password_reset_tokens (token_hash, expires_at)
+WHERE consumed_at IS NULL;
 
 CREATE TABLE goals (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -101,6 +122,8 @@ CREATE TABLE programs (
 	name VARCHAR,
 	start_date DATE DEFAULT CURRENT_DATE
 );
+
+CREATE INDEX programs_user_idx ON programs (user_id, id);
 
 CREATE TABLE cycles (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -230,6 +253,7 @@ CREATE TABLE workout_sessions (
 
 	status workout_session_status NOT NULL DEFAULT 'planned',
 
+	session_name VARCHAR,
 	notes TEXT,
 
 	UNIQUE (training_day_id, workout_session_order),
@@ -275,6 +299,9 @@ CREATE TABLE workout_step_logs (
 	exercise_variant_id INTEGER REFERENCES exercise_variants(id) ON DELETE SET NULL,
 
 	name VARCHAR,
+	step_type_name VARCHAR,
+	exercise_name VARCHAR,
+	exercise_variant_name VARCHAR,
 
 	-- Snapshot of the original plan
 	planned_sets INTEGER,
@@ -356,121 +383,13 @@ CREATE TABLE guest_creation_limits (
 CREATE INDEX guest_creation_limits_window_idx
 ON guest_creation_limits (window_started_at);
 
-INSERT INTO "step_types" ("name")
-VALUES
-  ('exercise'),
-  ('warm_up'),
-  ('cardio'),
-  ('stretching'),
-  ('mobility'),
-  ('cooldown');
+CREATE TABLE password_reset_request_limits (
+	key_hash VARCHAR(64) NOT NULL,
+	window_started_at TIMESTAMPTZ NOT NULL,
+	attempts INTEGER NOT NULL DEFAULT 1,
+	PRIMARY KEY (key_hash, window_started_at)
+);
 
-INSERT INTO "movement_patterns" ("name")
-VALUES
-  ('push'),
-  ('pull'),
-  ('squat'),
-  ('hinge'),
-  ('lunge'),
-  ('carry'),
-  ('rotation'),
-  ('gait');
-
-INSERT INTO "goals" ("name")
-VALUES
-  ('hypertrophy'),
-  ('strength'),
-  ('weight_loss'),
-  ('conditioning'),
-  ('mobility'),
-  ('rehabilitation'),
-  ('general_fitness');
-
-INSERT INTO muscles (common_name, scientific_name, body_region, reference_url) VALUES
-	('Chest', 'Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
-	('Upper Chest', 'Clavicular Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
-	('Lower Chest', 'Sternal Head of Pectoralis Major', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Pectoralis_major'),
-	('Upper Back', 'Trapezius', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Trapezius'),
-	('Lats', 'Latissimus Dorsi', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Latissimus_dorsi'),
-	('Mid Back', 'Rhomboids', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Rhomboid_muscles'),
-	('Lower Back', 'Erector Spinae', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Erector_spinae'),
-	('Front Delts', 'Anterior Deltoid', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
-	('Side Delts', 'Lateral Deltoid', 'Upper Body - Lateral', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
-	('Rear Delts', 'Posterior Deltoid', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Deltoid_muscle'),
-	('Biceps', 'Biceps Brachii', 'Upper Body - Anterior', 'https://en.wikipedia.org/wiki/Biceps'),
-	('Triceps', 'Triceps Brachii', 'Upper Body - Posterior', 'https://en.wikipedia.org/wiki/Triceps'),
-	('Forearms', 'Forearm Flexors and Extensors', 'Upper Body - Distal', 'https://en.wikipedia.org/wiki/Forearm'),
-	('Abs', 'Rectus Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Rectus_abdominis'),
-	('Obliques', 'External Obliques', 'Core - Lateral', 'https://en.wikipedia.org/wiki/Abdominal_oblique_muscles'),
-	('Deep Core', 'Transverse Abdominis', 'Core - Anterior', 'https://en.wikipedia.org/wiki/Transverse_abdominal_muscle'),
-	('Glutes', 'Gluteus Maximus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gluteus_maximus'),
-	('Glute Med', 'Gluteus Medius', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Gluteus_medius'),
-	('Quads', 'Quadriceps', 'Lower Body - Anterior', 'https://en.wikipedia.org/wiki/Quadriceps'),
-	('Hamstrings', 'Hamstrings', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Hamstring'),
-	('Adductors', 'Hip Adductors', 'Lower Body - Medial', 'https://en.wikipedia.org/wiki/Adductor_muscles_of_the_hip'),
-	('Abductors', 'Hip Abductors', 'Lower Body - Lateral', 'https://en.wikipedia.org/wiki/Hip_abductor'),
-	('Calves', 'Gastrocnemius', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Gastrocnemius'),
-	('Soleus', 'Soleus', 'Lower Body - Posterior', 'https://en.wikipedia.org/wiki/Soleus');
-
-INSERT INTO equipments (name, category) VALUES
-  ('Barbell', 'free_weight'),
-  ('Dumbbell', 'free_weight'),
-  ('Kettlebell', 'free_weight'),
-  ('Smith Machine', 'machine'),
-  ('Cable Machine', 'machine'),
-  ('Leg Press Machine', 'machine'),
-  ('Chest Press Machine', 'machine'),
-  ('Lat Pulldown Machine', 'machine'),
-  ('Pull-up Bar', 'bodyweight'),
-  ('Dip Bar', 'bodyweight'),
-  ('Resistance Band', 'accessory'),
-  ('Suspension Trainer (TRX)', 'accessory'),
-  ('Ab Wheel', 'accessory'),
-  ('Medicine Ball', 'accessory'),
-  ('Treadmill', 'cardio'),
-  ('Stationary Bike', 'cardio'),
-  ('Elliptical Trainer', 'cardio'),
-  ('Rowing Machine', 'cardio'),
-  ('Flat Bench', 'support'),
-  ('Incline Bench', 'support'),
-  ('Decline Bench', 'support'),
-  ('Squat Rack', 'support'),
-  ('Power Rack', 'support');
-
-INSERT INTO "muscle_roles" ("name", "description") VALUES
-  ('prime_mover', 'Primary muscle responsible for producing the movement (agonist)'),
-  ('synergist', 'Assists the prime mover in performing the movement'),
-  ('stabilizer', 'Stabilizes a joint or body segment during movement'),
-  ('antagonist', 'Opposes the action of the prime mover'),
-  ('fixator', 'Stabilizes the origin of the prime mover'),
-  ('dynamic_stabilizer', 'Provides stability while also contributing to movement'),
-  ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
-
-INSERT INTO exercises (name, movement_pattern_id)
-SELECT 'Push Up', id FROM movement_patterns WHERE name = 'push';
-
-INSERT INTO exercises (name, movement_pattern_id)
-SELECT 'Squat', id FROM movement_patterns WHERE name = 'squat';
-
-INSERT INTO exercise_variants (exercise_id, equipment_id, name, setup_description, environment, notes)
-SELECT e.id, NULL, 'Bodyweight Push Up', 'Hands beneath shoulders with a braced trunk.', 'gym_or_home', 'Global sample variant.'
-FROM exercises e WHERE e.name = 'Push Up';
-
-INSERT INTO exercise_variants (exercise_id, equipment_id, name, setup_description, environment, notes)
-SELECT e.id, eq.id, 'Barbell Back Squat', 'Barbell supported across the upper back.', 'gym', 'Global sample variant.'
-FROM exercises e
-JOIN equipments eq ON eq.name = 'Barbell'
-WHERE e.name = 'Squat';
-
-INSERT INTO sessions (name, notes)
-VALUES ('Sample Full Body Session', 'A read-only global session template.');
-
-INSERT INTO session_steps (
-	session_id, step_type_id, exercise_variant_id, name, sets, reps, step_order
-)
-SELECT s.id, st.id, ev.id, 'Push ups', 3, 10, 1
-FROM sessions s
-JOIN step_types st ON st.name = 'exercise'
-JOIN exercise_variants ev ON ev.name = 'Bodyweight Push Up'
-WHERE s.name = 'Sample Full Body Session';
+CREATE INDEX password_reset_request_limits_window_idx
+ON password_reset_request_limits (window_started_at);
 `;

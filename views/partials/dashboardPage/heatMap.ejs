@@ -1,11 +1,58 @@
 <% if (heatmap.isVisible) { %>
-	<section class="dashboard-metric dashboard-heatmap">
-		<div class="dashboard-section-heading"><div><p class="dashboard-eyebrow">Consistency</p><h2><%= heatmap.title %></h2></div></div>
-		<div class="dashboard-heatmap__scroll"><div class="dashboard-heatmap__content">
-			<div class="dashboard-heatmap__weekdays"><% heatmap.weekdays.forEach(day => { %><span><%= day %></span><% }) %></div>
-			<% heatmap.cycles.forEach(cycle => { %><div class="dashboard-heatmap__cycle"><h3><%= cycle.name %></h3><div class="dashboard-heatmap__grid">
-				<% cycle.days.forEach(day => { %><% day.emptyCells.forEach(() => { %><span aria-hidden="true"></span><% }) %><div class="dashboard-heatmap__cell <%= day.cellClass %>" title="<%= day.dateLabel %>"><span><%= day.dateLabel %></span></div><% }) %>
-			</div></div><% }) %>
-		</div></div>
+	<section class="dashboard-metric analytics-panel dashboard-heatmap" aria-labelledby="<%= heatmap.headingId %>" aria-describedby="<%= heatmap.descriptionId %>">
+		<header class="analytics-panel__header">
+			<div>
+				<p class="dashboard-eyebrow"><%= heatmap.eyebrow %></p>
+				<h3 id="<%= heatmap.headingId %>"><%= heatmap.title %></h3>
+			</div>
+			<p id="<%= heatmap.descriptionId %>"><%= heatmap.description %></p>
+		</header>
+		<p class="analytics-panel__summary"><%= heatmap.summary %></p>
+
+		<% if (heatmap.isEmpty) { %>
+			<div class="analytics-empty-state">
+				<span class="analytics-empty-state__mark" aria-hidden="true">●</span>
+				<div>
+					<h4><%= heatmap.emptyState.title %></h4>
+					<p><%= heatmap.emptyState.message %></p>
+				</div>
+			</div>
+		<% } else { %>
+			<ul class="analytics-legend" aria-label="Activity intensity legend">
+				<% heatmap.legend.forEach(item => { %>
+					<li><span class="analytics-legend__marker analytics-legend__marker--<%= item.modifier %>" aria-hidden="true"><%= item.marker %></span><%= item.label %></li>
+				<% }) %>
+			</ul>
+			<div class="dashboard-heatmap__scroll">
+				<div class="dashboard-heatmap__content" role="img" aria-label="<%= heatmap.summary %> Open the activity data table for exact dates and counts.">
+					<div class="dashboard-heatmap__weekdays" aria-hidden="true"><% heatmap.weekdays.forEach(day => { %><span><%= day %></span><% }) %></div>
+					<% heatmap.cycles.forEach(cycle => { %>
+						<div class="dashboard-heatmap__cycle" aria-hidden="true">
+							<div class="dashboard-heatmap__cycle-heading"><h4><%= cycle.name %></h4><span><%= cycle.finishedCount %> finished</span></div>
+							<div class="dashboard-heatmap__grid">
+								<% cycle.days.forEach(day => { %>
+									<% day.emptyCells.forEach(() => { %><span class="dashboard-heatmap__spacer"></span><% }) %>
+									<div class="dashboard-heatmap__cell <%= day.cellClass %>" title="<%= day.accessibleLabel %>">
+										<time datetime="<%= day.dateKey %>"><span><%= day.dayLabel %></span><strong><%= day.marker %></strong></time>
+									</div>
+								<% }) %>
+							</div>
+						</div>
+					<% }) %>
+				</div>
+			</div>
+			<details class="analytics-data-disclosure">
+				<summary>View activity data</summary>
+				<div class="analytics-table-scroll">
+					<table>
+						<caption>Dates with finished workouts. Every other date in the program calendar has no finished workouts.</caption>
+						<thead><tr><th scope="col">Date</th><th scope="col">Cycle</th><th scope="col">Finished</th></tr></thead>
+						<tbody>
+							<% heatmap.activityRows.forEach(row => { %><tr><th scope="row"><time datetime="<%= row.dateKey %>"><%= row.dateLabel %></time></th><td><%= row.cycleName %></td><td><%= row.finishedCount %></td></tr><% }) %>
+						</tbody>
+					</table>
+				</div>
+			</details>
+		<% } %>
 	</section>
 <% } %>

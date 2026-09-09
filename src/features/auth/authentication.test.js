@@ -7,8 +7,10 @@ import {
 	readRegistrationProfile,
 } from "./authenticateGoogleUser.js";
 import { hashPassword, verifyPassword } from "./passwordService.js";
+import { readPasswordResetConfiguration } from "./passwordResetService.js";
 import { readGoogleConfiguration } from "../../config/passport.js";
 import {
+	addPasswordSchema,
 	registrationSchema,
 	safeReturnTo,
 } from "../../interfaces/validation/authSchemas.js";
@@ -16,6 +18,31 @@ import {
 test("email normalization is stable", () => {
 	assert.equal(normalizeEmail("  Person@Example.COM "), "person@example.com");
 	assert.equal(normalizeEmail(null), "");
+});
+
+test("adding a password reuses password requirements and requires confirmation", () => {
+	assert.deepEqual(
+		addPasswordSchema.parse({
+			password: "a sufficiently long password",
+			confirmPassword: "a sufficiently long password",
+		}),
+		{
+			password: "a sufficiently long password",
+			confirmPassword: "a sufficiently long password",
+		},
+	);
+	assert.equal(
+		addPasswordSchema.safeParse({ password: "short", confirmPassword: "short" })
+			.success,
+		false,
+	);
+	assert.equal(
+		addPasswordSchema.safeParse({
+			password: "a sufficiently long password",
+			confirmPassword: "a different long password",
+		}).success,
+		false,
+	);
 });
 
 test("Argon2id hashes verify without exposing plaintext", async () => {
@@ -93,5 +120,35 @@ test("Google OAuth configuration is required and callback URLs must be absolute"
 				GOOGLE_CALLBACK_URL: "/auth/google/callback",
 			}),
 		/absolute HTTP\(S\) URL/,
+	);
+});
+
+test("password reset configuration requires a trusted HTTP(S) base URL and positive lifetime", () => {
+	assert.deepEqual(
+		readPasswordResetConfiguration({
+			APP_BASE_URL: "https://paxeri.dev",
+			PASSWORD_RESET_TTL_MS: "1800000",
+		}),
+		{ baseUrl: "https://paxeri.dev/", ttlMs: 1800000 },
+	);
+	assert.throws(() => readPasswordResetConfiguration({}), /APP_BASE_URL is required/);
+	assert.throws(
+		() => readPasswordResetConfiguration({ APP_BASE_URL: "ftp://paxeri.dev" }),
+		/trusted absolute HTTP\(S\) URL/,
+	);
+	assert.throws(
+		() =>
+			readPasswordResetConfiguration({
+				APP_BASE_URL: "https://user:password@paxeri.dev",
+			}),
+		/trusted absolute HTTP\(S\) URL/,
+	);
+	assert.throws(
+		() =>
+			readPasswordResetConfiguration({
+				APP_BASE_URL: "https://paxeri.dev",
+				PASSWORD_RESET_TTL_MS: "0",
+			}),
+		/must be positive/,
 	);
 });
