@@ -90,7 +90,7 @@ active reset token for that identity, and removes that user's PostgreSQL session
 in one transaction. Requests are limited to five per IP per 15-minute window.
 
 Password-reset email is sent through Resend. Production startup requires
-`RESEND_API_KEY`, `AUTH_EMAIL_FROM`, and `APP_BASE_URL=https://paxeri.dev`; missing or
+`RESEND_API_KEY`, `AUTH_EMAIL_FROM`, and `APP_BASE_URL=https://lets-flex.paxeri.dev`; missing or
 invalid configuration stops startup without printing secrets. Keep open and click
 tracking disabled for the sending domain in Resend. Password-reset messages do not set
 a reply-to address. Delivery failures retain the same non-enumerating public response,

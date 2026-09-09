@@ -43,8 +43,10 @@ export function createApp(options = {}) {
 	if (!emailService) {
 		if (process.env.NODE_ENV === "production") {
 			const { baseUrl } = readPasswordResetConfiguration();
-			if (new URL(baseUrl).origin !== "https://paxeri.dev") {
-				throw new Error("APP_BASE_URL must be https://paxeri.dev in production");
+			if (new URL(baseUrl).origin !== "https://lets-flex.paxeri.dev") {
+				throw new Error(
+					"APP_BASE_URL must be https://lets-flex.paxeri.dev in production",
+				);
 			}
 		}
 		emailService = createResendEmailService();
