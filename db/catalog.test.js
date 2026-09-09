@@ -171,4 +171,60 @@ integration("canonical database setup", { concurrency: false }, () => {
 			},
 		]);
 	});
+
+	test("fresh database contains the PostgreSQL session-store infrastructure", async () => {
+		const tables = (
+			await db.query(
+				`SELECT table_name
+				 FROM information_schema.tables
+				 WHERE table_schema = current_schema()
+				   AND table_name = ANY($1::text[])
+				 ORDER BY table_name`,
+				[["session", "sessions"]],
+			)
+		).rows;
+		assert.deepEqual(tables, [{ table_name: "session" }, { table_name: "sessions" }]);
+
+		const columns = (
+			await db.query(
+				`SELECT column_name, data_type, is_nullable
+				 FROM information_schema.columns
+				 WHERE table_schema = current_schema() AND table_name = 'session'
+				 ORDER BY ordinal_position`,
+			)
+		).rows;
+		assert.deepEqual(columns, [
+			{ column_name: "sid", data_type: "character varying", is_nullable: "NO" },
+			{ column_name: "sess", data_type: "json", is_nullable: "NO" },
+			{
+				column_name: "expire",
+				data_type: "timestamp without time zone",
+				is_nullable: "NO",
+			},
+		]);
+
+		const primaryKey = (
+			await db.query(
+				`SELECT constraint_name
+				 FROM information_schema.table_constraints
+				 WHERE table_schema = current_schema()
+				   AND table_name = 'session'
+				   AND constraint_type = 'PRIMARY KEY'`,
+			)
+		).rows;
+		assert.deepEqual(primaryKey, [{ constraint_name: "session_pkey" }]);
+
+		const indexes = (
+			await db.query(
+				`SELECT indexname
+				 FROM pg_indexes
+				 WHERE schemaname = current_schema() AND tablename = 'session'
+				 ORDER BY indexname`,
+			)
+		).rows;
+		assert.deepEqual(indexes, [
+			{ indexname: "IDX_session_expire" },
+			{ indexname: "session_pkey" },
+		]);
+	});
 });

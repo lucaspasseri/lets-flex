@@ -635,6 +635,27 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		);
 	}
 
+	test("PostgreSQL session store persists and reloads Express sessions", async () => {
+		const client = agent();
+		const firstPage = await client.request("/auth/login");
+		assert.equal(firstPage.response.status, 200);
+		assert.notEqual(client.cookie(), "");
+
+		const csrfToken = csrfFrom(firstPage.text);
+		const storedSessions = (await db.query(`SELECT sess FROM "session" ORDER BY "sid"`))
+			.rows;
+		assert.equal(storedSessions.length, 1);
+		assert.equal(storedSessions[0].sess.csrfToken, csrfToken);
+
+		const secondPage = await client.request("/auth/login");
+		assert.equal(secondPage.response.status, 200);
+		assert.equal(csrfFrom(secondPage.text), csrfToken);
+		assert.equal(
+			(await db.query("SELECT count(*)::int AS count FROM sessions")).rows[0].count,
+			1,
+		);
+	});
+
 	test("authentication is the entry point and CSRF protects mutations", async () => {
 		const client = agent();
 		let result = await client.request("/");

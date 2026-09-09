@@ -366,12 +366,14 @@ CREATE TABLE exercise_muscles (
 );
 
 CREATE TABLE "session" (
-	"sid" VARCHAR NOT NULL PRIMARY KEY,
-	"sess" JSON NOT NULL,
-	"expire" TIMESTAMP(6) NOT NULL
+	"sid" varchar NOT NULL COLLATE "default",
+	"sess" json NOT NULL,
+	"expire" timestamp(6) NOT NULL,
+	CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
 );
 
-CREATE INDEX session_expire_idx ON "session" ("expire");
+CREATE INDEX "IDX_session_expire"
+ON "session" ("expire");
 
 CREATE TABLE guest_creation_limits (
 	key_hash VARCHAR(64) NOT NULL,
