@@ -2170,6 +2170,13 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		);
 		assert.doesNotMatch(page.text, /data-create-session-form/);
 		assert.doesNotMatch(page.text, /Create your variant/);
+		assert.doesNotMatch(page.text, /aria-label="Library content"/);
+		assert.match(page.text, /id="exercise-discovery-query"/);
+		assert.match(page.text, /data-library-filter="equipment"/);
+		assert.match(page.text, /No exercises match these filters/);
+		assert.match(page.text, /18 exercises · 36 variants/);
+		assert.equal((page.text.match(/data-search-exercise-item/g) ?? []).length, 18);
+		assert.equal((page.text.match(/data-exercise-variant-id=/g) ?? []).length, 36);
 		const adminProfile = await admin.request("/profile");
 		assert.match(adminProfile.text, /Manage exercise catalog/);
 		const created = await admin.request("/admin/library/exercises", {
@@ -2264,6 +2271,14 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		const library = await client.request("/library");
 
 		assert.equal(library.response.status, 200);
+		assert.match(library.text, /role="tablist" aria-label="Library content"/);
+		assert.match(library.text, /id="library-sessions-tab"[\s\S]*aria-selected="true"/);
+		assert.match(library.text, /id="session-discovery-query"/);
+		assert.match(library.text, /id="exercise-discovery-query"/);
+		assert.equal((library.text.match(/data-library-query/g) ?? []).length, 2);
+		assert.match(library.text, /18 exercises · 36 variants/);
+		assert.equal((library.text.match(/data-search-exercise-item/g) ?? []).length, 18);
+		assert.equal((library.text.match(/data-exercise-variant-id=/g) ?? []).length, 36);
 		assert.match(library.text, /Cable Wood Chop/);
 		assert.match(library.text, /Bodyweight Glute Bridge/);
 		assert.match(library.text, /Single-Leg Press/);
@@ -2342,6 +2357,16 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.notEqual(variants.rows[0].owner_user_id, variants.rows[1].owner_user_id);
 
 		let library = await first.request("/library");
+		assert.match(library.text, /18 exercises · 37 variants/);
+		assert.match(library.text, /Tempo Squat[\s\S]*Private/);
+		assert.equal(
+			(
+				library.text.match(
+					new RegExp(`id="exercise-template-${exercise.id}-trigger"`, "g"),
+				) ?? []
+			).length,
+			1,
+		);
 		let result = await first.request(`/exercises/${exercise.id}/variants`, {
 			method: "POST",
 			form: { _csrf: csrfFrom(library.text), name: "tempo squat", equipmentId: "1" },

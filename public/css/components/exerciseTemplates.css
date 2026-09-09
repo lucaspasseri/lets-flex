@@ -75,6 +75,11 @@
 	min-width: 0;
 }
 
+.exercise-templates__list > li[hidden],
+.exercise-variant[hidden] {
+	display: none;
+}
+
 /* ======================================================
    Accordion container
    ====================================================== */
@@ -130,8 +135,7 @@
 	min-width: 0;
 }
 
-.exercise-template__identity,
-.exercise-template__variant-name {
+.exercise-template__identity {
 	display: flex;
 	align-items: center;
 	flex-wrap: wrap;
@@ -154,10 +158,14 @@
 	overflow-wrap: anywhere;
 }
 
-.exercise-template__variant-name {
-	color: var(--color-text);
-	font-size: 0.86rem;
-	font-weight: 650;
+.exercise-template__variant-count {
+	padding: 0.22rem 0.5rem;
+	border: 1px solid var(--color-border);
+	border-radius: 999px;
+	background: var(--color-page);
+	color: var(--color-text-muted);
+	font-size: 0.68rem;
+	font-weight: 700;
 }
 
 .exercise-template__scope {
@@ -290,6 +298,24 @@
 	font-size: 0.95rem;
 }
 
+.exercise-template__variants-header p {
+	margin: 0 0 0.2rem;
+}
+
+.exercise-template__variants-header > span {
+	color: var(--color-text-muted);
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+
+.exercise-variants {
+	display: grid;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
 .exercise-variant {
 	position: relative;
 	display: grid;
@@ -310,14 +336,22 @@
 	content: "";
 }
 
-.exercise-variant > strong {
+.exercise-variant__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.exercise-variant__header > strong {
 	color: var(--color-text);
 	font-size: 0.95rem;
 }
 
 .exercise-variant__facts {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 1rem;
 	margin: 0;
 }
@@ -349,7 +383,8 @@
    Actions
    ====================================================== */
 
-.exercise-template__actions {
+.exercise-template__actions,
+.exercise-variant__actions {
 	display: flex;
 	align-items: flex-end;
 	justify-content: flex-end;
@@ -357,6 +392,10 @@
 	gap: 0.65rem;
 	padding-top: 1rem;
 	border-top: 1px solid var(--color-border);
+}
+
+.exercise-variant__actions {
+	padding-top: 0.85rem;
 }
 
 .exercise-template__private-actions {
@@ -442,12 +481,14 @@
 		grid-template-columns: 1fr;
 	}
 
-	.exercise-template__actions {
+	.exercise-template__actions,
+	.exercise-variant__actions {
 		align-items: stretch;
 		flex-direction: column;
 	}
 
-	.exercise-template__actions .shared-button {
+	.exercise-template__actions .shared-button,
+	.exercise-variant__actions .shared-button {
 		justify-content: center;
 		width: 100%;
 	}

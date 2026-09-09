@@ -2,10 +2,10 @@
 
 ## Current goal
 
-Restore canonical starter-workout seed consistency so the authoritative setup path, guest starter
-experience, and verification suite agree on the established four-step global session.
+Redesign Library discovery around clearly separated sessions and base exercises, progressively
+disclosed variants, and relevant client-side filtering built from existing catalog metadata.
 
-**Goal status:** Completed on 2026-09-09. Action 1 is Completed.
+**Goal status:** Completed on 2026-09-09. Actions 1 and 2 are Completed.
 
 ## Status definitions
 
@@ -17,157 +17,318 @@ experience, and verification suite agree on the established four-step global ses
 - **Completed:** verification evidence was reviewed and the action was explicitly approved.
 
 Only one action may be Active. Approving this plan activates Action 1 and stops at that planning
-gate; it does not authorize implementation in the same response. Every implemented action stops
-at Ready for review.
+gate; it does not authorize implementation in the same response. Every implemented action stops at
+Ready for review.
 
 ## Verified evidence baseline
 
-- `starterWorkoutManifest.js` is a frozen four-step full-body definition: Box Squat, Push Up,
-  One-Arm Dumbbell Row, and Glute Bridge, in that order.
-- `createStarterWorkoutSeedSql.js` validates four or five unique catalog-backed steps and already
-  produces the complete global session and ordered-step SQL.
-- `createGuest.js` uses the manifest’s session name to assign that global template to each new
-  guest’s starter day.
-- `db/catalog.test.js`, `db/seed.test.js`, the generator unit tests, and the guest HTTP tests all
-  require the generated four-step contract.
-- `db/seed.js` instead contains a handwritten one-step Push Up session block and does not import
-  `starterWorkoutSeedSql`.
-- Git history verifies that `9c827bf` introduced manifest composition and the complete guest flow.
-  The later `691d96a` seed-printing commit replaced it with the old one-step block while adding a
-  test asserting that generated seed SQL includes `starterWorkoutSeedSql`.
-- `npm run verify` currently passes static checks and 185/187 tests. The two failures are exactly
-  the fresh-database starter contents and complete generated-seed SQL assertions.
-- The complete PostgreSQL HTTP suite currently passes 56/58. Its two failures are the guest
-  four-exercise display and lifecycle expectations caused by the same seed mismatch.
-- Reset production refusal, explicit opt-in, runtime, and safe-target tests already pass.
-- The working tree contains the completed Programs/training-day goal and a pre-existing
-  user-owned `package-lock.json` update. Both must be preserved without unrelated edits.
+- `getLibraryPageData` concurrently loads every visible session with all nested steps and every
+  visible exercise variant, plus equipment, movement, muscle, role, and step-type reference data.
+- `findVisibleForUser` scopes sessions to active global templates or the current owner;
+  `findAllForUser` scopes exercises to active bases and active global/current-owner variants.
+- The exercise query returns one row per variant, ordered by base and variant name. The ViewModel
+  maps each row to its own accordion, so the same base metadata and muscle set are repeated.
+- The canonical manifest contains 18 base exercises and 36 global variants. Private variants can
+  add more repeated rows for a member or guest.
+- The single `librarySearch` input hides both `[data-search-session-item]` and
+  `[data-search-exercise-item]` elements on each keystroke and rewrites their two counts. There are
+  no facets, clear action, filtered-empty state, URL filter state, or section-specific controls.
+- Session search indexes only session name, movement patterns, and muscles even though loaded steps
+  include base exercise, variant, equipment, and session notes. Exercise search indexes base name,
+  variant name, movement pattern, and equipment but omits loaded muscles, environment, setup/notes,
+  and scope.
+- Session and exercise presentation already have accessible, responsive shared-component styling.
+  The recently completed Library visual goal repaired accordion IDs, focus, expanded/hidden state,
+  reduced motion, semantic tokens, and long-content/mobile behavior; that work is reused.
+- Session form options require the full visible variant list and persist distinct variant IDs. The
+  administrator and personal variant forms also derive choices/actions from the same full data.
+- No repository evidence establishes a near-term target above the current catalog or demonstrates
+  current query, payload, DOM, or filtering latency. Server-side filtering is therefore not a
+  verified requirement for this action plan.
 
 ## Confirmed decisions
 
-- Treat the existing four-step `starterWorkoutManifest` and generator as authoritative. This is a
-  verified regression repair, not a choice between equally supported seed definitions.
-- Restore composition rather than copying four handwritten step statements into `db/seed.js`.
-- Reuse existing tests unless a genuinely uncovered correctness issue appears.
-- Do not change schema, migrations, catalog content, manifest exercises, guest lifecycle,
-  dependencies, UI, or unrelated completed work.
-- Do not reset a development database unless the repository opt-in is present and its exact target
-  is confirmed safe and intended. Use the disposable PostgreSQL test database for integration
-  verification.
+- Treat sessions and exercises as separate discovery intents with independent controls and result
+  state, not one mixed search result set.
+- Present one item per base exercise by grouping the existing variant-shaped mapper results at the
+  Library ViewModel boundary; do not change the repository query or the flat data used by forms.
+- Keep all variants collapsed by default and expose them through the base exercise’s existing
+  accessible disclosure pattern. A filter may narrow which variants count as matches, but it must
+  not flatten them back into default top-level rows.
+- Use existing movement pattern, muscle, equipment, environment, ownership, name, notes, and setup
+  metadata. Do not add schema or seed fields for this redesign.
+- Retain client-side filtering for the verified current scale. Reconsider server search/pagination
+  only with measured performance or an approved scale requirement that justifies the wider
+  route/query/form-data architecture.
+- Preserve personal/admin scope, variant IDs, selected-session URLs, contextual session creation,
+  all create/edit/archive behavior, and the completed shared accordion/accessibility work.
 
 ## Proposed action sequence
 
-### Action 1 — Restore canonical starter seed composition and verify the setup path
+### Action 1 — Group Library exercises by base exercise and disclose variants progressively
 
 **Status:** Completed
 
-**Prepared:** 2026-09-09. The user approved the goal outcome, not implementation. Repository and
-history inspection narrowed the required delta to one seed composition repair.
-
 **Approved:** 2026-09-09. The user approved the proposed action scope. Per the approval gate, no
-implementation or database reset was performed in the approval response.
+implementation was performed in the approval response.
 
 **Started:** 2026-09-09.
 
-**Ready for review:** 2026-09-09. The canonical composition repair, opted-in local development
-reset, fresh-database verification, guest lifecycle coverage, complete HTTP suite, and complete
-repository suite all pass.
+**Ready for review:** 2026-09-09.
 
-**Completed:** 2026-09-09. The user approved the repair after reviewing the implementation and
-recorded evidence. Approval-gate verification again passed all 187/187 repository tests and the
-complete 58/58 PostgreSQL HTTP suite. No further implementation was started.
+**Completed:** 2026-09-09. The user approved the verified grouped base-exercise presentation,
+progressive variant disclosure, preserved form/action identities, responsive styling, and recorded
+test evidence.
 
-**Progress:** `db/seed.js` now imports and interpolates the existing validated
-`starterWorkoutSeedSql` immediately after `catalogSeedSql`. The divergent handwritten global
-session and single Push Up step were removed. No generator, manifest, schema, migration, catalog,
-guest lifecycle, dependency, UI, or test contract was changed.
-
-The configured development environment had `ALLOW_DATABASE_RESET=true`,
-`NODE_ENV=development`, and the exact local target `postgresql://localhost:5432/lets_flex`.
-`npm run db:reset` completed successfully, replacing the disposable development database with the
-current schema and canonical seed. Direct post-reset inspection found one active global starter
-session with the canonical notes and all four manifest steps in order. Previous local development
-contents were discarded by the authorized reset and are not recoverable through this repository
-unless an external backup exists.
-
-**Verification evidence:**
-
-- Seed-output, reset-safeguard, and starter generator/manifest tests passed 7/7.
-- Fresh disposable PostgreSQL setup tests passed 3/3, including complete catalog, ordered global
-  starter workout, and session-store infrastructure.
-- Targeted guest starter display and workout/History/Progress lifecycle tests passed 2/2.
-- The complete PostgreSQL HTTP suite passed 58/58.
-- `npm run verify` passed formatting, lint, server/browser type checks, and all 187/187 repository
-  tests. This resolves the only two failures recorded before the action.
-- `git diff --check` passed. Final seed diff inspection contains only the generator import,
-  interpolation, and removal of the duplicate handwritten block. All completed Programs/day work
-  and the pre-existing user-owned `package-lock.json` update remain untouched by this action.
-
-**Purpose:** Remove the sole divergent starter-session definition so fresh databases, printable
-seed SQL, guest behavior, and tests consume the same validated manifest.
+**Purpose:** Correct the exercise hierarchy at the ViewModel and rendered-component boundary before
+building filters whose result identity depends on that hierarchy.
 
 **Expected work:**
 
-- Import `starterWorkoutSeedSql` in `db/seed.js` and interpolate it after `catalogSeedSql`.
-- Remove the handwritten one-step `Sample Full Body Session` and Push Up insert block.
-- Confirm the printable `seedSql` is fully resolved and contains the canonical catalog and exact
-  manifest-generated starter SQL.
-- Run the generator/manifest and reset-safeguard tests, fresh PostgreSQL catalog tests, targeted
-  guest starter HTTP tests, the complete HTTP suite, and `npm run verify`.
-- Run a development database reset only if the explicit reset opt-in and exact intended local
-  target are both available; otherwise record that it was intentionally not run.
-- Inspect the final diff for accidental schema, migration, manifest, guest-lifecycle, dependency,
-  UI, or unrelated working-tree changes.
+- Add a grouped exercise projection that emits one base item per exercise ID with shared movement
+  and muscle metadata, an ordered visible-variant collection, separate exercise/variant totals, and
+  the filter metadata needed by the later discovery action.
+- Keep the underlying `data.exerciseTemplates` array flat for session-form options and create/update
+  form contracts; do not introduce a parallel repository or duplicate query.
+- Change Exercise Templates markup so the collapsed row describes the base exercise and its variant
+  count, while expansion reveals the global/private variants with their equipment, environment,
+  setup, notes, scope, and existing per-variant actions.
+- Move exercise-level administrator archive behavior to one unambiguous base-level action while
+  keeping global variant edit and private variant update/archive actions attached to the correct
+  variant IDs.
+- Update the section count and empty state to describe base exercises and variants accurately in
+  personal and administrator modes.
+- Adapt existing semantic styles for grouped variant cards, long content, action placement, focus,
+  hidden state, reduced motion, and the established narrow layout; do not redesign the overall
+  Library discovery shell yet.
+- Add focused ViewModel/rendered/browser/CSS tests for grouping, ordering, counts, disclosure IDs,
+  ownership scope/actions, empty state, and preservation of the flat form option source.
 
 **Acceptance criteria:**
 
-- `db/seed.js` has one canonical starter-workout source: `starterWorkoutSeedSql`.
-- Generated and executed seed SQL creates exactly one global active starter session with the four
-  manifest steps in the correct order and with the correct names, variants, sets, and reps.
-- Guest starter display, execution, History, and Progress expectations pass without changing
-  their established behavior.
-- Reset safety tests, all static checks, all repository tests, the complete PostgreSQL HTTP suite,
-  and `git diff --check` pass.
-- No schema, migration, catalog, manifest, lifecycle, dependency, UI, or unrelated changes are
-  introduced. The action stops at Ready for review.
+- The canonical global catalog renders 18 collapsed base-exercise rows and reports 36 variants;
+  each base is rendered once and every visible variant appears once inside its parent disclosure.
+- A member’s private variant joins only its base exercise and retains its private label, edit form,
+  archive form, CSRF field, and canonical variant ID. Foreign and archived variants remain absent.
+- Administrator mode exposes only global variants, one base-level archive action, and the existing
+  create/edit flows with their current route identities.
+- Session create/update options remain complete, variant-aware, and backed by the original flat
+  mapper data.
+- Focused checks, `npm run format:check`, `npm run lint`, server/browser type checks, relevant HTTP
+  tests, and `git diff --check` pass. The action stops at Ready for review.
 
 **Constraints:**
 
-- Do not create a migration or parallel seed representation.
-- Do not alter the four-step manifest merely to make a test pass.
-- Do not reset production or any unconfirmed database target.
-- Preserve completed Programs/training-day changes and the user-owned lockfile update.
+- Do not implement the new section switcher or filter controls in this action.
+- Do not change repository SQL, schema, seed/catalog contents, visibility rules, persistence,
+  dependencies, or shared accordion behavior unless direct evidence proves a grouped-card contract
+  cannot be correct without a narrowly scoped shared fix.
+- Preserve unrelated working-tree changes and stop at the review gate.
 
-## Goal final-review assessment
+**Implemented delta:**
 
-**Status:** Completed on 2026-09-09. The user approved the final outcome after reviewing the
-implementation, fully green verification evidence, scope integrity, and intentionally excluded
-work.
+- Grouped the existing flat exercise-template mapper rows at the Library ViewModel boundary, keyed
+  by base exercise ID, while leaving the original flat array intact for session create/update
+  options and all form contracts.
+- Rendered one collapsed accordion per base exercise with an accurate variant count and moved each
+  visible variant's identity, equipment, environment, setup, notes, scope, and actions into an
+  ordered nested list inside that disclosure.
+- Preserved per-variant global edit and private owner update/archive actions with their canonical
+  IDs and CSRF fields; administrator archive now appears once for the base exercise.
+- Added separate base-exercise and variant totals to the ViewModel and retained those totals when
+  the existing interim client-side search hides grouped items. The section switcher and expanded
+  filter redesign remain exclusively in Action 2.
+- Added grouped-list styling for hierarchy, readable nested facts/actions, long content, and the
+  existing responsive breakpoint without changing the shared accordion implementation.
 
-- **Single canonical source — satisfied:** `db/seed.js` imports and composes
-  `starterWorkoutSeedSql`; the separate handwritten starter session and step definition is gone.
-- **Resolved generated SQL — satisfied:** seed-output and generator tests confirm the printable
-  SQL includes the complete catalog and exact manifest-generated starter SQL, without unresolved
-  interpolation or source imports.
-- **Fresh database contents — satisfied:** disposable PostgreSQL setup tests and direct post-reset
-  inspection confirm one active global starter session with the four correctly named, configured,
-  and ordered manifest steps.
-- **Guest experience — satisfied:** targeted and complete HTTP coverage confirms four-exercise
-  display, workout execution, History, and Progress without lifecycle changes.
-- **Safety and repository verification — satisfied:** reset refusal/opt-in tests remain green;
-  formatting, lint, server/browser types, all 187 repository tests, all 58 HTTP tests, and
-  `git diff --check` pass.
-- **Scope integrity — satisfied:** the implementation diff is limited to `db/seed.js` composition.
-  No schema, migration, catalog, manifest, guest lifecycle, dependency, UI, completed prior-goal,
-  or user-owned lockfile change was introduced by this goal.
+**Discoveries:**
 
-**Unmet criteria:** None.
+- No query, schema, seed, dependency, or route change was needed: grouping is correct at the
+  presentation boundary and the flat mapper data remains available to forms.
+- The existing ownership calculation could classify a global variant as owner-private when both
+  the actor and owner IDs were null. The grouped projection now requires an authenticated actor
+  identity before exposing private-owner presentation or actions.
+- Bodyweight variants have no equipment record, so the grouped equipment summary now supplies the
+  existing user-facing `Bodyweight` concept instead of silently omitting those variants.
 
-**Intentionally excluded:** schema and migration work, catalog/manifest redesign, exercise
-changes, guest-lifecycle changes, new seed architecture, production or unconfirmed database
-operations, dependencies, UI work, and unrelated cleanup.
+**Verification evidence:**
+
+- `npm run verify` passed: formatting, lint, server types, browser types, and all 190 repository
+  tests passed with 0 failures, cancellations, or skips.
+- `npm run test:http` passed against the local disposable test database: all 58 HTTP integration
+  tests passed with 0 failures, cancellations, or skips. This includes canonical catalog counts,
+  regular-user global/private rendering, administrator scoping/actions, and CSRF-protected flows.
+- Focused grouped-ViewModel, rendered-EJS, browser-interaction, CSS-contract, and Library page tests
+  pass, including the canonical 18-base/36-variant projection and preservation of flat session-form
+  options.
+- Live personal and administrator Library review at 1440px and 390px confirmed one base row per
+  exercise, nested progressive disclosure, correct 18/36 global totals, private variants joining
+  their base for the owner, expected administrator action counts, and no horizontal overflow.
+- `git diff --check` passes. Final diff inspection found no repository SQL, schema, seed,
+  dependency, shared-accordion, deployment, push, or production-data changes.
+
+### Action 2 — Build independent Session and Exercise discovery/filter experiences
+
+**Status:** Completed
+
+**Approved and started:** 2026-09-09. The user explicitly approved the prepared next action for
+implementation.
+
+**Ready for review:** 2026-09-09.
+
+**Completed:** 2026-09-09. The user approved the independent Session and Exercise discovery
+experience, grouped variant-aware filtering, responsive/accessibility treatment, preserved Library
+workflows, and the exact restoration of the pre-attempt exercise-variant form layout. Approval-gate
+verification passed before completion.
+
+**Changes requested:** 2026-09-09. Improve only the responsive presentation of the final
+exercise-variant creation form around the 600px range, including nearby mobile/tablet widths.
+Correct cramped or oddly stretched controls, spacing, alignment, wrapping, and label/input
+readability without changing form behavior or redesigning the feature.
+
+**Superseded correction:** 2026-09-09. A purpose-specific responsive field grid was implemented for
+the shared personal/administrator variant form. The user rejected its presentation and requested
+that it be reverted rather than revised.
+
+**Changes requested (revert):** 2026-09-09. The user rejected that responsive-form adjustment and
+requested an exact restoration of the preceding form layout. Revert only the form-specific markup,
+breakpoint rules, and focused assertions from the latest attempt; preserve all unrelated Library
+work and make no replacement design.
+
+**Revert completed:** 2026-09-09. Removed only the rejected form-specific class, its 46rem/34rem
+grid overrides, and the assertions introduced for those rules. Restored the preceding shared
+three-column form-grid markup and its existing 30rem full-width submit treatment. No form fields,
+labels, actions, submission behavior, or unrelated Library discovery code changed in this revert.
+
+**Purpose:** Make discovery a primary, responsive Library capability with controls and result
+feedback tailored to each content type.
+
+**Expected work:**
+
+- Introduce a clear Session/Exercise section switcher for personal Library mode, retaining Sessions
+  as the initial context and selecting it whenever a `sessionId` is being viewed. Keep administrator
+  mode focused on Exercise discovery without an irrelevant Session option.
+- Place a visibly labelled search/filter surface inside each content section rather than above the
+  whole page. Reuse the shared tabs or navigation interaction only after verifying its IDs,
+  selected state, keyboard behavior, and rendered-content needs fit this page.
+- Sessions: search names, notes, base exercises, variants, movement patterns, muscles, and equipment;
+  offer movement, muscle, and equipment facets derived from visible session metadata.
+- Exercises: search base/variant names and relevant descriptive metadata; offer movement, muscle,
+  and equipment facets, with environment or ownership scope only when their available options are
+  useful in the current mode.
+- Apply case-insensitive AND semantics across query and selected facets. At exercise level, retain a
+  base result when base metadata or a qualifying child variant matches and ensure variant-specific
+  criteria identify only the relevant variants inside the disclosure.
+- Provide independent result/total counts, clear-all controls, and accessible filtered-empty
+  feedback. Preserve ordinary content empty states and restore all scoped content on reset.
+- Ensure filtering does not mutate URLs, submit forms, cross session/exercise state, or disturb the
+  selected session/detail link. Preserve usable server-rendered content if enhancement is absent.
+- Refine the Library layout and control density for wide and narrow screens using existing design
+  tokens/components, visible focus, accessible labels/state, no color-only meaning, and reduced
+  motion.
+- Replace the current one-input filtering module with focused, testable state/filter functions and
+  add browser tests for search fields, facet combinations, grouped-variant matches, counts, reset,
+  no-results, section independence, keyboard switching, and admin mode.
+- Run focused ViewModel/rendered/browser/CSS/HTTP checks, `npm run verify`, the complete PostgreSQL
+  HTTP suite, representative wide/narrow manual or equivalent layout review, and final diff checks.
+
+**Acceptance criteria:**
+
+- Personal Library clearly separates Session and Exercise discovery; administrator Library exposes
+  the improved Exercise controls without personal content.
+- Searchable attributes and filter options are derived only from visible repository-backed data,
+  and query/facet combinations return correct base-exercise or session counts.
+- Matching a variant or equipment retains its base exercise without restoring a top-level row per
+  variant; unrelated child variants are not represented as matches.
+- Session and exercise queries, facets, counts, reset actions, and no-results messages operate
+  independently and remain keyboard/screen-reader understandable.
+- Contextual session creation, selected-session navigation/details, global/private visibility,
+  ownership actions, forms/modals, and invalid-form state pass regression coverage.
+- Representative personal/admin, populated/empty, filtered/unfiltered, narrow/wide, long-content,
+  focus, and reduced-motion review is recorded with no horizontal overflow.
+- `npm run verify`, the complete PostgreSQL HTTP suite, and `git diff --check` pass. The action stops
+  at Ready for review.
+
+**Constraints:**
+
+- Do not move filtering into route/query/repository code absent new measured evidence that
+  invalidates the approved client-side decision. Record that evidence and request a scope decision
+  before introducing server pagination or asynchronous APIs.
+- Do not add dependencies, schema/catalog fields, unrelated shared-component redesign, deployment,
+  push, or production-data work.
+- Preserve the Action 1 grouped projection and all existing security/data-integrity boundaries.
+
+**Implemented delta:**
+
+- Replaced the page-wide search field with independent, visibly labelled Session and Exercise
+  discovery surfaces. Each owns its query, relevant facets, live result count, clear action, and
+  filtered-empty state.
+- Added a personal-library Session/Exercise tab switcher using the established shared keyboard tab
+  behavior. Sessions remain the initial selection, including selected-session URLs; administrator
+  mode renders Exercise discovery directly without an irrelevant tab list.
+- Expanded session search to loaded names, notes, base exercises, variant names, setup/variant
+  notes, environment, movement, muscle, and equipment metadata. Movement, muscle, and equipment
+  facets are derived from the visible session collection.
+- Added base-aware Exercise filtering across movement and muscle plus variant-aware query,
+  equipment, environment, and ownership scope. A base remains once when a child matches, while
+  nonmatching child variants are hidden and the base/variant result totals show the filtered
+  relationship.
+- Derived every facet option from the already ownership-scoped ViewModels and omitted facets with
+  fewer than two available values. Bodyweight is represented explicitly where an equipment record
+  is absent.
+- Moved personal/global variant creation below Exercise discovery so finding existing content is
+  the primary interaction, while preserving all form, modal, URL, ownership, and CSRF contracts.
+- Added responsive discovery-panel and tab styling with semantic tokens, visible focus, live/empty
+  feedback, explicit hidden-state behavior, and reduced-motion handling.
+
+**Discoveries:**
+
+- The shared tabs behavior fits the required click and Arrow/Home/End keyboard interactions, but
+  its usual server-rendered hidden panel would make Exercise content unavailable if JavaScript
+  failed. The Library therefore renders both sections as ordinary content by default, hides the tab
+  list, and applies the tabbed presentation only when the page enhancement initializes.
+- Variant criteria must be evaluated against one child at a time. Combining a query match from one
+  variant with an equipment match from another would produce a false base result; the client
+  evaluator now requires all variant-level criteria to match the same child.
+- The catalog and page payload remained responsive at the verified scale. No evidence invalidated
+  the approved client-side filtering decision, so routes, repositories, SQL, schema, seed, and
+  dependencies remain unchanged.
+
+**Verification evidence:**
+
+- Focused ViewModel, rendered-EJS, browser-interaction, CSS-contract, and grouped-projection checks
+  passed: 18 tests with 0 failures. Coverage includes independent state, search/facet AND
+  semantics, same-child variant matching, counts, clear/reset, no-results, personal/admin markup,
+  server-rendered fallback, ownership actions, and flat session-form options.
+- `npm run verify` passed: formatting, lint, server types, browser types, and all 195 repository
+  tests passed with 0 failures, cancellations, or skips.
+- `npm run test:http` passed against the local disposable test database: all 58 HTTP integration
+  tests passed with 0 failures, cancellations, or skips, including Library personal/admin scoping,
+  contextual creation, selected-session behavior, forms, ownership, and CSRF regressions.
+- Live personal review at 1440px confirmed the Session-first workspace and the filtered Exercise
+  hierarchy; at 390px the selected Exercise panel reported 1 of 18 bases and 1 of 36 variants with
+  only one qualifying nested variant, correct tab state, and document width equal to viewport
+  width.
+- Live administrator review confirmed no Library tab list, one Exercise query, and query results of
+  4 of 18 bases/8 of 36 variants at both 1440px and 390px, with no horizontal overflow.
+- The explicitly local disposable `lets_flex_test` database was reset to the canonical schema and
+  seed for browser review. No development or production database was changed.
+- `git diff --check` passes. Final diff inspection found no repository query, route, schema, seed,
+  dependency, shared-tab implementation, deployment, push, or production-data change.
+- Revert verification passed: the focused rendered-EJS, CSS-contract, and browser-interaction tests
+  passed 13 of 13; repository inspection confirmed the rejected class and 46rem/34rem rules are
+  absent, the original shared three-column class is present, and the prior 30rem submit rule is
+  restored.
+- `npm run verify` passed again with all 195 repository tests, and `npm run test:http` passed all 58
+  PostgreSQL HTTP tests with no failures, cancellations, or skips. `git diff --check` and final diff
+  inspection confirmed the broader Library hierarchy, filtering, tabs, forms, and actions remain
+  present.
+- Approval-gate verification passed on 2026-09-09: `npm run verify` completed all formatting, lint,
+  server/browser type, and 195 repository tests; `npm run test:http` completed all 58 PostgreSQL
+  HTTP tests, with no failures, cancellations, or skips.
 
 ## Resume here
 
-The current goal and Action 1 are Completed. No next goal or action is approved. Reassess the
-repository and the user's priorities before proposing or starting further work.
+The goal and both actions are Completed. The user explicitly approved the goal on 2026-09-09 after
+reviewing the final behavior and verification evidence. Keep this completed record in place until
+the user explicitly approves a proposed next goal; do not start follow-up implementation.

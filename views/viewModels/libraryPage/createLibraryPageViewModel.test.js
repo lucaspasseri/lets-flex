@@ -63,6 +63,13 @@ test("library template renders from its page ViewModel", async () => {
 
 	assert.match(html, /data-library-page/);
 	assert.match(html, /data-library-mode="personal"/);
+	assert.match(html, /role="tablist" aria-label="Library content"/);
+	assert.match(html, /id="library-sessions-tab"[\s\S]*aria-selected="true"/);
+	assert.match(html, /id="library-exercises-tab"[\s\S]*aria-selected="false"/);
+	assert.match(html, /data-library-section-tabs/);
+	assert.match(html, /id="library-exercises-panel"/);
+	assert.doesNotMatch(html, /id="library-exercises-panel"[^>]*hidden/);
+	assert.equal((html.match(/data-library-query/g) ?? []).length, 2);
 	assert.match(html, /data-create-session-form/);
 	assert.match(html, /data-archive-session-form/);
 	assert.match(html, /data-variant-create-form/);
@@ -138,6 +145,22 @@ test("personal exercise markup identifies private scope and retains owner action
 				id: 3,
 				name: "Squat",
 				movementPattern: { id: 2, name: "Squat", notes: "Knee dominant" },
+				equipment: { id: 2, name: "Barbell", category: "Free weight" },
+				muscles: [],
+				variant: {
+					id: 10,
+					name: "Barbell Back Squat",
+					setupDescription: "Set the bar across the upper back.",
+					environment: "Gym",
+					notes: "Use safety arms.",
+					ownerUserId: null,
+					isArchived: false,
+				},
+			},
+			{
+				id: 3,
+				name: "Squat",
+				movementPattern: { id: 2, name: "Squat", notes: "Knee dominant" },
 				equipment: { id: 4, name: "Dumbbell", category: "Free weight" },
 				muscles: [],
 				variant: {
@@ -165,8 +188,23 @@ test("personal exercise markup identifies private scope and retains owner action
 		contentFor: (/** @type {string} */ name) => `<!-- section:${name} -->`,
 	});
 
+	assert.equal(viewModel.components.exerciseTemplates.items.length, 1);
+	assert.equal(viewModel.components.exerciseTemplates.count, 1);
+	assert.equal(viewModel.components.exerciseTemplates.variantCount, 2);
+	assert.equal(viewModel.components.createSessionForm.fields.exerciseOptions.length, 2);
+	assert.equal(viewModel.components.updateSessionForm.fields.exerciseOptions.length, 2);
 	assert.match(html, /Base exercise[\s\S]*Squat/);
+	assert.match(html, /1 exercise · 2 variants/);
+	assert.match(html, /2 variants/);
+	assert.match(html, /Barbell Back Squat/);
 	assert.match(html, /Tempo Goblet Squat[\s\S]*Private/);
+	assert.equal((html.match(/id="exercise-template-3-trigger"/g) ?? []).length, 1);
+	assert.equal((html.match(/data-exercise-variant-id=/g) ?? []).length, 2);
+	assert.equal((html.match(/data-exercise-variant-item/g) ?? []).length, 2);
+	assert.match(html, /data-base-search-key-word="Squat Squat Knee dominant"/);
+	assert.match(html, /data-filter-values=/);
+	assert.match(html, /Search exercises/);
+	assert.match(html, /No exercises match these filters/);
 	assert.match(html, /action="\/exercise-variants\/12\?_method=PATCH"/);
 	assert.match(html, /Archive private variant/);
 	assert.doesNotMatch(html, /data-update-exercise-template/);
@@ -184,6 +222,14 @@ test("administrator library state is catalog-only and excludes private variants"
 				equipment: {},
 				muscles: [],
 				variant: { id: 10, name: "Global squat", ownerUserId: null },
+			},
+			{
+				id: 1,
+				name: "Squat",
+				movementPattern: {},
+				equipment: { id: 4, name: "Dumbbell" },
+				muscles: [],
+				variant: { id: 12, name: "Global dumbbell squat", ownerUserId: null },
 			},
 			{
 				id: 1,
@@ -212,21 +258,27 @@ test("administrator library state is catalog-only and excludes private variants"
 	assert.equal(viewModel.shell.activeNavigation, "admin-exercises");
 	assert.equal(viewModel.components.exerciseTemplates.items.length, 1);
 	assert.match(html, /data-library-mode="admin"/);
+	assert.doesNotMatch(html, /role="tablist" aria-label="Library content"/);
+	assert.equal((html.match(/data-library-query/g) ?? []).length, 1);
 	assert.match(html, /Global catalog access/);
 	assert.match(html, /Create global variant/);
 	assert.match(html, /Global squat/);
+	assert.match(html, /Global dumbbell squat/);
 	assert.match(html, /Base exercise/);
 	assert.match(html, /Squat/);
-	assert.match(html, /1 variant/);
+	assert.match(html, /1 exercise · 2 variants/);
 	assert.match(
 		html,
-		/id="exercise-template-10-trigger"[\s\S]*aria-controls="exercise-template-10-panel"[\s\S]*aria-expanded="false"/,
+		/id="exercise-template-1-trigger"[\s\S]*aria-controls="exercise-template-1-panel"[\s\S]*aria-expanded="false"/,
 	);
 	assert.match(
 		html,
-		/id="exercise-template-10-panel"[\s\S]*role="region"[\s\S]*aria-labelledby="exercise-template-10-trigger"/,
+		/id="exercise-template-1-panel"[\s\S]*role="region"[\s\S]*aria-labelledby="exercise-template-1-trigger"/,
 	);
-	assert.equal((html.match(/id="exercise-template-10-panel"/g) ?? []).length, 1);
+	assert.equal((html.match(/id="exercise-template-1-panel"/g) ?? []).length, 1);
+	assert.equal((html.match(/data-exercise-variant-id=/g) ?? []).length, 2);
+	assert.equal((html.match(/data-exercise-id="1"/g) ?? []).length, 1);
+	assert.equal((html.match(/data-update-exercise-template=/g) ?? []).length, 2);
 	assert.match(html, /Optional\. Choose equipment when this variant requires it\./);
 	assert.match(html, /<option\s+value=""[^>]*>\s*No equipment\s*<\/option>/);
 	assert.doesNotMatch(html, /Admin private squat/);

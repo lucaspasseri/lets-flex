@@ -27,13 +27,17 @@
 			%>
 	</header>
 
-	<div class="session-workspace__content">
-		<%- include("./sessionSummaries", {
-			summaries: summaries
-		}) %>
+	<div data-library-discovery-section="sessions">
+		<%- include("../librarySearch", { discovery: locals.sessionWorkspace.discovery }) %>
 
-		<%- include("./sessionDetails", {
-			session: details
-		}) %>
+		<div class="session-workspace__content">
+			<%- include("./sessionSummaries", {
+				summaries: summaries
+			}) %>
+
+			<%- include("./sessionDetails", {
+				session: details
+			}) %>
+		</div>
 	</div>
 </section>

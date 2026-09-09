@@ -118,6 +118,7 @@
  * @property {string} musclesLabel
  * @property {string} equipmentsLabel
  * @property {string} searchKeyWord
+ * @property {{movement: string[], muscle: string[], equipment: string[]}} filters
  */
 
 /**
@@ -195,4 +196,5 @@
  * @property {SessionWorkspaceCreateAction} createAction
  * @property {SessionWorkspaceSummariesViewModel} summaries
  * @property {DetailsViewModel | null} details
+ * @property {{id: string, title: string, description: string, searchLabel: string, searchPlaceholder: string, filters: Array<{name: string, label: string, allLabel: string, level: "base", options: Array<{value: string, label: string}>}>}} discovery
  */

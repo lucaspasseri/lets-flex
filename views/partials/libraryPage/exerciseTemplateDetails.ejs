@@ -1,127 +1,130 @@
 <%
-	const {id=null, details={}, actions={}} = locals?.template ?? {};
+	const {id=null, baseName="", details={}, actions={}} = locals?.template ?? {};
+	const variants = details?.variants ?? [];
 %>
 
-	<div class="exercise-template__content">
-		<dl class="exercise-template__facts">
-			<div>
-				<dt class="exercise-template__field-label">
-					Movement pattern
-				</dt>
-				<dd>
-					<%= details?.movementPattern?.name %>
-				</dd>
-			</div>
-
-			<div>
-				<dt class="exercise-template__field-label">
-					Primary muscles
-				</dt>
-
-				<dd class="exercise-template__tags">
-
-
-					<% if (details?.muscleTemplates?.primary?.name) { %>
-						<span class="tag"><%= details.muscleTemplates.primary.name %></span>
-					<% } else { %>
-						<span class="exercise-template__empty-value">Not specified</span>
-					<% } %>
-				</dd>
-			</div>
-		</dl>
-
-		<section
-			class="exercise-template__variant-section"
-			aria-labelledby="exercise-template-<%= id %>-variants"
-		>
-			<header class="exercise-template__variants-header">
-				<h3 id="exercise-template-<%= id %>-variants">
-					Variant details
-				</h3>
-			</header>
-
-			
-			
-			<div class="exercise-variant">
-				<strong><%= details?.variant?.name %></strong>
-
-				<dl class="exercise-variant__facts">
-					<div>
-						<dt>Equipment</dt>
-						<dd><%= details?.variant?.equipment?.name ?? "None" %></dd>
-					</div>
-
-					<div>
-						<dt>Environment</dt>
-						<dd><%= details?.variant?.environmentLabel ?? "Not specified" %></dd>
-					</div>
-
-					<div>
-						<dt>Setup</dt>
-						<dd>
-							<%= details?.variant?.setupDescription ?? "No setup instructions" %>
-						</dd>
-					</div>
-				</dl>
-			</div>
-
-		</section>
-
-		<% if (actions?.canManageGlobal || actions?.canManagePrivate) { %>
-		<div class="exercise-template__actions">
-			<% if (actions?.canManageGlobal) { %>
-			<%- include("../shared/components/button/button",  {button: {
-					label: "Edit",
-					variant: "secondary",
-					type: "button",
-					attributes: {
-						"data-modal-open": actions?.update?.modalId,
-						"data-update-exercise-template": JSON.stringify(actions?.update?.values ?? {})
-					}
-				}})
-			%>
-			<%- include("../shared/components/button/button",  {button: {
-					label: "Archive",
-					variant: "danger",
-					attributes: {
-						"data-modal-open": actions?.remove?.modalId,
-						"data-exercise-id": actions?.remove?.value
-					}
-				}}) 
-			%> 
-			<% } %>
-			<% if (actions?.canManagePrivate) { %>
-				<div class="exercise-template__private-actions">
-					<form class="form exercise-template__inline-form" method="POST" action="/exercise-variants/<%= id %>?_method=PATCH">
-						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-						<input type="hidden" name="equipmentId" value="<%= details?.variant?.equipment?.id ?? '' %>">
-						<%- include("../shared/components/form/field", { field: {
-							id: `private-variant-${id}-name`,
-							name: "name",
-							label: "Variant name",
-							control: "input",
-							type: "text",
-							required: true,
-							value: details?.variant?.name,
-							hint: "Only you can update this private variant.",
-							attributes: { maxlength: 100, autocomplete: "off" }
-						} }) %>
-						<%- include("../shared/components/button/button", { button: {
-							label: "Save variant",
-							type: "submit",
-							variant: "primary"
-						} }) %>
-					</form>
-					<form class="exercise-template__archive-form" method="POST" action="/exercise-variants/<%= id %>/archive">
-						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-						<%- include("../shared/components/button/button", { button: {
-							label: "Archive private variant",
-							type: "submit",
-							variant: "dangerGhost"
-						} }) %>
-					</form>
-				</div>
-			<% } %>
+<div class="exercise-template__content">
+	<dl class="exercise-template__facts">
+		<div>
+			<dt class="exercise-template__field-label">Movement pattern</dt>
+			<dd><%= details?.movementPattern?.name %></dd>
 		</div>
-		<% } %>
-	</div>
+
+		<div>
+			<dt class="exercise-template__field-label">Primary muscles</dt>
+			<dd class="exercise-template__tags">
+				<% if (details?.muscleTemplates?.primary?.name) { %>
+					<span class="tag"><%= details.muscleTemplates.primary.name %></span>
+				<% } else { %>
+					<span class="exercise-template__empty-value">Not specified</span>
+				<% } %>
+			</dd>
+		</div>
+	</dl>
+
+	<section class="exercise-template__variant-section" aria-labelledby="exercise-template-<%= id %>-variants">
+		<header class="exercise-template__variants-header">
+			<div>
+				<p class="exercise-template__eyebrow">Available setups</p>
+				<h3 id="exercise-template-<%= id %>-variants"><%= baseName %> variants</h3>
+			</div>
+			<span data-exercise-variant-result-count><%= variants.length %> total</span>
+		</header>
+
+		<ul class="exercise-variants" data-exercise-variant-results>
+			<% variants.forEach(variant => { %>
+				<li class="exercise-variant" data-exercise-variant-item data-exercise-variant-id="<%= variant.id %>" data-search-key-word="<%= variant.searchKeyWord %>" data-filter-values="<%= JSON.stringify(variant.filters) %>">
+					<header class="exercise-variant__header">
+						<strong><%= variant.name %></strong>
+						<% if (variant.isPrivateOwner) { %><span class="exercise-template__scope">Private</span><% } %>
+					</header>
+
+					<dl class="exercise-variant__facts">
+						<div>
+							<dt>Equipment</dt>
+							<dd><%= variant.equipment?.name ?? "Bodyweight" %></dd>
+						</div>
+
+						<div>
+							<dt>Environment</dt>
+							<dd><%= variant.environmentLabel %></dd>
+						</div>
+
+						<div>
+							<dt>Setup</dt>
+							<dd><%= variant.setupDescription || "No setup instructions" %></dd>
+						</div>
+
+						<div>
+							<dt>Notes</dt>
+							<dd><%= variant.notes || "No additional notes" %></dd>
+						</div>
+					</dl>
+
+					<% if (variant.actions?.canManageGlobal || variant.actions?.canManagePrivate) { %>
+						<div class="exercise-variant__actions">
+							<% if (variant.actions.canManageGlobal) { %>
+								<%- include("../shared/components/button/button", {button: {
+									label: variant.actions.update.label,
+									variant: "secondary",
+									type: "button",
+									attributes: {
+										"data-modal-open": variant.actions.update.modalId,
+										"data-update-exercise-template": JSON.stringify(variant.actions.update.values ?? {})
+									}
+								}}) %>
+							<% } %>
+
+							<% if (variant.actions.canManagePrivate) { %>
+								<div class="exercise-template__private-actions">
+									<form class="form exercise-template__inline-form" method="POST" action="/exercise-variants/<%= variant.id %>?_method=PATCH">
+										<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+										<input type="hidden" name="equipmentId" value="<%= variant.equipment?.id ?? '' %>">
+										<%- include("../shared/components/form/field", { field: {
+											id: `private-variant-${variant.id}-name`,
+											name: "name",
+											label: "Variant name",
+											control: "input",
+											type: "text",
+											required: true,
+											value: variant.name,
+											hint: "Only you can update this private variant.",
+											attributes: { maxlength: 100, autocomplete: "off" }
+										} }) %>
+										<%- include("../shared/components/button/button", { button: {
+											label: "Save variant",
+											type: "submit",
+											variant: "primary"
+										} }) %>
+									</form>
+									<form class="exercise-template__archive-form" method="POST" action="/exercise-variants/<%= variant.id %>/archive">
+										<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+										<%- include("../shared/components/button/button", { button: {
+											label: "Archive private variant",
+											type: "submit",
+											variant: "dangerGhost"
+										} }) %>
+									</form>
+								</div>
+							<% } %>
+						</div>
+					<% } %>
+				</li>
+			<% }) %>
+		</ul>
+	</section>
+
+	<% if (actions?.archive) { %>
+		<div class="exercise-template__actions">
+			<%- include("../shared/components/button/button", {button: {
+				label: actions.archive.label,
+				variant: "danger",
+				type: "button",
+				attributes: {
+					"data-modal-open": actions.archive.modalId,
+					"data-exercise-id": actions.archive.value
+				}
+			}}) %>
+		</div>
+	<% } %>
+</div>

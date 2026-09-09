@@ -7,10 +7,83 @@
 	padding: 1.5rem var(--horizontal-margin) 3rem;
 }
 
-.main.library > .library-search,
 .main.library > .session-workspace,
 .main.library > .exercise-templates {
 	margin: 0;
+}
+
+.library-discovery {
+	display: grid;
+	gap: 1.25rem;
+}
+
+.library-discovery > .library-discovery__tabs {
+	display: none;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.75rem;
+	padding: 0.4rem;
+	border: 1px solid var(--color-border);
+	border-radius: 1rem;
+	background: var(--color-surface);
+}
+
+.library-discovery[data-library-tabs-ready] > .library-discovery__tabs {
+	display: grid;
+}
+
+.library-discovery__tabs [data-tab] {
+	display: grid;
+	gap: 0.15rem;
+	min-height: 4.25rem;
+	padding: 0.75rem 1rem;
+	border: 1px solid transparent;
+	border-radius: 0.75rem;
+	background: transparent;
+	color: var(--color-text-muted);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition:
+		border-color 150ms ease,
+		background-color 150ms ease,
+		color 150ms ease;
+}
+
+.library-discovery__tabs [data-tab] span {
+	font-size: 0.95rem;
+	font-weight: 750;
+}
+
+.library-discovery__tabs [data-tab] small {
+	font-size: 0.7rem;
+}
+
+.library-discovery__tabs [data-tab][aria-selected="true"] {
+	border-color: color-mix(in srgb, var(--color-action) 40%, var(--color-border));
+	background: color-mix(in srgb, var(--color-action) 10%, var(--color-surface-subtle));
+	color: var(--color-text);
+}
+
+.library-discovery__tabs [data-tab]:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 2px;
+}
+
+.library-discovery > .library-discovery__panel:not([hidden]) {
+	display: grid;
+	gap: 1.5rem;
+	padding: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+.library-discovery__panel:focus {
+	outline: none;
+}
+
+[data-library-discovery-section] {
+	display: grid;
+	gap: 1.25rem;
 }
 
 .library-admin-scope {
@@ -231,11 +304,21 @@
 }
 
 @media (max-width: 30rem) {
+	.library-discovery > .library-discovery__tabs {
+		grid-template-columns: 1fr;
+	}
+
 	.library-action-panel__header {
 		grid-template-columns: 1fr;
 	}
 
 	.library-variant-form__footer .shared-button {
 		width: 100%;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.library-discovery__tabs [data-tab] {
+		transition: none;
 	}
 }

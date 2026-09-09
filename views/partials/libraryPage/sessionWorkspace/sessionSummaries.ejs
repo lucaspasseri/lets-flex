@@ -11,22 +11,24 @@
 			<%= heading %>
 		</h3>
 
-		<span class="session-summaries__count">
-			<%= items.length %>
+		<span class="session-summaries__count" aria-live="polite" data-library-result-count data-total-count="<%= items.length %>">
+			<%= items.length %> <%= items.length === 1 ? "session" : "sessions" %>
 		</span>
 	</header>
 
 	<% if (items.length === 0) { %>
 		<%- include("sessionSummariesEmpty", { emptyState }) %>
 	<% } else { %>
-		<nav aria-label="Session templates">
+		<nav aria-label="Session templates" data-library-results>
 			<ul class="session-summaries__list">
 				<% items.forEach((item) => { %>
 					<li
 						<% if(item?.id) { %>
 							<%= `id=${item.id}` %>
 						<% } %>
-						data-search-session-item data-search-key-word="<%= item.searchKeyWord %>"
+						data-search-session-item
+						data-search-key-word="<%= item.searchKeyWord %>"
+						data-filter-values="<%= JSON.stringify(item.filters) %>"
 					>
 						<a
 							class="session-summary <%= item.isCurrent
@@ -63,5 +65,10 @@
 				<% }) %>
 			</ul>
 		</nav>
+		<div class="library-filter-empty" role="status" aria-live="polite" data-library-filter-empty hidden>
+			<%- include("../../shared/components/icons/namedIcon", { name: "search" }) %>
+			<h4>No sessions match these filters</h4>
+			<p>Try a broader search, choose fewer filters, or clear them to see every session.</p>
+		</div>
 	<% } %>
 </section>

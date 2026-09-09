@@ -1,17 +1,45 @@
-<% const label = locals.searchLabel ?? "Search sessions and exercises"; %>
-<% const placeholder = locals.searchPlaceholder ?? label; %>
-<div class="library-search">
-	<%- include("../shared/components/icons/namedIcon", { name: "search" }) %>
+<%
+	const {id, title, description, searchLabel, searchPlaceholder, filters=[]} = locals.discovery;
+%>
 
-	<label class="visually-hidden" for="library-search">
-		<%= label %>
-	</label>
+<section class="library-discovery-controls" aria-labelledby="<%= id %>-title" data-library-discovery-controls>
+	<header class="library-discovery-controls__header">
+		<div>
+			<p class="library-discovery-controls__eyebrow">Discover</p>
+			<h3 id="<%= id %>-title"><%= title %></h3>
+			<p><%= description %></p>
+		</div>
+		<%- include("../shared/components/button/button", {button: {
+			label: "Clear filters",
+			variant: "ghost",
+			disabled: true,
+			attributes: { "data-library-clear": true }
+		}}) %>
+	</header>
 
-	<input
-		id="library-search"
-		type="search"
-		placeholder="<%= placeholder %>"
-		autocomplete="on"
-		data-library-search
-	/>
-</div>
+	<div class="library-discovery-controls__fields">
+		<div class="library-discovery-controls__search">
+			<label for="<%= id %>-query"><%= searchLabel %></label>
+			<div class="library-search-input">
+				<%- include("../shared/components/icons/namedIcon", { name: "search" }) %>
+				<input id="<%= id %>-query" type="search" placeholder="<%= searchPlaceholder %>" autocomplete="off" data-library-query />
+			</div>
+		</div>
+
+		<% filters.forEach(filter => { %>
+			<div class="library-discovery-controls__filter">
+				<label for="<%= id %>-<%= filter.name %>"><%= filter.label %></label>
+				<%- include("../shared/components/form/controls/select", {control: {
+					id: `${id}-${filter.name}`,
+					name: filter.name,
+					defaultOption: { value: "", label: filter.allLabel },
+					options: filter.options,
+					attributes: {
+						"data-library-filter": filter.name,
+						"data-filter-level": filter.level
+					}
+				}}) %>
+			</div>
+		<% }) %>
+	</div>
+</section>

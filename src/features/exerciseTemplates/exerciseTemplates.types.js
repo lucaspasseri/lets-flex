@@ -76,6 +76,7 @@
  * @typedef {object} ExerciseTemplateItemSummary
  * @property {string} movementPatternLabel
  * @property {string} equipmentSummary
+ * @property {string} variantCountLabel
  */
 
 /**
@@ -91,22 +92,29 @@
  * @property {string} environmentLabel
  * @property {string} setupDescription
  * @property {string} notes
+ * @property {boolean} isPrivateOwner
+ * @property {string} searchKeyWord
+ * @property {{equipment: string[], environment: string[], scope: string[]}} filters
+ * @property {ExerciseTemplateVariantActions} actions
  */
 
 /**
  * @typedef {object} ExerciseTemplateItemDetails
- * @property {string} description
  * @property {ExerciseTemplateMovementItemPattern} movementPattern
  * @property {ExerciseTemplateMusclesViewModel} muscleTemplates
- * @property {ExerciseTemplateItemVariant} variant
+ * @property {ExerciseTemplateItemVariant[]} variants
+ */
+
+/**
+ * @typedef {object} ExerciseTemplateVariantActions
+ * @property {*} update
+ * @property {boolean} canManageGlobal
+ * @property {boolean} canManagePrivate
  */
 
 /**
  * @typedef {object} ExerciseTemplateItemActions
- * @property {*} update
- * @property {*} remove
- * @property {boolean} canManageGlobal
- * @property {boolean} canManagePrivate
+ * @property {*} archive
  */
 
 /**
@@ -114,9 +122,10 @@
  * @property {ExerciseTemplateRow["id"]} id
  * @property {ExerciseTemplateRow["id"]} exerciseId
  * @property {string} baseName
- * @property {string} name
- * @property {boolean} isPrivateOwner
  * @property {string} searchKeyWord
+ * @property {number} variantCount
+ * @property {string} baseSearchKeyWord
+ * @property {{movement: string[], muscle: string[]}} filters
  * @property {ExerciseTemplateItemSummary} summary
  * @property {ExerciseTemplateItemDetails} details
  * @property {ExerciseTemplateItemActions} actions
@@ -133,8 +142,10 @@
  * @property {string} label
  * @property {string} description
  * @property {number} count
+ * @property {number} variantCount
  * @property {string} countLabel
  * @property {{title: string, description: string, icon: string}} emptyState
- * @property {ExerciseTemplateMuscleItemViewModel[]} items
+ * @property {ExerciseTemplateItemViewModel[]} items
  * @property {ExerciseTemplateActions} actions
+ * @property {{id: string, title: string, description: string, searchLabel: string, searchPlaceholder: string, filters: Array<{name: string, label: string, allLabel: string, level: "base" | "variant", options: Array<{value: string, label: string}>}>}} discovery
  */

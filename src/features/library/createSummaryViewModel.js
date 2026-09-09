@@ -25,10 +25,35 @@ function createSummary({ session, activeSessionId }) {
 	const movements = getDistinctMovements(session);
 	const muscles = getDistinctMuscles(session);
 	const equipments = getDistinctEquipments(session);
+	const filterEquipments = [
+		...new Set(
+			steps.map((step) => step.equipment?.name ?? "Bodyweight").filter(Boolean),
+		),
+	];
 
 	const setCount = steps.reduce((total, step) => total + (step.sets ?? 0), 0);
 
-	const searchKeyWord = [session.name, ...movements, ...muscles]
+	const searchKeyWord = [
+		session.name,
+		session.notes,
+		...steps.flatMap((step) => [
+			step.name,
+			step.type,
+			step.exercise?.name,
+			step.exercise?.variantName,
+			step.exercise?.setupDescription,
+			step.exercise?.environment,
+			step.exercise?.notes,
+			step.movementPattern,
+			step.equipment?.name ?? "Bodyweight",
+			step.equipment?.category,
+			...(step.muscles ?? []).flatMap((muscle) => [
+				muscle.commonName,
+				muscle.scientificName,
+				muscle.bodyPart,
+			]),
+		]),
+	]
 		.filter(Boolean)
 		.join(" ");
 
@@ -45,6 +70,11 @@ function createSummary({ session, activeSessionId }) {
 		musclesLabel: muscles.length > 0 ? muscles.join(", ") : "No muscle",
 		equipmentsLabel: equipments.length > 0 ? equipments.join(", ") : "No equipment",
 		searchKeyWord,
+		filters: {
+			movement: movements,
+			muscle: muscles,
+			equipment: filterEquipments,
+		},
 	};
 }
 

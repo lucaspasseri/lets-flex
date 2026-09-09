@@ -1,14 +1,10 @@
-<% const {name="", baseName="", isPrivateOwner=false, summary={}} = locals?.template %>
+<% const {baseName="", summary={}} = locals?.template %>
 
 <span class="exercise-template__summary">
 	<span class="exercise-template__identity">
 		<span class="exercise-template__eyebrow">Base exercise</span>
 		<strong class="exercise-template__name"><%= baseName %></strong>
-	</span>
-
-	<span class="exercise-template__variant-name">
-		<span><%= name %></span>
-		<% if (isPrivateOwner) { %><span class="exercise-template__scope">Private</span><% } %>
+		<span class="exercise-template__variant-count" data-exercise-variant-count><%= summary.variantCountLabel %></span>
 	</span>
 
 	<span class="exercise-template__metadata">

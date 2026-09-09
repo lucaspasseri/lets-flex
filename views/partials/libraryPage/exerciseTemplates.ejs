@@ -1,10 +1,11 @@
 <%
-	const {id = null, label="", description="", countLabel="0 variants", items=[], emptyState=null, actions={}} = locals?.exerciseTemplates ?? {};
+	const {id = null, label="", description="", countLabel="0 exercises · 0 variants", items=[], emptyState=null, actions={}, discovery={}} = locals?.exerciseTemplates ?? {};
 %>
 
 <section
 	class="exercise-templates"
 	aria-labelledby="<%= id %>-heading"
+	data-library-discovery-section="exercises"
 >
 	<header class="exercise-templates__header">
 		<div>
@@ -22,7 +23,7 @@
 		</div>
 
 		<div class="exercise-templates__header-actions">
-			<span class="exercise-templates__count">
+			<span class="exercise-templates__count" aria-live="polite" data-library-result-count data-total-count="<%= items.length %>" data-total-variant-count="<%= items.reduce((total, item) => total + item.variantCount, 0) %>">
 				<%= countLabel %>
 			</span>
 
@@ -37,12 +38,17 @@
 		</div>
 	</header>
 
+	<%- include("./librarySearch", { discovery }) %>
+
 	<% if (items.length > 0) { %>
-		<ul class="exercise-templates__list">
+		<ul class="exercise-templates__list" data-library-results>
 			<% items.forEach(template => { %>
 				<li
 					data-search-exercise-item
 					data-search-key-word="<%= template.searchKeyWord %>"
+					data-base-search-key-word="<%= template.baseSearchKeyWord %>"
+					data-filter-values="<%= JSON.stringify(template.filters) %>"
+					data-variant-count="<%= template.variantCount %>"
 				>
 					<%- include("../shared/components/accordion/accordion", {
 						accordion: {
@@ -61,6 +67,11 @@
 				</li>
 			<% }) %>
 		</ul>
+		<div class="library-filter-empty" role="status" aria-live="polite" data-library-filter-empty hidden>
+			<%- include("../shared/components/icons/namedIcon", { name: "search" }) %>
+			<h3>No exercises match these filters</h3>
+			<p>Try a broader search, choose fewer filters, or clear them to restore the catalog.</p>
+		</div>
 	<% } else { %>
 		<%- include("./exerciseTemplatesEmptyState", {
 			emptyState,
