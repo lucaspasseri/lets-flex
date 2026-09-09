@@ -21,6 +21,7 @@
 		"start": "node server.js",
 		"dev": "node --env-file-if-exists=.env --watch server.js",
 		"db:reset": "node --env-file-if-exists=.env db/seed.js",
+		"db:seed:sql": "node db/printSeedSql.js",
 		"guests:cleanup": "node --env-file-if-exists=.env src/commands/cleanupExpiredGuests.js",
 		"check:argon2": "node src/commands/checkArgon2.js",
 		"check:types": "tsc --project jsconfig.json --noEmit",

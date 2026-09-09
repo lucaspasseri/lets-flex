@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
+import { seedSql } from "./seed.js";
+import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
+import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
+
 function runSeed(environment) {
 	return spawnSync(process.execPath, ["db/seed.js"], {
 		cwd: process.cwd(),
@@ -9,6 +13,23 @@ function runSeed(environment) {
 		encoding: "utf8",
 	});
 }
+
+test("complete seed SQL command prints the fully resolved seedSql export", () => {
+	const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+	const result = spawnSync(npmCommand, ["run", "--silent", "db:seed:sql"], {
+		cwd: process.cwd(),
+		encoding: "utf8",
+	});
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.equal(result.stderr, "");
+	assert.equal(result.stdout, seedSql);
+	assert.match(result.stdout, /INSERT INTO "step_types"/);
+	assert.ok(result.stdout.includes(catalogSeedSql.trim()));
+	assert.ok(result.stdout.includes(starterWorkoutSeedSql.trim()));
+	assert.doesNotMatch(result.stdout, /\$\{[^}]+\}/);
+	assert.doesNotMatch(result.stdout, /^\s*import\s/m);
+});
 
 test("database reset refuses production even when explicitly requested", () => {
 	const result = runSeed({
