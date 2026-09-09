@@ -5,7 +5,6 @@ import { schemaSql } from "./schema.js";
 import normalizeEmail from "../src/features/auth/normalizeEmail.js";
 import { hashPassword } from "../src/features/auth/passwordService.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
-import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
 
 export const seedSql = `
 INSERT INTO "step_types" ("name")
@@ -99,7 +98,18 @@ INSERT INTO "muscle_roles" ("name", "description") VALUES
   ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
 
 ${catalogSeedSql}
-${starterWorkoutSeedSql}
+
+INSERT INTO sessions (name, notes)
+VALUES ('Sample Full Body Session', 'A read-only global session template.');
+
+INSERT INTO session_steps (
+	session_id, step_type_id, exercise_variant_id, name, sets, reps, step_order
+)
+SELECT s.id, st.id, ev.id, 'Push ups', 3, 10, 1
+FROM sessions s
+JOIN step_types st ON st.name = 'exercise'
+JOIN exercise_variants ev ON ev.name = 'Bodyweight Push Up'
+WHERE s.name = 'Sample Full Body Session';
 `;
 
 function isDisposableDatabaseTarget(connectionString) {
