@@ -204,17 +204,22 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	} = {}) {
 		const context = (
 			await db.query(
-				`WITH selected_user AS (
+				`WITH clock_dates AS (
+				   SELECT CURRENT_DATE AS local_date,
+				          (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date AS utc_date
+				 ), selected_user AS (
 				   SELECT id FROM users WHERE email = $1
 				 ), program AS (
-				   INSERT INTO programs (user_id, name)
-				   SELECT id, 'Lifecycle program' FROM selected_user RETURNING id
+				   INSERT INTO programs (user_id, name, start_date)
+				   SELECT id, 'Lifecycle program', LEAST(local_date, utc_date)
+				   FROM selected_user CROSS JOIN clock_dates RETURNING id
 				 ), cycle AS (
 				   INSERT INTO cycles (program_id, name, cycle_size, cycle_order)
-				   SELECT id, 'Lifecycle cycle', 1, 1 FROM program RETURNING id
+				   SELECT id, 'Lifecycle cycle', 1 + ABS(local_date - utc_date), 1
+				   FROM program CROSS JOIN clock_dates RETURNING id
 				 ), training_day AS (
 				   INSERT INTO training_days (cycle_id, day_order, scheduled_date)
-				   SELECT id, 1, CURRENT_DATE FROM cycle RETURNING id
+				   SELECT id, 1, local_date FROM cycle CROSS JOIN clock_dates RETURNING id
 				 ), template AS (
 				   INSERT INTO sessions (owner_user_id, name)
 				   SELECT id, 'Lifecycle session' FROM selected_user RETURNING id

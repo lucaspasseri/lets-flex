@@ -4,13 +4,16 @@ import test from "node:test";
 
 const stylesheetPath = new URL("./progress.css", import.meta.url);
 const mainStylesheetPath = new URL("../main.css", import.meta.url);
-const footerStylesheetPath = new URL("../components/footer.css", import.meta.url);
+const chromeStylesheetPath = new URL(
+	"../components/applicationChrome.css",
+	import.meta.url,
+);
 
 test("progress presentation is loaded with responsive and accessible interaction contracts", async () => {
-	const [progressCss, mainCss, footerCss] = await Promise.all([
+	const [progressCss, mainCss, chromeCss] = await Promise.all([
 		readFile(stylesheetPath, "utf8"),
 		readFile(mainStylesheetPath, "utf8"),
-		readFile(footerStylesheetPath, "utf8"),
+		readFile(chromeStylesheetPath, "utf8"),
 	]);
 
 	assert.match(mainCss, /@import url\("\.\/pages\/progress\.css"\)/);
@@ -33,7 +36,10 @@ test("progress presentation is loaded with responsive and accessible interaction
 	assert.match(progressCss, /min-height: 2\.75rem/);
 	assert.match(progressCss, /overflow-wrap: anywhere/);
 	assert.match(progressCss, /font-variant-numeric: tabular-nums/);
-	assert.match(footerCss, /\.footer-nav\s*{[\s\S]*?overflow-x: auto/);
+	assert.match(
+		chromeCss,
+		/\.application-shell\.has-open-navigation > \.content\s*{[\s\S]*?overflow: hidden/,
+	);
 });
 
 test("progress hierarchy retains non-color unit and coverage markers", async () => {

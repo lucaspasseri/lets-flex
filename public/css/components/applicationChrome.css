@@ -1,0 +1,490 @@
+.application-shell {
+	--application-header-height: 4.5rem;
+	--application-chrome-layer: 99;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	min-width: 0;
+	overflow-x: hidden;
+}
+
+.application-chrome {
+	position: relative;
+	min-width: 0;
+	background: var(--color-surface);
+	z-index: var(--application-chrome-layer);
+}
+
+.page-header {
+	display: flex;
+	height: var(--application-header-height);
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.35rem var(--horizontal-margin);
+	border-bottom: 1px solid var(--color-border);
+	background:
+		linear-gradient(
+			90deg,
+			color-mix(in srgb, var(--color-brand) 7%, transparent),
+			transparent 45%
+		),
+		var(--color-surface);
+	box-shadow: var(--box-shadow-header);
+}
+
+.page-header__home {
+	display: block;
+	width: 3.75rem;
+	height: 3.75rem;
+	flex: 0 0 auto;
+	border-radius: 50%;
+}
+
+.page-header__menu-toggle {
+	display: grid;
+	width: 2.75rem;
+	min-height: 2.75rem;
+	place-items: center;
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: 0.75rem;
+	background: var(--color-surface-subtle);
+	color: var(--color-text);
+	cursor: pointer;
+	transition:
+		border-color 160ms ease,
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.page-header__menu-toggle:hover,
+.page-header__menu-toggle[aria-expanded="true"] {
+	border-color: var(--color-action);
+	background: color-mix(in srgb, var(--color-action) 8%, var(--color-surface-subtle));
+	color: var(--color-action);
+}
+
+.page-header__home:focus-visible,
+.page-header__menu-toggle:focus-visible,
+.primary-navigation__link:focus-visible,
+.application-chrome__profile:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 3px;
+}
+
+.page-header__menu-icon {
+	position: relative;
+	display: block;
+	width: 1.4rem;
+	height: 1.1rem;
+}
+
+.page-header__menu-icon > span {
+	position: absolute;
+	top: calc(50% - 0.0625rem);
+	left: 0;
+	display: block;
+	width: 100%;
+	height: 0.125rem;
+	border-radius: 999px;
+	background: currentColor;
+	transform-origin: center;
+	transition:
+		opacity 160ms ease,
+		transform 200ms ease;
+}
+
+.page-header__menu-icon > span:first-child {
+	transform: translateY(-0.42rem);
+}
+
+.page-header__menu-icon > span:last-child {
+	transform: translateY(0.42rem);
+}
+
+.page-header__menu-toggle[aria-expanded="true"]
+	.page-header__menu-icon
+	> span:first-child {
+	transform: rotate(45deg);
+}
+
+.page-header__menu-toggle[aria-expanded="true"]
+	.page-header__menu-icon
+	> span:nth-child(2) {
+	opacity: 0;
+	transform: scaleX(0.35);
+}
+
+.page-header__menu-toggle[aria-expanded="true"]
+	.page-header__menu-icon
+	> span:last-child {
+	transform: rotate(-45deg);
+}
+
+.application-menu {
+	position: fixed;
+	inset: var(--application-header-height) 0 0;
+	display: grid;
+	grid-template-rows: minmax(0, 1fr) auto;
+	gap: 1.5rem;
+	min-width: 0;
+	padding: clamp(1.25rem, 6dvh, 3rem) var(--horizontal-margin)
+		max(1.5rem, env(safe-area-inset-bottom));
+	overflow-y: auto;
+	background:
+		radial-gradient(
+			circle at 85% 5%,
+			color-mix(in srgb, var(--color-brand) 12%, transparent),
+			transparent 34rem
+		),
+		color-mix(in srgb, var(--color-surface) 98%, transparent);
+	box-shadow: 0 1.5rem 2.5rem rgb(0 0 0 / 32%);
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(-0.75rem);
+	visibility: hidden;
+	transition:
+		opacity 220ms ease,
+		transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+		visibility 0s linear 240ms;
+}
+
+.application-menu.is-open {
+	opacity: 1;
+	pointer-events: auto;
+	transform: translateY(0);
+	visibility: visible;
+	transition-delay: 0s;
+}
+
+.primary-navigation {
+	display: grid;
+	align-content: center;
+	min-width: 0;
+}
+
+.primary-navigation__list {
+	display: grid;
+	width: min(100%, 32rem);
+	margin-inline: auto;
+}
+
+.primary-navigation__link {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 1rem;
+	min-height: 3.25rem;
+	padding: 0.75rem 1rem;
+	border-radius: 0.75rem;
+	color: var(--color-text);
+	font-size: clamp(1.1rem, 5vw, 1.5rem);
+	font-weight: 650;
+	text-decoration: none;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.primary-navigation__link:hover,
+.primary-navigation__link[aria-current="page"] {
+	background: color-mix(in srgb, var(--color-action) 8%, transparent);
+	color: var(--color-action);
+}
+
+.primary-navigation__indicator {
+	display: block;
+	width: 0.4rem;
+	height: 0.4rem;
+	border-radius: 50%;
+}
+
+.primary-navigation__indicator.is-active {
+	view-transition-name: active-tab-indicator;
+	background: currentColor;
+	box-shadow: 0 0 0.75rem color-mix(in srgb, currentColor 65%, transparent);
+}
+
+.application-chrome__footer {
+	width: min(100%, 32rem);
+	margin-inline: auto;
+	padding-top: 1rem;
+	border-top: 1px solid var(--color-border);
+}
+
+.application-chrome__profile {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 0;
+	min-height: 3.5rem;
+	padding: 0.35rem;
+	border-radius: 0.75rem;
+	color: var(--color-text-muted);
+	text-decoration: none;
+	transition:
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.application-chrome__profile:hover,
+.application-chrome__profile[aria-current="page"] {
+	background: var(--color-surface-subtle);
+	color: var(--color-text);
+}
+
+.application-chrome__profile[aria-current="page"] {
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-action) 28%, transparent);
+}
+
+.application-chrome__avatar {
+	display: flex;
+	width: 3rem;
+	height: 3rem;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	padding: 0.35rem;
+	border: 1px solid transparent;
+	border-radius: 0.75rem;
+	background: var(--color-text-muted);
+	color: var(--color-surface);
+}
+
+.application-chrome__profile[aria-current="page"] .application-chrome__avatar {
+	border-color: var(--color-action);
+	background: var(--color-action);
+}
+
+.application-chrome__avatar svg {
+	width: 100%;
+	height: 100%;
+}
+
+.application-chrome__identity {
+	display: grid;
+	gap: 0.15rem;
+	min-width: 0;
+}
+
+.application-chrome__username,
+.application-chrome__status {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.application-chrome__username {
+	font-size: 1rem;
+	font-weight: 650;
+}
+
+.application-chrome__status {
+	color: var(--color-action);
+	font-size: 0.62rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+}
+
+.application-shell.has-open-navigation > .content {
+	overflow: hidden;
+}
+
+::view-transition-old(active-tab-indicator),
+::view-transition-new(active-tab-indicator) {
+	animation-duration: 160ms;
+}
+
+@media (min-width: 48rem) {
+	.application-shell {
+		--application-rail-width: 16.25rem;
+		grid-template-columns: var(--application-rail-width) minmax(0, 1fr);
+		grid-template-rows: minmax(0, 1fr) auto;
+	}
+
+	.application-shell > .application-chrome {
+		position: fixed;
+		inset: 0 auto 0 0;
+		display: grid;
+		width: var(--application-rail-width);
+		min-height: 0;
+		grid-template-rows: auto minmax(0, 1fr);
+		border-right: 1px solid var(--color-border);
+		background:
+			linear-gradient(
+				180deg,
+				color-mix(in srgb, var(--color-brand) 5%, transparent),
+				transparent 32%
+			),
+			var(--color-surface);
+		box-shadow: var(--box-shadow-header);
+		overflow: hidden;
+	}
+
+	.application-shell > .content {
+		grid-column: 2;
+		grid-row: 1 / -1;
+		width: 100%;
+		min-width: 0;
+	}
+
+	.application-shell > .overlays {
+		grid-column: 2;
+		grid-row: 2;
+		min-width: 0;
+	}
+
+	.page-header {
+		height: 7.5rem;
+		justify-content: center;
+		padding: 1rem;
+		border: 0;
+		border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+		background: transparent;
+		box-shadow: none;
+	}
+
+	.page-header__home {
+		width: 5.5rem;
+		height: 5.5rem;
+	}
+
+	.page-header__menu-toggle {
+		display: none;
+	}
+
+	.application-menu {
+		position: static;
+		display: grid;
+		grid-template-rows: minmax(0, 1fr) auto;
+		gap: 1.5rem;
+		min-height: 0;
+		padding: 1.5rem 1rem 1.25rem;
+		overflow-x: hidden;
+		overflow-y: auto;
+		scrollbar-gutter: stable;
+		background: transparent;
+		box-shadow: none;
+		opacity: 1;
+		pointer-events: auto;
+		transform: none;
+		visibility: visible;
+	}
+
+	.primary-navigation__list {
+		width: 100%;
+		gap: 0.25rem;
+	}
+
+	.primary-navigation__link {
+		grid-template-columns: 0.25rem minmax(0, 1fr);
+		gap: 0.85rem;
+		min-height: 3rem;
+		padding: 0.7rem 0.85rem;
+		font-size: 0.92rem;
+		text-align: left;
+	}
+
+	.primary-navigation__link > span:first-child {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+
+	.primary-navigation__indicator {
+		width: 0.2rem;
+		height: 1.25rem;
+		order: -1;
+		border-radius: 999px;
+	}
+
+	.application-chrome__footer {
+		width: 100%;
+		padding-top: 1rem;
+		border-top-color: color-mix(in srgb, var(--color-border) 72%, transparent);
+	}
+
+	.application-chrome__profile {
+		min-height: 3.5rem;
+		padding: 0.35rem;
+	}
+
+	.application-chrome__avatar {
+		width: 3rem;
+		height: 3rem;
+	}
+}
+
+@media (min-width: 75rem) {
+	.application-shell {
+		--application-rail-width: 21.875rem;
+	}
+
+	.application-shell > .application-chrome {
+		border-right-color: color-mix(
+			in srgb,
+			var(--color-action) 18%,
+			var(--color-border)
+		);
+	}
+
+	.application-menu {
+		padding-inline: 2rem;
+	}
+
+	.primary-navigation__link {
+		min-height: 3.25rem;
+		padding-inline: 1rem;
+		font-size: 1rem;
+	}
+}
+
+@media (min-width: 48rem) and (max-height: 46.875rem) {
+	.page-header {
+		height: 5.5rem;
+		padding-block: 0.5rem;
+	}
+
+	.page-header__home {
+		width: 4.5rem;
+		height: 4.5rem;
+	}
+
+	.application-menu {
+		grid-template-rows: auto auto;
+		align-content: start;
+		gap: 1rem;
+		padding-block: 1rem;
+	}
+
+	.primary-navigation {
+		align-content: start;
+	}
+
+	.primary-navigation__list {
+		gap: 0.1rem;
+	}
+
+	.primary-navigation__link {
+		min-height: 2.75rem;
+		padding-block: 0.5rem;
+	}
+
+	.application-chrome__footer {
+		padding-top: 0.75rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.page-header__menu-toggle,
+	.page-header__menu-icon > span,
+	.application-menu,
+	.primary-navigation__link,
+	.application-chrome__profile {
+		transition: none;
+	}
+
+	::view-transition-old(active-tab-indicator),
+	::view-transition-new(active-tab-indicator) {
+		animation-duration: 0s;
+	}
+}
