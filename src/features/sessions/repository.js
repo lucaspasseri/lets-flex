@@ -21,6 +21,17 @@ export async function findVisibleForUser({ userId }, db = pool) {
 	return rows;
 }
 
+/** @param {{name: string}} input @param {any} db */
+export async function findActiveGlobalByName({ name }, db = pool) {
+	const { rows } = await db.query(
+		`SELECT id, name, notes, is_archived, owner_user_id
+		 FROM sessions
+		 WHERE name = $1 AND owner_user_id IS NULL AND is_archived = FALSE`,
+		[name],
+	);
+	return rows[0] ?? null;
+}
+
 /**
  * @param {CreateSessionInput} input
  * @param {import("pg").Pool | import("pg").PoolClient} [db]

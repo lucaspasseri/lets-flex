@@ -455,9 +455,15 @@ async function register(req, res) {
 
 /** @param {any} req @param {any} res */
 async function enterGuest(req, res) {
-	const guest = await createGuest();
+	const { user: guest, starter } = await createGuest();
 	try {
-		await establishAuthenticatedSession(req, guest);
+		await establishAuthenticatedSession(req, guest, {
+			sessionState: {
+				programId: starter.programId,
+				cycleId: starter.cycleId,
+				dayId: starter.trainingDayId,
+			},
+		});
 		res.redirect("/");
 	} catch (error) {
 		await usersRepository.deleteGuestById({ userId: guest.id });

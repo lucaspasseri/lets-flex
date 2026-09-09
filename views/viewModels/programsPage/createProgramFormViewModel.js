@@ -1,3 +1,5 @@
+import formatGoalLabel from "./formatGoalLabel.js";
+
 /**
  * @typedef {import("../../../src/features/goals/goals.types.js").Goal} Goal
  */
@@ -40,7 +42,10 @@ export default function createProgramFormViewModel({ goals, state = {} }) {
 				label: "Goal",
 				control: "select",
 				required: true,
-				options: goals.map((goal) => ({ label: goal.name, value: goal.id })),
+				options: goals.map((goal) => ({
+					label: formatGoalLabel(goal.name),
+					value: goal.id,
+				})),
 				value: valueFor("goalId"),
 				error: errorFor("goalId"),
 			},

@@ -1,4 +1,5 @@
 import formatProgramsPageDate from "./formatProgramsPageDate.js";
+import formatGoalLabel from "./formatGoalLabel.js";
 
 /**
  * @typedef {import("../../../src/features/programs/programs.types.js").Program} Program
@@ -24,13 +25,14 @@ export default function createProgramSwitcherViewModel({
 		items: programs.map((program, index) => {
 			const isCurrent = program.id === currentProgramId;
 			const goal = program.goalId ? goalsById.get(program.goalId) : null;
+			const goalLabel = formatGoalLabel(goal?.name);
 			const startDateLabel = formatProgramsPageDate(program.startDate);
 
 			return {
 				id: program.id,
 				name: program.name,
 				badgeLabel: `P${index + 1}`,
-				metaLabel: [goal?.name, startDateLabel && `Starts ${startDateLabel}`]
+				metaLabel: [goalLabel, startDateLabel && `Starts ${startDateLabel}`]
 					.filter(Boolean)
 					.join(" • "),
 				href: `/programs?programId=${program.id}`,

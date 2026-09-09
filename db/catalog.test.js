@@ -112,4 +112,63 @@ integration("canonical database setup", { concurrency: false }, () => {
 		);
 		await assertManagedCatalogMatchesManifest(db);
 	});
+
+	test("fresh database contains the ordered global starter workout", async () => {
+		const sessions = (
+			await db.query(
+				"SELECT id, owner_user_id, is_archived, notes FROM sessions WHERE name = 'Sample Full Body Session'",
+			)
+		).rows;
+		assert.equal(sessions.length, 1);
+		assert.equal(sessions[0].owner_user_id, null);
+		assert.equal(sessions[0].is_archived, false);
+
+		const steps = (
+			await db.query(
+				`SELECT step.name, variant.name AS variant_name, step.sets, step.reps,
+				        step.step_order, type.name AS step_type
+				 FROM session_steps AS step
+				 JOIN sessions AS session ON session.id = step.session_id
+				 JOIN exercise_variants AS variant ON variant.id = step.exercise_variant_id
+				 JOIN step_types AS type ON type.id = step.step_type_id
+				 WHERE session.name = 'Sample Full Body Session'
+				 ORDER BY step.step_order`,
+			)
+		).rows;
+
+		assert.deepEqual(steps, [
+			{
+				name: "Box squats",
+				variant_name: "Bodyweight Box Squat",
+				sets: 3,
+				reps: 10,
+				step_order: 1,
+				step_type: "exercise",
+			},
+			{
+				name: "Push ups",
+				variant_name: "Bodyweight Push Up",
+				sets: 3,
+				reps: 10,
+				step_order: 2,
+				step_type: "exercise",
+			},
+			{
+				name: "One-arm rows",
+				variant_name: "One-Arm Dumbbell Row",
+				sets: 3,
+				reps: 10,
+				step_order: 3,
+				step_type: "exercise",
+			},
+			{
+				name: "Glute bridges",
+				variant_name: "Bodyweight Glute Bridge",
+				sets: 3,
+				reps: 12,
+				step_order: 4,
+				step_type: "exercise",
+			},
+		]);
+	});
 });

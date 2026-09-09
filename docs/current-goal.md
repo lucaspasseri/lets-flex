@@ -2,200 +2,242 @@
 
 ## Parent milestone
 
-Let’s Flex gives users a coherent, trustworthy, and polished interface for building and
-using strength-training sessions.
+Let’s Flex gives first-time and guest users an immediate, understandable, and visually
+confident introduction to planning and completing a workout.
 
 ## Current goal
 
-Refactor the authenticated application shell into one coordinated responsive system:
-a compact horizontal header with accessible expandable navigation on mobile, and a fixed
-Passport-inspired left rail containing brand, primary navigation, and account/secondary
-content on tablet and desktop.
+Improve the guest and first-use experience by providing a short, representative starter
+workout, presenting stored program-goal identifiers as human-readable labels, and increasing
+the existing logo’s visual presence without broad product or visual redesign.
 
 ## Status
 
-Completed on 2026-09-08 after explicit user approval. Actions 1, 2, and 3 are Completed.
+Completed on 2026-09-09 after explicit user approval. Actions 1, 2, and 3 are Completed and every
+`Done when` criterion has recorded verification evidence.
 
-**Outcome:** The authenticated application now uses one responsive chrome: an accessible
-header-connected navigation menu on mobile and the same brand, destinations, active state,
-and account identity in a fixed 260px/350px tablet/desktop rail. Live review found no
-shell-caused overflow or overlap at the requested viewports, interaction and reduced-motion
-contracts are covered, and final verification passed all 49 HTTP tests and all 169 repository
-tests.
+## Completion outcome
+
+New guests now enter an isolated starter program with a realistic four-step workout that flows
+through the existing workout and reporting lifecycle. Programs-page goal names are readable while
+their persisted identifiers remain unchanged. The established shared logo has greater visual
+presence and stronger balanced arms across authenticated and authentication layouts, with live
+responsive, focus, reduced-motion, and regression verification complete.
 
 ## Approved user outcome
 
-The authenticated application chrome feels like one layout changing form across viewport
-sizes. Mobile presents the Let’s Flex brand on the left and a semantic menu button on the
-right; opening it reveals every permitted primary destination in a large header-connected
-surface. At the established tablet/desktop boundary, the same brand, navigation, active
-state, and account information form a fixed left rail while page content occupies the
-remaining viewport. The app retains its own palette, typography, icons, routes, permissions,
-profile behavior, and component conventions.
+A newly created guest arrives in a private temporary workspace with a startable workout
+based on the existing global sample session. That session contains several useful catalog
+exercises and behaves like any other workout through start, step logging, completion,
+Dashboard, Progress, and conversion to a permanent account. Program goals retain their
+existing database identities while all current Programs-page presentations use readable
+labels such as `Weight Loss` rather than `weight_loss`. The established Let’s Flex logo is
+larger and its two arm shapes are more prominent, while the authenticated mobile header,
+responsive rail, short-height layout, and authentication presentation remain balanced and
+unclipped.
 
-The Passport.js site is a spatial and interaction reference only. Its branding, colors,
-content, code, non-semantic trigger, display-based menu toggle, and incomplete accessibility
-behavior are not implementation requirements.
+## Why now
+
+- **Verified user priority:** the user explicitly selected guest onboarding, goal-label
+  presentation, and logo presence as one focused first-use improvement.
+- **Verified guest gap:** `createGuest` currently inserts only a temporary `users` row.
+  There is no guest-specific program, cycle, training day, or planned workout, so the
+  Dashboard reached after guest entry shows `NO ACTIVE PROGRAM`.
+- **Verified reusable session:** the canonical seed contains one read-only global
+  `Sample Full Body Session`, visible to guests and safe to link into an owned training day,
+  but it contains only one `Bodyweight Push Up` step.
+- **Verified catalog foundation:** the current catalog already provides 18 base exercises
+  and 36 distinct global variants, including suitable push, pull, squat, hinge, lunge, and
+  rotation choices. No new exercise or variant is needed for the starter workout.
+- **Verified presentation defect:** goals are stored as stable identifiers including
+  `weight_loss` and `general_fitness`. Both the Create Program select and program switcher
+  currently render `goal.name` directly; the submitted form value is the numeric goal ID,
+  not the displayed name.
+- **Verified logo baseline:** one shared 240×240 inline SVG is used by the authenticated
+  chrome and login page. Current wrappers are 3.75rem on mobile, 5.5rem in the normal rail,
+  4.5rem in the short-height rail, and 3.5rem on authentication pages. The arm artwork is
+  part of the shared SVG, so its prominence can be changed once without creating variants.
 
 ## Delta-first baseline
 
 ### Already satisfied
 
-- `views/layouts/pageShell.ejs` is the single authenticated layout entry point for
-  Dashboard, Programs and training days, Library and administrator catalog management,
-  History, Progress, and Profile.
-- Every protected page supplies an explicit `shell.activeNavigation` value. The existing
-  navigation renders `aria-current="page"` for exactly one matching destination and exposes
-  administrator catalog management only when `isAdmin` is true.
-- The shared header already renders the Let’s Flex logo and the current user or guest
-  identity as a profile link. All six member destinations and the conditional administrator
-  destination already exist and have stable route semantics.
-- The application already has semantic color, surface, spacing, focus, and shadow tokens;
-  a reduced-motion baseline; a shared browser-component initializer; and tested modal
-  patterns for Escape handling, background inertness, focus movement/restoration, and
-  scroll locking.
-- The page shell deliberately owns viewport scrolling through `body > .content`, keeps
-  overlays outside `data-page-content`, and gives major page roots bounded centered widths
-  with shared horizontal spacing. The previous Library goal repaired narrow footer overflow.
-- Authentication entry and password-reset pages intentionally use `authShell.ejs` before an
-  authenticated principal exists. They already provide their own coherent full-viewport
-  layout and do not render protected navigation.
+- Guest principals are distinct, private, expire after 15 days, are protected by CSRF and
+  creation rate limiting, and can be converted in place without losing owned data.
+- Sessions, workout sessions, step-log snapshots, set logs, completion rules, Dashboard
+  summaries, History, and Progress already support multiple ordered exercise steps.
+- Global sessions and global exercise variants are visible to guests, while programs,
+  cycles, days, workouts, and private variants remain owner-scoped.
+- The Create Program form validates and persists a numeric `goalId`; goal identifiers do
+  not need to change for display.
+- The shared logo preserves one visual identity across authenticated and authentication
+  layouts, includes reduced-motion behavior, and allows SVG overflow.
+- The responsive application chrome already owns mobile, tablet/desktop, and short-height
+  sizing contracts and has focused structure/style/interaction coverage.
 
 ### Reuse
 
-- The `pageShell` composition point, `shell.currentUser`, `shell.activeNavigation`,
-  `isAdmin`, existing route/view-model contracts, and current navigation destinations.
-- The existing logo, user avatar, semantic tokens, focus styles, shared component bootstrap,
-  and browser-test conventions.
-- The tested modal interaction techniques where their mechanics are applicable to a
-  full-screen mobile menu, without turning navigation into a modal component.
-- Existing page max-width and horizontal-padding contracts, internal table/rail scrolling,
-  overlays, and page-specific sticky elements unless live verification proves a shell
-  compatibility defect.
-- Passport.js’s verified layout proportions: a 48rem/768px rail breakpoint, approximately
-  16.25rem/260px medium rail, approximately 21.875rem/350px large rail, vertically balanced
-  navigation, and a compact/scrolling fallback for short desktop viewports.
+- The canonical `Sample Full Body Session` rather than a duplicated guest-owned template.
+- Existing catalog variants, `exercise` step type, session-step ordering, workout snapshot
+  creation, logging/lifecycle services, analytics, and ownership constraints.
+- Existing guest creation, session rotation, failed-login cleanup, in-place account
+  conversion, and cascade deletion boundaries.
+- Existing goal rows and numeric form submission contract.
+- Existing Programs-page ViewModels as the presentation boundary for goal labels.
+- The shared logo partial, logo stylesheet, chrome sizing variables, breakpoints, and
+  reduced-motion rules.
 
 ### Modify
 
-- Replace the three-sibling top-header/content/bottom-navigation arrangement with one
-  application chrome whose header, navigation, account region, and content have a shared
-  responsive layout contract.
-- Move the existing navigation definition out of the footer-only presentation so one DOM
-  source serves the mobile menu and desktop rail. Preserve labels, URLs, administrator
-  visibility, active-route semantics, and current profile behavior.
-- Replace the mobile bottom primary-navigation bar with the requested header-connected menu.
-  The current footer contains no independent legal, version, or secondary copy, so retaining
-  it would duplicate the same primary navigation. The existing profile identity becomes the
-  lower account/secondary region in the rail and mobile menu; no filler content is invented.
-- Change the authenticated body/content layout from three rows to a mobile header/content
-  composition and a tablet/desktop fixed-rail/content composition. Keep the content scroller,
-  overlay positioning, page max widths, and shared page padding coherent.
-- Rework header/footer styles into application-shell styles using current semantic tokens.
-  Remove obsolete header/footer rules and page-level compensation only when direct evidence
-  shows the new shared contract supersedes them.
+- Expand the canonical sample session from one exercise to a short ordered full-body
+  sequence using existing global variants and realistic sets/reps.
+- Change guest creation from a bare user insert to an atomic starter-workspace operation
+  that creates one owned program, one current training day within a starter cycle, and one
+  planned workout linked to the shared sample session. Initialize the authenticated session
+  selection so the post-entry Dashboard resolves that workout immediately.
+- Format goal names when Programs-page presentation models are built, including the Create
+  Program options and existing-program metadata, while preserving raw names and goal IDs at
+  persistence boundaries.
+- Increase the logo wrappers where the chrome and authentication layout can accommodate it
+  and enlarge/emphasize both existing arm shapes within the shared SVG composition.
 
 ### Add
 
-- A native menu button with an accessible name, `aria-expanded`, and `aria-controls`, plus a
-  CSS hamburger-to-close treatment with practical touch sizing and visible focus.
-- A dependency-free browser shell component that opens and closes the mobile navigation,
-  closes on Escape and destination activation, restores focus when appropriate, constrains
-  keyboard focus, prevents interaction with covered content, locks the actual application
-  content scroller, and normalizes state when crossing the rail breakpoint.
-- Mobile menu transitions based on transform and opacity, safe shell transitions where they
-  clarify the responsive relationship, and a reduced-motion path. Essential state changes
-  must not depend solely on transition events.
-- Fixed medium and large rail widths, correct main-content offset, bottom account placement,
-  vertically balanced primary navigation, and short-height compaction/rail scrolling.
-- Focused rendered, CSS-contract, and browser-component coverage for the shared shell,
-  permissions, active state, menu state, keyboard behavior, scroll/inert behavior,
-  focus restoration, breakpoint normalization, and reduced motion.
+- Focused canonical-seed and HTTP coverage for the starter template, per-guest hierarchy,
+  initial Dashboard selection, workout start, ordered step snapshots, step performance or
+  skipping, finish behavior, analytics/progress compatibility, isolation, cleanup, and
+  conversion preservation.
+- A small reusable presentation formatter for underscore-delimited identifiers, with
+  focused coverage for single- and multi-word goal values.
+- Responsive logo contracts and recorded rendered checks at representative mobile,
+  tablet/desktop, large, and short desktop sizes.
 
-### Unknown until implementation review
+### Explicitly reconsider
 
-- The exact final visual balance of 260px and 350px rails in Let’s Flex’s denser application
-  pages. The reference values are a verified starting point, not mandatory final dimensions.
-- Whether the day and Library sticky panels, modal overlays, wide analytics/history tables,
-  and long administrator navigation label need bounded shell-compatibility corrections.
-  Source inspection identifies the risk but does not prove a defect.
-- Whether all representative pages remain visually balanced at 375px, 390px, 768px, 1024px,
-  1440px, and 1440×700 after the shell changes. This requires live rendered verification
-  and interactive breakpoint resizing.
-- No numeric contrast audit tooling has yet been identified. Changed colors should reuse the
-  already established semantic palette, with manual state review recorded.
+- The earlier authentication contract deliberately described generated guests as
+  “minimal.” This goal explicitly changes that first-use decision: guest identity remains
+  minimal, but each guest now receives a small owned starter hierarchy so the workout flow
+  is demonstrable immediately.
+- The completed application-chrome goal preserved the existing logo size and artwork. This
+  goal explicitly reopens only logo scale and arm prominence; its navigation, layout model,
+  palette, and interaction decisions remain established behavior.
+
+### Unknown until rendered review
+
+- The final safe wrapper dimensions and arm scale/stroke balance cannot be established from
+  CSS and SVG source alone. They require rendered checks at mobile, normal rail, large rail,
+  authentication, and wide-short layouts.
+- No browser automation dependency is installed. Existing live-review tooling may be used
+  if available; otherwise the remaining manual viewport check must be reported explicitly
+  rather than presented as automated verification.
+
+## Starter-workout contract
+
+- The existing `Sample Full Body Session` remains the single global read-only starter
+  template; its `owner_user_id` remains null.
+- The template uses only active global variants already present in the canonical catalog.
+  It gains several additional steps spanning lower-body, push, pull, and hinge work, with
+  contiguous unique ordering and realistic prescriptions. The final sequence should remain
+  approximately four to five exercises and should not attempt to be exhaustive.
+- Guest entry creates one guest-owned starter program using the existing
+  `general_fitness` goal, one bounded starter cycle containing today’s training day, and one
+  planned workout linked to the global sample template. It does not clone the session,
+  exercise, or variant rows.
+- Guest principal and owned hierarchy creation are atomic. A missing canonical goal,
+  session, or required variant fails without leaving a partial guest. Failure to establish
+  the web session still removes the newly created guest and all cascaded starter data.
+- The newly authenticated session selects the starter program/cycle so `/` resolves the
+  current training day and planned workout without a separate setup flow.
+- Starting the workout creates one ordered snapshot log per template step through the
+  existing start transaction. Existing per-step perform/skip, set-log, finish, Dashboard,
+  History, Progress, guest cleanup, and account-conversion behavior remain authoritative.
+
+## Goal-label contract
+
+- Database goal names and IDs remain unchanged.
+- Presentation converts underscore-delimited identifiers to title-cased words:
+  `weight_loss` becomes `Weight Loss` and `general_fitness` becomes `General Fitness`.
+- Both current goal-name consumers—the Create Program select and program switcher metadata—
+  use the same small formatter at the ViewModel/presentation boundary.
+- Create Program option values remain numeric goal IDs, invalid submitted selections remain
+  visible through the existing form-state behavior, and validated submissions persist the
+  selected existing goal row.
+
+## Logo contract
+
+- The current circular core, lettering, neon ring, opposing red/blue arms, animation, and
+  overall composition remain recognizable; this is a refinement, not a new logo.
+- Both arm shapes receive the same proportional prominence treatment and remain balanced
+  around the center mark.
+- Authenticated mobile, normal tablet/desktop rail, large rail, short-height rail, and login
+  presentation may adjust their existing wrappers only as needed for greater presence.
+- The enlarged mark must not clip, overlap the menu trigger or rail divider, widen the
+  viewport, create horizontal scrolling, or produce excessive header/rail height.
+- Existing focus visibility and reduced-motion behavior remain correct.
 
 ## Scope
 
 ### In scope
 
-- Authenticated `pageShell` markup and its shared brand, navigation, account/footer, content,
-  and overlay placement.
-- Header/navigation/footer EJS and CSS consolidation; a small browser shell component using
-  existing initialization patterns; focused tests for structure and interaction.
-- Responsive mobile header/menu and fixed tablet/desktop rail, including active navigation,
-  administrator visibility, guest/account identity, short-height behavior, motion, and
-  reduced motion.
-- Shared content-offset, scroll, overflow, and layering behavior across every protected page
-  using the shell.
-- Narrow compatibility corrections to individual pages only when rendered evidence proves
-  the shared-shell refactor requires them.
-- Live responsive review at the requested widths and a wide-short viewport, including menu,
-  active route, footer/account transformation, content alignment, sticky elements, overlays,
-  and cross-breakpoint resizing.
+- Canonical sample-session rows in `db/seed.js` and focused canonical-seed verification.
+- Guest starter-workspace creation and initial session selection through existing
+  authentication, ownership, and workout boundaries.
+- Directly affected guest, conversion, cleanup, Dashboard, session lifecycle, and Progress
+  tests.
+- A reusable goal-label presentation formatter and both verified goal display sites.
+- Shared logo SVG/CSS and narrowly required chrome/auth wrapper sizing.
+- Responsive rendered review and focused markup/style tests for the changed logo.
+- A guarded local development reset when the configured target is confirmed disposable and
+  `ALLOW_DATABASE_RESET=true`, as required by repository policy.
 
 ### Out of scope
 
-- Changes to routes, permissions, authentication/session behavior, business logic, database
-  schema/data, or navigation destinations.
-- Applying protected application chrome to unauthenticated login, registration, or password
-  reset pages; their existing `authShell` remains separate unless later evidence and explicit
-  approval establish a product requirement.
-- Passport.js branding, palette, typography, logo, text, code, dependencies, search/social
-  tooling, or its inaccessible menu implementation.
-- New global/footer content, new product features, unrelated page redesign, broad
-  accessibility remediation, or a new design system/framework.
-- New runtime dependencies, database reset/migration work, push, deployment, or production
-  mutation.
+- New exercise, variant, goal, or other catalog records; duplicated guest session templates;
+  schema changes; migrations; or migration infrastructure.
+- Starter content for existing registered accounts, multiple starter programs, onboarding
+  tours, coaching, exercise technique guidance, or an exhaustive training plan.
+- Changes to workout lifecycle semantics, analytics formulas, ownership/authorization,
+  guest lifetime, rate limits, account conversion, or cleanup policy.
+- Renaming stored goal identifiers or changing goal selection from numeric IDs.
+- Navigation, shell-layout, page, typography, palette, component, or logo redesign outside
+  the bounded prominence adjustments.
+- New dependencies, push, deployment, production reset, or production-data mutation.
 
-## Correctness and accessibility requirements
+## Correctness, security, and data-integrity requirements
 
-- One maintained navigation definition preserves all current member/admin destinations,
-  visibility rules, URLs, and explicit active state in both responsive presentations.
-- The mobile trigger is a native button with a clear accessible name, `aria-expanded`, and a
-  valid `aria-controls` relationship. Open and closed navigation states agree across DOM,
-  visuals, pointer input, and accessibility APIs.
-- The menu closes on Escape and destination activation, restores focus after dismissal,
-  contains keyboard focus while it obscures the page, prevents background interaction and
-  content scrolling, and returns to a stable closed state across breakpoint changes.
-- The fixed rail never covers content. Shell and page widths do not produce horizontal page
-  overflow, duplicate horizontal padding, clipped controls, or inaccessible short-height
-  navigation/account content.
-- Existing modal background-inertness, focus trapping, fixed overlay layering, page-level
-  scrolling, active route transitions, sticky elements, and route behavior remain correct.
-- Motion uses explicit transform/opacity (and only necessary layout-property) transitions,
-  avoids `transition: all`, remains modest, and is removed or greatly shortened for
-  `prefers-reduced-motion: reduce`.
-- Navigation, account, and menu controls retain practical touch targets, visible focus, text
-  wrapping, contrast, native link/button behavior, and semantic header/nav/main/footer
-  landmarks where appropriate.
+- Guest creation remains CSRF protected, rate limited, session-rotated, and isolated by a
+  generated guest user ID. No additional sensitive data is collected or logged.
+- Guest and starter hierarchy writes succeed or roll back together. Ownership joins continue
+  to prevent another guest from reading or mutating the starter program and workout.
+- Expired-guest cleanup and failed session-establishment cleanup remove the starter hierarchy
+  through existing foreign-key cascades; account conversion retains it under the same user
+  ID.
+- The shared global session and variants remain unowned and unduplicated. Workout start uses
+  existing immutable snapshot rows so later template changes cannot rewrite workout history.
+- Goal formatting is output-only. Request validation continues to accept only the existing
+  positive goal ID contract and controllers continue to consume validated input.
+- The canonical development seed remains authoritative. No ordinary development migration is
+  introduced, and production is never reset or mutated under development authorization.
+- Changed UI retains semantic links/controls, accessible names, visible focus, practical
+  mobile spacing, and reduced-motion behavior.
 
 ## Done when
 
-- Mobile renders a polished horizontal header and accessible expandable primary navigation;
-  tablet/desktop renders the same chrome as a fixed left rail with lower account/secondary
-  content and short-height fallback.
-- Main content is correctly offset from the rail, keeps one predictable padding/max-width
-  contract, and has no shell-caused horizontal overflow or overlap.
-- All existing routes, active states, administrator visibility, current-user/guest profile
-  behavior, overlays, modals, forms, charts, tables, and sticky elements remain functional.
-- Footer-only navigation has been coherently transformed rather than duplicated, and no
-  unnecessary footer copy or dependency has been added.
-- Menu and shell motion use the specified techniques and have a verified reduced-motion path.
-- Focused component/rendered/style tests pass; `npm run verify` and the PostgreSQL HTTP suite
-  pass because this is a broad cross-cutting UI change.
-- Live review records 375px, 390px, 768px, 1024px, 1440px, and approximately 1440×700,
-  interactive resizing in both directions, member/guest/admin states where practical, menu
-  keyboard/pointer behavior, and document/content overflow measurements.
-- Remaining page-specific visual issues are recorded as separate future candidates rather
-  than expanding this goal beyond shell compatibility.
+- A fresh canonical database contains one global sample session with the reviewed short,
+  ordered, non-duplicative catalog-based workout.
+- Two independently created guests each receive exactly one private starter hierarchy linked
+  to the same global session, and their initial authenticated selections resolve only their
+  own current program/day/workout.
+- A fresh guest can start the planned workout; every intended step is snapshotted in order,
+  steps can be performed or skipped, the workout can finish, and Dashboard, History, and
+  Progress continue to reflect the resulting data correctly.
+- Guest cleanup, failed-session cleanup, and permanent-account conversion retain their
+  established security and data-lifecycle guarantees.
+- Create Program and existing-program metadata display readable goal labels while option
+  values and persisted goal IDs remain unchanged.
+- The enlarged shared logo and more prominent arms render without clipping, overflow,
+  overlap, alignment regression, or excessive chrome height on representative mobile,
+  tablet/desktop, large, wide-short, and login layouts.
+- Focused tests, `npm run verify`, the PostgreSQL HTTP suite, applicable guarded reset, final
+  diff inspection, and `git diff --check` pass, with any unavailable manual check reported
+  rather than assumed.

@@ -2,423 +2,394 @@
 
 ## Current goal
 
-Refactor the authenticated application shell into a mobile horizontal header with accessible
-expandable navigation and a fixed Passport-inspired tablet/desktop rail, while preserving
-Let’s Flex’s routes, account behavior, visual language, and page functionality.
+Improve guest and first-use experience with an immediately startable representative workout,
+human-readable program-goal labels, and a larger, more prominent version of the established
+Let’s Flex logo.
 
-**Goal status:** Completed on 2026-09-08 after explicit user approval. Actions 1, 2, and 3
-are Completed.
+**Goal status:** Completed on 2026-09-09 after explicit user approval. Actions 1, 2, and 3 are
+Completed.
 
 ## Status definitions
 
-- **Pending approval:** proposed work that has not been approved for implementation.
-- **Pending:** later work whose preceding action is not yet completed and approved.
+- **Pending approval:** proposed first action that has not been approved for implementation.
+- **Pending:** later work whose preceding action has not been completed and approved.
 - **Active:** the only action currently authorized for implementation.
 - **Ready for review:** implemented and verified; awaiting explicit user approval.
 - **Changes requested:** review corrections are authorized for the current action.
 - **Completed:** verification evidence was reviewed and the action was explicitly approved.
 
-Only one action may be Active. Approving Action 1 authorizes its implementation and no later
-action. Each action stops at Ready for review.
+Only one action may be Active. Approving this plan activates Action 1 and stops at that
+planning gate; it does not authorize implementation in the same response. Every implemented
+action stops at Ready for review.
 
 ## Verified evidence baseline
 
-- The current authenticated `pageShell` renders a top `.page-header`, independently defined
-  bottom `.footer` primary navigation, scrollable `.content`, and separate `.overlays` as
-  sibling body regions. Body is a three-row grid with the content region owning vertical
-  scrolling.
-- Header and footer share user/shell locals but not one chrome structure. The header owns the
-  logo and profile identity; the footer locally defines all member routes plus conditional
-  administrator catalog management. Profile is consequently represented in both regions.
-- Every protected page supplies `shell.activeNavigation`; footer tests prove one
-  `aria-current="page"` match, no false active state without the contract, and admin-only
-  management visibility.
-- Dashboard, Library, Profile, Programs, training-day, History, and Progress pages use the
-  shared authenticated layout. Login/registration/password-reset controllers explicitly use
-  the separate `authShell`, which has no protected navigation and is not part of this shell
-  conversion.
-- Existing page roots use 68–76rem centered widths and shared horizontal spacing, with some
-  internal horizontal scrollers and two page-level sticky panels. Modals are fixed above
-  content, live outside `data-page-content`, and already test inertness, Escape, focus trap,
-  focus restoration, scroll locking, and transition fallback behavior.
-- There is no independent footer/legal/version content. The current footer is entirely the
-  primary navigation. The August 2026 footer refactor is historical evidence that the mobile
-  bottom navigation and explicit active-route contract were deliberate existing behavior;
-  this new goal explicitly changes its presentation while preserving its destinations and
-  semantics.
-- The live Passport.js source uses a horizontal 100px mobile menu, then a fixed 260px rail at
-  768px and 350px rail at 992px. Its navigation is vertically translated near the center,
-  switches to normal flow below 750px viewport height, and permits rail scrolling for a
-  short large viewport. Its mobile implementation toggles `display` with a non-button div
-  and does not supply the required ARIA/focus behavior, so only its spatial model is reused.
-- The worktree was clean before planning. No implementation, dependency, database, route, or
-  business-logic change has been made for this goal.
+- `src/features/auth/createGuest.js` creates only a `users` row through the users repository.
+  `authController.enterGuest` rotates/authenticates the web session and redirects to `/`, but
+  initializes no program or cycle selection. The resulting Dashboard has no active program.
+- The canonical seed creates one global `Sample Full Body Session` and exactly one ordered
+  step using the existing `Bodyweight Push Up` global variant. `findVisibleForUser` already
+  exposes that global template to guests.
+- The ownership model already permits a guest-owned program/cycle/day/workout to reference a
+  global session. Workout start snapshots every current session step into ordered
+  `workout_step_logs`, and lifecycle mutations are constrained through the owning program.
+- The expanded catalog has 18 base exercises and 36 global variants. Suitable starter
+  movements already exist, so neither new catalog rows nor duplicated variants are needed.
+- Guest deletion cascades through owned programs and private resources. Guest conversion
+  updates the same user row and therefore retains owned data. Existing tests cover both
+  boundaries, although assertions describing guests as minimal or counting manually added
+  programs will require focused updates for the new starter hierarchy.
+- Goal seed values include `hypertrophy`, `weight_loss`, and `general_fitness`.
+  `createProgramFormViewModel` and `createProgramSwitcherViewModel` both expose `goal.name`
+  directly. The form option value is `goal.id`, and request validation parses a positive
+  numeric `goalId`.
+- `utils/toCapitalizedString.js` capitalizes only the first character. Current uses replace
+  only one underscore or intentionally produce sentence-style labels, so changing that
+  helper globally would be broader and less predictable than adding a focused presentation
+  formatter.
+- The shared logo is one 240×240 SVG included by the application chrome and login page.
+  Existing arm paths are mirrored around the circular core. Wrapper sizes and responsive
+  header heights live in `applicationChrome.css` and `auth.css`; focus and reduced-motion
+  behavior already exist.
+- The worktree was clean before planning. No implementation, database, dependency, reset,
+  deployment, or production mutation has been performed for this goal.
+
+## Confirmed decisions
+
+- Reuse and expand the one global sample template; do not clone it per guest.
+- Reuse only current active global exercise variants and keep the starter sequence to roughly
+  four or five exercises with realistic sets/reps.
+- Create one guest-owned program/cycle/current day/planned workout atomically and point it at
+  the global starter template. Initialize the authenticated program/cycle selection so the
+  guest lands on the workout-ready Dashboard.
+- Preserve guest isolation, 15-day expiry, CSRF, rate limiting, session rotation, cleanup,
+  and in-place conversion behavior.
+- Preserve stored goal names and numeric goal IDs. Humanize names only in the Programs-page
+  presentation models and cover both verified display sites.
+- Refine the shared logo and its wrappers rather than creating separate mobile/desktop/auth
+  assets or redesigning the mark.
+- Use the canonical reset-first development workflow; add no migration or dependency and
+  never mutate production.
 
 ## Proposed action sequence
 
-### Action 1 — Establish the unified chrome and accessible navigation interaction
+### Action 1 — Build and verify the guest starter workout
 
 **Status:** Completed
 
-**Purpose:** Create one semantic shell/navigation contract and prove its responsive menu
-state behavior before applying the full rail visual treatment.
+**Approved:** 2026-09-08. The user accepted the implementation after its recorded review and
+final verification gate.
+
+**Purpose:** Turn guest entry into an immediate but bounded workout demonstration by
+expanding the shared starter template and linking it into an atomically created guest-owned
+hierarchy.
 
 **Expected work:**
 
-- Refactor `pageShell` and the current header/footer partials into one application chrome
-  containing the existing brand, one shared primary-navigation definition, and the existing
-  account/profile identity as the lower secondary region. Preserve all route URLs, labels,
-  active values, guest/member identity, and administrator-only visibility.
-- Render a native menu button with a stable controlled navigation ID, accessible open/close
-  name, `aria-expanded`, practical touch target, and a CSS-ready hamburger structure.
-- Add a shell browser component through the existing initializer. Implement open/close,
-  Escape dismissal, destination-activation close, appropriate focus movement/restoration,
-  focus containment, covered-content inertness, locking of the actual `.content` scroller,
-  and state normalization when crossing the desktop breakpoint.
-- Establish stable initial/enhanced states that do not animate `display`, do not leave
-  closed navigation keyboard-accessible, and do not make correctness depend on a transition
-  event. Coordinate rather than conflict with the existing modal/overlay contract.
-- Add or consolidate focused EJS and browser tests for one navigation source, active and
-  administrator states, button/control relationships, all interaction paths, inert/scroll
-  behavior, focus restoration, and breakpoint changes.
-- Apply only the minimum shell styling required for coherent structural states in this
-  action; defer final dimensions, rail composition, and visual polish to Action 2.
+- Define a reviewed four-to-five-step full-body sequence from existing active global
+  variants, retaining `Bodyweight Push Up` and adding complementary lower-body, pull, and
+  hinge work with contiguous ordering and realistic prescriptions.
+- Update the authoritative canonical seed so `Sample Full Body Session` contains exactly the
+  reviewed sequence, remains unowned/read-only, and introduces no duplicate catalog rows.
+- Introduce a cohesive guest-workspace creation boundary that creates the guest, resolves
+  the existing `general_fitness` goal and global sample session, and inserts one owned
+  starter program, cycle, current training day, and planned workout in one transaction.
+- Pass the new program/cycle selection through the existing session-rotation boundary so the
+  redirect to `/` resolves the starter Dashboard immediately. Preserve cleanup if web-session
+  establishment fails.
+- Update directly affected guest/conversion tests whose “minimal” or exact program-count
+  expectations are intentionally superseded.
+- Add focused seed/service/HTTP coverage for exact template steps, transaction rollback,
+  two-guest isolation, initial Dashboard state, workout start and ordered step snapshots,
+  step perform/skip and finish, Dashboard/History/Progress compatibility, cleanup, and
+  conversion preservation.
+- If `ALLOW_DATABASE_RESET=true`, confirm the configured development target is disposable,
+  run the required guarded reset, and verify its resulting relationships before the relevant
+  test suites.
 
 **Acceptance criteria:**
 
-- One rendered chrome contains every existing permitted destination exactly once and the
-  existing account identity once, with the correct current-page semantics.
-- The menu state contract is accessible and deterministic for pointer, keyboard, resize,
-  and reduced/no-transition conditions, with focused tests covering success and cleanup.
-- Existing protected page content and overlay placement remain structurally intact; auth
-  pages, routes, permissions, session state, and business behavior are unchanged.
-- Focused tests, formatting, lint, browser types, and server types pass. The action stops at
-  Ready for review with the precise remaining visual work recorded.
+- Fresh seed data contains one global starter template with the approved realistic sequence
+  and no new exercise or variant rows.
+- Each new guest owns one complete starter hierarchy and shares only the global template and
+  catalog. A partial hierarchy cannot survive any provisioning failure.
+- The post-entry Dashboard selects today’s planned starter workout, which starts through the
+  existing lifecycle and creates one correct ordered log per step.
+- Existing step logging, workout finish, Dashboard analytics, History, Progress, guest
+  cleanup, failure cleanup, isolation, and account conversion pass focused HTTP verification.
+- Required formatting, lint, server types, focused tests, and applicable database checks pass.
+  The action stops at Ready for review.
 
-**Constraints:**
+**Security and scope constraints:**
 
-- Do not create separate mobile and desktop navigation definitions or duplicate primary
-  navigation in a bottom bar.
-- Do not add dependencies or copy Passport.js markup/script behavior.
-- Do not begin page-specific layout remediation without rendered evidence.
+- Keep guest entry CSRF protected, rate limited, session-rotated, and owner-scoped; do not log
+  guest/session secrets or collect new personal information.
+- Do not change schema, workout lifecycle semantics, analytics formulas, guest expiry,
+  authorization rules, or catalog identities.
+- Do not create a migration, clone shared sessions/variants, add dependencies, touch the
+  logo/goal-label work, push, deploy, or mutate production.
 
 **Implemented:**
 
-- Replaced the separate authenticated header and footer includes with one
-  `applicationChrome.ejs` composition in `pageShell`. The shared chrome now owns the brand,
-  one primary navigation list, and one lower account/profile destination; the retired header
-  and footer partials and styles no longer leave parallel definitions behind.
-- Preserved Dashboard, History, Progress, Programs, Library, Profile, and conditional
-  administrator catalog destinations. Profile now appears exactly once as the existing
-  current-user/guest account link, including its active-page state and temporary-workspace
-  status. The other destinations retain their explicit `shell.activeNavigation` matching.
-- Added a native mobile menu button with a stable `application-menu` control relationship,
-  synchronized accessible label and `aria-expanded`, a 2.75rem target, visible focus, and a
-  three-line icon structure ready for Action 2's final hamburger transformation.
-- Added the dependency-free application-chrome browser component through the shared
-  initializer. It synchronizes visual, pointer, `inert`, and `aria-hidden` states; moves focus
-  into the menu; traps focus across the trigger/menu; closes on toggle, Escape, or destination
-  activation; restores focus for dismissal; and normalizes to accessible desktop or closed
-  mobile state across the 48rem media query.
-- Locks the actual `.content` scroller and makes covered page content inert while mobile
-  navigation is open. Cleanup tracks inertness ownership and does not remove background
-  restrictions belonging to an open modal.
-- Added a minimal responsive chrome foundation using existing semantic tokens. Mobile uses a
-  fixed header-connected transform/opacity surface without display animation; desktop keeps
-  the same DOM available in a temporary horizontal presentation. Final fixed-rail dimensions,
-  vertical balance, hamburger morph, short-height behavior, and visual polish remain exactly
-  the approved scope of Action 2.
-- Replaced the obsolete Progress test dependency on footer scrolling with the new shared
-  content-lock contract. Added focused rendered/style/component coverage and removed the
-  superseded header/footer tests with their implementations.
+- Added one reviewed, shared starter-workout manifest with four existing active global
+  variants in contiguous order: `Bodyweight Box Squat` (3×10), `Bodyweight Push Up` (3×10),
+  `One-Arm Dumbbell Row` (3×10), and `Bodyweight Glute Bridge` (3×12).
+- Made the canonical seed derive the unowned `Sample Full Body Session` and its ordered steps
+  from that manifest. Manifest validation rejects missing catalog variants, duplicate
+  variants, invalid prescriptions, and sequences outside the four-to-five-step scope.
+- Changed guest provisioning to resolve the existing `general_fitness` goal and shared
+  sample session, then transactionally create the guest, `Guest Starter Program`, `Getting
+Started` cycle, current `Full Body` day, and planned workout through existing repositories.
+- Extended the existing session-establishment boundary to persist the new program, cycle,
+  and day selection after session rotation and before its single save. Existing failure
+  cleanup still deletes a provisioned guest if web-session establishment fails.
+- Added canonical-seed, manifest, and HTTP coverage for exact steps, per-guest ownership,
+  immediate Dashboard/library state, workout start and ordered snapshots, perform/skip/
+  finish behavior, Dashboard/History/Progress results, missing-reference rollback, injected
+  mid-transaction rollback, cleanup, isolation, and conversion-compatible program counts.
 
-**Accessibility, security, and scope evaluation:**
+**Security and data-integrity review:**
 
-- Closed mobile navigation is both inert and `aria-hidden`; open navigation is available to
-  keyboard and accessibility APIs while obscured content is inert and non-scrollable. Desktop
-  removes the mobile-only restrictions rather than relying on CSS to override accessibility
-  state.
-- Navigation uses native links, the trigger uses a native button, current location retains
-  `aria-current="page"`, focus remains visibly styled, and essential open/close state does not
-  depend on a transition event. New transitions have an explicit reduced-motion override.
-- No authentication, authorization, session, CSRF, validation, route, controller, database,
-  or persistence behavior changed. The security-sensitive request controls are therefore not
-  applicable to this presentation-only action. Administrator visibility still comes from the
-  existing server-owned `isAdmin` boundary.
-- Authentication layouts and page content were not redesigned. No dependency, schema, seed,
-  migration, development-data reset, push, deployment, or production mutation occurred.
+- Guest entry remains behind the established CSRF, rate-limit, session-rotation, and
+  authentication boundaries. No credentials, session identifiers, or new personal data are
+  logged or collected.
+- The starter hierarchy is owner-scoped and transactionally atomic; both a missing canonical
+  session and a forced insert failure leave no guest or partial program data behind.
+- The shared session remains unowned and read-only, guest expiry remains 15 days, conversion
+  retains the same user row and owned hierarchy, and no schema, authorization, lifecycle,
+  migration, dependency, deployment, or production change was made.
 
 **Verification evidence:**
 
-- Focused application-chrome rendered, CSS, browser-interaction, and affected Progress tests
-  passed 13 of 13.
-- `npm run verify` passed outside the sandbox: formatting, lint, server types, browser types,
-  the canonical PostgreSQL catalog check, and all 166 repository tests passed.
-- The first sandboxed `npm run verify` attempt reached the test suite but the canonical
-  database hook was denied with `EPERM`; the required escalated rerun above passed completely.
-- The PostgreSQL HTTP application suite passed 48 of 49 tests on each of two runs. Its sole
-  failure is the pre-existing assertion for `1 finished workout across 1 active day` at
-  `test/http/applicationPages.test.js:3298`. Direct `HEAD` inspection proves the unchanged
-  Dashboard ViewModel already emits separate `Finished workouts` and `Active days` metrics
-  and contains no combined sentence. The same failing test's repository-level analytics
-  assertions pass before its stale rendered-text assertion. This unrelated baseline
-  discrepancy was not repaired under Action 1.
-- HTTP responses rendered the new application chrome successfully throughout the 49-test
-  suite, including member, guest, and administrator flows. Authentication page tests also
-  passed with the unchanged `authShell`.
-- `git diff --check` passed. Source search found no remaining imports or selectors for the
-  retired header/footer partials and styles.
+- Confirmed `.env` explicitly authorizes reset, `NODE_ENV=development`, and the target is
+  `localhost/lets_flex`; the guarded `npm run db:reset` completed successfully. A read-only
+  post-reset query found exactly one unowned active sample session with four steps in the
+  reviewed order.
+- Focused starter-manifest tests passed: 2/2. Canonical catalog/seed tests passed: 2/2.
+- The complete PostgreSQL HTTP suite passed: 52/52, including the new end-to-end guest
+  workout and both provisioning rollback cases.
+- `npm run verify` passed after the final code/test changes: formatting, lint, server types,
+  browser types, and all 172 automated tests (0 failures).
+- The approval-gate rerun passed `npm run verify` (172/172) and the complete PostgreSQL HTTP
+  suite (52/52) with 0 failures.
+- `git diff --check` passed. The final changed-file review found only Action 1 implementation,
+  tests, and governed goal/action documentation; no Action 2 or Action 3 implementation was
+  started.
 
-**Remaining work for approved later actions:**
+**Completion summary:** New guests now receive an atomically provisioned, immediately selected
+starter hierarchy linked to the expanded four-step global sample session. The existing workout,
+reporting, cleanup, isolation, expiry, and conversion boundaries remain intact and verified.
 
-- Action 2 owns the fixed 260/350px-inspired rail, exact content offset, vertically balanced
-  navigation and lower account region, short-height scrolling, final hamburger morph, and
-  polished responsive motion.
-- Action 3 owns live cross-page review and the requested viewport/interactive-resize matrix.
-  No manual layout claim is made from Action 1's source and automated checks alone.
-
-**Completion:** Approved on 2026-09-08 after final verification passed formatting, lint,
-server and browser type checks, the canonical PostgreSQL catalog check, and all 166 repository
-tests. Action 1 established the unified chrome and accessible responsive menu-state foundation;
-the visual rail treatment remains pending under Action 2.
-
-### Action 2 — Implement the coordinated mobile header and fixed responsive rail
+### Action 2 — Humanize goal labels at the presentation boundary
 
 **Status:** Completed
 
-**Purpose:** Give the unified chrome its final Let’s Flex visual treatment and responsive
-layout using Passport-inspired proportions and motion.
+**Approved:** 2026-09-08. The user accepted the presentation-boundary implementation after its
+recorded review and final verification gate.
+
+**Purpose:** Make goal names readable everywhere they are currently shown on the Programs
+page without changing their database identity or submission contract.
 
 **Expected work:**
 
-- Introduce shared shell sizing/layering tokens and transform the chrome at approximately
-  48rem into a fixed left rail, starting near 16.25rem and increasing near the existing large
-  breakpoint toward 21.875rem when the content balance supports it.
-- Offset the content scroller exactly once, preserve centered page max widths and shared page
-  padding, and keep overlays/modals above the shell without horizontal viewport overflow.
-- On mobile, present a compact horizontal header and a large header-connected navigation
-  surface. Animate the menu button and surface with explicit transform/opacity transitions
-  in the requested ranges; avoid `transition: all` and display animation.
-- On tablet/desktop, place the brand at the top, vertically balance primary navigation when
-  height permits, and place account/profile content at the bottom. Add compact spacing and
-  rail scrolling for wide-short viewports so links and account content never overlap or clip.
-- Preserve current palette, typography, logo, radii, shadows, focus treatment, active state,
-  and icon conventions. Add a comprehensive reduced-motion override for new movement.
-- Retire obsolete header/footer styling and remove only directly superseded shell workarounds.
-  Add CSS/rendered contracts for widths, offsets, overflow containment, short-height behavior,
-  explicit transition properties, active/focus states, and reduced motion.
+- Add a small shared ViewModel formatter that converts underscore-delimited identifiers to
+  title-cased display words and handles empty/non-string input predictably.
+- Use it in Create Program select options and existing-program switcher metadata, the two
+  verified consumers of goal names.
+- Preserve each select option’s numeric goal ID and the existing invalid-form selected value.
+- Add focused formatter/ViewModel/rendered tests covering `hypertrophy`, `weight_loss`, and
+  `general_fitness`, plus HTTP coverage proving a human-readable option still submits and
+  persists the matching existing goal ID.
+- Re-run the directly affected Programs-page and validation coverage, then the required
+  formatting, lint, and server type checks.
 
 **Acceptance criteria:**
 
-- Mobile and desktop visibly read as the same chrome transforming, with no duplicated nav,
-  hidden content, double padding, horizontal page scrollbar, rail overlap, or clipped
-  short-height controls.
-- Account/profile placement replaces the prior footer-only presentation coherently, and no
-  nonexistent footer content is invented.
-- Motion and reduced-motion behavior meet the goal and do not affect essential state changes.
-- Focused tests plus formatting, lint, server types, and browser types pass. The action stops
-  at Ready for review before cross-page live validation.
+- Create Program and program cards display `Hypertrophy`, `Weight Loss`, and
+  `General Fitness` rather than raw identifiers.
+- Display formatting is shared at the presentation boundary; raw goal names and IDs remain
+  unchanged in repositories, mappers, validation, and database rows.
+- Valid and invalid form-state behavior remains correct, and submitted IDs still resolve to
+  the intended existing goal.
+- Focused and required static checks pass. The action stops at Ready for review.
 
 **Constraints:**
 
-- Reference dimensions may be tuned only from rendered Let’s Flex evidence and must be
-  documented if changed.
-- Do not redesign individual page content or alter the established auth shell.
+- Do not rename seeded goal rows, change the goal schema, alter the numeric `goalId` contract,
+  or broaden formatting changes to unrelated identifiers.
+- Do not begin logo work or unrelated Programs-page redesign.
 
 **Implemented:**
 
-- Reworked the authenticated shell into a mobile header/content grid and, from 48rem, a
-  two-column viewport grid that reserves the rail width exactly once. The chrome is fixed in
-  the reserved column while `.content` owns the complete second column with `min-width: 0`;
-  no content margin or duplicate padding offset was introduced.
-- Applied the 16.25rem reference rail at the tablet boundary. Delayed the 21.875rem expansion
-  from Passport's 62rem reference to 75rem because Let’s Flex's verified Dashboard and
-  Library content contracts are denser: at 1024px a 350px rail would leave only 674px,
-  whereas retaining 260px leaves 764px for their existing responsive layouts.
-- Changed the same chrome DOM into a vertically composed rail: brand at the top, primary
-  navigation centered in the available height, and the existing account/profile link at the
-  bottom. Active navigation uses both text/background treatment and a non-color shape marker;
-  long labels wrap within the rail.
-- Added a short-height desktop contract below 46.875rem/750px. It reduces brand and link
-  dimensions, moves navigation to normal top-aligned flow, and keeps the entire menu/account
-  column vertically scrollable with a stable scrollbar gutter so controls cannot overlap.
-- Polished the compact mobile header and header-connected menu using existing semantic
-  surfaces, borders, shadows, focus color, logo, and account presentation. The menu retains
-  Action 1's inert-compatible transform/opacity visibility states.
-- Completed the hamburger-to-close morph with explicit opacity and transform transitions.
-  Menu motion uses only opacity, transform, and delayed visibility; interactive color changes
-  name their properties, and the reduced-motion query removes all newly introduced chrome
-  transitions. No `transition: all` or display animation was added.
-- Added focused CSS contracts for the medium/large widths, fixed rail, single grid offset,
-  overflow containment, short-height mode, scrolling, hamburger morph, and reduced motion.
-  No page-specific CSS, auth-shell markup, route, behavior, dependency, or database code was
-  changed in this action.
+- Added a focused Programs-page `formatGoalLabel` presentation helper. It converts each
+  underscore-delimited segment to a title-cased display word and returns an empty label for
+  empty or non-string input.
+- Applied the shared helper to both verified goal-name consumers: Create Program select
+  options and existing-program switcher metadata.
+- Kept form option values as numeric goal IDs and retained the submitted string ID in invalid
+  form state, including the selected human-readable option.
+- Added formatter, ViewModel, rendered EJS, and PostgreSQL HTTP assertions for `hypertrophy`,
+  `weight_loss`, and `general_fitness`, plus successful program creation using the existing
+  `weight_loss` row.
 
-**Accessibility, security, and scope evaluation:**
+**Security and scope evaluation:**
 
-- Native link/button semantics, visible focus, practical control sizes, current-page
-  semantics, administrator visibility, and Action 1's keyboard/inert/scroll state behavior
-  remain unchanged. Active state is not communicated by color alone.
-- Modals retain their existing fixed 1000 layer above the chrome's named layer 99. The
-  overlay sibling remains outside page content and is assigned to the content grid column
-  without changing modal markup or behavior.
-- Authentication, authorization, session, CSRF, validation, routes, controllers, database,
-  and persistence are unaffected. No new security-sensitive boundary applies.
-- Live cross-page and viewport verification was deliberately not claimed here; it remains
-  the approved scope of pending Action 3.
+- The change is output-only at the ViewModel boundary. Request validation still parses the
+  established positive numeric `goalId`, the controller still consumes validated input, and
+  the repository still persists the existing foreign-key ID.
+- The HTTP test proves the readable `Weight Loss` option submits the existing numeric ID while
+  the joined database row remains named `weight_loss`. Existing CSRF and authenticated form
+  boundaries were exercised and remain unchanged.
+- No EJS structure, controller, validation, repository, seed, schema, migration, dependency,
+  logo, unrelated page, deployment, or production data was changed for this action.
 
 **Verification evidence:**
 
-- Focused application-chrome rendered/style/browser-interaction and affected Progress tests
-  passed 15 of 15.
-- `npm run verify` passed outside the sandbox: formatting, lint, server types, browser types,
-  the canonical PostgreSQL catalog check, and all 168 repository tests passed.
-- `git diff --check` passed, and final diff inspection found Action 2 changes limited to the
-  shared chrome stylesheet, its focused tests, and active-goal records.
-- The PostgreSQL HTTP application suite was not rerun in Action 2 because Action 3 explicitly
-  owns final live and HTTP cross-page validation. Its recorded baseline remains 48 of 49 with
-  the unrelated stale Dashboard rendered-text assertion documented under Action 1.
+- Focused formatter and Programs ViewModel/rendered tests passed: 6/6.
+- The complete PostgreSQL HTTP suite passed: 53/53, including readable labels, invalid selected
+  state, numeric submission, and unchanged stored identity.
+- `npm run verify` passed: formatting, lint, server types, browser types, and all 174 automated
+  tests (0 failures).
+- The approval-gate rerun passed `npm run verify` (174/174) and the complete PostgreSQL HTTP
+  suite (53/53) with 0 failures.
+- `git diff --check` passed. A final source search confirmed the two Programs ViewModels are the
+  only presentation consumers of goal names; no Action 3 implementation was started.
 
-**Remaining work for the approved later action:**
+**Completion summary:** All current Programs-page goal presentations now use one output-only
+formatter, while numeric submissions and stored goal identifiers retain their established
+contracts.
 
-- Action 3 owns live review at every requested viewport, interactive breakpoint resizing,
-  role/state coverage, real overflow measurements, sticky and modal layering checks, and any
-  evidence-based compatibility repairs. Action 2 makes no live-layout completion claim.
-
-**Completion:** Approved on 2026-09-08 after final verification passed formatting, lint,
-server and browser type checks, the canonical PostgreSQL catalog check, and all 168 repository
-tests. The authenticated shell now has its coordinated mobile presentation and fixed
-responsive rail; live cross-page validation remains pending under Action 3.
-
-### Action 3 — Verify and repair shell compatibility across pages and viewports
+### Action 3 — Increase logo presence and complete responsive verification
 
 **Status:** Completed
 
-**Purpose:** Validate the shared contract in the real application and make only evidence-based
-compatibility corrections required to complete the goal.
+**Approved:** 2026-09-09. The user accepted the responsive logo refinement after its recorded
+rendered review and final verification gate.
+
+**Purpose:** Give the established mark more visual impact while proving that the refinement
+fits every existing first-use and authenticated shell state.
 
 **Expected work:**
 
-- Review Dashboard, Library personal/admin, Profile, Programs, training days, History detail
-  and list/status states, and Progress results/status states in a local browser. Include forms,
-  charts, wide tables, long content, empty/light-content states, sticky panels, and modals.
-- Verify 375px, 390px, the 768px breakpoint vicinity, 1024px, 1440px, and approximately
-  1440×700. Resize interactively across the breakpoint in both directions and record actual
-  document/body/content widths and scroll behavior.
-- Exercise hamburger animation, all open/close paths, focus containment/restoration, active
-  states, member/guest/admin visibility, rail footer/account positioning, background
-  inertness, content scroll lock, modal layering, and reduced motion where tooling permits.
-- Repair only reproduced shell-compatibility defects at their shared source. If a page-local
-  change is necessary, record the evidence and keep it narrowly scoped; document unrelated
-  visual inconsistencies as future candidates.
-- Run focused regression tests, `npm run verify`, the PostgreSQL HTTP application suite, and
-  `git diff --check`; inspect the final diff for unrelated changes and record any manual
-  limitation or remaining risk.
+- Increase the shared logo’s effective size in the mobile header and normal desktop rail,
+  and tune the authentication and short-height sizes only where rendered balance supports it.
+- Enlarge or proportionally emphasize both mirrored arm shapes inside the existing shared SVG
+  while preserving the core, lettering, rings, neon treatment, flex animation, and identity.
+- Adjust only the directly required header/rail wrapper or spacing values. Keep practical menu
+  spacing and avoid excessive chrome height.
+- Add focused shared-mark and chrome/auth style contracts for balanced arms, responsive
+  dimensions, overflow containment, focus, and reduced motion.
+- Render and inspect the guest Dashboard and login page at representative 375/390px mobile,
+  768/1024px rail, 1440px large, and approximately 1440×700 short-height viewports. Record
+  element/document widths and check clipping, overlap, alignment, header/rail height, focus,
+  motion, and breakpoint resizing.
+- Run focused tests, `npm run verify`, the complete PostgreSQL HTTP suite, `git diff --check`,
+  and final diff inspection. Record any unavailable manual verification explicitly.
 
 **Acceptance criteria:**
 
-- All requested viewport and interaction checks have recorded evidence with no shell-caused
-  overlap, page overflow, layout flash, broken fixed/sticky element, or inaccessible control.
-- Every Done-when criterion in `current-goal.md` is mapped to code, automated evidence, and
-  live evidence or is explicitly reported unmet.
-- Full repository and PostgreSQL HTTP verification pass. The action and goal stop at their
-  respective review gates for explicit user approval.
+- The logo is visibly larger in its primary chrome presentation and both arms have greater,
+  symmetric prominence without becoming a new design.
+- Mobile, normal/large rail, wide-short, and login layouts show no logo-caused clipping,
+  overflow, overlap, misalignment, inaccessible menu control, or excessive header height.
+- Existing focus, animation, reduced-motion, shell interaction, and page-layout contracts
+  remain correct.
+- All goal-level focused checks, `npm run verify`, PostgreSQL HTTP coverage, and diff checks
+  pass, with live viewport evidence recorded. The action stops at Ready for review and the
+  goal is prepared for final review.
 
 **Constraints:**
 
-- Do not treat visual review as authorization for unrelated page redesign or feature work.
-- Do not reset or mutate development data solely to manufacture screenshots unless separately
-  authorized and required; prefer existing roles/states and rendered-test coverage.
+- Do not redesign the brand, create separate logo assets, change navigation/shell behavior,
+  alter unrelated pages, add dependencies, push, deploy, or mutate production.
 
-**Requested corrections:**
+**Implemented:**
 
-- On 2026-09-08, investigate the remaining Dashboard HTTP failure from current production
-  behavior and data semantics. If production is correct, update only the smallest relevant
-  fixture and/or expectation, run the affected test, full HTTP suite, `npm run verify`, and
-  `git diff --check`, then return Action 3 to Ready for review without completing it.
+- Preserved the shared 240×240 logo, circular core, lettering, rings, neon effects, and flex
+  animation while enlarging the identical source geometry used by both mirrored arms.
+- Increased both arms' upper-arm and forearm depth and reach, elbow radius, main stroke from
+  3.5 to 4.25, detail stroke from 2 to 2.4, detail opacity, and restrained interior fill.
+- Increased the authenticated mobile mark from 3.75rem to 4rem within a 4.75rem header, the
+  normal rail mark from 5.5rem to 6.5rem within an 8.25rem header, and the compact-height mark
+  from 4.5rem to 4.75rem within a 5.75rem header. Padding was adjusted only enough to contain
+  those sizes.
+- Increased the authentication-page mark from 3.5rem to 4.25rem without changing the panel,
+  brand-link, or responsive layout model.
+- Added focused shared-mark tests for equal mirrored geometry, retained identity, more
+  prominent arm styling, responsive wrapper contracts, overflow containment, unchanged rail
+  layout, and reduced-motion behavior.
 
-**Implemented and repaired:**
+**Rendered responsive evidence:**
 
-- Performed a live authenticated shell audit across Dashboard, History, Progress, Programs,
-  Library, administrator Library, and Profile at 375×812, 390×844, 768×900, 1024×900,
-  1440×900, and 1440×700. The 42 page/viewport combinations had no document, body, or
-  content overflow and retained the expected 260px or 350px rail offset on desktop.
-- Verified the guest mobile shell separately. The administrator state exposes its permitted
-  catalog destination, while the shared member destinations and active state remain correct.
-  The canonical development data does not provide a separate non-admin member account, so
-  ordinary member destinations were exercised through the administrator account and their
-  role boundary remains covered by rendered and HTTP tests.
-- Exercised mobile opening, Escape dismissal, focus movement, background inertness, content
-  scroll locking, breakpoint resizing in both directions, the short-height rail, the Library
-  sticky panel, modal layering, and reduced motion. The 1440×700 account region remained
-  reachable inside the scrolling rail; the modal layer remained above the chrome.
-- Made focus restoration deterministic by treating the menu trigger as the dismissal target
-  even if opening is initiated without a preceding browser focus transfer. Added a window
-  resize synchronization fallback for environments where media-query change notification is
-  delayed. Both repairs preserve the existing media-query and modal ownership contracts.
-- Added focused regression coverage for the unfocused-trigger Escape path and resize-event
-  fallback. No page-local layout, route, permission, auth-shell, database, or product behavior
-  required repair.
-- Corrected the shared HTTP lifecycle fixture's calendar boundary without changing the
-  production Dashboard or its assertions. The fixture now spans both PostgreSQL's local
-  `CURRENT_DATE` and the UTC calendar date used by activity analytics, while its training day
-  remains scheduled on local today. This preserves the intended positive heatmap scenario at
-  every ordinary local/UTC date boundary.
+- Used the running local application and headless Chrome to enter a real guest workspace, then
+  captured and visually inspected the login page and guest Dashboard. Review images are in
+  the temporary directory `/private/tmp/lets-flex-logo-screens-20260909/`.
+- Login passed at 390×844 and 1440×900 with a measured 68×68px mark. The brand remained within
+  its introduction panel and neither document had horizontal overflow.
+- Guest Dashboard mobile passed at 375×812 and 390×844 with a 64×64px mark in a 76px header.
+  The home mark and 44×44px menu trigger did not intersect, and both document widths exactly
+  matched their viewports.
+- Normal rail layouts passed at 768×1024, 1024×900, and 1440×900 with a centered 104×104px mark
+  in a 132px header. The 1440×700 compact layout correctly used a centered 76×76px mark in a
+  92px header.
+- All eight measured layouts reported no horizontal overflow, no logo/menu overlap, and a logo
+  rectangle fully within the viewport. Visual inspection found no arm clipping, rail-divider
+  collision, alignment regression, or excessive header height.
 
-**Live evidence and limitations:**
+**Accessibility and scope evaluation:**
 
-- Mobile open state reported `aria-expanded=true`, exposed/non-inert navigation, inert page
-  content, locked content scrolling, and focus inside the menu. Escape returned focus to the
-  trigger. Returning below the breakpoint restored the closed, hidden, inert mobile state;
-  desktop removed mobile-only accessibility restrictions.
-- Measured desktop rails were exactly 260px at 768px and 1024px, and 350px at 1440px; content
-  began at the same x-coordinate. Stable scrollbar gutters reduced the usable body/content
-  edge by 15px on vertically scrolling pages without causing horizontal overflow.
-- Reduced-motion transition durations resolved to zero. At 1024px the Library sticky region
-  remained between the rail and viewport edges. Modal z-index 1000 remained above chrome
-  z-index 99 and its open state made page content inert.
-- The headless host emitted display-link errors, so live animation-frame observation of modal
-  focus movement was unreliable; the unchanged modal component's automated focus, trap,
-  restoration, inertness, and transition-fallback tests passed. Dynamic training-day and
-  history-detail routes were unavailable in the canonical seed, while their shared shell and
-  route behavior remain covered by the HTTP suite.
+- Live keyboard input focused the logo's home link and produced the established solid 3px focus
+  outline. Under emulated `prefers-reduced-motion: reduce`, the forearm animation name was
+  `none` and the static 90-degree flex transform remained applied.
+- The SVG remains decorative (`aria-hidden` and non-focusable) inside the existing accessible
+  home/sign-in links. No navigation interaction, accessible name, route, authentication,
+  authorization, form, database, dependency, or unrelated page behavior changed.
 
 **Verification evidence:**
 
-- Requested-correction verification on 2026-09-08: the affected Dashboard lifecycle HTTP
-  test passed 1 of 1, then the complete PostgreSQL HTTP suite passed all 49 tests.
-- Focused application-chrome rendered, modal, style, browser-interaction, and affected
-  Progress tests passed 18 of 18; browser type checking passed.
-- Final `npm run verify` passed formatting, lint, server types, browser types, the canonical
-  PostgreSQL catalog check, and all 169 repository tests.
-- Investigation verified that the summary sentence and one-workout heatmap cell remain the
-  intended production output when the actual completion date falls inside the program
-  calendar. The failure occurred because a one-day fixture used PostgreSQL-local today for
-  its calendar while analytics groups `finished_at` by UTC date; after 21:00 in São Paulo,
-  the workout correctly fell on the following UTC day and outside that synthetic calendar.
-- `git diff --check` passed. The requested correction changes only the HTTP fixture's date
-  range; no production file, assertion, route, database schema, or application behavior was
-  changed for the correction.
+- Focused logo, application-chrome, authentication-page, and menu-interaction tests passed:
+  22/22.
+- `npm run verify` passed: formatting, lint, server types, browser types, and all 177 automated
+  tests (0 failures).
+- The complete PostgreSQL HTTP suite passed: 53/53, covering the cohesive guest and goal-label
+  behavior alongside the visual change.
+- The approval-gate rerun passed `npm run verify` (177/177) and the complete PostgreSQL HTTP
+  suite (53/53) with 0 failures.
+- `git diff --check` passed. Final changed-file review found only the shared logo, its existing
+  chrome/auth sizing boundaries, focused tests, and governed documentation for Action 3.
 
-**Done-when mapping:**
+**Completion summary:** The established logo now has greater presence and equally stronger arm
+shapes across every shared presentation, with responsive fit, accessibility, and motion behavior
+verified in both contracts and live Chrome renders.
 
-- The mobile header/menu, fixed responsive rail, lower account region, and short-height
-  fallback are implemented in the one shared chrome and verified live.
-- Exact rail offsets and zero shell-caused overflow were measured at every requested width;
-  existing modal/sticky behavior and protected destinations remained functional in live or
-  automated coverage.
-- Footer-only navigation was retired rather than duplicated. Motion uses transform/opacity
-  with a zero-duration reduced-motion path, and no runtime dependency was added.
-- Focused and full repository verification pass, including all 49 PostgreSQL HTTP tests; all
-  Action 3 acceptance criteria now have passing evidence.
+## Goal completion review
 
-**Completion:** Approved on 2026-09-08 after the requested Dashboard investigation corrected
-only the clock-boundary-sensitive HTTP fixture. The affected test passed 1 of 1, the complete
-HTTP suite passed 49 of 49, `npm run verify` passed all 169 repository tests and checks, and
-`git diff --check` passed. Live shell compatibility is verified at every requested viewport.
+- **Starter seed:** Satisfied. A fresh guarded local reset produced one unowned, active global
+  sample session with the reviewed four-step sequence and no duplicate catalog data.
+- **Guest workspace and isolation:** Satisfied. Focused HTTP coverage created two independent
+  guest-owned hierarchies linked to the same global session and selected each guest's own current
+  workspace.
+- **Workout lifecycle and reporting:** Satisfied. A guest started the four-step workout, received
+  ordered snapshots, performed/skipped every step, finished it, and observed the result through
+  Dashboard, History, and Progress.
+- **Guest data lifecycle:** Satisfied. Missing-reference and forced-write rollback, failed web
+  session cleanup, expiry cleanup, cross-guest isolation, and in-place account conversion remain
+  covered and passing.
+- **Goal presentation and persistence:** Satisfied. Both Programs-page consumers display readable
+  labels, invalid selection state is retained, and numeric submission persists the unchanged
+  catalog goal ID/name.
+- **Responsive logo:** Satisfied. Eight rendered login/Dashboard layouts across mobile, normal
+  rail, large rail, and compact height had no measured overflow, clipping, overlap, or alignment
+  failures; focus and reduced motion also passed live checks.
+- **Required verification:** Satisfied. The authorized development reset, focused suites,
+  `npm run verify` (177/177), PostgreSQL HTTP suite (53/53), rendered review, final diff inspection,
+  and `git diff --check` all passed.
+- **Unmet criteria:** None.
+- **Intentionally excluded:** The approved out-of-scope items remain untouched, including catalog
+  additions, schema/migrations, workout or authorization redesign, unrelated UI refactors, new
+  dependencies, deployment, and production mutation.
 
 ## Resume here
 
-The goal and all three actions are **Completed**. No next goal has been approved; reassess from
-current repository evidence and the user's priorities before proposing or beginning further
-work.
+The goal is Completed. No next goal is strongly implied by the verified repository state and the
+user's stated priorities; await new user direction before changing goal/action tracking.

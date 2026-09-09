@@ -1499,7 +1499,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(unchanged.email, null);
 		assert.ok(unchanged.guest_expires_at);
 		assert.equal(unchanged.identity_count, 0);
-		assert.equal(unchanged.program_count, 1);
+		assert.equal(unchanged.program_count, 2);
 		assert.equal(
 			(
 				await db.query(
@@ -1567,7 +1567,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		await assertGoogleStateCleared();
 	});
 
-	test("generated guests are distinct, minimal, private, and expire in fifteen days", async () => {
+	test("generated guests are distinct, starter-ready, private, and expire in fifteen days", async () => {
 		const first = agent();
 		const second = agent();
 		await enterGuest(first);
@@ -1584,6 +1584,54 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			const lifetime = new Date(guest.guest_expires_at) - new Date(guest.created_at);
 			assert.ok(lifetime >= 14.99 * 24 * 60 * 60 * 1000);
 		}
+
+		const starterWorkspaces = (
+			await db.query(
+				`SELECT program.user_id, program.name AS program_name,
+				        program.start_date::text, goal.name AS goal_name,
+				        cycle.id AS cycle_id, cycle.name AS cycle_name,
+				        cycle.cycle_size, day.id AS training_day_id,
+				        day.scheduled_date::text, day.label AS day_label,
+				        workout.id AS workout_session_id, workout.status,
+				        session.id AS session_id, session.name AS session_name,
+				        session.owner_user_id AS session_owner_user_id
+				 FROM programs AS program
+				 JOIN goals AS goal ON goal.id = program.goal_id
+				 JOIN cycles AS cycle ON cycle.program_id = program.id
+				 JOIN training_days AS day ON day.cycle_id = cycle.id
+				 JOIN workout_sessions AS workout ON workout.training_day_id = day.id
+				 JOIN sessions AS session ON session.id = workout.session_id
+				 WHERE program.user_id = ANY($1::int[])
+				 ORDER BY program.user_id`,
+				[rows.map((guest) => guest.id)],
+			)
+		).rows;
+		assert.equal(starterWorkspaces.length, 2);
+		assert.equal(
+			new Set(starterWorkspaces.map((workspace) => workspace.user_id)).size,
+			2,
+		);
+		assert.equal(
+			new Set(starterWorkspaces.map((workspace) => workspace.session_id)).size,
+			1,
+		);
+		for (const workspace of starterWorkspaces) {
+			assert.equal(workspace.program_name, "Guest Starter Program");
+			assert.equal(workspace.goal_name, "general_fitness");
+			assert.equal(workspace.cycle_name, "Getting Started");
+			assert.equal(workspace.cycle_size, 1);
+			assert.equal(workspace.start_date, workspace.scheduled_date);
+			assert.equal(workspace.day_label, "Full Body");
+			assert.equal(workspace.status, "planned");
+			assert.equal(workspace.session_name, "Sample Full Body Session");
+			assert.equal(workspace.session_owner_user_id, null);
+		}
+
+		const dashboard = await first.request("/");
+		assert.equal(dashboard.response.status, 200);
+		assert.match(dashboard.text, /Sample Full Body Session/);
+		assert.match(dashboard.text, /Start session/);
+		assert.doesNotMatch(dashboard.text, /NO ACTIVE PROGRAM/);
 		const profile = await first.request("/profile");
 		assert.match(profile.text, /temporary/i);
 		assert.match(profile.text, /data-profile-role="guest"/);
@@ -1591,6 +1639,8 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		const library = await first.request("/library");
 		assert.match(library.text, /data-library-mode="personal"/);
 		assert.match(library.text, /removed when the workspace expires/);
+		assert.match(library.text, /Sample Full Body Session/);
+		assert.match(library.text, /4 exercises/);
 		assert.doesNotMatch(library.text, /\/admin\/library\/exercises/);
 
 		const exercise = (await db.query("SELECT id FROM exercises WHERE name = 'Squat'"))
@@ -1615,6 +1665,232 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			privateVariants.rows[0].owner_user_id,
 			privateVariants.rows[1].owner_user_id,
 		);
+	});
+
+	test("a guest can complete the starter workout through existing lifecycle and reporting boundaries", async () => {
+		const client = agent();
+		await enterGuest(client);
+
+		const starter = (
+			await db.query(
+				`SELECT guest.id AS user_id, program.id AS program_id,
+				        workout.id AS workout_session_id
+				 FROM users AS guest
+				 JOIN programs AS program ON program.user_id = guest.id
+				 JOIN cycles AS cycle ON cycle.program_id = program.id
+				 JOIN training_days AS day ON day.cycle_id = cycle.id
+				 JOIN workout_sessions AS workout ON workout.training_day_id = day.id
+				 WHERE guest.role = 'guest'
+				 ORDER BY guest.id DESC LIMIT 1`,
+			)
+		).rows[0];
+		const dashboard = await client.request("/");
+		const csrf = csrfFrom(dashboard.text);
+
+		const started = await client.request(
+			`/workout_sessions/${starter.workout_session_id}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(started.response.status, 302);
+
+		const stepLogs = (
+			await db.query(
+				`SELECT log.id, log.step_order, log.name, log.exercise_variant_name,
+				        log.planned_sets, log.planned_reps, log.status
+				 FROM workout_step_logs AS log
+				 WHERE log.workout_session_id = $1
+				 ORDER BY log.step_order`,
+				[starter.workout_session_id],
+			)
+		).rows;
+		assert.deepEqual(
+			stepLogs.map((log) => ({
+				order: log.step_order,
+				name: log.name,
+				variant: log.exercise_variant_name,
+				sets: log.planned_sets,
+				reps: log.planned_reps,
+				status: log.status,
+			})),
+			[
+				{
+					order: 1,
+					name: "Box squats",
+					variant: "Bodyweight Box Squat",
+					sets: 3,
+					reps: 10,
+					status: "planned",
+				},
+				{
+					order: 2,
+					name: "Push ups",
+					variant: "Bodyweight Push Up",
+					sets: 3,
+					reps: 10,
+					status: "planned",
+				},
+				{
+					order: 3,
+					name: "One-arm rows",
+					variant: "One-Arm Dumbbell Row",
+					sets: 3,
+					reps: 10,
+					status: "planned",
+				},
+				{
+					order: 4,
+					name: "Glute bridges",
+					variant: "Bodyweight Glute Bridge",
+					sets: 3,
+					reps: 12,
+					status: "planned",
+				},
+			],
+		);
+
+		const performed = await client.request(
+			`/workout_step_logs/${stepLogs[0].id}/perform`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: starter.workout_session_id,
+					"logFormRows[0][performedReps]": "10",
+					"logFormRows[0][performedLoadValue]": "0",
+					"logFormRows[0][performedLoadUnit]": "Kilograms",
+					"logFormRows[1][performedReps]": "10",
+					"logFormRows[1][performedLoadValue]": "0",
+					"logFormRows[1][performedLoadUnit]": "Kilograms",
+					"logFormRows[2][performedReps]": "10",
+					"logFormRows[2][performedLoadValue]": "0",
+					"logFormRows[2][performedLoadUnit]": "Kilograms",
+				},
+			},
+		);
+		assert.equal(performed.response.status, 302);
+
+		for (const step of stepLogs.slice(1)) {
+			const skipped = await client.request(`/workout_step_logs/${step.id}/skip`, {
+				method: "POST",
+				form: {
+					_csrf: csrf,
+					daysDifference: "0",
+					workoutSessionId: starter.workout_session_id,
+				},
+			});
+			assert.equal(skipped.response.status, 302);
+		}
+
+		const finished = await client.request(
+			`/workout_sessions/${starter.workout_session_id}/finish`,
+			{
+				method: "POST",
+				form: { _csrf: csrf, daysDifference: "0" },
+			},
+		);
+		assert.equal(finished.response.status, 302);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					starter.workout_session_id,
+				])
+			).rows[0].status,
+			"finished",
+		);
+
+		const completedDashboard = await client.request(
+			`/?workoutSessionId=${starter.workout_session_id}`,
+		);
+		assert.match(completedDashboard.text, /Workout complete/);
+		assert.match(completedDashboard.text, /1 completed · 3 skipped · 0 remaining/);
+
+		const history = await client.request(`/history?programId=${starter.program_id}`);
+		assert.equal(history.response.status, 200);
+		assert.match(history.text, /Sample Full Body Session/);
+		assert.match(history.text, /Finished/);
+
+		const progress = await client.request(`/progress?programId=${starter.program_id}`);
+		assert.equal(progress.response.status, 200);
+		assert.match(progress.text, /Bodyweight Box Squat/);
+	});
+
+	test("guest starter provisioning rolls back when its canonical session is unavailable", async () => {
+		await db.query(
+			"UPDATE sessions SET is_archived = TRUE WHERE name = 'Sample Full Body Session'",
+		);
+		const client = agent();
+		const page = await client.request("/auth/login");
+		const result = await client.request("/auth/guest", {
+			method: "POST",
+			form: { _csrf: csrfFrom(page.text) },
+		});
+
+		assert.equal(result.response.status, 500);
+		assert.equal(
+			(await db.query("SELECT count(*)::int AS count FROM users WHERE role = 'guest'"))
+				.rows[0].count,
+			0,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM programs WHERE name = 'Guest Starter Program'",
+				)
+			).rows[0].count,
+			0,
+		);
+	});
+
+	test("guest starter provisioning leaves no partial principal after a hierarchy write failure", async () => {
+		await db.query(`
+			CREATE OR REPLACE FUNCTION fail_guest_starter_program_insert() RETURNS trigger AS $$
+			BEGIN
+				IF NEW.name = 'Guest Starter Program' THEN
+					RAISE EXCEPTION 'simulated guest starter program failure';
+				END IF;
+				RETURN NEW;
+			END;
+			$$ LANGUAGE plpgsql;
+			CREATE TRIGGER fail_guest_starter_program_insert
+			BEFORE INSERT ON programs
+			FOR EACH ROW EXECUTE FUNCTION fail_guest_starter_program_insert();
+		`);
+
+		try {
+			const client = agent();
+			const page = await client.request("/auth/login");
+			const result = await client.request("/auth/guest", {
+				method: "POST",
+				form: { _csrf: csrfFrom(page.text) },
+			});
+
+			assert.equal(result.response.status, 500);
+			assert.equal(
+				(
+					await db.query(
+						"SELECT count(*)::int AS count FROM users WHERE role = 'guest'",
+					)
+				).rows[0].count,
+				0,
+			);
+			assert.equal(
+				(
+					await db.query(
+						"SELECT count(*)::int AS count FROM programs WHERE name = 'Guest Starter Program'",
+					)
+				).rows[0].count,
+				0,
+			);
+		} finally {
+			await db.query(
+				"DROP TRIGGER IF EXISTS fail_guest_starter_program_insert ON programs",
+			);
+			await db.query("DROP FUNCTION IF EXISTS fail_guest_starter_program_insert()");
+		}
 	});
 
 	test("an active guest converts in place and retains owned data", async () => {
@@ -1737,7 +2013,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(unchanged.email, null);
 		assert.ok(unchanged.guest_expires_at);
 		assert.equal(unchanged.identity_count, 0);
-		assert.equal(unchanged.program_count, 1);
+		assert.equal(unchanged.program_count, 2);
 		assert.equal((await client.request("/profile")).response.status, 200);
 	});
 
@@ -2052,6 +2328,71 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			},
 		);
 		assert.equal(result.response.status, 404);
+	});
+
+	test("program goal labels are readable while creation persists the existing goal ID", async () => {
+		const client = agent();
+		await login(client, "user-one@example.com");
+		const goals = (await db.query("SELECT id, name FROM goals ORDER BY id")).rows;
+		const weightLoss = goals.find((goal) => goal.name === "weight_loss");
+		assert.ok(weightLoss);
+
+		const page = await client.request("/programs");
+		assert.equal(page.response.status, 200);
+		assert.match(page.text, />\s*Hypertrophy\s*<\/option>/);
+		assert.match(page.text, />\s*Weight Loss\s*<\/option>/);
+		assert.match(page.text, />\s*General Fitness\s*<\/option>/);
+		assert.doesNotMatch(page.text, /weight_loss|general_fitness/);
+
+		const invalid = await client.request("/programs", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				name: " ",
+				goalId: String(weightLoss.id),
+				startDate: "",
+			},
+		});
+		assert.equal(invalid.response.status, 422);
+		assert.match(
+			invalid.text,
+			new RegExp(
+				`<option\\s+value="${weightLoss.id}"[\\s\\S]{0,120}?selected[\\s\\S]{0,120}?>\\s*Weight Loss\\s*</option>`,
+			),
+		);
+
+		const created = await client.request("/programs", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(invalid.text),
+				name: "Readable goal plan",
+				goalId: String(weightLoss.id),
+				startDate: "",
+			},
+		});
+		assert.equal(created.response.status, 302);
+		assert.equal(created.response.headers.get("location"), "/programs");
+
+		const stored = (
+			await db.query(
+				`SELECT program.goal_id, goal.name AS goal_name
+				 FROM programs AS program
+				 JOIN users AS owner ON owner.id = program.user_id
+				 JOIN goals AS goal ON goal.id = program.goal_id
+				 WHERE owner.email = 'user-one@example.com'
+				   AND program.name = 'Readable goal plan'`,
+			)
+		).rows[0];
+		assert.deepEqual(stored, {
+			goal_id: weightLoss.id,
+			goal_name: "weight_loss",
+		});
+
+		const refreshed = await client.request("/programs");
+		assert.equal(refreshed.response.status, 200);
+		assert.match(refreshed.text, /Readable goal plan/);
+		assert.match(refreshed.text, /Weight Loss/);
+		assert.doesNotMatch(refreshed.text, /weight_loss/);
 	});
 
 	test("program analytics aggregate owned history with stable boundaries, null handling, and separate units", async () => {
