@@ -4271,7 +4271,19 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			},
 		);
 		assert.equal(activeCancellation.response.status, 409);
+		assert.match(activeCancellation.response.headers.get("content-type"), /text\/html/);
 		assert.match(activeCancellation.text, /can no longer be cancelled/i);
+		assert.match(activeCancellation.text, /Workout not removed/);
+		assert.match(activeCancellation.text, /role="alert"[^>]*data-workout-feedback/);
+		assert.match(activeCancellation.text, /data-day-page data-workout-tracker/);
+		assert.doesNotMatch(
+			activeCancellation.text,
+			new RegExp(`data-modal-open="deleteWorkoutSessionId-${workoutSessionId}"`),
+		);
+		assert.doesNotMatch(
+			activeCancellation.text,
+			/constraint|one_active_workout_session_per_training_day|violates .* constraint/i,
+		);
 		assert.equal(
 			(
 				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
@@ -4344,6 +4356,21 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				form: request.form,
 			});
 			assert.equal(result.response.status, 409);
+			if (request.path.includes("?_method=PATCH")) {
+				assert.match(result.response.headers.get("content-type"), /text\/html/);
+				assert.match(result.text, /Workout not removed/);
+				assert.match(result.text, /can no longer be cancelled/i);
+				assert.match(result.text, /role="alert"[^>]*data-workout-feedback/);
+				assert.match(result.text, /data-day-page data-workout-tracker/);
+				assert.doesNotMatch(
+					result.text,
+					new RegExp(`data-modal-open="deleteWorkoutSessionId-${workoutSessionId}"`),
+				);
+				assert.doesNotMatch(
+					result.text,
+					/constraint|one_active_workout_session_per_training_day|violates .* constraint/i,
+				);
+			}
 		}
 		assert.deepEqual(
 			(

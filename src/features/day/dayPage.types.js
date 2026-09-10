@@ -47,6 +47,7 @@
  * @property {PageState} pageState
  * @property {DayPageData} data
  * @property {Record<string, any>} [sessionLinkFormState]
+ * @property {{tone: "error" | "success", title: string, message: string} | null} [workoutFeedback]
  */
 
 /**

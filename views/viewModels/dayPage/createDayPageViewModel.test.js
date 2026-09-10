@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import ejs from "ejs";
 import createDayPageViewModel from "./createDayPageViewModel.js";
+import createWorkoutSessionListViewModel from "./createWorkoutSessionListViewModel.js";
 
 const page = {
 	path: "/day",
@@ -166,6 +167,45 @@ test("day page exposes safe empty states for an invalid selection", () => {
 	assert.equal(result.components.workoutSessionList.emptyState.isVisible, true);
 });
 
+test("day page offers cancellation only for planned workout sessions", () => {
+	const workoutSessions = ["planned", "in_progress", "finished", "cancelled"].map(
+		(status, index) => ({
+			id: 30 + index,
+			trainingDayId: 2,
+			sessionId: 20,
+			order: index + 1,
+			status,
+			startedAt: status === "planned" ? null : "2026-08-21T10:00:00Z",
+			finishedAt: status === "finished" ? "2026-08-21T11:00:00Z" : null,
+			notes: null,
+			name: `${status} session`,
+			sessionNotes: null,
+			isArchived: false,
+			steps: [],
+		}),
+	);
+
+	const result = createWorkoutSessionListViewModel({
+		currentDayId: 2,
+		workoutSessions,
+	});
+
+	assert.deepEqual(
+		result.items.map((item) => item.header.statusLabel),
+		["planned", "in_progress", "finished"],
+	);
+	assert.equal(result.items[0].header.deleteActionLabel, "Delete planned session");
+	assert.equal(result.items[0].header.modalId, "deleteWorkoutSessionId-30");
+	assert.equal(result.items[1].header.deleteActionLabel, undefined);
+	assert.equal(result.items[1].header.modalId, undefined);
+	assert.equal(result.items[2].header.deleteActionLabel, undefined);
+	assert.equal(result.items[2].header.modalId, undefined);
+	assert.deepEqual(
+		result.cancelModals.map((modal) => modal.id),
+		["deleteWorkoutSessionId-30"],
+	);
+});
+
 test("day template renders only from its component ViewModels", async () => {
 	const viewModel = createDayPageViewModel({
 		page,
@@ -202,8 +242,27 @@ test("day template renders only from its component ViewModels", async () => {
 						isArchived: false,
 						steps: [{ ...step, stepLog: null }],
 					},
+					{
+						id: 31,
+						trainingDayId: 2,
+						sessionId: 20,
+						order: 2,
+						status: "finished",
+						startedAt: "2026-08-21T10:00:00Z",
+						finishedAt: "2026-08-21T11:00:00Z",
+						notes: null,
+						name: "Finished session",
+						sessionNotes: null,
+						isArchived: false,
+						steps: [],
+					},
 				],
 			},
+		},
+		workoutFeedback: {
+			tone: "error",
+			title: "Workout not removed",
+			message: "This workout session can no longer be cancelled.",
 		},
 	});
 	const renderFile =
@@ -232,7 +291,10 @@ test("day template renders only from its component ViewModels", async () => {
 		),
 	);
 
-	assert.match(html, /data-day-page/);
+	assert.match(html, /data-day-page data-workout-tracker/);
+	assert.match(html, /role="alert" tabindex="-1" data-workout-feedback/);
+	assert.match(html, /Workout not removed/);
+	assert.match(html, /This workout session can no longer be cancelled/);
 	assert.match(html, /Program hierarchy/);
 	assert.match(html, /Strength plan[\s\S]*Foundation[\s\S]*Day 2/);
 	assert.match(html, /21\/08\/2026/);
@@ -242,6 +304,7 @@ test("day template renders only from its component ViewModels", async () => {
 	assert.match(html, /workout-card--workout/);
 	assert.match(html, /Barbell:/);
 	assert.match(html, /action="\/workout_sessions\/30\?_method=PATCH"/);
+	assert.doesNotMatch(html, /deleteWorkoutSessionId-31/);
 	assert.match(html, /name="trainingDayId" value="2"/);
 	assert.match(html, /Assign to this day/);
 	assert.match(html, /href="\/library\?createSessionForDay=2"/);

@@ -2,143 +2,163 @@
 
 ## Parent milestone
 
-Let’s Flex remains clear and usable across the mobile-to-tablet transition, including secondary
-Library workflows that follow the primary discovery experience.
+Let’s Flex remains reliable in production and gains a reusable, evidence-based frontend design
+workflow that helps future AI-assisted UI work extend the product intentionally.
 
 ## Current goal
 
-Improve only the responsive presentation of the Library’s exercise-variant creation form around
-medium mobile/tablet widths, starting from the restored pre-attempt layout and preserving all form
-behavior and completed Library discovery work.
+Stabilize the known resolved-workout cancellation error, then audit the current frontend, define a
+Let’s Flex-specific frontend workflow, validate it on one representative surface, and refine it
+before regular adoption.
 
 ## Status
 
-Completed on 2026-09-10 after explicit user approval. The sole action passed final verification
-before the goal was closed.
+Completed on 2026-09-10 after explicit user approval. Actions 1 through 5 were separately approved
+and completed with their required verification. The resolved-workout cancellation experience is
+stabilized, the frontend audit and repository-scoped workflow are established, and the workflow was
+validated and refined from rendered product evidence.
 
 ## Approved user outcome
 
-The exercise-variant creation form remains readable, balanced, and comfortable to use around
-520px, 600px, and 680px without cramped columns, awkwardly stretched controls, uneven wrapping, or
-horizontal overflow. Its labels, hints, inputs, selections, submit behavior, and visual language
-remain consistent with the application. The rejected prior attempt is not reinstated.
-
-## Why now
-
-- The user explicitly identified the form’s presentation near 600px as the remaining Library issue
-  and approved reassessing it from the restored baseline.
-- The completed Library redesign is preserved in commit `3966016`; reopening its hierarchy,
-  filtering, tabs, or variant behavior is unnecessary.
-- The verified baseline has an abrupt layout boundary: the shared three-column form grid becomes a
-  single column at 38rem (608px), while the surrounding Library action panel has already become one
-  column at 56rem (896px). Nearby widths can therefore switch between narrow three-column controls
-  and comparatively wide single-column controls.
-- The rejected attempt added a full-width Exercise selector over a paired Variant name/Equipment
-  row between 34rem and 46rem. That specific arrangement is historical evidence of an unsuitable
-  direction, not a design to repeat.
+- Attempting to cancel or delete a resolved workout session no longer produces an application-level
+  failure experience. The intentional lifecycle restriction remains enforced, is communicated as
+  an expected state, and is reflected accurately by the UI.
+- The existing Let’s Flex frontend is audited before broad visual work, with its implicit design
+  language, inconsistencies, responsive behavior, accessibility patterns, and generic-looking
+  tendencies documented from repository and rendered evidence.
+- A project-specific frontend workflow or Skill complements the repository instructions and guides
+  future work on hierarchy, reuse, responsive design, accessibility, restraint, motion, and visual
+  verification.
+- The workflow is tested on one contained, representative surface and refined from the result
+  before it becomes the default frontend reference.
 
 ## Delta-first baseline
 
 ### Already satisfied
 
-- One shared EJS partial renders the personal and administrator variant forms with the same field
-  order, labels, hints, native controls, button, CSRF field, action-prefix data, and submission
-  behavior.
-- Shared form styles provide consistent control sizing, focus treatment, validation presentation,
-  and a three-column grid that stacks at 38rem.
-- The Library action panel already becomes one column at 56rem, and its submit action becomes full
-  width below 30rem.
-- The completed Library discovery goal already covers grouped base exercises, progressively
-  disclosed variants, independent filters, ownership actions, responsive page structure, and
-  personal/administrator behavior.
-- Focused rendered-EJS, CSS-contract, browser-interaction, and PostgreSQL HTTP coverage already
-  protects the variant form’s identity and behavior.
+- The workout-session domain permits cancellation only from `planned`; the service checks the
+  current owned state and the repository repeats the `planned` predicate in its ownership-scoped
+  update.
+- Missing or unowned workout sessions remain indistinguishable through the existing not-found path,
+  while known invalid lifecycle transitions use `WorkoutSessionLifecycleError`.
+- Authentication, validated route input, CSRF protection, and ownership-scoped reads and writes
+  already protect the cancellation route.
+- Existing PostgreSQL HTTP coverage proves valid planned cancellation, rejection of active and
+  finished cancellation attempts with `409`, and terminal-state immutability.
+- The repository already has shared EJS buttons, forms, modals, tabs, accordions, icons, application
+  chrome, view-model boundaries, page/component CSS, browser-component tests, and several focused
+  responsive CSS contracts.
+- `docs/ui-guidelines.md` already records the established dark palette and baseline rules for reuse,
+  accessibility, interaction states, responsive design, and motion.
+- Completed workout-tracking, analytics, application-chrome, Library discovery, and Library form
+  goals provide recent evidence of established behavior that should be audited and reused rather
+  than reimplemented.
 
 ### Reuse
 
-- `views/partials/libraryPage/createVariantForm.ejs` and its existing shared field/button partials.
-- The page-scoped `.library-variant-form`, `.library-action-panel`, and footer hooks in
-  `public/css/pages/library.css`.
-- The shared form grid as the baseline desktop/narrow behavior; avoid changing it globally unless
-  direct evidence proves a shared defect rather than a Library-specific issue.
-- Existing rendered Library, browser interaction, CSS contract, and HTTP tests.
+- `cancelWorkoutSession`, the ownership-scoped workout-session repository, and
+  `WorkoutSessionLifecycleError` remain the enforcement boundary for cancellation.
+- The day controller/view-model/template flow and shared feedback, button, modal, and session-card
+  patterns are the likely integration points for a designed conflict response and accurate action
+  visibility.
+- Existing view-model/rendered-view and PostgreSQL HTTP tests can be extended for the regression.
+- The current EJS/CSS/browser architecture, shared components, page-specific styles, UI guidelines,
+  and completed visual work form the evidence base for the audit and workflow.
 
-### Modify
+### Repair
 
-- Adjust only the form’s page-scoped responsive sizing, spacing, alignment, or wrapping through the
-  problematic medium-width range, based on direct comparison of the restored baseline.
-- Add a form-specific markup hook only if it is needed to scope the selected CSS without affecting
-  other shared forms.
+- The day-page workout-session view model currently creates a delete trigger and cancellation modal
+  for every non-cancelled session, including `in_progress` and `finished` sessions, even though only
+  `planned` sessions may be cancelled.
+- The cancellation controller catches the expected lifecycle error but sends a bare `409` text
+  response. This preserves integrity but replaces the application UI with the reported error text,
+  which is experienced as a crash rather than a designed conflict state.
+- Existing tests protect backend immutability but do not assert that resolved day-page sessions omit
+  the invalid delete action or that a stale cancellation rerenders an intentional user-facing page
+  state.
 
 ### Add
 
-- Focused regression evidence for the selected responsive contract and recorded layout inspection
-  at representative widths on both personal and administrator Library pages.
-
-### Explicitly reconsider
-
-- The current three-column-to-one-column transition near 608px is explicitly open for refinement.
-  The previously rejected full-width-first-field/two-field-row solution is not an approved answer.
+- An evidence-based frontend audit covering representative pages, shared components, responsive
+  ranges, interaction states, accessibility patterns, and visual inconsistencies without changing
+  visual code.
+- A reusable Let’s Flex-specific frontend workflow or Skill that complements rather than duplicates
+  `AGENTS.md` and `docs/ui-guidelines.md`.
+- One contained validation implementation selected from audit evidence, with explicit UX baseline,
+  preserved behavior, applicable workflow principles, and multi-viewport/accessibility verification.
+- A post-validation evaluation and any evidence-supported refinements needed before adopting the
+  workflow for future frontend goals.
 
 ## Scope
 
 ### In scope
 
-- Baseline inspection near 520px, 600px, and 680px, plus nearby narrow and wide regression widths.
-- Page-scoped CSS and, only if required for safe scoping, one form-specific markup hook.
-- Spacing, usable control width, alignment, wrapping, and submit-action presentation for the
-  exercise-variant creation form.
-- Focused tests and representative personal/administrator visual verification.
+- A small, regression-protected cancellation repair that preserves the planned-only domain rule,
+  safely handles stale/direct submissions, and does not invite cancellation for a known resolved
+  session.
+- A representative audit of Dashboard, Programs/cycles/days, Library, workout interfaces, forms,
+  application chrome, modals, accordions, buttons, surfaces, empty states, responsive layouts,
+  motion, and accessibility where repository or rendered evidence makes them relevant.
+- A repository-appropriate workflow artifact for future frontend work.
+- One contained frontend implementation used to validate the workflow, followed by evaluation and
+  refinement.
 
 ### Out of scope
 
-- Changing form fields, field order, labels, hints, options, validation, routes, actions, CSRF,
-  submission JavaScript, ownership, authorization, or persistence.
-- Reopening Library filtering, tabs, exercise grouping, progressive disclosure, catalog data, or
-  other page sections.
-- Changing the shared form system for unrelated screens, adding dependencies, or changing schema,
-  seed, repositories, APIs, deployment, or production data.
+- Removing or weakening workout lifecycle validation.
+- A broad workout-session lifecycle redesign unless direct evidence makes it necessary for
+  correctness, security, authentication, or data integrity.
+- Redesigning pages during the audit or applying the eventual workflow across the entire
+  application at once.
+- Replacing working custom components, the EJS/CSS/browser architecture, or the styling system for
+  convenience.
+- Introducing a frontend framework, styling system, production dependency, schema change,
+  migration, database reset, deployment, push, or production-data mutation.
+- Unrelated cleanup or visual changes outside the selected validation surface.
 
-## Correctness and accessibility requirements
+## Correctness, security, and accessibility requirements
 
-- Labels, required/optional cues, hints, inputs, selects, and the submit action remain readable and
-  associated exactly as before.
-- All controls retain their existing keyboard, focus, validation, and touch-target behavior.
-- The layout has no horizontal overflow, clipped content, overlap, or unstable wrap near its chosen
-  breakpoints.
-- Personal and administrator forms use the same intentional presentation without changing their
-  different action prefixes or copy.
-- The solution follows the established dark Library visual language and does not reintroduce the
-  rejected uneven two-row arrangement.
+- Only an owned `planned` workout session may be cancelled, and the mutating SQL remains the final
+  guard against stale or concurrent requests.
+- Valid cancellation continues to work; active, finished, cancelled, missing, and unowned records
+  remain unchanged by invalid attempts.
+- Expected lifecycle conflicts expose no SQL, stack, constraint, account, or internal identifier
+  details.
+- Existing authentication, authorization, validated-input, CSRF, and session behavior remain intact.
+- The day page does not expose a destructive cancellation action when the known session state makes
+  that action invalid, while the server still handles stale/direct submissions safely.
+- The frontend workflow preserves semantic HTML, keyboard operation, visible focus, labels and
+  accessible names, non-color state communication, contrast, and reduced-motion behavior where
+  applicable.
+- Meaningful UI changes are inspected at small, intermediate, and large widths for overflow,
+  wrapping, alignment, hierarchy, interaction state, and keyboard behavior.
+
+## Approved sequence
+
+1. Repair the resolved-workout cancellation experience and stop for review.
+2. After approval, audit the frontend and propose evidence-based design principles without changing
+   visual code.
+3. After approval, create the project-specific frontend workflow or Skill.
+4. After approval, select one representative surface from audit evidence and validate the workflow
+   with one cohesive implementation.
+5. After approval, evaluate the result, refine the workflow where evidence supports it, and prepare
+   the goal for final review.
+
+Each action is separately reviewable. Completing or approving one action does not authorize the
+next action.
 
 ## Done when
 
-- The restored baseline is compared at 520px, 600px, and 680px before selecting an implementation,
-  with at least one narrower and one wider regression width also checked.
-- The final form avoids both cramped controls and unnecessarily stretched fields throughout the
-  inspected range and transitions predictably between layouts.
-- Form markup and behavior contracts remain intact for personal and administrator modes.
-- Focused rendered/CSS/browser tests, `npm run verify`, relevant PostgreSQL HTTP regressions, and
-  `git diff --check` pass.
-- Final inspection confirms no unrelated Library, shared-form, backend, database, dependency,
-  deployment, push, or production-data change.
-
-## Completion outcome
-
-- The variant-creation form now responds to its own available width: it remains a readable uniform
-  column through constrained mobile/tablet and nested-panel layouts, then returns to three equal
-  columns when the form reaches 40rem.
-- The rejected uneven two-row layout was not restored, and shared form markup and behavior remain
-  unchanged.
-- Personal and administrator viewport checks, 13 focused Library tests, 195 repository tests, and
-  58 PostgreSQL HTTP tests passed. Formatting, lint, server/browser type checks, and final diff
-  inspection also passed.
-- No approved criterion remains unmet. Broader Library discovery, form behavior, shared components,
-  backend, database, dependencies, deployment, and production data were intentionally unchanged.
-
-## Next-goal assessment
-
-The scoped responsive issue and the previously approved Library discovery work are complete. The
-repository evidence reviewed for this goal does not establish another remaining gap or user
-priority strongly enough to propose a next goal. Await explicit user direction before replacing
-this completed goal.
+- Resolved-workout cancellation no longer produces the reported failure experience and is covered by
+  focused regression tests, while valid cancellation and all lifecycle protections remain correct.
+- The current frontend audit documents the product’s implicit design language, inconsistencies,
+  responsive/accessibility behavior, and generic-looking patterns from direct evidence.
+- A Let’s Flex-specific frontend workflow or Skill exists and complements the broader repository
+  workflow.
+- One contained representative surface has validated the workflow through implementation and
+  rendered inspection.
+- The workflow has been evaluated and refined based on that validation before regular adoption.
+- Applicable focused checks, repository verification, PostgreSQL HTTP regressions, responsive and
+  keyboard inspection, and final diff inspection pass for the actions that require them.
+- No broad unrelated redesign, architecture replacement, dependency, database, deployment, push, or
+  production-data change is introduced.

@@ -1,5 +1,6 @@
 <%
 	const session = locals?.session ?? null;
+	const summariesHeadingId = locals?.summariesHeadingId ?? "";
 	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={}, stepNumber } = session ?? {};
 %>
 
@@ -18,12 +19,16 @@
 		aria-labelledby="<%= headingId %>"
 		data-session-details-transition
 	>
+		<% if (summariesHeadingId) { %>
+			<a class="session-details__back-link" href="#<%= summariesHeadingId %>">
+				Back to session list
+			</a>
+		<% } %>
+
 		<header class="session-details__header">
 			<div>
 				<div class="session-details__labels">
-					<span class="status-badge">
-						Session template
-					</span>
+					<p class="session-details__eyebrow">Selected session</p>
 
 					<% if (isArchived) { %>
 						<span class="status-badge status-badge--muted">
@@ -137,7 +142,7 @@
 								</div>
 
 								<strong class="session-step__prescription">
-									<%= ` ${step.prescription.sets} × ${step.prescription.reps} - ${step.prescription.loadValue} ${step.prescription.loadUnit}` %>
+									<%= step.prescription.label %>
 								</strong>
 							</header>
 

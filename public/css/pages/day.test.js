@@ -16,6 +16,7 @@ test("training-day and contextual Library styles preserve hierarchy, actions, an
 	assert.match(mainCss, /@import url\("\.\/pages\/day\.css"\)/);
 	assert.match(mainCss, /@import url\("\.\/pages\/library\.css"\)/);
 	assert.match(dayCss, /\.day-context-path/);
+	assert.match(dayCss, /\.day-page > \.workout-feedback\s*{[\s\S]*?margin: 0/);
 	assert.match(dayCss, /\.day-panel__create-link:focus-visible/);
 	assert.match(dayCss, /\.day-panel__create-link--primary/);
 	assert.match(

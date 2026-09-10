@@ -91,7 +91,15 @@ async function respondToLifecycleConflict(req, res, error) {
 				? "Complete or skip every workout step before finishing this session."
 				: `This workout session can no longer be ${error.action === "cancel" ? "cancelled" : `${error.action}ed`}.`;
 	if (error.action === "cancel") {
-		res.status(409).send(message);
+		res.status(409);
+		await renderDay(req, res, {
+			dayId: req.validatedBody?.trainingDayId,
+			workoutFeedback: {
+				tone: "error",
+				title: "Workout not removed",
+				message,
+			},
+		});
 		return true;
 	}
 

@@ -11,8 +11,8 @@
  * @property {string} name
  * @property {number} sets
  * @property {number} reps
- * @property {number} load_value
- * @property {string} load_unit
+ * @property {number | null} load_value
+ * @property {string | null} load_unit
  * @property {number} step_order
  * @property {number} [step_type_id]
  * @property {string} step_type_name
@@ -85,8 +85,8 @@
  * @property {string} type
  * @property {number} sets
  * @property {number} reps
- * @property {number} loadValue
- * @property {string} loadUnit
+ * @property {number | null} loadValue
+ * @property {string | null} loadUnit
  * @property {string} movementPattern
  * @property {SessionMapperStepExercise} exercise
  * @property {SessionMapperStepEquipment} equipment
@@ -133,8 +133,9 @@
  * @typedef {object} DetailsStepsPrescription
  * @property {number} sets
  * @property {number} reps
- * @property {number} loadValue
- * @property {string} loadUnit
+ * @property {number | null} loadValue
+ * @property {string | null} loadUnit
+ * @property {string} label
  */
 
 /**

@@ -13,6 +13,7 @@ export default function createDayPageViewModel({
 	pageState,
 	data,
 	sessionLinkFormState,
+	workoutFeedback,
 }) {
 	const { currentUser, program, cycle, days, sessions, workoutSessions } = data;
 	const currentDayId = days.current?.id ?? null;
@@ -33,6 +34,7 @@ export default function createDayPageViewModel({
 		pageState: { ...pageState, dayId: currentDayId },
 		shell: { currentUser, activeNavigation: "programs" },
 		components: {
+			workoutFeedback: workoutFeedback ?? null,
 			contextPath: {
 				isVisible: Boolean(program && cycle && days.current),
 				backHref: programsHref,

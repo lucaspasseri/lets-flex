@@ -9,6 +9,11 @@
  */
 
 function createDetailsStepViewModel(step) {
+	const prescriptionLoad =
+		step.loadValue !== null && step.loadValue !== undefined && step.loadUnit
+			? ` · ${step.loadValue} ${step.loadUnit}`
+			: "";
+
 	return {
 		id: step.id,
 		order: step.order,
@@ -26,6 +31,7 @@ function createDetailsStepViewModel(step) {
 			reps: step.reps,
 			loadValue: step.loadValue,
 			loadUnit: step.loadUnit,
+			label: `${step.sets} sets × ${step.reps} reps${prescriptionLoad}`,
 		},
 
 		setupDescription: step.exercise.setupDescription ?? "-",

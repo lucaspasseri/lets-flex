@@ -10,18 +10,29 @@ export default function createWorkoutSessionListViewModel({
 	const visibleSessions = workoutSessions.filter(
 		(session) => session.status !== "cancelled",
 	);
-	const items = visibleSessions.map((session) => ({
-		id: session.id,
-		type: "workout",
-		header: {
-			title: session.name,
-			notes: session.notes ?? session.sessionNotes,
-			statusLabel: session.status,
-			modalId: `deleteWorkoutSessionId-${session.id}`,
-			deleteActionLabel: `Delete ${session.name}`,
-		},
-		steps: session.steps.map(toStepViewModel),
-	}));
+	const items = visibleSessions.map((session) => {
+		const canCancel = session.status === "planned";
+
+		return {
+			id: session.id,
+			type: "workout",
+			header: {
+				title: session.name,
+				notes: session.notes ?? session.sessionNotes,
+				statusLabel: session.status,
+				...(canCancel
+					? {
+							modalId: `deleteWorkoutSessionId-${session.id}`,
+							deleteActionLabel: `Delete ${session.name}`,
+						}
+					: {}),
+			},
+			steps: session.steps.map(toStepViewModel),
+		};
+	});
+	const cancellableSessions = visibleSessions.filter(
+		(session) => session.status === "planned",
+	);
 
 	return {
 		count: items.length,
@@ -36,7 +47,7 @@ export default function createWorkoutSessionListViewModel({
 				"Assign an existing session template or create one for this training day.",
 		},
 		items,
-		cancelModals: visibleSessions.map((session) => ({
+		cancelModals: cancellableSessions.map((session) => ({
 			id: `deleteWorkoutSessionId-${session.id}`,
 			title: "Delete the workout session",
 			form: {

@@ -1,8 +1,8 @@
 <%
-	const { contextPath, dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
+	const { workoutFeedback, contextPath, dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
 %>
 
-<main class="main day-page" data-day-page>
+<main class="main day-page" data-day-page data-workout-tracker>
 	<% if (contextPath.isVisible) { %>
 		<nav class="day-context-path" aria-label="Program hierarchy">
 			<a href="<%= contextPath.backHref %>">Programs</a>
@@ -13,6 +13,9 @@
 			<span aria-hidden="true">/</span>
 			<strong aria-current="page"><%= contextPath.dayName %></strong>
 		</nav>
+	<% } %>
+	<% if (workoutFeedback) { %>
+		<%- include("partials/sessionComponent/feedback", { feedback: workoutFeedback }) %>
 	<% } %>
 	<header
 		class="day-page__hero"

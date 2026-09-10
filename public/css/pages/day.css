@@ -7,6 +7,10 @@
 	padding: 1.5rem var(--horizontal-margin) 3rem;
 }
 
+.day-page > .workout-feedback {
+	margin: 0;
+}
+
 .day-page__hero {
 	display: grid;
 	justify-items: center;
