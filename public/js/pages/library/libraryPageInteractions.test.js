@@ -332,4 +332,20 @@ test("library exercise styles use semantic, responsive, focus, and motion contra
 	assert.match(pageCss, /\.library-discovery__tabs \[data-tab\]:focus-visible/);
 	assert.match(pageCss, /\[data-tab\]\[aria-selected="true"\]/);
 	assert.match(pageCss, /\.library-discovery__panel:not\(\[hidden\]\)/);
+	assert.match(
+		pageCss,
+		/\.library-variant-form\s*\{[^}]*container-type:\s*inline-size/,
+	);
+	assert.match(
+		pageCss,
+		/\.library-variant-form > \.form-grid\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/,
+	);
+	assert.match(
+		pageCss,
+		/@container \(min-width: 40rem\)[\s\S]*\.library-variant-form > \.form-grid[\s\S]*repeat\(3, minmax\(0, 1fr\)\)/,
+	);
+	assert.doesNotMatch(
+		pageCss,
+		/\.library-variant-form > \.form-grid\s*\{[^}]*repeat\(2/,
+	);
 });

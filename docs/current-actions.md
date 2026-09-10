@@ -5,7 +5,7 @@
 Refine only the Library exercise-variant creation form’s medium-width responsive presentation from
 the restored baseline, without changing behavior or the completed Library discovery experience.
 
-**Goal status:** Approved for planning on 2026-09-09. Action 1 is Pending approval.
+**Goal status:** Completed on 2026-09-10. Action 1 is Completed.
 
 ## Status definitions
 
@@ -59,10 +59,21 @@ Ready for review.
 
 ### Action 1 — Measure and refine the variant form’s medium-width layout
 
-**Status:** Pending approval
+**Status:** Completed
 
 **Prepared:** 2026-09-09. The user approved the goal outcome, not implementation. Repository
 inspection narrowed the work to one responsive presentation action.
+
+**Approved:** 2026-09-09. The user explicitly approved the proposed action scope. Per the approval
+gate, implementation was not started in the approval response.
+
+**Started:** 2026-09-09. Baseline viewport inspection began before any responsive CSS or markup
+change.
+
+**Ready for review:** 2026-09-10. The page-scoped responsive repair is implemented and verified.
+
+**Completed:** 2026-09-10. The user explicitly approved the responsive changes after reviewing
+the implementation. Final verification passed before completion.
 
 **Purpose:** Remove the abrupt, visually awkward medium-width form transition while preserving the
 restored baseline’s behavior and the completed Library page.
@@ -105,7 +116,63 @@ restored baseline’s behavior and the completed Library page.
   repositories, schema, seed, catalog data, deployment, push, or production data.
 - Preserve the completed Library commit and any unrelated working-tree changes.
 
+**Implemented delta:**
+
+- Made `.library-variant-form` an inline-size query container and scoped its direct field grid to
+  one uniform column until the form itself has 40rem of usable width.
+- Restored the existing three equal columns only above that container threshold. This responds to
+  the actual nested form width at both the action-panel and viewport transitions without creating
+  the rejected full-width-first/two-field-row arrangement.
+- Preserved the shared form stylesheet and EJS partial unchanged; field order, markup, submission,
+  validation, CSRF, role-specific action prefixes, and Library discovery behavior are unaffected.
+- Added a focused CSS-contract regression for the form-scoped container query and the absence of a
+  two-column intermediate state.
+
+**Inspection and verification evidence:**
+
+- Restored-baseline captures showed usable one-column controls at 520px and 600px, but the shared
+  viewport rule switched to roughly 175px three-column controls at 680px, causing dense hint
+  wrapping. At 900px, the action panel returned to two columns while its nested form still tried to
+  fit three controls into the narrower form column. Personal and administrator modes behaved the
+  same.
+- Final personal and administrator captures at 520px, 600px, 680px, and 900px use one aligned
+  column with readable labels and hints and no orphaned field row. At 1440px, the form has enough
+  local space to return to three balanced columns of roughly 204px each.
+- At 390px, the unchanged narrow contract remains one column and the new rule introduces no fixed
+  or minimum width. The standalone headless fixture was subject to Chromium's minimum-window
+  capture width, so overflow safety at this width is supported by the unchanged narrow CSS
+  contract and the prior full-page 390px Library verification rather than fixture-edge geometry.
+- Focused Library tests: 13 passed, 0 failed.
+- `npm run verify`: formatting, lint, server and browser type checks, and 195 tests passed with 0
+  failures.
+- `npm run test:http`: 58 passed, 0 failed, including the administrator, global-catalog, and
+  owner-scoped private-variant regressions.
+- `git diff --check` passed. The working tree contains only the approved goal/action records and
+  the focused Library CSS/test changes.
+
+**Final verification after approval:**
+
+- `npm run verify`: 195 passed, 0 failed; formatting, lint, and both server and browser type checks
+  passed.
+- `npm run test:http`: 58 passed, 0 failed.
+- No new implementation changes were made during approval verification.
+
+## Goal final-review summary
+
+- The restored baseline was inspected before editing at the required medium widths, with 390px,
+  900px, and 1440px used as adjacent regression widths.
+- The final container-scoped layout keeps controls readable through the constrained range and
+  restores equal desktop columns only when the form itself has sufficient room.
+- Personal and administrator form markup and behavior remain unchanged; focused and HTTP
+  regressions cover their distinct actions, CSRF, ownership, and catalog behavior.
+- The implementation is limited to page-scoped Library CSS and its regression test. There are no
+  shared-form, backend, database, dependency, deployment, push, or production-data changes.
+- Every `Done when` criterion in `docs/current-goal.md` is satisfied. There are no unmet criteria.
+- Intentionally excluded work remains unchanged: broader Library discovery redesign, form behavior,
+  shared component changes, backend work, and schema or catalog changes.
+
 ## Resume here
 
-Action 1 is Pending approval. Await an explicit action decision; do not implement responsive code
-until the user approves the proposed scope.
+Action 1 and the goal are Completed after explicit user approval. No verified remaining gap or
+stated priority strongly supports a specific next goal; await user direction before replacing the
+goal or planning further work.

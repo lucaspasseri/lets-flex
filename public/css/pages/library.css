@@ -272,11 +272,22 @@
 
 .library-variant-form {
 	gap: 1rem;
+	container-type: inline-size;
+}
+
+.library-variant-form > .form-grid {
+	grid-template-columns: minmax(0, 1fr);
 }
 
 .library-variant-form__footer {
 	display: flex;
 	justify-content: flex-end;
+}
+
+@container (min-width: 40rem) {
+	.library-variant-form > .form-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
 }
 
 @media (max-width: 56rem) {
