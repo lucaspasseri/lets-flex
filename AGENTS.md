@@ -290,11 +290,87 @@ without explicit user approval. Overlap with previously completed work is not, b
 approval to replace or redesign that work, and a sequence of agent proposals must never be
 treated as an approved roadmap.
 
+
+## Usage and cost reporting
+
+This section applies to every substantive repository task, including planning, implementation,
+review, verification, and repository analysis.
+
+Required:
+
+- End the final task response with a compact `Usage` footer. For active-goal responses, place
+  this footer after `Next decision`; it is the only content permitted after that section.
+- Capture a before-task usage snapshot and an after-task usage snapshot when the Codex/runtime
+  exposes usage information. Prefer runtime/account usage data over estimates.
+- Report only metrics that are directly available or can be calculated from directly observed
+  before/after values. Never invent usage, infer token or credit consumption from elapsed time,
+  or convert generic model averages into claimed task usage.
+- Preserve the runtime's actual limit label. If it exposes a `5h` or other short-window limit,
+  report that label; do not rename it `daily`. If it exposes a daily limit, report `day`.
+- When available, report:
+  - elapsed wall-clock task time;
+  - task credits consumed;
+  - short-window/day allowance consumed and remaining;
+  - weekly allowance consumed and remaining;
+  - purchased credits remaining;
+  - reset time/date for a reported allowance, when surfaced by the runtime.
+- Percentage consumption must be calculated as the difference between actual before/after
+  remaining values and reported in percentage points. For example, `44% -> 41%` means
+  `-3 pp remaining`, not an inferred number of credits.
+- If a usage metric is not available, omit it or explicitly mark it `unavailable`. Do not block
+  an otherwise complete task solely because billing or allowance telemetry is unavailable.
+- If usage telemetry appears delayed, contradictory, or unchanged despite substantial work,
+  label it as potentially delayed rather than forcing a non-zero estimate.
+- Do not treat plan allowance percentages, tokens, credits, elapsed time, and money as
+  interchangeable units.
+
+### Credit cost estimate
+
+Use the current user-confirmed purchase rate until the user explicitly updates it:
+
+`2,500 credits = R$550`, therefore `1 credit = R$0.22`.
+
+When actual task credit consumption is available, calculate:
+
+`estimated BRL value = task credits consumed × R$0.22`
+
+Required cost wording:
+
+- If purchased-credit balance actually decreased, report the result as
+  `estimated purchased-credit cost`.
+- If task credits are reported but the task was covered by included plan allowance, report the
+  result only as `purchased-credit equivalent`; do not claim that money was charged.
+- If actual task credits are unavailable, do not estimate a BRL task cost from time, allowance
+  percentages, token guesses, or generic average task costs.
+- Treat `R$0.22/credit` as a configurable reporting constant based on the user's current purchase
+  screen, not as a permanent product price. Update this rule when the user provides a new rate.
+
+### Usage footer format
+
+Prefer one compact line when the available metrics fit clearly:
+
+`Usage: 18 min · task 14 credits (≈ R$3.08 purchased-credit equivalent) · 5h 63% left · week 21% left · 2,486 credits left`
+
+When allowance deltas are directly observable, include them if useful:
+
+`Usage: 28 min · 5h -8 pp (42% left) · week -1 pp (11% left) · credits unchanged at 2,500`
+
+When purchased credits were actually consumed:
+
+`Usage: 31 min · task 27 credits · estimated purchased-credit cost ≈ R$5.94 · 2,473 credits left`
+
+When telemetry is incomplete:
+
+`Usage: 24 min · task credits unavailable · week 11% left`
+
+Keep the footer factual and compact. Do not add explanations unless a usage value is surprising,
+ambiguous, delayed, or unavailable in a way that matters to the user's decision.
+
 ## End-of-response workflow options
 
 When working on an action governed by `docs/current-goal.md` and
 `docs/current-actions.md`, end every review or status response with a
-`Next decision` section.
+`Next decision` section followed only by the required `Usage` footer.
 
 Present only options that are valid for the action's current status.
 Do not continue to another action until the user explicitly chooses
