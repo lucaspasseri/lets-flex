@@ -142,7 +142,20 @@ export function createApp(options = {}) {
 			respondWithApplicationRecovery(req, res, { kind: "notFound" });
 			return;
 		}
-		console.error(err instanceof Error ? err.stack : err);
+		const principal = /** @type {{id?: unknown, role?: unknown} | undefined} */ (
+			req.user
+		);
+		const role = new Set(["guest", "user", "admin"]).has(String(principal?.role))
+			? String(principal?.role)
+			: "anonymous";
+		const principalId = Number.isInteger(principal?.id)
+			? String(principal?.id)
+			: "none";
+		const requestId = req.get("x-request-id");
+		console.error(
+			`Unhandled request ${req.method} ${req.path} (requestId=${requestId ?? "none"}, principal=${role}:${principalId})`,
+			err instanceof Error ? err.stack : err,
+		);
 		respondWithApplicationRecovery(req, res, { kind: "server" });
 	});
 

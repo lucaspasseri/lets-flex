@@ -757,6 +757,61 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.deepEqual(JSON.parse(apiNotFound.text), { error: "Not found" });
 	});
 
+	test("GET /cycles stays a deterministic unavailable page across session states", async () => {
+		const fresh = agent();
+		const freshResult = await fresh.request("/cycles", {
+			headers: { accept: "text/html" },
+		});
+		assert.equal(freshResult.response.status, 302);
+		assert.equal(
+			freshResult.response.headers.get("location"),
+			"/auth/login?returnTo=%2Fcycles",
+		);
+
+		const guest = agent();
+		await enterGuest(guest);
+		const guestHtml = await guest.request("/cycles", {
+			headers: { accept: "text/html" },
+		});
+		assert.equal(guestHtml.response.status, 404);
+		assert.match(guestHtml.text, /Page not found/);
+		assert.doesNotMatch(guestHtml.text, /Something broke|stack|database/i);
+		const guestJson = await guest.request("/cycles", {
+			headers: { accept: "application/json" },
+		});
+		assert.equal(guestJson.response.status, 404);
+		assert.deepEqual(JSON.parse(guestJson.text), { error: "Not found" });
+
+		const registered = agent();
+		await login(registered);
+		const registeredHtml = await registered.request("/cycles", {
+			headers: { accept: "text/html" },
+		});
+		assert.equal(registeredHtml.response.status, 404);
+		assert.match(registeredHtml.text, /Page not found/);
+		assert.doesNotMatch(registeredHtml.text, /Something broke|stack|database/i);
+
+		const expired = agent();
+		await enterGuest(expired);
+		const guestId = (
+			await db.query(
+				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
+			)
+		).rows[0].id;
+		await db.query(
+			"UPDATE users SET guest_expires_at = NOW() - INTERVAL '1 minute' WHERE id = $1",
+			[guestId],
+		);
+		const expiredResult = await expired.request("/cycles", {
+			headers: { accept: "text/html" },
+		});
+		assert.equal(expiredResult.response.status, 302);
+		assert.equal(
+			expiredResult.response.headers.get("location"),
+			"/auth/login?returnTo=%2Fcycles",
+		);
+	});
+
 	test("public registration validates, creates a regular user, and starts a session", async () => {
 		const client = agent();
 		let page = await client.request("/auth/login?returnTo=/library&tab=signup");

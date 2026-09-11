@@ -2,167 +2,138 @@
 
 ## Parent milestone
 
-Let’s Flex presents a consistent, reliable experience across its user-facing surfaces while the
-validated repository frontend Skill governs ongoing UI work.
+Let’s Flex must remain reliable for real users across authentication, guest provisioning, and
+application navigation before additional UX work is prioritized.
 
 ## Current goal
 
-Evaluate the complete user-facing frontend against the Let’s Flex frontend Skill, preserve surfaces
-that are already aligned, and resolve the highest-value consistency, responsive, accessibility, and
-recovery gaps through separately approved increments.
+Diagnose and eliminate the production `/cycles` failure reported by a real user at
+`lets-flex.paxeri.dev/cycles`. Establish why the user reached that URL, reproduce the failure from
+clean application/session state where possible, identify the smallest root cause supported by
+repository and runtime evidence, repair the correct behavior, and protect it with regression
+coverage and useful non-sensitive server diagnostics.
 
 ## Status
 
-Completed on 2026-09-10. Action 1 was explicitly approved and Completed after final verification.
-Action 2 was explicitly approved, implemented, verified, and completed on 2026-09-10 after review.
-Action 3 was explicitly approved, implemented, verified, and completed on 2026-09-10 after review.
-Action 4 was explicitly approved, implemented, verified, and completed on 2026-09-10 after review.
-Action 5 was explicitly approved and completed on 2026-09-10 after final verification. Actions 6 and
-7 were explicitly approved, implemented or verified, and completed on 2026-09-10 after review. The
-goal outcome was explicitly approved by the user on 2026-09-10.
+Proposed on 2026-09-10 from the user's explicit production-reliability request. Actions 1, 2, and 3
+were completed after review; the goal was completed on 2026-09-10 after explicit user approval.
 
-## Approved user outcome
-
-- Every relevant user-facing area is evaluated against the repository frontend Skill.
-- Major inconsistencies and UX gaps are known from repository, test, and rendered evidence.
-- Approved high-value problems are addressed incrementally, with approved medium-value refinements
-  included only where the evidence justifies them.
-- Shared root causes are repaired before page-local symptoms when a bounded shared fix is safe.
-- Important flows are verified at representative narrow, pressure, and wide widths, including
-  keyboard and interaction behavior where applicable.
-- Surfaces that are already aligned remain intentionally unchanged.
-- The Let’s Flex frontend Skill remains the governing workflow for ongoing frontend work.
-
-This is not authorization for an application-wide redesign. Existing product identity, architecture,
-and established behavior remain the default.
-
-## Delta-first baseline
+## Verified delta-first baseline
 
 ### Already satisfied
 
-- The repository has a validated Let’s Flex frontend Skill, UI guidelines, a rendered-evidence
-  workflow, and an established component/page CSS architecture.
-- The Library selected-session detail was already implemented and fully validated through that
-  workflow at 390px, 700px, and 1440px, including keyboard tab behavior.
-- Application chrome, shared forms, Dashboard and current-workout foundations, day/session
-  assignment and cancellation, Progress, and several Library flows already provide compatible
-  patterns to preserve and reuse.
-- Existing browser-component, rendered-view, view-model, HTTP, CSS-contract, accessibility, and
-  repository verification tests provide a substantial regression baseline.
-- The approved discovery audit already covered the application inventory and exercised relevant
-  live surfaces at widths from 390px through 1320px. Ninety-three focused frontend tests passed with
-  zero failures during that audit.
+- The completed frontend goal is committed as `62a5ede`; the worktree was clean before this goal's
+  tracking update.
+- `app.js` mounts `/cycles` after authentication middleware. The current `/cycles` router registers
+  `POST /` for cycle creation and `DELETE /:cycleId` for owned deletion; it registers no `GET` route.
+- Current application links and redirects point to `/programs` or `/programs/day`; the cycle creation
+  form posts to `/cycles`, and cycle deletion uses `DELETE /cycles/:cycleId`.
+- Guest entry atomically provisions a guest, starter program, cycle, training day, workout session,
+  and session selection state before redirecting to `/`.
+- The application has a generic HTML/JSON recovery boundary and logs unexpected errors, so the repair
+  can extend existing boundaries rather than introducing a parallel error system.
+- The PostgreSQL HTTP test harness can reset a disposable test database and exercise fresh,
+  guest-authenticated, and registered-authenticated sessions without production data.
 
 ### Reuse
 
-- Reuse the existing EJS, CSS, JavaScript, view-model, route/controller, shared-component, icon, and
-  test architecture. Do not add a frontend framework, CSS framework, UI library, or parallel design
-  system.
-- Reuse the application rail, page containers, buttons, forms, tabs, feedback, modals, and their
-  existing semantics whenever they are compatible with the required repair.
-- Reuse current authentication, authorization, CSRF, rate-limit, ownership, validation, and
-  lifecycle boundaries. Frontend recovery work must not weaken or bypass them.
-- Reuse verified aligned surfaces as comparison evidence rather than reimplementing them.
+- Reuse the existing Express route/middleware/controller layering, Passport session lifecycle,
+  `respondWithApplicationRecovery`, PostgreSQL HTTP harness, and test-database reset path.
+- Preserve authentication, guest provisioning, session rotation, CSRF, ownership, status semantics,
+  and browser-facing JSON contracts unless the verified root cause requires a narrow correction.
+- Reuse `/programs` as the established cycle-management page only if evidence confirms that it is the
+  intended destination; do not assume that a redirect is the correct repair.
 
-### Repair
+### Verified gaps and unknowns
 
-- At intermediate application widths, page breakpoints use viewport width while the persistent
-  navigation rail reduces the actual content area. Programs, History, Profile, and Library can
-  consequently place primary controls or content outside the visible page area.
-- Authentication recovery links inherit low-contrast browser-default link styling, and the generic
-  tab panel selector leaks panel treatment into the authentication surface.
-- Shared modal transitions do not yet honor reduced-motion preferences across all production modal
-  consumers.
-- Several HTML-oriented global, authentication, CSRF, rate-limit, and stale-mutation failures fall
-  out of the application UI into raw text responses instead of a bounded recovery experience.
-- Some core-flow page titles and Programs/day hierarchy cues are generic or denser than the task
-  requires.
+- A read-only production request to `GET https://lets-flex.paxeri.dev/cycles` without a session
+  returned `302 Location: /auth/login?returnTo=%2Fcycles`; no production data was changed.
+- A disposable local reproduction returned fresh-session `302` to sign-in, successfully provisioned a
+  guest with `302` to `/`, then returned `404` HTML recovery (`Page not found`) and JSON
+  `{ "error": "Not found" }` for guest-authenticated `GET /cycles`. It did not reproduce a 500.
+- The current source therefore proves that `/cycles` is not a GET page and that the clean local path
+  does not throw. The exact production exception, session state, request headers, deployment revision,
+  and user navigation/referrer that produced “Something broke!” remain unknown.
+- Historical code once exposed `GET /cycles/:programId` as a JSON lookup route, but no current UI link
+  targets it. This is evidence of a possible stale/external path, not proof of the reported cause.
+- The global unexpected-error logger currently records only the error stack/value. It does not include
+  request method, path, status context, or a safe authenticated principal identifier, which limits
+  diagnosis if the production request reaches an exception path.
 
 ### Add
 
-- Add an application-level HTML recovery surface for eligible 404 and 500 responses and for
-  security-preserving HTML error paths that currently return bare text. Browser-facing JSON
-  endpoints remain API-like.
-- Add final coverage verification that records the evaluated inventory, important states and
-  widths, keyboard/interaction checks, intentional non-changes, and explicitly deferred work.
+- Add only the reproduction, root-cause repair, regression coverage, and safe diagnostic context that
+  the investigation proves necessary. Do not redesign Dashboard, Library, starter workout, deletion,
+  or exercise-catalog behavior.
 
-## Approved delta actions
+## Proposed action sequence
 
-1. **Repair application-shell pressure-width responsiveness.** Correct the available-width mismatch
-   for Programs, History, Profile, and Library; verify Dashboard’s minor pressure-width discrepancy;
-   and protect existing intentional horizontal scrollers.
-2. **Repair authentication and recovery-link accessibility.** Give auth links deliberate contrast,
-   focus, hover, and target treatment, and isolate authentication panels from generic tab styling.
-3. **Complete the shared modal motion contract.** Honor reduced-motion preferences across every
-   production modal consumer while preserving focus, inertness, keyboard, and lifecycle behavior.
-4. **Introduce an application-level recovery surface.** Render generic, non-sensitive recovery UI
-   for eligible global and HTML-oriented authentication, CSRF, and rate-limit errors.
-5. **Repair contextual mutation failures.** Keep users in Programs and Library when safe rerendering
-   context exists, while preserving status codes, security boundaries, and intentional JSON
-   endpoint behavior.
-6. **Refine core-flow hierarchy and page identity.** Replace generic page titles and make a bounded
-   Programs/day hierarchy refinement without reopening aligned Dashboard or workout surfaces.
-7. **Complete final frontend coverage verification.** Recheck the complete user-facing inventory,
-   relevant states, keyboard paths, and stress widths; run applicable automated checks; and document
-   intentional non-changes and deferred medium- and low-priority findings.
-
-Each action requires explicit approval before implementation and separate review before completion.
-Later actions may be narrowed if repository evidence or an earlier shared repair already satisfies
-their acceptance criteria.
+1. **Diagnose and reproduce the production `/cycles` failure.** Trace every route and navigation path
+   that can reach `/cycles`; compare fresh, guest, and registered sessions in the disposable local
+   environment; inspect session/selection assumptions and error boundaries; and record the exact
+   verified root cause or the remaining external evidence required.
+2. **Repair the verified root cause and add regression protection.** Implement the smallest supported
+   behavior correction, add coverage for the discovered fresh/guest/authenticated scenario, and extend
+   unexpected-error diagnostics with enough safe request context to investigate future failures.
+   **Completed after review:** explicit `GET /cycles` 404 handling, safe contextual error logging,
+   and the session/negotiation regression matrix were implemented and verified; the exact historical
+   production exception remains uncorrelated.
+3. **Complete reliability verification and review.** Run focused HTTP tests, type/lint/format checks,
+   the applicable full suite, inspect the final diff, and record production-safe smoke evidence and
+   any remaining deployment or runtime unknowns. **Completed after review:** sequential focused and
+   full verification pass; read-only production smoke returns the expected unauthenticated redirect;
+   no deploy, push, production-data mutation, or commit is included.
 
 ## Scope
 
 ### In scope
 
-- User-facing EJS, CSS, browser interaction, responsive behavior, accessibility, page identity,
-  HTML recovery behavior, and the smallest controller/view-model changes needed to render it.
-- Dashboard, current workout, Programs/cycles/day, Library discovery/detail/forms/exercises/admin,
-  authentication, profile, history, progress, application chrome, shared components, and applicable
-  global error paths.
-- Focused and cross-cutting tests plus rendered verification proportional to each approved action.
+- `/cycles` route registration, method behavior, links, redirects, session and selection state,
+  guest provisioning, authentication state, server-side exceptions, safe logging, and regression
+  tests directly related to the reported failure.
+- The smallest route/controller/middleware/error-boundary changes required by verified evidence.
 
 ### Out of scope
 
-- A wholesale redesign, new visual identity, frontend framework, CSS framework, UI library, or new
-  design system.
-- Unrelated backend architecture, database schema or seed changes, migrations, production data,
-  deployment, or pushing changes.
-- Reworking an aligned surface solely to make every page visibly different.
-- Browser-facing JSON errors that are intentionally consumed by client-side code, except where an
-  approved action proves their contract is incorrect.
+- Dashboard, Library, starter workout, session deletion, exercise catalog, broad UX redesign, schema
+  changes, migrations, dependencies, deployment, pushing, committing, or production data mutation.
+- Redirecting `/cycles` merely because `/programs` exists, unless the investigation establishes that
+  redirect as the correct product behavior.
 
 ## Constraints and invariants
 
-- Preserve current product identity and reuse existing components and architecture.
-- Keep authentication, authorization, CSRF, rate limiting, ownership, validation, lifecycle rules,
-  and status semantics intact.
-- Recovery messages must be generic where implementation details or sensitive state could leak.
-- Preserve modal focus management, keyboard behavior, inertness, and control semantics while adding
-  motion preference support.
-- Page-level overflow must not hide core actions; intentional component-owned scrollers may remain
-  when they are clearly usable.
-- Use actual rendered content at representative narrow, pressure, and wide widths. Width lists may
-  be narrowed or expanded per surface from evidence, not convenience.
-- Do not mutate production data, deploy, or push changes.
+- Do not expose stack traces, session contents, credentials, tokens, SQL, or personal data to users.
+- Keep server diagnostics useful but redact secrets and avoid raw session/user data.
+- Preserve authentication, authorization, CSRF, rate limiting, ownership, guest lifecycle, session
+  rotation, validation, and status semantics.
+- Use only disposable local/test data for reproduction. Production requests remain read-only unless
+  the user separately authorizes a specific production operation.
+- Do not commit, push, deploy, or modify production data as part of this goal.
 
 ## Done when
 
-- The complete relevant user-facing inventory has a recorded evaluation against the frontend Skill.
-- Every separately approved high-value finding is implemented and verified.
-- Approved medium-value findings are implemented where their evidence and scope remain justified.
-- Shared root causes are repaired at the narrowest safe shared boundary.
-- Important flows pass rendered verification at applicable narrow, pressure, and wide widths, with
-  keyboard, focus, interaction-state, and reduced-motion checks where relevant.
-- Applicable focused and repository-wide automated checks pass.
-- Aligned surfaces and intentional behavior remain unchanged unless an approved action requires a
-  specific delta.
-- Deferred findings, remaining unknowns, and intentional exclusions are documented for final review.
+- The root cause is documented with verified repository/runtime evidence and unknowns clearly separated.
+- The failing path has the correct behavior for the states relevant to the discovered scenario.
+- Regression coverage protects the discovered fresh-session, guest, and authenticated behavior where
+  applicable.
+- Unexpected server errors retain generic user responses and gain enough safe context for diagnosis.
+- Focused checks, required repository verification, and production-safe smoke evidence pass, or any
+  unavailable check is explicitly documented.
+- No unrelated UX, data, deployment, push, commit, or production mutation is included.
 - The goal reaches Ready for final review and receives explicit user approval.
 
 ## Resume here
 
-Action 1, **Repair application-shell pressure-width responsiveness**, is Completed. Action 2,
-**Repair authentication and recovery-link accessibility**, is Completed. Action 3, **Complete the
-shared modal motion contract**, is Completed. Action 4, **Introduce an application-level recovery
-surface**, is Completed. Action 5, **Repair contextual mutation failures**, is Completed. Action 6,
-**Refine core-flow hierarchy and page identity**, is Completed. Action 7 is Completed.
+Action 1, **Diagnose and reproduce the production `/cycles` failure**, and Action 2,
+**Repair the verified root cause and add regression protection**, are Completed after review. Action
+3 is Completed after review. The goal was completed on 2026-09-10 after explicit user approval.
+
+## Completion outcome
+
+The unsupported `/cycles` GET path now returns the generic 404 recovery response before mutation
+middleware, while POST/DELETE cycle contracts remain unchanged. Regression coverage protects fresh,
+guest, registered, expired-session, HTML, and JSON behavior. Unexpected errors retain generic user
+responses and now log safe request/principal context. Focused and full verification passed, and a
+read-only production smoke request returned the expected unauthenticated redirect. The historical
+production 500 remains uncorrelated without a request ID or server trace; deployment and production
+data changes were intentionally excluded.
