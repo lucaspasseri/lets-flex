@@ -1,10 +1,12 @@
-const requiredPatternCounts = Object.freeze({
-	push: 3,
-	pull: 4,
-	squat: 3,
-	hinge: 3,
-	lunge: 3,
-	rotation: 2,
+const minimumPatternCounts = Object.freeze({
+	push: 13,
+	pull: 13,
+	squat: 6,
+	hinge: 14,
+	lunge: 8,
+	rotation: 8,
+	carry: 3,
+	gait: 10,
 });
 
 const normalizeName = (name) =>
@@ -43,8 +45,8 @@ function assertUniqueNames(items, label) {
 }
 
 export function validateCatalogManifest(manifest, vocabulary) {
-	if (!Array.isArray(manifest) || manifest.length !== 18) {
-		throw new Error("Catalog must contain exactly 18 base exercises");
+	if (!Array.isArray(manifest) || manifest.length < 60) {
+		throw new Error("Catalog must contain at least 60 base exercises");
 	}
 
 	const movementPatterns = new Set(vocabulary.movementPatterns);
@@ -58,8 +60,8 @@ export function validateCatalogManifest(manifest, vocabulary) {
 	assertUniqueNames(manifest, "base exercise");
 	assertUniqueNames(variants, "global variant");
 
-	if (variants.length < 30) {
-		throw new Error("Catalog must contain at least 30 global variants");
+	if (variants.length < 100) {
+		throw new Error("Catalog must contain at least 100 global variants");
 	}
 
 	for (const exercise of manifest) {
@@ -116,10 +118,10 @@ export function validateCatalogManifest(manifest, vocabulary) {
 		}
 	}
 
-	for (const [pattern, count] of Object.entries(requiredPatternCounts)) {
-		if (patternCounts.get(pattern) !== count) {
+	for (const [pattern, count] of Object.entries(minimumPatternCounts)) {
+		if ((patternCounts.get(pattern) ?? 0) < count) {
 			throw new Error(
-				`Catalog must contain exactly ${count} ${pattern} base exercises`,
+				`Catalog must contain at least ${count} ${pattern} base exercises`,
 			);
 		}
 	}

@@ -14,15 +14,17 @@ test("canonical catalog satisfies the approved manifest contract", () => {
 	const result = validateCatalogManifest(catalogManifest, catalogVocabulary);
 
 	assert.deepEqual(result, {
-		baseCount: 18,
-		variantCount: 36,
+		baseCount: 78,
+		variantCount: 129,
 		patternCounts: {
-			push: 3,
-			pull: 4,
-			squat: 3,
-			hinge: 3,
-			lunge: 3,
-			rotation: 2,
+			push: 13,
+			pull: 13,
+			squat: 6,
+			hinge: 14,
+			lunge: 8,
+			rotation: 10,
+			carry: 3,
+			gait: 11,
 		},
 	});
 	assert.ok(catalogReviewNotes.length > 0);
@@ -82,6 +84,17 @@ test("canonical catalog covers approved equipment and foundational use cases", (
 			.find((exercise) => exercise.name === "Leg Press")
 			?.variants.some((variant) => variant.name === "Single-Leg Press"),
 	);
+	assert.ok(catalogManifest.some((exercise) => exercise.name === "Triceps Pushdown"));
+	assert.ok(
+		catalogManifest.some((exercise) => exercise.name === "Standing Calf Raise"),
+	);
+	assert.ok(catalogManifest.some((exercise) => exercise.name === "Running"));
+	assert.ok(catalogManifest.some((exercise) => exercise.name === "Cooldown Breathing"));
+	assert.ok(
+		catalogManifest
+			.find((exercise) => exercise.name === "Running")
+			?.variants.some((variant) => variant.environment === "track"),
+	);
 });
 
 test("validation rejects unresolved vocabulary references and missing metadata", () => {
@@ -129,6 +142,6 @@ test("validation rejects an incomplete pattern distribution", () => {
 
 	assert.throws(
 		() => validateCatalogManifest(invalidDistribution, catalogVocabulary),
-		/Catalog must contain exactly 3 push base exercises/,
+		/Catalog must contain at least 13 push base exercises/,
 	);
 });

@@ -142,7 +142,7 @@ test("administrator grouping keeps variant edit identities and one base archive 
 	);
 });
 
-test("canonical catalog projects 18 base exercises and 36 nested variants", () => {
+test("canonical catalog projects 78 base exercises and 129 nested variants", () => {
 	let nextVariantId = 1;
 	const exerciseTemplateArr = catalogManifest.flatMap((exercise, exerciseIndex) =>
 		exercise.variants.map((variant) =>
@@ -162,12 +162,12 @@ test("canonical catalog projects 18 base exercises and 36 nested variants", () =
 		managementMode: true,
 	});
 
-	assert.equal(viewModel.count, 18);
-	assert.equal(viewModel.variantCount, 36);
-	assert.equal(viewModel.items.length, 18);
+	assert.equal(viewModel.count, 78);
+	assert.equal(viewModel.variantCount, 129);
+	assert.equal(viewModel.items.length, 78);
 	assert.equal(
 		viewModel.items.reduce((total, item) => total + item.details.variants.length, 0),
-		36,
+		129,
 	);
 	const boxSquat = viewModel.items.find((item) => item.baseName === "Box Squat");
 	assert.ok(boxSquat);

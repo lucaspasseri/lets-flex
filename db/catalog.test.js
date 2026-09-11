@@ -101,7 +101,7 @@ integration("canonical database setup", { concurrency: false }, () => {
 		`)
 		).rows[0];
 
-		assert.deepEqual(counts, { bases: 18, variants: 36, prime_movers: 18 });
+		assert.deepEqual(counts, { bases: 78, variants: 129, prime_movers: 78 });
 		assert.equal(
 			(
 				await db.query(

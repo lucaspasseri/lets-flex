@@ -103,3 +103,26 @@ test("session discovery omits facets that cannot narrow the visible collection",
 
 	assert.deepEqual(viewModel.discovery.filters, []);
 });
+
+test("session discovery preserves large collections and long names for the scrollable list", () => {
+	const longName = "Strength block with a deliberately long training session name";
+	const viewModel = createSessionWorkspace({
+		sessionArr: Array.from({ length: 80 }, (_, index) =>
+			session({
+				id: index + 1,
+				name: index === 0 ? longName : `Session ${index + 1}`,
+				movement: "Squat",
+				equipment: "Barbell",
+				muscle: "Quads",
+				notes: "Keep the setup consistent.",
+				variantName: "Barbell Back Squat",
+			}),
+		),
+		activeSession: null,
+		actorUserId: 7,
+	});
+
+	assert.equal(viewModel.summaries.items.length, 80);
+	assert.equal(viewModel.summaries.items[0].name, longName);
+	assert.equal(viewModel.summaries.items.at(-1)?.href, "/library?sessionId=80");
+});

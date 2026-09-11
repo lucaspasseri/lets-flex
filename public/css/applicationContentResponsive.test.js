@@ -10,7 +10,7 @@ const stylesheetContracts = [
 	["./pages/library.css", ["56rem", "42rem", "30rem"]],
 	["./components/librarySearch.css", ["68rem", "42rem"]],
 	["./components/exerciseTemplates.css", ["45rem"]],
-	["./components/sessionWorkspace.css", ["52rem", "34rem"]],
+	["./components/sessionWorkspace.css", ["64rem", "34rem"]],
 	["./pages/dashboard.css", ["62rem", "44rem", "34rem"]],
 ];
 
