@@ -171,17 +171,14 @@ test("dashboard page exposes explicit component contracts and renders without le
 		result.components.currentWorkout.session?.steps[0].title,
 		"PRESS (Barbell)",
 	);
+	assert.equal(result.components.currentWorkout.session?.header.media?.src, null);
+	assert.equal(result.components.currentWorkout.session?.steps[0].media.src, null);
+	assert.equal(result.components.currentWorkout.session?.currentStep?.media.src, null);
+	assert.equal(result.components.currentWorkout.session?.header.media?.initial, "P");
+	assert.equal(result.components.currentWorkout.session?.steps[0].media.initial, "B");
 	assert.equal(
-		result.components.currentWorkout.session?.header.media.src,
-		"/media/exercise-bench-press.svg",
-	);
-	assert.equal(
-		result.components.currentWorkout.session?.steps[0].media.src,
-		"/media/exercise-bench-press.svg",
-	);
-	assert.equal(
-		result.components.currentWorkout.session?.currentStep?.media.src,
-		"/media/exercise-bench-press.svg",
+		result.components.currentWorkout.session?.currentStep?.media.initial,
+		"B",
 	);
 	assert.equal(result.components.currentWorkout.session?.steps[0].isCurrent, true);
 	assert.equal(result.components.analyticsSummary.primaryMetric.value, "67%");
@@ -419,9 +416,10 @@ test("workout validation preserves safe set values and presents associated feedb
 	assert.match(html, /value="27.5"/);
 	assert.match(html, /aria-invalid="true"/);
 	assert.match(html, /A step cannot contain more than 100 sets/);
-	assert.match(html, /class="session-header__media"/);
-	assert.match(html, /class="current-workout-step__media"/);
-	assert.match(html, /src="\/media\/exercise-bench-press\.svg"/);
+	assert.match(html, /class="[^"]*session-header__media[^"]*"/);
+	assert.match(html, /class="[^"]*current-workout-step__media[^"]*"/);
+	assert.match(html, /data-media-presentation="initial"/);
+	assert.doesNotMatch(html, /<img/);
 });
 
 test("rendered workout states expose only lifecycle-available actions", async () => {
@@ -439,7 +437,7 @@ test("rendered workout states expose only lifecycle-available actions", async ()
 
 	const plannedHtml = await renderWorkout({ ...workout, status: "planned" });
 	assert.match(plannedHtml, /Ready to start/);
-	assert.match(plannedHtml, /class="session-step__media"/);
+	assert.match(plannedHtml, /class="[^"]*session-step__media[^"]*"/);
 	assert.match(plannedHtml, />Start session</);
 	assert.doesNotMatch(plannedHtml, />Complete step</);
 

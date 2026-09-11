@@ -1,4 +1,5 @@
 import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
+import { resolveMedia } from "../../../src/features/media/resolveMedia.js";
 import resolveStepMedia from "../../../src/features/media/resolveStepMedia.js";
 
 const MAX_SET_ROWS = 100;
@@ -26,8 +27,16 @@ export default function createWorkoutSessionViewModel({
 		status: step.stepLog?.status ?? "planned",
 		statusLabel: stepStatusLabel(step.stepLog?.status),
 		stepLog: step.stepLog,
-		media: resolveStepMedia(step),
+		media: resolveStepMedia(step, { presentation: "initial" }),
 	}));
+	const sessionMedia =
+		session && steps.length > 0
+			? resolveMedia({
+					entityType: "session",
+					label: session.name,
+					presentation: "initial",
+				})
+			: null;
 	const performedCount = steps.filter((step) => step.status === "performed").length;
 	const skippedCount = steps.filter((step) => step.status === "skipped").length;
 	const resolvedCount = performedCount + skippedCount;
@@ -78,7 +87,7 @@ export default function createWorkoutSessionViewModel({
 						title: session.name,
 						statusLabel: statusPresentation(status).label,
 						statusModifier: statusPresentation(status).modifier,
-						media: steps[0]?.media ?? null,
+						media: sessionMedia,
 					},
 					steps: presentedSteps,
 					stepListLabel:

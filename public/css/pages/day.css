@@ -424,12 +424,6 @@
 
 .workout-card__media {
 	grid-row: 1 / span 2;
-	width: 4.5rem;
-	height: 3rem;
-	border: 1px solid var(--color-border);
-	border-radius: 0.55rem;
-	background: var(--color-surface);
-	object-fit: cover;
 }
 
 .workout-card:has(.workout-card__media) .workout-card__header {
@@ -517,12 +511,6 @@
 .workout-step__media {
 	grid-column: 2;
 	grid-row: 1;
-	width: 4rem;
-	height: 2.65rem;
-	border: 1px solid var(--color-border);
-	border-radius: 0.5rem;
-	background: var(--color-page);
-	object-fit: cover;
 }
 
 .workout-card:has(.workout-card__media) .workout-card__heading {

@@ -198,12 +198,17 @@ test("personal exercise markup identifies private scope and retains owner action
 	assert.match(html, /2 variants/);
 	assert.match(html, /Barbell Back Squat/);
 	assert.match(html, /Tempo Goblet Squat[\s\S]*Private/);
-	assert.match(html, /class="exercise-template__summary-media"/);
+	assert.match(html, /class="[^"]*exercise-template__summary-media[^"]*"/);
+	assert.doesNotMatch(html, /<img[\s\S]*\/media\//);
 	assert.match(
 		html,
-		/class="exercise-template__media"[\s\S]*\/media\/environment-gym\.svg/,
+		/exercise-template__summary-media media-frame media-frame--initial/,
 	);
-	assert.equal((html.match(/class="exercise-variant__media"/g) ?? []).length, 2);
+	assert.equal(
+		(html.match(/class="[^"]*exercise-variant__media[^"]*"/g) ?? []).length,
+		2,
+	);
+	assert.match(html, /exercise-variant__media media-frame media-frame--initial/);
 	assert.equal((html.match(/id="exercise-template-3-trigger"/g) ?? []).length, 1);
 	assert.equal((html.match(/data-exercise-variant-id=/g) ?? []).length, 2);
 	assert.equal((html.match(/data-exercise-variant-item/g) ?? []).length, 2);

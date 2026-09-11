@@ -46,7 +46,13 @@ export function validateMediaManifest(manifest) {
 
 	return {
 		assetCount: entries.length,
-		sources: [...new Set(entries.map((entry) => entry.src))],
+		sources: [
+			...new Set(
+				entries
+					.map((entry) => entry.src)
+					.filter((source) => typeof source === "string"),
+			),
+		],
 	};
 }
 
@@ -61,8 +67,9 @@ function assertEntry(value, label) {
 
 	const entry = /** @type {Partial<MediaManifestEntry>} */ (value);
 	if (
-		typeof entry.src !== "string" ||
-		!entry.src.startsWith("/media/") ||
+		(entry.presentation === "image" &&
+			(typeof entry.src !== "string" || !entry.src.startsWith("/media/"))) ||
+		(entry.presentation === "initial" && entry.src !== null) ||
 		typeof entry.alt !== "string" ||
 		entry.alt.trim() === "" ||
 		typeof entry.width !== "number" ||
@@ -71,7 +78,10 @@ function assertEntry(value, label) {
 		entry.height <= 0 ||
 		typeof entry.aspectRatio !== "number" ||
 		entry.aspectRatio <= 0 ||
-		typeof entry.matchType !== "string"
+		typeof entry.matchType !== "string" ||
+		(entry.presentation !== "image" && entry.presentation !== "initial") ||
+		(entry.presentation === "initial" &&
+			(typeof entry.initial !== "string" || entry.initial.length !== 1))
 	) {
 		throw new Error(`Media manifest entry is invalid: ${label}`);
 	}

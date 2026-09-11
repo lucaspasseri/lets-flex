@@ -1,14 +1,6 @@
 <header class="session-header">
 	<% if (header.media) { %>
-		<img
-			class="session-header__media"
-			data-media-fallback="true"
-			src="<%= header.media.src %>"
-			width="<%= header.media.width %>"
-			height="<%= header.media.height %>"
-			alt=""
-			aria-hidden="true"
-		>
+		<%- include("../shared/components/media", { media: header.media, className: "session-header__media", variant: "initial", decorative: true }) %>
 	<% } %>
 	<div class="session-header-text"><p><%= header.eyebrow %></p><h2 id="current-workout-title"><%= header.title %></h2></div>
 	<span class="session-status session-status--<%= header.statusModifier %>"><%= header.statusLabel %></span>

@@ -25,7 +25,7 @@ test("selected-session detail uses a contained responsive reading-flow contract"
 		/@container application-content \(max-width: 64rem\)[\s\S]*?\.session-summaries__list\s*\{[^}]*max-height:\s*26rem[\s\S]*?\.session-details__back-link\s*\{[^}]*display:\s*inline-flex/,
 	);
 	assert.match(css, /\.session-summaries__list\s*\{[^}]*overflow-y:\s*auto/);
-	assert.match(css, /\.session-summary__name\s*\{[^}]*overflow-wrap:\s*anywhere/);
+	assert.match(css, /\.session-summary__name\s*\{[^}]*overflow-wrap:\s*break-word/);
 	assert.match(css, /\.session-summary__media\s*\{/);
 	assert.match(css, /\.session-details__media\s*\{/);
 	assert.match(
@@ -34,13 +34,11 @@ test("selected-session detail uses a contained responsive reading-flow contract"
 	);
 	assert.match(
 		css,
-		/\.session-step__header--with-media\s*\{[^}]*grid-template-columns:\s*auto minmax\(0, 1fr\) auto/,
+		/\.session-step__header--with-media\s*\{[^}]*grid-template-columns:\s*auto minmax\(0, 1fr\) minmax\(0, auto\)/,
 	);
-	assert.match(
-		css,
-		/\.session-step__media\s*\{[^}]*width:\s*3\.75rem[^}]*height:\s*2.5rem[^}]*aspect-ratio:\s*3 \/ 2/,
-	);
-	assert.match(css, /\.session-step__media img\s*\{[^}]*aspect-ratio:\s*3 \/ 2/);
+	assert.match(css, /\.session-step__media\s*\{[^}]*align-self:\s*start/);
+	assert.doesNotMatch(css, /\.session-step__media img/);
+	assert.doesNotMatch(css, /\.session-details__media img/);
 	assert.match(css, /\.session-details__back-link:focus-visible/);
 	assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });

@@ -3,6 +3,7 @@ import {
 	getDistinctEquipments,
 } from "./selectors/sessionSelectors.js";
 import createDetailsStepViewModel from "./createDetailsStepViewModel.js";
+import { resolveMedia } from "../media/resolveMedia.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapper} SessionMapper
@@ -42,7 +43,13 @@ function createDetails({ session, actorUserId = null }) {
 		isArchived: session.isArchived,
 
 		stepNumber: stepCount,
-		media: detailSteps[0]?.media ?? null,
+		media: steps[0]
+			? resolveMedia({
+					entityType: "session",
+					label: session.name,
+					presentation: "initial",
+				})
+			: null,
 		steps: detailSteps,
 
 		stats: [

@@ -81,6 +81,8 @@ test("session discovery derives useful facets and searchable loaded metadata", (
 	assert.match(viewModel.summaries.items[0].searchKeyWord, /Heavy training day/);
 	assert.match(viewModel.summaries.items[0].searchKeyWord, /Back squat/);
 	assert.match(viewModel.summaries.items[0].searchKeyWord, /Controlled tempo/);
+	assert.equal(viewModel.summaries.items[0].media?.src, null);
+	assert.equal(viewModel.summaries.items[0].media?.initial, "L");
 	assert.deepEqual(viewModel.summaries.items[1].filters.equipment, ["Bodyweight"]);
 });
 

@@ -27,16 +27,7 @@
 
 		<header class="session-details__header">
 			<% if (session.media) { %>
-				<figure class="session-details__media" data-media-fallback="<%= session.media.isFallback %>">
-					<img
-						src="<%= session.media.src %>"
-						width="<%= session.media.width %>"
-						height="<%= session.media.height %>"
-						alt="<%= session.media.alt %>"
-						loading="lazy"
-						decoding="async"
-					>
-				</figure>
+				<%- include("../../shared/components/media", { media: session.media, className: "session-details__media", variant: "initial", decorative: true }) %>
 			<% } %>
 			<div>
 				<div class="session-details__labels">
@@ -133,18 +124,9 @@
 							<%= step.order %>
 						</div>
 						<div class="session-step__content">
-							<header class="session-step__header<%= step.media ? ' session-step__header--with-media' : '' %>">
+				<header class="session-step__header<%= step.media ? ' session-step__header--with-media' : '' %>">
 								<% if (step.media) { %>
-									<figure class="session-step__media" data-media-fallback="<%= step.media.isFallback %>">
-										<img
-											src="<%= step.media.src %>"
-											width="<%= step.media.width %>"
-											height="<%= step.media.height %>"
-											alt="<%= step.media.alt %>"
-											loading="lazy"
-											decoding="async"
-										>
-									</figure>
+									<%- include("../../shared/components/media", { media: step.media, className: "session-step__media", variant: "initial", decorative: true }) %>
 								<% } %>
 
 								<div class="session-step__identity">

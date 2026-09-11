@@ -104,12 +104,6 @@
 
 .session-header__media {
 	flex: 0 0 auto;
-	width: 5.5rem;
-	height: 3.65rem;
-	border: 1px solid var(--color-border);
-	border-radius: 0.65rem;
-	background: var(--color-page);
-	object-fit: cover;
 }
 
 .session-header-text {
@@ -308,14 +302,6 @@
 	grid-column: 2;
 	grid-row: 1;
 	align-self: center;
-	width: 3.75rem;
-	height: 2.5rem;
-	max-height: 2.5rem;
-	aspect-ratio: 3 / 2;
-	border: 1px solid var(--color-border);
-	border-radius: 0.55rem;
-	background: var(--color-surface);
-	object-fit: cover;
 }
 
 .session-component .session-step--current {
@@ -429,20 +415,7 @@
 }
 
 .current-workout-step__media {
-	width: min(100%, 12rem);
-	margin: 0;
-	border: 1px solid var(--color-border);
-	border-radius: 0.75rem;
-	overflow: hidden;
-	background: var(--color-page);
-}
-
-.current-workout-step__media img {
-	display: block;
-	width: 100%;
-	height: auto;
-	aspect-ratio: 3 / 2;
-	object-fit: cover;
+	align-self: start;
 }
 
 .session-outcome__mark {
@@ -736,9 +709,6 @@
 
 	.session-component .session-step__media {
 		grid-row: 1;
-		width: 4rem;
-		height: 2.65rem;
-		max-height: 2.65rem;
 	}
 
 	.session-component .session-step__content {

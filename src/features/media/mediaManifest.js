@@ -8,7 +8,20 @@ const mediaAsset = (src, alt, matchType) =>
 		height: 640,
 		aspectRatio: 1.5,
 		matchType,
+		presentation: "image",
+		initial: null,
 	});
+
+const initialFallback = /** @type {MediaManifestEntry} */ ({
+	src: null,
+	alt: "Initial fallback",
+	width: 960,
+	height: 640,
+	aspectRatio: 1.5,
+	matchType: "placeholder",
+	presentation: "initial",
+	initial: "?",
+});
 
 /**
  * Curated local media for the first media-system iteration.
@@ -88,11 +101,7 @@ export const mediaManifest = Object.freeze({
 			"category",
 		),
 	}),
-	placeholder: mediaAsset(
-		"/media/media-placeholder.svg",
-		"Generic training media placeholder",
-		"placeholder",
-	),
+	placeholder: initialFallback,
 });
 
 /**

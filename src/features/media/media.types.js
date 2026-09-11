@@ -3,7 +3,7 @@
  * step types can provide useful context even when a catalog entity has no
  * dedicated artwork.
  *
- * @typedef {"exercise" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category"} MediaEntityType
+ * @typedef {"session" | "exercise" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category"} MediaEntityType
  */
 
 /** @typedef {"exercise_variant" | "exercise" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category" | "placeholder"} MediaMatchType */
@@ -24,18 +24,21 @@
  * @property {string} [environment]
  * @property {string} [category]
  * @property {string} [label]
+ * @property {"image" | "initial"} [presentation]
  */
 
 /**
  * Presentation-ready metadata for one local media asset.
  *
  * @typedef {object} MediaManifestEntry
- * @property {string} src
+ * @property {string | null} src
  * @property {string} alt
  * @property {number} width
  * @property {number} height
  * @property {number} aspectRatio
  * @property {MediaMatchType} matchType
+ * @property {"image" | "initial"} presentation
+ * @property {string | null} initial
  */
 
 /**
@@ -44,11 +47,13 @@
  * manifest tier supplied the asset.
  *
  * @typedef {object} ResolvedMedia
- * @property {string} src
+ * @property {string | null} src
  * @property {string} alt
  * @property {number} width
  * @property {number} height
  * @property {number} aspectRatio
+ * @property {"image" | "initial"} presentation
+ * @property {string | null} initial
  * @property {MediaEntityType} entityType
  * @property {MediaMatchType} matchType
  * @property {string | null} matchedKey

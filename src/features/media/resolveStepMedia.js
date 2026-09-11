@@ -8,9 +8,10 @@ import { resolveMedia } from "./resolveMedia.js";
  * Step type supplies category context when the exercise has no dedicated asset.
  *
  * @param {SessionMapperStep} step
+ * @param {{presentation?: "image" | "initial"}} [options]
  * @returns {ResolvedMedia}
  */
-export default function resolveStepMedia(step) {
+export default function resolveStepMedia(step, options = {}) {
 	const label = step.exercise.variantName || step.exercise.name;
 
 	return resolveMedia({
@@ -21,6 +22,7 @@ export default function resolveStepMedia(step) {
 		environment: step.exercise.environment,
 		category: categoryForStepType(step.type),
 		label,
+		presentation: options.presentation,
 	});
 }
 

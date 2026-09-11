@@ -1,16 +1,6 @@
 <header class="workout-card__header">
 	<% if (header.media) { %>
-		<img
-			class="workout-card__media"
-			data-media-fallback="true"
-			src="<%= header.media.src %>"
-			width="<%= header.media.width %>"
-			height="<%= header.media.height %>"
-			alt=""
-			aria-hidden="true"
-			loading="lazy"
-			decoding="async"
-		>
+		<%- include("../shared/components/media", { media: header.media, className: "workout-card__media", variant: "initial", decorative: true }) %>
 	<% } %>
 	<div class="workout-card__heading">
 		<h3 class="workout-card__title">

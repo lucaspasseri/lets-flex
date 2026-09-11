@@ -14,10 +14,12 @@ test("selected-session detail renders orientation and presentation-ready prescri
 			id: 7,
 			headingId: "session-details-title-7",
 			media: {
-				src: "/media/category-strength.svg",
+				src: null,
 				width: 960,
 				height: 640,
-				alt: "Strength session illustration",
+				alt: "Strength session — initial tile",
+				presentation: "initial",
+				initial: "S",
 				isFallback: true,
 			},
 			name: "Strength session",
@@ -32,10 +34,12 @@ test("selected-session detail renders orientation and presentation-ready prescri
 				{
 					order: 1,
 					media: {
-						src: "/media/exercise-bench-press.svg",
+						src: null,
 						width: 960,
 						height: 640,
-						alt: "Bench press illustration",
+						alt: "Squat — initial tile",
+						presentation: "initial",
+						initial: "S",
 						isFallback: true,
 					},
 					type: "Exercise",
@@ -67,10 +71,11 @@ test("selected-session detail renders orientation and presentation-ready prescri
 	assert.match(html, /session-step__media/);
 	assert.match(
 		html,
-		/class="session-step__header session-step__header--with-media"[\s\S]*?class="session-step__media"[\s\S]*?class="session-step__identity"/,
+		/class="session-step__header session-step__header--with-media"[\s\S]*?class="session-step__media[^"]*"[\s\S]*?class="session-step__identity"/,
 	);
-	assert.match(html, /src="\/media\/exercise-bench-press\.svg"/);
-	assert.match(html, /alt="Bench press illustration"/);
+	assert.match(html, /data-media-presentation="initial"/);
+	assert.match(html, />S<\/span>/);
+	assert.doesNotMatch(html, /<img/);
 	assert.doesNotMatch(html, /Session template|null|undefined/);
 });
 

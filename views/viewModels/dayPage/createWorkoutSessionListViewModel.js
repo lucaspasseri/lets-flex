@@ -1,4 +1,5 @@
 import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
+import { resolveMedia } from "../../../src/features/media/resolveMedia.js";
 import resolveStepMedia from "../../../src/features/media/resolveStepMedia.js";
 
 /**
@@ -22,7 +23,13 @@ export default function createWorkoutSessionListViewModel({
 			header: {
 				title: session.name,
 				notes: session.notes ?? session.sessionNotes,
-				media: session.steps[0] ? resolveStepMedia(session.steps[0]) : null,
+				media: session.steps[0]
+					? resolveMedia({
+							entityType: "session",
+							label: session.name,
+							presentation: "initial",
+						})
+					: null,
 				statusLabel: session.status,
 				...(canCancel
 					? {
@@ -78,7 +85,7 @@ function toStepViewModel(step) {
 			loadUnit: step.loadUnit,
 			equipmentName: step.equipment.name,
 		}),
-		media: resolveStepMedia(step),
+		media: resolveStepMedia(step, { presentation: "initial" }),
 		details: [step.equipment.name, step.movementPattern].filter(Boolean),
 	};
 }

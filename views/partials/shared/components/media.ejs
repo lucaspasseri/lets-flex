@@ -1,0 +1,57 @@
+<%
+	const {
+		media = null,
+		className = "",
+		decorative = false,
+		loading = null,
+		decoding = null,
+		inFrame = false,
+		variant = "thumbnail",
+	} = locals ?? {};
+	const isInitial = variant === "initial" || media?.presentation === "initial";
+	const presentationClass = isInitial ? "media-frame--initial" : "";
+	const variantClass =
+		variant === "initial"
+			? ""
+			: ["icon", "thumbnail", "exercise"].includes(variant)
+				? `media-frame--${variant}`
+				: "media-frame--thumbnail";
+	const elementClass = [
+		className,
+		inFrame ? "media-frame__content" : "media-frame",
+		presentationClass,
+		variantClass,
+	]
+		.filter(Boolean)
+		.join(" ");
+	const initialClass = [
+		className,
+		inFrame ? "media-frame__initial" : "media-frame",
+		presentationClass,
+		variantClass,
+	]
+		.filter(Boolean)
+		.join(" ");
+%>
+
+<% if (isInitial) { %>
+	<span
+		class="<%= initialClass %>"
+		data-media-presentation="initial"
+		<% if (decorative) { %>aria-hidden="true"<% } else { %>role="img" aria-label="<%= media.alt %>"<% } %>
+	>
+		<span aria-hidden="true"><%= media.initial ?? "?" %></span>
+	</span>
+<% } else if (media?.src) { %>
+	<img
+		class="<%= elementClass %>"
+		data-media-fallback="true"
+		src="<%= media.src %>"
+		width="<%= media.width %>"
+		height="<%= media.height %>"
+		alt="<%= decorative ? '' : media.alt %>"
+		<% if (decorative) { %>aria-hidden="true"<% } %>
+		<% if (loading) { %>loading="<%= loading %>"<% } %>
+		<% if (decoding) { %>decoding="<%= decoding %>"<% } %>
+	>
+<% } %>

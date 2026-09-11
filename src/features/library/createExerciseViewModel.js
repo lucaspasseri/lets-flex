@@ -44,6 +44,7 @@ function createExercise({
 		movementPattern: movementPattern?.name,
 		environment: firstVariant?.environment,
 		label: exerciseTemplate.name,
+		presentation: "initial",
 	});
 	const variants = exerciseTemplates
 		.map(({ equipment, variant }) => {
@@ -72,6 +73,7 @@ function createExercise({
 				movementPattern: movementPattern?.name,
 				environment: variant.environment,
 				label: variant.name,
+				presentation: "initial",
 			});
 
 			return {

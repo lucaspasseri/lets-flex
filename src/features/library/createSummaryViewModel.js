@@ -3,7 +3,7 @@ import {
 	getDistinctMovements,
 	getDistinctMuscles,
 } from "./selectors/sessionSelectors.js";
-import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
+import { resolveMedia } from "../media/resolveMedia.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapper} SessionMapper
@@ -23,7 +23,13 @@ import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
 
 function createSummary({ session, activeSessionId }) {
 	const steps = session.steps ?? [];
-	const media = steps[0] ? resolveLibraryStepMedia(steps[0]) : null;
+	const media = steps[0]
+		? resolveMedia({
+				entityType: "session",
+				label: session.name,
+				presentation: "initial",
+			})
+		: null;
 	const movements = getDistinctMovements(session);
 	const muscles = getDistinctMuscles(session);
 	const equipments = getDistinctEquipments(session);

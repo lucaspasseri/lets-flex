@@ -5,16 +5,7 @@
 
 <div class="exercise-template__content">
 	<% if (details?.media) { %>
-		<figure class="exercise-template__media" data-media-fallback="<%= details.media.isFallback %>">
-			<img
-				src="<%= details.media.src %>"
-				width="<%= details.media.width %>"
-				height="<%= details.media.height %>"
-				alt="<%= details.media.alt %>"
-				loading="lazy"
-				decoding="async"
-			>
-		</figure>
+		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__media", variant: "initial", decorative: true }) %>
 	<% } %>
 
 	<dl class="exercise-template__facts">
@@ -47,16 +38,7 @@
 		<ul class="exercise-variants" data-exercise-variant-results>
 			<% variants.forEach(variant => { %>
 				<li class="exercise-variant" data-exercise-variant-item data-exercise-variant-id="<%= variant.id %>" data-search-key-word="<%= variant.searchKeyWord %>" data-filter-values="<%= JSON.stringify(variant.filters) %>">
-					<img
-						class="exercise-variant__media"
-						data-media-fallback="true"
-						src="<%= variant.media.src %>"
-						width="<%= variant.media.width %>"
-						height="<%= variant.media.height %>"
-						alt="<%= variant.media.alt %>"
-						loading="lazy"
-						decoding="async"
-					>
+					<%- include("../shared/components/media", { media: variant.media, className: "exercise-variant__media", variant: "initial", decorative: true }) %>
 					<header class="exercise-variant__header">
 						<strong><%= variant.name %></strong>
 						<% if (variant.isPrivateOwner) { %><span class="exercise-template__scope">Private</span><% } %>

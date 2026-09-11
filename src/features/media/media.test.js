@@ -10,7 +10,7 @@ test("the curated manifest has valid local asset metadata and files", async () =
 	const result = validateMediaManifest(mediaManifest);
 
 	assert.equal(result.assetCount, 13);
-	assert.equal(result.sources.length, 13);
+	assert.equal(result.sources.length, 12);
 	assert.ok(result.sources.every((source) => source.startsWith("/media/")));
 
 	const assets = await Promise.all(
@@ -95,7 +95,7 @@ test("movement and environment fallbacks are selected before category fallback",
 	assert.equal(category.src, "/media/category-mobility.svg");
 });
 
-test("missing media resolves to an intentional generic placeholder", () => {
+test("missing media resolves to an intentional initial fallback", () => {
 	const media = resolveMedia({
 		entityType: "exercise",
 		variantName: "Unlisted Exercise Variant",
@@ -103,14 +103,47 @@ test("missing media resolves to an intentional generic placeholder", () => {
 		label: "Unlisted Exercise Variant",
 	});
 
-	assert.equal(media.src, "/media/media-placeholder.svg");
+	assert.equal(media.src, null);
 	assert.equal(media.matchType, "placeholder");
 	assert.equal(media.matchedKey, null);
 	assert.equal(media.isFallback, true);
+	assert.equal(media.presentation, "initial");
+	assert.equal(media.initial, "U");
 	assert.equal(media.width, 960);
 	assert.equal(media.height, 640);
 	assert.equal(media.aspectRatio, 1.5);
-	assert.match(media.alt, /^Unlisted Exercise Variant — /);
+	assert.equal(media.alt, "Unlisted Exercise Variant — initial tile");
+});
+
+test("initial fallback uses the first meaningful letter", () => {
+	const media = resolveMedia({
+		entityType: "equipment",
+		key: "123 dumbbell",
+		label: "123 dumbbell",
+	});
+
+	assert.equal(media.presentation, "initial");
+	assert.equal(media.initial, "D");
+});
+
+test("initial presentation suppresses an available image and safely handles an empty label", () => {
+	const imageBacked = resolveMedia({
+		entityType: "exercise",
+		baseName: "Bench Press",
+		label: "Bench Press",
+		presentation: "initial",
+	});
+	assert.equal(imageBacked.src, null);
+	assert.equal(imageBacked.initial, "B");
+	assert.equal(imageBacked.alt, "Bench Press — initial tile");
+
+	const empty = resolveMedia({
+		entityType: "session",
+		label: "   ",
+		presentation: "initial",
+	});
+	assert.equal(empty.initial, "?");
+	assert.equal(empty.alt, "Training content — initial tile");
 });
 
 test("non-exercise entities use the same exact-match contract", () => {

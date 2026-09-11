@@ -40,6 +40,7 @@ export function resolveMedia(request) {
 				candidate.key,
 				candidate.isFallback,
 				label,
+				request.presentation,
 			);
 		}
 	}
@@ -50,7 +51,14 @@ export function resolveMedia(request) {
 		const key = toMediaKey(value);
 		const entry = getEntry(fallback.section, key);
 		if (entry) {
-			return toResolvedMedia(entry, request.entityType, key, true, label);
+			return toResolvedMedia(
+				entry,
+				request.entityType,
+				key,
+				true,
+				label,
+				request.presentation,
+			);
 		}
 	}
 
@@ -60,6 +68,7 @@ export function resolveMedia(request) {
 		null,
 		true,
 		label,
+		request.presentation,
 	);
 }
 
@@ -79,6 +88,7 @@ function getExactCandidates(request) {
 			...(request.key ? [createCandidate("exercise", request.key, false)] : []),
 		];
 	}
+	if (request.entityType === "session") return [];
 
 	return request.key
 		? [createCandidate(entitySection(request.entityType), request.key, false)]
@@ -127,14 +137,42 @@ function getEntry(section, key) {
  * @param {string | null} matchedKey
  * @param {boolean} isFallback
  * @param {string} [label]
+ * @param {"image" | "initial"} [presentationOverride]
  * @returns {ResolvedMedia}
  */
-function toResolvedMedia(entry, entityType, matchedKey, isFallback, label = "") {
+function toResolvedMedia(
+	entry,
+	entityType,
+	matchedKey,
+	isFallback,
+	label = "",
+	presentationOverride,
+) {
+	const displayLabel = typeof label === "string" ? label.trim() : "";
+	const safeLabel = displayLabel || "Training content";
+	const presentation = presentationOverride ?? entry.presentation;
+	const isInitial = presentation === "initial";
+
 	return {
 		...entry,
-		alt: isFallback && label ? `${label} — ${entry.alt}` : entry.alt,
+		src: isInitial ? null : entry.src,
+		alt: isInitial
+			? `${safeLabel} — initial tile`
+			: isFallback && displayLabel
+				? `${displayLabel} — ${entry.alt}`
+				: entry.alt,
+		initial: isInitial ? firstMeaningfulLetter(displayLabel) : entry.initial,
+		presentation,
 		entityType,
 		matchedKey,
 		isFallback,
 	};
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function firstMeaningfulLetter(value) {
+	return value.match(/\p{L}/u)?.[0]?.toLocaleUpperCase("en-US") ?? "?";
 }

@@ -3,17 +3,7 @@
 <li class="workout-step">
 	<div class="workout-step__order" aria-hidden="true"><%= step.orderLabel %></div>
 	<% if (step.media) { %>
-		<img
-			class="workout-step__media"
-			data-media-fallback="true"
-			src="<%= step.media.src %>"
-			width="<%= step.media.width %>"
-			height="<%= step.media.height %>"
-			alt=""
-			aria-hidden="true"
-			loading="lazy"
-			decoding="async"
-		>
+		<%- include("../shared/components/media", { media: step.media, className: "workout-step__media", variant: "initial", decorative: true }) %>
 	<% } %>
 	<div class="workout-step__content">
 		<div class="workout-step__main">

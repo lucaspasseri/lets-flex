@@ -2,17 +2,7 @@
 
 <span class="exercise-template__summary">
 	<% if (details.media) { %>
-		<img
-			class="exercise-template__summary-media"
-			data-media-fallback="true"
-			src="<%= details.media.src %>"
-			width="<%= details.media.width %>"
-			height="<%= details.media.height %>"
-			alt=""
-			aria-hidden="true"
-			loading="lazy"
-			decoding="async"
-		>
+		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__summary-media", variant: "initial", decorative: true }) %>
 	<% } %>
 	<span class="exercise-template__identity">
 		<span class="exercise-template__eyebrow">Base exercise</span>
