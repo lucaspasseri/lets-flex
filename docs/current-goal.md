@@ -2,163 +2,167 @@
 
 ## Parent milestone
 
-Let’s Flex remains reliable in production and gains a reusable, evidence-based frontend design
-workflow that helps future AI-assisted UI work extend the product intentionally.
+Let’s Flex presents a consistent, reliable experience across its user-facing surfaces while the
+validated repository frontend Skill governs ongoing UI work.
 
 ## Current goal
 
-Stabilize the known resolved-workout cancellation error, then audit the current frontend, define a
-Let’s Flex-specific frontend workflow, validate it on one representative surface, and refine it
-before regular adoption.
+Evaluate the complete user-facing frontend against the Let’s Flex frontend Skill, preserve surfaces
+that are already aligned, and resolve the highest-value consistency, responsive, accessibility, and
+recovery gaps through separately approved increments.
 
 ## Status
 
-Completed on 2026-09-10 after explicit user approval. Actions 1 through 5 were separately approved
-and completed with their required verification. The resolved-workout cancellation experience is
-stabilized, the frontend audit and repository-scoped workflow are established, and the workflow was
-validated and refined from rendered product evidence.
+Completed on 2026-09-10. Action 1 was explicitly approved and Completed after final verification.
+Action 2 was explicitly approved, implemented, verified, and completed on 2026-09-10 after review.
+Action 3 was explicitly approved, implemented, verified, and completed on 2026-09-10 after review.
+Action 4 was explicitly approved, implemented, verified, and completed on 2026-09-10 after review.
+Action 5 was explicitly approved and completed on 2026-09-10 after final verification. Actions 6 and
+7 were explicitly approved, implemented or verified, and completed on 2026-09-10 after review. The
+goal outcome was explicitly approved by the user on 2026-09-10.
 
 ## Approved user outcome
 
-- Attempting to cancel or delete a resolved workout session no longer produces an application-level
-  failure experience. The intentional lifecycle restriction remains enforced, is communicated as
-  an expected state, and is reflected accurately by the UI.
-- The existing Let’s Flex frontend is audited before broad visual work, with its implicit design
-  language, inconsistencies, responsive behavior, accessibility patterns, and generic-looking
-  tendencies documented from repository and rendered evidence.
-- A project-specific frontend workflow or Skill complements the repository instructions and guides
-  future work on hierarchy, reuse, responsive design, accessibility, restraint, motion, and visual
-  verification.
-- The workflow is tested on one contained, representative surface and refined from the result
-  before it becomes the default frontend reference.
+- Every relevant user-facing area is evaluated against the repository frontend Skill.
+- Major inconsistencies and UX gaps are known from repository, test, and rendered evidence.
+- Approved high-value problems are addressed incrementally, with approved medium-value refinements
+  included only where the evidence justifies them.
+- Shared root causes are repaired before page-local symptoms when a bounded shared fix is safe.
+- Important flows are verified at representative narrow, pressure, and wide widths, including
+  keyboard and interaction behavior where applicable.
+- Surfaces that are already aligned remain intentionally unchanged.
+- The Let’s Flex frontend Skill remains the governing workflow for ongoing frontend work.
+
+This is not authorization for an application-wide redesign. Existing product identity, architecture,
+and established behavior remain the default.
 
 ## Delta-first baseline
 
 ### Already satisfied
 
-- The workout-session domain permits cancellation only from `planned`; the service checks the
-  current owned state and the repository repeats the `planned` predicate in its ownership-scoped
-  update.
-- Missing or unowned workout sessions remain indistinguishable through the existing not-found path,
-  while known invalid lifecycle transitions use `WorkoutSessionLifecycleError`.
-- Authentication, validated route input, CSRF protection, and ownership-scoped reads and writes
-  already protect the cancellation route.
-- Existing PostgreSQL HTTP coverage proves valid planned cancellation, rejection of active and
-  finished cancellation attempts with `409`, and terminal-state immutability.
-- The repository already has shared EJS buttons, forms, modals, tabs, accordions, icons, application
-  chrome, view-model boundaries, page/component CSS, browser-component tests, and several focused
-  responsive CSS contracts.
-- `docs/ui-guidelines.md` already records the established dark palette and baseline rules for reuse,
-  accessibility, interaction states, responsive design, and motion.
-- Completed workout-tracking, analytics, application-chrome, Library discovery, and Library form
-  goals provide recent evidence of established behavior that should be audited and reused rather
-  than reimplemented.
+- The repository has a validated Let’s Flex frontend Skill, UI guidelines, a rendered-evidence
+  workflow, and an established component/page CSS architecture.
+- The Library selected-session detail was already implemented and fully validated through that
+  workflow at 390px, 700px, and 1440px, including keyboard tab behavior.
+- Application chrome, shared forms, Dashboard and current-workout foundations, day/session
+  assignment and cancellation, Progress, and several Library flows already provide compatible
+  patterns to preserve and reuse.
+- Existing browser-component, rendered-view, view-model, HTTP, CSS-contract, accessibility, and
+  repository verification tests provide a substantial regression baseline.
+- The approved discovery audit already covered the application inventory and exercised relevant
+  live surfaces at widths from 390px through 1320px. Ninety-three focused frontend tests passed with
+  zero failures during that audit.
 
 ### Reuse
 
-- `cancelWorkoutSession`, the ownership-scoped workout-session repository, and
-  `WorkoutSessionLifecycleError` remain the enforcement boundary for cancellation.
-- The day controller/view-model/template flow and shared feedback, button, modal, and session-card
-  patterns are the likely integration points for a designed conflict response and accurate action
-  visibility.
-- Existing view-model/rendered-view and PostgreSQL HTTP tests can be extended for the regression.
-- The current EJS/CSS/browser architecture, shared components, page-specific styles, UI guidelines,
-  and completed visual work form the evidence base for the audit and workflow.
+- Reuse the existing EJS, CSS, JavaScript, view-model, route/controller, shared-component, icon, and
+  test architecture. Do not add a frontend framework, CSS framework, UI library, or parallel design
+  system.
+- Reuse the application rail, page containers, buttons, forms, tabs, feedback, modals, and their
+  existing semantics whenever they are compatible with the required repair.
+- Reuse current authentication, authorization, CSRF, rate-limit, ownership, validation, and
+  lifecycle boundaries. Frontend recovery work must not weaken or bypass them.
+- Reuse verified aligned surfaces as comparison evidence rather than reimplementing them.
 
 ### Repair
 
-- The day-page workout-session view model currently creates a delete trigger and cancellation modal
-  for every non-cancelled session, including `in_progress` and `finished` sessions, even though only
-  `planned` sessions may be cancelled.
-- The cancellation controller catches the expected lifecycle error but sends a bare `409` text
-  response. This preserves integrity but replaces the application UI with the reported error text,
-  which is experienced as a crash rather than a designed conflict state.
-- Existing tests protect backend immutability but do not assert that resolved day-page sessions omit
-  the invalid delete action or that a stale cancellation rerenders an intentional user-facing page
-  state.
+- At intermediate application widths, page breakpoints use viewport width while the persistent
+  navigation rail reduces the actual content area. Programs, History, Profile, and Library can
+  consequently place primary controls or content outside the visible page area.
+- Authentication recovery links inherit low-contrast browser-default link styling, and the generic
+  tab panel selector leaks panel treatment into the authentication surface.
+- Shared modal transitions do not yet honor reduced-motion preferences across all production modal
+  consumers.
+- Several HTML-oriented global, authentication, CSRF, rate-limit, and stale-mutation failures fall
+  out of the application UI into raw text responses instead of a bounded recovery experience.
+- Some core-flow page titles and Programs/day hierarchy cues are generic or denser than the task
+  requires.
 
 ### Add
 
-- An evidence-based frontend audit covering representative pages, shared components, responsive
-  ranges, interaction states, accessibility patterns, and visual inconsistencies without changing
-  visual code.
-- A reusable Let’s Flex-specific frontend workflow or Skill that complements rather than duplicates
-  `AGENTS.md` and `docs/ui-guidelines.md`.
-- One contained validation implementation selected from audit evidence, with explicit UX baseline,
-  preserved behavior, applicable workflow principles, and multi-viewport/accessibility verification.
-- A post-validation evaluation and any evidence-supported refinements needed before adopting the
-  workflow for future frontend goals.
+- Add an application-level HTML recovery surface for eligible 404 and 500 responses and for
+  security-preserving HTML error paths that currently return bare text. Browser-facing JSON
+  endpoints remain API-like.
+- Add final coverage verification that records the evaluated inventory, important states and
+  widths, keyboard/interaction checks, intentional non-changes, and explicitly deferred work.
+
+## Approved delta actions
+
+1. **Repair application-shell pressure-width responsiveness.** Correct the available-width mismatch
+   for Programs, History, Profile, and Library; verify Dashboard’s minor pressure-width discrepancy;
+   and protect existing intentional horizontal scrollers.
+2. **Repair authentication and recovery-link accessibility.** Give auth links deliberate contrast,
+   focus, hover, and target treatment, and isolate authentication panels from generic tab styling.
+3. **Complete the shared modal motion contract.** Honor reduced-motion preferences across every
+   production modal consumer while preserving focus, inertness, keyboard, and lifecycle behavior.
+4. **Introduce an application-level recovery surface.** Render generic, non-sensitive recovery UI
+   for eligible global and HTML-oriented authentication, CSRF, and rate-limit errors.
+5. **Repair contextual mutation failures.** Keep users in Programs and Library when safe rerendering
+   context exists, while preserving status codes, security boundaries, and intentional JSON
+   endpoint behavior.
+6. **Refine core-flow hierarchy and page identity.** Replace generic page titles and make a bounded
+   Programs/day hierarchy refinement without reopening aligned Dashboard or workout surfaces.
+7. **Complete final frontend coverage verification.** Recheck the complete user-facing inventory,
+   relevant states, keyboard paths, and stress widths; run applicable automated checks; and document
+   intentional non-changes and deferred medium- and low-priority findings.
+
+Each action requires explicit approval before implementation and separate review before completion.
+Later actions may be narrowed if repository evidence or an earlier shared repair already satisfies
+their acceptance criteria.
 
 ## Scope
 
 ### In scope
 
-- A small, regression-protected cancellation repair that preserves the planned-only domain rule,
-  safely handles stale/direct submissions, and does not invite cancellation for a known resolved
-  session.
-- A representative audit of Dashboard, Programs/cycles/days, Library, workout interfaces, forms,
-  application chrome, modals, accordions, buttons, surfaces, empty states, responsive layouts,
-  motion, and accessibility where repository or rendered evidence makes them relevant.
-- A repository-appropriate workflow artifact for future frontend work.
-- One contained frontend implementation used to validate the workflow, followed by evaluation and
-  refinement.
+- User-facing EJS, CSS, browser interaction, responsive behavior, accessibility, page identity,
+  HTML recovery behavior, and the smallest controller/view-model changes needed to render it.
+- Dashboard, current workout, Programs/cycles/day, Library discovery/detail/forms/exercises/admin,
+  authentication, profile, history, progress, application chrome, shared components, and applicable
+  global error paths.
+- Focused and cross-cutting tests plus rendered verification proportional to each approved action.
 
 ### Out of scope
 
-- Removing or weakening workout lifecycle validation.
-- A broad workout-session lifecycle redesign unless direct evidence makes it necessary for
-  correctness, security, authentication, or data integrity.
-- Redesigning pages during the audit or applying the eventual workflow across the entire
-  application at once.
-- Replacing working custom components, the EJS/CSS/browser architecture, or the styling system for
-  convenience.
-- Introducing a frontend framework, styling system, production dependency, schema change,
-  migration, database reset, deployment, push, or production-data mutation.
-- Unrelated cleanup or visual changes outside the selected validation surface.
+- A wholesale redesign, new visual identity, frontend framework, CSS framework, UI library, or new
+  design system.
+- Unrelated backend architecture, database schema or seed changes, migrations, production data,
+  deployment, or pushing changes.
+- Reworking an aligned surface solely to make every page visibly different.
+- Browser-facing JSON errors that are intentionally consumed by client-side code, except where an
+  approved action proves their contract is incorrect.
 
-## Correctness, security, and accessibility requirements
+## Constraints and invariants
 
-- Only an owned `planned` workout session may be cancelled, and the mutating SQL remains the final
-  guard against stale or concurrent requests.
-- Valid cancellation continues to work; active, finished, cancelled, missing, and unowned records
-  remain unchanged by invalid attempts.
-- Expected lifecycle conflicts expose no SQL, stack, constraint, account, or internal identifier
-  details.
-- Existing authentication, authorization, validated-input, CSRF, and session behavior remain intact.
-- The day page does not expose a destructive cancellation action when the known session state makes
-  that action invalid, while the server still handles stale/direct submissions safely.
-- The frontend workflow preserves semantic HTML, keyboard operation, visible focus, labels and
-  accessible names, non-color state communication, contrast, and reduced-motion behavior where
-  applicable.
-- Meaningful UI changes are inspected at small, intermediate, and large widths for overflow,
-  wrapping, alignment, hierarchy, interaction state, and keyboard behavior.
-
-## Approved sequence
-
-1. Repair the resolved-workout cancellation experience and stop for review.
-2. After approval, audit the frontend and propose evidence-based design principles without changing
-   visual code.
-3. After approval, create the project-specific frontend workflow or Skill.
-4. After approval, select one representative surface from audit evidence and validate the workflow
-   with one cohesive implementation.
-5. After approval, evaluate the result, refine the workflow where evidence supports it, and prepare
-   the goal for final review.
-
-Each action is separately reviewable. Completing or approving one action does not authorize the
-next action.
+- Preserve current product identity and reuse existing components and architecture.
+- Keep authentication, authorization, CSRF, rate limiting, ownership, validation, lifecycle rules,
+  and status semantics intact.
+- Recovery messages must be generic where implementation details or sensitive state could leak.
+- Preserve modal focus management, keyboard behavior, inertness, and control semantics while adding
+  motion preference support.
+- Page-level overflow must not hide core actions; intentional component-owned scrollers may remain
+  when they are clearly usable.
+- Use actual rendered content at representative narrow, pressure, and wide widths. Width lists may
+  be narrowed or expanded per surface from evidence, not convenience.
+- Do not mutate production data, deploy, or push changes.
 
 ## Done when
 
-- Resolved-workout cancellation no longer produces the reported failure experience and is covered by
-  focused regression tests, while valid cancellation and all lifecycle protections remain correct.
-- The current frontend audit documents the product’s implicit design language, inconsistencies,
-  responsive/accessibility behavior, and generic-looking patterns from direct evidence.
-- A Let’s Flex-specific frontend workflow or Skill exists and complements the broader repository
-  workflow.
-- One contained representative surface has validated the workflow through implementation and
-  rendered inspection.
-- The workflow has been evaluated and refined based on that validation before regular adoption.
-- Applicable focused checks, repository verification, PostgreSQL HTTP regressions, responsive and
-  keyboard inspection, and final diff inspection pass for the actions that require them.
-- No broad unrelated redesign, architecture replacement, dependency, database, deployment, push, or
-  production-data change is introduced.
+- The complete relevant user-facing inventory has a recorded evaluation against the frontend Skill.
+- Every separately approved high-value finding is implemented and verified.
+- Approved medium-value findings are implemented where their evidence and scope remain justified.
+- Shared root causes are repaired at the narrowest safe shared boundary.
+- Important flows pass rendered verification at applicable narrow, pressure, and wide widths, with
+  keyboard, focus, interaction-state, and reduced-motion checks where relevant.
+- Applicable focused and repository-wide automated checks pass.
+- Aligned surfaces and intentional behavior remain unchanged unless an approved action requires a
+  specific delta.
+- Deferred findings, remaining unknowns, and intentional exclusions are documented for final review.
+- The goal reaches Ready for final review and receives explicit user approval.
+
+## Resume here
+
+Action 1, **Repair application-shell pressure-width responsiveness**, is Completed. Action 2,
+**Repair authentication and recovery-link accessibility**, is Completed. Action 3, **Complete the
+shared modal motion contract**, is Completed. Action 4, **Introduce an application-level recovery
+surface**, is Completed. Action 5, **Repair contextual mutation failures**, is Completed. Action 6,
+**Refine core-flow hierarchy and page identity**, is Completed. Action 7 is Completed.

@@ -108,6 +108,10 @@ test("chrome styles keep closed navigation inert-compatible without display anim
 
 test("chrome styles reserve one fixed responsive rail without offset margins", () => {
 	const css = fs.readFileSync(stylesheetPath, "utf8");
+	assert.match(
+		css,
+		/\.application-shell > \.content\s*\{[^}]*container-name: application-content;[^}]*container-type: inline-size;/,
+	);
 
 	assert.match(
 		css,

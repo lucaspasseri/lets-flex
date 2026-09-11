@@ -22,7 +22,7 @@ test("selected-session detail uses a contained responsive reading-flow contract"
 	);
 	assert.match(
 		css,
-		/@media \(max-width: 52rem\)[\s\S]*?\.session-details__back-link\s*\{[^}]*display:\s*inline-flex/,
+		/@container application-content \(max-width: 52rem\)[\s\S]*?\.session-details__back-link\s*\{[^}]*display:\s*inline-flex/,
 	);
 	assert.match(css, /\.session-details__back-link:focus-visible/);
 });

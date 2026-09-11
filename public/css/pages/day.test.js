@@ -28,6 +28,6 @@ test("training-day and contextual Library styles preserve hierarchy, actions, an
 	assert.match(libraryCss, /\.session-form-context/);
 	assert.match(
 		libraryCss,
-		/@media \(max-width: 42rem\)[\s\S]*?\.library-planning-context\s*{[\s\S]*?grid-template-columns: auto minmax\(0, 1fr\)/,
+		/@container application-content \(max-width: 42rem\)[\s\S]*?\.library-planning-context\s*{[\s\S]*?grid-template-columns: auto minmax\(0, 1fr\)/,
 	);
 });

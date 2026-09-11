@@ -79,7 +79,7 @@
 								<div class="exercise-template__private-actions">
 									<form class="form exercise-template__inline-form" method="POST" action="/exercise-variants/<%= variant.id %>?_method=PATCH">
 										<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
-										<input type="hidden" name="equipmentId" value="<%= variant.equipment?.id ?? '' %>">
+										<input type="hidden" name="equipmentId" value="<%= variant.privateMutation?.equipmentId ?? variant.equipment?.id ?? '' %>">
 										<%- include("../shared/components/form/field", { field: {
 											id: `private-variant-${variant.id}-name`,
 											name: "name",
@@ -87,7 +87,8 @@
 											control: "input",
 											type: "text",
 											required: true,
-											value: variant.name,
+											value: variant.privateMutation?.name ?? variant.name,
+											error: variant.privateMutation?.error ?? null,
 											hint: "Only you can update this private variant.",
 											attributes: { maxlength: 100, autocomplete: "off" }
 										} }) %>

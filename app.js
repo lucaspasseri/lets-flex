@@ -30,6 +30,7 @@ import workoutStepLogRouter from "./src/interfaces/routes/workoutStepLogs.js";
 import workoutHistoryRouter from "./src/interfaces/routes/workoutHistory.js";
 import exerciseProgressRouter from "./src/interfaces/routes/exerciseProgress.js";
 import exerciseVariantsRouter from "./src/interfaces/routes/exerciseVariants.js";
+import { respondWithApplicationRecovery } from "./src/interfaces/applicationRecovery.js";
 
 import playgroundRouter from "./src/interfaces/routes/playground.js";
 
@@ -128,21 +129,21 @@ export function createApp(options = {}) {
 		app.use("/playground", playgroundRouter);
 	}
 
-	app.use((_req, res) => {
-		res.status(404).send("Not found");
+	app.use((req, res) => {
+		respondWithApplicationRecovery(req, res, { kind: "notFound" });
 	});
 
-	app.use((err, _req, res, next) => {
+	app.use((err, req, res, next) => {
 		if (res.headersSent) {
 			next(err);
 			return;
 		}
 		if (err instanceof Error && err.name === "ResourceNotFoundError") {
-			res.status(404).send("Not found");
+			respondWithApplicationRecovery(req, res, { kind: "notFound" });
 			return;
 		}
 		console.error(err instanceof Error ? err.stack : err);
-		res.status(500).send("Something broke!");
+		respondWithApplicationRecovery(req, res, { kind: "server" });
 	});
 
 	return app;

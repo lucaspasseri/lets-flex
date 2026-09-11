@@ -7,6 +7,12 @@
 	overflow-x: hidden;
 }
 
+.application-shell > .content {
+	min-width: 0;
+	container-name: application-content;
+	container-type: inline-size;
+}
+
 .application-chrome {
 	position: relative;
 	min-width: 0;

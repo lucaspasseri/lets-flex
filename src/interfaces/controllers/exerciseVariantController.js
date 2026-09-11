@@ -1,17 +1,26 @@
 import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import * as exerciseVariantsRepository from "../../features/exerciseVariants/repository.js";
+import { renderLibrary } from "./libraryController.js";
+import respondWithContextualMutationError from "../contextualMutationError.js";
 
-/** @param {any} error @param {any} res */
-function handleConstraintError(error, res) {
+/** @param {any} error */
+function getConstraintFailure(error) {
 	if (error?.code === "23505") {
-		res.status(409).send("A variant with that name already exists for this exercise.");
-		return true;
+		return {
+			status: 409,
+			fallbackMessage: "A variant with that name already exists for this exercise.",
+			message:
+				"A variant with that name already exists for this exercise. Choose a different name.",
+		};
 	}
 	if (error?.code === "23503") {
-		res.status(422).send("Choose valid related Library resources.");
-		return true;
+		return {
+			status: 422,
+			fallbackMessage: "Choose valid related Library resources.",
+			message: "Choose a current exercise and equipment option, then try again.",
+		};
 	}
-	return false;
+	return null;
 }
 
 /** @param {any} req @param {any} res */
@@ -23,12 +32,56 @@ async function create(req, res) {
 			ownerUserId: req.user.id,
 		});
 		if (!variant) {
-			res.status(404).send("Exercise not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Exercise not found",
+				render: () =>
+					renderLibrary(req, res, {
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Variant not created",
+							message:
+								"That exercise is no longer available. Refresh Library and try again.",
+						},
+						variantFormState: {
+							values: {
+								...req.validatedBody,
+								exerciseId: req.validatedParams.exerciseId,
+							},
+							errors: { fieldErrors: {}, formErrors: [] },
+						},
+					}),
+			});
 			return;
 		}
 		res.redirect(`/library#exercise-template-${variant.id}`);
 	} catch (error) {
-		if (!handleConstraintError(error, res)) throw error;
+		const failure = getConstraintFailure(error);
+		if (!failure) throw error;
+		await respondWithContextualMutationError(req, res, {
+			...failure,
+			render: () =>
+				renderLibrary(req, res, {
+					pageFeedback: {
+						id: "library-page-feedback-title",
+						title: "Variant not created",
+						message: failure.message,
+					},
+					variantFormState: {
+						values: {
+							...req.validatedBody,
+							exerciseId: req.validatedParams.exerciseId,
+						},
+						errors: {
+							fieldErrors:
+								failure.status === 409
+									? { name: "Choose a different variant name." }
+									: {},
+							formErrors: failure.status === 409 ? [] : [failure.message],
+						},
+					},
+				}),
+		});
 	}
 }
 
@@ -41,12 +94,45 @@ async function update(req, res) {
 			ownerUserId: req.user.id,
 		});
 		if (!variant) {
-			res.status(404).send("Exercise variant not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Exercise variant not found",
+				render: () =>
+					renderLibrary(req, res, {
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Variant not updated",
+							message:
+								"That private variant is no longer available. Refresh Library to see the current exercises.",
+						},
+						privateVariantMutationState: {
+							variantId: req.validatedParams.variantId,
+							values: req.validatedBody,
+						},
+					}),
+			});
 			return;
 		}
 		res.redirect(`/library#exercise-template-${variant.id}`);
 	} catch (error) {
-		if (!handleConstraintError(error, res)) throw error;
+		const failure = getConstraintFailure(error);
+		if (!failure) throw error;
+		await respondWithContextualMutationError(req, res, {
+			...failure,
+			render: () =>
+				renderLibrary(req, res, {
+					pageFeedback: {
+						id: "library-page-feedback-title",
+						title: "Variant not updated",
+						message: failure.message,
+					},
+					privateVariantMutationState: {
+						variantId: req.validatedParams.variantId,
+						values: req.validatedBody,
+						error: failure.message,
+					},
+				}),
+		});
 	}
 }
 
@@ -57,7 +143,19 @@ async function archive(req, res) {
 		ownerUserId: req.user.id,
 	});
 	if (!variant) {
-		res.status(404).send("Exercise variant not found");
+		await respondWithContextualMutationError(req, res, {
+			status: 404,
+			fallbackMessage: "Exercise variant not found",
+			render: () =>
+				renderLibrary(req, res, {
+					pageFeedback: {
+						id: "library-page-feedback-title",
+						title: "Variant not archived",
+						message:
+							"That private variant is no longer available or has already been archived. Refresh Library to see the current exercises.",
+					},
+				}),
+		});
 		return;
 	}
 	res.redirect("/library");

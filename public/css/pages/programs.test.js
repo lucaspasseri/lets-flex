@@ -25,13 +25,13 @@ test("Programs presentation loads hierarchy, readable cards, and responsive cont
 		programsCss,
 		/\.entity-card__(?:name|meta)\s*{[^}]*text-overflow:\s*ellipsis/,
 	);
-	assert.match(programsCss, /@media \(max-width: 58rem\)/);
+	assert.match(programsCss, /@container application-content \(max-width: 58rem\)/);
 	assert.match(
 		programsCss,
-		/@media \(max-width: 58rem\)[\s\S]*?\.program-hierarchy__item:not\(:last-child\)::after\s*{[\s\S]*?display: none/,
+		/@container application-content \(max-width: 58rem\)[\s\S]*?\.program-hierarchy__item:not\(:last-child\)::after\s*{[\s\S]*?display: none/,
 	);
-	assert.match(programsCss, /@media \(max-width: 48rem\)/);
-	assert.match(programsCss, /@media \(max-width: 28rem\)/);
+	assert.match(programsCss, /@container application-content \(max-width: 48rem\)/);
+	assert.match(programsCss, /@container application-content \(max-width: 28rem\)/);
 	assert.match(programsCss, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.match(programsCss, /flex: 0 0 clamp\(16\.5rem, 82vw, 20rem\)/);
 	assert.match(programsCss, /overflow-x: auto/);

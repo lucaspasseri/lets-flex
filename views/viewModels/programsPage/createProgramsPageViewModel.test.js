@@ -81,6 +81,7 @@ test("Programs page creates presentation-ready component contracts", () => {
 	});
 
 	assert.deepEqual(Object.keys(result), ["page", "pageState", "shell", "components"]);
+	assert.equal(result.page.title, "Programs · Let's Flex!");
 	assert.equal(result.components.pageHeading.title, "Programs");
 	assert.deepEqual(
 		result.components.hierarchyGuide.items.map((item) => ({
@@ -274,7 +275,16 @@ test("Programs template renders populated and no-profile component states", asyn
 
 	assert.match(populatedHtml, /data-programs-page/);
 	assert.match(populatedHtml, /class="page-heading"/);
-	assert.match(populatedHtml, /How your training plan fits together/);
+	assert.match(populatedHtml, /Plan your workout from goal to session/);
+	assert.match(
+		populatedHtml,
+		/Choose a program, select its cycle, open a training day, then assign a session/,
+	);
+	assert.match(populatedHtml, /Level 1 · Start here[\s\S]*Level 2 · Choose a cycle/);
+	assert.match(
+		populatedHtml,
+		/Level 3 · Open a training day[\s\S]*Level 4 · Assign a session/,
+	);
 	assert.match(populatedHtml, /Program[\s\S]*Cycle[\s\S]*Training day[\s\S]*Session/);
 	assert.match(populatedHtml, /id="program-switcher"/);
 	assert.match(populatedHtml, /id="cycle-switcher"/);
@@ -299,6 +309,35 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.doesNotMatch(populatedHtml, /basic-line|basicModal/);
 	assert.match(noProfileHtml, /id="programs-empty-state-title"/);
 	assert.doesNotMatch(noProfileHtml, /id="create-program-form"/);
+});
+
+test("Programs template renders contextual mutation feedback", async () => {
+	const viewModel = createProgramsPageViewModel({
+		page,
+		pageState: { userId: 1, programId: 10, cycleId: 20 },
+		data: {
+			currentUser,
+			programs: { current: program, items: [program] },
+			cycles: { current: cycle, items: [cycle] },
+			trainingDays: [],
+			workoutSessions: [],
+			goals,
+		},
+		pageFeedback: {
+			id: "programs-page-feedback-title",
+			title: "Program not deleted",
+			message: "That program is no longer available.",
+		},
+	});
+	const html = await ejs.renderFile(path.resolve("views/programs.ejs"), {
+		...viewModel,
+		contentFor: () => "",
+	});
+
+	assert.match(html, /class="page-feedback page-feedback--error"/);
+	assert.match(html, /role="alert"/);
+	assert.match(html, /Program not deleted/);
+	assert.match(html, /That program is no longer available\./);
 });
 
 test("Programs cards preserve validated long names in readable selection content", async () => {

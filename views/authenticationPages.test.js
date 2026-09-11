@@ -26,6 +26,11 @@ test("login explains the application and presents both authentication paths", as
 	assert.match(html, /Guest data expires after 15 days/);
 	assert.match(html, /role="tablist"/);
 	assert.match(html, /aria-controls="auth-signup-panel"/);
+	assert.match(html, /class="auth-tab-panel" data-tab-panel role="tabpanel"/);
+	assert.match(
+		html,
+		/class="auth-form-link"><a href="\/auth\/password-reset\/request">Forgot password\?<\/a>/,
+	);
 	assert.match(html, /autocomplete="new-password"/);
 	assert.match(html, /class="form-input"/);
 	assert.match(html, /class="shared-button shared-button--primary auth-form__submit"/);
@@ -62,6 +67,10 @@ test("password-reset request page provides an accessible email form and neutral 
 	assert.match(html, /type="email"/);
 	assert.match(html, /autocomplete="email"/);
 	assert.match(html, /action="\/auth\/password-reset\/request"/);
+	assert.match(
+		html,
+		/class="auth-form-link"><a href="\/auth\/login">Back to sign in<\/a>/,
+	);
 });
 
 test("password-reset completion page labels both new-password fields and hides invalid tokens", async () => {
@@ -80,6 +89,10 @@ test("password-reset completion page labels both new-password fields and hides i
 	assert.match(validHtml, /<label[^>]*for="reset-confirm-password"/);
 	assert.equal((validHtml.match(/autocomplete="new-password"/g) ?? []).length, 2);
 	assert.match(validHtml, /name="token" value="opaque-token"/);
+	assert.match(
+		validHtml,
+		/class="auth-form-link"><a href="\/auth\/password-reset\/request">Request a new link<\/a>/,
+	);
 	assert.match(invalidHtml, /role="alert" aria-live="polite"/);
 	assert.doesNotMatch(invalidHtml, /<form[^>]*action="\/auth\/password-reset"/);
 });

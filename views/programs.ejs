@@ -1,5 +1,6 @@
 <%
 	const {
+		pageFeedback,
 		pageHeading,
 		hierarchyGuide,
 		programSwitcher,
@@ -15,6 +16,7 @@
 
 <main class="main programs" data-programs-page>
 	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
+	<%- include("partials/shared/components/pageFeedback", { pageFeedback }) %>
 	<%- include("partials/programsPage/hierarchyGuide", { hierarchyGuide }) %>
 
 	<% if (noActiveUser.isVisible) { %>

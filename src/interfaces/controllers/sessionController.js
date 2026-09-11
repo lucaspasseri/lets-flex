@@ -8,6 +8,7 @@ import updateSessionTemplate, {
 } from "../../features/sessions/updateSessionTemplate.js";
 import { renderLibrary } from "./libraryController.js";
 import getOwnedTrainingDayContext from "../../features/day/getOwnedTrainingDayContext.js";
+import respondWithContextualMutationError from "../contextualMutationError.js";
 
 /** @typedef {import("express").Request & {validatedBody?: any, validatedParams?: any}} Request */
 /** @typedef {import("express").Response} Response */
@@ -23,7 +24,30 @@ async function create(req, res) {
 		userId: ownerUserId,
 	});
 	if (contextDayId !== null && !sessionCreationContext) {
-		res.status(404).send("Training day not found");
+		await respondWithContextualMutationError(req, res, {
+			status: 404,
+			fallbackMessage: "Training day not found",
+			render: () =>
+				renderLibrary(req, res, {
+					pageFeedback: {
+						id: "library-page-feedback-title",
+						title: "Session not created",
+						message:
+							"That training day is no longer available. Return to Programs and choose a current day.",
+					},
+					sessionTemplateFormState: {
+						mode: "create",
+						open: true,
+						values: req.validatedBody,
+						errors: {
+							fieldErrors: {
+								contextDayId: "This training day is no longer available.",
+							},
+							formErrors: [],
+						},
+					},
+				}),
+		});
 		return;
 	}
 
@@ -68,7 +92,19 @@ async function archive(req, res) {
 		await archiveSession({ sessionId, ownerUserId: req.user.id });
 	} catch (error) {
 		if (error instanceof SessionTemplateNotArchivableError) {
-			res.status(404).send("Session template not found or already archived");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Session template not found or already archived",
+				render: () =>
+					renderLibrary(req, res, {
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Session not archived",
+							message:
+								"That session template is no longer available or has already been archived. Refresh Library to see the current templates.",
+						},
+					}),
+			});
 			return;
 		}
 		throw error;
@@ -89,7 +125,26 @@ async function update(req, res) {
 		});
 	} catch (error) {
 		if (error instanceof SessionTemplateNotFoundError) {
-			res.status(404).send("Session template not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Session template not found",
+				render: () =>
+					renderLibrary(req, res, {
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Session not updated",
+							message:
+								"That session template is no longer available. Your changes are preserved below; refresh Library before trying again.",
+						},
+						sessionTemplateFormState: {
+							mode: "update",
+							open: true,
+							sessionId: req.validatedParams.sessionId,
+							values: req.validatedBody,
+							errors: { fieldErrors: {}, formErrors: [error.message] },
+						},
+					}),
+			});
 			return;
 		}
 		throw error;

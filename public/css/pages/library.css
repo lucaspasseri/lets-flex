@@ -290,13 +290,13 @@
 	}
 }
 
-@media (max-width: 56rem) {
+@container application-content (max-width: 56rem) {
 	.library-action-panel {
 		grid-template-columns: 1fr;
 	}
 }
 
-@media (max-width: 42rem) {
+@container application-content (max-width: 42rem) {
 	.library-admin-scope {
 		grid-template-columns: auto minmax(0, 1fr);
 	}
@@ -314,7 +314,7 @@
 	}
 }
 
-@media (max-width: 30rem) {
+@container application-content (max-width: 30rem) {
 	.library-discovery > .library-discovery__tabs {
 		grid-template-columns: 1fr;
 	}

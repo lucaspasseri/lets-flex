@@ -16,7 +16,7 @@
  * @property {LocalsPage} page
  * @property {PageState} pageState
  * @property {{currentUser: User | null, activeNavigation: "programs"}} shell
- * @property {{pageHeading: {eyebrow: string, title: string, description: string}, hierarchyGuide: HierarchyGuideViewModel, programSwitcher: ProgramSwitcherViewModel, cycleSwitcher: CycleSwitcherViewModel, calendarNavigation: CalendarNavigationViewModel, createProgramForm: CreateProgramFormViewModel, createCycleForm: CreateCycleFormViewModel, deleteProgramForm: DeleteEntityFormViewModel, deleteCycleForm: DeleteEntityFormViewModel, noActiveUser: {isVisible: boolean, title: string, description: string, action: {label: string, href: string, icon: string}}}} components
+ * @property {{pageFeedback: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, pageHeading: {eyebrow: string, title: string, description: string}, hierarchyGuide: HierarchyGuideViewModel, programSwitcher: ProgramSwitcherViewModel, cycleSwitcher: CycleSwitcherViewModel, calendarNavigation: CalendarNavigationViewModel, createProgramForm: CreateProgramFormViewModel, createCycleForm: CreateCycleFormViewModel, deleteProgramForm: DeleteEntityFormViewModel, deleteCycleForm: DeleteEntityFormViewModel, noActiveUser: {isVisible: boolean, title: string, description: string, action: {label: string, href: string, icon: string}}}} components
  */
 
 export {};

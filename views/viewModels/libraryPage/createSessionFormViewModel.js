@@ -22,6 +22,9 @@ export default function createSessionFormViewModel({
 	const values = state.values ?? {};
 	const errors = state.errors ?? { fieldErrors: {}, formErrors: [] };
 	const idPrefix = isUpdate ? "update-session" : "create-session";
+	const contextDayId = !isUpdate
+		? (creationContext?.day.id ?? values.contextDayId ?? null)
+		: null;
 	const stepRow = Array.isArray(values.stepRow)
 		? values.stepRow.filter(
 				(/** @type {any} */ item) => item && typeof item === "object",
@@ -62,7 +65,7 @@ export default function createSessionFormViewModel({
 				...(errors.formErrors ?? []),
 				...(errors.fieldErrors?.contextDayId ? [errors.fieldErrors.contextDayId] : []),
 			],
-			contextDayId: !isUpdate ? (creationContext?.day.id ?? null) : null,
+			contextDayId,
 			creationContext:
 				!isUpdate && creationContext
 					? {

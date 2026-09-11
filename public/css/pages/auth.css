@@ -47,6 +47,35 @@
 	text-align: right;
 }
 
+.auth-form-link a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 2.75rem;
+	padding-inline: 0.5rem;
+	border-radius: 0.4rem;
+	color: var(--color-action);
+	font-weight: 700;
+	line-height: 1.4;
+	text-decoration-line: underline;
+	text-decoration-thickness: 0.08em;
+	text-underline-offset: 0.22em;
+}
+
+.auth-form-link a:hover {
+	color: var(--color-action-hover);
+	text-decoration-thickness: 0.12em;
+}
+
+.auth-form-link a:active {
+	color: var(--color-text);
+}
+
+.auth-form-link a:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 2px;
+}
+
 .auth-introduction,
 .auth-actions {
 	display: grid;
@@ -195,6 +224,14 @@
 .auth-tab-panel {
 	display: grid;
 	gap: 1rem;
+}
+
+.auth-actions > .auth-tab-panel:not([hidden]) {
+	display: grid;
+	gap: 1rem;
+	padding: 0;
+	background: transparent;
+	box-shadow: none;
 }
 
 .auth-tab-panel[hidden] {

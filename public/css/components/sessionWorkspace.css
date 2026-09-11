@@ -434,7 +434,7 @@
 	}
 }
 
-@media (max-width: 52rem) {
+@container application-content (max-width: 52rem) {
 	.session-workspace__content {
 		grid-template-columns: 1fr;
 	}
@@ -454,7 +454,7 @@
 	}
 }
 
-@media (max-width: 34rem) {
+@container application-content (max-width: 34rem) {
 	.session-workspace__header,
 	.session-details__header,
 	.session-step__header {

@@ -496,7 +496,7 @@
 	color: var(--color-text-muted);
 }
 
-@media (max-width: 58rem) {
+@container application-content (max-width: 58rem) {
 	.program-hierarchy__list {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
@@ -506,7 +506,7 @@
 	}
 }
 
-@media (max-width: 48rem) {
+@container application-content (max-width: 48rem) {
 	.main.programs {
 		padding-inline: 0;
 	}
@@ -564,7 +564,7 @@
 	}
 }
 
-@media (max-width: 28rem) {
+@container application-content (max-width: 28rem) {
 	.program-hierarchy__list {
 		grid-template-columns: 1fr;
 	}

@@ -290,81 +290,162 @@ without explicit user approval. Overlap with previously completed work is not, b
 approval to replace or redesign that work, and a sequence of agent proposals must never be
 treated as an approved roadmap.
 
-
 ## Usage and cost reporting
 
 This section applies to every substantive repository task, including planning, implementation,
 review, verification, and repository analysis.
 
+This is the source of truth for reporting information from the Codex CLI `/status` command. Here,
+`/status` means Codex CLI output only; it is not an HTTP route, page, dashboard, or metric in the
+Let's Flex application. Application and dashboard metrics must never be described as Codex usage,
+cost, allowance, credits, tokens, or `/status` data.
+
+The goal is to make observed Codex status useful without inventing precision. Official billing or
+fully reliable account telemetry is preferred, but its absence must reduce confidence and precision
+rather than suppress the report. Report every useful `/status` value or other locally observable
+task value that is actually available, and identify each reported value as **Verified**,
+**Estimated**, or **Unavailable**.
+
+Classification:
+
+- **Verified** — copied directly from Codex CLI `/status`, a readable screenshot of that CLI
+  output attached in the current conversation, a supported non-interactive Codex account/usage
+  query, or a local task clock. Preserve CLI text, labels, units, and percentages exactly; do not
+  rename a `5h` window to `daily`, convert `used` to `left`, or reinterpret a context/token value
+  as billing data.
+- **Estimated** or **Approximate** — derived from verified inputs using a formula documented below.
+  State the inputs and formula when the derivation is not clear from the compact footer.
+- **Unavailable** — not exposed, not safely observable, or lacking a defensible estimate. Showing
+  one unavailable field must not hide other available status fields.
+
+### Telemetry collection
+
 Required:
 
-- End the final task response with a compact `Usage` footer. For active-goal responses, place
-  this footer after `Next decision`; it is the only content permitted after that section.
-- Capture a before-task usage snapshot and an after-task usage snapshot when the Codex/runtime
-  exposes usage information. Prefer runtime/account usage data over estimates.
-- Report only metrics that are directly available or can be calculated from directly observed
-  before/after values. Never invent usage, infer token or credit consumption from elapsed time,
-  or convert generic model averages into claimed task usage.
-- Preserve the runtime's actual limit label. If it exposes a `5h` or other short-window limit,
-  report that label; do not rename it `daily`. If it exposes a daily limit, report `day`.
-- When available, report:
-  - elapsed wall-clock task time;
-  - task credits consumed;
-  - short-window/day allowance consumed and remaining;
-  - weekly allowance consumed and remaining;
-  - purchased credits remaining;
-  - reset time/date for a reported allowance, when surfaced by the runtime.
-- Percentage consumption must be calculated as the difference between actual before/after
-  remaining values and reported in percentage points. For example, `44% -> 41%` means
-  `-3 pp remaining`, not an inferred number of credits.
-- If a usage metric is not available, omit it or explicitly mark it `unavailable`. Do not block
-  an otherwise complete task solely because billing or allowance telemetry is unavailable.
-- If usage telemetry appears delayed, contradictory, or unchanged despite substantial work,
-  label it as potentially delayed rather than forcing a non-zero estimate.
-- Do not treat plan allowance percentages, tokens, credits, elapsed time, and money as
-  interchangeable units.
+- At the beginning of a substantive task, capture a usage baseline when the current Codex runtime
+  exposes account usage telemetry non-interactively.
+- Near the end of the task, after implementation and verification but before the final response,
+  capture a second snapshot from the same source when possible.
+- Prefer telemetry sources in this order:
+  1. direct usage/rate-limit data already exposed to the current runtime;
+  2. a supported non-interactive Codex account/rate-limit query available in the local runtime,
+     such as an `account/rateLimits/read` capability exposed by the Codex app server;
+  3. Codex CLI `/status` output available to the agent, including readable screenshots or text
+     explicitly supplied by the user in the current conversation;
+  4. other local task observations, such as elapsed wall-clock time.
+- Do not assume the interactive `/status` slash command can be invoked by the coding agent itself.
+  Use it only when its values are already available to the agent or the user explicitly supplies
+  them.
+- Do not read, print, copy, parse, or expose authentication tokens, cookies, API keys, browser
+  credentials, or other secrets in order to obtain telemetry.
+- Do not add repository dependencies, application code, external telemetry services, or billing
+  API calls solely for usage reporting unless the user explicitly approves that implementation.
+- This repository does not collect Codex allowance, task-credit, or billing telemetry; application
+  and dashboard metrics are not valid substitutes for that source.
+- If a safe non-interactive telemetry query is unavailable, continue the task normally. Report the
+  available CLI `/status` fields verbatim; if no CLI output is observable, label only those fields
+  `Unavailable` and still report other locally observed information, such as elapsed time.
+- When a readable CLI `/status` screenshot is attached during the task, extract every clearly
+  legible usage field and carry the latest screenshot's values into the final `Usage` footer as
+  **Verified CLI `/status`**. The screenshot is a point-in-time snapshot, not live telemetry; do
+  not imply it reflects later consumption. Do not include a session/thread identifier by default,
+  because it identifies a session rather than measuring usage.
 
-### Credit cost estimate
+### Snapshot interpretation
+
+Required:
+
+- Preserve the runtime's actual window labels. For example, report `5h` and `7d` when those are
+  the labels shown by Codex; do not rename them `day` and `week` unless the runtime uses those
+  labels.
+- Preserve each available CLI `/status` percentage, runtime window, reset time, model/provider,
+  token/context field, and other telemetry exactly as displayed. A value copied from `/status` is
+  **Verified**, even if it is not official billing telemetry.
+- For each available limit snapshot, record:
+  - percentage remaining or used exactly as shown;
+  - reset time/date when available;
+  - purchased-credit balance when available.
+- Compare before/after allowance values only when they refer to the same usage window. Use the
+  reset timestamp/date, when available, to determine whether the window is the same.
+- If a limit resets during the task, do not subtract the pre-reset percentage from the post-reset
+  percentage. Report `window reset during task` and show the final remaining value instead.
+- Percentage consumption is a percentage-point difference in remaining allowance. For example,
+  `44% -> 41%` means `3 pp consumed`, not `3% of credits` and not a known number of tokens.
+- If the displayed percentage is rounded, treat the calculated delta as rounded telemetry. A
+  displayed `0 pp` change does not prove that the task consumed zero usage.
+- Treat account telemetry as potentially delayed. If values are unchanged after substantial work,
+  report the observed values without inventing a non-zero delta.
+- Do not treat context-window usage as billing usage. `Context 91% left`, for example, describes
+  the current conversation context capacity and must not be converted into allowance, credits, or
+  money. It may still be reported as `Verified context: 91% left` when CLI `/status` exposes it.
+
+### Task credit and cost calculation
 
 Use the current user-confirmed purchase rate until the user explicitly updates it:
 
 `2,500 credits = R$550`, therefore `1 credit = R$0.22`.
 
-When actual task credit consumption is available, calculate:
+Required:
 
-`estimated BRL value = task credits consumed × R$0.22`
-
-Required cost wording:
-
-- If purchased-credit balance actually decreased, report the result as
-  `estimated purchased-credit cost`.
-- If task credits are reported but the task was covered by included plan allowance, report the
-  result only as `purchased-credit equivalent`; do not claim that money was charged.
-- If actual task credits are unavailable, do not estimate a BRL task cost from time, allowance
-  percentages, token guesses, or generic average task costs.
+- Calculate task credits from an actual before/after purchased-credit balance only when both
+  balances are available and refer to the same account balance:
+  `task credits consumed = credits before - credits after`.
+- If the credit balance decreases, calculate:
+  `estimated purchased-credit cost = task credits consumed × R$0.22`.
+- If the runtime directly reports task-level credits, they may be reported as measured task
+  credits. Prefer a directly reported task value over an inferred value when the source is clear.
+- Never derive task credits from elapsed time, 5h/7d percentage changes, context tokens, model
+  averages, task complexity, or generic pricing examples.
+- While the task is covered by included plan allowance and purchased credits do not decrease,
+  report `purchased credits: unchanged` when the balance is known. Do not assign a BRL charge to
+  included allowance usage.
 - Treat `R$0.22/credit` as a configurable reporting constant based on the user's current purchase
-  screen, not as a permanent product price. Update this rule when the user provides a new rate.
+  screen, not as a permanent product price.
 
-### Usage footer format
+The only permitted monetary estimate under this contract uses the formula above. Its assumptions
+are: both balances are verified snapshots of the same purchased-credit balance; the decrease is
+attributable to the task unless a concurrent charge is known; and the user-confirmed conversion is
+still `R$0.22/credit`. Label the result **Estimated purchased-credit cost** (or **Approximate**),
+never official OpenAI billing. If any assumption or input is missing, report `cost: Unavailable`.
+Never calculate credits or BRL from elapsed time, allowance percentages, context/tokens, model
+averages, task complexity, or generic pricing examples.
 
-Prefer one compact line when the available metrics fit clearly:
+### Elapsed time
 
-`Usage: 18 min · task 14 credits (≈ R$3.08 purchased-credit equivalent) · 5h 63% left · week 21% left · 2,486 credits left`
+Preferred:
 
-When allowance deltas are directly observable, include them if useful:
+- Capture a local start timestamp when substantive work begins and a local end timestamp after
+  verification, when doing so is reliable and low-overhead.
+- Report elapsed time as approximate working time. Do not convert elapsed time into credits or
+  allowance consumption.
 
-`Usage: 28 min · 5h -8 pp (42% left) · week -1 pp (11% left) · credits unchanged at 2,500`
+### Usage footer
 
-When purchased credits were actually consumed:
+Include a compact `Usage` footer for every substantive repository task. It must include all useful
+observed CLI `/status` or local task information and label unavailable cost explicitly. A footer
+with only unavailable values is allowed only when the agent cannot observe even elapsed time;
+otherwise include the observed elapsed time. Do not omit the whole footer merely because official
+billing telemetry is absent.
 
-`Usage: 31 min · task 27 credits · estimated purchased-credit cost ≈ R$5.94 · 2,473 credits left`
+Preferred formats:
 
-When telemetry is incomplete:
+`Usage: ~18 min (Verified local clock) · 5h 42% -> 37% (Verified CLI /status; 5 pp consumed; resets 20:05) · 7d 18% left (Verified CLI /status; resets Sep 15) · cost: Unavailable`
 
-`Usage: 24 min · task credits unavailable · week 11% left`
+`Usage: ~31 min (Verified local clock) · credits 2,500 -> 2,473 (Verified CLI /status; 27 consumed) · Estimated purchased-credit cost: ≈ R$5.94 [27 × R$0.22]`
 
-Keep the footer factual and compact. Do not add explanations unless a usage value is surprising,
-ambiguous, delayed, or unavailable in a way that matters to the user's decision.
+`Usage: ~30 min (Verified local clock) · daily usage: 8% (Verified CLI /status) · weekly usage: 1% (Verified CLI /status) · cost: Unavailable`
+
+`Usage: ~12 min (Verified local clock) · Context 91% left (Verified CLI /status; not billing data) · cost: Unavailable`
+
+`Usage: Context: 62% left (98,316 used / 258K) (Verified CLI /status) · 5h limit: 92% left (resets 01:15) (Verified CLI /status) · 7d limit: 17% left (resets 15 de set.) (Verified CLI /status) · cost: Unavailable`
+
+If two snapshots describe the same verified allowance window, a percentage-point difference is a
+calculation from verified values, not a credit or money estimate. For example, `44% -> 41%` is
+`3 pp consumed`; if the window resets, report `window reset during task` instead. Keep reset
+information only when useful for deciding whether more work can continue.
+
+For active-goal responses, place the `Usage` footer after `Next decision`. The footer is the only
+content permitted after `Next decision`.
 
 ## End-of-response workflow options
 

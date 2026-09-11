@@ -6,6 +6,7 @@ import updateExerciseTemplate, {
 } from "../../features/exerciseTemplates/updateExerciseTemplate.js";
 import { renderLibrary } from "./libraryController.js";
 import * as exerciseVariantsRepository from "../../features/exerciseVariants/repository.js";
+import respondWithContextualMutationError from "../contextualMutationError.js";
 
 /** @typedef {import("express").Request & {validatedBody?: any, validatedParams?: any}} Request */
 /** @typedef {import("express").Response} Response */
@@ -58,7 +59,30 @@ async function createGlobalVariant(req, res) {
 			exerciseId: req.validatedParams.exerciseId,
 		});
 		if (!variant) {
-			res.status(404).send("Exercise not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Exercise not found",
+				render: () =>
+					renderLibrary(req, res, {
+						managementMode: true,
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Variant not created",
+							message:
+								"That exercise is no longer available. Refresh the catalog and try again.",
+						},
+						variantFormState: {
+							values: {
+								...req.validatedBody,
+								exerciseId: req.validatedParams.exerciseId,
+							},
+							errors: {
+								fieldErrors: {},
+								formErrors: ["The selected exercise is no longer available."],
+							},
+						},
+					}),
+			});
 			return;
 		}
 		res.redirect(`/admin/library/exercises#exercise-template-${variant.id}`);
@@ -69,7 +93,30 @@ async function createGlobalVariant(req, res) {
 			"code" in error &&
 			error.code === "23505"
 		) {
-			res.status(409).send("A global variant with that name already exists.");
+			await respondWithContextualMutationError(req, res, {
+				status: 409,
+				fallbackMessage: "A global variant with that name already exists.",
+				render: () =>
+					renderLibrary(req, res, {
+						managementMode: true,
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Variant not created",
+							message:
+								"A global variant with that name already exists. Choose a different name.",
+						},
+						variantFormState: {
+							values: {
+								...req.validatedBody,
+								exerciseId: req.validatedParams.exerciseId,
+							},
+							errors: {
+								fieldErrors: { name: "Choose a different variant name." },
+								formErrors: [],
+							},
+						},
+					}),
+			});
 			return;
 		}
 		if (
@@ -78,7 +125,27 @@ async function createGlobalVariant(req, res) {
 			"code" in error &&
 			error.code === "23503"
 		) {
-			res.status(422).send("Choose valid related Library resources.");
+			await respondWithContextualMutationError(req, res, {
+				status: 422,
+				fallbackMessage: "Choose valid related Library resources.",
+				render: () =>
+					renderLibrary(req, res, {
+						managementMode: true,
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Variant not created",
+							message:
+								"Choose a current exercise and equipment option, then try again.",
+						},
+						variantFormState: {
+							values: {
+								...req.validatedBody,
+								exerciseId: req.validatedParams.exerciseId,
+							},
+							errors: { fieldErrors: {}, formErrors: [] },
+						},
+					}),
+			});
 			return;
 		}
 		throw error;
@@ -97,7 +164,28 @@ async function update(req, res) {
 		});
 	} catch (error) {
 		if (error instanceof ExerciseTemplateNotFoundError) {
-			res.status(404).send("Exercise template not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Exercise template not found",
+				render: () =>
+					renderLibrary(req, res, {
+						managementMode: true,
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Exercise not updated",
+							message:
+								"That exercise template is no longer available. Your changes are preserved below; refresh Library before trying again.",
+						},
+						exerciseTemplateFormState: {
+							mode: "update",
+							open: true,
+							exerciseId: req.validatedParams.exerciseId,
+							variantId: req.validatedParams.variantId,
+							values: req.validatedBody,
+							errors: { fieldErrors: {}, formErrors: [error.message] },
+						},
+					}),
+			});
 			return;
 		}
 		throw error;

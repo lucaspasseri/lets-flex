@@ -12,9 +12,9 @@ test("history presentation is loaded and includes responsive accessibility contr
 	]);
 
 	assert.match(mainCss, /@import url\("\.\/pages\/history\.css"\)/);
-	assert.match(historyCss, /@media \(max-width: 48rem\)/);
-	assert.match(historyCss, /@media \(max-width: 34rem\)/);
-	assert.match(historyCss, /@media \(max-width: 23rem\)/);
+	assert.match(historyCss, /@container application-content \(max-width: 48rem\)/);
+	assert.match(historyCss, /@container application-content \(max-width: 34rem\)/);
+	assert.match(historyCss, /@container application-content \(max-width: 23rem\)/);
 	assert.match(historyCss, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.match(historyCss, /\.history-table-scroll[\s\S]*overflow-x: auto/);
 	assert.match(historyCss, /\.history-table-scroll:focus-visible/);

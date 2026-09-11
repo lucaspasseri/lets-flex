@@ -157,6 +157,8 @@ test("dashboard page exposes explicit component contracts and renders without le
 		},
 	});
 
+	assert.equal(result.page.title, "Dashboard · Let's Flex!");
+
 	assert.equal(result.pageState.workoutSessionId, 5);
 	assert.equal(result.components.programBanner.programName, "Strength");
 	assert.equal(result.components.dateNavigation.days.length, 7);

@@ -95,6 +95,7 @@
  * @property {boolean} isPrivateOwner
  * @property {string} searchKeyWord
  * @property {{equipment: string[], environment: string[], scope: string[]}} filters
+ * @property {{name: string, equipmentId: number | string | null | undefined, error: string | null} | null} [privateMutation]
  * @property {ExerciseTemplateVariantActions} actions
  */
 

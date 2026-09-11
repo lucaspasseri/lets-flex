@@ -20,13 +20,14 @@ async function show(req, res) {
 /**
  * @param {Request} req
  * @param {Response} res
- * @param {{exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, sessionCreationDayId?: unknown, managementMode?: boolean}} [formState]
+ * @param {{exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, sessionCreationDayId?: unknown, sessionId?: unknown, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean}} [formState]
  */
 export async function renderLibrary(req, res, formState = {}) {
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
 	const validatedQuery = req.validatedQuery ?? {};
-	const sessionId = toNullableNumber(validatedQuery.sessionId);
+	const sessionId =
+		toNullableNumber(formState.sessionId) ?? toNullableNumber(validatedQuery.sessionId);
 	const sessionCreationDayId =
 		toNullableNumber(formState.sessionCreationDayId) ??
 		toNullableNumber(validatedQuery.createSessionForDay);
@@ -62,6 +63,7 @@ export async function renderLibrary(req, res, formState = {}) {
 		pageState,
 		data,
 		managementMode,
+		pageFeedback: formState.pageFeedback,
 		...formState,
 	});
 

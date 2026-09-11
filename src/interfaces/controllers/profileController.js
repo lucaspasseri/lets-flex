@@ -7,6 +7,7 @@ import * as usersRepository from "../../features/users/repository.js";
 import * as userMapper from "../../features/users/mapper.js";
 import createAuthenticationMethodsViewModel from "../../../views/viewModels/profilePage/createAuthenticationMethodsViewModel.js";
 import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
+import { respondWithApplicationRecovery } from "../applicationRecovery.js";
 import { addPasswordSchema } from "../validation/authSchemas.js";
 
 /** @param {import("express").Request} req @param {import("express").Response} res @param {{passwordErrors?: string[]}} [state] */
@@ -14,7 +15,7 @@ async function renderProfile(req, res, state = {}) {
 	// @ts-ignore -- application Passport principal.
 	const row = await usersRepository.findById({ userId: req.user?.id ?? null });
 	if (!row) {
-		res.status(401).send("Authentication required");
+		respondWithApplicationRecovery(req, res, { kind: "authentication" });
 		return;
 	}
 	const currentUser = userMapper.toLoggedUser(row);

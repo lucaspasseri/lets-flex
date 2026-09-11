@@ -312,7 +312,7 @@ test("library exercise styles use semantic, responsive, focus, and motion contra
 	assert.match(css, /\.exercise-template__panel\[hidden\]\s*\{\s*display: none;/);
 	assert.match(css, /\.exercise-variants\s*\{/);
 	assert.match(css, /\.exercise-variant__actions/);
-	assert.match(css, /@media \(max-width: 45rem\)/);
+	assert.match(css, /@container application-content \(max-width: 45rem\)/);
 	assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.doesNotMatch(css, /--template-|#[\da-f]{3,8}|rgb\(/i);
 
@@ -327,7 +327,7 @@ test("library exercise styles use semantic, responsive, focus, and motion contra
 	assert.match(discoveryCss, /\.library-discovery-controls\s*\{/);
 	assert.match(discoveryCss, /\.library-search-input:focus-within/);
 	assert.match(discoveryCss, /\.library-filter-empty\[hidden\]/);
-	assert.match(discoveryCss, /@media \(max-width: 42rem\)/);
+	assert.match(discoveryCss, /@container application-content \(max-width: 42rem\)/);
 	assert.match(discoveryCss, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.match(pageCss, /\.library-discovery__tabs \[data-tab\]:focus-visible/);
 	assert.match(pageCss, /\[data-tab\]\[aria-selected="true"\]/);

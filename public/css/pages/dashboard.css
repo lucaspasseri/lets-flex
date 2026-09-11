@@ -923,7 +923,7 @@
 	border: 0;
 }
 
-@media (max-width: 62rem) {
+@container application-content (max-width: 62rem) {
 	.dashboard__metrics {
 		grid-template-columns: 1fr;
 	}
@@ -932,7 +932,7 @@
 	}
 }
 
-@media (max-width: 44rem) {
+@container application-content (max-width: 44rem) {
 	.dashboard {
 		gap: 1rem;
 		padding-inline: 0;
@@ -984,7 +984,7 @@
 	}
 }
 
-@media (max-width: 34rem) {
+@container application-content (max-width: 34rem) {
 	.analytics-summary__metrics,
 	.analytics-workload__metrics {
 		grid-template-columns: 1fr;

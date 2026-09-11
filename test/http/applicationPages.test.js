@@ -505,9 +505,15 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			const result = await requestPasswordReset(client, "user-one@example.com");
 			assert.equal(result.response.status, 200);
 		}
-		const limited = await requestPasswordReset(client, "user-one@example.com");
+		const page = await client.request("/auth/password-reset/request");
+		const limited = await client.request("/auth/password-reset/request", {
+			method: "POST",
+			headers: { accept: "text/html" },
+			form: { _csrf: csrfFrom(page.text), email: "user-one@example.com" },
+		});
 		assert.equal(limited.response.status, 429);
-		assert.match(limited.text, /Too many reset requests/);
+		assert.match(limited.text, /Too many requests/);
+		assert.doesNotMatch(limited.text, /Too many reset requests/);
 		assert.equal(passwordResetDeliveries.length, 5);
 	});
 
@@ -718,13 +724,37 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			new Set(["profile", "email"]),
 		);
 
-		result = await client.request("/auth/guest", { method: "POST", form: {} });
+		result = await client.request("/auth/guest", {
+			method: "POST",
+			headers: { accept: "text/html" },
+			form: {},
+		});
 		assert.equal(result.response.status, 403);
+		assert.match(result.text, /Request not verified/);
 		assert.equal(
 			(await db.query("SELECT count(*)::int AS count FROM users WHERE role = 'guest'"))
 				.rows[0].count,
 			0,
 		);
+	});
+
+	test("HTML global failures render recovery UI while JSON callers keep their contract", async () => {
+		const client = agent();
+		await login(client);
+
+		const notFound = await client.request("/does-not-exist", {
+			headers: { accept: "text/html" },
+		});
+		assert.equal(notFound.response.status, 404);
+		assert.match(notFound.text, /Page not found/);
+		assert.match(notFound.text, /href="\/"/);
+		assert.doesNotMatch(notFound.text, /Something broke|stack|database/i);
+
+		const apiNotFound = await client.request("/does-not-exist", {
+			headers: { accept: "application/json" },
+		});
+		assert.equal(apiNotFound.response.status, 404);
+		assert.deepEqual(JSON.parse(apiNotFound.text), { error: "Not found" });
 	});
 
 	test("public registration validates, creates a regular user, and starts a session", async () => {
@@ -1883,10 +1913,16 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		const page = await client.request("/auth/login");
 		const result = await client.request("/auth/guest", {
 			method: "POST",
+			headers: { accept: "text/html" },
 			form: { _csrf: csrfFrom(page.text) },
 		});
 
 		assert.equal(result.response.status, 500);
+		assert.match(result.text, /Temporary problem/);
+		assert.doesNotMatch(
+			result.text,
+			/canonical session|Something broke|stack|database/i,
+		);
 		assert.equal(
 			(await db.query("SELECT count(*)::int AS count FROM users WHERE role = 'guest'"))
 				.rows[0].count,
@@ -2293,6 +2329,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		).rows[0];
 		const created = await client.request("/sessions", {
 			method: "POST",
+			headers: { accept: "text/html" },
 			form: {
 				_csrf: csrfFrom(library.text),
 				name: "Expanded catalog session",
@@ -2369,9 +2406,17 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		);
 		let result = await first.request(`/exercises/${exercise.id}/variants`, {
 			method: "POST",
+			headers: { accept: "text/html" },
 			form: { _csrf: csrfFrom(library.text), name: "tempo squat", equipmentId: "1" },
 		});
 		assert.equal(result.response.status, 409);
+		assert.match(result.text, /data-library-page/);
+		assert.match(result.text, /Variant not created/);
+		assert.match(result.text, /tempo squat/);
+		assert.match(
+			result.text,
+			/A variant with that name already exists for this exercise/,
+		);
 
 		library = await second.request("/library");
 		result = await second.request(
@@ -2410,6 +2455,42 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			},
 		);
 		assert.equal(result.response.status, 404);
+	});
+
+	test("Programs mutation failures keep the user in context for HTML callers", async () => {
+		const context = await createPlanningFixture();
+		const client = agent();
+		await login(client, "user-one@example.com");
+
+		const programs = await client.request(
+			`/programs?programId=${context.program_id}&cycleId=${context.cycle_id}`,
+		);
+		await db.query("DELETE FROM programs WHERE id = $1", [context.program_id]);
+
+		const stale = await client.request(
+			`/programs/${context.program_id}?_method=DELETE`,
+			{
+				method: "POST",
+				headers: { accept: "text/html" },
+				form: { _csrf: csrfFrom(programs.text) },
+			},
+		);
+
+		assert.equal(stale.response.status, 404);
+		assert.match(stale.text, /data-programs-page/);
+		assert.match(stale.text, /Program not deleted/);
+		assert.match(stale.text, /That program is no longer available/);
+		assert.doesNotMatch(stale.text, /^Program not found$/);
+
+		const jsonPage = await client.request("/programs");
+		const jsonFailure = await client.request("/programs/999999?_method=DELETE", {
+			method: "POST",
+			headers: { accept: "application/json" },
+			form: { _csrf: csrfFrom(jsonPage.text) },
+		});
+
+		assert.equal(jsonFailure.response.status, 404);
+		assert.deepEqual(JSON.parse(jsonFailure.text), { error: "Program not found" });
 	});
 
 	test("program goal labels are readable while creation persists the existing goal ID", async () => {
@@ -2551,6 +2632,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 
 		const created = await client.request("/sessions", {
 			method: "POST",
+			headers: { accept: "text/html" },
 			form: {
 				_csrf: csrfFrom(invalid.text),
 				name: "Contextual strength",
@@ -2646,6 +2728,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 
 		const created = await client.request("/sessions", {
 			method: "POST",
+			headers: { accept: "text/html" },
 			form: {
 				_csrf: csrfFrom(ordinaryLibrary.text),
 				name: "Safe fallback template",
@@ -2654,6 +2737,10 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			},
 		});
 		assert.equal(created.response.status, 404);
+		assert.match(created.text, /data-library-page/);
+		assert.match(created.text, /Session not created/);
+		assert.match(created.text, /Safe fallback template/);
+		assert.match(created.text, /name="contextDayId" value="/);
 		assert.equal(
 			(
 				await db.query(

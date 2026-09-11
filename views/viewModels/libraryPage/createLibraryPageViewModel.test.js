@@ -398,3 +398,50 @@ test("invalid session update preserves its aggregate and reopens the update moda
 	assert.match(html, /Step error/);
 	assert.match(html, /stepRow\[0\]\[stepId\]/);
 });
+
+test("Library renders contextual feedback and preserves variant mutation input", async () => {
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: 7, sessionId: null },
+		data: /** @type {any} */ ({
+			...data,
+			user: { id: 7, name: "Member", role: "user" },
+			equipments: [{ id: 2, name: "Barbell" }],
+			exerciseTemplates: [
+				{
+					id: 3,
+					name: "Squat",
+					movementPattern: {},
+					equipment: { id: 1, name: "Dumbbell" },
+					muscles: [],
+					variant: { id: 12, name: "Old name", ownerUserId: 7 },
+				},
+			],
+		}),
+		variantFormState: {
+			values: { exerciseId: "3", name: "Submitted variant", equipmentId: "2" },
+			errors: { fieldErrors: { name: "Use another name." }, formErrors: [] },
+		},
+		privateVariantMutationState: {
+			variantId: "12",
+			values: { name: "Updated private variant", equipmentId: "2" },
+			error: "Use another name.",
+		},
+		pageFeedback: {
+			title: "Variant not saved",
+			message: "Review the variant details and try again.",
+		},
+	});
+	const html = await ejs.renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		csrfToken: "test-token",
+		contentFor: () => "",
+	});
+
+	assert.match(html, /role="alert"/);
+	assert.match(html, /Variant not saved/);
+	assert.match(html, /Review the variant details and try again\./);
+	assert.match(html, /value="Submitted variant"/);
+	assert.match(html, /value="Updated private variant"/);
+	assert.match(html, /Use another name\./);
+});

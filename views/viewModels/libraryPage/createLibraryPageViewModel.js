@@ -14,7 +14,7 @@ import formatDayPageDate from "../dayPage/formatDayPageDate.js";
  */
 
 /**
- * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, managementMode?: boolean}} input
+ * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean}} input
  * @returns {LibraryPageViewModel}
  */
 export default function createLibraryPageViewModel({
@@ -23,6 +23,9 @@ export default function createLibraryPageViewModel({
 	data,
 	exerciseTemplateFormState,
 	sessionTemplateFormState,
+	variantFormState,
+	privateVariantMutationState,
+	pageFeedback = null,
 	managementMode = false,
 }) {
 	const visibleExerciseTemplates = managementMode
@@ -47,6 +50,7 @@ export default function createLibraryPageViewModel({
 			activeNavigation: managementMode ? "admin-exercises" : "library",
 		},
 		components: {
+			pageFeedback,
 			planningContext: sessionCreationContext
 				? {
 						isVisible: true,
@@ -83,6 +87,7 @@ export default function createLibraryPageViewModel({
 				exerciseTemplateArr: visibleExerciseTemplates,
 				actorUserId: pageState.userId,
 				managementMode,
+				privateVariantMutationState,
 			}),
 			privateVariantForm: {
 				idPrefix: managementMode ? "global-variant" : "private-variant",
@@ -98,6 +103,8 @@ export default function createLibraryPageViewModel({
 					: "Create private variant",
 				actionPrefix: managementMode ? "/admin/library/exercises" : "/exercises",
 				isGuest,
+				values: variantFormState?.values ?? {},
+				errors: variantFormState?.errors ?? { fieldErrors: {}, formErrors: [] },
 				exercises: [
 					...new Map(
 						visibleExerciseTemplates.map((item) => [

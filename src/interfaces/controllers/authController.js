@@ -21,6 +21,7 @@ import {
 } from "../../features/auth/passwordResetService.js";
 import * as usersRepository from "../../features/users/repository.js";
 import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
+import { respondWithApplicationRecovery } from "../applicationRecovery.js";
 import {
 	loginSchema,
 	passwordResetRequestSchema,
@@ -213,7 +214,10 @@ function buildGoogleManagementStartHandler(passport, purpose) {
 	return asyncHandler(async (req, res, next) => {
 		const principal = /** @type {any} */ (req.user);
 		if (principal?.role === "guest" || !Number.isInteger(principal?.id)) {
-			res.status(403).send("A registered account is required to connect Google.");
+			respondWithApplicationRecovery(req, res, {
+				kind: "forbidden",
+				actionHref: "/profile",
+			});
 			return;
 		}
 		const methods = await getAuthenticationMethods({ userId: principal.id });
@@ -272,7 +276,10 @@ export function buildGoogleCallbackHandler(passport) {
 				principal.id !== oauthState.linkUserId ||
 				principal.role === "guest"
 			) {
-				res.status(403).send("Google linking could not be verified for this account.");
+				respondWithApplicationRecovery(req, res, {
+					kind: "forbidden",
+					actionHref: "/profile",
+				});
 				return;
 			}
 			// @ts-ignore -- request-local context consumed by the Google strategy.
@@ -283,7 +290,10 @@ export function buildGoogleCallbackHandler(passport) {
 		} else {
 			const principal = /** @type {any} */ (req.user);
 			if (principal?.role !== "guest" && principal) {
-				res.status(403).send("Google sign-in cannot replace an authenticated account.");
+				respondWithApplicationRecovery(req, res, {
+					kind: "forbidden",
+					actionHref: "/",
+				});
 				return;
 			}
 		}

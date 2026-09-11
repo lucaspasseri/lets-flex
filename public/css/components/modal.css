@@ -71,3 +71,14 @@
 		align-items: start;
 	}
 }
+
+@media (prefers-reduced-motion: reduce) {
+	.modal__backdrop,
+	.modal__content {
+		transition: none;
+	}
+
+	.modal__content {
+		transform: none;
+	}
+}

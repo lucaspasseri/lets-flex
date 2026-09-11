@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import pool from "../../../db/pool.js";
+import { respondWithApplicationRecovery } from "../applicationRecovery.js";
 
 const WINDOW_MS = 15 * 60 * 1000;
 const MAX_ATTEMPTS = 10;
@@ -20,7 +21,10 @@ export default async function rateLimitGuestCreation(req, res, next) {
 			[keyHash, windowStartedAt],
 		);
 		if (rows[0].attempts > MAX_ATTEMPTS) {
-			res.status(429).send("Too many guest accounts created. Try again later.");
+			respondWithApplicationRecovery(req, res, {
+				kind: "rateLimit",
+				actionHref: "/auth/login",
+			});
 			return;
 		}
 		next();

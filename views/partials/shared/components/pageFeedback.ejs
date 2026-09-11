@@ -1,0 +1,12 @@
+<% if (locals.pageFeedback) { %>
+	<section
+		class="page-feedback page-feedback--<%= pageFeedback.tone ?? 'error' %>"
+		role="alert"
+		tabindex="-1"
+		aria-labelledby="<%= pageFeedback.id ?? 'page-feedback-title' %>"
+	>
+		<p class="page-feedback__eyebrow"><%= pageFeedback.eyebrow ?? 'Action not completed' %></p>
+		<h2 id="<%= pageFeedback.id ?? 'page-feedback-title' %>"><%= pageFeedback.title %></h2>
+		<p><%= pageFeedback.message %></p>
+	</section>
+<% } %>

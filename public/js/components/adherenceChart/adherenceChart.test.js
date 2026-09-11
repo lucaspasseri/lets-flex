@@ -98,9 +98,9 @@ test("analytics styles include responsive, focus, target-size, and non-color cue
 		"utf8",
 	);
 
-	assert.match(css, /@media \(max-width: 62rem\)/);
-	assert.match(css, /@media \(max-width: 44rem\)/);
-	assert.match(css, /@media \(max-width: 34rem\)/);
+	assert.match(css, /@container application-content \(max-width: 62rem\)/);
+	assert.match(css, /@container application-content \(max-width: 44rem\)/);
+	assert.match(css, /@container application-content \(max-width: 34rem\)/);
 	assert.match(css, /\.analytics-data-disclosure > summary[\s\S]*min-height: 2\.75rem/);
 	assert.match(css, /\.analytics-data-disclosure > summary:focus-visible/);
 	assert.match(css, /\.adherence-chart__status\[hidden\]\s*\{\s*display: none;/);

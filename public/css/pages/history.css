@@ -712,7 +712,7 @@
 	outline-offset: 3px;
 }
 
-@media (max-width: 48rem) {
+@container application-content (max-width: 48rem) {
 	.history-filter__fields,
 	.history-step__content {
 		grid-template-columns: 1fr;
@@ -737,7 +737,7 @@
 	}
 }
 
-@media (max-width: 34rem) {
+@container application-content (max-width: 34rem) {
 	.workout-history,
 	.workout-history-state {
 		padding-top: 1rem;
@@ -802,7 +802,7 @@
 	}
 }
 
-@media (max-width: 23rem) {
+@container application-content (max-width: 23rem) {
 	.history-summary__facts,
 	.history-prescription dl {
 		grid-template-columns: 1fr;

@@ -11,6 +11,7 @@ import createDiscoveryFilterOptions from "./createDiscoveryFilterOptions.js";
  * @property {ExerciseTemplateMapper[]} exerciseTemplateArr
  * @property {number | null} actorUserId
  * @property {boolean} managementMode
+ * @property {Record<string, any>} [privateVariantMutationState]
  */
 
 /**
@@ -23,6 +24,7 @@ function createExerciseTemplates({
 	exerciseTemplateArr = [],
 	actorUserId = null,
 	managementMode = false,
+	privateVariantMutationState,
 }) {
 	const groupedExercises = /** @type {Map<number, ExerciseTemplateMapper[]>} */ (
 		new Map()
@@ -35,7 +37,12 @@ function createExerciseTemplates({
 
 	const items = [...groupedExercises.values()]
 		.map((exerciseTemplates) =>
-			createExercise({ exerciseTemplates, actorUserId, managementMode }),
+			createExercise({
+				exerciseTemplates,
+				actorUserId,
+				managementMode,
+				privateVariantMutationState,
+			}),
 		)
 		.sort((first, second) => first.baseName.localeCompare(second.baseName));
 	const exerciseCount = items.length;

@@ -40,7 +40,7 @@ export async function renderDay(req, res, formState = {}) {
 		dayId: data.days.current?.id ?? null,
 	};
 
-	const page = { ...res.locals.page, title: "Let's Flex!" };
+	const page = res.locals.page;
 	const pageState = { userId, programId, cycleId, dayId, sessionId };
 
 	const dayPage = createDayPageViewModel({ page, pageState, data, ...formState });

@@ -48,7 +48,7 @@
 	text-transform: uppercase;
 }
 
-@media (max-width: 36rem) {
+@container application-content (max-width: 36rem) {
 	.page-heading {
 		align-items: start;
 		flex-direction: column;

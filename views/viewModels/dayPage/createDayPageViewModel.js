@@ -20,6 +20,8 @@ export default function createDayPageViewModel({
 	const dayTitle =
 		days.current?.label?.trim() ||
 		(days.current ? `Day ${days.current.dayOrder}` : "Training day unavailable");
+	const dayEyebrow =
+		program && cycle ? `${program.name} · ${cycle.name}` : "Training day";
 	const workoutSessionList = createWorkoutSessionListViewModel({
 		currentDayId,
 		workoutSessions: workoutSessions.items,
@@ -30,7 +32,12 @@ export default function createDayPageViewModel({
 			: "/programs";
 
 	return {
-		page,
+		page: {
+			...page,
+			title: days.current
+				? `${dayTitle} · ${cycle?.name ?? "Training day"} · Let's Flex!`
+				: "Training day unavailable · Let's Flex!",
+		},
 		pageState: { ...pageState, dayId: currentDayId },
 		shell: { currentUser, activeNavigation: "programs" },
 		components: {
@@ -45,6 +52,7 @@ export default function createDayPageViewModel({
 			dayHeader: {
 				dayId: currentDayId,
 				viewTransitionName: createDayViewTransitionName(currentDayId),
+				eyebrow: dayEyebrow,
 				title: dayTitle,
 				dateLabel:
 					formatDayPageDate(days.current?.scheduledDate ?? null) ??

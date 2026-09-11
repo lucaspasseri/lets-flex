@@ -103,6 +103,8 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 
 	assert.equal(result.components.dayHeader.dateLabel, "21/08/2026");
 	assert.equal(result.components.dayHeader.title, "Day 2");
+	assert.equal(result.components.dayHeader.eyebrow, "Strength plan · Foundation");
+	assert.equal(result.page.title, "Day 2 · Foundation · Let's Flex!");
 	assert.equal(result.components.contextPath.programName, "Strength plan");
 	assert.equal(
 		result.components.contextPath.backHref,
@@ -296,6 +298,7 @@ test("day template renders only from its component ViewModels", async () => {
 	assert.match(html, /Workout not removed/);
 	assert.match(html, /This workout session can no longer be cancelled/);
 	assert.match(html, /Program hierarchy/);
+	assert.match(html, /Strength plan · Foundation/);
 	assert.match(html, /Strength plan[\s\S]*Foundation[\s\S]*Day 2/);
 	assert.match(html, /21\/08\/2026/);
 	assert.match(html, /href="\/programs\/day\?dayId=1"/);

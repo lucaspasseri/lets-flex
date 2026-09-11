@@ -171,6 +171,22 @@ test("a closed modal is removed from layout and does not restrict the page", () 
 	assert.equal(body.style.top, undefined);
 });
 
+test("modal transitions are disabled and the content stays in place for reduced motion", () => {
+	const css = fs.readFileSync(
+		new URL("../../../css/components/modal.css", import.meta.url),
+		"utf8",
+	);
+
+	assert.match(
+		css,
+		/@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.modal__backdrop,\s*\.modal__content\s*\{[\s\S]*?transition: none;/,
+	);
+	assert.match(
+		css,
+		/@media \(prefers-reduced-motion: reduce\)[\s\S]*?\.modal__content\s*\{[\s\S]*?transform: none;/,
+	);
+});
+
 test("opening activates the backdrop and restricts background interaction", async () => {
 	const { root, backdrop, content, openButton, pageContent, body } = createHarness();
 	createModal(root);

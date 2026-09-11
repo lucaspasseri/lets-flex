@@ -11,6 +11,7 @@ import toCapitalizedString from "../../../utils/toCapitalizedString.js";
  * @property {ExerciseTemplateMapper[]} exerciseTemplates
  * @property {number | null} actorUserId
  * @property {boolean} managementMode
+ * @property {Record<string, any>} [privateVariantMutationState]
  */
 
 /**
@@ -21,6 +22,7 @@ function createExercise({
 	exerciseTemplates,
 	actorUserId = null,
 	managementMode = false,
+	privateVariantMutationState,
 }) {
 	const exerciseTemplate = exerciseTemplates[0];
 	if (!exerciseTemplate) {
@@ -38,6 +40,17 @@ function createExercise({
 		.map(({ equipment, variant }) => {
 			const isPrivateOwner =
 				actorUserId !== null && variant.ownerUserId === actorUserId;
+			const isMutationTarget =
+				isPrivateOwner &&
+				String(privateVariantMutationState?.variantId) === String(variant.id);
+			const mutationValues = isMutationTarget
+				? (privateVariantMutationState?.values ?? {})
+				: {};
+			const mutationName =
+				typeof mutationValues.name === "string" ? mutationValues.name : variant.name;
+			const mutationEquipmentId = Object.hasOwn(mutationValues, "equipmentId")
+				? mutationValues.equipmentId
+				: equipment?.id;
 			const equipmentLabel = equipment?.name ?? "Bodyweight";
 			const environmentLabel = variant.environment
 				? toCapitalizedString(variant.environment).replaceAll("_", " ")
@@ -68,6 +81,13 @@ function createExercise({
 					environment: [environmentLabel],
 					scope: [scopeLabel],
 				},
+				privateMutation: isMutationTarget
+					? {
+							name: mutationName,
+							equipmentId: mutationEquipmentId,
+							error: privateVariantMutationState?.error ?? null,
+						}
+					: null,
 				actions: {
 					canManageGlobal: managementMode && variant.ownerUserId == null,
 					canManagePrivate: isPrivateOwner,

@@ -1,5 +1,6 @@
 <%
 	const {
+		pageFeedback,
 		sessionWorkspace,
 		exerciseTemplates,
 		createSessionForm,
@@ -17,6 +18,7 @@
 
 <main class="main library<%= managementMode ? ' library--admin' : '' %>" data-library-page data-library-mode="<%= managementMode ? 'admin' : 'personal' %>">
 	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
+	<%- include("partials/shared/components/pageFeedback", { pageFeedback }) %>
 
 	<% if (planningContext.isVisible) { %>
 		<aside class="library-planning-context" aria-labelledby="library-planning-context-title">

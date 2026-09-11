@@ -25,22 +25,22 @@ export default function createHierarchyGuideViewModel({
 
 	return {
 		id: "program-hierarchy",
-		heading: "How your training plan fits together",
+		heading: "Plan your workout from goal to session",
 		description:
-			"Start with a program, then move through each level to plan a workout.",
+			"Choose a program, select its cycle, open a training day, then assign a session.",
 		items: [
 			{
-				levelLabel: "Level 1",
+				levelLabel: "Level 1 · Start here",
 				name: "Program",
-				description: "Your overall training plan and goal.",
+				description: "Set the overall goal and schedule.",
 				icon: "layers",
 				stateLabel: currentProgram?.name ?? "Choose or create a program",
 				isSelected: currentProgram !== null,
 			},
 			{
-				levelLabel: "Level 2",
+				levelLabel: "Level 2 · Choose a cycle",
 				name: "Cycle",
-				description: "A focused block inside the program.",
+				description: "Organize the plan into a focused block.",
 				icon: "repeat-2",
 				stateLabel:
 					currentCycle?.name ??
@@ -48,9 +48,9 @@ export default function createHierarchyGuideViewModel({
 				isSelected: currentCycle !== null,
 			},
 			{
-				levelLabel: "Level 3",
+				levelLabel: "Level 3 · Open a training day",
 				name: "Training day",
-				description: "A scheduled day within a cycle.",
+				description: "Open a scheduled day to assign its workout.",
 				icon: "calendar-range",
 				stateLabel: currentCycle
 					? formatCount(selectedCycleDays.length, "day", "days", "in selected cycle")
@@ -60,9 +60,9 @@ export default function createHierarchyGuideViewModel({
 				isSelected: currentCycle !== null,
 			},
 			{
-				levelLabel: "Level 4",
+				levelLabel: "Level 4 · Assign a session",
 				name: "Session",
-				description: "The workout assigned to a training day.",
+				description: "Choose the reusable workout template for the day.",
 				icon: "dumbbell",
 				stateLabel: currentCycle
 					? formatCount(

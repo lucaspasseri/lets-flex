@@ -5,6 +5,7 @@ import createCycle, {
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 import { renderPrograms } from "./programController.js";
 import deleteCycle, { CycleNotFoundError } from "../../features/cycles/deleteCycle.js";
+import respondWithContextualMutationError from "../contextualMutationError.js";
 
 /**
  * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
@@ -70,11 +71,33 @@ async function destroy(req, res) {
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
 	if (cycleId === null || !Number.isInteger(cycleId) || cycleId <= 0) {
-		res.status(400).send("Invalid cycle ID");
+		await respondWithContextualMutationError(req, res, {
+			status: 400,
+			fallbackMessage: "Invalid cycle ID",
+			render: () =>
+				renderPrograms(req, res, {
+					pageFeedback: {
+						id: "programs-page-feedback-title",
+						title: "Cycle not deleted",
+						message: "Refresh Programs and choose the cycle again.",
+					},
+				}),
+		});
 		return;
 	}
 	if (userId === null || !Number.isInteger(userId) || userId <= 0) {
-		res.status(403).send("Choose an active profile before deleting a cycle");
+		await respondWithContextualMutationError(req, res, {
+			status: 403,
+			fallbackMessage: "Choose an active profile before deleting a cycle",
+			render: () =>
+				renderPrograms(req, res, {
+					pageFeedback: {
+						id: "programs-page-feedback-title",
+						title: "Cycle not deleted",
+						message: "Choose an active profile before deleting a cycle.",
+					},
+				}),
+		});
 		return;
 	}
 
@@ -82,7 +105,19 @@ async function destroy(req, res) {
 		await deleteCycle({ cycleId, userId });
 	} catch (error) {
 		if (error instanceof CycleNotFoundError) {
-			res.status(404).send("Cycle not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Cycle not found",
+				render: () =>
+					renderPrograms(req, res, {
+						pageFeedback: {
+							id: "programs-page-feedback-title",
+							title: "Cycle not deleted",
+							message:
+								"That cycle is no longer available. Refresh Programs to see the current plan.",
+						},
+					}),
+			});
 			return;
 		}
 		throw error;

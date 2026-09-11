@@ -465,7 +465,7 @@
    Responsive layout
    ====================================================== */
 
-@media (max-width: 45rem) {
+@container application-content (max-width: 45rem) {
 	.exercise-templates__header {
 		align-items: stretch;
 		flex-direction: column;

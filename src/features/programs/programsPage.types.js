@@ -49,6 +49,7 @@
  * @property {ProgramsPageData} data
  * @property {Record<string, any>} [programFormState]
  * @property {Record<string, any>} [cycleFormState]
+ * @property {{tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null} [pageFeedback]
  */
 
 export {};

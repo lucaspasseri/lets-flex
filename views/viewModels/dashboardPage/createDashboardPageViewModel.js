@@ -43,7 +43,7 @@ export default function createDashboardPageViewModel({
 	};
 
 	return {
-		page,
+		page: { ...page, title: "Dashboard · Let's Flex!" },
 		pageState: resolvedPageState,
 		shell: { currentUser: data.currentUser, activeNavigation: "dashboard" },
 		components,

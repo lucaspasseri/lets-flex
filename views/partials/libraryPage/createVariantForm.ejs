@@ -1,4 +1,4 @@
-<% const { idPrefix, title, eyebrow, description, submitLabel, actionPrefix, exercises, equipments } = locals.variantForm; %>
+<% const { idPrefix, title, eyebrow, description, submitLabel, actionPrefix, exercises, equipments, values = {}, errors = {} } = locals.variantForm; %>
 
 <section class="library-action-panel" aria-labelledby="<%= idPrefix %>-heading">
 	<header class="library-action-panel__header">
@@ -20,13 +20,20 @@
 		data-action-prefix="<%= actionPrefix %>"
 	>
 		<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
+		<% if (errors.formErrors?.length) { %>
+			<div class="form-errors" role="alert">
+				<% errors.formErrors.forEach(error => { %><p><%= error %></p><% }) %>
+			</div>
+		<% } %>
 		<div class="form-grid form-grid--three-columns">
 			<%- include("../shared/components/form/field", { field: {
 				id: `${idPrefix}-exercise`,
 				name: "exerciseId",
 				label: "Exercise",
-				control: "select",
-				required: true,
+					control: "select",
+					required: true,
+					value: values.exerciseId ?? "",
+					error: errors.fieldErrors?.exerciseId,
 				hint: "Choose the global exercise this variation belongs to.",
 				defaultOption: { label: "Choose exercise", value: "" },
 				options: exercises.map(exercise => ({ value: exercise.id, label: exercise.name }))
@@ -36,8 +43,10 @@
 				name: "name",
 				label: "Variant name",
 				control: "input",
-				type: "text",
-				required: true,
+					type: "text",
+					required: true,
+					value: values.name ?? "",
+					error: errors.fieldErrors?.name,
 				hint: "Use a short name that describes the variation.",
 				attributes: { maxlength: 100, autocomplete: "off" }
 			} }) %>
@@ -45,8 +54,10 @@
 				id: `${idPrefix}-equipment`,
 				name: "equipmentId",
 				label: "Equipment",
-				control: "select",
-				required: false,
+					control: "select",
+					required: false,
+					value: values.equipmentId ?? "",
+					error: errors.fieldErrors?.equipmentId,
 				hint: "Leave empty for a bodyweight variation.",
 				defaultOption: { label: "No equipment", value: "" },
 				options: equipments.map(equipment => ({ value: equipment.id, label: equipment.name }))

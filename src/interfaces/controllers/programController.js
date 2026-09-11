@@ -6,6 +6,7 @@ import { getProgramsPageData } from "../../features/programs/getProgramsPageData
 import deleteProgram, {
 	ProgramNotFoundError,
 } from "../../features/programs/deleteProgram.js";
+import respondWithContextualMutationError from "../contextualMutationError.js";
 
 /**
  * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
@@ -24,7 +25,7 @@ async function show(req, res) {
 /**
  * @param {Request} req
  * @param {Response} res
- * @param {{programFormState?: Record<string, any>, cycleFormState?: Record<string, any>}} [formState]
+ * @param {{programFormState?: Record<string, any>, cycleFormState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null}} [formState]
  */
 export async function renderPrograms(req, res, formState = {}) {
 	const sessionState = res.locals?.sessionState;
@@ -53,7 +54,7 @@ export async function renderPrograms(req, res, formState = {}) {
 		cycleId,
 	};
 
-	const page = { ...res.locals.page, title: "Let's Flex!" };
+	const page = res.locals.page;
 	const pageState = { userId, programId, cycleId };
 	const programsPage = createProgramsPageViewModel({
 		page,
@@ -113,11 +114,33 @@ async function destroy(req, res) {
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
 	if (programId === null || !Number.isInteger(programId) || programId <= 0) {
-		res.status(400).send("Invalid program ID");
+		await respondWithContextualMutationError(req, res, {
+			status: 400,
+			fallbackMessage: "Invalid program ID",
+			render: () =>
+				renderPrograms(req, res, {
+					pageFeedback: {
+						id: "programs-page-feedback-title",
+						title: "Program not deleted",
+						message: "Refresh Programs and choose the program again.",
+					},
+				}),
+		});
 		return;
 	}
 	if (userId === null || !Number.isInteger(userId) || userId <= 0) {
-		res.status(403).send("Choose an active profile before deleting a program");
+		await respondWithContextualMutationError(req, res, {
+			status: 403,
+			fallbackMessage: "Choose an active profile before deleting a program",
+			render: () =>
+				renderPrograms(req, res, {
+					pageFeedback: {
+						id: "programs-page-feedback-title",
+						title: "Program not deleted",
+						message: "Choose an active profile before deleting a program.",
+					},
+				}),
+		});
 		return;
 	}
 
@@ -125,7 +148,19 @@ async function destroy(req, res) {
 		await deleteProgram({ programId, userId });
 	} catch (error) {
 		if (error instanceof ProgramNotFoundError) {
-			res.status(404).send("Program not found");
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Program not found",
+				render: () =>
+					renderPrograms(req, res, {
+						pageFeedback: {
+							id: "programs-page-feedback-title",
+							title: "Program not deleted",
+							message:
+								"That program is no longer available. Refresh Programs to see the current plan.",
+						},
+					}),
+			});
 			return;
 		}
 		throw error;

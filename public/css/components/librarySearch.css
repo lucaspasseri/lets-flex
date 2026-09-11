@@ -150,7 +150,7 @@
 	line-height: 1.5;
 }
 
-@media (max-width: 68rem) {
+@container application-content (max-width: 68rem) {
 	.library-discovery-controls__fields {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
@@ -160,7 +160,7 @@
 	}
 }
 
-@media (max-width: 42rem) {
+@container application-content (max-width: 42rem) {
 	.library-discovery-controls__header {
 		align-items: stretch;
 		flex-direction: column;

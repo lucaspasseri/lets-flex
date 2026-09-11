@@ -21,6 +21,7 @@ export default function createProgramsPageViewModel({
 	data,
 	programFormState,
 	cycleFormState,
+	pageFeedback = null,
 }) {
 	const {
 		currentUser,
@@ -32,13 +33,14 @@ export default function createProgramsPageViewModel({
 	} = data;
 
 	return {
-		page,
+		page: { ...page, title: "Programs · Let's Flex!" },
 		pageState,
 		shell: {
 			currentUser,
 			activeNavigation: "programs",
 		},
 		components: {
+			pageFeedback,
 			pageHeading: {
 				eyebrow: "Training plans",
 				title: "Programs",

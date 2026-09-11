@@ -255,7 +255,7 @@
 	outline-offset: 3px;
 }
 
-@media (max-width: 48rem) {
+@container application-content (max-width: 48rem) {
 	.profile-layout {
 		grid-template-columns: 1fr;
 	}
@@ -271,7 +271,7 @@
 	}
 }
 
-@media (max-width: 30rem) {
+@container application-content (max-width: 30rem) {
 	.profile-identity {
 		grid-template-columns: 1fr;
 		justify-items: center;

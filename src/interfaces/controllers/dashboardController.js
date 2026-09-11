@@ -26,10 +26,7 @@ export async function renderDashboard(req, res, formState = {}) {
 		workoutSessionId,
 	});
 	const dashboard = createDashboardPageViewModel({
-		page: {
-			...res.locals.page,
-			title: "Let's Flex!",
-		},
+		page: res.locals.page,
 		data,
 		pageState: { userId, programId, daysDifference, workoutSessionId },
 		...formState,

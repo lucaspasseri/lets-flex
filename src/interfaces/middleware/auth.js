@@ -1,3 +1,5 @@
+import { respondWithApplicationRecovery } from "../applicationRecovery.js";
+
 /** @type {import("express").RequestHandler} */
 export function requireAuthentication(req, res, next) {
 	if (req.isAuthenticated?.() && req.user) {
@@ -30,12 +32,12 @@ export function requireAnonymousOrGuest(req, res, next) {
 /** @type {import("express").RequestHandler} */
 export function requireAdmin(req, res, next) {
 	if (!req.isAuthenticated?.() || !req.user) {
-		res.status(401).send("Authentication required");
+		respondWithApplicationRecovery(req, res, { kind: "authentication" });
 		return;
 	}
 	// @ts-ignore -- application Passport principal.
 	if (req.user.role !== "admin") {
-		res.status(403).send("Forbidden");
+		respondWithApplicationRecovery(req, res, { kind: "forbidden" });
 		return;
 	}
 	next();

@@ -1,4 +1,5 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
+import { respondWithApplicationRecovery } from "../applicationRecovery.js";
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -27,7 +28,7 @@ export default function csrfProtection(req, res, next) {
 
 	// @ts-ignore -- application session extension.
 	if (!tokensMatch(req.body?._csrf, req.session.csrfToken)) {
-		res.status(403).send("Invalid CSRF token");
+		respondWithApplicationRecovery(req, res, { kind: "csrf" });
 		return;
 	}
 	next();
