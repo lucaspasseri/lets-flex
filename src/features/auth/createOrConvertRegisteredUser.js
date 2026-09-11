@@ -1,6 +1,6 @@
+import { format } from "date-fns";
 import * as usersRepository from "../users/repository.js";
-import * as sessionsRepository from "../sessions/repository.js";
-import { starterWorkoutManifest } from "../guests/starterWorkoutManifest.js";
+import createStarterWorkspace from "../guests/createStarterWorkspace.js";
 
 export class GuestConversionUnavailableError extends Error {
 	constructor() {
@@ -12,11 +12,11 @@ export class GuestConversionUnavailableError extends Error {
 /**
  * Creates a registered principal or converts the active guest in place.
  * The caller owns the transaction that also attaches an authentication identity.
- * @param {{email: string, name: string, guestUserId?: number | null}} input
+ * @param {{email: string, name: string, guestUserId?: number | null, sessionState?: Record<string, unknown>}} input
  * @param {import("pg").PoolClient} db
  */
 export default async function createOrConvertRegisteredUser(
-	{ email, name, guestUserId = null },
+	{ email, name, guestUserId = null, sessionState = {} },
 	db,
 ) {
 	const user =
@@ -28,20 +28,34 @@ export default async function createOrConvertRegisteredUser(
 			: await usersRepository.createRegisteredUser({ email, name }, db);
 
 	if (!user) throw new GuestConversionUnavailableError();
-	if (guestUserId === null) {
-		const starterTemplate = await sessionsRepository.findActiveGlobalByName(
-			{ name: starterWorkoutManifest.sessionName },
-			db,
-		);
-		if (!starterTemplate) throw new Error("Registered starter session is unavailable");
 
-		const starterSession = await sessionsRepository.createOwnedCopy(
-			{ sourceSessionId: starterTemplate.id, ownerUserId: user.id },
-			db,
-		);
-		if (!starterSession)
-			throw new Error("Registered starter session could not be copied");
+	const starterSessionState =
+		guestUserId === null
+			? toSessionState(
+					await createStarterWorkspace(
+						{ userId: user.id, scheduledDate: format(new Date(), "yyyy-MM-dd") },
+						db,
+					),
+				)
+			: toSessionState(sessionState);
+
+	return Object.assign(user, { starterSessionState });
+}
+
+/** @param {any} starter */
+function toSessionState(starter) {
+	const dayId = starter?.dayId ?? starter?.trainingDayId;
+	if (
+		!Number.isInteger(starter?.programId) ||
+		!Number.isInteger(starter?.cycleId) ||
+		!Number.isInteger(dayId)
+	) {
+		return null;
 	}
 
-	return user;
+	return {
+		programId: starter.programId,
+		cycleId: starter.cycleId,
+		dayId,
+	};
 }

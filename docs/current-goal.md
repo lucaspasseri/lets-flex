@@ -2,148 +2,157 @@
 
 ## Parent milestone
 
-Let’s Flex should provide a clear, reliable starter workout for both temporary guests and
-authenticated users without inventing exercise prescriptions or destroying workout history.
+Let’s Flex should give every new user a clear, usable first workout without weakening ownership,
+authentication, or historical-workout boundaries.
 
 ## Current goal
 
-Improve starter-workout clarity while allowing Guest and authenticated users to delete their own
-Library sessions. Keep planned `workout_sessions` lifecycle behavior separate from reusable Library
-`sessions`, protect global templates and historical references, and avoid destroying workout history.
-
-The user clarified that the previous implementation confused a reusable Library `session` with a
-planned `workout_session`. The corrected deletion target is the Library session owned by the current
-Guest or authenticated user, not the planned workout instance.
+Provide the same meaningful starter training structure to direct authenticated registrations that
+Guests receive, while preserving the existing Guest-to-account conversion behavior. Repair the
+Dashboard weekly-adherence disclosure so expanded data stays contained and readable at supported
+viewport widths.
 
 ## Status
 
-Completed on 2026-09-11 after explicit user approval. Owned starter-session copies are provisioned
-for Guests and direct registrations, while the global `Sample Full Body Session` remains protected.
+Completed on 2026-09-11 after explicit user approval. The preceding starter-session and Library
+goal was committed as `15225f0` before this plan was prepared. Actions 1, 2, and 3 are completed.
 
 ## Verified delta-first baseline
 
 ### Already satisfied
 
-- Guest entry provisions a guest, starter program, cycle, training day, and workout-session assignment
-  atomically in `src/features/auth/createGuest.js`.
-- The assignment references a Guest-owned copy of the shared global `Sample Full Body Session`
-  template. The seeded template remains protected by `owner_user_id IS NULL`; it is not the deletion
-  target for this goal.
-- Planned workout assignments already have a cancellation path at `PATCH /workout_sessions/:id`,
-  scoped through the owning program/user. Cancellation preserves the workout row and its history;
-  this is not the Library session deletion target.
-- Finished and in-progress workout lifecycle rules, step snapshots, and history queries already
-  distinguish terminal records from planned work. These boundaries must be reused and preserved.
-- The prior action added clear prescribed/bodyweight/unassigned load labels and optional no-load
-  logging; those improvements remain in scope and must be preserved.
+- `createGuest` atomically creates a Guest principal, owned copy of the active global starter
+  session, program, cycle, training day, and planned workout session. `enterGuest` records that
+  hierarchy in authenticated session state, allowing the Dashboard to select and render the
+  scheduled workout immediately.
+- The direct-registration path (`createOrConvertRegisteredUser`) already creates an owned copy of
+  the active global starter session within the same transaction as identity creation. The global
+  `Sample Full Body Session` remains shared (`owner_user_id IS NULL`) and protected.
+- Guest conversion changes the existing principal in place. Its user ID and owned session/program
+  data remain unchanged, and the direct-registration-only starter-copy branch is skipped.
+- The Dashboard resolves its active program exclusively from session-state `programId`; without it,
+  it renders no active program even when an owned Library session exists.
+- The adherence details are semantic native `details`/`summary` markup. The table has a deliberate
+  `28rem` minimum width inside `.analytics-table-scroll`, which owns horizontal overflow. The
+  Dashboard card is a grid item with `min-width: 0`.
 
 ### Reuse
 
-- Reuse `starterWorkoutManifest`, the canonical seed/reset path, `createGuest`, workout-session
-  lifecycle services/repositories, existing ownership predicates, recovery responses, and the
-  PostgreSQL HTTP harness.
-- Reuse nullable `session_steps.load_value`/`load_unit` semantics for exercises where load has no
-  meaning unless investigation proves the domain model cannot express the required distinction.
-- Preserve authentication, guest provisioning, CSRF, ownership, status transitions, cancellation,
-  history snapshots, and foreign-key protections.
+- Reuse the starter manifest, the Guest provisioning repositories and transaction sequence,
+  `createOrConvertRegisteredUser`, `establishAuthenticatedSession`, existing ownership predicates,
+  and the PostgreSQL HTTP harness. Generalize the starter hierarchy rather than maintaining a
+  second authenticated-only implementation.
+- Reuse the existing Dashboard analytics panel, native disclosure, scroll-region semantics, and
+  visual tokens. Correct the layout where its available width is constrained rather than replacing
+  the table or creating a separate mobile component.
 
-### Verified gaps and unknowns
+### Modify
 
-- The previous implementation did confuse the concepts: it added Dashboard controls and HTTP
-  coverage for `workout_sessions` cancellation instead of Library `sessions` deletion.
-- The existing Library session model, ownership predicates, route registration, and foreign-key
-  references must be inspected before selecting the smallest deletion behavior.
+- Direct local and first-time Google registrations must receive the full starter hierarchy and its
+  selection state, not just an owned Library-session copy.
+- Registration/identity boundaries must carry only the necessary starter selection information to
+  session establishment while preserving existing return contracts and session rotation.
+- The expanded adherence disclosure needs a responsive containment correction supported by
+  rendered evidence at its actual failure width.
 
-- `starterWorkoutManifest` contains four steps but no load fields, and
-  `createStarterWorkoutSeedSql` inserts only name, sets, reps, type, and order. Every seeded starter
-  step therefore currently has a nullable load.
-- The starter variants are `Bodyweight Box Squat`, `Bodyweight Push Up`, `One-Arm Dumbbell Row`, and
-  `Bodyweight Glute Bridge`. The catalog marks the first, second, and fourth as bodyweight variants;
-  the row uses a dumbbell. Which starter load, if any, is appropriate must be established explicitly.
-- The prior action corrected null-load presentation in Library and workout views; this behavior must
-  remain intact while the deletion target is corrected.
-- The assigned default workout can be cancelled only while `planned`; the existing Programs/Day
-  workflow owns that behavior. Dashboard must not duplicate it. In-progress and terminal assignments
-  are intentionally not cancellable.
-- `workout_sessions.session_id` uses `ON DELETE RESTRICT`, while workout logs cascade from the
-  workout assignment. This supports preserving historical data, but the final removal rule must be
-  confirmed against guest and authenticated flows.
-- It is unknown whether guest and authenticated users currently receive different UI affordances or
-  lifecycle failures for the same planned/started/finished assignment.
+### Add
+
+- Regression coverage for a direct authenticated registration's program/cycle/day/owned-session/
+  planned-workout structure and visible Dashboard workout, plus Guest-to-authenticated conversion
+  proof that no duplicate starter data is created.
+- Focused layout/interaction coverage and rendered checks for expanded adherence data at small,
+  intermediate, and large widths using long representative content where applicable.
+
+### Unknowns to resolve within the relevant action
+
+- The precise nested element that contributed the disclosure's minimum inline size was not measured
+  in this workspace. The user manually verified the repaired rendered-width behavior in a real
+  browser, satisfying the responsive acceptance criterion without changing the existing semantic
+  disclosure or scroll-region contract.
 
 ## Proposed action sequence
 
-1. **Diagnose starter prescriptions and assignment lifecycle.** Reproduce clean guest and
-   authenticated flows, inspect starter seed data and rendered load states, exercise planned,
-   in-progress, finished, and history-bearing removal cases, and document the domain rule.
-   **Ready for review:** the starter data, Dashboard/Day removal boundary, ownership/status guards,
-   foreign-key protection, and remaining product-choice unknown are documented; no code changed.
-2. **Correct Library session deletion and preserve valid starter improvements.** Remove the duplicate
-   Dashboard planned-workout action, implement owned Library-session deletion for Guest and
-   authenticated users, and add regression coverage for access and references.
-3. **Complete verification and review.** Run focused HTTP/domain/UI checks, repository verification,
-   inspect the final diff, and stop for review. No production data, deployment, push, or commit is
-   included.
+1. **Generalize starter-workspace provisioning for direct registrations.** Extract or extend the
+   Guest starter hierarchy path so a new direct local or Google account receives one owned starter
+   session, program, cycle, scheduled training day, planned workout, and Dashboard selection in the
+   existing transaction. Preserve Guest conversion in place, global-template ownership, idempotent
+   provider sign-in, and existing user-owned structures. Add focused unit/HTTP regression coverage.
+2. **Repair the weekly-adherence disclosure layout.** Reproduce the expanded Dashboard state with
+   representative long data; identify the constrained element; apply the smallest responsive
+   correction using the existing analytics/table-scroll system; and add relevant regression
+   coverage. Inspect mobile (~390px), the measured intermediate pressure width, and desktop
+   (~1280px), including disclosure keyboard/focus behavior.
+3. **Complete verification and review.** Run focused domain, HTTP, browser, and UI checks, then the
+   required repository verification; inspect the final diff and record rendered-width evidence. Do
+   not deploy, reset production data, push, or commit this goal.
 
 ## Scope
 
 ### In scope
 
-- Guest starter workout seed/manifest, nullable load meaning and presentation, Library `sessions`
-  ownership/deletion, references, history, and directly related tests.
-- The smallest schema/domain change only if repository evidence proves the current model cannot
-  represent the required behavior.
+- New-account starter hierarchy provisioning, authenticated session selection, its transactional
+  ownership/idempotence boundaries, and directly related regression tests.
+- Dashboard weekly-adherence disclosure structure/styles and directly related UI/browser tests.
 
 ### Out of scope
 
-- Dashboard “Remove from plan” duplication, planned-workout redesign, exercise catalog expansion,
-  broad UX changes, unrelated lifecycle refactors, deployment, production data, push, or commit.
+- Backfilling or overwriting existing authenticated users' programs, globally owning templates,
+  workout-history redesign, a broad Dashboard redesign, schema migrations unless repository
+  evidence proves one is necessary, deployment, production data, push, or commit.
 
 ## Constraints and invariants
 
-- Do not assign artificial loads to bodyweight, mobility, stretching, cardio, or other activities
-  where load has no semantic meaning.
-- Do not destroy completed workout history. Prefer cancellation or archival/removal from future
-  planning when true deletion would invalidate meaningful records.
-- Establish the rule from ownership and historical references, not guest status alone.
-- Keep guest and authenticated behavior consistent where their ownership and workout state are the
-  same; document any intentional difference.
-- Follow the disposable development database/reset policy. Do not mutate production.
+- Never duplicate starter data when a Guest converts, and never change that Guest's ownership ID.
+- Do not recreate starter data for an authenticated user who already has training structure.
+- Keep the global starter template global and protected; only user copies are owned.
+- Keep registration/identity creation and starter provisioning atomic. Preserve CSRF, rate limits,
+  generic account-conflict responses, session rotation, validation, and secret handling.
+- Keep long adherence data readable without allowing it to overflow or widen surrounding Dashboard
+  layout. Preserve native disclosure semantics, visible focus, reduced-motion behavior, and the
+  existing dark visual system.
+- Do not reset or mutate production data. Development reset is not currently authorized.
 
 ## Done when
 
-- Starter-session creation and prescriptions are documented with verified evidence.
-- Meaningful loads are present where justified, and legitimate no-load steps are clear in the UI.
-- The previous `session`/`workout_session` confusion is documented and corrected.
-- Guest and authenticated users can delete only their own Library sessions, while global/system
-  templates and referenced history remain protected according to repository rules.
-- Regression coverage protects starter creation, load presentation, ownership, status, and history
-  behavior.
-- Required verification passes and the goal reaches Ready for final review before explicit approval.
+- A new Guest and a new direct authenticated user each receive a usable owned starter hierarchy
+  with a planned workout visible through the normal Dashboard flow.
+- Guest conversion preserves exactly the existing starter data and ownership, without a duplicate.
+- Global templates and existing authenticated users' own training structures remain untouched.
+- The expanded weekly-adherence disclosure remains contained and readable at small, intermediate,
+  and desktop widths.
+- Regression coverage and required verification pass, and the goal reaches Ready for final review
+  before explicit approval.
 
 ## Final review assessment
 
-- **Starter-session creation and prescriptions:** Satisfied. The seeded global template remains the
-  canonical source, Guests and direct registrations receive owned copies, and nullable-load meaning
-  is documented and rendered.
-- **Owned Library deletion with protected history/templates:** Satisfied. Owners archive their
-  copies; cross-account and global-template deletion remain denied; references and history are
-  preserved.
-- **Session/workout-session boundary:** Satisfied. Library `sessions` use the owner-scoped archive
-  path; planned `workout_sessions` retain their existing lifecycle.
-- **Regression coverage and verification:** Satisfied. `npm run verify` passed 227/227 tests and
-  `npm run test:http` passed 62/62; the rendered Library flow is covered for owner deletion,
-  cross-account denial, and global protection.
-- **Intentionally excluded:** production data changes, deployment, push, commit, broad workout
-  redesign, and global-template deletion authorization.
+- **Starter hierarchy for new Guests and direct registrations:** Satisfied. Both flows receive an
+  owned starter session, program, cycle, training day, and planned workout, with Dashboard selection
+  state established for direct registrations.
+- **Guest conversion without duplication:** Satisfied. Local and Google conversion retains the
+  existing principal and owned hierarchy; regression coverage confirms no duplicate starter rows.
+- **Global-template and existing-user protection:** Satisfied. The global starter remains unowned and
+  protected, and existing authenticated users are not backfilled or overwritten.
+- **Responsive weekly-adherence disclosure:** Satisfied. The containment correction preserves native
+  disclosure semantics and intentional table scrolling; the user manually verified rendered-width
+  behavior in a real browser because no browser engine was available in the workspace.
+- **Regression coverage and required verification:** Satisfied. Focused browser tests, `npm run
+verify` (227/227), `npm run test:http` (63/63), formatting, lint, type checks, browser types, and
+  final diff checks passed. The initial sandbox-only database attempt failed with `EPERM` and was
+  rerun successfully with approved local PostgreSQL access.
+- **Intentionally excluded:** production data changes, development database reset, deployment, push,
+  schema migration, and broad Dashboard or workout-history redesign. The user separately authorized
+  the final commit after approving the goal.
 
 ## Completion outcome
 
-The goal is complete. Guest and directly registered users receive owned starter-session copies,
-Library deletion archives only owned sessions, and global templates, cross-account data, workout
-references, and history remain protected. Final verification passed with 227 repository tests and
-62 PostgreSQL HTTP tests.
+The goal is complete. New Guests and direct authenticated registrations receive the same owned
+starter hierarchy without duplicating Guest data during conversion, and the Dashboard adherence
+disclosure remains contained while preserving its native semantics and intentional table scrolling.
+Required automated verification passed, the user supplied the remaining real-browser verification,
+and the approved changes are committed by the requested final step. No production mutation,
+deployment, push, or database reset was performed.
 
 ## Resume here
 
-Completed on 2026-09-11. No next goal is approved.
+Actions 1, 2, and 3 are completed. The current goal is **Completed** on 2026-09-11. No next goal is
+approved; request user direction before preparing another goal.

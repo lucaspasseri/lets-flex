@@ -362,7 +362,9 @@ export function buildGoogleCallbackHandler(passport) {
 			}
 
 			try {
-				await establishAuthenticatedSession(req, user);
+				await establishAuthenticatedSession(req, user, {
+					sessionState: user.starterSessionState,
+				});
 				res.redirect(
 					oauthState.purpose !== "login"
 						? `/profile?googleLink=${oauthState.purpose === "replace" ? "replaced" : "connected"}`
@@ -430,8 +432,14 @@ async function register(req, res) {
 			principal?.role === "guest" && Number.isInteger(principal.id)
 				? principal.id
 				: null;
-		const user = await registerUser({ ...parsed.data, guestUserId });
-		await establishAuthenticatedSession(req, user);
+		const user = await registerUser({
+			...parsed.data,
+			guestUserId,
+			sessionState: req.session?.state,
+		});
+		await establishAuthenticatedSession(req, user, {
+			sessionState: user.starterSessionState,
+		});
 		res.redirect(safeReturnTo(parsed.data.returnTo));
 	} catch (error) {
 		if (

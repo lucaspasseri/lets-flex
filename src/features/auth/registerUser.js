@@ -3,8 +3,13 @@ import * as authIdentitiesRepository from "./authIdentitiesRepository.js";
 import createOrConvertRegisteredUser from "./createOrConvertRegisteredUser.js";
 import { hashPassword } from "./passwordService.js";
 
-/** @param {{email: string, password: string, guestUserId?: number | null}} input */
-export default async function registerUser({ email, password, guestUserId = null }) {
+/** @param {{email: string, password: string, guestUserId?: number | null, sessionState?: Record<string, unknown>}} input */
+export default async function registerUser({
+	email,
+	password,
+	guestUserId = null,
+	sessionState = {},
+}) {
 	const passwordHash = await hashPassword(password);
 	const name = email.slice(0, email.lastIndexOf("@"));
 	const client = await pool.connect();
@@ -12,7 +17,7 @@ export default async function registerUser({ email, password, guestUserId = null
 	try {
 		await client.query("BEGIN");
 		const user = await createOrConvertRegisteredUser(
-			{ email, name, guestUserId },
+			{ email, name, guestUserId, sessionState },
 			client,
 		);
 		await authIdentitiesRepository.createLocal(

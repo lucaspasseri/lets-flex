@@ -106,5 +106,7 @@ test("analytics styles include responsive, focus, target-size, and non-color cue
 	assert.match(css, /\.adherence-chart__status\[hidden\]\s*\{\s*display: none;/);
 	assert.match(css, /\.dashboard-heatmap__cell--many[\s\S]*repeating-linear-gradient/);
 	assert.match(css, /\.analytics-legend__marker--cancelled::after[\s\S]*content: "×"/);
+	assert.match(css, /\.analytics-data-disclosure\s*\{[\s\S]*min-width: 0/);
 	assert.match(css, /\.analytics-table-scroll[\s\S]*overflow-x: auto/);
+	assert.match(css, /\.analytics-table-scroll\s*\{[\s\S]*min-width: 0/);
 });

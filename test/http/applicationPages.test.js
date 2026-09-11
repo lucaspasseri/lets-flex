@@ -97,6 +97,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 								principal?.role === "guest" && Number.isInteger(principal.id)
 									? principal.id
 									: null,
+							sessionState: req.session?.state,
 						});
 				authentication.then(
 					(account) => {
@@ -858,6 +859,41 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			owner_user_id: account.id,
 			step_count: 4,
 		});
+		const starterWorkspace = (
+			await db.query(
+				`SELECT program.id AS program_id, program.user_id,
+				        program.start_date::text, goal.name AS goal_name,
+				        cycle.id AS cycle_id, cycle.name AS cycle_name,
+				        day.id AS training_day_id, day.label AS day_label,
+				        day.scheduled_date::text AS scheduled_date,
+				        workout.id AS workout_session_id, workout.status,
+				        session.id AS session_id, session.owner_user_id AS session_owner_user_id
+				 FROM programs AS program
+				 JOIN goals AS goal ON goal.id = program.goal_id
+				 JOIN cycles AS cycle ON cycle.program_id = program.id
+				 JOIN training_days AS day ON day.cycle_id = cycle.id
+				 JOIN workout_sessions AS workout ON workout.training_day_id = day.id
+				 JOIN sessions AS session ON session.id = workout.session_id
+				 WHERE program.user_id = $1
+				 ORDER BY program.id`,
+				[account.id],
+			)
+		).rows;
+		assert.equal(starterWorkspace.length, 1);
+		assert.equal(starterWorkspace[0].user_id, account.id);
+		assert.equal(starterWorkspace[0].goal_name, "general_fitness");
+		assert.equal(starterWorkspace[0].cycle_name, "Getting Started");
+		assert.equal(starterWorkspace[0].day_label, "Full Body");
+		assert.equal(starterWorkspace[0].status, "planned");
+		assert.equal(starterWorkspace[0].session_id, starterSession.id);
+		assert.equal(starterWorkspace[0].session_owner_user_id, account.id);
+		assert.equal(starterWorkspace[0].start_date, starterWorkspace[0].scheduled_date);
+
+		const dashboard = await client.request("/");
+		assert.equal(dashboard.response.status, 200);
+		assert.match(dashboard.text, /Sample Full Body Session/);
+		assert.match(dashboard.text, /Start session/);
+		assert.doesNotMatch(dashboard.text, /NO ACTIVE PROGRAM/);
 
 		const library = await client.request(`/library?sessionId=${starterSession.id}`);
 		assert.equal(library.response.status, 200);
@@ -979,6 +1015,51 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(logout.response.status, 302);
 		assert.notEqual(client.cookie(), oldCookie);
 		assert.equal((await client.request("/")).response.status, 302);
+	});
+
+	test("direct Google registration provisions the starter workspace and Dashboard selection", async () => {
+		const client = agent(oauthOrigin);
+		const flow = await beginGoogle(client, "/");
+		const result = await completeGoogle(client, flow, {
+			sub: "direct-starter-google-sub",
+			email: "direct.google@example.com",
+			verified: true,
+			name: "Direct Google Member",
+		});
+
+		assert.equal(result.response.status, 302);
+		assert.equal(result.response.headers.get("location"), "/");
+		const account = (
+			await db.query(
+				"SELECT id, role FROM users WHERE email = 'direct.google@example.com'",
+			)
+		).rows[0];
+		assert.equal(account.role, "user");
+		const starterWorkspace = (
+			await db.query(
+				`SELECT program.id AS program_id, program.user_id,
+				        cycle.id AS cycle_id, day.id AS training_day_id,
+				        workout.id AS workout_session_id, workout.status,
+				        session.id AS session_id, session.owner_user_id AS session_owner_user_id
+				 FROM programs AS program
+				 JOIN cycles AS cycle ON cycle.program_id = program.id
+				 JOIN training_days AS day ON day.cycle_id = cycle.id
+				 JOIN workout_sessions AS workout ON workout.training_day_id = day.id
+				 JOIN sessions AS session ON session.id = workout.session_id
+				 WHERE program.user_id = $1`,
+				[account.id],
+			)
+		).rows;
+		assert.equal(starterWorkspace.length, 1);
+		assert.equal(starterWorkspace[0].user_id, account.id);
+		assert.equal(starterWorkspace[0].status, "planned");
+		assert.equal(starterWorkspace[0].session_owner_user_id, account.id);
+
+		const dashboard = await client.request("/");
+		assert.equal(dashboard.response.status, 200);
+		assert.match(dashboard.text, /Sample Full Body Session/);
+		assert.match(dashboard.text, /Start session/);
+		assert.doesNotMatch(dashboard.text, /NO ACTIVE PROGRAM/);
 	});
 
 	test("an existing Google subject resolves the same provider-neutral user", async () => {
@@ -1692,6 +1773,27 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			).rows[0].owner_user_id,
 			guest.id,
 		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM programs WHERE user_id = $1 AND name = 'Guest Starter Program'",
+					[guest.id],
+				)
+			).rows[0].count,
+			1,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM sessions WHERE owner_user_id = $1 AND name = 'Sample Full Body Session'",
+					[guest.id],
+				)
+			).rows[0].count,
+			1,
+		);
+		const convertedDashboard = await client.request("/");
+		assert.match(convertedDashboard.text, /Sample Full Body Session/);
+		assert.match(convertedDashboard.text, /Start session/);
 		assert.match((await client.request("/profile")).text, /Converted with Google/);
 		await assertGoogleStateCleared();
 	});
@@ -2059,7 +2161,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(progress.text, /Bodyweight Box Squat/);
 	});
 
-	test("guest starter provisioning rolls back when its canonical session is unavailable", async () => {
+	test("starter provisioning rolls back when its canonical session is unavailable", async () => {
 		await db.query(
 			"UPDATE sessions SET is_archived = TRUE WHERE name = 'Sample Full Body Session'",
 		);
@@ -2086,6 +2188,26 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			(
 				await db.query(
 					"SELECT count(*)::int AS count FROM programs WHERE name = 'Guest Starter Program'",
+				)
+			).rows[0].count,
+			0,
+		);
+
+		const registrationClient = agent();
+		const registrationPage = await registrationClient.request("/auth/login");
+		const registration = await registrationClient.request("/auth/register", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(registrationPage.text),
+				email: "rolled-back@example.com",
+				password: "correct horse battery staple",
+			},
+		});
+		assert.equal(registration.response.status, 500);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM users WHERE email = 'rolled-back@example.com'",
 				)
 			).rows[0].count,
 			0,
@@ -2234,6 +2356,27 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			).rows[0].owner_user_id,
 			guest.id,
 		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM programs WHERE user_id = $1 AND name = 'Guest Starter Program'",
+					[guest.id],
+				)
+			).rows[0].count,
+			1,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM sessions WHERE owner_user_id = $1 AND name = 'Sample Full Body Session'",
+					[guest.id],
+				)
+			).rows[0].count,
+			1,
+		);
+		const convertedDashboard = await client.request("/");
+		assert.match(convertedDashboard.text, /Sample Full Body Session/);
+		assert.match(convertedDashboard.text, /Start session/);
 		const convertedProfile = await client.request("/profile");
 		assert.equal(convertedProfile.response.status, 200);
 		assert.match(convertedProfile.text, /converted\.guest@example\.com/);

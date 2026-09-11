@@ -10,13 +10,17 @@ import * as usersRepository from "../features/users/repository.js";
 
 /** @param {any} row */
 function toPrincipal(row) {
-	return {
+	const principal = {
 		id: row.id,
 		email: row.email ?? null,
 		name: row.name,
 		role: row.role,
 		guestExpiresAt: row.guest_expires_at ?? null,
 	};
+	if (row.starterSessionState) {
+		principal.starterSessionState = row.starterSessionState;
+	}
+	return principal;
 }
 
 /** @param {any} row @param {Date} [now] */
@@ -97,6 +101,8 @@ export function createPassport() {
 									principal?.role === "guest" && Number.isInteger(principal.id)
 										? principal.id
 										: null,
+								// @ts-ignore -- application-owned starter selection state.
+								sessionState: req.session?.state,
 							});
 					if (account.role === "guest" || !isUsablePrincipal(account)) {
 						done(null, false, { message: "This account is not available." });

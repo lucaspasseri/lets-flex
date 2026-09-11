@@ -760,6 +760,7 @@
 }
 
 .analytics-data-disclosure {
+	min-width: 0;
 	border-top: 1px solid var(--color-border);
 }
 
@@ -781,6 +782,7 @@
 }
 
 .analytics-table-scroll {
+	min-width: 0;
 	max-width: 100%;
 	overflow-x: auto;
 	padding-bottom: 0.35rem;

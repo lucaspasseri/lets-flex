@@ -66,9 +66,13 @@ function readProviderEmail(profile) {
 /**
  * Resolves an existing Google subject, or atomically creates/converts a user
  * and attaches that subject. Access and refresh tokens never enter this boundary.
- * @param {{profile: any, guestUserId?: number | null}} input
+ * @param {{profile: any, guestUserId?: number | null, sessionState?: Record<string, unknown>}} input
  */
-export default async function authenticateGoogleUser({ profile, guestUserId = null }) {
+export default async function authenticateGoogleUser({
+	profile,
+	guestUserId = null,
+	sessionState = {},
+}) {
 	const providerSubject = readProviderSubject(profile);
 	const existing = await authIdentitiesRepository.findPrincipalByProviderSubject({
 		provider: "google",
@@ -81,7 +85,7 @@ export default async function authenticateGoogleUser({ profile, guestUserId = nu
 	try {
 		await client.query("BEGIN");
 		const user = await createOrConvertRegisteredUser(
-			{ email, name, guestUserId },
+			{ email, name, guestUserId, sessionState },
 			client,
 		);
 		await authIdentitiesRepository.createGoogle(
