@@ -8,7 +8,7 @@
 		createExerciseForm,
 		updateExerciseForm,
 		deleteExerciseForm,
-		archiveSessionForm
+		deleteSessionForm
 	} = locals.components;
 	const managementMode = Boolean(locals.managementMode);
 	const privateVariantForm = locals.components.privateVariantForm;
@@ -86,14 +86,14 @@
 } }) %><% } %>
 
 <% if (!managementMode) { %><%- include("partials/shared/components/modal/modal", { modal: {
-	id: archiveSessionForm.modal.id,
-	title: archiveSessionForm.modal.title,
+	id: deleteSessionForm.modal.id,
+	title: deleteSessionForm.modal.title,
 	showTitle: false,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
-		...archiveSessionForm.form,
-		attributes: { "data-archive-session-form": true },
+		...deleteSessionForm.form,
+		attributes: { "data-delete-session-form": true },
 		slots: {
-			footer: include("partials/libraryPage/archiveSessionTemplateForm/archiveSessionFormFooter", { archiveSessionForm })
+			footer: include("partials/libraryPage/deleteSessionForm/deleteSessionFormFooter", { deleteSessionForm })
 		}
 	}})
 } }) %><% } %>

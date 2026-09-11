@@ -2,138 +2,148 @@
 
 ## Parent milestone
 
-Let’s Flex must remain reliable for real users across authentication, guest provisioning, and
-application navigation before additional UX work is prioritized.
+Let’s Flex should provide a clear, reliable starter workout for both temporary guests and
+authenticated users without inventing exercise prescriptions or destroying workout history.
 
 ## Current goal
 
-Diagnose and eliminate the production `/cycles` failure reported by a real user at
-`lets-flex.paxeri.dev/cycles`. Establish why the user reached that URL, reproduce the failure from
-clean application/session state where possible, identify the smallest root cause supported by
-repository and runtime evidence, repair the correct behavior, and protect it with regression
-coverage and useful non-sensitive server diagnostics.
+Improve starter-workout clarity while allowing Guest and authenticated users to delete their own
+Library sessions. Keep planned `workout_sessions` lifecycle behavior separate from reusable Library
+`sessions`, protect global templates and historical references, and avoid destroying workout history.
+
+The user clarified that the previous implementation confused a reusable Library `session` with a
+planned `workout_session`. The corrected deletion target is the Library session owned by the current
+Guest or authenticated user, not the planned workout instance.
 
 ## Status
 
-Proposed on 2026-09-10 from the user's explicit production-reliability request. Actions 1, 2, and 3
-were completed after review; the goal was completed on 2026-09-10 after explicit user approval.
+Completed on 2026-09-11 after explicit user approval. Owned starter-session copies are provisioned
+for Guests and direct registrations, while the global `Sample Full Body Session` remains protected.
 
 ## Verified delta-first baseline
 
 ### Already satisfied
 
-- The completed frontend goal is committed as `62a5ede`; the worktree was clean before this goal's
-  tracking update.
-- `app.js` mounts `/cycles` after authentication middleware. The current `/cycles` router registers
-  `POST /` for cycle creation and `DELETE /:cycleId` for owned deletion; it registers no `GET` route.
-- Current application links and redirects point to `/programs` or `/programs/day`; the cycle creation
-  form posts to `/cycles`, and cycle deletion uses `DELETE /cycles/:cycleId`.
-- Guest entry atomically provisions a guest, starter program, cycle, training day, workout session,
-  and session selection state before redirecting to `/`.
-- The application has a generic HTML/JSON recovery boundary and logs unexpected errors, so the repair
-  can extend existing boundaries rather than introducing a parallel error system.
-- The PostgreSQL HTTP test harness can reset a disposable test database and exercise fresh,
-  guest-authenticated, and registered-authenticated sessions without production data.
+- Guest entry provisions a guest, starter program, cycle, training day, and workout-session assignment
+  atomically in `src/features/auth/createGuest.js`.
+- The assignment references a Guest-owned copy of the shared global `Sample Full Body Session`
+  template. The seeded template remains protected by `owner_user_id IS NULL`; it is not the deletion
+  target for this goal.
+- Planned workout assignments already have a cancellation path at `PATCH /workout_sessions/:id`,
+  scoped through the owning program/user. Cancellation preserves the workout row and its history;
+  this is not the Library session deletion target.
+- Finished and in-progress workout lifecycle rules, step snapshots, and history queries already
+  distinguish terminal records from planned work. These boundaries must be reused and preserved.
+- The prior action added clear prescribed/bodyweight/unassigned load labels and optional no-load
+  logging; those improvements remain in scope and must be preserved.
 
 ### Reuse
 
-- Reuse the existing Express route/middleware/controller layering, Passport session lifecycle,
-  `respondWithApplicationRecovery`, PostgreSQL HTTP harness, and test-database reset path.
-- Preserve authentication, guest provisioning, session rotation, CSRF, ownership, status semantics,
-  and browser-facing JSON contracts unless the verified root cause requires a narrow correction.
-- Reuse `/programs` as the established cycle-management page only if evidence confirms that it is the
-  intended destination; do not assume that a redirect is the correct repair.
+- Reuse `starterWorkoutManifest`, the canonical seed/reset path, `createGuest`, workout-session
+  lifecycle services/repositories, existing ownership predicates, recovery responses, and the
+  PostgreSQL HTTP harness.
+- Reuse nullable `session_steps.load_value`/`load_unit` semantics for exercises where load has no
+  meaning unless investigation proves the domain model cannot express the required distinction.
+- Preserve authentication, guest provisioning, CSRF, ownership, status transitions, cancellation,
+  history snapshots, and foreign-key protections.
 
 ### Verified gaps and unknowns
 
-- A read-only production request to `GET https://lets-flex.paxeri.dev/cycles` without a session
-  returned `302 Location: /auth/login?returnTo=%2Fcycles`; no production data was changed.
-- A disposable local reproduction returned fresh-session `302` to sign-in, successfully provisioned a
-  guest with `302` to `/`, then returned `404` HTML recovery (`Page not found`) and JSON
-  `{ "error": "Not found" }` for guest-authenticated `GET /cycles`. It did not reproduce a 500.
-- The current source therefore proves that `/cycles` is not a GET page and that the clean local path
-  does not throw. The exact production exception, session state, request headers, deployment revision,
-  and user navigation/referrer that produced “Something broke!” remain unknown.
-- Historical code once exposed `GET /cycles/:programId` as a JSON lookup route, but no current UI link
-  targets it. This is evidence of a possible stale/external path, not proof of the reported cause.
-- The global unexpected-error logger currently records only the error stack/value. It does not include
-  request method, path, status context, or a safe authenticated principal identifier, which limits
-  diagnosis if the production request reaches an exception path.
+- The previous implementation did confuse the concepts: it added Dashboard controls and HTTP
+  coverage for `workout_sessions` cancellation instead of Library `sessions` deletion.
+- The existing Library session model, ownership predicates, route registration, and foreign-key
+  references must be inspected before selecting the smallest deletion behavior.
 
-### Add
-
-- Add only the reproduction, root-cause repair, regression coverage, and safe diagnostic context that
-  the investigation proves necessary. Do not redesign Dashboard, Library, starter workout, deletion,
-  or exercise-catalog behavior.
+- `starterWorkoutManifest` contains four steps but no load fields, and
+  `createStarterWorkoutSeedSql` inserts only name, sets, reps, type, and order. Every seeded starter
+  step therefore currently has a nullable load.
+- The starter variants are `Bodyweight Box Squat`, `Bodyweight Push Up`, `One-Arm Dumbbell Row`, and
+  `Bodyweight Glute Bridge`. The catalog marks the first, second, and fourth as bodyweight variants;
+  the row uses a dumbbell. Which starter load, if any, is appropriate must be established explicitly.
+- The prior action corrected null-load presentation in Library and workout views; this behavior must
+  remain intact while the deletion target is corrected.
+- The assigned default workout can be cancelled only while `planned`; the existing Programs/Day
+  workflow owns that behavior. Dashboard must not duplicate it. In-progress and terminal assignments
+  are intentionally not cancellable.
+- `workout_sessions.session_id` uses `ON DELETE RESTRICT`, while workout logs cascade from the
+  workout assignment. This supports preserving historical data, but the final removal rule must be
+  confirmed against guest and authenticated flows.
+- It is unknown whether guest and authenticated users currently receive different UI affordances or
+  lifecycle failures for the same planned/started/finished assignment.
 
 ## Proposed action sequence
 
-1. **Diagnose and reproduce the production `/cycles` failure.** Trace every route and navigation path
-   that can reach `/cycles`; compare fresh, guest, and registered sessions in the disposable local
-   environment; inspect session/selection assumptions and error boundaries; and record the exact
-   verified root cause or the remaining external evidence required.
-2. **Repair the verified root cause and add regression protection.** Implement the smallest supported
-   behavior correction, add coverage for the discovered fresh/guest/authenticated scenario, and extend
-   unexpected-error diagnostics with enough safe request context to investigate future failures.
-   **Completed after review:** explicit `GET /cycles` 404 handling, safe contextual error logging,
-   and the session/negotiation regression matrix were implemented and verified; the exact historical
-   production exception remains uncorrelated.
-3. **Complete reliability verification and review.** Run focused HTTP tests, type/lint/format checks,
-   the applicable full suite, inspect the final diff, and record production-safe smoke evidence and
-   any remaining deployment or runtime unknowns. **Completed after review:** sequential focused and
-   full verification pass; read-only production smoke returns the expected unauthenticated redirect;
-   no deploy, push, production-data mutation, or commit is included.
+1. **Diagnose starter prescriptions and assignment lifecycle.** Reproduce clean guest and
+   authenticated flows, inspect starter seed data and rendered load states, exercise planned,
+   in-progress, finished, and history-bearing removal cases, and document the domain rule.
+   **Ready for review:** the starter data, Dashboard/Day removal boundary, ownership/status guards,
+   foreign-key protection, and remaining product-choice unknown are documented; no code changed.
+2. **Correct Library session deletion and preserve valid starter improvements.** Remove the duplicate
+   Dashboard planned-workout action, implement owned Library-session deletion for Guest and
+   authenticated users, and add regression coverage for access and references.
+3. **Complete verification and review.** Run focused HTTP/domain/UI checks, repository verification,
+   inspect the final diff, and stop for review. No production data, deployment, push, or commit is
+   included.
 
 ## Scope
 
 ### In scope
 
-- `/cycles` route registration, method behavior, links, redirects, session and selection state,
-  guest provisioning, authentication state, server-side exceptions, safe logging, and regression
-  tests directly related to the reported failure.
-- The smallest route/controller/middleware/error-boundary changes required by verified evidence.
+- Guest starter workout seed/manifest, nullable load meaning and presentation, Library `sessions`
+  ownership/deletion, references, history, and directly related tests.
+- The smallest schema/domain change only if repository evidence proves the current model cannot
+  represent the required behavior.
 
 ### Out of scope
 
-- Dashboard, Library, starter workout, session deletion, exercise catalog, broad UX redesign, schema
-  changes, migrations, dependencies, deployment, pushing, committing, or production data mutation.
-- Redirecting `/cycles` merely because `/programs` exists, unless the investigation establishes that
-  redirect as the correct product behavior.
+- Dashboard “Remove from plan” duplication, planned-workout redesign, exercise catalog expansion,
+  broad UX changes, unrelated lifecycle refactors, deployment, production data, push, or commit.
 
 ## Constraints and invariants
 
-- Do not expose stack traces, session contents, credentials, tokens, SQL, or personal data to users.
-- Keep server diagnostics useful but redact secrets and avoid raw session/user data.
-- Preserve authentication, authorization, CSRF, rate limiting, ownership, guest lifecycle, session
-  rotation, validation, and status semantics.
-- Use only disposable local/test data for reproduction. Production requests remain read-only unless
-  the user separately authorizes a specific production operation.
-- Do not commit, push, deploy, or modify production data as part of this goal.
+- Do not assign artificial loads to bodyweight, mobility, stretching, cardio, or other activities
+  where load has no semantic meaning.
+- Do not destroy completed workout history. Prefer cancellation or archival/removal from future
+  planning when true deletion would invalidate meaningful records.
+- Establish the rule from ownership and historical references, not guest status alone.
+- Keep guest and authenticated behavior consistent where their ownership and workout state are the
+  same; document any intentional difference.
+- Follow the disposable development database/reset policy. Do not mutate production.
 
 ## Done when
 
-- The root cause is documented with verified repository/runtime evidence and unknowns clearly separated.
-- The failing path has the correct behavior for the states relevant to the discovered scenario.
-- Regression coverage protects the discovered fresh-session, guest, and authenticated behavior where
-  applicable.
-- Unexpected server errors retain generic user responses and gain enough safe context for diagnosis.
-- Focused checks, required repository verification, and production-safe smoke evidence pass, or any
-  unavailable check is explicitly documented.
-- No unrelated UX, data, deployment, push, commit, or production mutation is included.
-- The goal reaches Ready for final review and receives explicit user approval.
+- Starter-session creation and prescriptions are documented with verified evidence.
+- Meaningful loads are present where justified, and legitimate no-load steps are clear in the UI.
+- The previous `session`/`workout_session` confusion is documented and corrected.
+- Guest and authenticated users can delete only their own Library sessions, while global/system
+  templates and referenced history remain protected according to repository rules.
+- Regression coverage protects starter creation, load presentation, ownership, status, and history
+  behavior.
+- Required verification passes and the goal reaches Ready for final review before explicit approval.
 
-## Resume here
+## Final review assessment
 
-Action 1, **Diagnose and reproduce the production `/cycles` failure**, and Action 2,
-**Repair the verified root cause and add regression protection**, are Completed after review. Action
-3 is Completed after review. The goal was completed on 2026-09-10 after explicit user approval.
+- **Starter-session creation and prescriptions:** Satisfied. The seeded global template remains the
+  canonical source, Guests and direct registrations receive owned copies, and nullable-load meaning
+  is documented and rendered.
+- **Owned Library deletion with protected history/templates:** Satisfied. Owners archive their
+  copies; cross-account and global-template deletion remain denied; references and history are
+  preserved.
+- **Session/workout-session boundary:** Satisfied. Library `sessions` use the owner-scoped archive
+  path; planned `workout_sessions` retain their existing lifecycle.
+- **Regression coverage and verification:** Satisfied. `npm run verify` passed 227/227 tests and
+  `npm run test:http` passed 62/62; the rendered Library flow is covered for owner deletion,
+  cross-account denial, and global protection.
+- **Intentionally excluded:** production data changes, deployment, push, commit, broad workout
+  redesign, and global-template deletion authorization.
 
 ## Completion outcome
 
-The unsupported `/cycles` GET path now returns the generic 404 recovery response before mutation
-middleware, while POST/DELETE cycle contracts remain unchanged. Regression coverage protects fresh,
-guest, registered, expired-session, HTML, and JSON behavior. Unexpected errors retain generic user
-responses and now log safe request/principal context. Focused and full verification passed, and a
-read-only production smoke request returned the expected unauthenticated redirect. The historical
-production 500 remains uncorrelated without a request ID or server trace; deployment and production
-data changes were intentionally excluded.
+The goal is complete. Guest and directly registered users receive owned starter-session copies,
+Library deletion archives only owned sessions, and global templates, cross-account data, workout
+references, and history remain protected. Final verification passed with 227 repository tests and
+62 PostgreSQL HTTP tests.
+
+## Resume here
+
+Completed on 2026-09-11. No next goal is approved.

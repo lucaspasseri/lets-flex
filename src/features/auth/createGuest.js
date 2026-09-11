@@ -54,11 +54,12 @@ export default async function createGuest(
 		);
 		if (!goal) throw new Error("Guest starter goal is unavailable");
 
-		const session = await dependencies.sessionsRepository.findActiveGlobalByName(
-			{ name: starterWorkoutManifest.sessionName },
-			client,
-		);
-		if (!session) throw new Error("Guest starter session is unavailable");
+		const starterTemplate =
+			await dependencies.sessionsRepository.findActiveGlobalByName(
+				{ name: starterWorkoutManifest.sessionName },
+				client,
+			);
+		if (!starterTemplate) throw new Error("Guest starter session is unavailable");
 
 		const guest = await dependencies.usersRepository.createGuest(
 			{
@@ -68,6 +69,12 @@ export default async function createGuest(
 			client,
 		);
 		if (!guest) throw new Error("Guest account could not be created");
+
+		const session = await dependencies.sessionsRepository.createOwnedCopy(
+			{ sourceSessionId: starterTemplate.id, ownerUserId: guest.id },
+			client,
+		);
+		if (!session) throw new Error("Guest starter session could not be copied");
 
 		const program = await dependencies.programsRepository.create(
 			{

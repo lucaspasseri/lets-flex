@@ -14,18 +14,18 @@ function session(isArchived) {
 	};
 }
 
-test("active session details expose a presentation-safe archive action", () => {
+test("active owned session details expose a presentation-safe delete action", () => {
 	const details = createDetails({ session: session(false), actorUserId: 3 });
 	assert.ok(details);
-	assert.deepEqual(details.actions.archive, {
-		label: "Archive session",
-		modalId: "archiveSessionModal",
+	assert.deepEqual(details.actions.delete, {
+		label: "Delete session",
+		modalId: "deleteSessionModal",
 		values: { sessionId: 7, name: "Upper body" },
 	});
 });
 
-test("archived session details do not offer the archive action again", () => {
+test("archived session details do not offer the delete action again", () => {
 	const details = createDetails({ session: session(true), actorUserId: 3 });
 	assert.ok(details);
-	assert.equal(details.actions.archive, null);
+	assert.equal(details.actions.delete, null);
 });

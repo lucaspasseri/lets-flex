@@ -86,15 +86,15 @@ function createDetails({ session, actorUserId = null }) {
 								})),
 							},
 						},
-						archive: session.isArchived
+						delete: session.isArchived
 							? null
 							: {
-									label: "Archive session",
-									modalId: "archiveSessionModal",
+									label: "Delete session",
+									modalId: "deleteSessionModal",
 									values: { sessionId: session.id, name: session.name },
 								},
 					}
-				: { edit: null, archive: null },
+				: { edit: null, delete: null },
 	};
 }
 

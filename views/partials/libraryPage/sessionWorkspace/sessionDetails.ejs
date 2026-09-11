@@ -60,14 +60,14 @@
 						}
 					}}) %>
 				<% } %>
-				<% if (actions?.archive) { %>
+				<% if (actions?.delete) { %>
 					<%- include("../../shared/components/button/button", {button: {
-						label: actions.archive.label,
+						label: actions.delete.label,
 						variant: "danger",
 						type: "button",
 						attributes: {
-							"data-modal-open": actions.archive.modalId,
-							"data-archive-session-template": JSON.stringify(actions.archive.values)
+							"data-modal-open": actions.delete.modalId,
+							"data-delete-session-template": JSON.stringify(actions.delete.values)
 						}
 					}}) %>
 				<% } %>

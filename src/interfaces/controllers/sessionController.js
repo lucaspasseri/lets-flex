@@ -3,6 +3,9 @@ import createSession from "../../features/sessions/createSession.js";
 import archiveSession, {
 	SessionTemplateNotArchivableError,
 } from "../../features/sessions/archiveSession.js";
+import deleteSession, {
+	SessionTemplateNotDeletableError,
+} from "../../features/sessions/deleteSession.js";
 import updateSessionTemplate, {
 	SessionTemplateNotFoundError,
 } from "../../features/sessions/updateSessionTemplate.js";
@@ -113,6 +116,36 @@ async function archive(req, res) {
 	res.redirect("/library");
 }
 
+/** @param {Request} req @param {Response} res */
+async function destroy(req, res) {
+	const { sessionId } = req.validatedParams;
+
+	try {
+		// @ts-ignore -- authenticated route principal.
+		await deleteSession({ sessionId, ownerUserId: req.user.id });
+	} catch (error) {
+		if (error instanceof SessionTemplateNotDeletableError) {
+			await respondWithContextualMutationError(req, res, {
+				status: 404,
+				fallbackMessage: "Session template not found",
+				render: () =>
+					renderLibrary(req, res, {
+						pageFeedback: {
+							id: "library-page-feedback-title",
+							title: "Session not deleted",
+							message:
+								"That session is no longer available or is not owned by this profile. Refresh Library to see the current sessions.",
+						},
+					}),
+			});
+			return;
+		}
+		throw error;
+	}
+
+	res.redirect("/library");
+}
+
 /** @param {Request & {validatedBody?: any}} req @param {Response} res */
 async function update(req, res) {
 	const { sessionId } = req.validatedParams;
@@ -173,4 +206,5 @@ export const sessionController = {
 	update: asyncHandler(update),
 	showUpdateErrors,
 	archive: asyncHandler(archive),
+	delete: asyncHandler(destroy),
 };

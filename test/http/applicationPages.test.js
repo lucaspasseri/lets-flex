@@ -830,7 +830,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.notEqual(client.cookie(), "", "registration must establish a session");
 		const account = (
 			await db.query(
-				`SELECT u.email, u.role, ai.provider, ai.provider_subject, ai.password_hash
+				`SELECT u.id, u.email, u.role, ai.provider, ai.provider_subject, ai.password_hash
 				 FROM users u
 				 JOIN auth_identities ai ON ai.user_id = u.id
 				 WHERE u.email = 'new.member@example.com'`,
@@ -841,7 +841,59 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(account.provider, "local");
 		assert.equal(account.provider_subject, "new.member@example.com");
 		assert.notEqual(account.password_hash, "correct horse battery staple");
-		assert.equal((await client.request("/library")).response.status, 200);
+		const starterSession = (
+			await db.query(
+				`SELECT session.id, session.owner_user_id,
+				        (SELECT count(*)::int FROM session_steps WHERE session_id = session.id) AS step_count
+				 FROM sessions AS session
+				 WHERE session.name = 'Sample Full Body Session'
+				   AND session.owner_user_id = $1
+				   AND session.is_archived = FALSE`,
+				[account.id],
+			)
+		).rows[0];
+		assert.ok(starterSession);
+		assert.deepEqual(starterSession, {
+			id: starterSession.id,
+			owner_user_id: account.id,
+			step_count: 4,
+		});
+
+		const library = await client.request(`/library?sessionId=${starterSession.id}`);
+		assert.equal(library.response.status, 200);
+		assert.match(library.text, /Sample Full Body Session/);
+		assert.match(library.text, /data-delete-session-template/);
+
+		const anotherUser = agent();
+		await login(anotherUser);
+		const otherLibrary = await anotherUser.request("/library");
+		const foreignDelete = await anotherUser.request(
+			`/sessions/${starterSession.id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(otherLibrary.text) } },
+		);
+		assert.equal(foreignDelete.response.status, 404);
+
+		const ownerDelete = await client.request(
+			`/sessions/${starterSession.id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(library.text) } },
+		);
+		assert.equal(ownerDelete.response.status, 302);
+		assert.equal(
+			(
+				await db.query("SELECT is_archived FROM sessions WHERE id = $1", [
+					starterSession.id,
+				])
+			).rows[0].is_archived,
+			true,
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT owner_user_id, is_archived FROM sessions WHERE name = 'Sample Full Body Session' AND owner_user_id IS NULL",
+				)
+			).rows[0],
+			{ owner_user_id: null, is_archived: false },
+		);
 
 		const invalid = agent();
 		page = await invalid.request("/auth/login?tab=signup");
@@ -1266,6 +1318,18 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(created.provider_subject, "stable-google-sub-101");
 		assert.notEqual(created.provider_subject, created.email);
 		assert.equal(created.password_hash, null);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT owner_user_id, count(*)::int AS count
+					 FROM sessions
+					 WHERE name = 'Sample Full Body Session' AND owner_user_id = $1
+					 GROUP BY owner_user_id`,
+					[created.id],
+				)
+			).rows[0],
+			{ owner_user_id: created.id, count: 1 },
+		);
 		const googleOnlyProfile = await client.request("/profile");
 		assert.match(googleOnlyProfile.text, /Password[\s\S]*Not set/);
 		assert.match(googleOnlyProfile.text, /Google[\s\S]*Connected/);
@@ -1286,6 +1350,15 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			(
 				await db.query(
 					"SELECT count(*)::int AS count FROM users WHERE email = 'new.google@example.com'",
+				)
+			).rows[0].count,
+			1,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM sessions WHERE name = 'Sample Full Body Session' AND owner_user_id = $1",
+					[created.id],
 				)
 			).rows[0].count,
 			1,
@@ -1549,6 +1622,18 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
 			)
 		).rows[0];
+		const starterSession = (
+			await db.query(
+				`SELECT id, owner_user_id FROM sessions
+				 WHERE name = 'Sample Full Body Session' AND owner_user_id = $1`,
+				[guest.id],
+			)
+		).rows[0];
+		assert.ok(starterSession);
+		assert.deepEqual(starterSession, {
+			id: starterSession.id,
+			owner_user_id: guest.id,
+		});
 		const program = (
 			await db.query(
 				"INSERT INTO programs (user_id, name) VALUES ($1, 'Google guest plan') RETURNING id",
@@ -1586,6 +1671,14 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(converted.role, "user");
 		assert.equal(converted.guest_expires_at, null);
 		assert.equal(converted.provider_subject, "converted-guest-google-sub");
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM sessions WHERE id = $1", [
+					starterSession.id,
+				])
+			).rows[0].owner_user_id,
+			guest.id,
+		);
 		assert.equal(
 			(await db.query("SELECT user_id FROM programs WHERE id = $1", [program.id]))
 				.rows[0].user_id,
@@ -1755,7 +1848,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		);
 		assert.equal(
 			new Set(starterWorkspaces.map((workspace) => workspace.session_id)).size,
-			1,
+			2,
 		);
 		for (const workspace of starterWorkspaces) {
 			assert.equal(workspace.program_name, "Guest Starter Program");
@@ -1766,8 +1859,14 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			assert.equal(workspace.day_label, "Full Body");
 			assert.equal(workspace.status, "planned");
 			assert.equal(workspace.session_name, "Sample Full Body Session");
-			assert.equal(workspace.session_owner_user_id, null);
+			assert.equal(workspace.session_owner_user_id, workspace.user_id);
 		}
+		const globalStarter = (
+			await db.query(
+				"SELECT owner_user_id, is_archived FROM sessions WHERE name = 'Sample Full Body Session' AND owner_user_id IS NULL",
+			)
+		).rows[0];
+		assert.deepEqual(globalStarter, { owner_user_id: null, is_archived: false });
 
 		const dashboard = await first.request("/");
 		assert.equal(dashboard.response.status, 200);
@@ -2049,6 +2148,18 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
 			)
 		).rows[0];
+		const starterSession = (
+			await db.query(
+				`SELECT id, owner_user_id FROM sessions
+				 WHERE name = 'Sample Full Body Session' AND owner_user_id = $1`,
+				[guest.id],
+			)
+		).rows[0];
+		assert.ok(starterSession);
+		assert.deepEqual(starterSession, {
+			id: starterSession.id,
+			owner_user_id: guest.id,
+		});
 		const owned = (
 			await db.query(
 				"INSERT INTO programs (user_id, name) VALUES ($1, 'Guest plan') RETURNING id",
@@ -2102,6 +2213,14 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(converted.provider, "local");
 		assert.equal(converted.provider_subject, "converted.guest@example.com");
 		assert.notEqual(converted.password_hash, "correct horse battery staple");
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM sessions WHERE id = $1", [
+					starterSession.id,
+				])
+			).rows[0].owner_user_id,
+			guest.id,
+		);
 		assert.equal(
 			(await db.query("SELECT user_id FROM programs WHERE id = $1", [owned.id])).rows[0]
 				.user_id,
@@ -2353,6 +2472,270 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			(await db.query("SELECT is_archived FROM exercises WHERE id = $1", [exercise.id]))
 				.rows[0].is_archived,
 			true,
+		);
+	});
+
+	test("Library deletes only owned sessions and archives referenced templates", async () => {
+		const guest = agent();
+		await enterGuest(guest);
+		const guestId = (
+			await db.query(
+				"SELECT id FROM users WHERE role = 'guest' ORDER BY id DESC LIMIT 1",
+			)
+		).rows[0].id;
+		const starter = (
+			await db.query(
+				`SELECT workout.id AS workout_session_id, workout.session_id,
+				        session.owner_user_id
+				 FROM workout_sessions AS workout
+				 JOIN sessions AS session ON session.id = workout.session_id
+				 JOIN training_days AS day ON day.id = workout.training_day_id
+				 JOIN cycles AS cycle ON cycle.id = day.cycle_id
+				 JOIN programs AS program ON program.id = cycle.program_id
+				 WHERE program.user_id = $1
+				 ORDER BY workout.id DESC LIMIT 1`,
+				[guestId],
+			)
+		).rows[0];
+		assert.equal(starter.owner_user_id, guestId);
+		const guestLibrary = await guest.request(
+			`/library?sessionId=${starter.session_id}`,
+		);
+		assert.match(guestLibrary.text, /Delete session/);
+		assert.match(guestLibrary.text, /data-delete-session-form/);
+		const started = await guest.request(
+			`/workout_sessions/${starter.workout_session_id}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrfFrom(guestLibrary.text), daysDifference: "0" },
+			},
+		);
+		assert.equal(started.response.status, 302);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					starter.workout_session_id,
+				])
+			).rows[0].status,
+			"in_progress",
+		);
+		const startedLibrary = await guest.request(
+			`/library?sessionId=${starter.session_id}`,
+		);
+		assert.match(startedLibrary.text, /Delete session/);
+		const guestDeleted = await guest.request(
+			`/sessions/${starter.session_id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(startedLibrary.text) } },
+		);
+		assert.equal(guestDeleted.response.status, 302);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT owner_user_id, is_archived FROM sessions WHERE id = $1",
+					[starter.session_id],
+				)
+			).rows[0],
+			{ owner_user_id: guestId, is_archived: true },
+		);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					starter.workout_session_id,
+				])
+			).rows[0].status,
+			"in_progress",
+		);
+		const guestLibraryAfterDelete = await guest.request("/library");
+		assert.doesNotMatch(
+			guestLibraryAfterDelete.text,
+			new RegExp(`href="/library\\?sessionId=${starter.session_id}"`),
+		);
+		assert.doesNotMatch(guestLibraryAfterDelete.text, /Sample Full Body Session/);
+		assert.doesNotMatch(guestLibraryAfterDelete.text, /data-delete-session-template/);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT owner_user_id, is_archived FROM sessions WHERE name = 'Sample Full Body Session' AND owner_user_id IS NULL",
+				)
+			).rows[0],
+			{ owner_user_id: null, is_archived: false },
+		);
+
+		const account = agent();
+		await login(account, "user-one@example.com");
+		const accountId = (
+			await db.query("SELECT id FROM users WHERE email = 'user-one@example.com'")
+		).rows[0].id;
+		const accountSession = (
+			await db.query(
+				"INSERT INTO sessions (owner_user_id, name) VALUES ($1, 'Account library session') RETURNING id",
+				[accountId],
+			)
+		).rows[0];
+		const accountFixture = await createPlanningFixture();
+		const accountWorkout = (
+			await db.query(
+				`INSERT INTO workout_sessions (training_day_id, session_id, workout_session_order)
+				 VALUES ($1, $2, 1) RETURNING id`,
+				[accountFixture.day_id, accountSession.id],
+			)
+		).rows[0];
+		const accountLibrary = await account.request(
+			`/library?sessionId=${accountSession.id}`,
+		);
+		assert.match(accountLibrary.text, /Delete session/);
+		const accountStarted = await account.request(
+			`/workout_sessions/${accountWorkout.id}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrfFrom(accountLibrary.text), daysDifference: "0" },
+			},
+		);
+		assert.equal(accountStarted.response.status, 302);
+		const startedAccountLibrary = await account.request(
+			`/library?sessionId=${accountSession.id}`,
+		);
+		assert.match(startedAccountLibrary.text, /Delete session/);
+		const accountDeleted = await account.request(
+			`/sessions/${accountSession.id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(startedAccountLibrary.text) } },
+		);
+		assert.equal(accountDeleted.response.status, 302);
+		assert.equal(
+			(
+				await db.query("SELECT is_archived FROM sessions WHERE id = $1", [
+					accountSession.id,
+				])
+			).rows[0].is_archived,
+			true,
+		);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					accountWorkout.id,
+				])
+			).rows[0].status,
+			"in_progress",
+		);
+		const accountLibraryAfterDelete = await account.request("/library");
+		assert.doesNotMatch(
+			accountLibraryAfterDelete.text,
+			new RegExp(`href="/library\\?sessionId=${accountSession.id}"`),
+		);
+		const referencedSession = (
+			await db.query(
+				"INSERT INTO sessions (owner_user_id, name) VALUES ($1, 'Referenced library session') RETURNING id",
+				[accountId],
+			)
+		).rows[0];
+		const fixture = await createPlanningFixture();
+		await db.query(
+			`INSERT INTO workout_sessions (training_day_id, session_id, workout_session_order)
+			 VALUES ($1, $2, 1)`,
+			[fixture.day_id, referencedSession.id],
+		);
+		const referencedLibrary = await account.request(
+			`/library?sessionId=${referencedSession.id}`,
+		);
+		const referencedDeleted = await account.request(
+			`/sessions/${referencedSession.id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(referencedLibrary.text) } },
+		);
+		assert.equal(referencedDeleted.response.status, 302);
+		assert.equal(
+			(
+				await db.query("SELECT is_archived FROM sessions WHERE id = $1", [
+					referencedSession.id,
+				])
+			).rows[0].is_archived,
+			true,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM workout_sessions WHERE session_id = $1",
+					[referencedSession.id],
+				)
+			).rows[0].count,
+			1,
+		);
+		const accountLibraryAfterReferencedDelete = await account.request("/library");
+		assert.doesNotMatch(
+			accountLibraryAfterReferencedDelete.text,
+			new RegExp(`href="/library\\?sessionId=${referencedSession.id}"`),
+		);
+
+		const other = agent();
+		await login(other, "user-two@example.com");
+		const otherLibrary = await other.request("/library");
+		const denied = await other.request(
+			`/sessions/${referencedSession.id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(otherLibrary.text) } },
+		);
+		assert.equal(denied.response.status, 404);
+		assert.equal(
+			(
+				await db.query("SELECT owner_user_id FROM sessions WHERE id = $1", [
+					referencedSession.id,
+				])
+			).rows[0].owner_user_id,
+			accountId,
+		);
+
+		const globalSession = (
+			await db.query(
+				`SELECT id FROM sessions
+				 WHERE name = 'Sample Full Body Session'
+				   AND owner_user_id IS NULL
+				   AND is_archived = FALSE`,
+			)
+		).rows[0];
+		assert.ok(globalSession, "the seeded starter template must remain global");
+		const globalFixture = await createPlanningFixture();
+		const globalWorkout = (
+			await db.query(
+				`INSERT INTO workout_sessions (training_day_id, session_id, workout_session_order)
+				 VALUES ($1, $2, 1) RETURNING id`,
+				[globalFixture.day_id, globalSession.id],
+			)
+		).rows[0];
+		const globalLibrary = await account.request(
+			`/library?sessionId=${globalSession.id}`,
+		);
+		assert.doesNotMatch(globalLibrary.text, /data-delete-session-template/);
+		const globalStarted = await account.request(
+			`/workout_sessions/${globalWorkout.id}/start`,
+			{
+				method: "POST",
+				form: { _csrf: csrfFrom(globalLibrary.text), daysDifference: "0" },
+			},
+		);
+		assert.equal(globalStarted.response.status, 302);
+		const startedGlobalLibrary = await account.request(
+			`/library?sessionId=${globalSession.id}`,
+		);
+		assert.doesNotMatch(startedGlobalLibrary.text, /data-delete-session-template/);
+		const globalDenied = await account.request(
+			`/sessions/${globalSession.id}?_method=DELETE`,
+			{ method: "POST", form: { _csrf: csrfFrom(startedGlobalLibrary.text) } },
+		);
+		assert.equal(globalDenied.response.status, 404);
+		assert.equal(
+			(
+				await db.query("SELECT status FROM workout_sessions WHERE id = $1", [
+					globalWorkout.id,
+				])
+			).rows[0].status,
+			"in_progress",
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT owner_user_id, is_archived FROM sessions WHERE id = $1",
+					[globalSession.id],
+				)
+			).rows[0],
+			{ owner_user_id: null, is_archived: false },
 		);
 	});
 

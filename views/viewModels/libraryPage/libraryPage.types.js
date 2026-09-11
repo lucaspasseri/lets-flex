@@ -8,7 +8,7 @@
  * @typedef {ReturnType<typeof import("./createSessionFormViewModel.js").default>} CreateSessionFormViewModel
  * @typedef {ReturnType<typeof import("./createExerciseFormViewModel.js").default>} CreateExerciseFormViewModel
  * @typedef {ReturnType<typeof import("./createDeleteExerciseFormViewModel.js").default>} DeleteExerciseFormViewModel
- * @typedef {ReturnType<typeof import("./createArchiveSessionFormViewModel.js").default>} ArchiveSessionFormViewModel
+ * @typedef {ReturnType<typeof import("./createDeleteSessionFormViewModel.js").default>} DeleteSessionFormViewModel
  */
 
 /**
@@ -19,7 +19,7 @@
  * @property {LibraryPageState} pageState
  * @property {boolean} managementMode
  * @property {{currentUser: User | null, activeSession: Session | null, activeNavigation: "library" | "admin-exercises"}} shell
- * @property {{pageFeedback: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, pageHeading: {eyebrow: string, title: string, description: string, meta?: string}, planningContext: {isVisible: boolean, title?: string, description?: string, pathLabel?: string, dateLabel?: string, backHref?: string}, sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, privateVariantForm: {idPrefix: string, title: string, eyebrow: string, description: string, submitLabel: string, actionPrefix: string, isGuest: boolean, values?: Record<string, any>, errors?: {fieldErrors?: Record<string, string>, formErrors?: string[]}, exercises: Array<{id: number, name: string}>, equipments: any[]}, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, archiveSessionForm: ArchiveSessionFormViewModel}} components
+ * @property {{pageFeedback: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, pageHeading: {eyebrow: string, title: string, description: string, meta?: string}, planningContext: {isVisible: boolean, title?: string, description?: string, pathLabel?: string, dateLabel?: string, backHref?: string}, sessionWorkspace: SessionWorkspaceViewModel, exerciseTemplates: ExerciseTemplatesViewModel, privateVariantForm: {idPrefix: string, title: string, eyebrow: string, description: string, submitLabel: string, actionPrefix: string, isGuest: boolean, values?: Record<string, any>, errors?: {fieldErrors?: Record<string, string>, formErrors?: string[]}, exercises: Array<{id: number, name: string}>, equipments: any[]}, createSessionForm: CreateSessionFormViewModel, updateSessionForm: CreateSessionFormViewModel, createExerciseForm: CreateExerciseFormViewModel, updateExerciseForm: CreateExerciseFormViewModel, deleteExerciseForm: DeleteExerciseFormViewModel, deleteSessionForm: DeleteSessionFormViewModel}} components
  */
 
 export {};

@@ -15,7 +15,7 @@
 			</div>
 		</form>
 		<%- include('../shared/components/button/button', { button: { label: "Add another set", type: "button", variant: "secondary", alternativeClassname: "add-row", attributes: { "data-action": "add-set", "aria-describedby": "set-limit-help" } } }) %>
-		<p class="sets-container__help" id="set-limit-help">Add up to <%= workoutLogForm.maxRows %> sets. Repetitions and load are optional; the unit is required.</p>
+		<p class="sets-container__help" id="set-limit-help">Add up to <%= workoutLogForm.maxRows %> sets. Repetitions and load are optional. <%= workoutLogForm.loadGuidance %>.</p>
 	</div>
 	<div class="step-log-button-container">
 		<%- include('../shared/components/button/button', { button: { label: "Complete step", type: "submit", attributes: { form: workoutLogForm.formId, "data-workout-submit": true, "data-loading-label": "Saving step…" }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "performed", icon: { attributes: { "aria-hidden": true } } }) } }) %>

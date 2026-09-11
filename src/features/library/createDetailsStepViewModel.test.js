@@ -33,11 +33,20 @@ test("session-detail prescriptions describe sets, reps, and an available load", 
 	assert.equal(detailsStep.prescription.label, "3 sets × 10 reps · 40 Kilograms");
 });
 
-test("session-detail prescriptions omit absent load data", () => {
+test("session-detail prescriptions explain absent load data", () => {
 	const detailsStep = createDetailsStepViewModel(
 		step({ loadValue: null, loadUnit: null }),
 	);
 
-	assert.equal(detailsStep.prescription.label, "3 sets × 10 reps");
+	assert.equal(detailsStep.prescription.label, "3 sets × 10 reps · No external load");
 	assert.doesNotMatch(detailsStep.prescription.label, /null|undefined/);
+});
+
+test("session-detail prescriptions explain an unassigned equipment load", () => {
+	const detailsStep = createDetailsStepViewModel({
+		...step({ loadValue: null, loadUnit: null }),
+		equipment: { name: "Dumbbell" },
+	});
+
+	assert.match(detailsStep.prescription.label, /Choose a manageable dumbbell load/);
 });

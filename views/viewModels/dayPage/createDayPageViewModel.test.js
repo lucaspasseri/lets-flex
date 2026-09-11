@@ -137,8 +137,55 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 		"3 sets × 8 reps",
 	);
 	assert.equal(
+		result.components.workoutSessionList.items[0].steps[0].loadLabel,
+		"60 Kilograms",
+	);
+	assert.equal(
 		result.components.workoutSessionList.cancelModals[0].form.trainingDayId,
 		2,
+	);
+});
+
+test("day session steps explain bodyweight and unassigned equipment loads", () => {
+	const result = createWorkoutSessionListViewModel({
+		currentDayId: 2,
+		workoutSessions: [
+			{
+				id: 30,
+				trainingDayId: 2,
+				sessionId: 20,
+				order: 1,
+				status: "planned",
+				startedAt: null,
+				finishedAt: null,
+				notes: null,
+				name: "Starter",
+				sessionNotes: null,
+				isArchived: false,
+				steps: [
+					{
+						...step,
+						stepLog: null,
+						loadValue: null,
+						loadUnit: null,
+						equipment: { name: "", category: "" },
+					},
+					{
+						...step,
+						stepLog: null,
+						id: 9,
+						loadValue: null,
+						loadUnit: null,
+						equipment: { name: "Dumbbell", category: "Free weight" },
+					},
+				],
+			},
+		],
+	});
+
+	assert.deepEqual(
+		result.items[0].steps.map((item) => item.loadLabel),
+		["No external load", "Choose a manageable dumbbell load"],
 	);
 });
 

@@ -71,7 +71,7 @@ test("library template renders from its page ViewModel", async () => {
 	assert.doesNotMatch(html, /id="library-exercises-panel"[^>]*hidden/);
 	assert.equal((html.match(/data-library-query/g) ?? []).length, 2);
 	assert.match(html, /data-create-session-form/);
-	assert.match(html, /data-archive-session-form/);
+	assert.match(html, /data-delete-session-form/);
 	assert.match(html, /data-variant-create-form/);
 	assert.match(html, /Create your variant/);
 	assert.match(html, /exercise-templates-empty-state/);

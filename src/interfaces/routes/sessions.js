@@ -31,5 +31,10 @@ router.patch(
 	validateRequestParams(sessionTemplateParamsSchema),
 	sessionController.archive,
 );
+router.delete(
+	"/:sessionId",
+	validateRequestParams(sessionTemplateParamsSchema),
+	sessionController.delete,
+);
 
 export default router;

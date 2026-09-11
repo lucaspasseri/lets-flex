@@ -1,4 +1,6 @@
 import * as usersRepository from "../users/repository.js";
+import * as sessionsRepository from "../sessions/repository.js";
+import { starterWorkoutManifest } from "../guests/starterWorkoutManifest.js";
 
 export class GuestConversionUnavailableError extends Error {
 	constructor() {
@@ -17,10 +19,29 @@ export default async function createOrConvertRegisteredUser(
 	{ email, name, guestUserId = null },
 	db,
 ) {
-	const user = guestUserId
-		? await usersRepository.convertActiveGuest({ userId: guestUserId, email, name }, db)
-		: await usersRepository.createRegisteredUser({ email, name }, db);
+	const user =
+		guestUserId !== null
+			? await usersRepository.convertActiveGuest(
+					{ userId: guestUserId, email, name },
+					db,
+				)
+			: await usersRepository.createRegisteredUser({ email, name }, db);
 
 	if (!user) throw new GuestConversionUnavailableError();
+	if (guestUserId === null) {
+		const starterTemplate = await sessionsRepository.findActiveGlobalByName(
+			{ name: starterWorkoutManifest.sessionName },
+			db,
+		);
+		if (!starterTemplate) throw new Error("Registered starter session is unavailable");
+
+		const starterSession = await sessionsRepository.createOwnedCopy(
+			{ sourceSessionId: starterTemplate.id, ownerUserId: user.id },
+			db,
+		);
+		if (!starterSession)
+			throw new Error("Registered starter session could not be copied");
+	}
+
 	return user;
 }

@@ -7,6 +7,7 @@ import {
 	initializeSearchAndFiltering,
 } from "./searchAndFiltering.js";
 import { initializeVariantCreateForm } from "./configureVariantCreateForm.js";
+import { initializeDeleteSessionForm } from "./configureDeleteSessionFormAction.js";
 
 test("session discovery combines expanded search metadata with independent facets", () => {
 	const session = {
@@ -33,6 +34,26 @@ test("session discovery combines expanded search metadata with independent facet
 		}),
 		false,
 	);
+});
+
+test("Library delete controls target the owner-scoped session delete route", () => {
+	let listener;
+	const root = {
+		addEventListener(_type, callback) {
+			listener = callback;
+		},
+	};
+	const form = { action: "/sessions" };
+	const button = {
+		dataset: {
+			deleteSessionTemplate: JSON.stringify({ sessionId: 42 }),
+		},
+	};
+
+	initializeDeleteSessionForm(root, form);
+	listener({ target: { closest: () => button } });
+
+	assert.equal(form.action, "/sessions/42?_method=DELETE");
 });
 
 test("exercise discovery retains a base match but exposes only qualifying variants", () => {

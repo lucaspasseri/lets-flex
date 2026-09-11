@@ -4,7 +4,7 @@ import { initializeCreateSessionForm } from "./manageCreateSessionForm.js";
 import { initializeDeleteExerciseForm } from "./configureDeleteExerciseFormAction.js";
 import { initializeUpdateExerciseForm } from "./configureUpdateExerciseForm.js";
 import { initializeUpdateSessionForm } from "./configureUpdateSessionForm.js";
-import { initializeArchiveSessionForm } from "./configureArchiveSessionForm.js";
+import { initializeDeleteSessionForm } from "./configureDeleteSessionFormAction.js";
 import { initializeVariantCreateForm } from "./configureVariantCreateForm.js";
 
 const libraryPage = document.querySelector("[data-library-page]");
@@ -13,7 +13,7 @@ const createSessionForm = document.querySelector("[data-create-session-form]");
 const deleteExerciseForm = document.querySelector("[data-delete-exercise-form]");
 const updateExerciseForm = document.querySelector("[data-update-exercise-form]");
 const updateSessionForm = document.querySelector("[data-update-session-form]");
-const archiveSessionForm = document.querySelector("[data-archive-session-form]");
+const deleteSessionForm = document.querySelector("[data-delete-session-form]");
 const variantCreateForm = document.querySelector("[data-variant-create-form]");
 
 if (libraryPage) initializeSearchAndFiltering(libraryPage);
@@ -27,6 +27,6 @@ if (libraryPage && updateExerciseForm)
 	initializeUpdateExerciseForm(libraryPage, updateExerciseForm);
 if (libraryPage && updateSessionForm)
 	initializeUpdateSessionForm(libraryPage, updateSessionForm);
-if (libraryPage && archiveSessionForm)
-	initializeArchiveSessionForm(libraryPage, archiveSessionForm);
+if (libraryPage && deleteSessionForm)
+	initializeDeleteSessionForm(libraryPage, deleteSessionForm);
 if (variantCreateForm) initializeVariantCreateForm(variantCreateForm);

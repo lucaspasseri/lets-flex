@@ -60,6 +60,41 @@ test("perform log schema normalizes numeric input and blank optional measurement
 	);
 });
 
+test("perform log schema allows a blank load unit when no load was recorded", () => {
+	assert.deepEqual(
+		performWorkoutStepLogBodySchema.parse({
+			daysDifference: "0",
+			workoutSessionId: "5",
+			logFormRows: [
+				{ performedReps: "10", performedLoadValue: "", performedLoadUnit: "" },
+			],
+		}),
+		{
+			daysDifference: 0,
+			workoutSessionId: 5,
+			logFormRows: [
+				{ performedReps: 10, performedLoadValue: null, performedLoadUnit: null },
+			],
+		},
+	);
+});
+
+test("perform log schema requires a unit when a load is recorded", () => {
+	const result = performWorkoutStepLogBodySchema.safeParse({
+		daysDifference: "0",
+		workoutSessionId: "5",
+		logFormRows: [
+			{ performedReps: "10", performedLoadValue: "20", performedLoadUnit: "" },
+		],
+	});
+
+	assert.equal(result.success, false);
+	assert.deepEqual(
+		result.error.issues.map((issue) => issue.path.join(".")),
+		["logFormRows.0.performedLoadUnit"],
+	);
+});
+
 test("perform log schema reports invalid set fields", () => {
 	const result = performWorkoutStepLogBodySchema.safeParse({
 		daysDifference: "today",

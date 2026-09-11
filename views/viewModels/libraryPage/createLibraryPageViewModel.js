@@ -3,7 +3,7 @@ import createExerciseTemplates from "../../../src/features/library/createExercis
 import createSessionForm from "./createSessionFormViewModel.js";
 import createExerciseForm from "./createExerciseFormViewModel.js";
 import createDeleteExerciseForm from "./createDeleteExerciseFormViewModel.js";
-import createArchiveSessionForm from "./createArchiveSessionFormViewModel.js";
+import createDeleteSessionForm from "./createDeleteSessionFormViewModel.js";
 import formatDayPageDate from "../dayPage/formatDayPageDate.js";
 
 /**
@@ -147,7 +147,7 @@ export default function createLibraryPageViewModel({
 				mode: "update",
 			}),
 			deleteExerciseForm: createDeleteExerciseForm(),
-			archiveSessionForm: createArchiveSessionForm(),
+			deleteSessionForm: createDeleteSessionForm(),
 		},
 	};
 }

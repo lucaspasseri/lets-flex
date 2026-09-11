@@ -1,3 +1,5 @@
+import formatStepLoadLabel from "../sessions/formatStepLoadLabel.js";
+
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapperStep} SessionMapperStep
  * @typedef {import("../sessions/sessions.types.js").DetailsStepsViewModel} DetailsStepsViewModel
@@ -9,10 +11,11 @@
  */
 
 function createDetailsStepViewModel(step) {
-	const prescriptionLoad =
-		step.loadValue !== null && step.loadValue !== undefined && step.loadUnit
-			? ` · ${step.loadValue} ${step.loadUnit}`
-			: "";
+	const prescriptionLoad = ` · ${formatStepLoadLabel({
+		loadValue: step.loadValue,
+		loadUnit: step.loadUnit,
+		equipmentName: step.equipment.name,
+	})}`;
 
 	return {
 		id: step.id,

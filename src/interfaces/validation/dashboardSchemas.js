@@ -47,24 +47,39 @@ const nullableNumber = (schema) =>
 		schema.nullable(),
 	);
 
-const workoutSetSchema = z.object({
-	performedReps: nullableNumber(
-		z.coerce
-			.number({ error: "Enter a valid number of reps." })
-			.int("Reps must be a whole number.")
-			.min(0, "Reps cannot be negative.")
-			.max(10000, "Reps must be 10,000 or fewer."),
-	),
-	performedLoadValue: nullableNumber(
-		z.coerce
-			.number({ error: "Enter a valid load." })
-			.min(0, "Load cannot be negative.")
-			.max(1000000, "Load must be 1,000,000 or less."),
-	),
-	performedLoadUnit: z.enum(["Kilograms", "Libra"], {
-		error: "Choose a valid load unit.",
-	}),
-});
+const workoutSetSchema = z
+	.object({
+		performedReps: nullableNumber(
+			z.coerce
+				.number({ error: "Enter a valid number of reps." })
+				.int("Reps must be a whole number.")
+				.min(0, "Reps cannot be negative.")
+				.max(10000, "Reps must be 10,000 or fewer."),
+		),
+		performedLoadValue: nullableNumber(
+			z.coerce
+				.number({ error: "Enter a valid load." })
+				.min(0, "Load cannot be negative.")
+				.max(1000000, "Load must be 1,000,000 or less."),
+		),
+		performedLoadUnit: z.preprocess(
+			(value) => (value === "" || value == null ? null : value),
+			z
+				.enum(["Kilograms", "Libra"], {
+					error: "Choose a valid load unit.",
+				})
+				.nullable(),
+		),
+	})
+	.superRefine((row, context) => {
+		if (row.performedLoadValue !== null && row.performedLoadUnit === null) {
+			context.addIssue({
+				code: "custom",
+				path: ["performedLoadUnit"],
+				message: "Choose a valid load unit.",
+			});
+		}
+	});
 
 export const performWorkoutStepLogBodySchema = dashboardStepActionBodySchema.extend({
 	logFormRows: z

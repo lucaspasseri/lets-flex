@@ -1,3 +1,5 @@
+import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
+
 const MAX_SET_ROWS = 100;
 
 /** @param {Array<{status: string}>} steps @param {(step: {status: string}) => boolean} predicate */
@@ -16,6 +18,7 @@ export default function createWorkoutSessionViewModel({
 }) {
 	const status = session?.status ?? null;
 	const steps = (session?.steps ?? []).map((step) => ({
+		...step,
 		id: step.id,
 		orderLabel: String(step.order).padStart(2, "0"),
 		title: formatStepTitle(step),
@@ -39,6 +42,12 @@ export default function createWorkoutSessionViewModel({
 		...step,
 		isCurrent: step.id === currentStep?.id,
 		positionLabel: `Step ${index + 1} of ${steps.length}`,
+		prescriptionLabel: `${step.sets} sets × ${step.reps} reps`,
+		loadLabel: formatStepLoadLabel({
+			loadValue: step.loadValue,
+			loadUnit: step.loadUnit,
+			equipmentName: step.equipment.name,
+		}),
 	}));
 	const hasWorkoutLogs = steps.some((step) => step.stepLog?.id);
 	const showWorkoutLogs = Boolean(
@@ -216,7 +225,14 @@ function formatStepTitle(step) {
 		: baseName.toUpperCase();
 }
 
-/** @param {{title: string, stepLog: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutStepLog | null}} step @param {number} position @param {number} stepCount @param {number | null} daysDifference */
+/**
+ * @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSessionStep & {title: string}} step
+ * @param {number} position
+ * @param {number} stepCount
+ * @param {number | null} daysDifference
+ * @param {number} workoutSessionId
+ * @param {any} formState
+ */
 function createCurrentStepViewModel(
 	step,
 	position,
@@ -239,6 +255,11 @@ function createCurrentStepViewModel(
 	);
 	return {
 		title: step.title,
+		loadGuidance: formatStepLoadLabel({
+			loadValue: log.plannedLoadValue,
+			loadUnit: log.plannedLoadUnit,
+			equipmentName: step.equipment.name,
+		}),
 		positionLabel: `Step ${position} of ${stepCount}`,
 		formId: `workout-step-log-${log.id}`,
 		performAction: `/workout_step_logs/${log.id}/perform`,
@@ -289,7 +310,7 @@ function createLogRow(log, index, submitted = undefined, errors = {}) {
 				name: `${context}[performedLoadUnit]`,
 				label: "Load unit",
 				control: "select",
-				required: true,
+				required: false,
 				value: submitted?.performedLoadUnit ?? log.plannedLoadUnit ?? "",
 				error: errors[`logFormRows.${index}.performedLoadUnit`] ?? null,
 				hint: null,

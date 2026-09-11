@@ -1,3 +1,5 @@
+import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
+
 /**
  * @typedef {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession} WorkoutSession
  * @typedef {import("../../../src/features/sessions/sessions.types.js").SessionMapperStep} SessionStep
@@ -63,16 +65,17 @@ export default function createWorkoutSessionListViewModel({
 /** @param {SessionStep} step */
 function toStepViewModel(step) {
 	const title = step.exercise.variantName || step.exercise.name || step.name;
-	const hasLoad = step.loadValue !== null && step.loadValue !== undefined;
 
 	return {
 		id: step.id,
 		orderLabel: String(step.order).padStart(2, "0"),
 		title: `${title}:`,
 		prescriptionLabel: `${step.sets} sets × ${step.reps} reps`,
-		loadLabel: hasLoad
-			? [step.loadValue, step.loadUnit].filter(Boolean).join(" ")
-			: null,
+		loadLabel: formatStepLoadLabel({
+			loadValue: step.loadValue,
+			loadUnit: step.loadUnit,
+			equipmentName: step.equipment.name,
+		}),
 		details: [step.equipment.name, step.movementPattern].filter(Boolean),
 	};
 }
