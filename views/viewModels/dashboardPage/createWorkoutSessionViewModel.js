@@ -1,4 +1,5 @@
 import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
+import resolveStepMedia from "../../../src/features/media/resolveStepMedia.js";
 
 const MAX_SET_ROWS = 100;
 
@@ -25,6 +26,7 @@ export default function createWorkoutSessionViewModel({
 		status: step.stepLog?.status ?? "planned",
 		statusLabel: stepStatusLabel(step.stepLog?.status),
 		stepLog: step.stepLog,
+		media: resolveStepMedia(step),
 	}));
 	const performedCount = steps.filter((step) => step.status === "performed").length;
 	const skippedCount = steps.filter((step) => step.status === "skipped").length;
@@ -76,6 +78,7 @@ export default function createWorkoutSessionViewModel({
 						title: session.name,
 						statusLabel: statusPresentation(status).label,
 						statusModifier: statusPresentation(status).modifier,
+						media: steps[0]?.media ?? null,
 					},
 					steps: presentedSteps,
 					stepListLabel:
@@ -226,7 +229,7 @@ function formatStepTitle(step) {
 }
 
 /**
- * @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSessionStep & {title: string}} step
+ * @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSessionStep & {title: string, media: import("../../../src/features/media/media.types.js").ResolvedMedia}} step
  * @param {number} position
  * @param {number} stepCount
  * @param {number | null} daysDifference
@@ -255,6 +258,7 @@ function createCurrentStepViewModel(
 	);
 	return {
 		title: step.title,
+		media: step.media,
 		loadGuidance: formatStepLoadLabel({
 			loadValue: log.plannedLoadValue,
 			loadUnit: log.plannedLoadUnit,

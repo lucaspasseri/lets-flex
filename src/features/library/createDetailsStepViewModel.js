@@ -1,4 +1,5 @@
 import formatStepLoadLabel from "../sessions/formatStepLoadLabel.js";
+import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapperStep} SessionMapperStep
@@ -28,6 +29,7 @@ function createDetailsStepViewModel(step) {
 			movementPattern: step.movementPattern,
 			equipment: step.equipment.name,
 		},
+		media: resolveLibraryStepMedia(step),
 
 		prescription: {
 			sets: step.sets,

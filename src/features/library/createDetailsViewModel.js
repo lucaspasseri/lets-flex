@@ -31,6 +31,8 @@ function createDetails({ session, actorUserId = null }) {
 	const movements = getDistinctMovements(session);
 	const equipments = getDistinctEquipments(session);
 
+	const detailSteps = steps.map(createDetailsStepViewModel);
+
 	return {
 		id: session.id,
 		headingId: `session-details-title-${session.id}`,
@@ -40,7 +42,8 @@ function createDetails({ session, actorUserId = null }) {
 		isArchived: session.isArchived,
 
 		stepNumber: stepCount,
-		steps: steps.map(createDetailsStepViewModel),
+		media: detailSteps[0]?.media ?? null,
+		steps: detailSteps,
 
 		stats: [
 			{

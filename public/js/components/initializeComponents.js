@@ -4,6 +4,7 @@ import * as modal from "./modal/index.js";
 import * as workoutTracker from "./workoutTracker/index.js";
 import * as adherenceChart from "./adherenceChart/index.js";
 import * as applicationChrome from "./applicationChrome/index.js";
+import { initializeMediaFallback } from "./mediaFallback/mediaFallback.js";
 
 export function initializeComponents(root = document) {
 	applicationChrome.initialize(root);
@@ -12,4 +13,5 @@ export function initializeComponents(root = document) {
 	modal.initialize(root);
 	workoutTracker.initialize(root);
 	adherenceChart.initialize(root);
+	initializeMediaFallback(root);
 }

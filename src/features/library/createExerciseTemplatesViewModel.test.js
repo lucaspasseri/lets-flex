@@ -87,6 +87,11 @@ test("exercise catalog groups, orders, and counts visible variants by base exerc
 	assert.equal(viewModel.items[1].details.variants[1].isPrivateOwner, true);
 	assert.equal(viewModel.items[1].details.variants[1].actions.canManagePrivate, true);
 	assert.equal(viewModel.items[1].actions.archive, null);
+	assert.equal(viewModel.items[0].details.media.src, "/media/exercise-bench-press.svg");
+	assert.equal(
+		viewModel.items[0].details.variants[0].media.src,
+		"/media/exercise-barbell-bench-press.svg",
+	);
 	assert.match(viewModel.items[1].searchKeyWord, /Chest/);
 	assert.match(viewModel.items[1].searchKeyWord, /Controlled tempo/);
 	assert.match(viewModel.items[1].searchKeyWord, /Private/);

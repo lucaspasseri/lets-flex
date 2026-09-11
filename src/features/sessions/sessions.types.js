@@ -1,6 +1,7 @@
 /**
  * @typedef {import("../muscles/muscles.types.js").MuscleRow} MuscleRow
  * @typedef {import("../muscles/muscles.types.js").MuscleMapper} MuscleMapper
+ * @typedef {import("../media/media.types.js").ResolvedMedia} ResolvedMedia
  */
 
 /**
@@ -117,6 +118,7 @@
  * @property {string} movementPatternsLabel
  * @property {string} musclesLabel
  * @property {string} equipmentsLabel
+ * @property {ResolvedMedia | null} media
  * @property {string} searchKeyWord
  * @property {{movement: string[], muscle: string[], equipment: string[]}} filters
  */
@@ -148,6 +150,7 @@
  * @property {string} setupDescription
  * @property {string} environment
  * @property {string} notes
+ * @property {ResolvedMedia} media
  *
  * @property {MuscleMapper[]} muscles
  */
@@ -168,6 +171,7 @@
  * @property {string} notes
  * @property {boolean} isArchived
  * @property {number} stepNumber
+ * @property {ResolvedMedia | null} media
  * @property {DetailsStepsViewModel[]} steps
  *
  * @property {Stat[]} stats

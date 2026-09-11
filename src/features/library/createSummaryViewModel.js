@@ -3,6 +3,7 @@ import {
 	getDistinctMovements,
 	getDistinctMuscles,
 } from "./selectors/sessionSelectors.js";
+import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapper} SessionMapper
@@ -22,6 +23,7 @@ import {
 
 function createSummary({ session, activeSessionId }) {
 	const steps = session.steps ?? [];
+	const media = steps[0] ? resolveLibraryStepMedia(steps[0]) : null;
 	const movements = getDistinctMovements(session);
 	const muscles = getDistinctMuscles(session);
 	const equipments = getDistinctEquipments(session);
@@ -62,6 +64,7 @@ function createSummary({ session, activeSessionId }) {
 		name: session.name,
 		href: `/library?sessionId=${session.id}`,
 		isCurrent: session.id === activeSessionId,
+		media,
 		description: session.notes ?? "Remember, safety first.",
 		stepCountLabel: `${steps.length} exercises`,
 		setCountLabel: `${setCount} sets`,

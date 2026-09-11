@@ -26,6 +26,18 @@
 		<% } %>
 
 		<header class="session-details__header">
+			<% if (session.media) { %>
+				<figure class="session-details__media" data-media-fallback="<%= session.media.isFallback %>">
+					<img
+						src="<%= session.media.src %>"
+						width="<%= session.media.width %>"
+						height="<%= session.media.height %>"
+						alt="<%= session.media.alt %>"
+						loading="lazy"
+						decoding="async"
+					>
+				</figure>
+			<% } %>
 			<div>
 				<div class="session-details__labels">
 					<p class="session-details__eyebrow">Selected session</p>
@@ -120,10 +132,22 @@
 						<div class="session-step__order" aria-hidden="true">
 							<%= step.order %>
 						</div>
-
 						<div class="session-step__content">
-							<header class="session-step__header">
-								<div>
+							<header class="session-step__header<%= step.media ? ' session-step__header--with-media' : '' %>">
+								<% if (step.media) { %>
+									<figure class="session-step__media" data-media-fallback="<%= step.media.isFallback %>">
+										<img
+											src="<%= step.media.src %>"
+											width="<%= step.media.width %>"
+											height="<%= step.media.height %>"
+											alt="<%= step.media.alt %>"
+											loading="lazy"
+											decoding="async"
+										>
+									</figure>
+								<% } %>
+
+								<div class="session-step__identity">
 									<span class="session-step__type">
 										<%= step.type %>
 									</span>

@@ -1,6 +1,19 @@
-<% const {baseName="", summary={}} = locals?.template %>
+<% const {baseName="", summary={}, details={}} = locals?.template %>
 
 <span class="exercise-template__summary">
+	<% if (details.media) { %>
+		<img
+			class="exercise-template__summary-media"
+			data-media-fallback="true"
+			src="<%= details.media.src %>"
+			width="<%= details.media.width %>"
+			height="<%= details.media.height %>"
+			alt=""
+			aria-hidden="true"
+			loading="lazy"
+			decoding="async"
+		>
+	<% } %>
 	<span class="exercise-template__identity">
 		<span class="exercise-template__eyebrow">Base exercise</span>
 		<strong class="exercise-template__name"><%= baseName %></strong>

@@ -23,6 +23,12 @@ test("training-day and contextual Library styles preserve hierarchy, actions, an
 		dayCss,
 		/@media \(max-width: 52rem\)[\s\S]*?\.day-page__content\s*{[\s\S]*?grid-template-columns: 1fr/,
 	);
+	assert.match(dayCss, /\.workout-card__media\s*\{/);
+	assert.match(dayCss, /\.workout-step__media\s*\{/);
+	assert.match(
+		dayCss,
+		/@media \(max-width: 30rem\)[\s\S]*?\.workout-step__media[\s\S]*?grid-row: 1/,
+	);
 	assert.match(dayCss, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.match(libraryCss, /\.library-planning-context/);
 	assert.match(libraryCss, /\.session-form-context/);

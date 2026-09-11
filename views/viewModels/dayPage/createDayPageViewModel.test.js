@@ -128,8 +128,16 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 	assert.equal(result.components.workoutSessionList.count, 1);
 	assert.equal(result.components.workoutSessionList.items[0].header.title, "Available");
 	assert.equal(
+		result.components.workoutSessionList.items[0].header.media?.src,
+		"/media/exercise-bench-press.svg",
+	);
+	assert.equal(
 		result.components.workoutSessionList.items[0].steps[0].title,
 		"Barbell:",
+	);
+	assert.equal(
+		result.components.workoutSessionList.items[0].steps[0].media.src,
+		"/media/exercise-bench-press.svg",
 	);
 	assert.equal(result.components.workoutSessionList.items[0].steps[0].orderLabel, "01");
 	assert.equal(
@@ -352,6 +360,9 @@ test("day template renders only from its component ViewModels", async () => {
 	assert.match(html, /day-navigation__item--current[^>]*aria-current="date"/);
 	assert.match(html, /<option[\s\S]*?value="20"[\s\S]*?>\s*Available/);
 	assert.match(html, /workout-card--workout/);
+	assert.match(html, /class="workout-card__media"/);
+	assert.match(html, /class="workout-step__media"/);
+	assert.match(html, /src="\/media\/exercise-bench-press\.svg"/);
 	assert.match(html, /Barbell:/);
 	assert.match(html, /action="\/workout_sessions\/30\?_method=PATCH"/);
 	assert.doesNotMatch(html, /deleteWorkoutSessionId-31/);

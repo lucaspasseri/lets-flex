@@ -1,4 +1,17 @@
 <header class="workout-card__header">
+	<% if (header.media) { %>
+		<img
+			class="workout-card__media"
+			data-media-fallback="true"
+			src="<%= header.media.src %>"
+			width="<%= header.media.width %>"
+			height="<%= header.media.height %>"
+			alt=""
+			aria-hidden="true"
+			loading="lazy"
+			decoding="async"
+		>
+	<% } %>
 	<div class="workout-card__heading">
 		<h3 class="workout-card__title">
 			<%= header.title %>

@@ -333,6 +333,9 @@ test("library exercise styles use semantic, responsive, focus, and motion contra
 	assert.match(css, /\.exercise-template__panel\[hidden\]\s*\{\s*display: none;/);
 	assert.match(css, /\.exercise-variants\s*\{/);
 	assert.match(css, /\.exercise-variant__actions/);
+	assert.match(css, /\.exercise-template__summary-media\s*\{/);
+	assert.match(css, /\.exercise-template__media\s*\{/);
+	assert.match(css, /\.exercise-variant__media\s*\{/);
 	assert.match(css, /@container application-content \(max-width: 45rem\)/);
 	assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.doesNotMatch(css, /--template-|#[\da-f]{3,8}|rgb\(/i);

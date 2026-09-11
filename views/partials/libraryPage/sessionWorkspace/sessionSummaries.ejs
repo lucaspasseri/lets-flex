@@ -39,6 +39,19 @@
 								aria-current="true"
 							<% } %>
 						>
+							<% if (item.media) { %>
+								<img
+									class="session-summary__media"
+									data-media-fallback="true"
+									src="<%= item.media.src %>"
+									width="<%= item.media.width %>"
+									height="<%= item.media.height %>"
+									alt=""
+									aria-hidden="true"
+									loading="lazy"
+									decoding="async"
+								>
+							<% } %>
 							<span class="session-summary__body">
 								<strong class="session-summary__name">
 									<%= item.name %>

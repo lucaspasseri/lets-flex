@@ -37,6 +37,17 @@
 
 	<% if (workout.currentStep) { %>
 		<section class="current-workout-step-container" aria-labelledby="current-step-title">
+			<% if (workout.currentStep.media) { %>
+				<figure class="current-workout-step__media" data-media-fallback="<%= workout.currentStep.media.isFallback %>">
+					<img
+						src="<%= workout.currentStep.media.src %>"
+						width="<%= workout.currentStep.media.width %>"
+						height="<%= workout.currentStep.media.height %>"
+						alt="<%= workout.currentStep.media.alt %>"
+						decoding="async"
+					>
+				</figure>
+			<% } %>
 			<header>
 				<p class="session-section-label"><%= workout.currentStep.positionLabel %> · Current step</p>
 				<h3 id="current-step-title"><%= workout.currentStep.title %></h3>

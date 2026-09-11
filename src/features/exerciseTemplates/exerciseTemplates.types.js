@@ -3,6 +3,7 @@
  * @typedef {import("../movementPatterns/movementPatterns.types.js").MovementPatternMapper} MovementPatternMapper
  * @typedef {import("../equipments/equipments.types.js").EquipmentMapper} EquipmentMapper
  * @typedef {import("../exerciseVariants/exerciseVariants.types.js").ExerciseVariantRow} ExerciseVariantRow
+ * @typedef {import("../media/media.types.js").ResolvedMedia} ResolvedMedia
  */
 
 /**
@@ -93,6 +94,7 @@
  * @property {string} setupDescription
  * @property {string} notes
  * @property {boolean} isPrivateOwner
+ * @property {ResolvedMedia} media
  * @property {string} searchKeyWord
  * @property {{equipment: string[], environment: string[], scope: string[]}} filters
  * @property {{name: string, equipmentId: number | string | null | undefined, error: string | null} | null} [privateMutation]
@@ -102,6 +104,7 @@
 /**
  * @typedef {object} ExerciseTemplateItemDetails
  * @property {ExerciseTemplateMovementItemPattern} movementPattern
+ * @property {ResolvedMedia} media
  * @property {ExerciseTemplateMusclesViewModel} muscleTemplates
  * @property {ExerciseTemplateItemVariant[]} variants
  */

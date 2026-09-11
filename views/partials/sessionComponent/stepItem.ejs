@@ -1,5 +1,18 @@
 <li class="session-step session-step--<%= step.status %> <%= step.isCurrent ? 'session-step--current' : '' %>" <%- step.isCurrent ? 'aria-current="step"' : '' %>>
 	<span class="session-step__order" aria-hidden="true"><%= step.orderLabel %></span>
+	<% if (step.media) { %>
+		<img
+			class="session-step__media"
+			data-media-fallback="true"
+			src="<%= step.media.src %>"
+			width="<%= step.media.width %>"
+			height="<%= step.media.height %>"
+			alt=""
+			aria-hidden="true"
+			loading="lazy"
+			decoding="async"
+		>
+	<% } %>
 	<div class="session-step__content">
 		<span class="session-step__position"><%= step.positionLabel %></span>
 		<p class="session-step__name"><%= step.title %></p>

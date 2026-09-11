@@ -31,6 +31,8 @@ test("session-detail prescriptions describe sets, reps, and an available load", 
 	);
 
 	assert.equal(detailsStep.prescription.label, "3 sets × 10 reps · 40 Kilograms");
+	assert.equal(detailsStep.media.src, "/media/category-strength.svg");
+	assert.equal(detailsStep.media.isFallback, true);
 });
 
 test("session-detail prescriptions explain absent load data", () => {

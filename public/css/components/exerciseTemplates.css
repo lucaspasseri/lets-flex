@@ -131,8 +131,19 @@
 
 .exercise-template__summary {
 	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
 	gap: 0.35rem;
 	min-width: 0;
+}
+
+.exercise-template__summary-media {
+	grid-row: 1 / span 2;
+	width: 4.25rem;
+	height: 2.85rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.55rem;
+	background: var(--color-page);
+	object-fit: cover;
 }
 
 .exercise-template__identity {
@@ -181,6 +192,7 @@
 }
 
 .exercise-template__metadata {
+	grid-column: 2;
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -188,6 +200,23 @@
 	color: var(--color-text-muted);
 	font-size: 0.75rem;
 	line-height: 1.4;
+}
+
+.exercise-template__media {
+	width: min(100%, 14rem);
+	margin: 0;
+	border: 1px solid var(--color-border);
+	border-radius: 0.8rem;
+	overflow: hidden;
+	background: var(--color-page);
+}
+
+.exercise-template__media img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
 }
 
 .exercise-template__metadata [aria-hidden="true"] {
@@ -319,12 +348,23 @@
 .exercise-variant {
 	position: relative;
 	display: grid;
+	grid-template-columns: 4.5rem minmax(0, 1fr);
 	gap: 0.85rem;
 	padding: 1rem 1rem 1rem 1.2rem;
 
 	border: 1px solid var(--color-border);
 	border-radius: 0.8rem;
 	background: var(--color-surface);
+}
+
+.exercise-variant__media {
+	grid-row: 1 / span 3;
+	width: 4.5rem;
+	height: 3rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.55rem;
+	background: var(--color-page);
+	object-fit: cover;
 }
 
 .exercise-variant::before {
@@ -337,6 +377,7 @@
 }
 
 .exercise-variant__header {
+	grid-column: 2;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -350,6 +391,7 @@
 }
 
 .exercise-variant__facts {
+	grid-column: 2;
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 1rem;
@@ -385,6 +427,7 @@
 
 .exercise-template__actions,
 .exercise-variant__actions {
+	grid-column: 2;
 	display: flex;
 	align-items: flex-end;
 	justify-content: flex-end;
@@ -479,6 +522,23 @@
 	.exercise-template__facts,
 	.exercise-variant__facts {
 		grid-template-columns: 1fr;
+	}
+
+	.exercise-variant {
+		grid-template-columns: 1fr;
+	}
+
+	.exercise-variant__media,
+	.exercise-variant__header,
+	.exercise-variant__facts,
+	.exercise-variant__actions {
+		grid-column: auto;
+	}
+
+	.exercise-variant__media {
+		grid-row: auto;
+		width: 6rem;
+		height: 4rem;
 	}
 
 	.exercise-template__actions,

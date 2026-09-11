@@ -1,5 +1,6 @@
 import createMuscles from "./createMuscleViewModel.js";
 import toCapitalizedString from "../../../utils/toCapitalizedString.js";
+import { resolveMedia } from "../media/resolveMedia.js";
 
 /**
  * @typedef {import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplateMapper} ExerciseTemplateMapper
@@ -36,6 +37,14 @@ function createExercise({
 			: movementPattern.name
 		: "-";
 	const muscleTemplates = createMuscles({ muscles });
+	const firstVariant = exerciseTemplates[0]?.variant;
+	const baseMedia = resolveMedia({
+		entityType: "exercise",
+		baseName: exerciseTemplate.name,
+		movementPattern: movementPattern?.name,
+		environment: firstVariant?.environment,
+		label: exerciseTemplate.name,
+	});
 	const variants = exerciseTemplates
 		.map(({ equipment, variant }) => {
 			const isPrivateOwner =
@@ -56,10 +65,19 @@ function createExercise({
 				? toCapitalizedString(variant.environment).replaceAll("_", " ")
 				: "Not specified";
 			const scopeLabel = isPrivateOwner ? "Private" : "Global";
+			const media = resolveMedia({
+				entityType: "exercise",
+				variantName: variant.name,
+				baseName: exerciseTemplate.name,
+				movementPattern: movementPattern?.name,
+				environment: variant.environment,
+				label: variant.name,
+			});
 
 			return {
 				id: variant.id,
 				name: variant.name,
+				media,
 				isPrivateOwner,
 				equipment,
 				environmentLabel,
@@ -148,6 +166,7 @@ function createExercise({
 			variantCountLabel: `${variantCount} ${variantCount === 1 ? "variant" : "variants"}`,
 		},
 		details: {
+			media: baseMedia,
 			movementPattern: {
 				name: movementPatternLabel,
 			},

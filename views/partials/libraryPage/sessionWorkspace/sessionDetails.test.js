@@ -13,6 +13,13 @@ test("selected-session detail renders orientation and presentation-ready prescri
 		session: {
 			id: 7,
 			headingId: "session-details-title-7",
+			media: {
+				src: "/media/category-strength.svg",
+				width: 960,
+				height: 640,
+				alt: "Strength session illustration",
+				isFallback: true,
+			},
 			name: "Strength session",
 			description: "A focused session.",
 			notes: "Move with control.",
@@ -24,6 +31,13 @@ test("selected-session detail renders orientation and presentation-ready prescri
 			steps: [
 				{
 					order: 1,
+					media: {
+						src: "/media/exercise-bench-press.svg",
+						width: 960,
+						height: 640,
+						alt: "Bench press illustration",
+						isFallback: true,
+					},
 					type: "Exercise",
 					exercise: {
 						name: "Squat",
@@ -49,6 +63,14 @@ test("selected-session detail renders orientation and presentation-ready prescri
 	assert.match(html, /Selected session/);
 	assert.match(html, /Archived/);
 	assert.match(html, /3 sets × 10 reps/);
+	assert.match(html, /session-details__media/);
+	assert.match(html, /session-step__media/);
+	assert.match(
+		html,
+		/class="session-step__header session-step__header--with-media"[\s\S]*?class="session-step__media"[\s\S]*?class="session-step__identity"/,
+	);
+	assert.match(html, /src="\/media\/exercise-bench-press\.svg"/);
+	assert.match(html, /alt="Bench press illustration"/);
 	assert.doesNotMatch(html, /Session template|null|undefined/);
 });
 
