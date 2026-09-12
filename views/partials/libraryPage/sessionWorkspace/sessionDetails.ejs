@@ -1,7 +1,8 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const session = locals?.session ?? null;
 	const summariesHeadingId = locals?.summariesHeadingId ?? "";
-	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={}, stepNumber } = session ?? {};
+	const {id = null, headingId= "", name="", description="", notes="", isArchived=false, stats = [], equipment = "", movementPatterns = [], steps = [], actions={}, stepNumber, stepCountLabel } = session ?? {};
 %>
 
 
@@ -10,8 +11,8 @@
 		<div class="icon-container">
 			<%- include("../../shared/components/icons/namedIcon", { name: "square-mouse-pointer" }) %>
 		</div>
-		<h3>Select a session</h3>
-		<p>Choose a session to inspect its exercises and prescription.</p>
+		<h3><%= translate("library.selectSession", { defaultValue: "Select a session" }) %></h3>
+		<p><%= translate("library.selectSessionDescription", { defaultValue: "Choose a session to inspect its exercises and prescription." }) %></p>
 	</section>
 <% } else { %>
 	<article
@@ -21,7 +22,7 @@
 	>
 		<% if (summariesHeadingId) { %>
 			<a class="session-details__back-link" href="#<%= summariesHeadingId %>">
-				Back to session list
+				<%= translate("library.backToSessionList", { defaultValue: "Back to session list" }) %>
 			</a>
 		<% } %>
 
@@ -31,11 +32,11 @@
 			<% } %>
 			<div>
 				<div class="session-details__labels">
-					<p class="session-details__eyebrow">Selected session</p>
+					<p class="session-details__eyebrow"><%= translate("library.selectedSession", { defaultValue: "Selected session" }) %></p>
 
 					<% if (isArchived) { %>
 						<span class="status-badge status-badge--muted">
-							Archived
+							<%= translate("library.archived", { defaultValue: "Archived" }) %>
 						</span>
 					<% } %>
 				</div>
@@ -98,7 +99,7 @@
 				<%- include("../../shared/components/icons/namedIcon", { name: "notebook-pen" }) %>
 
 				<div>
-					<h4 id="session-notes-title">Coach notes</h4>
+					<h4 id="session-notes-title"><%= translate("library.coachNotes", { defaultValue: "Coach notes" }) %></h4>
 					<p><%= notes %></p>
 				</div>
 			</section>
@@ -110,11 +111,11 @@
 		>
 			<header class="section-heading">
 				<div>
-					<p class="section-heading__eyebrow">Prescription</p>
-					<h4 id="session-exercises-title">Exercises</h4>
+					<p class="section-heading__eyebrow"><%= translate("library.prescription", { defaultValue: "Prescription" }) %></p>
+					<h4 id="session-exercises-title"><%= translate("library.exercises", { defaultValue: "Exercises" }) %></h4>
 				</div>
 
-				<span><%= stepNumber %> total</span>
+				<span><%= stepCountLabel ?? "" %></span>
 			</header>
 
 			<ol class="session-steps">
@@ -155,7 +156,7 @@
 							<dl class="session-step__metadata">
 								<% if (step.exercise.movementPattern) { %>
 									<div>
-										<dt>Movement</dt>
+										<dt><%= translate("library.movement", { defaultValue: "Movement" }) %></dt>
 										<dd>
 											<%= step.exercise.movementPattern %>
 										</dd>
@@ -164,7 +165,7 @@
 
 								<% if (step.exercise.equipment) { %>
 									<div>
-										<dt>Equipment</dt>
+										<dt><%= translate("library.equipment", { defaultValue: "Equipment" }) %></dt>
 										<dd><%= step.exercise.equipment %></dd>
 									</div>
 								<% } %>
@@ -172,14 +173,14 @@
 
 							<% if (step.setupDescription) { %>
 								<div class="session-step__instruction">
-									<h6>Setup</h6>
+									<h6><%= translate("library.setup", { defaultValue: "Setup" }) %></h6>
 									<p><%= step.setupDescription %></p>
 								</div>
 							<% } %>
 
 							<% if (step.notes) { %>
 								<div class="session-step__instruction">
-									<h6>Notes</h6>
+									<h6><%= translate("library.notes", { defaultValue: "Notes" }) %></h6>
 									<p><%= step.notes %></p>
 								</div>
 							<% } %>

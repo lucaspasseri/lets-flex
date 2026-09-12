@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import path from "node:path";
 import ejs from "ejs";
+import { i18n } from "../../../../src/infrastructure/i18n/i18n.js";
 
 const templatePath = path.resolve(
 	"views/partials/libraryPage/sessionWorkspace/sessionDetails.ejs",
@@ -88,4 +89,27 @@ test("empty session detail preserves its selection guidance without a return lin
 	assert.match(html, /Select a session/);
 	assert.match(html, /Choose a session to inspect its exercises and prescription/);
 	assert.doesNotMatch(html, /session-details__back-link/);
+});
+
+test("selected-session detail localizes its interface labels", async () => {
+	const html = await ejs.renderFile(templatePath, {
+		t: i18n.getFixedT("pt-BR"),
+		summariesHeadingId: "session-summaries-title",
+		session: {
+			headingId: "session-details-title-7",
+			name: "Sessão de força",
+			description: "Uma sessão focada.",
+			notes: "Mova-se com controle.",
+			isArchived: true,
+			stats: [],
+			steps: [],
+			actions: { edit: null, delete: null },
+		},
+	});
+
+	assert.match(html, /Voltar para a lista de sessões/);
+	assert.match(html, /Sessão selecionada/);
+	assert.match(html, /Arquivada/);
+	assert.match(html, /Notas do treinador/);
+	assert.match(html, /Prescrição/);
 });

@@ -9,9 +9,17 @@ import createAuthenticationMethodsViewModel from "../../../views/viewModels/prof
 import establishAuthenticatedSession from "../auth/establishAuthenticatedSession.js";
 import { respondWithApplicationRecovery } from "../applicationRecovery.js";
 import { addPasswordSchema } from "../validation/authSchemas.js";
+import { formatLocaleDate } from "../../infrastructure/i18n/formatLocale.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
+import translateAuthErrors from "../validation/translateAuthErrors.js";
+
+function profileMessage(res, key, defaultValue) {
+	return translateMessage(res.locals?.t, `profile.${key}`, defaultValue);
+}
 
 /** @param {import("express").Request} req @param {import("express").Response} res @param {{passwordErrors?: string[]}} [state] */
 async function renderProfile(req, res, state = {}) {
+	const t = (key, defaultValue) => profileMessage(res, key, defaultValue);
 	// @ts-ignore -- application Passport principal.
 	const row = await usersRepository.findById({ userId: req.user?.id ?? null });
 	if (!row) {
@@ -19,36 +27,64 @@ async function renderProfile(req, res, state = {}) {
 		return;
 	}
 	const currentUser = userMapper.toLoggedUser(row);
+	const expirationLabel =
+		currentUser.role === "guest" && currentUser.guestExpiresAt
+			? formatLocaleDate(currentUser.guestExpiresAt, res.locals.language, {
+					dateStyle: "long",
+				})
+			: null;
 	const authenticationMethods = createAuthenticationMethodsViewModel(
 		await getAuthenticationMethods({ userId: row.id }),
 		res.locals.t,
 	);
 	const googleLinkMessages = {
-		connected: { type: "success", text: "Google is now connected to this account." },
+		connected: {
+			type: "success",
+			text: t("googleConnected", "Google is now connected to this account."),
+		},
 		conflict: {
 			type: "error",
-			text: "That Google account is already connected to another Let's Flex account.",
+			text: t(
+				"googleConflict",
+				"That Google account is already connected to another Let's Flex account.",
+			),
 		},
 		"already-connected": {
 			type: "error",
-			text: "This account already has a different Google account connected.",
+			text: t(
+				"googleAlreadyConnected",
+				"This account already has a different Google account connected.",
+			),
 		},
-		replaced: { type: "success", text: "The connected Google account was changed." },
-		invalid: { type: "error", text: "Google did not provide a usable verified email." },
+		replaced: {
+			type: "success",
+			text: t("googleReplaced", "The connected Google account was changed."),
+		},
+		invalid: {
+			type: "error",
+			text: t("googleInvalid", "Google did not provide a usable verified email."),
+		},
 		"replacement-unavailable": {
 			type: "error",
-			text: "Add a password before changing the connected Google account.",
+			text: t(
+				"googleReplacementUnavailable",
+				"Add a password before changing the connected Google account.",
+			),
 		},
 	};
 	res.render("profile", {
-		page: { ...res.locals.page, title: "Profile · Let's Flex!" },
+		page: { ...res.locals.page, title: t("pageTitle", "Profile · Let's Flex!") },
 		shell: { currentUser, activeNavigation: "profile" },
 		currentUser,
+		expirationLabel,
 		authenticationMethods,
 		googleLinkMessage: googleLinkMessages[req.query?.googleLink] ?? null,
 		passwordMessage:
 			req.query?.password === "added"
-				? { type: "success", text: "Password authentication is now connected." }
+				? {
+						type: "success",
+						text: t("passwordConnected", "Password authentication is now connected."),
+					}
 				: null,
 		passwordErrors: state.passwordErrors ?? [],
 	});
@@ -65,7 +101,7 @@ async function addPassword(req, res) {
 	if (!parsed.success) {
 		res.status(422);
 		await renderProfile(req, res, {
-			passwordErrors: parsed.error.issues.map((issue) => issue.message),
+			passwordErrors: translateAuthErrors(res, parsed.error.issues),
 		});
 		return;
 	}
@@ -80,7 +116,15 @@ async function addPassword(req, res) {
 	} catch (error) {
 		if (error instanceof LocalIdentityAlreadyExistsError) {
 			res.status(409);
-			await renderProfile(req, res, { passwordErrors: [error.message] });
+			await renderProfile(req, res, {
+				passwordErrors: [
+					profileMessage(
+						res,
+						"passwordAlreadyExists",
+						"A password is already set for this account.",
+					),
+				],
+			});
 			return;
 		}
 		throw error;

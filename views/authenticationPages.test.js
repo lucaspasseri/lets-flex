@@ -106,6 +106,7 @@ test("profile presents role-specific guest and administrator states", async () =
 			email: null,
 			guestExpiresAt: "2030-01-15T12:00:00.000Z",
 		},
+		expirationLabel: "January 15, 2030",
 	});
 	const adminHtml = await renderFile(path.resolve("views/profile.ejs"), {
 		csrfToken: "test-token",

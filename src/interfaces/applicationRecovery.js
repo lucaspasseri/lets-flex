@@ -1,3 +1,5 @@
+import translateMessage from "../infrastructure/i18n/translateMessage.js";
+
 const RECOVERY_STATES = Object.freeze({
 	notFound: {
 		status: 404,
@@ -55,6 +57,67 @@ const RECOVERY_STATES = Object.freeze({
 	},
 });
 
+const RECOVERY_KEYS = Object.freeze({
+	notFound: {
+		eyebrow: "recovery.pageNotFound",
+		title: "recovery.pageNotFoundTitle",
+		message: "recovery.pageNotFoundMessage",
+		actionLabel: "recovery.returnToDashboard",
+		fallbackMessage: "recovery.notFound",
+	},
+	server: {
+		eyebrow: "recovery.temporaryProblem",
+		title: "recovery.temporaryProblemTitle",
+		message: "recovery.temporaryProblemMessage",
+		actionLabel: "recovery.returnToDashboard",
+		fallbackMessage: "recovery.somethingBroke",
+	},
+	authentication: {
+		eyebrow: "recovery.signInRequired",
+		title: "recovery.signInRequiredTitle",
+		message: "recovery.signInRequiredMessage",
+		actionLabel: "recovery.returnToSignIn",
+		fallbackMessage: "recovery.authenticationRequired",
+	},
+	forbidden: {
+		eyebrow: "recovery.accessLimited",
+		title: "recovery.accessLimitedTitle",
+		message: "recovery.accessLimitedMessage",
+		actionLabel: "recovery.returnToDashboard",
+		fallbackMessage: "recovery.forbidden",
+	},
+	csrf: {
+		eyebrow: "recovery.requestNotVerified",
+		title: "recovery.requestNotVerifiedTitle",
+		message: "recovery.requestNotVerifiedMessage",
+		actionLabel: "recovery.returnToDashboard",
+		fallbackMessage: "recovery.invalidCsrfToken",
+	},
+	rateLimit: {
+		eyebrow: "recovery.pleaseWait",
+		title: "recovery.tooManyRequests",
+		message: "recovery.tooManyRequestsMessage",
+		actionLabel: "recovery.returnToSignIn",
+		fallbackMessage: "recovery.tooManyRequestsFallback",
+	},
+});
+
+function localizeRecoveryState(state, kind, translate) {
+	const keys = RECOVERY_KEYS[kind] ?? RECOVERY_KEYS.server;
+	return {
+		...state,
+		eyebrow: translateMessage(translate, keys.eyebrow, state.eyebrow),
+		title: translateMessage(translate, keys.title, state.title),
+		message: translateMessage(translate, keys.message, state.message),
+		actionLabel: translateMessage(translate, keys.actionLabel, state.actionLabel),
+		fallbackMessage: translateMessage(
+			translate,
+			keys.fallbackMessage,
+			state.fallbackMessage,
+		),
+	};
+}
+
 /** @param {import("express").Request} req */
 export function acceptsJson(req) {
 	const accept = String(req.get?.("accept") ?? "").toLowerCase();
@@ -80,7 +143,8 @@ export function acceptsHtml(req) {
  */
 export function respondWithApplicationRecovery(req, res, { kind, actionHref }) {
 	const state = RECOVERY_STATES[kind] ?? RECOVERY_STATES.server;
-	const recovery = actionHref ? { ...state, actionHref } : state;
+	const recoveryState = localizeRecoveryState(state, kind, res.locals?.t);
+	const recovery = actionHref ? { ...recoveryState, actionHref } : recoveryState;
 
 	if (acceptsHtml(req)) {
 		res.status(recovery.status).render("application-recovery", {

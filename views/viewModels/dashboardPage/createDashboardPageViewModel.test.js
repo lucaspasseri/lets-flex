@@ -4,6 +4,7 @@ import path from "node:path";
 import ejs from "ejs";
 import createDashboardPageViewModel from "./createDashboardPageViewModel.js";
 import createWorkoutSessionViewModel from "./createWorkoutSessionViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const page = { path: "/", title: "Let's Flex!" };
 const user = { id: 1, name: "Lucas", dateOfBirth: null, anamnesis: null };
@@ -504,4 +505,27 @@ test("rendered workout states expose only lifecycle-available actions", async ()
 	const cancelledHtml = await renderWorkout({ ...workout, status: "cancelled" });
 	assert.match(cancelledHtml, /Session cancelled/);
 	assert.doesNotMatch(cancelledHtml, />Finish session|>Start session|>Complete step</);
+});
+
+test("workout interaction states render translated Portuguese controls", async () => {
+	const html = await ejs.renderFile(
+		path.resolve("views/partials/dashboardPage/currentWorkoutSession.ejs"),
+		{
+			currentWorkout: createWorkoutSessionViewModel({
+				session: { ...workout, status: "planned" },
+				sessions: [{ ...workout, status: "planned" }],
+				daysDifference: 0,
+				translate: i18n.getFixedT("pt-BR"),
+				language: "pt-BR",
+			}),
+			translate: i18n.getFixedT("pt-BR"),
+			csrfToken: "test-token",
+		},
+	);
+
+	assert.match(html, /Pronto para começar/);
+	assert.match(html, /Iniciar sessão/);
+	assert.match(html, /Iniciando…/);
+	assert.doesNotMatch(html, />Ready when you are</);
+	assert.doesNotMatch(html, />Start session</);
 });

@@ -32,11 +32,11 @@
 		<p class="day-page__intro"><%= dayHeader.intro %></p>
 	</header>
 
-	<%- include("partials/dayPage/dayNavigation", { dayNavigation }) %>
+	<%- include("partials/dayPage/dayNavigation", { dayNavigation, t: translate }) %>
 
 	<div class="day-page__content">
-		<%- include("partials/dayPage/sessionLinkPanel", { sessionLinkForm }) %>
-		<%- include("partials/dayPage/workoutSessionList", { workoutSessionList }) %>
+		<%- include("partials/dayPage/sessionLinkPanel", { sessionLinkForm, t: translate }) %>
+		<%- include("partials/dayPage/workoutSessionList", { workoutSessionList, t: translate }) %>
 	</div>
 </main>
 
@@ -45,7 +45,7 @@
 	<%- include("partials/shared/components/modal/modal", { modal: {
 		id: cancelModal.id,
 		title: cancelModal.title,
-		renderContent: () => include("partials/deleteSessionWorkoutForm", { form: cancelModal.form, modalId: cancelModal.id }),
+		renderContent: () => include("partials/deleteSessionWorkoutForm", { form: cancelModal.form, modalId: cancelModal.id, t: translate }),
 	} }) %>
 <% }) %>
 

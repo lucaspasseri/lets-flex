@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const {id, title, description, searchLabel, searchPlaceholder, filters=[]} = locals.discovery;
 %>
@@ -5,12 +6,12 @@
 <section class="library-discovery-controls" aria-labelledby="<%= id %>-title" data-library-discovery-controls>
 	<header class="library-discovery-controls__header">
 		<div>
-			<p class="library-discovery-controls__eyebrow">Discover</p>
+			<p class="library-discovery-controls__eyebrow"><%= translate("library.discover", { defaultValue: "Discover" }) %></p>
 			<h3 id="<%= id %>-title"><%= title %></h3>
 			<p><%= description %></p>
 		</div>
 		<%- include("../shared/components/button/button", {button: {
-			label: "Clear filters",
+			label: translate("library.clearFilters", { defaultValue: "Clear filters" }),
 			variant: "ghost",
 			disabled: true,
 			attributes: { "data-library-clear": true }

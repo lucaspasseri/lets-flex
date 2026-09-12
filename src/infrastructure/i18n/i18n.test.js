@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { DEFAULT_LOCALE, i18nMiddleware, normalizeDetectedLocale } from "./i18n.js";
+import {
+	DEFAULT_LOCALE,
+	i18n,
+	i18nMiddleware,
+	normalizeDetectedLocale,
+} from "./i18n.js";
 
 function runMiddleware({ session = {}, acceptLanguage = "" } = {}) {
 	const request = /** @type {any} */ ({
@@ -68,4 +73,12 @@ test("unsupported browser languages fall back to English without persisting them
 
 	assert.equal(request.language, "en");
 	assert.equal(session.locale, undefined);
+});
+
+test("missing translations use the supplied safe fallback", () => {
+	const translate = i18n.getFixedT("pt-BR");
+	assert.equal(
+		translate("missing.production.key", { defaultValue: "Safe fallback" }),
+		"Safe fallback",
+	);
 });

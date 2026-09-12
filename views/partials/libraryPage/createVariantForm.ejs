@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <% const { idPrefix, title, eyebrow, description, submitLabel, actionPrefix, exercises, equipments, values = {}, errors = {} } = locals.variantForm; %>
 
 <section class="library-action-panel" aria-labelledby="<%= idPrefix %>-heading">
@@ -29,37 +30,40 @@
 			<%- include("../shared/components/form/field", { field: {
 				id: `${idPrefix}-exercise`,
 				name: "exerciseId",
-				label: "Exercise",
+				label: translate("library.exercise", { defaultValue: "Exercise" }),
 					control: "select",
 					required: true,
 					value: values.exerciseId ?? "",
 					error: errors.fieldErrors?.exerciseId,
-				hint: "Choose the global exercise this variation belongs to.",
-				defaultOption: { label: "Choose exercise", value: "" },
+				hint: translate("library.globalExerciseVariantHint", { defaultValue: "Choose the global exercise this variation belongs to." }),
+				defaultOption: { label: translate("library.chooseExercise", { defaultValue: "Choose exercise" }), value: "" },
+				t: translate,
 				options: exercises.map(exercise => ({ value: exercise.id, label: exercise.name }))
 			} }) %>
 			<%- include("../shared/components/form/field", { field: {
 				id: `${idPrefix}-name`,
 				name: "name",
-				label: "Variant name",
+				label: translate("library.variantName", { defaultValue: "Variant name" }),
 				control: "input",
 					type: "text",
 					required: true,
 					value: values.name ?? "",
 					error: errors.fieldErrors?.name,
-				hint: "Use a short name that describes the variation.",
+				hint: translate("library.variantNameHint", { defaultValue: "Use a short name that describes the variation." }),
+				t: translate,
 				attributes: { maxlength: 100, autocomplete: "off" }
 			} }) %>
 			<%- include("../shared/components/form/field", { field: {
 				id: `${idPrefix}-equipment`,
 				name: "equipmentId",
-				label: "Equipment",
+				label: translate("library.equipment", { defaultValue: "Equipment" }),
 					control: "select",
 					required: false,
 					value: values.equipmentId ?? "",
 					error: errors.fieldErrors?.equipmentId,
-				hint: "Leave empty for a bodyweight variation.",
-				defaultOption: { label: "No equipment", value: "" },
+				hint: translate("library.bodyweightVariantHint", { defaultValue: "Leave empty for a bodyweight variation." }),
+				defaultOption: { label: translate("library.noEquipment", { defaultValue: "No equipment" }), value: "" },
+				t: translate,
 				options: equipments.map(equipment => ({ value: equipment.id, label: equipment.name }))
 			} }) %>
 		</div>

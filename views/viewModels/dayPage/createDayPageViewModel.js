@@ -3,11 +3,11 @@ import createSessionLinkFormViewModel from "./createSessionLinkFormViewModel.js"
 import createWorkoutSessionListViewModel from "./createWorkoutSessionListViewModel.js";
 import formatDayPageDate from "./formatDayPageDate.js";
 import createDayViewTransitionName from "../shared/createDayViewTransitionName.js";
-import createViewModelTranslator from "../translate.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
 
 /**
  * @typedef {import("../../../src/features/day/dayPage.types.js").CreateDayPageViewModelInput} CreateDayPageViewModelInput
- * @param {CreateDayPageViewModelInput & {translate?: Function}} input
+ * @param {CreateDayPageViewModelInput & {translate?: Function, language?: string}} input
  */
 export default function createDayPageViewModel({
 	page,
@@ -16,6 +16,7 @@ export default function createDayPageViewModel({
 	sessionLinkFormState,
 	workoutFeedback,
 	translate,
+	language = "en",
 }) {
 	const t = createViewModelTranslator(translate);
 	const { currentUser, program, cycle, days, sessions, workoutSessions } = data;
@@ -32,6 +33,8 @@ export default function createDayPageViewModel({
 	const workoutSessionList = createWorkoutSessionListViewModel({
 		currentDayId,
 		workoutSessions: workoutSessions.items,
+		language,
+		translate,
 	});
 	const programsHref =
 		program && cycle
@@ -62,16 +65,22 @@ export default function createDayPageViewModel({
 				eyebrow: dayEyebrow,
 				title: dayTitle,
 				dateLabel:
-					formatDayPageDate(days.current?.scheduledDate ?? null) ??
+					formatDayPageDate(days.current?.scheduledDate ?? null, language) ??
 					t("dashboard.dateNotScheduled", { defaultValue: "Date not scheduled" }),
 				statusLabel:
 					currentDayId === null
 						? t("dashboard.dayUnavailable", { defaultValue: "Day unavailable" })
 						: workoutSessionList.count === 0
 							? t("dashboard.needsSession", { defaultValue: "Needs a session" })
-							: workoutSessionList.count === 1
-								? "1 session assigned"
-								: `${workoutSessionList.count} sessions assigned`,
+							: translateCount(
+									translate,
+									"dashboard.sessionsAssigned",
+									workoutSessionList.count,
+									{
+										one: "{{count}} session assigned",
+										other: "{{count}} sessions assigned",
+									},
+								),
 				intro: days.current
 					? t("dashboard.dayIntro", {
 							defaultValue:
@@ -87,12 +96,14 @@ export default function createDayPageViewModel({
 				days: days.items,
 				programName: program?.name ?? null,
 				cycleName: cycle?.name ?? null,
+				language,
 			}),
 			sessionLinkForm: createSessionLinkFormViewModel({
 				currentDayId,
 				sessions: sessions.items,
 				state: sessionLinkFormState,
 				selectedSessionId: pageState.sessionId,
+				translate,
 			}),
 			workoutSessionList,
 		},

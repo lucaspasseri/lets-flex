@@ -4,6 +4,8 @@ import {
 	getDistinctMuscles,
 } from "./selectors/sessionSelectors.js";
 import { resolveMedia } from "../media/resolveMedia.js";
+import translateCount from "../../infrastructure/i18n/translateCount.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapper} SessionMapper
@@ -14,6 +16,7 @@ import { resolveMedia } from "../media/resolveMedia.js";
  * @typedef {object} CreateSummaryInput
  * @property {SessionMapper} session
  * @property {SessionMapper["id"] | null} activeSessionId
+ * @property {Function} [translate]
  */
 
 /**
@@ -21,7 +24,9 @@ import { resolveMedia } from "../media/resolveMedia.js";
  * @returns {SummaryViewModel}
  */
 
-function createSummary({ session, activeSessionId }) {
+function createSummary({ session, activeSessionId, translate }) {
+	const t = (key, options = {}) =>
+		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
 	const steps = session.steps ?? [];
 	const media = steps[0]
 		? resolveMedia({
@@ -76,13 +81,29 @@ function createSummary({ session, activeSessionId }) {
 		href: `/library?sessionId=${session.id}`,
 		isCurrent: session.id === activeSessionId,
 		media,
-		description: session.notes ?? "Remember, safety first.",
-		stepCountLabel: `${steps.length} exercises`,
-		setCountLabel: `${setCount} sets`,
+		description:
+			session.notes ??
+			t("library.safetyReminder", { defaultValue: "Remember, safety first." }),
+		stepCountLabel: translateCount(translate, "library.exerciseCount", steps.length, {
+			one: "{{count}} exercise",
+			other: "{{count}} exercises",
+		}),
+		setCountLabel: translateCount(translate, "library.setCount", setCount, {
+			one: "{{count}} set",
+			other: "{{count}} sets",
+		}),
 		movementPatternsLabel:
-			movements.length > 0 ? movements.join(", ") : "No movement pattern",
-		musclesLabel: muscles.length > 0 ? muscles.join(", ") : "No muscle",
-		equipmentsLabel: equipments.length > 0 ? equipments.join(", ") : "No equipment",
+			movements.length > 0
+				? movements.join(", ")
+				: t("library.noMovementPattern", { defaultValue: "No movement pattern" }),
+		musclesLabel:
+			muscles.length > 0
+				? muscles.join(", ")
+				: t("library.noMuscle", { defaultValue: "No muscle" }),
+		equipmentsLabel:
+			equipments.length > 0
+				? equipments.join(", ")
+				: t("library.noEquipment", { defaultValue: "No equipment" }),
 		searchKeyWord,
 		filters: {
 			movement: movements,

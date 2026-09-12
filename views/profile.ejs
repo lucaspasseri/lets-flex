@@ -5,15 +5,12 @@
 	const isGuest = currentUser.role === "guest";
 	const isAdmin = currentUser.role === "admin";
 	const methods = locals.authenticationMethods ?? {
-		password: { label: "Password", status: "Not set", showAddForm: false },
-		google: { label: "Google", status: "Not linked", email: null, action: null }
+		password: { label: translate("auth.password", { defaultValue: "Password" }), status: translate("profile.notSet", { defaultValue: "Not set" }), showAddForm: false },
+		google: { label: "Google", status: translate("profile.notLinked", { defaultValue: "Not linked" }), email: null, action: null }
 	};
 	const linkMessage = locals.googleLinkMessage ?? null;
 	const passwordMessage = locals.passwordMessage ?? null;
 	const passwordErrors = locals.passwordErrors ?? [];
-	const expirationLabel = isGuest && currentUser.guestExpiresAt
-		? new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(new Date(currentUser.guestExpiresAt))
-		: null;
 %>
 
 <main class="main profile" data-profile-page data-profile-role="<%= currentUser.role %>">

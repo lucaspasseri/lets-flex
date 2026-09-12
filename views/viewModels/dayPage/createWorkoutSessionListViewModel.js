@@ -1,16 +1,20 @@
 import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
 import { resolveMedia } from "../../../src/features/media/resolveMedia.js";
 import resolveStepMedia from "../../../src/features/media/resolveStepMedia.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
 
 /**
  * @typedef {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession} WorkoutSession
  * @typedef {import("../../../src/features/sessions/sessions.types.js").SessionMapperStep} SessionStep
- * @param {{currentDayId: number | null, workoutSessions: WorkoutSession[]}} input
+ * @param {{currentDayId: number | null, workoutSessions: WorkoutSession[], language?: string, translate?: Function}} input
  */
 export default function createWorkoutSessionListViewModel({
 	currentDayId,
 	workoutSessions,
+	language = "en",
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const visibleSessions = workoutSessions.filter(
 		(session) => session.status !== "cancelled",
 	);
@@ -34,11 +38,16 @@ export default function createWorkoutSessionListViewModel({
 				...(canCancel
 					? {
 							modalId: `deleteWorkoutSessionId-${session.id}`,
-							deleteActionLabel: `Delete ${session.name}`,
+							deleteActionLabel: t("workout.deleteWorkoutSession", {
+								name: session.name,
+								defaultValue: "Delete {{name}}",
+							}),
 						}
 					: {}),
 			},
-			steps: session.steps.map(toStepViewModel),
+			steps: session.steps.map((step) =>
+				toStepViewModel(step, language, t, translate ?? t),
+			),
 		};
 	});
 	const cancellableSessions = visibleSessions.filter(
@@ -47,43 +56,65 @@ export default function createWorkoutSessionListViewModel({
 
 	return {
 		count: items.length,
-		countLabel:
-			items.length === 1
-				? "1 session is assigned to this training day."
-				: `${items.length} sessions are assigned to this training day.`,
+		countLabel: translateCount(
+			translate,
+			"dashboard.sessionsAssignedSentence",
+			items.length,
+			{
+				one: "{{count}} session is assigned to this training day.",
+				other: "{{count}} sessions are assigned to this training day.",
+			},
+		),
 		emptyState: {
 			isVisible: items.length === 0,
-			title: "No session assigned yet",
-			description:
-				"Assign an existing session template or create one for this training day.",
+			title: t("dashboard.noSessionAssigned", {
+				defaultValue: "No session assigned yet",
+			}),
+			description: t("dashboard.assignSessionDescription", {
+				defaultValue:
+					"Assign an existing session template or create one for this training day.",
+			}),
 		},
 		items,
 		cancelModals: cancellableSessions.map((session) => ({
 			id: `deleteWorkoutSessionId-${session.id}`,
-			title: "Delete the workout session",
+			title: t("workout.deleteWorkoutTitle", {
+				defaultValue: "Delete the workout session",
+			}),
 			form: {
 				action: `/workout_sessions/${session.id}?_method=PATCH`,
 				method: "POST",
 				trainingDayId: currentDayId,
-				submitLabel: "Confirm delete",
+				submitLabel: t("workout.confirmDelete", { defaultValue: "Confirm delete" }),
 			},
 		})),
 	};
 }
 
-/** @param {SessionStep} step */
-function toStepViewModel(step) {
+/** @param {SessionStep} step @param {string} language @param {Function} t @param {Function} translate */
+function toStepViewModel(step, language, t, translate) {
 	const title = step.exercise.variantName || step.exercise.name || step.name;
 
 	return {
 		id: step.id,
 		orderLabel: String(step.order).padStart(2, "0"),
 		title: `${title}:`,
-		prescriptionLabel: `${step.sets} sets × ${step.reps} reps`,
+		prescriptionLabel: t("workout.prescription", {
+			sets: translateCount(translate, "workout.sets", step.sets, {
+				one: "{{count}} set",
+				other: "{{count}} sets",
+			}),
+			reps: translateCount(translate, "workout.reps", step.reps, {
+				one: "{{count}} rep",
+				other: "{{count}} reps",
+			}),
+			defaultValue: "{{sets}} × {{reps}}",
+		}),
 		loadLabel: formatStepLoadLabel({
 			loadValue: step.loadValue,
 			loadUnit: step.loadUnit,
 			equipmentName: step.equipment.name,
+			language,
 		}),
 		media: resolveStepMedia(step, { presentation: "initial" }),
 		details: [step.equipment.name, step.movementPattern].filter(Boolean),

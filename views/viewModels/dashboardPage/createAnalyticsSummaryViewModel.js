@@ -1,3 +1,9 @@
+import {
+	formatLocaleNumber,
+	formatLocalePercent,
+} from "../../../src/infrastructure/i18n/formatLocale.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
+
 /** @param {import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData} input @param {Function} [translate] */
 export default function createAnalyticsSummaryViewModel(
 	{ currentProgram, analytics },
@@ -5,8 +11,7 @@ export default function createAnalyticsSummaryViewModel(
 	language = "en",
 ) {
 	const t = createViewModelTranslator(translate);
-	const numberFormatter = new Intl.NumberFormat(language);
-	const formatNumber = (value) => numberFormatter.format(value);
+	const formatNumber = (value) => formatLocaleNumber(value, language);
 	const scheduledCount = analytics.adherence.reduce(
 		(sum, week) => sum + week.scheduledCount,
 		0,
@@ -57,7 +62,10 @@ export default function createAnalyticsSummaryViewModel(
 		},
 		primaryMetric: {
 			label: t("dashboard.programAdherence", { defaultValue: "Program adherence" }),
-			value: completionPercentage === null ? "—" : `${completionPercentage}%`,
+			value:
+				completionPercentage === null
+					? "—"
+					: formatLocalePercent(completionPercentage, language),
 			context:
 				scheduledCount === 0
 					? t("dashboard.noScheduledSessions", {
@@ -66,6 +74,12 @@ export default function createAnalyticsSummaryViewModel(
 					: t("dashboard.adherenceSummary", {
 							finished: formatNumber(finishedScheduledCount),
 							scheduled: formatNumber(scheduledCount),
+							scheduledLabel: translateCount(
+								translate,
+								"dashboard.scheduledSession",
+								scheduledCount,
+								{ one: "scheduled session", other: "scheduled sessions" },
+							),
 							cancelled:
 								cancelledCount > 0
 									? t("dashboard.cancelledSummary", {
@@ -74,7 +88,7 @@ export default function createAnalyticsSummaryViewModel(
 										})
 									: "",
 							defaultValue:
-								"{{finished}} of {{scheduled}} scheduled sessions finished{{cancelled}}.",
+								"{{finished}} of {{scheduled}} {{scheduledLabel}} finished{{cancelled}}.",
 						}),
 		},
 		metrics: [
@@ -102,4 +116,3 @@ export default function createAnalyticsSummaryViewModel(
 		],
 	};
 }
-import createViewModelTranslator from "../translate.js";

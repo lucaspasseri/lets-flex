@@ -57,3 +57,28 @@ test("body middleware returns nested field paths for repeatable form rows", asyn
 		"rows.0.reps": "Invalid input: expected number, received NaN",
 	});
 });
+
+test("body middleware translates application-owned validation messages at the response boundary", async () => {
+	let invalidResult;
+	const request = /** @type {*} */ ({ body: { workoutSessionId: "bad" } });
+	const response = /** @type {*} */ ({
+		locals: {
+			t(key, options) {
+				return key === "validation.validWorkoutSession"
+					? "Escolha uma sessão de treino válida."
+					: options.defaultValue;
+			},
+		},
+	});
+
+	await validateRequestBody(
+		z.object({
+			workoutSessionId: z.coerce.number({ error: "Choose a valid workout session." }),
+		}),
+		(_req, _res, result) => (invalidResult = result),
+	)(request, response, () => assert.fail("must not continue"));
+
+	assert.deepEqual(invalidResult.errors.fieldErrors, {
+		workoutSessionId: "Escolha uma sessão de treino válida.",
+	});
+});

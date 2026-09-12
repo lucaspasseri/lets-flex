@@ -1,5 +1,6 @@
 import formatStepLoadLabel from "../sessions/formatStepLoadLabel.js";
 import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
+import translateCount from "../../infrastructure/i18n/translateCount.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapperStep} SessionMapperStep
@@ -8,14 +9,17 @@ import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
 
 /**
  * @param {SessionMapperStep} step
+ * @param {string} [language]
+ * @param {Function} [translate]
  * @returns {DetailsStepsViewModel}
  */
 
-function createDetailsStepViewModel(step) {
+function createDetailsStepViewModel(step, language = "en", translate) {
 	const prescriptionLoad = ` · ${formatStepLoadLabel({
 		loadValue: step.loadValue,
 		loadUnit: step.loadUnit,
 		equipmentName: step.equipment.name,
+		language,
 	})}`;
 
 	return {
@@ -36,7 +40,7 @@ function createDetailsStepViewModel(step) {
 			reps: step.reps,
 			loadValue: step.loadValue,
 			loadUnit: step.loadUnit,
-			label: `${step.sets} sets × ${step.reps} reps${prescriptionLoad}`,
+			label: `${translateCount(translate, "workout.sets", step.sets, { one: "{{count}} set", other: "{{count}} sets" })} × ${translateCount(translate, "workout.reps", step.reps, { one: "{{count}} rep", other: "{{count}} reps" })}${prescriptionLoad}`,
 		},
 
 		setupDescription: step.exercise.setupDescription ?? "-",

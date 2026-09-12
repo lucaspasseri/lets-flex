@@ -33,12 +33,14 @@ function showFallback(root, canvas, container, status, translate) {
  * available and does not expose provider or implementation details.
  *
  * @param {HTMLElement} root
- * @param {{ChartConstructor?: any, readColor?: (name: string) => string, reducedMotion?: boolean, translate?: Function}} [options]
+ * @param {{ChartConstructor?: any, readColor?: (name: string) => string, reducedMotion?: boolean, translate?: Function, language?: string}} [options]
  */
 export function initializeAdherenceChart(root, options = {}) {
 	const translate =
 		options.translate ??
 		createBrowserTranslator(/** @type {any} */ (root), FALLBACK_MESSAGES);
+	const language =
+		options.language ?? root.ownerDocument?.documentElement?.lang ?? "en";
 	const canvas = /** @type {HTMLCanvasElement | null} */ (
 		root.querySelector("[data-adherence-chart-canvas]")
 	);
@@ -129,7 +131,20 @@ export function initializeAdherenceChart(root, options = {}) {
 				responsive: true,
 				maintainAspectRatio: false,
 				animation: reducedMotion ? false : { duration: 320 },
-				plugins: { legend: { display: false } },
+				plugins: {
+					legend: { display: false },
+					tooltip: {
+						callbacks: {
+							label(context) {
+								const value = Number(context.raw);
+								const formattedValue = Number.isFinite(value)
+									? new Intl.NumberFormat(language).format(value)
+									: String(context.raw);
+								return `${context.dataset.label}: ${formattedValue}`;
+							},
+						},
+					},
+				},
 				interaction: { mode: "index", intersect: false },
 				scales: {
 					x: {

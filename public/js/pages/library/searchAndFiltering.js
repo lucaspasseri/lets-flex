@@ -1,3 +1,26 @@
+import { createBrowserTranslator } from "../../i18n.js";
+
+const FALLBACK_MESSAGES = {
+	library: {
+		sessionCount: { one: "{{count}} session", other: "{{count}} sessions" },
+		sessionRange: {
+			one: "{{visible}} of {{count}} session",
+			other: "{{visible}} of {{count}} sessions",
+		},
+		exerciseCount: { one: "{{count}} exercise", other: "{{count}} exercises" },
+		exerciseRange: {
+			one: "{{visible}} of {{count}} exercise",
+			other: "{{visible}} of {{count}} exercises",
+		},
+		variantCount: { one: "{{count}} variant", other: "{{count}} variants" },
+		variantRange: {
+			one: "{{visible}} of {{count}} variant",
+			other: "{{visible}} of {{count}} variants",
+		},
+		shownTotal: "{{shown}} shown · {{total}} total",
+	},
+};
+
 function normalize(value) {
 	return String(value ?? "")
 		.trim()
@@ -84,10 +107,10 @@ function hasActiveFilters(state) {
 	);
 }
 
-function formatSessionCount(visibleCount, totalCount, filtered) {
+function formatSessionCount(visibleCount, totalCount, filtered, translate) {
 	return filtered
-		? `${visibleCount} of ${totalCount} ${totalCount === 1 ? "session" : "sessions"}`
-		: `${visibleCount} ${visibleCount === 1 ? "session" : "sessions"}`;
+		? translate("library.sessionRange", { visible: visibleCount, count: totalCount })
+		: translate("library.sessionCount", { count: visibleCount });
 }
 
 function formatExerciseCount(
@@ -96,10 +119,11 @@ function formatExerciseCount(
 	totalCount,
 	totalVariantCount,
 	filtered,
+	translate,
 ) {
 	return filtered
-		? `${visibleCount} of ${totalCount} ${totalCount === 1 ? "exercise" : "exercises"} · ${visibleVariantCount} of ${totalVariantCount} ${totalVariantCount === 1 ? "variant" : "variants"}`
-		: `${visibleCount} ${visibleCount === 1 ? "exercise" : "exercises"} · ${visibleVariantCount} ${visibleVariantCount === 1 ? "variant" : "variants"}`;
+		? `${translate("library.exerciseRange", { visible: visibleCount, count: totalCount })} · ${translate("library.variantRange", { visible: visibleVariantCount, count: totalVariantCount })}`
+		: `${translate("library.exerciseCount", { count: visibleCount })} · ${translate("library.variantCount", { count: visibleVariantCount })}`;
 }
 
 function applySessionFilters(section, state) {
@@ -121,7 +145,7 @@ function applySessionFilters(section, state) {
 	return { visibleCount, totalCount: items.length };
 }
 
-function applyExerciseFilters(section, state) {
+function applyExerciseFilters(section, state, translate) {
 	const items = Array.from(section.querySelectorAll("[data-search-exercise-item]"));
 	let visibleCount = 0;
 	let visibleVariantCount = 0;
@@ -162,12 +186,21 @@ function applyExerciseFilters(section, state) {
 		if (variantCount) {
 			const matchedCount = result.visibleVariantIndexes.length;
 			variantCount.textContent = hasActiveFilters(state)
-				? `${matchedCount} of ${variantElements.length} variants`
-				: `${variantElements.length} ${variantElements.length === 1 ? "variant" : "variants"}`;
+				? translate("library.variantRange", {
+						visible: matchedCount,
+						count: variantElements.length,
+					})
+				: translate("library.variantCount", { count: variantElements.length });
 			if (variantResultCount) {
 				variantResultCount.textContent = hasActiveFilters(state)
-					? `${matchedCount} shown · ${variantElements.length} total`
-					: `${variantElements.length} total`;
+					? translate("library.shownTotal", {
+							shown: matchedCount,
+							total: variantElements.length,
+						})
+					: translate("library.shownTotal", {
+							shown: variantElements.length,
+							total: variantElements.length,
+						});
 			}
 		}
 	});
@@ -180,7 +213,7 @@ function applyExerciseFilters(section, state) {
 	};
 }
 
-function initializeDiscoverySection(section) {
+function initializeDiscoverySection(section, translate) {
 	const query = section.querySelector("[data-library-query]");
 	const filterFields = Array.from(section.querySelectorAll("[data-library-filter]"));
 	const clearButton = section.querySelector("[data-library-clear]");
@@ -196,13 +229,14 @@ function initializeDiscoverySection(section) {
 		const result =
 			sectionType === "sessions"
 				? applySessionFilters(section, state)
-				: applyExerciseFilters(section, state);
+				: applyExerciseFilters(section, state, translate);
 
 		if (sectionType === "sessions") {
 			count.textContent = formatSessionCount(
 				result.visibleCount,
 				result.totalCount,
 				filtered,
+				translate,
 			);
 		} else {
 			count.textContent = formatExerciseCount(
@@ -211,6 +245,7 @@ function initializeDiscoverySection(section) {
 				result.totalCount,
 				result.totalVariantCount ?? 0,
 				filtered,
+				translate,
 			);
 		}
 
@@ -248,8 +283,9 @@ function initializeLibrarySectionTabs(root) {
 }
 
 export function initializeSearchAndFiltering(root) {
+	const translate = createBrowserTranslator(root, FALLBACK_MESSAGES);
 	initializeLibrarySectionTabs(root);
 	root
 		.querySelectorAll("[data-library-discovery-section]")
-		.forEach(initializeDiscoverySection);
+		.forEach((section) => initializeDiscoverySection(section, translate));
 }

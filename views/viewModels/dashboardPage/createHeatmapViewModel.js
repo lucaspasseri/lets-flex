@@ -1,4 +1,8 @@
 import createViewModelTranslator from "../translate.js";
+import {
+	formatLocaleDate,
+	formatLocaleNumber,
+} from "../../../src/infrastructure/i18n/formatLocale.js";
 
 /** @param {Pick<import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, "currentProgram" | "heatmap">} input @param {Function} [translate] */
 export default function createHeatmapViewModel(
@@ -7,29 +11,12 @@ export default function createHeatmapViewModel(
 	language = "en",
 ) {
 	const t = createViewModelTranslator(translate);
-	const dayFormatter = new Intl.DateTimeFormat(language, {
-		day: "numeric",
-		timeZone: "UTC",
-	});
-	const shortDateFormatter = new Intl.DateTimeFormat(language, {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-		timeZone: "UTC",
-	});
-	const longDateFormatter = new Intl.DateTimeFormat(language, {
-		dateStyle: "full",
-		timeZone: "UTC",
-	});
-	const weekdayFormatter = new Intl.DateTimeFormat(language, {
-		weekday: "short",
-		timeZone: "UTC",
-	});
 	const days = heatmap.flatMap((cycle) =>
 		cycle.days.map((day) => ({ ...day, cycleName: cycle.cycleName })),
 	);
 	const finishedCount = days.reduce((sum, day) => sum + day.finishedCount, 0);
 	const activeDays = days.filter((day) => day.finishedCount > 0);
+	const formatCount = (count) => formatLocaleNumber(count, language);
 
 	return {
 		isVisible: Boolean(currentProgram),
@@ -48,12 +35,12 @@ export default function createHeatmapViewModel(
 						defaultValue: "No finished workouts fall inside this program calendar yet.",
 					})
 				: t("dashboard.activitySummary", {
-						finished: finishedCount,
+						finished: formatCount(finishedCount),
 						workouts: t("dashboard.finishedWorkout", {
 							count: finishedCount,
 							defaultValue: "workouts",
 						}),
-						active: activeDays.length,
+						active: formatCount(activeDays.length),
 						days: t("dashboard.activeDay", {
 							count: activeDays.length,
 							defaultValue: "days",
@@ -71,7 +58,9 @@ export default function createHeatmapViewModel(
 			}),
 		},
 		weekdays: Array.from({ length: 7 }, (_, index) =>
-			weekdayFormatter.format(new Date(Date.UTC(2023, 0, index + 1))),
+			formatLocaleDate(new Date(Date.UTC(2023, 0, index + 1)), language, {
+				weekday: "short",
+			}),
 		),
 		legend: [
 			{
@@ -100,20 +89,32 @@ export default function createHeatmapViewModel(
 			id: cycle.cycleId,
 			name: cycle.cycleName,
 			finishedCount: cycle.days.reduce((sum, day) => sum + day.finishedCount, 0),
+			finishedCountLabel: t("dashboard.finishedWorkoutsOnDate", {
+				count: cycle.days.reduce((sum, day) => sum + day.finishedCount, 0),
+				formattedCount: formatCount(
+					cycle.days.reduce((sum, day) => sum + day.finishedCount, 0),
+				),
+				defaultValue: "{{formattedCount}} finished workouts",
+			}),
 			days: cycle.days.map((day) => ({
 				...day,
-				dayLabel: dayFormatter.format(day.date),
-				marker: day.finishedCount === 0 ? "—" : String(day.finishedCount),
-				accessibleLabel: `${longDateFormatter.format(day.date)}: ${day.finishedCount === 0 ? t("dashboard.noFinishedWorkoutsOnDate", { defaultValue: "no finished workouts" }) : t("dashboard.finishedWorkoutsOnDate", { count: day.finishedCount, defaultValue: "{{count}} finished workouts" })}`,
+				dayLabel: formatLocaleDate(day.date, language, { day: "numeric" }),
+				marker: day.finishedCount === 0 ? "—" : formatCount(day.finishedCount),
+				accessibleLabel: `${formatLocaleDate(day.date, language, { dateStyle: "full" })}: ${day.finishedCount === 0 ? t("dashboard.noFinishedWorkoutsOnDate", { defaultValue: "no finished workouts" }) : t("dashboard.finishedWorkoutsOnDate", { count: day.finishedCount, formattedCount: formatCount(day.finishedCount), defaultValue: "{{formattedCount}} finished workouts" })}`,
 				emptyCells: Array.from({ length: day.offset ?? 0 }, (_, index) => index),
 				cellClass: `dashboard-heatmap__cell--${day.intensity}`,
 			})),
 		})),
 		activityRows: activeDays.map((day) => ({
 			dateKey: day.dateKey,
-			dateLabel: shortDateFormatter.format(day.date),
+			dateLabel: formatLocaleDate(day.date, language, {
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			}),
 			cycleName: day.cycleName,
 			finishedCount: day.finishedCount,
+			finishedCountLabel: formatCount(day.finishedCount),
 		})),
 	};
 }

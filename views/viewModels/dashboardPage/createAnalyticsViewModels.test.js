@@ -4,6 +4,7 @@ import createAnalyticsSummaryViewModel from "./createAnalyticsSummaryViewModel.j
 import createBarChartViewModel from "./createBarChartViewModel.js";
 import createHeatmapViewModel from "./createHeatmapViewModel.js";
 import createWorkloadViewModel from "./createWorkloadViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const currentProgram = {
 	id: 7,
@@ -126,4 +127,41 @@ test("analytics view models expose intentional empty states without inventing ze
 	assert.equal(createBarChartViewModel(input).isEmpty, true);
 	assert.equal(createWorkloadViewModel(input).isEmpty, true);
 	assert.equal(createHeatmapViewModel({ currentProgram, heatmap: [] }).isEmpty, true);
+});
+
+test("analytics labels and counts follow the Brazilian Portuguese presentation locale", () => {
+	const translate = i18n.getFixedT("pt-BR");
+	const adherence = createBarChartViewModel(
+		{ currentProgram, analytics },
+		translate,
+		"pt-BR",
+	);
+	const activity = createHeatmapViewModel(
+		{
+			currentProgram,
+			heatmap: [
+				{
+					cycleId: 9,
+					cycleName: "Foundation",
+					days: [
+						{
+							date: new Date(2026, 7, 12),
+							dateKey: "2026-08-12",
+							dateLabel: "12/08",
+							offset: null,
+							intensity: "many",
+							finishedCount: 2,
+						},
+					],
+				},
+			],
+		},
+		translate,
+		"pt-BR",
+	);
+
+	assert.deepEqual(adherence.labels, ["S1", "S2"]);
+	assert.equal(activity.cycles[0].finishedCountLabel, "2 treinos concluídos");
+	assert.equal(activity.cycles[0].days[0].marker, "2");
+	assert.match(activity.cycles[0].days[0].accessibleLabel, /2 treinos concluídos/);
 });

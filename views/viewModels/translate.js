@@ -1,3 +1,5 @@
+import translateCount from "../../src/infrastructure/i18n/translateCount.js";
+
 /**
  * Keep view models usable in isolated unit tests while using the established EJS/i18next
  * translator when a controller supplies one.
@@ -12,3 +14,14 @@ export default function createViewModelTranslator(translate) {
 					(_match, name) => options[name] ?? _match,
 				);
 }
+
+/**
+ * Resolve a count-aware translation while keeping isolated view-model tests
+ * useful when no i18next translator is supplied.
+ *
+ * @param {unknown} translate
+ * @param {string} key
+ * @param {number} count
+ * @param {{one: string, other: string} & Record<string, unknown>} options
+ */
+export { translateCount };

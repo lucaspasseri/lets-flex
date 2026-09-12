@@ -1,15 +1,16 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const { id, heading, description, items } = locals.hierarchyGuide;
 %>
 
 <section class="program-hierarchy" aria-labelledby="<%= id %>-heading">
 	<header class="program-hierarchy__header">
-		<p class="program-hierarchy__eyebrow">Plan structure</p>
+		<p class="program-hierarchy__eyebrow"><%= translate("programs.planStructure", { defaultValue: "Plan structure" }) %></p>
 		<h2 id="<%= id %>-heading"><%= heading %></h2>
 		<p><%= description %></p>
 	</header>
 
-	<ol class="program-hierarchy__list" aria-label="Program planning hierarchy">
+	<ol class="program-hierarchy__list" aria-label="<%= translate("dashboard.programHierarchy", { defaultValue: "Program planning hierarchy" }) %>">
 		<% items.forEach(item => { %>
 			<li class="program-hierarchy__item<%= item.isSelected ? ' program-hierarchy__item--selected' : '' %>">
 				<div class="program-hierarchy__icon" aria-hidden="true">

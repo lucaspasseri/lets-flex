@@ -1,7 +1,7 @@
 import formatStepLoadLabel from "../../../src/features/sessions/formatStepLoadLabel.js";
 import { resolveMedia } from "../../../src/features/media/resolveMedia.js";
 import resolveStepMedia from "../../../src/features/media/resolveStepMedia.js";
-import createViewModelTranslator from "../translate.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
 
 const MAX_SET_ROWS = 100;
 
@@ -10,7 +10,7 @@ function percentage(steps, predicate) {
 	return steps.length === 0 ? 0 : (steps.filter(predicate).length / steps.length) * 100;
 }
 
-/** @param {{session: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession | null, sessions: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession[], daysDifference: number | null, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, translate?: Function}} input */
+/** @param {{session: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession | null, sessions: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession[], daysDifference: number | null, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, translate?: Function, language?: string}} input */
 export default function createWorkoutSessionViewModel({
 	session,
 	sessions,
@@ -19,6 +19,7 @@ export default function createWorkoutSessionViewModel({
 	actionFormState,
 	workoutFeedback = null,
 	translate,
+	language = "en",
 }) {
 	const t = createViewModelTranslator(translate);
 	const status = session?.status ?? null;
@@ -61,14 +62,21 @@ export default function createWorkoutSessionViewModel({
 			defaultValue: "Step {{position}} of {{total}}",
 		}),
 		prescriptionLabel: t("workout.prescription", {
-			sets: step.sets,
-			reps: step.reps,
-			defaultValue: "{{sets}} sets × {{reps}} reps",
+			sets: translateCount(translate, "workout.sets", step.sets, {
+				one: "{{count}} set",
+				other: "{{count}} sets",
+			}),
+			reps: translateCount(translate, "workout.reps", step.reps, {
+				one: "{{count}} rep",
+				other: "{{count}} reps",
+			}),
+			defaultValue: "{{sets}} × {{reps}}",
 		}),
 		loadLabel: formatStepLoadLabel({
 			loadValue: step.loadValue,
 			loadUnit: step.loadUnit,
 			equipmentName: step.equipment.name,
+			language,
 		}),
 	}));
 	const hasWorkoutLogs = steps.some((step) => step.stepLog?.id);
@@ -115,10 +123,11 @@ export default function createWorkoutSessionViewModel({
 						value: resolvedCount,
 						max: steps.length,
 						percentage: Math.round(resolvedPercentage),
-						label: t("workout.stepsResolved", {
+						label: translateCount(translate, "workout.stepsResolved", steps.length, {
 							resolved: resolvedCount,
 							total: steps.length,
-							defaultValue: "{{resolved}} of {{total}} steps resolved",
+							one: "{{resolved}} of {{total}} step resolved",
+							other: "{{resolved}} of {{total}} steps resolved",
 						}),
 						detail: t("workout.progressDetail", {
 							performed: performedCount,
@@ -147,6 +156,7 @@ export default function createWorkoutSessionViewModel({
 								session.id,
 								workoutLogFormState ?? actionFormState,
 								t,
+								language,
 							)
 						: null,
 					startForm: {
@@ -315,6 +325,7 @@ function createCurrentStepViewModel(
 	workoutSessionId,
 	formState,
 	t,
+	language,
 ) {
 	const log = step.stepLog;
 	if (!log) return null;
@@ -335,6 +346,7 @@ function createCurrentStepViewModel(
 			loadValue: log.plannedLoadValue,
 			loadUnit: log.plannedLoadUnit,
 			equipmentName: step.equipment.name,
+			language,
 		}),
 		positionLabel: t("workout.stepPosition", {
 			position,

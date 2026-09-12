@@ -15,7 +15,7 @@
 				<% workoutLogForm.rows.forEach(row => { %><%- include("workoutLogsFormRow", { row, translate: t }) %><% }) %>
 			</div>
 		</form>
-		<%- include('../shared/components/button/button', { button: { label: "Add another set", type: "button", variant: "secondary", alternativeClassname: "add-row", attributes: { "data-action": "add-set", "aria-describedby": "set-limit-help" } } }) %>
+		<%- include('../shared/components/button/button', { button: { label: t("workout.addSet", { defaultValue: "Add another set" }), type: "button", variant: "secondary", alternativeClassname: "add-row", attributes: { "data-action": "add-set", "aria-describedby": "set-limit-help" } } }) %>
 		<p class="sets-container__help" id="set-limit-help"><%= t("workout.setLimitHelp", { max: workoutLogForm.maxRows, defaultValue: "Add up to {{max}} sets. Repetitions and load are optional." }) %> <%= workoutLogForm.loadGuidance %>.</p>
 	</div>
 	<div class="step-log-button-container">

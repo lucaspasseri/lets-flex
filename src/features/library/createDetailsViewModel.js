@@ -4,6 +4,8 @@ import {
 } from "./selectors/sessionSelectors.js";
 import createDetailsStepViewModel from "./createDetailsStepViewModel.js";
 import { resolveMedia } from "../media/resolveMedia.js";
+import translateCount from "../../infrastructure/i18n/translateCount.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapper} SessionMapper
@@ -15,6 +17,8 @@ import { resolveMedia } from "../media/resolveMedia.js";
  * @typedef {object} CreateDetailsInput
  * @property { SessionMapper | null} session
  * @property {number | null} [actorUserId]
+ * @property {string} [language]
+ * @property {Function} [translate]
  */
 
 /**
@@ -22,27 +26,37 @@ import { resolveMedia } from "../media/resolveMedia.js";
  * @returns {DetailsViewModel | null}
  */
 
-function createDetails({ session, actorUserId = null }) {
+function createDetails({ session, actorUserId = null, language = "en", translate }) {
 	if (!session) {
 		return null;
 	}
+	const t = (key, options = {}) =>
+		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
 	const steps = session.steps ?? [];
 	const stepCount = steps.length;
 	const setCount = steps.reduce((total, step) => total + step.sets, 0);
 	const movements = getDistinctMovements(session);
 	const equipments = getDistinctEquipments(session);
 
-	const detailSteps = steps.map(createDetailsStepViewModel);
+	const detailSteps = steps.map((step) =>
+		createDetailsStepViewModel(step, language, translate),
+	);
 
 	return {
 		id: session.id,
 		headingId: `session-details-title-${session.id}`,
 		name: session.name,
-		description: "Remember, safety first.",
+		description: t("library.safetyReminder", {
+			defaultValue: "Remember, safety first.",
+		}),
 		notes: session.notes,
 		isArchived: session.isArchived,
 
 		stepNumber: stepCount,
+		stepCountLabel: translateCount(translate, "library.exerciseCount", stepCount, {
+			one: "{{count}} exercise",
+			other: "{{count}} exercises",
+		}),
 		media: steps[0]
 			? resolveMedia({
 					entityType: "session",
@@ -54,22 +68,22 @@ function createDetails({ session, actorUserId = null }) {
 
 		stats: [
 			{
-				label: "Exercises",
+				label: t("library.exercises", { defaultValue: "Exercises" }),
 				value: stepCount,
 				icon: "dumbbell",
 			},
 			{
-				label: "Working sets",
+				label: t("library.workingSets", { defaultValue: "Working sets" }),
 				value: setCount,
 				icon: "layers",
 			},
 			{
-				label: "Movement patterns",
+				label: t("library.movementPatterns", { defaultValue: "Movement patterns" }),
 				value: movements.length,
 				icon: "activity",
 			},
 			{
-				label: "Equipment",
+				label: t("library.equipment", { defaultValue: "Equipment" }),
 				value: equipments.length,
 				icon: "wrench",
 			},
@@ -79,7 +93,7 @@ function createDetails({ session, actorUserId = null }) {
 			session.ownerUserId === actorUserId
 				? {
 						edit: {
-							label: "Edit session",
+							label: t("library.editSession", { defaultValue: "Edit session" }),
 							modalId: "updateSessionModal",
 							values: {
 								sessionId: session.id,
@@ -99,7 +113,7 @@ function createDetails({ session, actorUserId = null }) {
 						delete: session.isArchived
 							? null
 							: {
-									label: "Delete session",
+									label: t("library.deleteSession", { defaultValue: "Delete session" }),
 									modalId: "deleteSessionModal",
 									values: { sessionId: session.id, name: session.name },
 								},

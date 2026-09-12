@@ -7,6 +7,7 @@ import updateExerciseTemplate, {
 import { renderLibrary } from "./libraryController.js";
 import * as exerciseVariantsRepository from "../../features/exerciseVariants/repository.js";
 import respondWithContextualMutationError from "../contextualMutationError.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /** @typedef {import("express").Request & {validatedBody?: any, validatedParams?: any}} Request */
 /** @typedef {import("express").Response} Response */
@@ -53,6 +54,8 @@ async function destroy(req, res) {
 
 /** @param {Request} req @param {Response} res */
 async function createGlobalVariant(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	try {
 		const variant = await exerciseVariantsRepository.createGlobal({
 			...req.validatedBody,
@@ -62,14 +65,17 @@ async function createGlobalVariant(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 404,
 				fallbackMessage: "Exercise not found",
+				fallbackKey: "mutation.exerciseNotFound",
 				render: () =>
 					renderLibrary(req, res, {
 						managementMode: true,
 						pageFeedback: {
 							id: "library-page-feedback-title",
-							title: "Variant not created",
-							message:
+							title: t("variantNotCreated", "Variant not created"),
+							message: t(
+								"exerciseUnavailable",
 								"That exercise is no longer available. Refresh the catalog and try again.",
+							),
 						},
 						variantFormState: {
 							values: {
@@ -78,7 +84,12 @@ async function createGlobalVariant(req, res) {
 							},
 							errors: {
 								fieldErrors: {},
-								formErrors: ["The selected exercise is no longer available."],
+								formErrors: [
+									t(
+										"exerciseUnavailable",
+										"The selected exercise is no longer available.",
+									),
+								],
 							},
 						},
 					}),
@@ -96,14 +107,17 @@ async function createGlobalVariant(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 409,
 				fallbackMessage: "A global variant with that name already exists.",
+				fallbackKey: "mutation.globalVariantConflict",
 				render: () =>
 					renderLibrary(req, res, {
 						managementMode: true,
 						pageFeedback: {
 							id: "library-page-feedback-title",
-							title: "Variant not created",
-							message:
+							title: t("variantNotCreated", "Variant not created"),
+							message: t(
+								"globalVariantConflict",
 								"A global variant with that name already exists. Choose a different name.",
+							),
 						},
 						variantFormState: {
 							values: {
@@ -111,7 +125,9 @@ async function createGlobalVariant(req, res) {
 								exerciseId: req.validatedParams.exerciseId,
 							},
 							errors: {
-								fieldErrors: { name: "Choose a different variant name." },
+								fieldErrors: {
+									name: t("differentVariantName", "Choose a different variant name."),
+								},
 								formErrors: [],
 							},
 						},
@@ -128,14 +144,17 @@ async function createGlobalVariant(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 422,
 				fallbackMessage: "Choose valid related Library resources.",
+				fallbackKey: "mutation.relatedResourcesFallback",
 				render: () =>
 					renderLibrary(req, res, {
 						managementMode: true,
 						pageFeedback: {
 							id: "library-page-feedback-title",
-							title: "Variant not created",
-							message:
+							title: t("variantNotCreated", "Variant not created"),
+							message: t(
+								"relatedResourcesInvalid",
 								"Choose a current exercise and equipment option, then try again.",
+							),
 						},
 						variantFormState: {
 							values: {
@@ -154,6 +173,8 @@ async function createGlobalVariant(req, res) {
 
 /** @param {Request & {validatedBody?: any}} req @param {Response} res */
 async function update(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	const { exerciseId, variantId } = req.validatedParams;
 
 	try {
@@ -167,14 +188,17 @@ async function update(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 404,
 				fallbackMessage: "Exercise template not found",
+				fallbackKey: "mutation.exerciseNotFound",
 				render: () =>
 					renderLibrary(req, res, {
 						managementMode: true,
 						pageFeedback: {
 							id: "library-page-feedback-title",
-							title: "Exercise not updated",
-							message:
+							title: t("exerciseNotUpdated", "Exercise not updated"),
+							message: t(
+								"exerciseUnavailable",
 								"That exercise template is no longer available. Your changes are preserved below; refresh Library before trying again.",
+							),
 						},
 						exerciseTemplateFormState: {
 							mode: "update",
@@ -182,7 +206,15 @@ async function update(req, res) {
 							exerciseId: req.validatedParams.exerciseId,
 							variantId: req.validatedParams.variantId,
 							values: req.validatedBody,
-							errors: { fieldErrors: {}, formErrors: [error.message] },
+							errors: {
+								fieldErrors: {},
+								formErrors: [
+									t(
+										"exerciseUnavailable",
+										"That exercise template is no longer available. Your changes are preserved below; refresh Library before trying again.",
+									),
+								],
+							},
 						},
 					}),
 			});

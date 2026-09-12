@@ -4,6 +4,7 @@ import path from "node:path";
 import ejs from "ejs";
 import createDayPageViewModel from "./createDayPageViewModel.js";
 import createWorkoutSessionListViewModel from "./createWorkoutSessionListViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const page = {
 	path: "/day",
@@ -50,6 +51,40 @@ const step = {
 	equipment: { name: "Barbell", category: "Free weight" },
 	muscles: [],
 };
+
+test("day presentation keeps assignment and empty-state copy in Portuguese", () => {
+	const result = createDayPageViewModel({
+		page,
+		pageState: { userId: 1, programId: 6, cycleId: 5, dayId: 2, sessionId: null },
+		data: {
+			currentUser: user,
+			program,
+			cycle,
+			days: { current: days[1], items: days },
+			sessions: { items: [] },
+			workoutSessions: { items: [] },
+		},
+		translate: i18n.getFixedT("pt-BR"),
+		language: "pt-BR",
+	});
+
+	assert.equal(
+		result.components.sessionLinkForm.fields.session.label,
+		"Modelo de sessão",
+	);
+	assert.equal(
+		result.components.sessionLinkForm.actions.submit.label,
+		"Atribuir a este dia",
+	);
+	assert.equal(
+		result.components.workoutSessionList.emptyState.title,
+		"Nenhuma sessão atribuída ainda",
+	);
+	assert.equal(
+		result.components.workoutSessionList.emptyState.description,
+		"Atribua um modelo de sessão existente ou crie um para este dia de treino.",
+	);
+});
 
 test("day page creates predictable navigation, form, cards, and modal contracts", () => {
 	const result = createDayPageViewModel({
@@ -101,7 +136,7 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 		},
 	});
 
-	assert.equal(result.components.dayHeader.dateLabel, "21/08/2026");
+	assert.equal(result.components.dayHeader.dateLabel, "08/21/2026");
 	assert.equal(result.components.dayHeader.title, "Day 2");
 	assert.equal(result.components.dayHeader.eyebrow, "Strength plan · Foundation");
 	assert.equal(result.page.title, "Day 2 · Foundation · Let's Flex!");
@@ -148,7 +183,7 @@ test("day page creates predictable navigation, form, cards, and modal contracts"
 	);
 	assert.equal(
 		result.components.workoutSessionList.items[0].steps[0].loadLabel,
-		"60 Kilograms",
+		"60 kg",
 	);
 	assert.equal(
 		result.components.workoutSessionList.cancelModals[0].form.trainingDayId,
@@ -395,7 +430,7 @@ test("day template renders only from its component ViewModels", async () => {
 	assert.match(html, /Program hierarchy/);
 	assert.match(html, /Strength plan · Foundation/);
 	assert.match(html, /Strength plan[\s\S]*Foundation[\s\S]*Day 2/);
-	assert.match(html, /21\/08\/2026/);
+	assert.match(html, /08\/21\/2026/);
 	assert.match(html, /href="\/programs\/day\?dayId=1"/);
 	assert.match(html, /day-navigation__item--current[^>]*aria-current="date"/);
 	assert.match(html, /<option[\s\S]*?value="20"[\s\S]*?>\s*Available/);

@@ -6,6 +6,7 @@ import toNullableNumber from "../../../utils/toNullableNumber.js";
 import { renderPrograms } from "./programController.js";
 import deleteCycle, { CycleNotFoundError } from "../../features/cycles/deleteCycle.js";
 import respondWithContextualMutationError from "../contextualMutationError.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
@@ -14,6 +15,8 @@ import respondWithContextualMutationError from "../contextualMutationError.js";
 
 /** @param {Request} req @param {Response} res */
 async function create(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	const programId = toNullableNumber(req.session?.state?.programId);
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
@@ -26,7 +29,9 @@ async function create(req, res) {
 				values: req.body,
 				errors: {
 					fieldErrors: {},
-					formErrors: ["Choose an active program before creating a cycle."],
+					formErrors: [
+						t("cycleRequired", "Choose an active program before creating a cycle."),
+					],
 				},
 			},
 		});
@@ -52,7 +57,9 @@ async function create(req, res) {
 					open: true,
 					values: req.body,
 					errors: {
-						fieldErrors: { cycleOrder: error.message },
+						fieldErrors: {
+							cycleOrder: t("cycleOrderInvalid", "Choose a valid cycle position."),
+						},
 						formErrors: [],
 					},
 				},
@@ -67,6 +74,8 @@ async function create(req, res) {
 }
 
 async function destroy(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	const cycleId = toNullableNumber(req.validatedParams?.cycleId ?? req.params.cycleId);
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
@@ -74,12 +83,16 @@ async function destroy(req, res) {
 		await respondWithContextualMutationError(req, res, {
 			status: 400,
 			fallbackMessage: "Invalid cycle ID",
+			fallbackKey: "mutation.invalidCycleId",
 			render: () =>
 				renderPrograms(req, res, {
 					pageFeedback: {
 						id: "programs-page-feedback-title",
-						title: "Cycle not deleted",
-						message: "Refresh Programs and choose the cycle again.",
+						title: t("cycleNotDeleted", "Cycle not deleted"),
+						message: t(
+							"refreshChooseCycle",
+							"Refresh Programs and choose the cycle again.",
+						),
 					},
 				}),
 		});
@@ -89,12 +102,16 @@ async function destroy(req, res) {
 		await respondWithContextualMutationError(req, res, {
 			status: 403,
 			fallbackMessage: "Choose an active profile before deleting a cycle",
+			fallbackKey: "mutation.profileRequired",
 			render: () =>
 				renderPrograms(req, res, {
 					pageFeedback: {
 						id: "programs-page-feedback-title",
-						title: "Cycle not deleted",
-						message: "Choose an active profile before deleting a cycle.",
+						title: t("cycleNotDeleted", "Cycle not deleted"),
+						message: t(
+							"profileRequired",
+							"Choose an active profile before deleting a cycle.",
+						),
 					},
 				}),
 		});
@@ -108,13 +125,16 @@ async function destroy(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 404,
 				fallbackMessage: "Cycle not found",
+				fallbackKey: "mutation.cycleNotFound",
 				render: () =>
 					renderPrograms(req, res, {
 						pageFeedback: {
 							id: "programs-page-feedback-title",
-							title: "Cycle not deleted",
-							message:
+							title: t("cycleNotDeleted", "Cycle not deleted"),
+							message: t(
+								"cycleUnavailable",
 								"That cycle is no longer available. Refresh Programs to see the current plan.",
+							),
 						},
 					}),
 			});

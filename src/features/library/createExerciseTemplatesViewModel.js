@@ -1,5 +1,7 @@
 import createExercise from "./createExerciseViewModel.js";
 import createDiscoveryFilterOptions from "./createDiscoveryFilterOptions.js";
+import translateCount from "../../infrastructure/i18n/translateCount.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef { import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplateMapper} ExerciseTemplateMapper
@@ -12,6 +14,7 @@ import createDiscoveryFilterOptions from "./createDiscoveryFilterOptions.js";
  * @property {number | null} actorUserId
  * @property {boolean} managementMode
  * @property {Record<string, any>} [privateVariantMutationState]
+ * @property {Function} [translate]
  */
 
 /**
@@ -25,7 +28,10 @@ function createExerciseTemplates({
 	actorUserId = null,
 	managementMode = false,
 	privateVariantMutationState,
+	translate,
 }) {
+	const t = (key, options = {}) =>
+		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
 	const groupedExercises = /** @type {Map<number, ExerciseTemplateMapper[]>} */ (
 		new Map()
 	);
@@ -42,6 +48,7 @@ function createExerciseTemplates({
 				actorUserId,
 				managementMode,
 				privateVariantMutationState,
+				translate,
 			}),
 		)
 		.sort((first, second) => first.baseName.localeCompare(second.baseName));
@@ -50,8 +57,8 @@ function createExerciseTemplates({
 	const filterDefinitions = [
 		{
 			name: "movement",
-			label: "Movement pattern",
-			allLabel: "All movements",
+			label: t("library.movementPattern", { defaultValue: "Movement pattern" }),
+			allLabel: t("library.allMovements", { defaultValue: "All movements" }),
 			level: /** @type {const} */ ("base"),
 			options: createDiscoveryFilterOptions(
 				items.flatMap((item) => item.filters.movement),
@@ -59,8 +66,8 @@ function createExerciseTemplates({
 		},
 		{
 			name: "muscle",
-			label: "Muscle",
-			allLabel: "All muscles",
+			label: t("library.muscle", { defaultValue: "Muscle" }),
+			allLabel: t("library.allMuscles", { defaultValue: "All muscles" }),
 			level: /** @type {const} */ ("base"),
 			options: createDiscoveryFilterOptions(
 				items.flatMap((item) => item.filters.muscle),
@@ -68,8 +75,8 @@ function createExerciseTemplates({
 		},
 		{
 			name: "equipment",
-			label: "Equipment",
-			allLabel: "All equipment",
+			label: t("library.equipment", { defaultValue: "Equipment" }),
+			allLabel: t("library.allEquipment", { defaultValue: "All equipment" }),
 			level: /** @type {const} */ ("variant"),
 			options: createDiscoveryFilterOptions(
 				items.flatMap((item) =>
@@ -79,8 +86,8 @@ function createExerciseTemplates({
 		},
 		{
 			name: "environment",
-			label: "Environment",
-			allLabel: "All environments",
+			label: t("library.environment", { defaultValue: "Environment" }),
+			allLabel: t("library.allEnvironments", { defaultValue: "All environments" }),
 			level: /** @type {const} */ ("variant"),
 			options: createDiscoveryFilterOptions(
 				items.flatMap((item) =>
@@ -90,8 +97,8 @@ function createExerciseTemplates({
 		},
 		{
 			name: "scope",
-			label: "Availability",
-			allLabel: "All availability",
+			label: t("library.availability", { defaultValue: "Availability" }),
+			allLabel: t("library.allAvailability", { defaultValue: "All availability" }),
 			level: /** @type {const} */ ("variant"),
 			options: createDiscoveryFilterOptions(
 				items.flatMap((item) =>
@@ -103,19 +110,39 @@ function createExerciseTemplates({
 
 	return {
 		id: "exercise-templates",
-		label: managementMode ? "Global exercise catalog" : "Available exercises",
+		label: managementMode
+			? t("library.globalExerciseCatalog", { defaultValue: "Global exercise catalog" })
+			: t("library.availableExercises", { defaultValue: "Available exercises" }),
 		description: managementMode
-			? "Only global exercises and sample variants are shown in this administrator view."
-			: "Global exercises are available to everyone; variants you create remain private to you.",
+			? t("library.globalExerciseDescription", {
+					defaultValue:
+						"Only global exercises and sample variants are shown in this administrator view.",
+				})
+			: t("library.availableExercisesDescription", {
+					defaultValue:
+						"Global exercises are available to everyone; variants you create remain private to you.",
+				}),
 
 		count: exerciseCount,
 		variantCount,
-		countLabel: `${exerciseCount} ${exerciseCount === 1 ? "exercise" : "exercises"} · ${variantCount} ${variantCount === 1 ? "variant" : "variants"}`,
+		countLabel: translateCount(translate, "library.catalogCount", exerciseCount, {
+			exerciseCount,
+			variantLabel: translateCount(translate, "library.variantCount", variantCount, {
+				one: "{{count}} variant",
+				other: "{{count}} variants",
+			}),
+			one: "{{exerciseCount}} exercise · {{variantLabel}}",
+			other: "{{exerciseCount}} exercises · {{variantLabel}}",
+		}),
 
 		emptyState: {
-			title: "No exercise templates yet",
-			description:
-				"Create your first exercise template to start building reusable training sessions.",
+			title: t("library.noExerciseTemplates", {
+				defaultValue: "No exercise templates yet",
+			}),
+			description: t("library.noExerciseTemplatesDescription", {
+				defaultValue:
+					"Create your first exercise template to start building reusable training sessions.",
+			}),
 			icon: "dumbbell",
 		},
 
@@ -124,18 +151,24 @@ function createExerciseTemplates({
 		actions: {
 			create: {
 				isVisible: managementMode,
-				label: "Create exercise template",
+				label: t("library.createExerciseTemplate", {
+					defaultValue: "Create exercise template",
+				}),
 				modalId: "createExerciseModal",
 			},
 		},
 
 		discovery: {
 			id: "exercise-discovery",
-			title: "Find an exercise",
-			description:
-				"Search base exercises or variant details, then narrow the catalog by movement, muscle, equipment, or environment.",
-			searchLabel: "Search exercises",
-			searchPlaceholder: "Search exercises, variants, or setup notes",
+			title: t("library.findExercise", { defaultValue: "Find an exercise" }),
+			description: t("library.findExerciseDescription", {
+				defaultValue:
+					"Search base exercises or variant details, then narrow the catalog by movement, muscle, equipment, or environment.",
+			}),
+			searchLabel: t("library.searchExercises", { defaultValue: "Search exercises" }),
+			searchPlaceholder: t("library.searchExercisesPlaceholder", {
+				defaultValue: "Search exercises, variants, or setup notes",
+			}),
 			filters: filterDefinitions,
 		},
 	};

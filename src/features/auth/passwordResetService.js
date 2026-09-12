@@ -40,10 +40,11 @@ export async function requestPasswordReset({
 	email,
 	emailService,
 	environment = process.env,
+	language = "en",
 }) {
 	const normalizedEmail = normalizeEmail(email);
 	const client = await pool.connect();
-	/** @type {{to: string, resetUrl: string, expiresInMs: number} | null} */
+	/** @type {{to: string, resetUrl: string, expiresInMs: number, language?: string} | null} */
 	let delivery = null;
 	try {
 		await client.query("BEGIN");
@@ -69,6 +70,7 @@ export async function requestPasswordReset({
 				to: identity.email,
 				resetUrl: resetUrl.toString(),
 				expiresInMs: ttlMs,
+				language,
 			};
 		}
 		await client.query("COMMIT");

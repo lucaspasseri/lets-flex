@@ -130,8 +130,8 @@ test("progress page renders semantic filters and complete non-chart trend data s
 	assert.match(html, /class="exercise-progress-unit-card"/);
 	assert.match(html, /<time datetime="2026-09-01">Sep 1, 2026<\/time>/);
 	assert.match(html, /href="\/history\/11"/);
-	assert.match(html, /102.5 Kilograms/);
-	assert.match(html, /1,620 repetitions × Kilograms/);
+	assert.match(html, /102.5 kg/);
+	assert.match(html, /1,620 repetitions × kg/);
 	assert.match(html, /Squat &lt;script&gt; — Back &amp; squat/);
 	assert.match(html, /Strength &lt;unsafe&gt;/);
 	assert.match(html, /Lower &lt;strong&gt;day/);

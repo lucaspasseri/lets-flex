@@ -2,13 +2,14 @@ import formatDayPageDate from "./formatDayPageDate.js";
 
 /**
  * @typedef {import("../../../src/features/trainingDays/trainingDays.types.js").TrainingDay} TrainingDay
- * @param {{currentDay: TrainingDay | null, days: TrainingDay[], programName?: string | null, cycleName?: string | null}} input
+ * @param {{currentDay: TrainingDay | null, days: TrainingDay[], programName?: string | null, cycleName?: string | null, language?: string}} input
  */
 export default function createDayNavigationViewModel({
 	currentDay,
 	days,
 	programName = null,
 	cycleName = null,
+	language = "en",
 }) {
 	const currentIndex = currentDay
 		? days.findIndex((day) => day.id === currentDay.id)
@@ -19,7 +20,7 @@ export default function createDayNavigationViewModel({
 		day
 			? {
 					id: day.id,
-					label: formatDayPageDate(day.scheduledDate) ?? "Date pending",
+					label: formatDayPageDate(day.scheduledDate, language) ?? "Date pending",
 					name: day.label?.trim() || `Day ${day.dayOrder}`,
 					contextLabel: `Cycle ${day.cycleOrder} · Day ${day.dayOrder}`,
 					href: `/programs/day?dayId=${day.id}`,

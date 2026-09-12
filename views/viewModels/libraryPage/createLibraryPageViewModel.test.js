@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import ejs from "ejs";
 import createLibraryPageViewModel from "./createLibraryPageViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const page = {
 	path: "/library",
@@ -23,6 +24,48 @@ const data = {
 	exerciseTemplates: [],
 	stepTypes: [],
 };
+
+test("Library discovery presentation does not fall back to English in Portuguese", () => {
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: null, sessionId: null },
+		data,
+		translate: i18n.getFixedT("pt-BR"),
+		language: "pt-BR",
+	});
+
+	assert.equal(viewModel.components.sessionWorkspace.heading, "Modelos de sessão");
+	assert.equal(
+		viewModel.components.sessionWorkspace.discovery.title,
+		"Encontre uma sessão",
+	);
+	assert.equal(
+		viewModel.components.sessionWorkspace.discovery.searchLabel,
+		"Pesquisar sessões",
+	);
+	assert.equal(viewModel.components.exerciseTemplates.label, "Exercícios disponíveis");
+	assert.equal(
+		viewModel.components.exerciseTemplates.discovery.title,
+		"Encontre um exercício",
+	);
+	assert.equal(
+		viewModel.components.exerciseTemplates.emptyState.title,
+		"Ainda não há modelos de exercício",
+	);
+	assert.equal(viewModel.components.privateVariantForm.title, "Crie sua variante");
+	assert.equal(
+		viewModel.components.privateVariantForm.submitLabel,
+		"Criar variante privada",
+	);
+	assert.equal(
+		viewModel.components.createExerciseForm.form.heading,
+		"Criar modelo de exercício",
+	);
+	assert.equal(
+		viewModel.components.createExerciseForm.actions.addMuscle.label,
+		"Adicionar músculo",
+	);
+});
 
 test("library page exposes one explicit component contract", () => {
 	const viewModel = createLibraryPageViewModel({

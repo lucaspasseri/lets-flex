@@ -14,7 +14,7 @@
 		<% if (currentWorkout.hasMultipleSessions) { %>
 			<nav class="dashboard-session-picker" aria-label="<%= translate("dashboard.workoutSessions", { defaultValue: "Workout sessions" }) %>"><p><%= translate("dashboard.chooseSession", { defaultValue: "Choose session" }) %></p><ul>
 				<% currentWorkout.selectors.forEach((selector, index) => { %>
-					<li><a class="dashboard-session-picker__item <%= selector.isActive ? 'is-active' : '' %>" href="<%= selector.href %>" <%- selector.isActive ? 'aria-current="true"' : '' %>><span class="visually-hidden">Workout session </span><%= index + 1 %></a></li>
+					<li><a class="dashboard-session-picker__item <%= selector.isActive ? 'is-active' : '' %>" href="<%= selector.href %>" <%- selector.isActive ? 'aria-current="true"' : '' %>><span class="visually-hidden"><%= translate("dashboard.workoutSessionNumber", { number: index + 1, defaultValue: "Workout session {{number}}" }) %></span></a></li>
 				<% }) %>
 			</ul></nav>
 		<% } %>

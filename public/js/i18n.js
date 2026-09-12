@@ -7,7 +7,7 @@
 export function createBrowserTranslator(root = document, fallbacks = {}) {
 	const ownerDocument = "ownerDocument" in root ? root.ownerDocument : root;
 	const element =
-		root.querySelector("[data-i18n-messages]") ??
+		root.querySelector?.("[data-i18n-messages]") ??
 		ownerDocument?.querySelector?.("[data-i18n-messages]");
 	let messages = {};
 	if (element?.textContent) {

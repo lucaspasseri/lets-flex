@@ -1,13 +1,17 @@
+import createViewModelTranslator from "../translate.js";
+
 /**
  * @typedef {import("../../../src/features/sessions/sessions.types.js").SessionMapper} Session
- * @param {{currentDayId: number | null, sessions: Session[], state?: Record<string, any>, selectedSessionId?: number | null}} input
+ * @param {{currentDayId: number | null, sessions: Session[], state?: Record<string, any>, selectedSessionId?: number | null, translate?: Function}} input
  */
 export default function createSessionLinkFormViewModel({
 	currentDayId,
 	sessions,
 	state = {},
 	selectedSessionId = null,
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const values = state?.values && typeof state.values === "object" ? state.values : {};
 	const errors = state?.errors ?? { fieldErrors: {}, formErrors: [] };
 	const options = sessions
@@ -30,16 +34,26 @@ export default function createSessionLinkFormViewModel({
 		hasTemplates: options.length > 0,
 		action: "/workout_sessions",
 		createAction: {
-			label: options.length ? "Create another template" : "Create a session template",
+			label: options.length
+				? t("library.createAnotherTemplate", {
+						defaultValue: "Create another template",
+					})
+				: t("library.createSessionTemplate", {
+						defaultValue: "Create a session template",
+					}),
 			href: currentDayId ? `/library?createSessionForDay=${currentDayId}` : "/library",
 			isContextual: currentDayId !== null,
 		},
 		feedback:
 			contextualSessionId && value === contextualSessionId
 				? {
-						title: "Session template created",
-						message:
-							"Your new template is selected. Review it, then assign it to this training day.",
+						title: t("library.sessionTemplateCreated", {
+							defaultValue: "Session template created",
+						}),
+						message: t("library.sessionTemplateCreatedMessage", {
+							defaultValue:
+								"Your new template is selected. Review it, then assign it to this training day.",
+						}),
 					}
 				: null,
 		method: "POST",
@@ -47,7 +61,7 @@ export default function createSessionLinkFormViewModel({
 			trainingDayId: currentDayId,
 			session: {
 				id: "sessionSelect",
-				label: "Session template",
+				label: t("library.sessionTemplate", { defaultValue: "Session template" }),
 				name: "sessionId",
 				required: true,
 				options,
@@ -59,6 +73,11 @@ export default function createSessionLinkFormViewModel({
 			...(errors.formErrors ?? []),
 			...(errors.fieldErrors?.trainingDayId ? [errors.fieldErrors.trainingDayId] : []),
 		],
-		actions: { submit: { label: "Assign to this day", disabled } },
+		actions: {
+			submit: {
+				label: t("library.assignToDay", { defaultValue: "Assign to this day" }),
+				disabled,
+			},
+		},
 	};
 }

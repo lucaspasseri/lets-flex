@@ -104,7 +104,7 @@ test("history detail renders snapshots, performed sets, notes, and units without
 	assert.match(html, /<table>/);
 	assert.match(html, /role="region" aria-label="Performed sets for Back squat"/);
 	assert.match(html, /<caption>Performed sets for Back squat<\/caption>/);
-	assert.match(html, /100 Kilograms/);
+	assert.match(html, /100 kg/);
 	assert.match(html, /Session &lt;script&gt;alert\(1\)&lt;\/script&gt;/);
 	assert.match(html, /Step &lt;strong&gt;note&lt;\/strong&gt;/);
 	assert.doesNotMatch(html, /method="POST"|method="PATCH"|method="DELETE"/);

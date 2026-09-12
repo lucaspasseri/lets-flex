@@ -1,4 +1,9 @@
-import createViewModelTranslator from "../translate.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
+import {
+	formatLocaleDate,
+	formatLocaleNumber,
+	formatMeasurementSymbol,
+} from "../../../src/infrastructure/i18n/formatLocale.js";
 
 /** @param {string} dateKey */
 function formatDate(
@@ -6,13 +11,9 @@ function formatDate(
 	language = "en",
 	t = (key, options) => options?.defaultValue ?? key,
 ) {
-	const date = new Date(`${dateKey}T00:00:00.000Z`);
-	return Number.isNaN(date.valueOf())
+	return formatLocaleDate(dateKey, language, { dateStyle: "medium" }) === null
 		? t("progress.dateUnavailable", { defaultValue: "Date unavailable" })
-		: new Intl.DateTimeFormat(language, {
-				dateStyle: "medium",
-				timeZone: "UTC",
-			}).format(date);
+		: formatLocaleDate(dateKey, language, { dateStyle: "medium" });
 }
 
 /** @param {string | Date | null} value */
@@ -23,13 +24,16 @@ function formatTimestamp(
 ) {
 	if (!value)
 		return t("progress.timeUnavailable", { defaultValue: "Time unavailable" });
-	const date = value instanceof Date ? value : new Date(value);
-	return Number.isNaN(date.valueOf())
+	const iso = value instanceof Date ? value.toISOString() : value;
+	return formatLocaleDate(iso, language, {
+		dateStyle: "medium",
+		timeStyle: "short",
+	}) === null
 		? t("progress.timeUnavailable", { defaultValue: "Time unavailable" })
-		: `${new Intl.DateTimeFormat(language, {
+		: `${formatLocaleDate(iso, language, {
+				dateStyle: "medium",
 				timeStyle: "short",
-				timeZone: "UTC",
-			}).format(date)} UTC`;
+			})} UTC`;
 }
 
 /** @param {{exerciseName: string, exerciseVariantName: string | null}} choice */
@@ -40,19 +44,19 @@ function choiceLabel(choice) {
 }
 
 /** @param {number | null} value @param {string} unit */
-function loadLabel(value, unit, numberFormatter, t) {
+function loadLabel(value, unit, language, t) {
 	return value === null
 		? t("progress.notRecorded", { defaultValue: "Not recorded" })
-		: `${numberFormatter.format(value)} ${unit}`;
+		: `${formatLocaleNumber(value, language, { maximumFractionDigits: 2 })} ${formatMeasurementSymbol(unit)}`;
 }
 
 /** @param {number | null} value @param {string} unit */
-function volumeLabel(value, unit, numberFormatter, t) {
+function volumeLabel(value, unit, language, t) {
 	return value === null
 		? t("progress.notRecorded", { defaultValue: "Not recorded" })
 		: t("progress.repetitionsByUnit", {
-				value: numberFormatter.format(value),
-				unit,
+				value: formatLocaleNumber(value, language, { maximumFractionDigits: 2 }),
+				unit: formatMeasurementSymbol(unit),
 				defaultValue: "{{value}} repetitions × {{unit}}",
 			});
 }
@@ -77,7 +81,8 @@ function clearDatesUrl(query) {
  */
 function toResults(progress, t, language) {
 	const summary = progress.summary;
-	const numberFormatter = new Intl.NumberFormat(language, { maximumFractionDigits: 2 });
+	const formatNumber = (value) =>
+		formatLocaleNumber(value, language, { maximumFractionDigits: 2 });
 	const count = (value, key, fallback) =>
 		t(key, { count: value, defaultValue: fallback });
 	return {
@@ -102,21 +107,21 @@ function toResults(progress, t, language) {
 				label: t("progress.workoutOccurrences", {
 					defaultValue: "Workout occurrences",
 				}),
-				value: numberFormatter.format(summary.occurrenceCount),
+				value: formatNumber(summary.occurrenceCount),
 			},
 			{
 				label: t("progress.performedSteps", { defaultValue: "Performed steps" }),
-				value: numberFormatter.format(summary.performedStepCount),
+				value: formatNumber(summary.performedStepCount),
 			},
 			{
 				label: t("progress.recordedSets", { defaultValue: "Recorded sets" }),
-				value: numberFormatter.format(summary.recordedSetCount),
+				value: formatNumber(summary.recordedSetCount),
 			},
 			{
 				label: t("progress.completedRepetitions", {
 					defaultValue: "Completed repetitions",
 				}),
-				value: numberFormatter.format(summary.completedRepetitionCount),
+				value: formatNumber(summary.completedRepetitionCount),
 			},
 		],
 		coverage: [
@@ -139,8 +144,8 @@ function toResults(progress, t, language) {
 		],
 		units: summary.units.map((unit) => ({
 			unit: unit.unit,
-			maximumLoad: loadLabel(unit.maximumLoad, unit.unit, numberFormatter, t),
-			volume: volumeLabel(unit.volume, unit.unit, numberFormatter, t),
+			maximumLoad: loadLabel(unit.maximumLoad, unit.unit, language, t),
+			volume: volumeLabel(unit.volume, unit.unit, language, t),
 			loadContext: count(
 				unit.loadObservationCount,
 				"progress.loadObservation",
@@ -164,10 +169,40 @@ function toResults(progress, t, language) {
 			performedStepCount: occurrence.performedStepCount,
 			recordedSetCount: occurrence.recordedSetCount,
 			completedRepetitionCount: occurrence.completedRepetitionCount,
+			summaryLabel: t("progress.occurrenceSummary", {
+				performed: translateCount(
+					t,
+					"progress.performedStepCount",
+					occurrence.performedStepCount,
+					{
+						one: "{{count}} performed step",
+						other: "{{count}} performed steps",
+					},
+				),
+				sets: translateCount(
+					t,
+					"progress.recordedSetCount",
+					occurrence.recordedSetCount,
+					{
+						one: "{{count}} set",
+						other: "{{count}} sets",
+					},
+				),
+				repetitions: translateCount(
+					t,
+					"progress.completedRepetitionCount",
+					occurrence.completedRepetitionCount,
+					{
+						one: "{{count}} completed repetition",
+						other: "{{count}} completed repetitions",
+					},
+				),
+				defaultValue: "{{performed}}; {{sets}}; {{repetitions}}",
+			}),
 			units: occurrence.units.map((unit) => ({
 				unit: unit.unit,
-				maximumLoad: loadLabel(unit.maximumLoad, unit.unit, numberFormatter, t),
-				volume: volumeLabel(unit.volume, unit.unit, numberFormatter, t),
+				maximumLoad: loadLabel(unit.maximumLoad, unit.unit, language, t),
+				volume: volumeLabel(unit.volume, unit.unit, language, t),
 				context: `${count(unit.loadObservationCount, "progress.loadObservation", "{{count}} load observations")}; ${count(unit.volumeSetCount, "progress.volumeSet", "{{count}} volume sets")}`,
 			})),
 			emptyUnitMessage:

@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const {
 		pageFeedback,
@@ -17,26 +18,29 @@
 <main class="main programs" data-programs-page>
 	<%- include("partials/shared/components/pageHeading", { heading: pageHeading }) %>
 	<%- include("partials/shared/components/pageFeedback", { pageFeedback }) %>
-	<%- include("partials/programsPage/hierarchyGuide", { hierarchyGuide }) %>
+	<%- include("partials/programsPage/hierarchyGuide", { hierarchyGuide, t: translate }) %>
 
 	<% if (noActiveUser.isVisible) { %>
 		<%- include("partials/programsPage/noActiveUser", { noActiveUser }) %>
 	<% } else { %>
 		<%- include("partials/programsPage/entitySwitcher/entitySwitcher", {
 			entitySwitcher: programSwitcher,
-			variant: "program"
+			variant: "program",
+			t: translate
 		}) %>
 
 		<% if (cycleSwitcher.isVisible) { %>
 			<%- include("partials/programsPage/entitySwitcher/entitySwitcher", {
 				entitySwitcher: cycleSwitcher,
-				variant: "cycle"
+				variant: "cycle",
+				t: translate
 			}) %>
 		<% } %>
 
 		<% if (calendarNavigation.isVisible) { %>
 			<%- include("partials/programsPage/calendarNavigation/calendarNavigation", {
-				calendarNavigation
+				calendarNavigation,
+				t: translate
 			}) %>
 		<% } %>
 	<% } %>

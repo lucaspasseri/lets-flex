@@ -37,6 +37,7 @@ export default function createDashboardPageViewModel({
 			actionFormState,
 			workoutFeedback,
 			translate,
+			language,
 		}),
 		analyticsSummary: createAnalyticsSummaryViewModel(data, t, language),
 		heatmap: createHeatmapViewModel(data, t, language),

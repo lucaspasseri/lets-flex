@@ -48,6 +48,7 @@ export async function renderDay(req, res, formState = {}) {
 		pageState,
 		data,
 		translate: res.locals.t,
+		language: res.locals.language,
 		...formState,
 	});
 

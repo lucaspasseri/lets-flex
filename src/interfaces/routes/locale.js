@@ -8,7 +8,11 @@ const router = Router();
 router.post(
 	"/",
 	validateRequestBody(localeSelectionSchema, (_req, res) => {
-		res.status(400).send("Unsupported locale.");
+		res.status(400).send(
+			res.locals?.t?.("validation.unsupportedLocale", {
+				defaultValue: "Unsupported locale.",
+			}) ?? "Unsupported locale.",
+		);
 	}),
 	localeController.set,
 );

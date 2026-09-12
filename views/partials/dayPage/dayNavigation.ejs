@@ -1,17 +1,18 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <% if (dayNavigation.isVisible) { %>
-	<nav class="day-navigation" aria-label="Training days">
+	<nav class="day-navigation" aria-label="<%= translate("dashboard.trainingDays", { defaultValue: "Training days" }) %>">
 		<div class="day-navigation__header">
 			<div>
-				<p class="day-navigation__eyebrow">Program timeline</p>
+				<p class="day-navigation__eyebrow"><%= translate("dashboard.programTimeline", { defaultValue: "Program timeline" }) %></p>
 				<h2><%= dayNavigation.heading %></h2>
 				<p class="day-navigation__description"><%= dayNavigation.description %></p>
 			</div>
-			<div class="day-navigation__controls" aria-label="Timeline controls">
+			<div class="day-navigation__controls" aria-label="<%= translate("dashboard.timelineControls", { defaultValue: "Timeline controls" }) %>">
 				<% if (dayNavigation.previous) { %>
-					<a class="day-navigation__arrow" href="<%= dayNavigation.previous.href %>" data-scroll-left aria-label="Previous training day">←</a>
+					<a class="day-navigation__arrow" href="<%= dayNavigation.previous.href %>" data-scroll-left aria-label="<%= translate("dashboard.previousTrainingDay", { defaultValue: "Previous training day" }) %>">←</a>
 				<% } %>
 				<% if (dayNavigation.next) { %>
-					<a class="day-navigation__arrow" href="<%= dayNavigation.next.href %>" data-scroll-right aria-label="Next training day">→</a>
+					<a class="day-navigation__arrow" href="<%= dayNavigation.next.href %>" data-scroll-right aria-label="<%= translate("dashboard.nextTrainingDay", { defaultValue: "Next training day" }) %>">→</a>
 				<% } %>
 			</div>
 		</div>
@@ -23,7 +24,7 @@
 						<strong class="day-navigation__item-name"><%= day.name %></strong>
 						<span class="day-navigation__item-label"><%= day.label %></span>
 						<span class="day-navigation__item-context"><%= day.contextLabel %></span>
-						<span class="day-navigation__item-status"><%= day.isCurrent ? "Selected" : "Open day" %></span>
+						<span class="day-navigation__item-status"><%= day.isCurrent ? translate("dashboard.selectedDay", { defaultValue: "Selected" }) : translate("dashboard.openDay", { defaultValue: "Open day" }) %></span>
 					</a>
 				</li>
 			<% }) %>

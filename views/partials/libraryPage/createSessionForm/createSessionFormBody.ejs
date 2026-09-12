@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const {
 		stepTypeOptions,
@@ -17,8 +18,8 @@
 <% } %>
 
 <% if (creationContext) { %>
-	<div class="session-form-context" aria-label="Return destination">
-		<span>Return destination</span>
+	<div class="session-form-context" aria-label="<%= translate("library.returnDestination", { defaultValue: "Return destination" }) %>">
+		<span><%= translate("library.returnDestination", { defaultValue: "Return destination" }) %></span>
 		<strong><%= creationContext.pathLabel %></strong>
 		<p><%= creationContext.dateLabel %></p>
 	</div>
@@ -35,13 +36,14 @@
 	field: {
 		id: `${idPrefix}-name-input`,
 		name: "name",
-		label: "Session name",
+		label: translate("library.sessionName", { defaultValue: "Session name" }),
 		control: "input",
 		type: "text",
 		required: true,
 		value: values.name,
 		error: errors.name,
-		hint: "Enter a name for the session template.",
+		hint: translate("library.sessionNameHint", { defaultValue: "Enter a name for the session template." }),
+		t: translate,
 		attributes: {
 			autocomplete: "off",
 			maxlength: 100
@@ -53,11 +55,12 @@
 	field: {
 		id: `${idPrefix}-notes-input`,
 		name: "notes",
-		label: "Notes",
+		label: translate("library.notes", { defaultValue: "Notes" }),
 		control: "textarea",
 		value: values.notes,
 		error: errors.notes,
-		hint: "Add any general instructions for this session.",
+		hint: translate("library.sessionNotesHint", { defaultValue: "Add any general instructions for this session." }),
+		t: translate,
 		attributes: {
 			rows: 3,
 			maxlength: 500
@@ -69,8 +72,8 @@
 <section class="form-section" aria-labelledby="<%= idPrefix %>-step-heading">
 	<div class="form-section__header">
 		<div>
-			<h4 id="<%= idPrefix %>-step-heading">Add a step</h4>
-			<p>Configure an exercise prescription, then add it to the session.</p>
+			<h4 id="<%= idPrefix %>-step-heading"><%= translate("library.addStep", { defaultValue: "Add a step" }) %></h4>
+			<p><%= translate("library.addStepDescription", { defaultValue: "Configure an exercise prescription, then add it to the session." }) %></p>
 		</div>
 	</div>
 
@@ -79,10 +82,11 @@
 		field: {
 			id: `${idPrefix}-step-type-select`,
 			name: "draftStepTypeId",
-			label: "Step type",
+			label: translate("library.stepType", { defaultValue: "Step type" }),
 			control: "select",
 			required: false,
-			hint: "Choose the kind of step.",
+			hint: translate("library.stepTypeHint", { defaultValue: "Choose the kind of step." }),
+			t: translate,
 			options: stepTypeOptions
 		}
 	}) %>
@@ -91,10 +95,11 @@
 		field: {
 			id: `${idPrefix}-exercise-variant-select`,
 			name: "draftExerciseVariantId",
-			label: "Exercise",
+			label: translate("library.exercise", { defaultValue: "Exercise" }),
 			control: "select",
 			required: false,
-			hint: "Choose the exercise for this step.",
+			hint: translate("library.exerciseHint", { defaultValue: "Choose the exercise for this step." }),
+			t: translate,
 			options: exerciseOptions
 		}
 	}) %>
@@ -105,10 +110,11 @@
 		field: {
 			id: `${idPrefix}-step-sets-input`,
 			name: "draftSets",
-			label: "Sets",
+			label: translate("workout.setsLabel", { defaultValue: "Sets" }),
 			control: "input",
 			type: "number",
-			hint: "Number of planned sets.",
+			hint: translate("library.plannedSetsHint", { defaultValue: "Number of planned sets." }),
+			t: translate,
 			attributes: {
 				min: 1,
 				step: 1
@@ -120,10 +126,11 @@
 		field: {
 			id: `${idPrefix}-step-reps-input`,
 			name: "draftReps",
-			label: "Repetitions",
+			label: translate("workout.repetitions", { defaultValue: "Repetitions" }),
 			control: "input",
 			type: "number",
-			hint: "Number of planned repetitions per set.",
+			hint: translate("library.plannedRepsHint", { defaultValue: "Number of planned repetitions per set." }),
+			t: translate,
 			attributes: {
 				min: 1,
 				step: 1
@@ -135,10 +142,11 @@
 		field: {
 			id: `${idPrefix}-step-load-input`,
 			name: "draftLoadValue",
-			label: "Load",
+			label: translate("workout.load", { defaultValue: "Load" }),
 			control: "input",
 			type: "number",
-			hint: "Planned load for the exercise.",
+			hint: translate("library.plannedLoadHint", { defaultValue: "Planned load for the exercise." }),
+			t: translate,
 			attributes: {
 				min: 0,
 				step: "any"
@@ -150,9 +158,10 @@
 		field: {
 			id: `${idPrefix}-step-load-unit-select`,
 			name: "draftLoadUnit",
-			label: "Load unit",
+			label: translate("workout.loadUnit", { defaultValue: "Load unit" }),
 			control: "select",
-			hint: "Choose the unit used for the load.",
+			hint: translate("library.loadUnitHint", { defaultValue: "Choose the unit used for the load." }),
+			t: translate,
 			options: loadUnitOptions
 		}
 	}) %>
@@ -181,14 +190,14 @@
 <section class="form-section" aria-labelledby="<%= idPrefix %>-step-list-heading">
 	<div class="form-section__header">
 		<div>
-			<h4 id="<%= idPrefix %>-step-list-heading">Session steps</h4>
-			<p>Steps will be performed in the order shown here.</p>
+			<h4 id="<%= idPrefix %>-step-list-heading"><%= translate("workout.sessionSteps", { defaultValue: "Session steps" }) %></h4>
+			<p><%= translate("library.sessionStepsDescription", { defaultValue: "Steps will be performed in the order shown here." }) %></p>
 		</div>
 	</div>
 
 	<div class="form-collection" aria-live="polite">
 		<p id="<%= idPrefix %>-step-list-message" class="form-collection__empty" data-session-step-list-message <% if (errors.stepRow) { %>data-step-error role="alert"<% } %>>
-			<%= errors.stepRow || "No steps added yet." %>
+			<%= errors.stepRow || translate("workout.noSteps", { defaultValue: "No steps added yet." }) %>
 		</p>
 		<ol id="<%= idPrefix %>-step-list" class="form-collection__list" data-session-step-list>
 			<% values.stepRow.forEach((step, index) => {
@@ -196,7 +205,7 @@
 				const exercise = exerciseOptions.find(option => String(option.value) === String(step.exerciseVariantId));
 			%>
 				<li class="form-collection__item session-step-draft">
-					<p><%= stepType?.label ?? "Unknown step type" %> — <%= exercise?.label ?? "Unknown exercise" %></p>
+				<p><%= stepType?.label ?? translate("library.unknownStepType", { defaultValue: "Unknown step type" }) %> — <%= exercise?.label ?? translate("library.unknownExercise", { defaultValue: "Unknown exercise" }) %></p>
 					<% if (step.stepId) { %><input type="hidden" data-step-field="stepId" name="stepRow[<%= index %>][stepId]" value="<%= step.stepId %>"><% } %>
 					<input type="hidden" data-step-field="stepTypeId" name="stepRow[<%= index %>][stepTypeId]" value="<%= step.stepTypeId %>">
 					<input type="hidden" data-step-field="exerciseVariantId" name="stepRow[<%= index %>][exerciseVariantId]" value="<%= step.exerciseVariantId %>">
@@ -205,9 +214,9 @@
 					<input type="hidden" data-step-field="loadValue" name="stepRow[<%= index %>][loadValue]" value="<%= step.loadValue %>">
 					<input type="hidden" data-step-field="loadUnit" name="stepRow[<%= index %>][loadUnit]" value="<%= step.loadUnit %>">
 					<div class="form-collection__actions">
-						<button type="button" class="form-collection__move" data-move-step-up>Move up</button>
-						<button type="button" class="form-collection__move" data-move-step-down>Move down</button>
-						<button type="button" class="form-collection__remove" data-remove-session-step>Remove</button>
+						<button type="button" class="form-collection__move" data-move-step-up><%= translate("workout.moveUp", { defaultValue: "Move up" }) %></button>
+						<button type="button" class="form-collection__move" data-move-step-down><%= translate("workout.moveDown", { defaultValue: "Move down" }) %></button>
+						<button type="button" class="form-collection__remove" data-remove-session-step><%= translate("workout.remove", { defaultValue: "Remove" }) %></button>
 					</div>
 				</li>
 			<% }) %>

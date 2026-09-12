@@ -1,8 +1,9 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <aside class="day-panel day-panel--link" aria-labelledby="session-link-title">
 	<div class="day-panel__header">
-		<p class="day-panel__eyebrow">Level 4 · Session</p>
-		<h2 id="session-link-title">Assign a session to this day</h2>
-		<p>A template is reusable. Assigning it creates the planned workout for this specific day.</p>
+		<p class="day-panel__eyebrow"><%= translate("programs.levelSession", { defaultValue: "Level 4 · Session" }) %></p>
+		<h2 id="session-link-title"><%= translate("library.assignSessionToDay", { defaultValue: "Assign a session to this day" }) %></h2>
+		<p><%= translate("library.assignSessionDescription", { defaultValue: "A template is reusable. Assigning it creates the planned workout for this specific day." }) %></p>
 	</div>
 
 	<% if (sessionLinkForm.feedback) { %>
@@ -17,7 +18,7 @@
 		method: sessionLinkForm.method,
 		attributes: { "data-session-link-form": true },
 		slots: {
-			body: include("sessionLinkFormBody", { sessionLinkForm }),
+			body: include("sessionLinkFormBody", { sessionLinkForm, t: translate }),
 			footer: include("sessionLinkFormFooter", { sessionLinkForm }),
 		},
 	} }) %>

@@ -12,8 +12,11 @@ export default function validateRequestParams(schema) {
 
 		if (!result.success) {
 			res.status(400).json({
-				error: "Invalid route parameters.",
-				...formatValidationErrors(result.error),
+				error:
+					res.locals?.t?.("validation.invalidRouteParameters", {
+						defaultValue: "Invalid route parameters.",
+					}) ?? "Invalid route parameters.",
+				...formatValidationErrors(result.error, res.locals?.t),
 			});
 			return;
 		}

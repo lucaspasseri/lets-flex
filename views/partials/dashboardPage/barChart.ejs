@@ -37,7 +37,7 @@
 						<thead><tr><th scope="col"><%= translate("dashboard.programWeek", { defaultValue: "Program week" }) %></th><th scope="col"><%= translate("dashboard.scheduled", { defaultValue: "Scheduled" }) %></th><th scope="col"><%= translate("dashboard.finished", { defaultValue: "Finished" }) %></th><th scope="col"><%= translate("dashboard.cancelled", { defaultValue: "Cancelled" }) %></th><th scope="col"><%= translate("dashboard.remaining", { defaultValue: "Remaining" }) %></th></tr></thead>
 						<tbody>
 							<% barChart.rows.forEach(row => { %>
-								<tr><th scope="row"><span><%= row.weekLabel %></span><small><%= row.rangeLabel %> · <%= row.completionLabel %></small></th><td><%= row.scheduledCount %></td><td><%= row.finishedCount %></td><td><%= row.cancelledCount %></td><td><%= row.remainingCount %></td></tr>
+								<tr><th scope="row"><span><%= row.weekLabel %></span><small><%= row.rangeLabel %> · <%= row.completionLabel %></small></th><td><%= row.scheduledCountLabel %></td><td><%= row.finishedCountLabel %></td><td><%= row.cancelledCountLabel %></td><td><%= row.remainingCountLabel %></td></tr>
 							<% }) %>
 						</tbody>
 					</table>

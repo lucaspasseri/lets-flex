@@ -150,9 +150,7 @@
 									</td>
 									<td class="exercise-progress-table-workout"><a href="<%= occurrence.historyHref %>"><%= occurrence.sessionName %></a></td>
 									<td>
-										<%= occurrence.performedStepCount %> performed <%= occurrence.performedStepCount === 1 ? "step" : "steps" %>;
-										<%= occurrence.recordedSetCount %> <%= occurrence.recordedSetCount === 1 ? "set" : "sets" %>;
-										<%= occurrence.completedRepetitionCount %> completed <%= occurrence.completedRepetitionCount === 1 ? "repetition" : "repetitions" %>
+										<%= occurrence.summaryLabel %>
 									</td>
 									<td>
 										<% if (occurrence.units.length) { %>

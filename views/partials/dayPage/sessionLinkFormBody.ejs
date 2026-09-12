@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <input type="hidden" name="trainingDayId" value="<%= sessionLinkForm.fields.trainingDayId ?? "" %>">
 <% if (sessionLinkForm.formErrors.length) { %>
 	<div class="form-errors" role="alert">
@@ -8,9 +9,10 @@
 	...sessionLinkForm.fields.session,
 	control: "select",
 	disabled: !sessionLinkForm.isEnabled,
-	hint: sessionLinkForm.isEnabled
-		? "Only active global templates and templates owned by you are shown."
+		t: translate,
+		hint: sessionLinkForm.isEnabled
+		? translate("library.sessionTemplateHint", { defaultValue: "Only active global templates and templates owned by you are shown." })
 		: sessionLinkForm.createAction.isContextual
-			? "No active templates are available. Create one below, then return here to assign it."
-			: "Choose a training day before assigning a template.",
+			? translate("library.noActiveTemplatesHint", { defaultValue: "No active templates are available. Create one below, then return here to assign it." })
+			: translate("library.chooseTrainingDayHint", { defaultValue: "Choose a training day before assigning a template." }),
 } }) %>

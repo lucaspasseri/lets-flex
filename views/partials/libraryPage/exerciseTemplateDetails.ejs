@@ -1,5 +1,6 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
-	const {id=null, baseName="", details={}, actions={}} = locals?.template ?? {};
+	const {id=null, baseName="", summary={}, details={}, actions={}} = locals?.template ?? {};
 	const variants = details?.variants ?? [];
 %>
 
@@ -10,17 +11,17 @@
 
 	<dl class="exercise-template__facts">
 		<div>
-			<dt class="exercise-template__field-label">Movement pattern</dt>
+			<dt class="exercise-template__field-label"><%= translate("library.movementPattern", { defaultValue: "Movement pattern" }) %></dt>
 			<dd><%= details?.movementPattern?.name %></dd>
 		</div>
 
 		<div>
-			<dt class="exercise-template__field-label">Primary muscles</dt>
+			<dt class="exercise-template__field-label"><%= translate("library.primaryMuscles", { defaultValue: "Primary muscles" }) %></dt>
 			<dd class="exercise-template__tags">
 				<% if (details?.muscleTemplates?.primary?.name) { %>
 					<span class="tag"><%= details.muscleTemplates.primary.name %></span>
 				<% } else { %>
-					<span class="exercise-template__empty-value">Not specified</span>
+					<span class="exercise-template__empty-value"><%= translate("library.notSpecified", { defaultValue: "Not specified" }) %></span>
 				<% } %>
 			</dd>
 		</div>
@@ -29,10 +30,10 @@
 	<section class="exercise-template__variant-section" aria-labelledby="exercise-template-<%= id %>-variants">
 		<header class="exercise-template__variants-header">
 			<div>
-				<p class="exercise-template__eyebrow">Available setups</p>
-				<h3 id="exercise-template-<%= id %>-variants"><%= baseName %> variants</h3>
+				<p class="exercise-template__eyebrow"><%= translate("library.availableSetups", { defaultValue: "Available setups" }) %></p>
+				<h3 id="exercise-template-<%= id %>-variants"><%= translate("library.variantsHeading", { name: baseName, defaultValue: "{{name}} variants" }) %></h3>
 			</div>
-			<span data-exercise-variant-result-count><%= variants.length %> total</span>
+			<span data-exercise-variant-result-count><%= summary?.variantCountLabel ?? "" %></span>
 		</header>
 
 		<ul class="exercise-variants" data-exercise-variant-results>
@@ -41,28 +42,28 @@
 					<%- include("../shared/components/media", { media: variant.media, className: "exercise-variant__media", variant: "initial", decorative: true }) %>
 					<header class="exercise-variant__header">
 						<strong><%= variant.name %></strong>
-						<% if (variant.isPrivateOwner) { %><span class="exercise-template__scope">Private</span><% } %>
+						<% if (variant.isPrivateOwner) { %><span class="exercise-template__scope"><%= translate("library.private", { defaultValue: "Private" }) %></span><% } %>
 					</header>
 
 					<dl class="exercise-variant__facts">
 						<div>
-							<dt>Equipment</dt>
-							<dd><%= variant.equipment?.name ?? "Bodyweight" %></dd>
+							<dt><%= translate("library.equipment", { defaultValue: "Equipment" }) %></dt>
+							<dd><%= variant.equipment?.name ?? translate("library.bodyweight", { defaultValue: "Bodyweight" }) %></dd>
 						</div>
 
 						<div>
-							<dt>Environment</dt>
+							<dt><%= translate("library.environment", { defaultValue: "Environment" }) %></dt>
 							<dd><%= variant.environmentLabel %></dd>
 						</div>
 
 						<div>
-							<dt>Setup</dt>
-							<dd><%= variant.setupDescription || "No setup instructions" %></dd>
+							<dt><%= translate("library.setup", { defaultValue: "Setup" }) %></dt>
+							<dd><%= variant.setupDescription || translate("library.noSetupInstructions", { defaultValue: "No setup instructions" }) %></dd>
 						</div>
 
 						<div>
-							<dt>Notes</dt>
-							<dd><%= variant.notes || "No additional notes" %></dd>
+							<dt><%= translate("library.notes", { defaultValue: "Notes" }) %></dt>
+							<dd><%= variant.notes || translate("library.noAdditionalNotes", { defaultValue: "No additional notes" }) %></dd>
 						</div>
 					</dl>
 

@@ -55,6 +55,14 @@ export default function createSessionStatusMarkersViewModel(sessions, translate)
 				? t("dashboard.noSessionsPlanned", {
 						defaultValue: "No workout sessions planned",
 					})
-				: `${t("dashboard.workoutSessionsCount", { count: items.length, defaultValue: "{{count}} workout sessions" })}: ${items.map((item) => item.label).join(", ")}`,
+				: t("dashboard.workoutSessionsStatus", {
+						count: items.length,
+						countLabel: t("dashboard.workoutSessionsCount", {
+							count: items.length,
+							defaultValue: "{{count}} workout sessions",
+						}),
+						statuses: items.map((item) => item.label).join(", "),
+						defaultValue: "{{countLabel}}: {{statuses}}",
+					}),
 	};
 }

@@ -13,7 +13,7 @@ import createViewModelTranslator from "../translate.js";
  */
 
 /**
- * @param {CreateProgramsPageViewModelInput & {translate?: Function}} input
+ * @param {CreateProgramsPageViewModelInput & {translate?: Function, language?: string}} input
  * @returns {ProgramsPageViewModel}
  */
 export default function createProgramsPageViewModel({
@@ -24,6 +24,7 @@ export default function createProgramsPageViewModel({
 	cycleFormState,
 	pageFeedback = null,
 	translate,
+	language = "en",
 }) {
 	const t = createViewModelTranslator(translate);
 	const {
@@ -60,16 +61,20 @@ export default function createProgramsPageViewModel({
 				currentCycle: cycles.current,
 				trainingDays,
 				workoutSessions,
+				translate,
 			}),
 			programSwitcher: createProgramSwitcherViewModel({
 				currentProgramId: programs.current?.id ?? null,
 				programs: programs.items,
 				goals,
+				translate,
+				language,
 			}),
 			cycleSwitcher: createCycleSwitcherViewModel({
 				currentProgram: programs.current,
 				currentCycleId: cycles.current?.id ?? null,
 				cycles: cycles.items,
+				translate,
 			}),
 			calendarNavigation: createCalendarNavigationViewModel({
 				currentProgram: programs.current,
@@ -77,6 +82,7 @@ export default function createProgramsPageViewModel({
 				trainingDays,
 				workoutSessions,
 				translate,
+				language,
 			}),
 			createProgramForm: createProgramFormViewModel({
 				goals,

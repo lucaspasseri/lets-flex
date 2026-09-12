@@ -2,51 +2,490 @@
 
 ## Current goal
 
-### Phase 3 — Localize database-backed catalog and domain content
+### Phase 4 — Harden internationalization and complete locale-sensitive presentation
 
-Establish localized presentation for application-managed catalog/domain content in English (`en`)
-and Brazilian Portuguese (`pt-BR`) while preserving stable identity, relational behavior, ownership,
-history, analytics, media, and user-generated content.
+Complete the established English (`en`) / Brazilian Portuguese (`pt-BR`) i18n implementation across
+locale-sensitive presentation, application-owned dynamic copy, validation/errors, authentication and
+account flows, generated auth email copy where supported, accessibility, browser UI, analytics, and
+responsive behavior while preserving stable identity, persisted data, security, and user-authored
+content.
 
 ## Goal status
 
-Completed on 2026-09-11. Actions 1–9 and the Phase 3 goal are completed.
+Completed on 2026-09-12. Actions 1–9 were approved and completed. Phase 3 remains completed and
+approved.
 
 ## Planning evidence
 
-- **Verified:** Phase 1/2 i18n and the locale switch contract are present and reusable.
-- **Verified:** The authoritative fresh-database setup is `db/schema.js` plus `db/seed.js`; the
-  lifecycle now also has an explicit opt-in migration runner for existing databases.
-- **Verified:** The schema mixes global seeded catalog rows with user-owned/custom records. Exercises
-  use `created_by_user_id` as creator provenance under an admin-only create route; variants use
-  nullable `owner_user_id`; sessions also mix global templates and owned copies.
-- **Verified after Action 5:** Locale-aware repositories/queries return active-locale catalog
-  labels with English/canonical fallback metadata; mappers and view models expose presentation-ready
-  values while stable IDs remain available to forms and machine contracts.
-- **Verified:** Forms submit stable numeric IDs for catalog relationships.
-- **Verified:** Media lookup is centralized but currently derives manifest keys from names; this is a
-  dependency to preserve and evaluate, not permission for a media redesign.
-- **Verified after Action 2 implementation:** A narrowly scoped `db:migrate` process now loads
-  ordered versioned migration modules, records applied names in `schema_migrations`, requires
-  explicit opt-in, applies each migration transactionally, and requires a separate production
-  opt-in in addition to rejecting unsafe non-production targets.
+- **Verified:** The existing i18next/session/EJS architecture supports `en` and `pt-BR`, English
+  fallback, document language, locale persistence, and a locale switch route.
+- **Verified:** Phase 3 centralized application-managed catalog localization and preserved stable IDs,
+  media identity, relationships, ownership, history, analytics, and user-generated content.
+- **Verified gap:** No shared locale-aware boundary for dates, numbers, percentages, or durations was
+  found; direct formatting and count-dependent copy remain in view models and email delivery.
+- **Verified gap:** Auth/provider/controller messages, validation presentation, browser scripts, and
+  Chart.js labels require a focused application-owned localization audit.
+- **Verified gap:** Resource completeness currently compares leaf-key sets but does not provide a
+  stronger required-key/missing-production-key contract.
+- **Verified constraint:** The email service has no persisted user-locale argument; locale-aware
+  email copy must use reliable context or document the limitation without changing token/security
+  behavior.
+- **Verified boundary:** User-authored content, external/provider-owned text, historical snapshots,
+  and stable symbols such as `kg`/`lb` are not translation targets.
 
 ## Confirmed decisions
 
-- Strategy A (translation resources): fixed step types, muscle roles, known environment codes, and
-  other values confirmed to be stable internal codes.
-- Strategy B (database translations): globally managed exercises, global exercise variants where
-  persisted display/setup text is in scope, muscles, equipment, and movement patterns.
-- Strategy C (do not translate automatically): user-owned/custom exercise or variant names, session,
-  program, cycle, training-day, note, description, and historical snapshot content.
-- Global session templates, goals, scientific muscle fields, environment metadata, and long-form
-  global setup text remain classification candidates until their presentation/ownership boundaries
-  are verified in the relevant action.
-- Reuse stable IDs and IDs in forms/API contracts; never use translated names for identity,
-  authorization, business rules, joins, or analytics grouping.
+- Reuse the existing i18next/session/EJS/browser-message architecture and English fallback.
+- Keep formatting and translated copy at presentation boundaries; calculations, storage, IDs,
+  relationships, authorization, business rules, and machine contracts remain locale-neutral.
+- Use explicit reviewed translations only; no runtime machine translation or external translation API.
 - Stop at the active action’s review gate before activating the next action.
 
-## Proposed action sequence
+## Proposed Phase 4 action sequence
+
+### Action 1 — Update goal tracking and audit
+
+**Status:** Completed
+
+**Purpose:** Record Phase 4 as the active goal, inspect completed Phase 1–3 behavior, audit
+locale-sensitive presentation/mixed-language surfaces, and classify the verified implementation delta
+before code changes begin.
+
+**Acceptance criteria:**
+
+- `docs/current-goal.md` explicitly describes Phase 4 objective, scope, non-goals, completion criteria,
+  constraints, and current status.
+- This file records the Phase 4 action sequence and keeps statuses synchronized with actual work.
+- Existing i18n, catalog localization, locale persistence, document language, security, ownership,
+  user-content, and browser-message contracts are documented as reusable boundaries.
+- Formatting, dynamic copy, validation/errors, auth/account/email, accessibility, client-side,
+  analytics, responsive, mixed-language, and completeness findings are classified by priority.
+- No broad application implementation occurs in this audit action.
+
+**Action 1 implementation and audit evidence (2026-09-11):** Updated `docs/current-goal.md` and
+this file before executable Phase 4 implementation. Inspected the completed i18next middleware and
+resource contract, shared EJS layout/document language, locale persistence route, Phase 3 catalog
+localization/query/mapper boundaries, auth routes/controllers/passport strategy, validation schemas,
+password-reset service/email delivery, dashboard analytics/chart view models, browser i18n/search/
+workout scripts, accessibility-facing templates, and existing translation tests. Classified the
+existing locale infrastructure and catalog identity/ownership boundaries as reusable; identified
+direct date/number/duration formatting, manual pluralization, hard-coded auth/email messages,
+browser/chart dynamic copy, and leaf-key-only completeness checks as the Phase 4 delta. Confirmed
+user-authored content, external/provider-owned text, stable measurement symbols, persisted values,
+security semantics, and analytics calculations remain outside translation scope.
+
+**Action 1 verification (2026-09-11):** Both tracking files and the recorded baseline were inspected
+against the Phase 4 request and repository evidence. `git diff --check` passed. No runtime code,
+schema, seed data, database, route, email delivery, or user content was changed. Executable code
+checks are deferred until an implementation action changes code.
+
+**Action 1 review stop (2026-09-11):** Phase 4 tracking and the verified audit baseline are
+complete. Action 1 is ready for review. Action 2 remains pending and has not been activated or
+implemented.
+
+**Action 1 review approval (2026-09-12):** The user approved the recorded tracking and audit
+baseline after verification evidence was available. Action 1 is complete. Action 2 remains pending
+and is prepared as the next action; it has not been activated or implemented.
+
+### Action 2 — Centralize locale-sensitive formatting
+
+**Status:** Completed
+
+**Purpose:** Add or refine shared presentation helpers for dates, times, numbers, percentages,
+durations, and application-owned workout unit/count labels, then migrate high-impact usages.
+
+**Action 2 activation (2026-09-12):** The user approved the prepared next action. Action 2 was
+activated and was the only action authorized for implementation in this work cycle. Actions 3–9
+remain pending.
+
+**Action 2 progress (2026-09-12):** The initial implementation audit confirms that several view
+models already use `Intl` locally, but date-only helpers and analytics/workload/progress/history
+formatters duplicate locale construction and some fixed-format helpers remain locale-insensitive.
+The implementation centralized those presentation calls without changing stored date keys, numeric
+calculations, unit identifiers, or translated sentence/pluralization scope reserved for Action 3.
+
+**Action 2 implementation (2026-09-12):** Added the shared `src/infrastructure/i18n/formatLocale.js`
+presentation boundary for locale-aware dates/times, numbers, percentages, durations, and long-form
+measurements, with UTC anchoring for date-only values and stable `kg`/`lb` symbols for workout
+labels. Migrated high-impact dashboard analytics/workload/navigation, Programs, Day, Library,
+workout-session, progress, workout-history, and guest-profile expiration presentation paths to
+receive the active language. Preserved stored date keys, numeric calculations, persisted unit
+identifiers, catalog identity, and user-authored content.
+
+**Action 2 verification (2026-09-12):** Focused locale/presentation tests passed (46 tests), with
+English and Brazilian Portuguese date, decimal, percentage, duration, measurement, load, progress,
+history, dashboard, Day, Programs, Library, and profile coverage. `npm run check:types`,
+`npm run check:browser-types`, `npm run lint`, `npm run format:check`, and `git diff --check` passed.
+The elevated full `npm test` run passed all 288 tests, including PostgreSQL-backed setup and the
+locale-persistence HTTP test. The initial sandboxed `npm run verify` could not access loopback
+PostgreSQL/HTTP resources (`EPERM`); the same complete test phase passed with the approved elevated
+local verification.
+
+**Action 2 review stop (2026-09-12):** Centralized formatting and the approved high-impact
+migrations are complete and verified. Action 2 is ready for review. Actions 3–9 remain pending and
+have not been activated or implemented.
+
+**Action 2 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 2 is complete. Action 3 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 3 — Dynamic copy and pluralization
+
+**Status:** Completed
+
+**Purpose:** Replace application-owned count-dependent and sentence-fragment construction with
+localized pluralization/interpolation while preserving stable symbols and user content.
+
+**Action 3 activation (2026-09-12):** The user approved the prepared next action. Action 3 is now
+active and is the only action authorized for implementation in this work cycle. Actions 4–9 remain
+pending.
+
+**Acceptance criteria:**
+
+- Count-dependent application copy uses the established translation boundary and reviewed
+  `one`/`other` resources for English and Brazilian Portuguese.
+- Dynamic workout, library, Programs, Day, history, progress, and analytics labels preserve
+  interpolation and stable measurement symbols while localizing grammatical copy.
+- Server-rendered and browser-generated Library counters consume the existing server-provided
+  browser message contract and do not revert to English after interaction.
+- User-authored content, catalog identity, persisted values, calculations, relationships, and
+  authorization behavior remain unchanged.
+
+**Action 3 implementation (2026-09-12):** Added the shared count translation helper and reviewed
+plural resources for workout prescriptions/progress, dashboard assignment/adherence/workload,
+Programs cycle/hierarchy counts, Library session/exercise/variant/set/step counts, history step
+counts, and progress occurrence summaries. Migrated server-rendered view models and EJS surfaces
+away from manual singular/plural branches and direct count fragments, including session details,
+Library tabs, history details, and progress rows. Updated the existing browser message contract and
+Library search/filter counters so locale-provided messages remain active during filtering. Kept
+`kg`/`lb` symbols, IDs, stored values, analytics calculations, and user content unchanged.
+
+**Action 3 verification (2026-09-12):** Focused dynamic-copy, Library, dashboard, Day, Programs,
+progress, history, and rendering tests passed (49 tests), including a new test proving that browser
+Library counters consume a Portuguese message payload. `npm run format:check`, `npm run lint`,
+`npm run check:types`, `npm run check:browser-types`, and `git diff --check` passed. The translation
+resource leaf-key audit found matching `en`/`pt-BR` structures with 550 keys. The complete elevated
+`npm run verify` passed all static checks and all 289 repository tests. A preceding sandboxed run
+could not access local PostgreSQL/HTTP loopback resources (`EPERM`); the same test suite passed with
+approved elevated local access.
+
+**Action 3 review stop (2026-09-12):** Dynamic copy and pluralization implementation is complete
+and verified. Action 3 is ready for review. Actions 4–9 remain pending and have not been activated
+or implemented.
+
+**Action 3 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 3 is complete. Action 4 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 4 — Validation, errors, and notifications
+
+**Status:** Completed
+
+**Purpose:** Localize major application-controlled validation, safe error, success, confirmation, and
+notification messages without translating logs, stack traces, or raw provider errors.
+
+**Action 4 activation (2026-09-12):** The user approved the prepared next action. Action 4 is now
+active and is the only action authorized for implementation in this work cycle. Actions 5–9 remain
+pending.
+
+**Acceptance criteria:**
+
+- Application-owned validation literals are mapped to reviewed English and Brazilian Portuguese
+  resources at the request/presentation boundary, while unknown Zod/provider/internal text keeps its
+  safe existing fallback behavior.
+- Recovery responses and contextual mutation failures localize HTML, JSON, and plain-text copy
+  without exposing raw database, provider, stack-trace, or internal error details.
+- Major Programs, Library, workout-session, and locale-switch validation/error/confirmation paths
+  use stable translation keys and preserve status codes, redirects, submitted values, identities,
+  and authorization behavior.
+- Auth/account/provider copy remains assigned to Action 5; no success path or security-sensitive
+  behavior is changed here unless it is already covered by the shared application boundary.
+
+**Action 4 implementation (2026-09-12):** Added the shared application-owned message translator
+with safe default interpolation. Expanded the validation presentation map and both locale resources
+for route/query envelopes, program/cycle/day/session/exercise/workout identifiers, form constraints,
+date ranges, reps, loads, and relationship errors. Localized application recovery states across HTML,
+JSON, and plain responses; added locale-aware contextual mutation fallbacks; and migrated major
+Programs, Library, session-template, exercise-variant, workout lifecycle, Library-context, and
+locale-switch feedback paths. Replaced raw known not-found exception messages in rendered form errors
+with safe localized copy. Localized workout deletion confirmation labels while preserving authored
+session names and all mutation contracts.
+
+**Action 4 verification (2026-09-12):** Focused validation, recovery, contextual mutation, and
+deletion tests passed (21 tests), including Portuguese translation-boundary coverage. Application
+types, browser types, lint, formatting, and `git diff --check` passed. The complete elevated
+`npm run verify` passed all static checks and all 293 repository tests. The initial sandboxed verify
+could not access loopback PostgreSQL/HTTP resources (`EPERM`); the same complete suite passed with
+approved elevated local access. The final locale leaf-key audit found matching `en`/`pt-BR`
+structures with 663 keys and no missing or extra keys.
+
+**Action 4 review stop (2026-09-12):** Validation, safe error, contextual mutation, recovery, and
+confirmation copy are implemented and verified. Action 4 is ready for review. Action 5 remains
+pending and has not been activated or implemented.
+
+**Action 4 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 4 is complete. Action 5 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 5 — Auth/account/email localization
+
+**Status:** Completed
+
+**Purpose:** Audit and localize authentication/account states and generated auth email copy where
+reliable locale context exists, preserving generic responses, tokens, URLs, sessions, and secrecy.
+
+**Action 5 activation (2026-09-12):** The user approved the prepared next action. Action 5 is now
+active and is the only action authorized for implementation in this work cycle. Actions 6–9 remain
+pending.
+
+**Verified delta-first baseline (2026-09-12):** Authentication and profile templates already use
+the shared translation function for most labels, descriptions, forms, and accessible names. The
+remaining application-owned copy is injected by auth/profile controllers: schema errors, generic
+credential and registration failures, password-reset status/invalid-token messages, Google failure
+states, profile provider-link statuses, and password-add errors. The reset email service hard-codes
+English subject/body/lifetime copy and its delivery payload carries no locale; the password-reset
+request already has reliable request-local language context. Provider errors and feature-layer
+exception messages are not safe presentation contracts and must be mapped to generic reviewed copy.
+
+**Proposed Action 5 delta:** Add reviewed auth/profile/email resources; translate auth validation and
+controller-owned status/error messages at presentation boundaries; map known provider/account errors
+to safe localized messages; pass the active locale into reset-email delivery; and add focused tests
+for validation, profile/auth states, localized email output, token secrecy, and generic failures.
+
+**Acceptance criteria:**
+
+- Auth and password validation, generic credential failures, registration conflicts, reset states, and
+  Google/account statuses use reviewed English and Brazilian Portuguese resources at presentation
+  boundaries.
+- Provider, database, and feature-layer exception details are not exposed as user-facing auth copy;
+  generic login/reset behavior and anti-enumeration responses remain intact.
+- Password-reset email subject, text, HTML, and lifetime wording use the active locale when request
+  context is available and fall back safely to English for context-free callers.
+- Reset tokens, reset URLs, session rotation/invalidation, CSRF/rate-limit boundaries, email
+  recipient handling, and secret-free delivery diagnostics remain unchanged.
+- Existing authentication/profile semantics and responsive/accessibility structure remain intact;
+  no unrelated visual redesign is included.
+
+**Action 5 implementation (2026-09-12):** Added shared auth-validation translation mapping and
+reviewed auth, profile, and email resources. Localized controller-owned sign-in, registration,
+Google, password-reset, and profile-link/password-add statuses while replacing raw known exception
+messages with safe application copy and keeping invalid credentials generic. Carried the reliable
+request locale through password-reset delivery and localized Resend subject, plain text, HTML, and
+one/other lifetime wording; context-free email calls continue to use English. Preserved reset token
+and URL generation, session/security behavior, provider boundaries, and recipient/diagnostic secrecy.
+The existing profile/auth EJS structure and shared form/accessibility contracts were reused without
+CSS or layout changes.
+
+**Action 5 verification (2026-09-12):** Focused auth validation, profile/auth rendering, feature
+authentication, and Resend email tests passed 19/19, including Portuguese validation/status/email
+copy and secret-free provider rejection coverage. `npm run check:types`,
+`npm run check:browser-types`, `npm run lint`, `npm run format:check`, and `git diff --check`
+passed. The complete elevated `npm run verify` passed all static checks and all 295 repository
+tests. The final locale leaf-key audit found matching `en`/`pt-BR` structures with 700 keys and no
+missing or extra keys. No real email was sent; the initial sandbox database/HTTP limitation was
+resolved by approved elevated local verification.
+
+**Action 5 review stop (2026-09-12):** Authentication, account, and locale-aware reset-email copy
+are implemented and verified. Action 5 is ready for review. Actions 6–9 remain pending and have
+not been activated or implemented.
+
+**Action 5 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 5 is complete. Action 6 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 6 — Client-side, accessibility, and analytics copy
+
+**Status:** Completed
+
+**Purpose:** Localize remaining browser-generated application UI, accessible names/descriptions, and
+Chart.js/analytics labels and fallback copy through the existing shared boundary.
+
+**Action 6 activation (2026-09-12):** The user approved the prepared next action. Action 6 is now
+active and is the only action authorized for implementation in this work cycle. Actions 7–9 remain
+pending.
+
+**Action 6 implementation (2026-09-12):** Extended the established presentation boundary across
+browser and accessibility-facing output. Chart week labels, numeric tooltip values, heatmap markers,
+cycle summaries, and analytics table counts now use the active locale while chart metric arrays and
+analytics calculations remain unchanged. Localized remaining application-owned navigation/list
+accessible names for training-day navigation, program/cycle collections, calendar day links, the
+Library session-template region, contextual session creation, and the heatmap data-table hint.
+Nested EJS includes now receive the existing request translator explicitly. User-authored names,
+stable IDs, form values, persisted metrics, and stable measurement symbols remain unchanged.
+
+**Action 6 verification (2026-09-12):** Focused browser, analytics, Programs, Day, Library, and
+rendering tests passed (20/20), including Brazilian Portuguese chart/heatmap labels and tooltip
+number formatting. `npm run check:types`, `npm run check:browser-types`, `npm run lint`,
+`npm run format:check`, and `git diff --check` passed. The complete elevated `npm run verify`
+passed all 296 repository tests. The initial sandboxed full run was unable to access local PostgreSQL
+and loopback HTTP resources (`EPERM`); the same complete verification passed with approved elevated
+local access. No browser automation dependency is present, so new viewport screenshots and live
+assistive-technology inspection were not available; those responsive/mixed-language checks remain
+with Action 7.
+
+**Action 6 review stop (2026-09-12):** Client-side, accessibility, and analytics copy are
+implemented and verified within the approved boundary. Action 6 is ready for review. Actions 7–9
+remain pending and have not been activated or implemented.
+
+**Action 6 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 6 is complete. Action 7 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 7 — Responsive and mixed-language audit
+
+**Status:** Completed
+
+**Purpose:** Verify representative English and Portuguese guest/authenticated/auth screens and
+interaction states at supported widths, correcting only proven translated-copy regressions and mixed
+application language.
+
+**Action 7 activation (2026-09-12):** The user approved the prepared next action. Action 7 is now
+active and is the only action authorized for implementation in this work cycle. Actions 8–9 remain
+pending.
+
+**Action 7 implementation (2026-09-12):** Audited representative authenticated Library, Day,
+Dashboard/workout, Programs, and shared interaction surfaces in both locale paths. The audit found
+proven mixed-language regressions in Library discovery, session/exercise detail, session assignment,
+workout lifecycle/cancellation, Programs navigation, and Library creation forms. Routed those labels,
+descriptions, hints, empty states, accessible names, and action controls through the established
+server translator, including private/global variant and administrator exercise forms. Added matching
+reviewed English and Brazilian Portuguese resources and regression assertions for Portuguese Library,
+Day, Dashboard/workout, and selected-session detail output. Stable catalog labels, IDs, submitted form
+values, ownership, authorization, and user-authored content remain unchanged.
+
+**Action 7 responsive and mixed-language verification (2026-09-12):** The focused Library and
+translation checks passed 14/14 after the final form corrections. The repository-wide literal audit
+found no obvious remaining hard-coded application-owned English in the reviewed EJS surfaces; any
+remaining English found outside that pattern is intentional fallback/resource text, catalog or
+user-authored content, or outside the reviewed application-owned copy boundary. Existing static
+responsive contracts for pressure widths, navigation, Library, Programs, Day, workout, history,
+progress, media, and accessibility passed as part of the full suite. No live browser executable or
+assistive-technology runner is available in this workspace, so viewport screenshots and live
+interaction inspection at approximately 390px, an intermediate pressure width, and desktop remain
+unavailable; no CSS/layout redesign was introduced because no repository-level responsive defect was
+proven.
+
+**Action 7 verification (2026-09-12):** `npm run verify` passed formatting, lint, server type-check,
+browser type-check, and all 300 repository tests, including PostgreSQL-backed setup and HTTP tests.
+`git diff --check` passed. The initial sandboxed full run was environment-limited by denied loopback
+PostgreSQL/HTTP access (`EPERM`); the same complete verification passed with approved elevated local
+access. No database reset, production mutation, deployment, push, or commit was performed.
+
+**Action 7 review stop (2026-09-12):** The responsive and mixed-language audit is implemented and
+verified within the available static/rendering evidence. Action 7 is ready for review. Action 8
+remains pending and has not been activated or implemented.
+
+**Action 7 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 7 is complete. Action 8 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 8 — Completeness and regression verification
+
+**Status:** Completed
+
+**Purpose:** Strengthen translation completeness/missing-key detection and run focused, static,
+regression, and environment-available verification across the Phase 4 contract.
+
+**Action 8 activation (2026-09-12):** The user approved the prepared next action. Action 8 is now
+active and is the only action authorized for implementation in this work cycle. Action 9 remains
+pending.
+
+**Action 8 implementation (2026-09-12):** Strengthened the common-resource contract so English and
+Brazilian Portuguese must preserve the same namespace/object shape and every leaf value must be a
+non-empty string in both locales. Added a production-source translation-reference audit covering
+literal server, EJS, and browser translation calls, including plural-family references, so missing
+application keys fail the test suite before reaching production. Added explicit chart and Programs
+browser-message resources and corrected verified missing Library, workout-form, and Programs keys.
+Preserved i18next English fallback, browser message interpolation, catalog/user-content boundaries,
+stable IDs, calculations, and runtime behavior.
+
+**Action 8 verification (2026-09-12):** Focused i18n resource and fallback checks passed 11/11.
+`npm run verify` passed formatting, lint, server type-check, browser type-check, and all 303
+repository tests, including PostgreSQL-backed setup and HTTP tests. `git diff --check` passed. The
+initial sandboxed full run was environment-limited by denied loopback PostgreSQL/HTTP access
+(`EPERM`); the same complete verification passed with approved elevated local access. No database
+reset, production mutation, deployment, push, or commit was performed.
+
+**Action 8 review stop (2026-09-12):** Translation completeness and regression verification are
+implemented and verified. Action 8 is ready for review. Action 9 remains pending and has not been
+activated or implemented.
+
+**Action 8 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 8 is complete. Action 9 remains pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 9 — Final tracking synchronization and review preparation
+
+**Status:** Completed
+
+**Purpose:** Record the actual implementation, audit classifications, verification results,
+environment limitations, intentional exclusions, and criterion-by-criterion Phase 4 status before
+the final review gate.
+
+**Action 9 activation (2026-09-12):** The user approved the prepared next action. Action 9 is now
+active and is the only action authorized for implementation in this work cycle.
+
+**Action 9 implementation and completion matrix (2026-09-12):** Reconciled the Phase 4 goal and
+action records with the repository, tests, and approved Action 1–8 evidence:
+
+1. **Verified:** `docs/current-goal.md` and `docs/current-actions.md` describe the Phase 4 scope,
+   constraints, action statuses, approval history, and current review gate.
+2. **Verified:** Dates, times, numbers, percentages, durations, measurements, and workout count
+   labels use the shared locale-aware presentation boundary; stored values and calculations remain
+   locale-neutral.
+3. **Verified:** Application-owned dynamic copy uses reviewed interpolation and plural resources,
+   including server-rendered and browser-generated Library counters.
+4. **Verified:** Validation, recovery, mutation, confirmation, authentication, and account messages
+   use localized application boundaries without exposing internal/provider details.
+5. **Verified with documented limitation:** Password-reset email copy uses the request locale when
+   reliably supplied; context-free email calls remain English because no user locale is available in
+   those call paths. Token, URL, secrecy, anti-enumeration, and delivery behavior are preserved.
+6. **Verified:** Accessible names/descriptions, browser-generated UI, chart/analytics labels, and
+   document language use the active locale; browser message interpolation remains intact.
+7. **Verified:** Stable IDs, relationships, ownership, authorization, persisted data, analytics
+   calculations, catalog identity, user-authored content, and authentication behavior are unchanged.
+8. **Verified:** Locale detection, session persistence, English fallback, and locale switching are
+   covered by middleware and HTTP tests for guest/authenticated request paths.
+9. **Partially verified with precise limit:** Static responsive contracts and rendered component
+   tests pass for guest/authenticated surfaces at supported pressure widths. No live browser
+   executable is available, so viewport screenshots and live interaction inspection at mobile,
+   intermediate, and desktop widths were not possible; no known major repository-level responsive
+   regression remains from the available evidence.
+10. **Verified with classifications:** The mixed-language audit resolved obvious application-owned
+    literals in reviewed surfaces. Remaining English is intentional fallback/resource text,
+    catalog or user-authored content, external/provider-owned content, or the documented context-free
+    email limitation.
+11. **Verified:** Required translation keys are checked for matching namespace shape, non-empty
+    values in both locales, literal production references, plural families, and safe missing-key
+    fallback behavior.
+12. **Verified:** Focused checks, server/browser type checks, lint, formatting, full regression
+    verification, PostgreSQL-backed setup, HTTP tests, and `git diff --check` passed. The sandboxed
+    PostgreSQL/HTTP attempt was environment-limited by `EPERM`; approved elevated local verification
+    passed the same suite. No database reset, production mutation, deployment, push, or commit was
+    performed.
+13. **Verified:** Actions 1–9 are approved and complete, and the user explicitly approved the Phase
+    4 goal. Phase 4 is complete with the documented live-browser and context-free email limitations.
+
+**Action 9 verification (2026-09-12):** The final matrix and both tracking files were inspected
+against the current repository state. `npm run verify` passed all static checks and 303 repository
+tests before this documentation-only synchronization; `git diff --check` passed afterward. No live
+browser or assistive-technology runner is available, as recorded above.
+
+**Action 9 review stop (2026-09-12):** Phase 4 tracking, completion-criterion comparison,
+intentional-exclusion classification, and verification evidence are synchronized. Action 9 is ready
+for review. The Phase 4 goal remains active pending explicit approval of this final action.
+
+**Action 9 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 9 is complete, and Phase 4 is ready for final review. The live
+browser/assistive-technology limitation and context-free email limitation remain explicitly recorded
+in the completion matrix; no other unmet completion criterion was identified.
+
+**Phase 4 final approval (2026-09-12):** The user approved the goal after the completion matrix and
+verification evidence were recorded. Phase 4 is complete. The remaining live-browser/
+assistive-technology and context-free email limitations are intentional, documented boundaries;
+no other unmet completion criterion was identified.
+
+## Historical Phase 3 record
 
 ### Action 1 — Goal tracking and domain audit
 
@@ -532,10 +971,7 @@ been activated or implemented.
 
 ## Resume here
 
-Actions 1–9 are **Completed**. Phase 3 is **Completed** on 2026-09-11. The completion matrix,
-verification limits, and intentional exclusions are recorded above and in `docs/current-goal.md`.
-
-**Phase 3 goal approval (2026-09-11):** The user approved the final completion matrix and the
-recorded verification limits/exclusions. Phase 3 is complete: localized application-managed catalog
-presentation is implemented while stable identity, ownership, history, analytics, media, forms,
-and user-generated content boundaries remain preserved. No next goal is proposed automatically.
+Action 1 is **Completed**. Action 2 is **Completed**. Action 3 is **Completed**. Action 4 is
+**Completed**. Action 5 is **Completed**. Action 6 is **Completed**. Action 7 is **Pending** and
+prepared as the next action; Actions 8–9 remain **Pending** and have not been
+activated. Phase 3 historical action records remain preserved under `Historical Phase 3 record`.

@@ -2,12 +2,14 @@ import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import * as exerciseVariantsRepository from "../../features/exerciseVariants/repository.js";
 import { renderLibrary } from "./libraryController.js";
 import respondWithContextualMutationError from "../contextualMutationError.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /** @param {any} error */
 function getConstraintFailure(error) {
 	if (error?.code === "23505") {
 		return {
 			status: 409,
+			fallbackKey: "mutation.variantConflict",
 			fallbackMessage: "A variant with that name already exists for this exercise.",
 			message:
 				"A variant with that name already exists for this exercise. Choose a different name.",
@@ -16,6 +18,7 @@ function getConstraintFailure(error) {
 	if (error?.code === "23503") {
 		return {
 			status: 422,
+			fallbackKey: "mutation.relatedResourcesFallback",
 			fallbackMessage: "Choose valid related Library resources.",
 			message: "Choose a current exercise and equipment option, then try again.",
 		};
@@ -25,6 +28,8 @@ function getConstraintFailure(error) {
 
 /** @param {any} req @param {any} res */
 async function create(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	try {
 		const variant = await exerciseVariantsRepository.createPrivate({
 			...req.validatedBody,
@@ -35,13 +40,16 @@ async function create(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 404,
 				fallbackMessage: "Exercise not found",
+				fallbackKey: "mutation.exerciseNotFound",
 				render: () =>
 					renderLibrary(req, res, {
 						pageFeedback: {
 							id: "library-page-feedback-title",
-							title: "Variant not created",
-							message:
+							title: t("variantNotCreated", "Variant not created"),
+							message: t(
+								"exerciseUnavailable",
 								"That exercise is no longer available. Refresh Library and try again.",
+							),
 						},
 						variantFormState: {
 							values: {
@@ -60,12 +68,16 @@ async function create(req, res) {
 		if (!failure) throw error;
 		await respondWithContextualMutationError(req, res, {
 			...failure,
+			fallbackMessage: failure.fallbackMessage,
 			render: () =>
 				renderLibrary(req, res, {
 					pageFeedback: {
 						id: "library-page-feedback-title",
-						title: "Variant not created",
-						message: failure.message,
+						title: t("variantNotCreated", "Variant not created"),
+						message: t(
+							failure.status === 409 ? "variantConflict" : "relatedResourcesInvalid",
+							failure.message,
+						),
 					},
 					variantFormState: {
 						values: {
@@ -75,9 +87,17 @@ async function create(req, res) {
 						errors: {
 							fieldErrors:
 								failure.status === 409
-									? { name: "Choose a different variant name." }
+									? {
+											name: t(
+												"differentVariantName",
+												"Choose a different variant name.",
+											),
+										}
 									: {},
-							formErrors: failure.status === 409 ? [] : [failure.message],
+							formErrors:
+								failure.status === 409
+									? []
+									: [t("relatedResourcesInvalid", failure.message)],
 						},
 					},
 				}),
@@ -87,6 +107,8 @@ async function create(req, res) {
 
 /** @param {any} req @param {any} res */
 async function update(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	try {
 		const variant = await exerciseVariantsRepository.updatePrivate({
 			...req.validatedBody,
@@ -97,13 +119,16 @@ async function update(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 404,
 				fallbackMessage: "Exercise variant not found",
+				fallbackKey: "mutation.exerciseNotFound",
 				render: () =>
 					renderLibrary(req, res, {
 						pageFeedback: {
 							id: "library-page-feedback-title",
-							title: "Variant not updated",
-							message:
+							title: t("variantNotUpdated", "Variant not updated"),
+							message: t(
+								"privateVariantUnavailable",
 								"That private variant is no longer available. Refresh Library to see the current exercises.",
+							),
 						},
 						privateVariantMutationState: {
 							variantId: req.validatedParams.variantId,
@@ -119,17 +144,24 @@ async function update(req, res) {
 		if (!failure) throw error;
 		await respondWithContextualMutationError(req, res, {
 			...failure,
+			fallbackMessage: failure.fallbackMessage,
 			render: () =>
 				renderLibrary(req, res, {
 					pageFeedback: {
 						id: "library-page-feedback-title",
-						title: "Variant not updated",
-						message: failure.message,
+						title: t("variantNotUpdated", "Variant not updated"),
+						message: t(
+							failure.status === 409 ? "variantConflict" : "relatedResourcesInvalid",
+							failure.message,
+						),
 					},
 					privateVariantMutationState: {
 						variantId: req.validatedParams.variantId,
 						values: req.validatedBody,
-						error: failure.message,
+						error: t(
+							failure.status === 409 ? "variantConflict" : "relatedResourcesInvalid",
+							failure.message,
+						),
 					},
 				}),
 		});
@@ -138,6 +170,8 @@ async function update(req, res) {
 
 /** @param {any} req @param {any} res */
 async function archive(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	const variant = await exerciseVariantsRepository.archivePrivate({
 		variantId: req.validatedParams.variantId,
 		ownerUserId: req.user.id,
@@ -146,13 +180,16 @@ async function archive(req, res) {
 		await respondWithContextualMutationError(req, res, {
 			status: 404,
 			fallbackMessage: "Exercise variant not found",
+			fallbackKey: "mutation.exerciseNotFound",
 			render: () =>
 				renderLibrary(req, res, {
 					pageFeedback: {
 						id: "library-page-feedback-title",
-						title: "Variant not archived",
-						message:
+						title: t("variantNotArchived", "Variant not archived"),
+						message: t(
+							"privateVariantArchived",
 							"That private variant is no longer available or has already been archived. Refresh Library to see the current exercises.",
+						),
 					},
 				}),
 		});

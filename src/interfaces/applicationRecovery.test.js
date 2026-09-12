@@ -89,3 +89,23 @@ test("callers without a negotiated format retain the plain fallback", () => {
 	assert.equal(response.statusCode, 429);
 	assert.equal(response.body, "Too many requests. Try again later.");
 });
+
+test("recovery responses translate application-owned state for the active locale", () => {
+	const response = createResponse();
+	const request = createRequest({ accept: "text/html" });
+	request.res = undefined;
+	response.locals = {
+		t(key, options) {
+			const translations = {
+				"recovery.pageNotFoundTitle": "Essa página não está aqui",
+				"recovery.pageNotFound": "Página não encontrada",
+			};
+			return translations[key] ?? options.defaultValue;
+		},
+	};
+
+	respondWithApplicationRecovery(request, response, { kind: "notFound" });
+
+	assert.equal(response.data.recovery.title, "Essa página não está aqui");
+	assert.equal(response.data.recovery.eyebrow, "Página não encontrada");
+});

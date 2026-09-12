@@ -2,6 +2,7 @@ import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getLibraryPageData from "../../features/library/getLibraryPageData.js";
 import createLibraryPageViewModel from "../../../views/viewModels/libraryPage/createLibraryPageViewModel.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef {import("express").Request & {validatedQuery?: Record<string, any>}} Request
@@ -44,7 +45,15 @@ export async function renderLibrary(req, res, formState = {}) {
 		sessionCreationDayId !== null &&
 		!data.sessionCreationContext
 	) {
-		res.status(404).send("Training day not found");
+		res
+			.status(404)
+			.send(
+				translateMessage(
+					res.locals?.t,
+					"mutation.trainingDayNotFound",
+					"Training day not found",
+				),
+			);
 		return;
 	}
 	const page = {
@@ -64,6 +73,7 @@ export async function renderLibrary(req, res, formState = {}) {
 		pageState,
 		data,
 		translate: res.locals.t,
+		language: res.locals.language,
 		managementMode,
 		pageFeedback: formState.pageFeedback,
 		...formState,

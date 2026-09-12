@@ -1,4 +1,8 @@
-import createViewModelTranslator from "../translate.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
+import {
+	formatLocaleMeasurement,
+	formatLocaleNumber,
+} from "../../../src/infrastructure/i18n/formatLocale.js";
 
 /** @param {string} unit */
 function formatUnit(unit) {
@@ -16,9 +20,8 @@ export default function createWorkloadViewModel(
 	language = "en",
 ) {
 	const t = createViewModelTranslator(translate);
-	const numberFormatter = new Intl.NumberFormat(language, {
-		maximumFractionDigits: 2,
-	});
+	const formatNumber = (value) =>
+		formatLocaleNumber(value, language, { maximumFractionDigits: 2 });
 	const work = analytics.performedWork;
 	const isEmpty = work.performedStepCount === 0 && work.recordedSetCount === 0;
 	const repetitionCoverage =
@@ -29,8 +32,8 @@ export default function createWorkloadViewModel(
 						defaultValue: "Every recorded set includes repetitions.",
 					})
 				: t("dashboard.someSetReps", {
-						included: numberFormatter.format(work.setsWithRepetitionsCount),
-						total: numberFormatter.format(work.recordedSetCount),
+						included: formatNumber(work.setsWithRepetitionsCount),
+						total: formatNumber(work.recordedSetCount),
 						defaultValue: "{{included}} of {{total}} sets include repetitions.",
 					});
 
@@ -54,15 +57,15 @@ export default function createWorkloadViewModel(
 		metrics: [
 			{
 				label: t("dashboard.performedSteps", { defaultValue: "Performed steps" }),
-				value: numberFormatter.format(work.performedStepCount),
+				value: formatNumber(work.performedStepCount),
 			},
 			{
 				label: t("dashboard.recordedSets", { defaultValue: "Recorded sets" }),
-				value: numberFormatter.format(work.recordedSetCount),
+				value: formatNumber(work.recordedSetCount),
 			},
 			{
 				label: t("dashboard.completedReps", { defaultValue: "Completed reps" }),
-				value: numberFormatter.format(work.completedRepetitionCount),
+				value: formatNumber(work.completedRepetitionCount),
 			},
 		],
 		repetitionCoverage,
@@ -76,12 +79,22 @@ export default function createWorkloadViewModel(
 				return {
 					unit: bucket.unit,
 					label: unit.short,
-					value: numberFormatter.format(bucket.volume),
-					accessibleValue: `${numberFormatter.format(bucket.volume)} ${unit.long}`,
-					context: t("dashboard.volumeUnitContext", {
-						count: numberFormatter.format(bucket.setCount),
-						defaultValue: "{{count}} sets with complete load data",
-					}),
+					value: formatNumber(bucket.volume),
+					accessibleValue: formatLocaleMeasurement(
+						bucket.volume,
+						bucket.unit,
+						language,
+					),
+					context: translateCount(
+						translate,
+						"dashboard.volumeUnitContext",
+						bucket.setCount,
+						{
+							count: formatNumber(bucket.setCount),
+							one: "{{count}} set with complete load data",
+							other: "{{count}} sets with complete load data",
+						},
+					),
 				};
 			}),
 		},

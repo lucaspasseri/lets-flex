@@ -7,6 +7,7 @@ import deleteProgram, {
 	ProgramNotFoundError,
 } from "../../features/programs/deleteProgram.js";
 import respondWithContextualMutationError from "../contextualMutationError.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
@@ -61,6 +62,7 @@ export async function renderPrograms(req, res, formState = {}) {
 		pageState,
 		data,
 		translate: res.locals.t,
+		language: res.locals.language,
 		...formState,
 	});
 
@@ -73,6 +75,8 @@ export async function renderPrograms(req, res, formState = {}) {
  */
 
 async function create(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
 
@@ -84,7 +88,9 @@ async function create(req, res) {
 				values: req.body,
 				errors: {
 					fieldErrors: {},
-					formErrors: ["Choose an active profile before creating a program."],
+					formErrors: [
+						t("programRequired", "Choose an active profile before creating a program."),
+					],
 				},
 			},
 		});
@@ -109,6 +115,8 @@ async function create(req, res) {
 }
 
 async function destroy(req, res) {
+	const t = (key, defaultValue) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	const programId = toNullableNumber(
 		req.validatedParams?.programId ?? req.params.programId,
 	);
@@ -118,12 +126,16 @@ async function destroy(req, res) {
 		await respondWithContextualMutationError(req, res, {
 			status: 400,
 			fallbackMessage: "Invalid program ID",
+			fallbackKey: "mutation.invalidProgramId",
 			render: () =>
 				renderPrograms(req, res, {
 					pageFeedback: {
 						id: "programs-page-feedback-title",
-						title: "Program not deleted",
-						message: "Refresh Programs and choose the program again.",
+						title: t("programNotDeleted", "Program not deleted"),
+						message: t(
+							"refreshChooseProgram",
+							"Refresh Programs and choose the program again.",
+						),
 					},
 				}),
 		});
@@ -133,12 +145,16 @@ async function destroy(req, res) {
 		await respondWithContextualMutationError(req, res, {
 			status: 403,
 			fallbackMessage: "Choose an active profile before deleting a program",
+			fallbackKey: "mutation.profileRequired",
 			render: () =>
 				renderPrograms(req, res, {
 					pageFeedback: {
 						id: "programs-page-feedback-title",
-						title: "Program not deleted",
-						message: "Choose an active profile before deleting a program.",
+						title: t("programNotDeleted", "Program not deleted"),
+						message: t(
+							"profileRequired",
+							"Choose an active profile before deleting a program.",
+						),
 					},
 				}),
 		});
@@ -152,13 +168,16 @@ async function destroy(req, res) {
 			await respondWithContextualMutationError(req, res, {
 				status: 404,
 				fallbackMessage: "Program not found",
+				fallbackKey: "mutation.programNotFound",
 				render: () =>
 					renderPrograms(req, res, {
 						pageFeedback: {
 							id: "programs-page-feedback-title",
-							title: "Program not deleted",
-							message:
+							title: t("programNotDeleted", "Program not deleted"),
+							message: t(
+								"programUnavailable",
 								"That program is no longer available. Refresh Programs to see the current plan.",
+							),
 						},
 					}),
 			});

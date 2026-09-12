@@ -1,12 +1,13 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const {
-		title = "No exercise templates yet",
-		description = "Create your first exercise template to start building reusable training sessions.",
+		title = translate("library.noExerciseTemplates", { defaultValue: "No exercise templates yet" }),
+		description = translate("library.noExerciseTemplatesDescription", { defaultValue: "Create your first exercise template to start building reusable training sessions." }),
 		icon = "dumbbell"
 	} = locals.emptyState;
 
 	const {
-		label: createLabel = "Create exercise template",
+		label: createLabel = translate("library.createExerciseTemplate", { defaultValue: "Create exercise template" }),
 		modalId = "modal"
 	} = locals.createAction;
 %>

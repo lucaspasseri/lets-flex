@@ -60,6 +60,13 @@ test("adherence chart progressively enhances complete server-rendered series", (
 	);
 	assert.equal(calls[0].config.options.animation, false);
 	assert.equal(calls[0].config.options.plugins.legend.display, false);
+	assert.equal(
+		calls[0].config.options.plugins.tooltip.callbacks.label({
+			dataset: { label: "Scheduled" },
+			raw: 1234,
+		}),
+		"Scheduled: 1,234",
+	);
 });
 
 test("adherence data remains available when Chart.js is missing or series are invalid", () => {

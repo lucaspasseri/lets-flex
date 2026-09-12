@@ -3,9 +3,17 @@ import test from "node:test";
 import formatStepLoadLabel from "./formatStepLoadLabel.js";
 
 test("formats a prescribed load", () => {
+	assert.equal(formatStepLoadLabel({ loadValue: 20, loadUnit: "Kilograms" }), "20 kg");
+});
+
+test("formats prescribed decimal loads with locale separators and stable symbols", () => {
 	assert.equal(
-		formatStepLoadLabel({ loadValue: 20, loadUnit: "Kilograms" }),
-		"20 Kilograms",
+		formatStepLoadLabel({
+			loadValue: 20.5,
+			loadUnit: "Kilograms",
+			language: "pt-BR",
+		}),
+		"20,5 kg",
 	);
 });
 

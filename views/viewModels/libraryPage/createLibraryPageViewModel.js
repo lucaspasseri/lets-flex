@@ -15,7 +15,7 @@ import createViewModelTranslator from "../translate.js";
  */
 
 /**
- * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean, translate?: Function}} input
+ * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean, translate?: Function, language?: string}} input
  * @returns {LibraryPageViewModel}
  */
 export default function createLibraryPageViewModel({
@@ -29,6 +29,7 @@ export default function createLibraryPageViewModel({
 	pageFeedback = null,
 	managementMode = false,
 	translate,
+	language = "en",
 }) {
 	const t = createViewModelTranslator(translate);
 	const visibleExerciseTemplates = managementMode
@@ -64,7 +65,7 @@ export default function createLibraryPageViewModel({
 						}),
 						pathLabel: `${sessionCreationContext.program.name} · ${sessionCreationContext.cycle.name} · ${dayTitle}`,
 						dateLabel:
-							formatDayPageDate(sessionCreationContext.day.scheduledDate) ??
+							formatDayPageDate(sessionCreationContext.day.scheduledDate, language) ??
 							"Date not scheduled",
 						backHref: `/programs/day?dayId=${sessionCreationContext.day.id}`,
 					}
@@ -91,25 +92,45 @@ export default function createLibraryPageViewModel({
 				sessionArr: data.sessions,
 				activeSession: data.activeSession,
 				actorUserId: pageState.userId,
+				language,
+				translate,
 			}),
 			exerciseTemplates: createExerciseTemplates({
 				exerciseTemplateArr: visibleExerciseTemplates,
 				actorUserId: pageState.userId,
 				managementMode,
 				privateVariantMutationState,
+				translate,
 			}),
 			privateVariantForm: {
 				idPrefix: managementMode ? "global-variant" : "private-variant",
-				title: managementMode ? "Add a global variant" : "Create your variant",
-				eyebrow: managementMode ? "Global catalog" : "Personalize an exercise",
+				title: managementMode
+					? t("library.addGlobalVariant", { defaultValue: "Add a global variant" })
+					: t("library.createYourVariant", { defaultValue: "Create your variant" }),
+				eyebrow: managementMode
+					? t("library.globalCatalog", { defaultValue: "Global catalog" })
+					: t("library.personalizeExercise", {
+							defaultValue: "Personalize an exercise",
+						}),
 				description: managementMode
-					? "Add an equipment-specific sample variant that every workspace can use."
+					? t("library.addGlobalVariantDescription", {
+							defaultValue:
+								"Add an equipment-specific sample variant that every workspace can use.",
+						})
 					: isGuest
-						? "This variant belongs only to your guest workspace and will be removed when the workspace expires."
-						: "This variant belongs only to your account. Other members and administrators cannot access it.",
+						? t("library.guestVariantDescription", {
+								defaultValue:
+									"This variant belongs only to your guest workspace and will be removed when the workspace expires.",
+							})
+						: t("library.privateVariantDescription", {
+								defaultValue:
+									"This variant belongs only to your account. Other members and administrators cannot access it.",
+							}),
 				submitLabel: managementMode
-					? "Create global variant"
-					: "Create private variant",
+					? t("library.createGlobalVariant", { defaultValue: "Create global variant" })
+					: t("library.createPrivateVariant", {
+							defaultValue: "Create private variant",
+						}),
 				actionPrefix: managementMode ? "/admin/library/exercises" : "/exercises",
 				isGuest,
 				values: variantFormState?.values ?? {},
@@ -130,6 +151,8 @@ export default function createLibraryPageViewModel({
 				state:
 					sessionTemplateFormState?.mode === "create" ? sessionTemplateFormState : {},
 				creationContext: sessionCreationContext,
+				language,
+				translate,
 			}),
 			updateSessionForm: createSessionForm({
 				stepTypes: data.stepTypes,
@@ -137,6 +160,8 @@ export default function createLibraryPageViewModel({
 				state:
 					sessionTemplateFormState?.mode === "update" ? sessionTemplateFormState : {},
 				mode: "update",
+				language,
+				translate,
 			}),
 			createExerciseForm: createExerciseForm({
 				equipments: data.equipments,
@@ -145,6 +170,7 @@ export default function createLibraryPageViewModel({
 				muscleRoles: data.muscleRoles,
 				state:
 					exerciseTemplateFormState?.mode === "create" ? exerciseTemplateFormState : {},
+				translate,
 			}),
 			updateExerciseForm: createExerciseForm({
 				equipments: data.equipments,
@@ -154,6 +180,7 @@ export default function createLibraryPageViewModel({
 				state:
 					exerciseTemplateFormState?.mode === "update" ? exerciseTemplateFormState : {},
 				mode: "update",
+				translate,
 			}),
 			deleteExerciseForm: createDeleteExerciseForm(),
 			deleteSessionForm: createDeleteSessionForm(),

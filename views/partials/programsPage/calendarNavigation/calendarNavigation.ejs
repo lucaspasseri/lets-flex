@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const { id, eyebrow, heading, description, items, emptyState } =
 		locals.calendarNavigation;
@@ -30,7 +31,7 @@
 						data-calendar-day-id="<%= item.id %>"
 						data-view-transition-name="<%= item.viewTransitionName %>"
 					>
-						<span class="calendar-navigation__cycle">Cycle <%= item.cycleOrder %></span>
+						<span class="calendar-navigation__cycle"><%= translate("programs.cycleNumber", { count: item.cycleOrder, defaultValue: "Cycle {{count}}" }) %></span>
 						<strong><%= item.dateLabel %></strong>
 						<span class="calendar-navigation__label"><%= item.label %></span>
 						<%- include("../../shared/components/sessionStatusMarkers/sessionStatusMarkers", { statusMarkers: item.statusMarkers }) %>

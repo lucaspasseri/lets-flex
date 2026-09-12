@@ -114,7 +114,7 @@ test("Programs page creates presentation-ready component contracts", () => {
 		result.components.calendarNavigation.items[0].href,
 		"/programs/day?dayId=30",
 	);
-	assert.equal(result.components.calendarNavigation.items[0].dateLabel, "18/08");
+	assert.equal(result.components.calendarNavigation.items[0].dateLabel, "08/18");
 	assert.equal(
 		result.components.calendarNavigation.items[0].statusMarkers.items[0].label,
 		"Finished",
@@ -126,7 +126,7 @@ test("Programs page creates presentation-ready component contracts", () => {
 	]);
 	assert.equal(
 		result.components.programSwitcher.items[0].metaLabel,
-		"Weight Loss • Starts 18/08",
+		"Weight Loss • Starts 08/18",
 	);
 	assert.deepEqual(result.components.createCycleForm.fields[2].options, [
 		{ label: "Position 1", value: 1 },
@@ -295,7 +295,7 @@ test("Programs template renders populated and no-profile component states", asyn
 	assert.match(populatedHtml, />\s*Hypertrophy\s*<\/option>/);
 	assert.match(populatedHtml, />\s*Weight Loss\s*<\/option>/);
 	assert.match(populatedHtml, />\s*General Fitness\s*<\/option>/);
-	assert.match(populatedHtml, /Weight Loss • Starts 18\/08/);
+	assert.match(populatedHtml, /Weight Loss • Starts 08\/18/);
 	assert.doesNotMatch(populatedHtml, /weight_loss|general_fitness/);
 	assert.match(populatedHtml, /id="create-cycle-form"/);
 	assert.match(populatedHtml, /id="delete-program-form"/);

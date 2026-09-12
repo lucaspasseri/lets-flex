@@ -1,6 +1,7 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%- include("../shared/components/button/button", { button: {
 	type: "button",
-	label: "Keep session",
+	label: translate("workout.keepSession", { defaultValue: "Keep session" }),
 	variant: "secondary",
 	attributes: { "data-modal-close": modalId },
 } }) %>

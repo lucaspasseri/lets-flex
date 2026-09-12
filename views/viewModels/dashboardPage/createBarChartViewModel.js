@@ -1,5 +1,9 @@
 import { parseISO } from "date-fns";
 import createViewModelTranslator from "../translate.js";
+import {
+	formatLocaleDate,
+	formatLocaleNumber,
+} from "../../../src/infrastructure/i18n/formatLocale.js";
 
 /** @param {Pick<import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, "currentProgram" | "analytics">} input @param {Function} [translate] */
 export default function createBarChartViewModel(
@@ -8,11 +12,6 @@ export default function createBarChartViewModel(
 	language = "en",
 ) {
 	const t = createViewModelTranslator(translate);
-	const dateFormatter = new Intl.DateTimeFormat(language, {
-		month: "short",
-		day: "numeric",
-		timeZone: "UTC",
-	});
 	const weeks = analytics.adherence;
 	const scheduledCount = weeks.reduce((sum, week) => sum + week.scheduledCount, 0);
 	const finishedCount = weeks.reduce((sum, week) => sum + week.finishedCount, 0);
@@ -29,12 +28,22 @@ export default function createBarChartViewModel(
 				count: week.weekIndex + 1,
 				defaultValue: "Week {{count}}",
 			}),
-			shortLabel: `W${week.weekIndex + 1}`,
-			rangeLabel: `${dateFormatter.format(startDate)}–${dateFormatter.format(endDate)}`,
+			shortLabel: t("dashboard.weekShortLabel", {
+				count: week.weekIndex + 1,
+				defaultValue: "W{{count}}",
+			}),
+			rangeLabel: `${formatLocaleDate(startDate, language, { month: "short", day: "numeric" })}–${formatLocaleDate(endDate, language, { month: "short", day: "numeric" })}`,
 			scheduledCount: week.scheduledCount,
+			scheduledCountLabel: formatLocaleNumber(week.scheduledCount, language),
 			finishedCount: week.finishedCount,
+			finishedCountLabel: formatLocaleNumber(week.finishedCount, language),
 			cancelledCount: week.cancelledCount,
+			cancelledCountLabel: formatLocaleNumber(week.cancelledCount, language),
 			remainingCount: week.plannedCount + week.inProgressCount,
+			remainingCountLabel: formatLocaleNumber(
+				week.plannedCount + week.inProgressCount,
+				language,
+			),
 			completionLabel:
 				completionPercentage === null
 					? t("dashboard.noSessionsScheduled", {
@@ -65,9 +74,9 @@ export default function createBarChartViewModel(
 						defaultValue: "No sessions are scheduled inside this program calendar yet.",
 					})
 				: t("dashboard.adherenceSummaryCompact", {
-						percentage: completionPercentage,
-						finished: finishedCount,
-						cancelled: cancelledCount,
+						percentage: formatLocaleNumber(completionPercentage, language),
+						finished: formatLocaleNumber(finishedCount, language),
+						cancelled: formatLocaleNumber(cancelledCount, language),
 						defaultValue:
 							"{{percentage}}% complete · {{finished}} finished · {{cancelled}} cancelled",
 					}),

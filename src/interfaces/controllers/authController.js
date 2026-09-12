@@ -29,10 +29,14 @@ import {
 	registrationSchema,
 	safeReturnTo,
 } from "../validation/authSchemas.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
+import translateAuthErrors from "../validation/translateAuthErrors.js";
 
-const RESET_REQUEST_MESSAGE =
-	"If that email can use password sign-in, we sent a password reset link.";
 const SAFE_DELIVERY_CATEGORIES = new Set(["provider_rejected", "transport_failure"]);
+
+function authMessage(res, key, defaultValue, values) {
+	return translateMessage(res.locals?.t, `auth.${key}`, defaultValue, values);
+}
 
 function reportPasswordResetFailure(error) {
 	const category = SAFE_DELIVERY_CATEGORIES.has(error?.category)
@@ -50,20 +54,26 @@ function reportPasswordResetFailure(error) {
 	);
 }
 
-function renderResetRequest(res, state = {}) {
+function renderResetRequest(req, res, state = {}) {
 	res.render("password-reset-request", {
 		layout: "./layouts/authShell",
-		page: { title: "Reset password · Let's Flex!" },
+		page: { title: authMessage(res, "pageTitleReset", "Reset password · Let's Flex!") },
 		email: state.email ?? "",
 		errors: state.errors ?? [],
 		statusMessage: state.statusMessage ?? "",
 	});
 }
 
-function renderResetPassword(res, state) {
+function renderResetPassword(req, res, state) {
 	res.render("password-reset", {
 		layout: "./layouts/authShell",
-		page: { title: "Choose a new password · Let's Flex!" },
+		page: {
+			title: authMessage(
+				res,
+				"pageTitleChoosePassword",
+				"Choose a new password · Let's Flex!",
+			),
+		},
 		token: state.token ?? "",
 		errors: state.errors ?? [],
 	});
@@ -72,38 +82,54 @@ function renderResetPassword(res, state) {
 export function buildPasswordResetHandlers(emailService) {
 	return {
 		showRequest(_req, res) {
-			renderResetRequest(res);
+			renderResetRequest(_req, res);
 		},
 		request: asyncHandler(async (req, res) => {
 			const parsed = passwordResetRequestSchema.safeParse(req.body);
 			try {
 				if (parsed.success)
-					await requestPasswordReset({ email: parsed.data.email, emailService });
+					await requestPasswordReset({
+						email: parsed.data.email,
+						emailService,
+						language: res.locals?.language,
+					});
 			} catch (error) {
 				// Only stable, allow-listed operational context reaches diagnostics.
 				reportPasswordResetFailure(error);
 			}
-			renderResetRequest(res, { statusMessage: RESET_REQUEST_MESSAGE });
+			renderResetRequest(req, res, {
+				statusMessage: authMessage(
+					res,
+					"resetRequestStatus",
+					"If that email can use password sign-in, we sent a password reset link.",
+				),
+			});
 		}),
 		showReset: asyncHandler(async (req, res) => {
 			const token = typeof req.query?.token === "string" ? req.query.token : "";
 			if (!(await isPasswordResetTokenUsable(token))) {
 				res.status(400);
-				renderResetPassword(res, {
+				renderResetPassword(req, res, {
 					token: "",
-					errors: ["This password reset link is invalid or has expired."],
+					errors: [
+						authMessage(
+							res,
+							"invalidResetToken",
+							"This password reset link is invalid or has expired.",
+						),
+					],
 				});
 				return;
 			}
-			renderResetPassword(res, { token });
+			renderResetPassword(req, res, { token });
 		}),
 		reset: asyncHandler(async (req, res) => {
 			const parsed = passwordResetSchema.safeParse(req.body);
 			if (!parsed.success) {
 				res.status(422);
-				renderResetPassword(res, {
+				renderResetPassword(req, res, {
 					token: typeof req.body?.token === "string" ? req.body.token : "",
-					errors: parsed.error.issues.map((issue) => issue.message),
+					errors: translateAuthErrors(res, parsed.error.issues),
 				});
 				return;
 			}
@@ -113,7 +139,16 @@ export function buildPasswordResetHandlers(emailService) {
 			} catch (error) {
 				if (error instanceof InvalidPasswordResetTokenError) {
 					res.status(400);
-					renderResetPassword(res, { token: "", errors: [error.message] });
+					renderResetPassword(req, res, {
+						token: "",
+						errors: [
+							authMessage(
+								res,
+								"invalidResetToken",
+								"This password reset link is invalid or has expired.",
+							),
+						],
+					});
 					return;
 				}
 				throw error;
@@ -127,14 +162,18 @@ function renderLogin(req, res, state = {}) {
 	const returnTo = safeReturnTo(state.returnTo ?? req.query?.returnTo);
 	res.render("login", {
 		layout: "./layouts/authShell",
-		page: { title: "Sign in · Let's Flex!" },
+		page: { title: authMessage(res, "pageTitleSignIn", "Sign in · Let's Flex!") },
 		returnTo,
 		googleAuthUrl: `/auth/google?returnTo=${encodeURIComponent(returnTo)}`,
 		email: state.email ?? "",
 		errors: state.errors ?? [],
 		statusMessage:
 			req.query?.passwordReset === "success"
-				? "Your password has been reset. Sign in with your new password."
+				? authMessage(
+						res,
+						"passwordResetSuccess",
+						"Your password has been reset. Sign in with your new password.",
+					)
 				: "",
 		activeTab: state.activeTab ?? (req.query?.tab === "signup" ? "signup" : "signin"),
 	});
@@ -261,11 +300,15 @@ export function buildGoogleReplaceStartHandler(passport) {
 /** @param {any} passport */
 export function buildGoogleCallbackHandler(passport) {
 	return asyncHandler(async (req, res, next) => {
+		const t = (key, defaultValue) => authMessage(res, key, defaultValue);
 		const oauthState = await consumeGoogleOAuthState(req);
 		if (!oauthState.valid) {
 			renderGoogleFailure(req, res, {
 				status: 403,
-				message: "Google sign-in could not be verified. Please try again.",
+				message: t(
+					"googleVerificationFailed",
+					"Google sign-in could not be verified. Please try again.",
+				),
 			});
 			return;
 		}
@@ -299,7 +342,10 @@ export function buildGoogleCallbackHandler(passport) {
 		}
 		if (req.query?.error || typeof req.query?.code !== "string") {
 			renderGoogleFailure(req, res, {
-				message: "Google sign-in was cancelled or could not be completed.",
+				message: t(
+					"googleCancelled",
+					"Google sign-in was cancelled or could not be completed.",
+				),
 				returnTo: oauthState.returnTo,
 			});
 			return;
@@ -325,7 +371,10 @@ export function buildGoogleCallbackHandler(passport) {
 			if (error instanceof GoogleEmailConflictError) {
 				renderGoogleFailure(req, res, {
 					status: 409,
-					message: error.message,
+					message: t(
+						"googleEmailConflict",
+						"An account with that email address already exists. Sign in using its existing authentication method.",
+					),
 					returnTo: oauthState.returnTo,
 				});
 				return;
@@ -340,14 +389,26 @@ export function buildGoogleCallbackHandler(passport) {
 			) {
 				renderGoogleFailure(req, res, {
 					status: 422,
-					message: error.message,
+					message:
+						error instanceof GuestConversionUnavailableError
+							? t(
+									"guestConversionUnavailable",
+									"The guest workspace is no longer available for conversion.",
+								)
+							: t(
+									"googleProfileInvalid",
+									"Google did not provide a valid account profile. Please try again.",
+								),
 					returnTo: oauthState.returnTo,
 				});
 				return;
 			}
 			if (isOAuthProviderError(error)) {
 				renderGoogleFailure(req, res, {
-					message: "Google sign-in could not be completed. Please try again.",
+					message: t(
+						"googleFailed",
+						"Google sign-in could not be completed. Please try again.",
+					),
 					returnTo: oauthState.returnTo,
 				});
 				return;
@@ -355,7 +416,10 @@ export function buildGoogleCallbackHandler(passport) {
 			if (error) return next(error);
 			if (!user) {
 				renderGoogleFailure(req, res, {
-					message: "Google sign-in could not be completed. Please try again.",
+					message: t(
+						"googleFailed",
+						"Google sign-in could not be completed. Please try again.",
+					),
 					returnTo: oauthState.returnTo,
 				});
 				return;
@@ -386,19 +450,21 @@ export function buildLoginHandler(passport) {
 			renderLogin(req, res, {
 				email: typeof req.body?.email === "string" ? req.body.email : "",
 				returnTo: req.body?.returnTo,
-				errors: parsed.error.issues.map((issue) => issue.message),
+				errors: translateAuthErrors(res, parsed.error.issues),
 			});
 			return;
 		}
 
-		passport.authenticate("local", async (error, user, info) => {
+		passport.authenticate("local", async (error, user) => {
 			if (error) return next(error);
 			if (!user) {
 				res.status(401);
 				renderLogin(req, res, {
 					email: parsed.data.email,
 					returnTo: parsed.data.returnTo,
-					errors: [info?.message ?? "Invalid email or password."],
+					errors: [
+						authMessage(res, "invalidCredentials", "Invalid email or password."),
+					],
 				});
 				return;
 			}
@@ -421,7 +487,7 @@ async function register(req, res) {
 			activeTab: "signup",
 			email: typeof req.body?.email === "string" ? req.body.email : "",
 			returnTo: req.body?.returnTo,
-			errors: parsed.error.issues.map((issue) => issue.message),
+			errors: translateAuthErrors(res, parsed.error.issues),
 		});
 		return;
 	}
@@ -453,7 +519,13 @@ async function register(req, res) {
 				activeTab: "signup",
 				email: parsed.data.email,
 				returnTo: parsed.data.returnTo,
-				errors: ["An account with that email address already exists."],
+				errors: [
+					authMessage(
+						res,
+						"accountExists",
+						"An account with that email address already exists.",
+					),
+				],
 			});
 			return;
 		}
@@ -463,7 +535,13 @@ async function register(req, res) {
 				activeTab: "signup",
 				email: parsed.data.email,
 				returnTo: parsed.data.returnTo,
-				errors: [error.message],
+				errors: [
+					authMessage(
+						res,
+						"guestConversionUnavailable",
+						"The guest workspace is no longer available for conversion.",
+					),
+				],
 			});
 			return;
 		}

@@ -1,2 +1,3 @@
-<p class="cancel-workout-form__message">This session will be removed from the active plan for this day.</p>
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
+<p class="cancel-workout-form__message"><%= translate("workout.cancelSessionMessage", { defaultValue: "This session will be removed from the active plan for this day." }) %></p>
 <input type="hidden" name="trainingDayId" value="<%= form.trainingDayId ?? "" %>">

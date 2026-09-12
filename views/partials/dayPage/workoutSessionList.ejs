@@ -1,8 +1,9 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <section class="day-panel day-panel--workouts" aria-labelledby="workout-list-title">
 	<div class="day-panel__header day-panel__header--workouts">
 		<div>
-			<p class="day-panel__eyebrow">Planned workouts</p>
-			<h2 id="workout-list-title">Sessions assigned to this day</h2>
+			<p class="day-panel__eyebrow"><%= translate("dashboard.plannedWorkouts", { defaultValue: "Planned workouts" }) %></p>
+			<h2 id="workout-list-title"><%= translate("dashboard.sessionsAssignedToDay", { defaultValue: "Sessions assigned to this day" }) %></h2>
 		</div>
 		<% if (!workoutSessionList.emptyState.isVisible) { %>
 			<span class="day-panel__count"><%= workoutSessionList.count %></span>
@@ -19,7 +20,7 @@
 		<p class="day-panel__summary"><%= workoutSessionList.countLabel %></p>
 		<ul class="workout-session-list">
 			<% workoutSessionList.items.forEach(card => { %>
-				<li><%- include("../session/sessionCard", { card }) %></li>
+				<li><%- include("../session/sessionCard", { card, t: translate }) %></li>
 			<% }) %>
 		</ul>
 	<% } %>

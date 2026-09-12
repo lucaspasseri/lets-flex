@@ -1,4 +1,9 @@
-import createViewModelTranslator from "../translate.js";
+import createViewModelTranslator, { translateCount } from "../translate.js";
+import {
+	formatLocaleDate,
+	formatLocaleNumber,
+	formatMeasurementSymbol,
+} from "../../../src/infrastructure/i18n/formatLocale.js";
 
 /** @param {string | null | undefined} dateKey @param {string} [language] @param {Function} [translate] */
 function formatDate(dateKey, language = "en", translate) {
@@ -8,13 +13,9 @@ function formatDate(dateKey, language = "en", translate) {
 			: (_key, options) => options?.defaultValue ?? _key;
 	if (!dateKey)
 		return t("history.dateUnavailable", { defaultValue: "Date unavailable" });
-	const date = new Date(`${dateKey}T00:00:00.000Z`);
-	return Number.isNaN(date.valueOf())
+	return formatLocaleDate(dateKey, language, { dateStyle: "medium" }) === null
 		? t("history.dateUnavailable", { defaultValue: "Date unavailable" })
-		: new Intl.DateTimeFormat(language, {
-				dateStyle: "medium",
-				timeZone: "UTC",
-			}).format(date);
+		: formatLocaleDate(dateKey, language, { dateStyle: "medium" });
 }
 
 function toIsoTimestamp(value) {
@@ -30,13 +31,19 @@ function formatTimestamp(value, language = "en", translate) {
 			? translate
 			: (_key, options) => options?.defaultValue ?? _key;
 	const iso = toIsoTimestamp(value);
-	return iso
-		? `${new Intl.DateTimeFormat(language, {
-				dateStyle: "medium",
-				timeStyle: "short",
-				timeZone: "UTC",
-			}).format(new Date(iso))} UTC`
+	const label = formatLocaleDate(iso, language, {
+		dateStyle: "medium",
+		timeStyle: "short",
+	});
+	return label
+		? `${label} UTC`
 		: t("history.notRecorded", { defaultValue: "Not recorded" });
+}
+
+function formatLoadLabel(value, unit, language = "en") {
+	if (value === null || value === undefined) return null;
+	if (!unit) return formatLocaleNumber(value, language, { maximumFractionDigits: 2 });
+	return `${formatLocaleNumber(value, language, { maximumFractionDigits: 2 })} ${formatMeasurementSymbol(unit)}`;
 }
 
 function appendFilters(parameters, filters) {
@@ -247,13 +254,17 @@ function toStepViewModel(step, t, language) {
 			reps: step.plannedReps,
 			loadValue: step.plannedLoadValue,
 			loadUnit: step.plannedLoadUnit,
+			loadLabel: formatLoadLabel(step.plannedLoadValue, step.plannedLoadUnit, language),
 		},
 		completedAt: {
 			value: toIsoTimestamp(step.completedAt),
 			label: formatTimestamp(step.completedAt, language, t),
 		},
 		notes: step.notes,
-		sets: step.sets,
+		sets: step.sets.map((set) => ({
+			...set,
+			loadLabel: formatLoadLabel(set.loadValue, set.loadUnit, language),
+		})),
 	};
 }
 
@@ -318,6 +329,15 @@ export function createWorkoutHistoryDetailPageViewModel({
 			notes: history.notes,
 		},
 		steps: history.steps.map((step) => toStepViewModel(step, t, language)),
+		stepsCountLabel: translateCount(
+			translate,
+			"history.stepsCount",
+			history.steps.length,
+			{
+				one: "{{count}} step",
+				other: "{{count}} steps",
+			},
+		),
 		emptySteps: {
 			title:
 				history.status === "cancelled"

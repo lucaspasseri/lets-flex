@@ -1,6 +1,8 @@
 import createMuscles from "./createMuscleViewModel.js";
 import toCapitalizedString from "../../../utils/toCapitalizedString.js";
 import { resolveMedia } from "../media/resolveMedia.js";
+import translateCount from "../../infrastructure/i18n/translateCount.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 /**
  * @typedef {import("../exerciseTemplates/exerciseTemplates.types.js").ExerciseTemplateMapper} ExerciseTemplateMapper
@@ -13,6 +15,7 @@ import { resolveMedia } from "../media/resolveMedia.js";
  * @property {number | null} actorUserId
  * @property {boolean} managementMode
  * @property {Record<string, any>} [privateVariantMutationState]
+ * @property {Function} [translate]
  */
 
 /**
@@ -24,7 +27,10 @@ function createExercise({
 	actorUserId = null,
 	managementMode = false,
 	privateVariantMutationState,
+	translate,
 }) {
+	const t = (key, options = {}) =>
+		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
 	const exerciseTemplate = exerciseTemplates[0];
 	if (!exerciseTemplate) {
 		throw new TypeError("An exercise group requires at least one visible variant.");
@@ -35,7 +41,7 @@ function createExercise({
 		? movementPattern.notes
 			? `${movementPattern.name} - ${movementPattern.notes}`
 			: movementPattern.name
-		: "-";
+		: t("library.notSpecified", { defaultValue: "Not specified" });
 	const muscleTemplates = createMuscles({ muscles });
 	const firstVariant = exerciseTemplates[0]?.variant;
 	const baseMedia = resolveMedia({
@@ -63,11 +69,14 @@ function createExercise({
 			const mutationEquipmentId = Object.hasOwn(mutationValues, "equipmentId")
 				? mutationValues.equipmentId
 				: equipment?.id;
-			const equipmentLabel = equipment?.name ?? "Bodyweight";
+			const equipmentLabel =
+				equipment?.name ?? t("library.bodyweight", { defaultValue: "Bodyweight" });
 			const environmentLabel = variant.environment
 				? toCapitalizedString(variant.environment).replaceAll("_", " ")
-				: "Not specified";
-			const scopeLabel = isPrivateOwner ? "Private" : "Global";
+				: t("library.notSpecified", { defaultValue: "Not specified" });
+			const scopeLabel = isPrivateOwner
+				? t("library.private", { defaultValue: "Private" })
+				: t("library.global", { defaultValue: "Global" });
 			const equipmentSearchLabels = [
 				equipmentLabel,
 				equipment?.canonicalName,
@@ -122,7 +131,10 @@ function createExercise({
 					canManageGlobal: managementMode && variant.ownerUserId == null,
 					canManagePrivate: isPrivateOwner,
 					update: {
-						label: `Edit ${variant.name}`,
+						label: t("library.editVariant", {
+							name: variant.name,
+							defaultValue: "Edit {{name}}",
+						}),
 						modalId: "updateExerciseModal",
 						values: {
 							exerciseId: id,
@@ -141,7 +153,13 @@ function createExercise({
 		})
 		.sort((first, second) => first.name.localeCompare(second.name));
 	const equipmentNames = [
-		...new Set(variants.map((variant) => variant.equipment?.name ?? "Bodyweight")),
+		...new Set(
+			variants.map(
+				(variant) =>
+					variant.equipment?.name ??
+					t("library.bodyweight", { defaultValue: "Bodyweight" }),
+			),
+		),
 	];
 	const variantCount = variants.length;
 	const baseSearchKeyWord = [
@@ -177,8 +195,18 @@ function createExercise({
 		},
 		summary: {
 			movementPatternLabel,
-			equipmentSummary: equipmentNames.join(", ") || "Bodyweight",
-			variantCountLabel: `${variantCount} ${variantCount === 1 ? "variant" : "variants"}`,
+			equipmentSummary:
+				equipmentNames.join(", ") ||
+				t("library.bodyweight", { defaultValue: "Bodyweight" }),
+			variantCountLabel: translateCount(
+				translate,
+				"library.variantCount",
+				variantCount,
+				{
+					one: "{{count}} variant",
+					other: "{{count}} variants",
+				},
+			),
 		},
 		details: {
 			media: baseMedia,
@@ -191,7 +219,10 @@ function createExercise({
 		actions: {
 			archive: managementMode
 				? {
-						label: `Archive ${exerciseTemplate.name}`,
+						label: t("library.archiveExercise", {
+							name: exerciseTemplate.name,
+							defaultValue: "Archive {{name}}",
+						}),
 						modalId: "deleteExerciseModal",
 						value: id,
 					}

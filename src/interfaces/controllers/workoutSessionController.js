@@ -6,6 +6,7 @@ import { finishWorkoutSession } from "../../features/workoutSessions/finishWorko
 import WorkoutSessionLifecycleError from "../../features/workoutSessions/WorkoutSessionLifecycleError.js";
 import { renderDay } from "./dayController.js";
 import { renderDashboard } from "./dashboardController.js";
+import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
 async function create(req, res) {
 	const { sessionId, trainingDayId } = req.validatedBody;
@@ -41,7 +42,15 @@ async function showCreateErrors(req, res, { errors, submittedValues }) {
 
 async function showCancelErrors(_req, res, { errors }) {
 	const messages = [...Object.values(errors.fieldErrors), ...errors.formErrors];
-	res.status(400).json({ error: messages[0] ?? "Invalid workout session." });
+	res.status(400).json({
+		error:
+			messages[0] ??
+			translateMessage(
+				res.locals?.t,
+				"mutation.workoutInvalid",
+				"Invalid workout session.",
+			),
+	});
 }
 
 async function start(req, res, next) {
@@ -83,20 +92,39 @@ async function finish(req, res, next) {
 
 async function respondToLifecycleConflict(req, res, error) {
 	if (!(error instanceof WorkoutSessionLifecycleError)) return false;
+	const t = (key, defaultValue, values) =>
+		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue, values);
+	const actionKey =
+		error.action === "cancel"
+			? "cancelledAction"
+			: error.action === "start"
+				? "startedAction"
+				: "finishedAction";
 
 	const message =
 		error.reason === "active_session"
-			? "Another workout session is already active for this training day."
+			? t(
+					"activeWorkoutExists",
+					"Another workout session is already active for this training day.",
+				)
 			: error.reason === "unresolved_steps"
-				? "Complete or skip every workout step before finishing this session."
-				: `This workout session can no longer be ${error.action === "cancel" ? "cancelled" : `${error.action}ed`}.`;
+				? t(
+						"unresolvedWorkoutSteps",
+						"Complete or skip every workout step before finishing this session.",
+					)
+				: t("workoutUnavailable", "This workout session can no longer be {{action}}.", {
+						action: t(
+							actionKey,
+							error.action === "cancel" ? "cancelled" : `${error.action}ed`,
+						),
+					});
 	if (error.action === "cancel") {
 		res.status(409);
 		await renderDay(req, res, {
 			dayId: req.validatedBody?.trainingDayId,
 			workoutFeedback: {
 				tone: "error",
-				title: "Workout not removed",
+				title: t("workoutNotRemoved", "Workout not removed"),
 				message,
 			},
 		});
@@ -109,7 +137,7 @@ async function respondToLifecycleConflict(req, res, error) {
 		workoutSessionId: req.validatedParams?.workoutSessionId,
 		workoutFeedback: {
 			tone: "error",
-			title: "Workout not updated",
+			title: t("workoutNotUpdated", "Workout not updated"),
 			message,
 		},
 	});

@@ -24,7 +24,7 @@
 	<section class="history-steps" aria-labelledby="history-steps-heading">
 		<div class="history-section-heading">
 			<div><p class="history-eyebrow"><%= translate("progress.recordedPerformance", { defaultValue: "Recorded performance" }) %></p><h2 id="history-steps-heading"><%= translate("history.exerciseResults", { defaultValue: "Exercise results" }) %></h2></div>
-			<% if (steps.length) { %><span class="history-results__page"><%= steps.length %> <%= steps.length === 1 ? "step" : "steps" %></span><% } %>
+			<% if (steps.length) { %><span class="history-results__page"><%= stepsCountLabel %></span><% } %>
 		</div>
 		<% if (steps.length) { %>
 			<ol class="history-step-list">
@@ -48,7 +48,7 @@
 									<dl>
 										<div><dt><%= translate("history.set", { defaultValue: "Set" }) %>s</dt><dd><%= step.planned.sets ?? "—" %></dd></div>
 										<div><dt><%= translate("history.repetitions", { defaultValue: "Repetitions" }) %></dt><dd><%= step.planned.reps ?? "—" %></dd></div>
-										<div><dt><%= translate("history.load", { defaultValue: "Load" }) %></dt><dd><%= step.planned.loadValue ?? "—" %><% if (step.planned.loadValue != null && step.planned.loadUnit) { %> <%= step.planned.loadUnit %><% } %></dd></div>
+										<div><dt><%= translate("history.load", { defaultValue: "Load" }) %></dt><dd><%= step.planned.loadLabel ?? "—" %></dd></div>
 										<% if (step.completedAt.value) { %><div class="history-prescription__resolved"><dt><%= translate("history.resolved", { defaultValue: "Resolved" }) %></dt><dd><time datetime="<%= step.completedAt.value %>"><%= step.completedAt.label %></time></dd></div><% } %>
 									</dl>
 								</section>
@@ -60,8 +60,8 @@
 											<table>
 													<caption><%= translate("history.performedSetsFor", { title: step.title, defaultValue: "Performed sets for {{title}}" }) %></caption>
 													<thead><tr><th scope="col"><%= translate("history.set", { defaultValue: "Set" }) %></th><th scope="col"><%= translate("history.repetitions", { defaultValue: "Repetitions" }) %></th><th scope="col"><%= translate("history.load", { defaultValue: "Load" }) %></th></tr></thead>
-												<tbody>
-													<% step.sets.forEach(set => { %><tr><th scope="row"><%= set.order %></th><td><%= set.reps ?? "—" %></td><td><%= set.loadValue ?? "—" %><% if (set.loadValue != null && set.loadUnit) { %> <%= set.loadUnit %><% } %></td></tr><% }) %>
+														<tbody>
+															<% step.sets.forEach(set => { %><tr><th scope="row"><%= set.order %></th><td><%= set.reps ?? "—" %></td><td><%= set.loadLabel ?? "—" %></td></tr><% }) %>
 												</tbody>
 											</table>
 										</div>

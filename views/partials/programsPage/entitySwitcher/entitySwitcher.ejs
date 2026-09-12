@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%
 	const { id, eyebrow, heading, description, items, emptyState, createAction } =
 		locals.entitySwitcher;
@@ -34,7 +35,7 @@
 			entitySwitcherEmptyState: { ...emptyState, createAction }
 		}) %>
 	<% } else { %>
-		<ul class="entity-switcher__list" aria-label="Available <%= eyebrow.toLowerCase() %>">
+		<ul class="entity-switcher__list" aria-label="<%= entitySwitcher.listLabel ?? translate("programs.availableItems", { entity: eyebrow, defaultValue: "Available {{entity}}" }) %>">
 			<% items.forEach(entityCard => { %>
 				<li class="entity-switcher__list-item">
 					<%- include("entitySwitcherCard", { entityCard }) %>

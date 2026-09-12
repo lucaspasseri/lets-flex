@@ -1,10 +1,11 @@
+<% const t = typeof locals?.translate === "function" ? locals.translate : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <article class="session-component session-component--<%= workout.state %>" aria-labelledby="current-workout-title">
 	<%- include('./header', { header: workout.header }) %>
 
 	<% if (workout.progress.isVisible) { %>
 		<section class="session-progress" aria-labelledby="session-progress-label">
 			<div class="session-progress__summary">
-				<div><p class="session-section-label">Workout progress</p><h3 id="session-progress-label"><%= workout.progress.label %></h3></div>
+				<div><p class="session-section-label"><%= t("workout.progress", { defaultValue: "Workout progress" }) %></p><h3 id="session-progress-label"><%= workout.progress.label %></h3></div>
 				<strong aria-hidden="true"><%= workout.progress.percentage %>%</strong>
 			</div>
 			<progress value="<%= workout.progress.value %>" max="<%= workout.progress.max %>"><%= workout.progress.percentage %>%</progress>
@@ -29,7 +30,7 @@
 			<p class="session-section-label"><%= workout.stepListLabel %></p>
 			<ol class="session-step-list">
 				<% workout.steps.forEach(step => { %>
-					<%- include("stepItem", { step }) %>
+					<%- include("stepItem", { step, translate: t }) %>
 				<% }) %>
 			</ol>
 		</div>
@@ -41,37 +42,37 @@
 				<%- include("../shared/components/media", { media: workout.currentStep.media, className: "current-workout-step__media", variant: "initial", decorative: true }) %>
 			<% } %>
 			<header>
-				<p class="session-section-label"><%= workout.currentStep.positionLabel %> · Current step</p>
+				<p class="session-section-label"><%= workout.currentStep.positionLabel %> · <%= t("workout.currentStep", { defaultValue: "Current step" }) %></p>
 				<h3 id="current-step-title"><%= workout.currentStep.title %></h3>
-				<p>Record what you completed, or skip this step to keep moving.</p>
+				<p><%= t("workout.recordStepInstruction", { defaultValue: "Record what you completed, or skip this step to keep moving." }) %></p>
 			</header>
 			<%- include("workoutLogsForm", { workoutLogForm: workout.currentStep, translate }) %>
 		</section>
 	<% } else if (workout.showMissingLogs) { %>
 		<section class="session-outcome session-outcome--error" role="alert">
 			<span class="session-outcome__mark" aria-hidden="true">!</span>
-			<div><h3>Workout steps unavailable</h3><p>Reload the page before trying to finish this session.</p></div>
+			<div><h3><%= t("workout.stepsUnavailable", { defaultValue: "Workout steps unavailable" }) %></h3><p><%= t("workout.reloadBeforeFinish", { defaultValue: "Reload the page before trying to finish this session." }) %></p></div>
 		</section>
 	<% } %>
 
 	<% if (workout.showStart) { %>
 		<section class="session-action-panel">
-			<div><h3>Ready when you are</h3><p>Starting locks in this session's planned steps for today's workout.</p></div>
+			<div><h3><%= t("workout.readyWhenYouAre", { defaultValue: "Ready when you are" }) %></h3><p><%= t("workout.startInstruction", { defaultValue: "Starting locks in this session's planned steps for today's workout." }) %></p></div>
 			<form method="POST" action="<%= workout.startForm.action %>" data-workout-action-form>
 				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 				<input type="hidden" name="daysDifference" value="<%= workout.startForm.daysDifference ?? 0 %>">
 				<% if (workout.startForm.errors?.fieldErrors?.daysDifference) { %><p class="form-field__error"><%= workout.startForm.errors.fieldErrors.daysDifference %></p><% } %>
-				<%- include('../shared/components/button/button', { button: { label: "Start session", type: "submit", alternativeClassname: "session-start-button", attributes: { "data-workout-submit": true, "data-loading-label": "Starting…" }, renderIcon: () => include("../shared/components/icons/playCircle", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
+				<%- include('../shared/components/button/button', { button: { label: t("workout.startSession", { defaultValue: "Start session" }), type: "submit", alternativeClassname: "session-start-button", attributes: { "data-workout-submit": true, "data-loading-label": t("workout.starting", { defaultValue: "Starting…" }) }, renderIcon: () => include("../shared/components/icons/playCircle", { icon: { attributes: { "aria-hidden": true } } }) } }) %>
 			</form>
 		</section>
 	<% } else if (workout.showFinish) { %>
 		<section class="session-action-panel session-action-panel--finish">
-			<div><h3>All steps resolved</h3><p>Finish the session to add this workout to your completed history.</p></div>
+			<div><h3><%= t("workout.allStepsResolved", { defaultValue: "All steps resolved" }) %></h3><p><%= t("workout.finishInstruction", { defaultValue: "Finish the session to add this workout to your completed history." }) %></p></div>
 			<form method="POST" action="<%= workout.finishForm.action %>" data-workout-action-form>
 				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 				<input type="hidden" name="daysDifference" value="<%= workout.finishForm.daysDifference ?? 0 %>">
 				<% if (workout.finishForm.errors?.fieldErrors?.daysDifference) { %><p class="form-field__error"><%= workout.finishForm.errors.fieldErrors.daysDifference %></p><% } %>
-				<%- include('../shared/components/button/button', { button: { label: "Finish session", type: "submit", attributes: { "data-workout-submit": true, "data-loading-label": "Finishing…" } } }) %>
+				<%- include('../shared/components/button/button', { button: { label: t("workout.finishSession", { defaultValue: "Finish session" }), type: "submit", attributes: { "data-workout-submit": true, "data-loading-label": t("workout.finishing", { defaultValue: "Finishing…" }) } } }) %>
 			</form>
 		</section>
 	<% } %>

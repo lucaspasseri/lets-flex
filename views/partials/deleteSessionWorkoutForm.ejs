@@ -1,11 +1,12 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <%- include("shared/components/form/form", { form: {
 	action: form.action,
 	method: form.method,
-	heading: "Cancel this workout session?",
-	description: "You can link the template again later if plans change.",
+	heading: translate("workout.cancelSessionHeading", { defaultValue: "Cancel this workout session?" }),
+	description: translate("workout.cancelSessionDescription", { defaultValue: "You can link the template again later if plans change." }),
 	attributes: { "data-cancel-workout-form": true },
 	slots: {
-		body: include("dayPage/cancelWorkoutSessionFormBody", { form }),
-		footer: include("dayPage/cancelWorkoutSessionFormFooter", { form, modalId: locals.modalId }),
+		body: include("dayPage/cancelWorkoutSessionFormBody", { form, t: translate }),
+		footer: include("dayPage/cancelWorkoutSessionFormFooter", { form, modalId: locals.modalId, t: translate }),
 	},
 } }) %>

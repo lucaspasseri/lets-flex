@@ -302,7 +302,55 @@ test("exercise-only initialization updates base and nested variant results", () 
 		items.flatMap((item) => item.variants).every((item) => !item.hidden),
 		true,
 	);
-	assert.equal(items[0].resultCount.textContent, "2 total");
+	assert.equal(items[0].resultCount.textContent, "2 shown · 2 total");
+});
+
+test("library counters use the server-provided locale message contract", () => {
+	const query = createField();
+	const count = { textContent: "" };
+	const item = {
+		dataset: { searchKeyWord: "agachamento", filterValues: "{}" },
+		hidden: false,
+	};
+	const section = {
+		dataset: { libraryDiscoverySection: "sessions" },
+		querySelector(selector) {
+			return {
+				"[data-library-query]": query,
+				"[data-library-result-count]": count,
+			}[selector];
+		},
+		querySelectorAll(selector) {
+			if (selector === "[data-library-filter]") return [];
+			if (selector === "[data-search-session-item]") return [item];
+			return [];
+		},
+	};
+	const root = {
+		querySelector(selector) {
+			if (selector === "[data-i18n-messages]") {
+				return {
+					textContent: JSON.stringify({
+						library: {
+							sessionCount: { one: "{{count}} sessão", other: "{{count}} sessões" },
+							sessionRange: {
+								one: "{{visible}} de {{count}} sessão",
+								other: "{{visible}} de {{count}} sessões",
+							},
+						},
+					}),
+				};
+			}
+			return null;
+		},
+		querySelectorAll: () => [section],
+	};
+
+	initializeSearchAndFiltering(root);
+	query.value = "agacha";
+	query.listeners.input();
+
+	assert.equal(count.textContent, "1 de 1 sessão");
 });
 
 test("variant form resolves its role-specific action before submission", () => {

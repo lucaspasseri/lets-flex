@@ -4,9 +4,10 @@
  */
 
 import formatDayPageDate from "../dayPage/formatDayPageDate.js";
+import createViewModelTranslator from "../translate.js";
 
 /**
- * @param {{stepTypes: StepType[], exerciseTemplates: ExerciseTemplate[], state?: Record<string, any>, mode?: "create" | "update", creationContext?: import("../../../src/features/trainingDays/trainingDays.types.js").TrainingDayContext | null}} input
+ * @param {{stepTypes: StepType[], exerciseTemplates: ExerciseTemplate[], state?: Record<string, any>, mode?: "create" | "update", creationContext?: import("../../../src/features/trainingDays/trainingDays.types.js").TrainingDayContext | null, language?: string, translate?: Function}} input
  */
 export default function createSessionFormViewModel({
 	stepTypes,
@@ -14,7 +15,10 @@ export default function createSessionFormViewModel({
 	state = {},
 	mode = "create",
 	creationContext = null,
+	language = "en",
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const isUpdate = mode === "update";
 	const contextDayTitle = creationContext
 		? creationContext.day.label?.trim() || `Day ${creationContext.day.dayOrder}`
@@ -34,23 +38,41 @@ export default function createSessionFormViewModel({
 		modal: {
 			id: isUpdate ? "updateSessionModal" : "createSessionModal",
 			title: isUpdate
-				? "Update session template"
+				? t("library.updateSessionTemplate", {
+						defaultValue: "Update session template",
+					})
 				: creationContext
-					? "Create and return to training day"
-					: "Create session template",
+					? t("library.createAndReturnToDay", {
+							defaultValue: "Create and return to training day",
+						})
+					: t("library.createSessionTemplate", {
+							defaultValue: "Create session template",
+						}),
 			openOnLoad: Boolean(state.open || (!isUpdate && creationContext)),
 		},
 		form: {
 			id: `${idPrefix}-template-form`,
 			heading: isUpdate
-				? "Update session template"
+				? t("library.updateSessionTemplate", {
+						defaultValue: "Update session template",
+					})
 				: contextDayTitle
-					? `Create a session for ${contextDayTitle}`
-					: "Create session template",
+					? t("library.createSessionFor", {
+							day: contextDayTitle,
+							defaultValue: "Create a session for {{day}}",
+						})
+					: t("library.createSessionTemplate", {
+							defaultValue: "Create session template",
+						}),
 			description:
 				!isUpdate && creationContext
-					? "Define a reusable template. You will review and assign it after returning to the training day."
-					: "Define a reusable session template.",
+					? t("library.createSessionFormContextDescription", {
+							defaultValue:
+								"Define a reusable template. You will review and assign it after returning to the training day.",
+						})
+					: t("library.createSessionFormDescription", {
+							defaultValue: "Define a reusable session template.",
+						}),
 			action: isUpdate ? `/sessions/${state.sessionId}?_method=PATCH` : "/sessions",
 		},
 		fields: {
@@ -71,7 +93,7 @@ export default function createSessionFormViewModel({
 					? {
 							pathLabel: `${creationContext.program.name} · ${creationContext.cycle.name} · ${contextDayTitle}`,
 							dateLabel:
-								formatDayPageDate(creationContext.day.scheduledDate) ??
+								formatDayPageDate(creationContext.day.scheduledDate, language) ??
 								"Date not scheduled",
 						}
 					: null,
@@ -80,7 +102,7 @@ export default function createSessionFormViewModel({
 				value: stepType.id,
 			})),
 			exerciseOptions: exerciseTemplates.map((exercise) => ({
-				label: `${exercise.name} — ${exercise.variant.name}${exercise.variant.ownerUserId == null ? "" : " (Private)"}`,
+				label: `${exercise.name} — ${exercise.variant.name}${exercise.variant.ownerUserId == null ? "" : ` (${t("library.private", { defaultValue: "Private" })})`}`,
 				value: exercise.variant.id,
 			})),
 			loadUnitOptions: [
@@ -89,15 +111,15 @@ export default function createSessionFormViewModel({
 			],
 		},
 		actions: {
-			cancel: { label: "Cancel" },
+			cancel: { label: t("actions.cancel", { defaultValue: "Cancel" }) },
 			submit: {
 				label: isUpdate
-					? "Update session"
+					? t("library.updateSession", { defaultValue: "Update session" })
 					: creationContext
-						? "Create and return"
-						: "Create session",
+						? t("library.createAndReturn", { defaultValue: "Create and return" })
+						: t("library.createSession", { defaultValue: "Create session" }),
 			},
-			addStep: { label: "Add step" },
+			addStep: { label: t("library.addStep", { defaultValue: "Add step" }) },
 		},
 	};
 }

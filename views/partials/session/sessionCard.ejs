@@ -1,5 +1,6 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <article class="workout-card workout-card--<%= card.type %>">
 	<%- include("./sessionHeader", { header: card.header }) %>
-	<p class="workout-card__section-label">Session steps</p>
+	<p class="workout-card__section-label"><%= translate("workout.sessionSteps", { defaultValue: "Session steps" }) %></p>
 	<%- include("./stepList", { steps: card.steps }) %>
 </article>

@@ -1,4 +1,5 @@
 import { addDays } from "date-fns";
+import { formatLocaleDate } from "../../../src/infrastructure/i18n/formatLocale.js";
 
 /** @param {Pick<import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, "currentUser" | "currentProgram" | "selectedDate">} input */
 
@@ -6,28 +7,28 @@ export default function createDashboardStatusViewModel(
 	{ currentUser, currentProgram, selectedDate },
 	language = "en",
 ) {
-	const dateFormatter = new Intl.DateTimeFormat(language, {
+	/** @type {Intl.DateTimeFormatOptions} */
+	const dateOptions = {
 		month: "short",
 		day: "2-digit",
 		year: "numeric",
-		timeZone: "UTC",
-	});
-	const weekdayFormatter = new Intl.DateTimeFormat(language, {
+	};
+	/** @type {Intl.DateTimeFormatOptions} */
+	const weekdayOptions = {
 		weekday: "short",
-		timeZone: "UTC",
-	});
-	const dayFormatter = new Intl.DateTimeFormat(language, {
+	};
+	/** @type {Intl.DateTimeFormatOptions} */
+	const dayOptions = {
 		day: "2-digit",
-		timeZone: "UTC",
-	});
+	};
 	return {
 		isVisible: !currentUser || !currentProgram,
-		dateLabel: dateFormatter.format(selectedDate),
+		dateLabel: formatLocaleDate(selectedDate, language, dateOptions) ?? "",
 		days: Array.from({ length: 7 }, (_, index) => {
 			const date = addDays(selectedDate, index - 3);
 			return {
-				label: weekdayFormatter.format(date).toUpperCase(),
-				dayLabel: dayFormatter.format(date),
+				label: formatLocaleDate(date, language, weekdayOptions)?.toUpperCase(),
+				dayLabel: formatLocaleDate(date, language, dayOptions) ?? "",
 				isCurrent: index === 3,
 			};
 		}),

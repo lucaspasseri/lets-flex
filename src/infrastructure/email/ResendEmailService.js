@@ -1,4 +1,6 @@
 import { Resend } from "resend";
+import { formatLocaleNumber } from "../i18n/formatLocale.js";
+import { i18n, isSupportedLocale } from "../i18n/i18n.js";
 
 const EMAIL_PATTERN = /^[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+$/;
 const DISPLAY_EMAIL_PATTERN = /^.+<([^\s<>@]+@[^\s<>@]+\.[^\s<>@]+)>$/;
@@ -35,9 +37,13 @@ function escapeHtml(value) {
 		.replaceAll(">", "&gt;");
 }
 
-function describeLifetime(expiresInMs) {
+function describeLifetime(expiresInMs, translate, language) {
 	const minutes = Math.max(1, Math.round(expiresInMs / 60_000));
-	return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+	return translate("email.passwordResetLifetime", {
+		count: minutes,
+		minutes: formatLocaleNumber(minutes, language),
+		defaultValue: "Use this link within {{minutes}} minutes:",
+	});
 }
 
 function safeProviderRequestId(response) {
@@ -53,25 +59,34 @@ export default class ResendEmailService {
 		this.from = from;
 	}
 
-	async sendPasswordReset({ to, resetUrl, expiresInMs }) {
-		const lifetime = describeLifetime(expiresInMs);
+	async sendPasswordReset({ to, resetUrl, expiresInMs, language = "en" }) {
+		const locale = isSupportedLocale(language) ? language : "en";
+		const translate = i18n.getFixedT(locale);
+		const lifetime = describeLifetime(expiresInMs, translate, locale);
 		const text = [
-			"Reset your Let’s Flex password",
+			translate("email.passwordResetIntro", {
+				defaultValue: "Reset your Let’s Flex password",
+			}),
 			"",
-			`Use this link within ${lifetime}:`,
+			lifetime,
 			resetUrl,
 			"",
-			"If you did not request a password reset, you can ignore this email.",
+			translate("email.passwordResetIgnore", {
+				defaultValue:
+					"If you did not request a password reset, you can ignore this email.",
+			}),
 		].join("\n");
 		const escapedUrl = escapeHtml(resetUrl);
-		const html = `<h1>Reset your Let’s Flex password</h1><p>Use this link within ${lifetime}:</p><p><a href="${escapedUrl}">Reset password</a></p><p>If you did not request a password reset, you can ignore this email.</p>`;
+		const html = `<h1>${translate("email.passwordResetIntro", { defaultValue: "Reset your Let’s Flex password" })}</h1><p>${lifetime}</p><p><a href="${escapedUrl}">${translate("email.passwordResetLink", { defaultValue: "Reset password" })}</a></p><p>${translate("email.passwordResetIgnore", { defaultValue: "If you did not request a password reset, you can ignore this email." })}</p>`;
 
 		let response;
 		try {
 			response = await this.client.emails.send({
 				from: this.from,
 				to,
-				subject: "Reset your Let’s Flex password",
+				subject: translate("email.passwordResetSubject", {
+					defaultValue: "Reset your Let’s Flex password",
+				}),
 				text,
 				html,
 			});

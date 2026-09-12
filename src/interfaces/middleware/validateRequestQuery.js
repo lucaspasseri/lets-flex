@@ -13,7 +13,10 @@ export default function validateRequestQuery(schema) {
 
 		if (!result.success) {
 			res.status(400).json({
-				error: "Invalid query parameters.",
+				error:
+					res.locals?.t?.("validation.invalidQueryParameters", {
+						defaultValue: "Invalid query parameters.",
+					}) ?? "Invalid query parameters.",
 				...formatValidationErrors(result.error, res.locals?.t),
 			});
 			return;

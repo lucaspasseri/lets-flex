@@ -89,3 +89,27 @@ test("unnegotiated mutation failures retain the plain fallback", async () => {
 	assert.equal(response.statusCode, 400);
 	assert.equal(response.body, "Invalid variant identifier.");
 });
+
+test("non-HTML mutation fallbacks translate through the supplied key", async () => {
+	const response = createResponse();
+	response.locals = {
+		t(key, options) {
+			return key === "mutation.variantConflict"
+				? "Já existe uma variação com esse nome."
+				: options.defaultValue;
+		},
+	};
+
+	await respondWithContextualMutationError(
+		createRequest({ accept: "application/json" }),
+		response,
+		{
+			status: 409,
+			fallbackMessage: "A variant with that name already exists.",
+			fallbackKey: "mutation.variantConflict",
+			render: () => {},
+		},
+	);
+
+	assert.deepEqual(response.body, { error: "Já existe uma variação com esse nome." });
+});

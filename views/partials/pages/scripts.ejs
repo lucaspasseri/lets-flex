@@ -23,16 +23,25 @@
 			moveDown: translate("workout.moveDown", { defaultValue: "Move down" }),
 			remove: translate("workout.remove", { defaultValue: "Remove" }),
 		},
+		library: {
+			sessionCount: browserMessage("library.sessionCount", "{{count}} sessions"),
+			sessionRange: browserMessage("library.sessionRange", "{{visible}} of {{count}} sessions"),
+			exerciseCount: browserMessage("library.exerciseCount", "{{count}} exercises"),
+			exerciseRange: browserMessage("library.exerciseRange", "{{visible}} of {{count}} exercises"),
+			variantCount: browserMessage("library.variantCount", "{{count}} variants"),
+			variantRange: browserMessage("library.variantRange", "{{visible}} of {{count}} variants"),
+			shownTotal: translate("library.shownTotal", { defaultValue: "{{shown}} shown · {{total}} total" }),
+		},
 		chart: {
-			fallback: translate("workout.chartFallback", { defaultValue: "Visual chart unavailable. Complete weekly data remains available below." }),
-			loading: translate("workout.chartLoading", { defaultValue: "Preparing visual chart… Weekly data is available below." }),
-			scheduled: translate("workout.scheduled", { defaultValue: "Scheduled" }),
-			finished: translate("workout.finished", { defaultValue: "Finished" }),
-			cancelled: translate("workout.cancelled", { defaultValue: "Cancelled" }),
+			fallback: translate("chart.fallback", { defaultValue: "Visual chart unavailable. Complete weekly data remains available below." }),
+			loading: translate("chart.loading", { defaultValue: "Preparing visual chart… Weekly data is available below." }),
+			scheduled: translate("chart.scheduled", { defaultValue: "Scheduled" }),
+			finished: translate("chart.finished", { defaultValue: "Finished" }),
+			cancelled: translate("chart.cancelled", { defaultValue: "Cancelled" }),
 		},
 		programs: {
-			deleteEntityTitle: translate("workout.deleteEntityTitle", { defaultValue: "Delete {{entity}} “{{name}}”?" }),
-			deleteEntityDescription: translate("workout.deleteEntityDescription", { defaultValue: "This permanently deletes {{entity}} “{{name}}” and its dependent training data." }),
+			deleteEntityTitle: translate("programs.deleteEntityTitle", { defaultValue: "Delete {{entity}} “{{name}}”?" }),
+			deleteEntityDescription: translate("programs.deleteEntityDescription", { defaultValue: "This permanently deletes {{entity}} “{{name}}” and its dependent training data." }),
 		},
 	};
 %>

@@ -4,7 +4,10 @@ import { MAX_PASSWORD_BYTES } from "../../features/auth/passwordService.js";
 
 const emailSchema = z.preprocess(
 	normalizeEmail,
-	z.string().email("Enter a valid email address.").max(254),
+	z
+		.string()
+		.email("Enter a valid email address.")
+		.max(254, "Enter a valid email address."),
 );
 
 export const loginSchema = z.object({

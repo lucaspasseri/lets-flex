@@ -117,8 +117,8 @@ test("progress page view model exposes stable filters, coverage, units, and hist
 	]);
 	assert.deepEqual(view.results.units[0], {
 		unit: "Kilograms",
-		maximumLoad: "102.5 Kilograms",
-		volume: "1,640 repetitions × Kilograms",
+		maximumLoad: "102.5 kg",
+		volume: "1,640 repetitions × kg",
 		loadContext: "3 load observations",
 		volumeContext: "2 volume sets",
 	});
@@ -129,6 +129,23 @@ test("progress page view model exposes stable filters, coverage, units, and hist
 		"Showing the most recent 1 of 2 workouts in this range.",
 	);
 	assert.equal(view.state, null);
+});
+
+test("progress presentation formats dates, decimal loads, and units for Brazilian Portuguese", () => {
+	const view = createExerciseProgressPageViewModel({
+		page: {},
+		data: { currentUser: user, programs: [program], choices: [choice], progress },
+		query,
+		language: "pt-BR",
+		translate: (key, options) =>
+			key === "progress.repetitionsByUnit"
+				? `${options.value} repetições × ${options.unit}`
+				: options.defaultValue,
+	});
+
+	assert.equal(view.results.occurrences[0].date.label, "1 de set. de 2026");
+	assert.equal(view.results.units[0].maximumLoad, "102,5 kg");
+	assert.equal(view.results.units[0].volume, "1.640 repetições × kg");
 });
 
 test("progress page view model distinguishes each unavailable and empty selection state", () => {

@@ -181,6 +181,7 @@
  * @property {string} notes
  * @property {boolean} isArchived
  * @property {number} stepNumber
+ * @property {string} stepCountLabel
  * @property {ResolvedMedia | null} media
  * @property {DetailsStepsViewModel[]} steps
  *
@@ -200,6 +201,7 @@
  * @typedef {object} SessionWorkspaceSummariesViewModel
  * @property {string} id
  * @property {string} heading
+ * @property {string} countLabel
  * @property {{message: string, icon: string}} emptyState
  * @property {SummaryViewModel[]} items
  */

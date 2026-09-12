@@ -59,6 +59,33 @@ test("password reset delivery maps safe transactional content without tracking o
 	assert.equal("headers" in payload, false);
 });
 
+test("password reset delivery uses the supplied locale for reviewed copy", async () => {
+	let payload;
+	const service = new ResendEmailService({
+		from: "Let’s Flex account@auth.paxeri.dev",
+		client: {
+			emails: {
+				async send(value) {
+					payload = value;
+					return { data: { id: "email_pt" }, error: null };
+				},
+			},
+		},
+	});
+
+	await service.sendPasswordReset({
+		...message,
+		expiresInMs: 60_000,
+		language: "pt-BR",
+	});
+
+	assert.equal(payload.subject, "Redefina sua senha do Let’s Flex");
+	assert.match(payload.text, /Use este link em até 1 minuto/);
+	assert.match(payload.text, /Redefina sua senha do Let’s Flex/);
+	assert.match(payload.text, /ignore este e-mail/);
+	assert.doesNotMatch(payload.html, /Reset password/);
+});
+
 test("provider rejection becomes a secret-free application error", async () => {
 	const service = new ResendEmailService({
 		from: "Let’s Flex account@auth.paxeri.dev",

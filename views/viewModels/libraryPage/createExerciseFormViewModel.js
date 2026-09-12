@@ -1,3 +1,5 @@
+import createViewModelTranslator from "../translate.js";
+
 /**
  * @typedef {import("../../../src/features/equipments/equipments.types.js").EquipmentMapper} Equipment
  * @typedef {import("../../../src/features/movementPatterns/movementPatterns.types.js").MovementPatternMapper} MovementPattern
@@ -6,7 +8,7 @@
  */
 
 /**
- * @param {{equipments: Equipment[], movementPatterns: MovementPattern[], muscles: Muscle[], muscleRoles: MuscleRole[], state?: Record<string, any>, mode?: "create" | "update"}} input
+ * @param {{equipments: Equipment[], movementPatterns: MovementPattern[], muscles: Muscle[], muscleRoles: MuscleRole[], state?: Record<string, any>, mode?: "create" | "update", translate?: Function}} input
  */
 export default function createExerciseFormViewModel({
 	equipments,
@@ -15,7 +17,9 @@ export default function createExerciseFormViewModel({
 	muscleRoles,
 	state = {},
 	mode = "create",
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const values = state.values ?? {};
 	const errors = state.errors ?? { fieldErrors: {}, formErrors: [] };
 	const isUpdate = mode === "update";
@@ -36,13 +40,27 @@ export default function createExerciseFormViewModel({
 	return {
 		modal: {
 			id: isUpdate ? "updateExerciseModal" : "createExerciseModal",
-			title: isUpdate ? "Update exercise template" : "Create exercise template",
+			title: isUpdate
+				? t("library.updateExerciseTemplate", {
+						defaultValue: "Update exercise template",
+					})
+				: t("library.createExerciseTemplate", {
+						defaultValue: "Create exercise template",
+					}),
 			openOnLoad: Boolean(state.open),
 		},
 		form: {
 			id: `${idPrefix}-template-form`,
-			heading: isUpdate ? "Update exercise template" : "Create exercise template",
-			description: "Define a reusable exercise template.",
+			heading: isUpdate
+				? t("library.updateExerciseTemplate", {
+						defaultValue: "Update exercise template",
+					})
+				: t("library.createExerciseTemplate", {
+						defaultValue: "Create exercise template",
+					}),
+			description: t("library.exerciseTemplateDescription", {
+				defaultValue: "Define a reusable exercise template.",
+			}),
 			action: isUpdate
 				? `/admin/library/exercises/${state.exerciseId}/variants/${state.variantId}?_method=PATCH`
 				: "/admin/library/exercises",
@@ -75,9 +93,13 @@ export default function createExerciseFormViewModel({
 			})),
 		},
 		actions: {
-			cancel: { label: "Cancel" },
-			submit: { label: isUpdate ? "Update exercise" : "Create exercise" },
-			addMuscle: { label: "Add muscle" },
+			cancel: { label: t("actions.cancel", { defaultValue: "Cancel" }) },
+			submit: {
+				label: isUpdate
+					? t("library.updateExercise", { defaultValue: "Update exercise" })
+					: t("library.createExercise", { defaultValue: "Create exercise" }),
+			},
+			addMuscle: { label: t("library.addMuscle", { defaultValue: "Add muscle" }) },
 		},
 	};
 }
