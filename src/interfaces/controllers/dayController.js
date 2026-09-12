@@ -2,6 +2,8 @@ import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getDayPageData from "../../features/day/getDayPageData.js";
 import createDayPageViewModel from "../../../views/viewModels/dayPage/createDayPageViewModel.js";
+import createMediaResolver from "../../features/media/createMediaResolver.js";
+import { loadMediaAssignments } from "../../features/media/loadMediaAssignments.js";
 
 /**
  * @typedef {import("express").Request} Request
@@ -42,11 +44,16 @@ export async function renderDay(req, res, formState = {}) {
 
 	const page = res.locals.page;
 	const pageState = { userId, programId, cycleId, dayId, sessionId };
+	const mediaAssignments = await loadMediaAssignments({
+		sessions: data.sessions.items,
+		workoutSessions: data.workoutSessions.items,
+	});
 
 	const dayPage = createDayPageViewModel({
 		page,
 		pageState,
 		data,
+		mediaResolver: createMediaResolver(mediaAssignments),
 		translate: res.locals.t,
 		language: res.locals.language,
 		...formState,

@@ -18,6 +18,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @property { SessionMapper | null} session
  * @property {number | null} [actorUserId]
  * @property {string} [language]
+ * @property {Function} [mediaResolver]
  * @property {Function} [translate]
  */
 
@@ -26,7 +27,13 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @returns {DetailsViewModel | null}
  */
 
-function createDetails({ session, actorUserId = null, language = "en", translate }) {
+function createDetails({
+	session,
+	actorUserId = null,
+	language = "en",
+	mediaResolver,
+	translate,
+}) {
 	if (!session) {
 		return null;
 	}
@@ -39,7 +46,7 @@ function createDetails({ session, actorUserId = null, language = "en", translate
 	const equipments = getDistinctEquipments(session);
 
 	const detailSteps = steps.map((step) =>
-		createDetailsStepViewModel(step, language, translate),
+		createDetailsStepViewModel(step, language, translate, mediaResolver),
 	);
 
 	return {

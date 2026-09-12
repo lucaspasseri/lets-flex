@@ -6,7 +6,7 @@
 
 <div class="exercise-template__content">
 	<% if (details?.media) { %>
-		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__media", variant: "initial", decorative: true }) %>
+		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__media", variant: "thumbnail", decorative: true }) %>
 	<% } %>
 
 	<dl class="exercise-template__facts">
@@ -42,7 +42,7 @@
 		<ul class="exercise-variants" data-exercise-variant-results>
 			<% variants.forEach(variant => { %>
 				<li class="exercise-variant" data-exercise-variant-item data-exercise-variant-id="<%= variant.id %>" data-search-key-word="<%= variant.searchKeyWord %>" data-filter-values="<%= JSON.stringify(variant.filters) %>">
-					<%- include("../shared/components/media", { media: variant.media, className: "exercise-variant__media", variant: "initial", decorative: true }) %>
+					<%- include("../shared/components/media", { media: variant.media, className: "exercise-variant__media", variant: "icon", decorative: true }) %>
 					<header class="exercise-variant__header">
 						<strong><%= variant.name %></strong>
 						<% if (variant.isPrivateOwner) { %><span class="exercise-template__scope"><%= translate("library.private", { defaultValue: "Private" }) %></span><% } %>

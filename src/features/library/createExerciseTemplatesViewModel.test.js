@@ -106,6 +106,55 @@ test("exercise catalog groups, orders, and counts visible variants by base exerc
 	);
 });
 
+test("exercise catalog uses persistent media assignments through one resolver", () => {
+	const requests = [];
+	const mediaResolver = (request) => {
+		requests.push(request);
+		return /** @type {any} */ ({
+			src: `/media/${request.entityType}-${request.entityId}.svg`,
+			alt: "Assigned media",
+			width: 640,
+			height: 480,
+			aspectRatio: 4 / 3,
+			matchType: request.entityType,
+			mediaType: "image",
+			fallbackType: "none",
+			presentation: "image",
+			initial: null,
+			entityType: request.entityType,
+			matchedKey: null,
+			matchedId: request.entityId,
+			isFallback: false,
+		});
+	};
+	const viewModel = createExerciseTemplates({
+		exerciseTemplateArr: [
+			exerciseTemplate({
+				exerciseId: 7,
+				baseName: "Bench press",
+				variantId: 11,
+				variantName: "Barbell bench press",
+			}),
+		],
+		actorUserId: 7,
+		managementMode: false,
+		mediaResolver,
+	});
+
+	assert.equal(viewModel.items[0].details.media.src, "/media/exercise-7.svg");
+	assert.equal(
+		viewModel.items[0].details.variants[0].media.src,
+		"/media/exercise_variant-11.svg",
+	);
+	assert.deepEqual(
+		requests.map(({ entityType, entityId }) => ({ entityType, entityId })),
+		[
+			{ entityType: "exercise", entityId: 7 },
+			{ entityType: "exercise_variant", entityId: 11 },
+		],
+	);
+});
+
 test("administrator grouping keeps variant edit identities and one base archive action", () => {
 	const viewModel = createExerciseTemplates({
 		exerciseTemplateArr: [

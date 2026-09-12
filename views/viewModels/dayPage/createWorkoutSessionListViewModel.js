@@ -6,11 +6,12 @@ import createViewModelTranslator, { translateCount } from "../translate.js";
 /**
  * @typedef {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession} WorkoutSession
  * @typedef {import("../../../src/features/sessions/sessions.types.js").SessionMapperStep} SessionStep
- * @param {{currentDayId: number | null, workoutSessions: WorkoutSession[], language?: string, translate?: Function}} input
+ * @param {{currentDayId: number | null, workoutSessions: WorkoutSession[], mediaResolver?: Function, language?: string, translate?: Function}} input
  */
 export default function createWorkoutSessionListViewModel({
 	currentDayId,
 	workoutSessions,
+	mediaResolver,
 	language = "en",
 	translate,
 }) {
@@ -46,7 +47,7 @@ export default function createWorkoutSessionListViewModel({
 					: {}),
 			},
 			steps: session.steps.map((step) =>
-				toStepViewModel(step, language, t, translate ?? t),
+				toStepViewModel(step, language, t, translate ?? t, mediaResolver),
 			),
 		};
 	});
@@ -91,8 +92,8 @@ export default function createWorkoutSessionListViewModel({
 	};
 }
 
-/** @param {SessionStep} step @param {string} language @param {Function} t @param {Function} translate */
-function toStepViewModel(step, language, t, translate) {
+/** @param {SessionStep} step @param {string} language @param {Function} t @param {Function} translate @param {Function} [mediaResolver] */
+function toStepViewModel(step, language, t, translate, mediaResolver) {
 	const title = step.exercise.variantName || step.exercise.name || step.name;
 
 	return {
@@ -116,7 +117,10 @@ function toStepViewModel(step, language, t, translate) {
 			equipmentName: step.equipment.name,
 			language,
 		}),
-		media: resolveStepMedia(step, { presentation: "initial" }),
+		media: resolveStepMedia(step, {
+			presentation: mediaResolver ? "image" : "initial",
+			resolveMedia: mediaResolver,
+		}),
 		details: [step.equipment.name, step.movementPattern].filter(Boolean),
 	};
 }

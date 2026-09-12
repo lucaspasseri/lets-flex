@@ -3,7 +3,7 @@
  * step types can provide useful context even when a catalog entity has no
  * dedicated artwork.
  *
- * @typedef {"session" | "exercise" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category"} MediaEntityType
+ * @typedef {"session" | "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category"} MediaEntityType
  */
 
 /** @typedef {"exercise_variant" | "exercise" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category" | "placeholder"} MediaMatchType */
@@ -40,6 +40,8 @@
  * @property {number} height
  * @property {number} aspectRatio
  * @property {MediaMatchType} matchType
+ * @property {"image" | "initial"} mediaType
+ * @property {"none" | "base-exercise" | "movement-pattern" | "environment" | "category" | "initial"} fallbackType
  * @property {"image" | "initial"} presentation
  * @property {string | null} initial
  */
@@ -60,7 +62,34 @@
  * @property {MediaEntityType} entityType
  * @property {MediaMatchType} matchType
  * @property {string | null} matchedKey
+ * @property {number | null} [matchedId]
  * @property {boolean} isFallback
+ * @property {"image" | "initial"} mediaType
+ * @property {"none" | "base-exercise" | "movement-pattern" | "environment" | "category" | "initial"} fallbackType
+ */
+
+/**
+ * Input for the ID-backed resolver. Context names are retained for the current
+ * category/environment fallback boundary until those concepts become entities.
+ *
+ * @typedef {object} EntityMediaRequest
+ * @property {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} entityType
+ * @property {number} entityId
+ * @property {number} [parentExerciseId]
+ * @property {number} [movementPatternId]
+ * @property {string} [variantName]
+ * @property {string} [baseName]
+ * @property {string} [movementPattern]
+ * @property {string} [environment]
+ * @property {string} [category]
+ * @property {string} [label]
+ * @property {"image" | "initial"} [presentation]
+ */
+
+/**
+ * @typedef {object} MediaAssignmentCandidate
+ * @property {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} entityType
+ * @property {number} entityId
  */
 
 export {};

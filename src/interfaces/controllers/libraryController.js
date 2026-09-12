@@ -3,6 +3,8 @@ import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getLibraryPageData from "../../features/library/getLibraryPageData.js";
 import createLibraryPageViewModel from "../../../views/viewModels/libraryPage/createLibraryPageViewModel.js";
 import translateMessage from "../../infrastructure/i18n/translateMessage.js";
+import createMediaResolver from "../../features/media/createMediaResolver.js";
+import { loadMediaAssignments } from "../../features/media/loadMediaAssignments.js";
 
 /**
  * @typedef {import("express").Request & {validatedQuery?: Record<string, any>}} Request
@@ -67,11 +69,16 @@ export async function renderLibrary(req, res, formState = {}) {
 		sessionId,
 		sessionCreationDayId: data.sessionCreationContext?.day.id ?? null,
 	};
+	const mediaAssignments = await loadMediaAssignments({
+		exerciseTemplates: data.exerciseTemplates,
+		sessions: data.sessions,
+	});
 
 	const library = createLibraryPageViewModel({
 		page,
 		pageState,
 		data,
+		mediaResolver: createMediaResolver(mediaAssignments),
 		translate: res.locals.t,
 		language: res.locals.language,
 		managementMode,

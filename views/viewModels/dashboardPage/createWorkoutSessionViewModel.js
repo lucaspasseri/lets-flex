@@ -10,7 +10,7 @@ function percentage(steps, predicate) {
 	return steps.length === 0 ? 0 : (steps.filter(predicate).length / steps.length) * 100;
 }
 
-/** @param {{session: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession | null, sessions: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession[], daysDifference: number | null, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, translate?: Function, language?: string}} input */
+/** @param {{session: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession | null, sessions: import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession[], daysDifference: number | null, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, mediaResolver?: Function, translate?: Function, language?: string}} input */
 export default function createWorkoutSessionViewModel({
 	session,
 	sessions,
@@ -18,6 +18,7 @@ export default function createWorkoutSessionViewModel({
 	workoutLogFormState,
 	actionFormState,
 	workoutFeedback = null,
+	mediaResolver,
 	translate,
 	language = "en",
 }) {
@@ -31,7 +32,10 @@ export default function createWorkoutSessionViewModel({
 		status: step.stepLog?.status ?? "planned",
 		statusLabel: stepStatusLabel(step.stepLog?.status, t),
 		stepLog: step.stepLog,
-		media: resolveStepMedia(step, { presentation: "initial" }),
+		media: resolveStepMedia(step, {
+			presentation: mediaResolver ? "image" : "initial",
+			resolveMedia: mediaResolver,
+		}),
 	}));
 	const sessionMedia =
 		session && steps.length > 0

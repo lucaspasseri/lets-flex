@@ -39,7 +39,7 @@
 	<% if (workout.currentStep) { %>
 		<section class="current-workout-step-container" aria-labelledby="current-step-title">
 			<% if (workout.currentStep.media) { %>
-				<%- include("../shared/components/media", { media: workout.currentStep.media, className: "current-workout-step__media", variant: "initial", decorative: true }) %>
+				<%- include("../shared/components/media", { media: workout.currentStep.media, className: "current-workout-step__media", variant: "thumbnail", decorative: true }) %>
 			<% } %>
 			<header>
 				<p class="session-section-label"><%= workout.currentStep.positionLabel %> · <%= t("workout.currentStep", { defaultValue: "Current step" }) %></p>

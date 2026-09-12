@@ -3,7 +3,7 @@
 <li class="workout-step">
 	<div class="workout-step__order" aria-hidden="true"><%= step.orderLabel %></div>
 	<% if (step.media) { %>
-		<%- include("../shared/components/media", { media: step.media, className: "workout-step__media", variant: "initial", decorative: true }) %>
+		<%- include("../shared/components/media", { media: step.media, className: "workout-step__media", variant: "icon", decorative: true }) %>
 	<% } %>
 	<div class="workout-step__content">
 		<div class="workout-step__main">

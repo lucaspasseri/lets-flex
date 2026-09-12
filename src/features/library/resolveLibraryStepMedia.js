@@ -7,7 +7,11 @@ import resolveStepMedia from "../media/resolveStepMedia.js";
  * image presentation used by Dashboard and Program Day.
  *
  * @param {SessionMapperStep} step
+ * @param {{resolveMedia?: Function}} [options]
  */
-export default function resolveLibraryStepMedia(step) {
-	return resolveStepMedia(step, { presentation: "initial" });
+export default function resolveLibraryStepMedia(step, options = {}) {
+	return resolveStepMedia(step, {
+		presentation: options.resolveMedia ? "image" : "initial",
+		resolveMedia: options.resolveMedia,
+	});
 }

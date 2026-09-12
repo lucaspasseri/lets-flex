@@ -18,6 +18,8 @@
  * @property {number} [step_type_id]
  * @property {string} step_type_name
  * @property {number} [exercise_variant_id]
+ * @property {number} [exercise_id]
+ * @property {number} [movement_pattern_id]
  * @property {string} exercise_variant_name
  * @property {"en" | "pt-BR" | "canonical"} [exercise_variant_name_locale]
  * @property {string} [canonical_exercise_variant_name]
@@ -91,6 +93,8 @@
  * @property {number} order
  * @property {number} [stepTypeId] Present for Library session aggregates.
  * @property {number} [exerciseVariantId] Present for Library session aggregates.
+ * @property {number} [exerciseId] Present for media resolution.
+ * @property {number} [movementPatternId] Present for media resolution.
  * @property {string} type
  * @property {number} sets
  * @property {number} reps

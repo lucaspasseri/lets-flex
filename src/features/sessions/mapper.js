@@ -36,6 +36,8 @@ export function toSessionMapperStepSeed(step) {
 		order: step.step_order,
 		stepTypeId: step.step_type_id,
 		exerciseVariantId: step.exercise_variant_id,
+		exerciseId: step.exercise_id,
+		movementPatternId: step.movement_pattern_id,
 		type: toCapitalizedString(step.step_type_name).replace("_", " "),
 		sets: step.sets,
 		reps: step.reps,

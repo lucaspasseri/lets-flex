@@ -129,6 +129,28 @@ integration("canonical database setup", { concurrency: false }, () => {
 			pt_equipment: 28,
 			pt_movement_patterns: 8,
 		});
+		const mediaTables = (
+			await db.query(
+				`SELECT table_name
+				 FROM information_schema.tables
+				 WHERE table_schema = current_schema()
+				   AND table_name = ANY($1::text[])
+				 ORDER BY table_name`,
+				[["entity_media", "media_assets"]],
+			)
+		).rows;
+		assert.deepEqual(mediaTables, [
+			{ table_name: "entity_media" },
+			{ table_name: "media_assets" },
+		]);
+		const mediaCounts = (
+			await db.query(`
+				SELECT
+					(SELECT COUNT(*)::int FROM media_assets) AS assets,
+					(SELECT COUNT(*)::int FROM entity_media) AS assignments
+			`)
+		).rows[0];
+		assert.deepEqual(mediaCounts, { assets: 0, assignments: 0 });
 		assert.equal(
 			(
 				await db.query(

@@ -7,132 +7,147 @@ stable training relationships, ownership boundaries, and the focused strength-tr
 
 ## Current goal
 
-### Phase 5 — Add translation maintenance and admin tooling
+### Phase 1 — Build the Media Foundation
 
-Build on the completed English (`en`) / Brazilian Portuguese (`pt-BR`) internationalization and
-catalog-localization work by giving authorized administrators a small, safe workflow to inspect
-catalog translation coverage and add or correct application-managed translations.
+Create a clean, predictable, and extensible media foundation so catalog entities can use managed
+visual assets without hard-coded image paths or page-specific fallback rules.
 
 ## Status
 
-Phase 5 is Completed on 2026-09-12. Actions 1–8 are completed with their verification evidence
-recorded. Phase 4 is completed and approved historical work.
+Phase 1 is **Completed** on 2026-09-12. Actions 1–4 are **Completed**.
 
-**Phase 5 outcome (2026-09-12):** Delivered the approved translation maintenance and admin tooling
-workflow while preserving stable identity, relationships, fallback, ownership, user-authored content,
-and existing catalog behavior. Final verification recorded five out-of-scope HTTP failures and the
-unavailable live-browser/assistive-technology inspection as limitations; no next goal is implied.
+## Problem being solved
 
-## Objective
+The current implementation has useful curated local assets and a shared initial-letter component,
+but media assignments are inferred from normalized names in a static manifest. That prevents
+explicit replacement/removal and makes persistent entity ownership of media impossible. The
+presentation boundary is shared, while the source of truth is not yet entity data.
 
-Make translation completeness visible and actionable for application-managed catalog content while
-preserving stable entity identity, relationships, locale fallback, global/private ownership
-boundaries, user-generated content, authorization, and current catalog behavior. Routine single-
-record translation maintenance should not require manual SQL or seed-file edits.
+## Intended outcome
 
-## Verified current baseline
-
-- Phase 3 provides dedicated translation tables for exercises, global exercise variants, muscles,
-  equipment, and movement patterns. Each table uses a stable entity foreign key, supported `en` /
-  `pt-BR` locale constraint, non-empty trimmed names, and an `(entity_id, locale)` primary key.
-- Catalog reads use active locale → English → canonical-column fallback. Unsupported catalog locales
-  normalize to English. The existing translation joins are application-owned SQL boundaries.
-- Global versus user-owned content is represented by `exercise_variants.owner_user_id`: null rows
-  are application-managed/global and non-null rows are private/user-owned. Existing translation
-  seed and read guards exclude private variants.
-- The existing admin capability is the `admin` user role enforced server-side by `requireAdmin`.
-  `/admin/library/exercises` already exposes global exercise and sample-variant management; the
-  ordinary `/library` path remains personal/guest-aware.
-- Existing admin catalog forms edit canonical exercise/variant fields and create global catalog
-  records. They do not yet provide a translation-maintenance contract or completeness overview.
-- The current completeness contract validates the authored catalog manifest and Portuguese seed
-  coverage. It does not calculate database-backed per-record status for an admin UI.
-- Translation tables have optional localized `setup_description` and movement-pattern `notes`
-  columns, but the current Portuguese seed and catalog read paths do not use those localized fields.
-  The Phase 5 field contract must therefore be explicit rather than exposing every column.
-- UI translation resources remain source-controlled through i18next and are not candidates for
-  database editing in this phase.
+Catalog entities can resolve optional media through one deterministic, presentation-ready contract.
+Assets are reusable database records, assignments are explicit, exercise variants inherit base
+exercise media when appropriate, and all missing-media cases remain safe, stable initial fallbacks.
+The foundation remains ready for later curation, uploads, localization, or administration without
+coupling those workflows to templates.
 
 ## Scope
 
-- Define one small completeness contract for supported global catalog entities and derive status
-  from actual translation rows, including complete, missing English, missing Portuguese, and any
-  necessary incomplete state.
-- Provide an admin-facing overview with lightweight counts, search, entity-type/status filters,
-  fallback visibility, and a path to edit incomplete records.
-- Provide accessible, responsive single-record editing for reviewed localized catalog fields,
-  initially names and only explicitly supported descriptions where the existing read/write contract
-  makes them meaningful.
-- Add or update translations through repositories/services using parameterized queries and stable
-  foreign keys, with server-side admin authorization and validation for locale, trimming, required
-  values, duplicate pairs, and safe English fallback behavior.
-- Integrate existing global catalog creation/editing only where needed to avoid a parallel or
-  contradictory workflow. Preserve user-owned/custom creation behavior unchanged.
-- Add focused unit, repository, rendering, and HTTP/security regression coverage and synchronize
-  the tracking documents before review.
+- Audit the current manifest, resolver, shared component, local assets, fallbacks, consuming
+  surfaces, duplicated lookup boundaries, and tests.
+- Add an additive reusable `media_assets` / `entity_media` persistence model with explicit primary
+  assignments and referential integrity for media assets.
+- Support exercises, exercise variants, muscles, equipment, and movement patterns as assignable
+  entity types. Keep the resolver boundary open for environments without treating the current
+  `exercise_variants.environment` string as a relational entity.
+- Resolve direct media, variant-to-exercise inheritance, appropriate catalog fallback, and the
+  intentional initial-letter fallback deterministically.
+- Keep storage access behind an application-owned boundary using storage keys/paths rather than
+  embedding provider logic in pages.
+- Preserve and reuse the shared media component, add only demonstrated bounded presentation
+  variants, and integrate representative Library, Dashboard, Program Day, and workout surfaces.
+- Define the accessibility contract for meaningful and decorative media and add focused persistence,
+  resolver, rendering, and bounded-layout regression tests.
 
-## Non-goals
+## Explicitly out of scope
 
-- Additional locales, machine/AI/third-party translation, runtime translation, or moving UI resource
-  files into the database.
-- Translation of user-created programs, sessions, notes, descriptions, custom exercises, private
-  variants, historical snapshots, or external/provider-owned content.
-- A general CMS, bulk CSV import/export, full audit-log system, approval workflow, synonym system,
-  broad admin-dashboard redesign, route localization, or unrelated catalog/schema redesign.
-- Changing stable IDs, internal values, foreign keys, relationships, canonical business data,
-  ownership rules, locale fallback semantics, or existing Library/catalog authorization.
+- AI image generation, prompt generation, moderation, or automatic catalog population.
+- Admin upload or assignment interfaces, drag-and-drop, bulk media management, or galleries.
+- Multiple exercise angles, videos, animation, user workout photos, CDN/image transformation
+  infrastructure, or external cloud storage provisioning.
+- Replacing every existing initial fallback or redesigning pages around images.
+- Artificial environment entities, unrelated catalog redesign, or destructive database resets.
+
+## Verified current baseline
+
+- `src/features/media/mediaManifest.js` contains 12 local SVG assets plus an initial placeholder;
+  `resolveMedia.js` matches exercise variants, base exercises, muscles, equipment, movement
+  patterns, environments, and categories by normalized names.
+- Existing exercise resolution is deterministic: variant asset → base exercise asset → movement
+  pattern → environment → category → initial fallback. Localized labels can provide canonical
+  matching keys.
+- `views/partials/shared/components/media.ejs` is the shared rendering boundary. It supports image
+  and initial presentations with informative/decorative semantics, while `mediaFallback.css` bounds
+  icon, thumbnail, and exercise frames.
+- Media is currently consumed by Library exercise summaries/details/variants, Dashboard and Program
+  Day session views, and workout-session headers/current steps/step lists. History and standalone
+  catalog pages do not currently render this component.
+- The database has persistent exercises, exercise variants, muscles, equipment, and movement
+  patterns. `exercise_variants.environment` is a validated string; no persistent environment table
+  exists. No media tables or media repositories exist.
+- The canonical development/test lifecycle is `schemaSql` followed by `seedSql` when the explicit
+  reset safety boundary allows it. Media tables belong to that disposable reset path; this phase
+  does not add a media migration or mutate an existing database.
+
+## Confirmed decisions and limitations
+
+- Preserve the current initial-letter fallback and local assets while moving exact entity
+  assignments behind persistent records. Existing useful behavior is reused, not discarded.
+- Use polymorphic entity assignments with a constrained entity-type contract because the supported
+  catalog tables have different foreign-key targets; application validation will verify the target
+  entity while media-asset foreign keys remain database-enforced.
+- Store stable storage keys and presentation metadata at the media boundary. Locale-specific alt
+  text remains a future metadata extension unless the current implementation requires a minimal
+  default field now.
+- Keep category/environment artwork as fallback context only where the repository has no persistent
+  entity model; do not create artificial relationships to satisfy this phase.
 
 ## Completion criteria
 
-Phase 5 is ready for final review only when:
+Phase 1 is ready for final review only when:
 
-1. Both tracking files explicitly describe the Phase 5 scope and match the repository state.
-2. Supported global catalog entity types and editable localized fields are documented and enforced.
-3. Authorized admins can inspect per-record translation coverage and find missing `pt-BR` or `en`.
-4. Completeness status and counts come from one reusable contract rather than duplicated view logic.
-5. Authorized admins can add/update supported translations through validated server-side routes.
-6. Guests and ordinary authenticated users cannot access or mutate translation maintenance.
-7. Translation writes preserve entity IDs, relationships, canonical/internal values, and ownership
-   boundaries; private/user-owned content is not exposed as global translation work.
-8. English fallback remains available and English content cannot be accidentally removed as the only
-   usable fallback.
-9. Existing catalog creation, editing, search, rendering, locale fallback, and Library behavior
-   continue working.
-10. Maintenance forms are escaped, accessible, responsive, and usable at representative widths.
-11. Focused security, fallback, identity, duplicate, unsupported-locale, and regression tests pass,
-    along with applicable formatting, lint, type, browser-type, database, HTTP, and full checks.
-12. Environment limitations and deferred maintenance improvements are documented precisely.
+1. This goal and the action tracker accurately describe the final implementation and status.
+2. A reusable persistent media model supports explicit reusable assignments without image columns on
+   catalog tables.
+3. The supported entity types can be assigned media and entities without media remain valid.
+4. One deterministic resolver returns a presentation-ready contract, including variant inheritance,
+   safe missing-media behavior, and intentional fallback metadata.
+5. The initial-letter fallback remains stable, compact, network-independent, and accessible.
+6. Shared presentation variants have bounded dimensions and do not depend on source proportions.
+7. Representative current surfaces use the centralized path without page-local lookup rules.
+8. Focused data-layer, resolver, rendering, accessibility, and layout-regression tests pass.
+9. Applicable formatting, lint, type, browser-type, database, HTTP, and full checks pass.
+10. No AI-generation, admin-management, gallery, bulk-population, or other Phase 2+ scope leaks
+    into the implementation.
 
-## Constraints and confirmed decisions
+## Final review matrix
 
-- Reuse the Phase 3 translation tables, catalog localization helpers, existing Library/admin
-  patterns, i18next presentation boundary, CSRF protection, and `requireAdmin` authorization.
-- Keep translation status derived; do not add persisted status columns unless direct evidence makes
-  that unavoidable.
-- Keep translation values separate from stable IDs, internal codes/slugs, canonical relationships,
-  and user-owned content. Do not create duplicate entities for language variants.
-- Use explicit reviewed translations only. No machine translation or external translation provider.
-- Prefer update/upsert over deletion; preserve an English fallback and do not expose destructive
-  translation deletion without a clear product need and fallback enforcement.
-- Do not reset databases, mutate production data, deploy, push, commit, or add a production
-  dependency without explicit approval.
+Recorded 2026-09-12 after Action 4 approval:
+
+- **Met:** The goal and action tracker describe the final implementation and statuses.
+- **Met:** Persistent reusable media assets and explicit assignments are implemented.
+- **Met:** Supported entities can be assigned media and unassigned entities remain valid.
+- **Met:** Deterministic resolution, variant inheritance, safe fallbacks, and fallback metadata
+  are covered by focused tests and the clean-database check.
+- **Met:** Initial fallback behavior remains stable, compact, network-independent, and accessible.
+- **Met:** Shared presentation variants are bounded and representative surfaces use the centralized
+  resolver path.
+- **Met:** Focused data-layer, resolver, rendering, accessibility, and layout-regression tests pass.
+- **Partially met:** Formatting, lint, types, browser types, database, and full repository checks
+  pass. The complete HTTP suite is 59/64, with five unrelated authentication/progress/history
+  lifecycle failures documented in Action 4; focused representative HTTP checks are 3/3.
+- **Skipped:** Live browser viewport capture was unavailable because no browser executable exists
+  in the environment; repository rendering and responsive regression checks pass.
+- **Met:** No migration, bulk population, admin management, gallery, or other Phase 2+ scope leak
+  was introduced.
+
+## Goal completion
+
+Completed on 2026-09-12 after final review approval. The approved media foundation includes the
+canonical disposable schema/reset/seed path, reusable media assets and explicit assignments,
+deterministic entity resolution with safe fallback behavior, centralized representative-surface
+presentation, and the recorded verification evidence. The five unrelated HTTP failures and the
+unavailable live-browser capture remain documented limitations; no additional scope was introduced.
+No next goal is implied by this completion.
 
 ## Historical context
 
-- Phases 1–2 established the i18next/session/EJS/browser resource contract, locale selection and
-  persistence, shared UI localization, and English fallback.
-- Phase 3 added database-backed application-managed catalog translations while preserving stable
-  identity and ownership boundaries; it was completed and approved on 2026-09-11.
-- Phase 4 completed locale-aware formatting, dynamic copy, validation/errors, auth/account/email,
-  accessibility/browser/analytics localization, and stronger resource completeness checks; it was
-  completed and approved on 2026-09-12.
+Phase 5 translation maintenance and admin tooling was completed and approved on 2026-09-12 before
+this goal was opened. Its stable catalog IDs, localization joins, ownership boundaries, migration
+safeguards, and shared UI conventions are preserved as implementation context rather than reopened.
 
 ## Resume here
 
-Action 1 — Update goal tracking and audit — is **Completed**. Action 2 — Define the translation
-maintenance contract — is **Completed**. Action 3 — Add the completeness query/service boundary — is
-**Completed**. Action 4 — Add the admin translation overview — is **Completed**. Action 5 — Add
-single-record translation editing — is **Completed**. Action 6 — Integrate global catalog
-creation/editing — is **Completed**. Action 7 — Security, accessibility, and regression audit — is
-**Completed**. Action 8 — Final verification and tracking synchronization — is **Completed**.
-Phase 5 is **Completed** on 2026-09-12.
+Action 1 — Audit and architecture is **Completed**. Action 2 — persistence and deterministic
+resolver is **Completed**. Action 3 — shared presentation layer — is **Completed**. Action 4 is
+**Completed**. Phase 1 is **Completed**; no next action is active.

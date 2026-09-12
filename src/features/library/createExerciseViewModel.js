@@ -1,6 +1,6 @@
 import createMuscles from "./createMuscleViewModel.js";
 import toCapitalizedString from "../../../utils/toCapitalizedString.js";
-import { resolveMedia } from "../media/resolveMedia.js";
+import { resolveMedia as resolveStaticMedia } from "../media/resolveMedia.js";
 import translateCount from "../../infrastructure/i18n/translateCount.js";
 import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
@@ -15,6 +15,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @property {number | null} actorUserId
  * @property {boolean} managementMode
  * @property {Record<string, any>} [privateVariantMutationState]
+ * @property {Function} [mediaResolver]
  * @property {Function} [translate]
  */
 
@@ -27,6 +28,7 @@ function createExercise({
 	actorUserId = null,
 	managementMode = false,
 	privateVariantMutationState,
+	mediaResolver,
 	translate,
 }) {
 	const t = (key, options = {}) =>
@@ -44,15 +46,19 @@ function createExercise({
 		: t("library.notSpecified", { defaultValue: "Not specified" });
 	const muscleTemplates = createMuscles({ muscles });
 	const firstVariant = exerciseTemplates[0]?.variant;
-	const baseMedia = resolveMedia({
+	const resolvePresentationMedia = mediaResolver ?? resolveStaticMedia;
+	const presentation = mediaResolver ? "image" : "initial";
+	const baseMedia = resolvePresentationMedia({
 		entityType: "exercise",
+		entityId: id,
+		movementPatternId: movementPattern?.id,
 		baseName: exerciseTemplate.name,
 		movementPattern: movementPattern?.name,
 		matchBaseName: exerciseTemplate.canonicalName,
 		matchMovementPattern: movementPattern?.canonicalName,
 		environment: firstVariant?.environment,
 		label: exerciseTemplate.name,
-		presentation: "initial",
+		presentation,
 	});
 	const variants = exerciseTemplates
 		.map(({ equipment, variant }) => {
@@ -82,8 +88,11 @@ function createExercise({
 				equipment?.canonicalName,
 				equipment?.category,
 			];
-			const media = resolveMedia({
-				entityType: "exercise",
+			const media = resolvePresentationMedia({
+				entityType: mediaResolver ? "exercise_variant" : "exercise",
+				entityId: variant.id,
+				parentExerciseId: id,
+				movementPatternId: movementPattern?.id,
 				variantName: variant.name,
 				baseName: exerciseTemplate.name,
 				movementPattern: movementPattern?.name,
@@ -92,7 +101,7 @@ function createExercise({
 				matchMovementPattern: movementPattern?.canonicalName,
 				environment: variant.environment,
 				label: variant.name,
-				presentation: "initial",
+				presentation,
 			});
 
 			return {

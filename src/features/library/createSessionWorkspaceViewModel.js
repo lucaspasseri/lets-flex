@@ -15,6 +15,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @property {SessionMapper | null} activeSession
  * @property {number | null} actorUserId
  * @property {string} [language]
+ * @property {Function} [mediaResolver]
  * @property {Function} [translate]
  */
 
@@ -28,6 +29,7 @@ function createSessionWorkspace({
 	activeSession,
 	actorUserId = null,
 	language = "en",
+	mediaResolver,
 	translate,
 }) {
 	const t = (key, options = {}) =>
@@ -44,6 +46,7 @@ function createSessionWorkspace({
 		session: activeSession,
 		actorUserId,
 		language,
+		mediaResolver,
 		translate,
 	});
 	const filterDefinitions = [

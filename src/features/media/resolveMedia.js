@@ -169,10 +169,29 @@ function toResolvedMedia(
 				: entry.alt,
 		initial: isInitial ? firstMeaningfulLetter(displayLabel) : entry.initial,
 		presentation,
+		mediaType: presentation,
+		fallbackType: isInitial
+			? "initial"
+			: isFallback
+				? fallbackTypeForMatch(entry.matchType)
+				: "none",
 		entityType,
 		matchedKey,
 		isFallback,
 	};
+}
+
+/** @param {string} matchType @returns {"base-exercise" | "movement-pattern" | "environment" | "category" | "initial"} */
+function fallbackTypeForMatch(matchType) {
+	return (
+		{
+			exercise: "base-exercise",
+			movement_pattern: "movement-pattern",
+			environment: "environment",
+			category: "category",
+			placeholder: "initial",
+		}[matchType] ?? "initial"
+	);
 }
 
 /**

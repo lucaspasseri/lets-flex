@@ -14,6 +14,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @property {number | null} actorUserId
  * @property {boolean} managementMode
  * @property {Record<string, any>} [privateVariantMutationState]
+ * @property {Function} [mediaResolver]
  * @property {Function} [translate]
  */
 
@@ -28,6 +29,7 @@ function createExerciseTemplates({
 	actorUserId = null,
 	managementMode = false,
 	privateVariantMutationState,
+	mediaResolver,
 	translate,
 }) {
 	const t = (key, options = {}) =>
@@ -48,6 +50,7 @@ function createExerciseTemplates({
 				actorUserId,
 				managementMode,
 				privateVariantMutationState,
+				mediaResolver,
 				translate,
 			}),
 		)

@@ -2,6 +2,8 @@ import asyncHandler from "../../../utils/asyncControllerHandler.js";
 import toNullableNumber from "../../../utils/toNullableNumber.js";
 import getDashboardPageData from "../../features/dashboard/getDashboardPageData.js";
 import createDashboardPageViewModel from "../../../views/viewModels/dashboardPage/createDashboardPageViewModel.js";
+import createMediaResolver from "../../features/media/createMediaResolver.js";
+import { loadMediaAssignments } from "../../features/media/loadMediaAssignments.js";
 
 /** @param {import("express").Request} req @param {import("express").Response} res */
 async function show(req, res) {
@@ -26,9 +28,13 @@ export async function renderDashboard(req, res, formState = {}) {
 		workoutSessionId,
 		locale: res.locals.language,
 	});
+	const mediaAssignments = await loadMediaAssignments({
+		workoutSessions: data.currentDayWorkoutSessions,
+	});
 	const dashboard = createDashboardPageViewModel({
 		page: res.locals.page,
 		data,
+		mediaResolver: createMediaResolver(mediaAssignments),
 		pageState: { userId, programId, daysDifference, workoutSessionId },
 		translate: res.locals.t,
 		language: res.locals.language,

@@ -2,6 +2,249 @@
 
 ## Current goal
 
+### Phase 1 — Build the Media Foundation
+
+Establish a reusable, persistent, deterministic media foundation for catalog entities while
+preserving the existing initial-letter fallback, shared rendering boundary, ownership rules, and
+current training surfaces.
+
+## Goal status
+
+Phase 1 is **Completed** on 2026-09-12. Actions 1–4 are **Completed**.
+
+## Planning evidence
+
+- **Verified:** `src/features/media/mediaManifest.js` contains 12 local SVG assets and a placeholder;
+  `resolveMedia.js` centralizes normalized-name matching, exercise variant/base inheritance, and
+  movement/environment/category fallbacks.
+- **Verified:** `views/partials/shared/components/media.ejs` is the shared image/initial rendering
+  boundary with informative and decorative semantics. `mediaFallback.css` bounds icon, thumbnail,
+  and exercise variants; browser fallback behavior is covered by focused tests.
+- **Verified:** Existing consumers are Library exercise summaries/details/variants, Dashboard and
+  Program Day session views, and workout-session headers/current steps/step lists. No standalone
+  History media consumer was found.
+- **Verified:** Exercises, exercise variants, muscles, equipment, and movement patterns are
+  persistent catalog entities. `exercise_variants.environment` is a validated string, not a
+  relational entity. No media tables, assignments, or media repositories exist.
+- **Verified:** Existing migration files are additive and transactional; fresh development setup
+  is generated from `db/schema.js` and `db/seed.js`.
+
+## Delta classification
+
+- **Already satisfied / reuse:** shared media partial, initial fallback, local SVG assets, bounded
+  CSS frame rules, localized canonical matching, and existing representative surface integration.
+- **Add:** persistent reusable media assets, explicit entity assignments, media repository boundary,
+  ID-based resolution, and data-layer constraints/tests.
+- **Modify:** resolver fallback order and view-model inputs so exact assignments are authoritative;
+  shared media metadata must distinguish assets from fallbacks without changing compact layouts.
+- **Preserve:** environment as a string, private/user ownership boundaries, current catalog IDs and
+  relationships, and no media requirement on any entity.
+
+## Confirmed decisions
+
+- Add an explicit `primary` assignment role only; do not introduce gallery/thumbnail role
+  complexity without a demonstrated consumer.
+- Use stable storage keys and a storage/application boundary; do not embed a cloud provider or
+  page-local paths in templates.
+- Use a constrained polymorphic assignment contract for the supported catalog entity types and
+  application-side target validation. Media-asset foreign keys remain database-enforced.
+- Preserve current curated assets and initial fallback. Seed only a small representative set if
+  persistence needs existing visuals for integration tests; do not bulk-populate the catalog.
+- Because development/test data is disposable in this phase, keep media DDL only in the authoritative
+  schema/reset/seed path. Do not add a media migration, reset production, or weaken reset guards.
+- Do not implement admin upload/assignment UI, AI generation, galleries, videos, CDN processing, or
+  artificial environment relationships.
+
+## Proposed Phase 1 action sequence
+
+### Action 1 — Audit and architecture
+
+**Status:** Completed
+
+**Purpose:** Replace the completed translation goal in both tracking files, record the verified
+media baseline, and agree the smallest persistence/resolution architecture before runtime changes.
+
+**Audit findings (2026-09-12):** The existing static manifest is useful but name-keyed rather than
+entity-owned. The resolver already provides deterministic variant → base exercise → movement →
+environment → category → initial fallback behavior. The shared component already supports image and
+initial semantics, and current CSS keeps media bounded. Current database entities cover exercises,
+variants, muscles, equipment, and movement patterns; environment is a string. No persistent media
+model, assignment repository, or database resolver boundary exists. Media is used in Library,
+Dashboard, Program Day, and workout views; History has no current media consumer.
+
+**Proposed architecture:** Add reusable `media_assets` records for storage key, MIME type,
+dimensions, source, and timestamps; add `entity_media` records for supported entity type/id,
+`primary` role, sort order, and asset foreign key. Resolve IDs through one application-owned media
+service, with explicit variant inheritance and existing contextual fallback behavior. Return the
+existing presentation-ready shape, extending it only where needed for fallback type and future
+localized metadata.
+
+**Verification:** Read-only repository audit completed. No runtime, schema, seed, migration, or
+database mutation was performed. Documentation formatting and final diff checks remain part of the
+next verification pass.
+
+**Review approval (2026-09-12):** The user approved the audit and architecture after the recorded
+repository findings and documentation verification. Action 1 is completed. Action 2 remains
+pending and prepared as the next action; it has not been activated or implemented.
+
+### Action 2 — Persistence and deterministic resolver
+
+**Status:** Completed
+
+**Purpose:** Add the canonical schema/reset/seed contract, repositories/services, ID-based exact
+media assignment, variant inheritance, safe contextual/initial fallbacks, and focused data/resolver
+tests.
+
+**Acceptance criteria:** The fresh schema and reset/seed flow converge; constraints cover supported roles,
+positive dimensions, MIME/storage metadata, assignment uniqueness, and asset reuse; missing media is
+normal; variant media overrides base exercise media; malformed optional metadata cannot crash the
+resolver; environment is not modeled as a fake entity.
+
+**Activation (2026-09-12):** The user approved Action 1 and explicitly approved the next action.
+Action 2 is now the only active runtime action; Actions 3–4 remain pending.
+
+**Changes requested (2026-09-12):** The user requested that this development phase use the
+disposable `ALLOW_DATABASE_RESET=true` schema-plus-seed lifecycle rather than a media migration.
+Remove `003_media_foundation`, keep the media DDL in the canonical schema, verify clean reset/seed
+creation and reset safety, and do not mark the action complete until those checks pass.
+
+**Implementation (2026-09-12):** Added the reusable `media_assets` and `entity_media` schema in
+`db/mediaSql.js`, included it in the canonical fresh setup, and kept the existing `db/seed.js`
+schema-plus-seed flow as the only media provisioning path. The asset model stores storage key, MIME type, dimensions, source, optional
+default alt text, and creation time. Assignments support the supported exercise, exercise variant,
+muscle, equipment, and movement-pattern entity types, one replaceable `primary` role, sort order,
+positive IDs, and reusable asset foreign keys. Assignment writes validate the entity table through a
+fixed allowlist and support removal without deleting the reusable asset. No media rows were bulk
+seeded and no database was reset or mutated.
+
+Added `mediaRepository.js` for asset creation, primary assignment replacement/removal, and batched
+assignment lookup. Added `resolveEntityMedia.js` as the ID-backed resolver: direct assignment →
+base exercise assignment for variants → movement-pattern assignment → existing static
+movement/environment/category context → initial-letter fallback. It returns presentation-ready
+metadata and preserves the existing static resolver for compatibility until the shared presentation
+action integrates the async boundary. Environment remains a string context and is not modeled as a
+fake entity.
+
+**Initial implementation verification (2026-09-12):** Focused persistence, schema, resolver, and
+existing media tests passed 26/26. `npm run check:types`, `npm run check:browser-types`,
+`npm run format:check`, `npm run lint`, and `git diff --check` passed. The first sandboxed full
+suite was blocked by local PostgreSQL/loopback `EPERM` restrictions after 338 passes; the approved
+elevated full suite passed 342/342, including fresh schema setup and PostgreSQL-backed catalog tests.
+
+**Revision implementation (2026-09-12):** Removed the media migration and migration export. Added
+explicit empty-database assertions proving that the normal schema-plus-seed reset creates
+`media_assets` and `entity_media` with zero baseline rows. Existing reset guards remain unchanged:
+production is refused, non-development/test runtimes are refused, ambiguous targets are refused,
+and `ALLOW_DATABASE_RESET=true` remains required.
+
+**Revision verification (2026-09-12):** The focused schema/seed, reset-safety, media repository,
+and resolver suite passed 35/35. `npm run verify` passed formatting, lint, server types,
+browser types, and the full test suite at 342/342. The migration file and media migration export
+are absent; no media assignments were bulk seeded. A guarded `ALLOW_DATABASE_RESET=true` reset
+and seed completed successfully against the local `lets_flex_test` database, and a direct
+application smoke request returned `GET /auth/login 200` from that clean state. No production or
+non-test database was mutated.
+
+**Completion (2026-09-12):** The user approved the revised implementation. Action 2 is complete;
+the next action remains pending and has not been activated.
+
+### Action 3 — Shared presentation layer
+
+**Status:** Completed
+
+**Activation (2026-09-12):** The user approved the completed Action 2 and explicitly approved the
+next action. Action 3 became the only active runtime action; Action 4 remained pending.
+
+**Purpose:** Refactor the existing shared component only where the new resolver contract requires
+it, preserve initial fallback semantics, retain compact Library/session/workout bounds, and migrate
+representative view-models without page-local media lookup rules.
+
+**Acceptance criteria:** Real assets and initial fallbacks render through one boundary; explicit
+icon/thumbnail/exercise/detail variants remain bounded; meaningful and decorative accessibility
+semantics are covered; long names and nullable media do not expand or overflow compact surfaces.
+
+**Implementation (2026-09-12):** Added one shared page-level media resolver that batches visible
+exercise, variant, and movement-pattern assignment lookups. Session/workout query mapping now
+retains the stable exercise, variant, and movement-pattern IDs needed by the resolver. Library,
+Program Day, and Dashboard controllers load assignments once and pass the resolver into their
+view-models; unassigned entities retain the existing manifest, contextual fallback, and initial
+letter behavior. Shared consumers now use bounded icon, thumbnail, and current-step thumbnail
+variants so assigned images can render without changing compact layout contracts. Session headers
+remain initial tiles because sessions are not supported persistent media entities.
+
+**Verification (2026-09-12):** Focused media, resolver, Library, Day, Dashboard, and shared-rendering
+tests passed 32/32. `npm run verify` passed formatting, lint, server types, browser types, and the
+full suite at 344/344. Focused HTTP integration coverage for representative Library and application
+pages passed 3/3. No browser executable was available for live viewport capture; rendered EJS
+contracts, bounded CSS variants, responsive regression tests, and accessible image/initial markup
+were verified through the repository test suite.
+
+**Completion (2026-09-12):** The user approved the shared presentation implementation. Action 3 is
+complete; Action 4 was prepared as the next pending action and was subsequently activated after
+approval.
+
+### Action 4 — Verification and tracking synchronization
+
+**Status:** Completed
+
+**Activation (2026-09-12):** The user approved the completed Action 3 and explicitly approved the
+next action. Action 4 is now the only active runtime action.
+
+**Purpose:** Check for duplicated media logic, verify entities without assignments, run focused and
+full repository checks, inspect the final diff, document limitations, and prepare the goal for final
+review without marking it completed automatically.
+
+**Acceptance criteria:** All applicable checks have explicit pass/fail/skipped results; tracking
+files match the repository; deferred Phase 2+ work is recorded; the action and goal statuses stop at
+the required review gate.
+
+**Verification (2026-09-12):** The final media audit found no duplicated persistent-entity lookup
+rules. Library, Program Day, and Dashboard entity media use the shared batched resolver; remaining
+direct static resolver calls are intentional session-header/summary fallbacks because sessions are
+not supported persistent media entities. A clean disposable test database reported zero baseline
+`media_assets` and `entity_media` rows, and an unassigned exercise variant resolved safely through
+the existing movement-pattern fallback. No media migration or bulk media assignment seed is present,
+and `git diff --check` passed.
+
+`npm run verify` passed formatting, lint, server types, browser types, and the full repository suite:
+344/344 tests passed. Focused representative HTTP integration checks passed 3/3. The complete
+`npm run test:http` suite ran 64 tests with 59 passing and 5 failing in unrelated authentication,
+exercise-progress, workout-history, and lifecycle scenarios; no media-specific HTTP failure was
+observed. These failures remain a known verification limitation for the Phase 1 completion matrix
+and were not changed because they are outside Action 4's media scope. A live browser viewport check
+was skipped because no browser executable is available in the environment; EJS rendering contracts,
+bounded CSS variants, responsive regressions, and accessibility markup passed their repository
+tests.
+
+**Review stop (2026-09-12):** Action 4 was ready for review. The Phase 1 goal remained Active until
+the user approved this action; no further action was activated.
+
+**Completion (2026-09-12):** The user approved Action 4 after the recorded verification evidence.
+The final audit, clean-database fallback check, focused checks, full verification suite, diff
+inspection, and tracking synchronization are complete. The five unrelated HTTP failures and the
+unavailable live-browser capture remain explicitly documented limitations for final goal review.
+Phase 1 was ready for final review; no further action was active.
+
+**Goal completion (2026-09-12):** The user approved the Phase 1 final review. The media
+foundation is complete within the approved scope: canonical schema/reset/seed integration, reusable
+asset and assignment persistence, deterministic resolution and fallbacks, shared representative
+surface integration, and verification evidence are recorded above. The documented unrelated HTTP
+failures and unavailable live-browser capture remain limitations rather than unapproved scope
+expansion. No next goal is implied; future direction requires user approval.
+
+## Resume here
+
+Action 1 — Audit and architecture is **Completed**. Action 2 — Persistence and deterministic
+resolver is **Completed**. Action 3 — Shared presentation layer is **Completed**. Action 4 is
+**Completed**. Phase 1 is **Completed**; no next action is active.
+
+## Historical Phase 5 record
+
+The completed translation-maintenance action records are retained below as historical evidence. They
+are not active instructions for this Media Foundation goal.
+
+## Current goal
+
 ### Phase 5 — Add translation maintenance and admin tooling
 
 Add a small, secure admin workflow for inspecting and maintaining application-managed `en` and

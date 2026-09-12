@@ -11,10 +11,11 @@ import translateCount from "../../infrastructure/i18n/translateCount.js";
  * @param {SessionMapperStep} step
  * @param {string} [language]
  * @param {Function} [translate]
+ * @param {Function} [mediaResolver]
  * @returns {DetailsStepsViewModel}
  */
 
-function createDetailsStepViewModel(step, language = "en", translate) {
+function createDetailsStepViewModel(step, language = "en", translate, mediaResolver) {
 	const prescriptionLoad = ` · ${formatStepLoadLabel({
 		loadValue: step.loadValue,
 		loadUnit: step.loadUnit,
@@ -33,7 +34,7 @@ function createDetailsStepViewModel(step, language = "en", translate) {
 			movementPattern: step.movementPattern,
 			equipment: step.equipment.name,
 		},
-		media: resolveLibraryStepMedia(step),
+		media: resolveLibraryStepMedia(step, { resolveMedia: mediaResolver }),
 
 		prescription: {
 			sets: step.sets,

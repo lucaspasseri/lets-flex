@@ -8,7 +8,7 @@ import createAnalyticsSummaryViewModel from "./createAnalyticsSummaryViewModel.j
 import createWorkloadViewModel from "./createWorkloadViewModel.js";
 import createViewModelTranslator from "../translate.js";
 
-/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, translate?: Function, language?: string}} input */
+/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, mediaResolver?: Function, translate?: Function, language?: string}} input */
 export default function createDashboardPageViewModel({
 	page,
 	pageState,
@@ -16,6 +16,7 @@ export default function createDashboardPageViewModel({
 	workoutLogFormState,
 	actionFormState,
 	workoutFeedback,
+	mediaResolver,
 	translate,
 	language,
 }) {
@@ -36,6 +37,7 @@ export default function createDashboardPageViewModel({
 			workoutLogFormState,
 			actionFormState,
 			workoutFeedback,
+			mediaResolver,
 			translate,
 			language,
 		}),

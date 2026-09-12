@@ -15,6 +15,7 @@ export default function createDayPageViewModel({
 	data,
 	sessionLinkFormState,
 	workoutFeedback,
+	mediaResolver,
 	translate,
 	language = "en",
 }) {
@@ -33,6 +34,7 @@ export default function createDayPageViewModel({
 	const workoutSessionList = createWorkoutSessionListViewModel({
 		currentDayId,
 		workoutSessions: workoutSessions.items,
+		mediaResolver,
 		language,
 		translate,
 	});
