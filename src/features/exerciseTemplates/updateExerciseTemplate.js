@@ -2,6 +2,7 @@ import pool from "../../../db/pool.js";
 import * as exercisesRepository from "../exercises/repository.js";
 import * as exerciseMusclesRepository from "../exerciseMuscles/repository.js";
 import * as exerciseVariantsRepository from "../exerciseVariants/repository.js";
+import * as translationMaintenanceRepository from "../translationMaintenance/repository.js";
 
 export class ExerciseTemplateNotFoundError extends Error {
 	constructor() {
@@ -15,6 +16,7 @@ const defaultDependencies = {
 	exercisesRepository,
 	exerciseMusclesRepository,
 	exerciseVariantsRepository,
+	translationMaintenanceRepository,
 };
 
 /**
@@ -30,6 +32,7 @@ export async function updateExerciseTemplate(
 		exercisesRepository: exercises,
 		exerciseMusclesRepository: exerciseMuscles,
 		exerciseVariantsRepository: exerciseVariants,
+		translationMaintenanceRepository: translations,
 	} = dependencies;
 	const client = await databasePool.connect();
 
@@ -40,6 +43,28 @@ export async function updateExerciseTemplate(
 
 		const exerciseExists = await exercises.update(input, client);
 		if (!exerciseExists) throw new ExerciseTemplateNotFoundError();
+
+		const exerciseTranslation = await translations.upsertTranslation(
+			{
+				entityType: "exercise",
+				entityId: input.exerciseId,
+				locale: "en",
+				name: input.name,
+			},
+			client,
+		);
+		const variantTranslation = await translations.upsertTranslation(
+			{
+				entityType: "exercise_variant",
+				entityId: input.variantId,
+				locale: "en",
+				name: input.name,
+			},
+			client,
+		);
+		if (!exerciseTranslation || !variantTranslation) {
+			throw new Error("Exercise translations could not be synchronized");
+		}
 
 		await exerciseMuscles.deleteByExerciseId(input, client);
 		for (const relation of input.muscleGroup) {

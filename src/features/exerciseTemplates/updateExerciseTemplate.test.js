@@ -58,6 +58,12 @@ function createDependencies({ variantExists = true, failCreateAt = 0 } = {}) {
 					if (createCount === failCreateAt) throw new Error("insert failed");
 				},
 			},
+			translationMaintenanceRepository: {
+				async upsertTranslation(/** @type {any} */ received, /** @type {any} */ db) {
+					calls.push(["translation", received, db]);
+					return received;
+				},
+			},
 		},
 	};
 }
@@ -73,6 +79,20 @@ test("valid update synchronizes every muscle relationship and commits", async ()
 		[
 			{ exerciseId: 7, muscleId: 3, muscleRoleId: 1 },
 			{ exerciseId: 7, muscleId: 9, muscleRoleId: 2 },
+		],
+	);
+	assert.deepEqual(
+		calls
+			.filter((call) => Array.isArray(call) && call[0] === "translation")
+			.map((call) => call[1]),
+		[
+			{ entityType: "exercise", entityId: 7, locale: "en", name: "Updated press" },
+			{
+				entityType: "exercise_variant",
+				entityId: 11,
+				locale: "en",
+				name: "Updated press",
+			},
 		],
 	);
 	assert.deepEqual(

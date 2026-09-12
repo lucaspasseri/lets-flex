@@ -30,6 +30,7 @@ import workoutStepLogRouter from "./src/interfaces/routes/workoutStepLogs.js";
 import workoutHistoryRouter from "./src/interfaces/routes/workoutHistory.js";
 import exerciseProgressRouter from "./src/interfaces/routes/exerciseProgress.js";
 import exerciseVariantsRouter from "./src/interfaces/routes/exerciseVariants.js";
+import translationMaintenanceRouter from "./src/interfaces/routes/translationMaintenance.js";
 import { respondWithApplicationRecovery } from "./src/interfaces/applicationRecovery.js";
 import localeRouter from "./src/interfaces/routes/locale.js";
 import { i18nMiddleware } from "./src/infrastructure/i18n/i18n.js";
@@ -123,6 +124,7 @@ export function createApp(options = {}) {
 	app.use("/cycles", cyclesRouter);
 	app.use("/sessions", sessionRouter);
 	app.use("/admin/library/exercises", exerciseTemplatesRouter);
+	app.use("/admin/translations", translationMaintenanceRouter);
 	app.use("/", exerciseVariantsRouter);
 	app.use("/workout_sessions", workoutSessionsRouter);
 	app.use("/workout_step_logs", workoutStepLogRouter);

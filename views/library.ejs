@@ -38,7 +38,10 @@
 		<aside class="library-admin-scope" aria-label="<%= translate("library.adminScope", { defaultValue: "Administrator access scope" }) %>">
 			<span class="library-admin-scope__icon" aria-hidden="true"><%- include("partials/shared/components/icons/namedIcon", { name: "wrench" }) %></span>
 			<div><strong><%= translate("library.globalCatalogAccess", { defaultValue: "Global catalog access" }) %></strong><p><%= translate("library.globalCatalogPrivacy", { defaultValue: "This view does not expose member or guest profiles, sessions, or private variants." }) %></p></div>
-			<a href="/library"><%= translate("library.returnToLibrary", { defaultValue: "Return to personal Library" }) %></a>
+			<div class="library-admin-scope__links">
+				<a href="/admin/translations"><%= translate("translationMaintenance.openOverview", { defaultValue: "Review translations" }) %></a>
+				<a href="/library"><%= translate("library.returnToLibrary", { defaultValue: "Return to personal Library" }) %></a>
+			</div>
 		</aside>
 	<% } %>
 

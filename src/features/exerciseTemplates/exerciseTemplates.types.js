@@ -127,6 +127,7 @@
 /**
  * @typedef {object} ExerciseTemplateVariantActions
  * @property {*} update
+ * @property {*} translation
  * @property {boolean} canManageGlobal
  * @property {boolean} canManagePrivate
  */
@@ -134,6 +135,7 @@
 /**
  * @typedef {object} ExerciseTemplateItemActions
  * @property {*} archive
+ * @property {*} translation
  */
 
 /**

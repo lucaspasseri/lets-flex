@@ -318,6 +318,9 @@ test("administrator library state is catalog-only and excludes private variants"
 	assert.match(html, /Create global variant/);
 	assert.match(html, /Global squat/);
 	assert.match(html, /Global dumbbell squat/);
+	assert.match(html, /href="\/admin\/translations\/exercise\/1"/);
+	assert.match(html, /href="\/admin\/translations\/exercise_variant\/10"/);
+	assert.doesNotMatch(html, /href="\/admin\/translations\/exercise_variant\/11"/);
 	assert.match(html, /Base exercise/);
 	assert.match(html, /Squat/);
 	assert.match(html, /1 exercise · 2 variants/);

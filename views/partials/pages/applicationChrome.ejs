@@ -19,7 +19,10 @@
 		{ id: "progress", href: "/progress", label: translate("navigation.progress", { defaultValue: "Progress" }) },
 		{ id: "programs", href: "/programs", label: translate("navigation.programs", { defaultValue: "Programs" }) },
 		{ id: "library", href: "/library", label: translate("navigation.library", { defaultValue: "Library" }) },
-		...(locals?.isAdmin ? [{ id: "admin-exercises", href: "/admin/library/exercises", label: translate("navigation.manageExercises", { defaultValue: "Manage exercises" }) }] : []),
+		...(locals?.isAdmin ? [
+			{ id: "admin-exercises", href: "/admin/library/exercises", label: translate("navigation.manageExercises", { defaultValue: "Manage exercises" }) },
+			{ id: "admin-translations", href: "/admin/translations", label: translate("navigation.manageTranslations", { defaultValue: "Manage translations" }) },
+		] : []),
 	];
 %>
 

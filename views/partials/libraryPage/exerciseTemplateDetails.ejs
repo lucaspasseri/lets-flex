@@ -33,7 +33,10 @@
 				<p class="exercise-template__eyebrow"><%= translate("library.availableSetups", { defaultValue: "Available setups" }) %></p>
 				<h3 id="exercise-template-<%= id %>-variants"><%= translate("library.variantsHeading", { name: baseName, defaultValue: "{{name}} variants" }) %></h3>
 			</div>
-			<span data-exercise-variant-result-count><%= summary?.variantCountLabel ?? "" %></span>
+			<div class="exercise-template__header-actions">
+				<span data-exercise-variant-result-count><%= summary?.variantCountLabel ?? "" %></span>
+				<% if (actions?.translation) { %><a class="exercise-template__translation-link" href="<%= actions.translation.href %>"><%= actions.translation.label %></a><% } %>
+			</div>
 		</header>
 
 		<ul class="exercise-variants" data-exercise-variant-results>
@@ -80,6 +83,7 @@
 									}
 								}}) %>
 							<% } %>
+							<% if (variant.actions.translation) { %><a class="exercise-template__translation-link" href="<%= variant.actions.translation.href %>"><%= variant.actions.translation.label %></a><% } %>
 
 							<% if (variant.actions.canManagePrivate) { %>
 								<div class="exercise-template__private-actions">

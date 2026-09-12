@@ -4,8 +4,8 @@ import deleteExerciseTemplate from "../../features/exerciseTemplates/deleteExerc
 import updateExerciseTemplate, {
 	ExerciseTemplateNotFoundError,
 } from "../../features/exerciseTemplates/updateExerciseTemplate.js";
+import createGlobalVariantFeature from "../../features/exerciseTemplates/createGlobalVariant.js";
 import { renderLibrary } from "./libraryController.js";
-import * as exerciseVariantsRepository from "../../features/exerciseVariants/repository.js";
 import respondWithContextualMutationError from "../contextualMutationError.js";
 import translateMessage from "../../infrastructure/i18n/translateMessage.js";
 
@@ -57,7 +57,7 @@ async function createGlobalVariant(req, res) {
 	const t = (key, defaultValue) =>
 		translateMessage(res.locals?.t, `mutation.${key}`, defaultValue);
 	try {
-		const variant = await exerciseVariantsRepository.createGlobal({
+		const variant = await createGlobalVariantFeature({
 			...req.validatedBody,
 			exerciseId: req.validatedParams.exerciseId,
 		});

@@ -130,6 +130,16 @@ function createExercise({
 				actions: {
 					canManageGlobal: managementMode && variant.ownerUserId == null,
 					canManagePrivate: isPrivateOwner,
+					translation:
+						managementMode && variant.ownerUserId == null
+							? {
+									href: `/admin/translations/exercise_variant/${variant.id}`,
+									label: t("library.manageVariantTranslations", {
+										name: variant.name,
+										defaultValue: "Manage translations for {{name}}",
+									}),
+								}
+							: null,
 					update: {
 						label: t("library.editVariant", {
 							name: variant.name,
@@ -217,6 +227,15 @@ function createExercise({
 			variants,
 		},
 		actions: {
+			translation: managementMode
+				? {
+						href: `/admin/translations/exercise/${id}`,
+						label: t("library.manageExerciseTranslations", {
+							name: exerciseTemplate.name,
+							defaultValue: "Manage translations for {{name}}",
+						}),
+					}
+				: null,
 			archive: managementMode
 				? {
 						label: t("library.archiveExercise", {

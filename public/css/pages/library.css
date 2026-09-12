@@ -224,6 +224,12 @@
 	text-underline-offset: 0.2rem;
 }
 
+.library-admin-scope__links {
+	display: grid;
+	justify-items: start;
+	gap: 0.35rem;
+}
+
 .library-admin-scope a:focus-visible {
 	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
 	outline-offset: 3px;
@@ -302,6 +308,10 @@
 	}
 
 	.library-admin-scope a {
+		grid-column: 2;
+	}
+
+	.library-admin-scope__links {
 		grid-column: 2;
 	}
 

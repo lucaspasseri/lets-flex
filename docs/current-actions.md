@@ -2,46 +2,421 @@
 
 ## Current goal
 
-### Phase 4 — Harden internationalization and complete locale-sensitive presentation
+### Phase 5 — Add translation maintenance and admin tooling
 
-Complete the established English (`en`) / Brazilian Portuguese (`pt-BR`) i18n implementation across
-locale-sensitive presentation, application-owned dynamic copy, validation/errors, authentication and
-account flows, generated auth email copy where supported, accessibility, browser UI, analytics, and
-responsive behavior while preserving stable identity, persisted data, security, and user-authored
-content.
+Add a small, secure admin workflow for inspecting and maintaining application-managed `en` and
+`pt-BR` catalog translations while preserving stable identity, relationships, fallback, ownership,
+user-authored content, and existing catalog behavior.
 
 ## Goal status
 
-Completed on 2026-09-12. Actions 1–9 were approved and completed. Phase 3 remains completed and
-approved.
+Phase 5 is Completed on 2026-09-12. Actions 1–8 are completed with their verification evidence
+recorded. Phase 4 is completed and approved historical work.
+
+**Phase 5 goal completion (2026-09-12):** The user approved the final review after the completion
+matrix and verification evidence were recorded. Phase 5 delivered the shared translation
+maintenance contract, database-backed overview and counts, admin-only validated upsert workflow,
+global catalog synchronization, fallback and ownership safeguards, accessible responsive maintenance
+views, and regression coverage. The five out-of-scope HTTP failures and unavailable live-browser /
+assistive-technology inspection remain documented limitations; no next goal is implied by this
+completion record.
 
 ## Planning evidence
 
-- **Verified:** The existing i18next/session/EJS architecture supports `en` and `pt-BR`, English
-  fallback, document language, locale persistence, and a locale switch route.
-- **Verified:** Phase 3 centralized application-managed catalog localization and preserved stable IDs,
-  media identity, relationships, ownership, history, analytics, and user-generated content.
-- **Verified gap:** No shared locale-aware boundary for dates, numbers, percentages, or durations was
-  found; direct formatting and count-dependent copy remain in view models and email delivery.
-- **Verified gap:** Auth/provider/controller messages, validation presentation, browser scripts, and
-  Chart.js labels require a focused application-owned localization audit.
-- **Verified gap:** Resource completeness currently compares leaf-key sets but does not provide a
-  stronger required-key/missing-production-key contract.
-- **Verified constraint:** The email service has no persisted user-locale argument; locale-aware
-  email copy must use reliable context or document the limitation without changing token/security
-  behavior.
-- **Verified boundary:** User-authored content, external/provider-owned text, historical snapshots,
-  and stable symbols such as `kg`/`lb` are not translation targets.
+- **Verified:** Five dedicated translation tables exist for exercises, global exercise variants,
+  muscles, equipment, and movement patterns, keyed by stable entity ID and locale.
+- **Verified:** Catalog reads resolve active locale → English → canonical value; unsupported locales
+  normalize to English. Existing seed/read guards exclude private variants from global translation.
+- **Verified:** `requireAdmin` enforces the existing admin role for `/admin/library/exercises`; current
+  admin Library forms manage canonical exercises and global variants but not translations.
+- **Verified gap:** No reusable database-backed completeness query/service or admin translation list
+  currently exists. Existing completeness checks validate authored manifest/seed coverage only.
+- **Verified gap:** Existing translation tables include optional localized description columns, while
+  current Portuguese seed/read behavior uses names; the supported editable field set must be chosen
+  explicitly.
+- **Verified boundary:** UI resource files remain source-controlled; user-owned variants, authored
+  names/notes, sessions/programs, and historical/external content are outside this goal.
 
 ## Confirmed decisions
 
-- Reuse the existing i18next/session/EJS/browser-message architecture and English fallback.
-- Keep formatting and translated copy at presentation boundaries; calculations, storage, IDs,
-  relationships, authorization, business rules, and machine contracts remain locale-neutral.
-- Use explicit reviewed translations only; no runtime machine translation or external translation API.
-- Stop at the active action’s review gate before activating the next action.
+- Reuse the Phase 3 translation tables, catalog localization helpers, existing Library/admin forms,
+  CSRF and `requireAdmin` boundaries, and the established i18next presentation architecture.
+- Derive completeness from translation availability rather than adding persisted status columns.
+- Keep stable IDs, canonical/internal values, relationships, calculations, authorization, and user
+  content locale-neutral and unchanged.
+- Use explicit reviewed translations only; no machine translation, SaaS/CMS, or external API.
+- Stop at each active action’s review gate before activating the next action.
 
-## Proposed Phase 4 action sequence
+## Proposed Phase 5 action sequence
+
+### Action 1 — Update goal tracking and audit
+
+**Status:** Completed
+
+**Purpose:** Establish Phase 5 as the active goal, preserve Phase 3/4 history, and record the
+verified translation schema, fallback, ownership, existing admin routes, catalog flows, and current
+completeness checks before runtime implementation.
+
+**Acceptance criteria:**
+
+- Both tracking files explicitly describe Phase 5 objective, scope, non-goals, completion criteria,
+  constraints, and current status.
+- The audit identifies supported global entity types, localized fields, fallback behavior, existing
+  admin authorization, private-content exclusions, and the verified implementation delta.
+- No broad runtime implementation occurs before the action plan is approved.
+
+**Action 1 activation (2026-09-12):** The user approved the proposed Phase 5 action plan. Action 1
+was activated as the only authorized action; Actions 2–8 remain pending.
+
+**Action 1 implementation and audit evidence (2026-09-12):** Updated `docs/current-goal.md` to make
+Phase 5 the active goal and retained Phase 4 and Phase 3 records as historical context. Inspected
+the Phase 3 translation schema, seed/migration contract, catalog localization joins, fallback
+behavior, global/private variant ownership, existing `/admin/library/exercises` routes and forms,
+the `requireAdmin` authorization middleware, source-controlled UI resources, and current manifest/
+seed completeness tests. The verified Phase 5 delta is a reusable database-backed completeness
+contract plus concise admin overview and safe single-record translation maintenance. Supported
+entities are exercises, global exercise variants, muscles, equipment, and movement patterns.
+Existing translation tables expose name fields and optional description columns; current Portuguese
+seed/read behavior uses names, so the editable field contract remains explicitly scoped for Action 2.
+No runtime, schema, seed, database, route, or user-content implementation was performed in this
+audit action.
+
+**Action 1 verification (2026-09-12):** Confirmed both tracking files explicitly describe Phase 5,
+its objective, scope, non-goals, completion criteria, constraints, verified baseline, and action
+status. Confirmed the proposed actions contain only the verified maintenance delta and preserve the
+existing identity, ownership, fallback, authorization, UI-resource, and database lifecycle
+boundaries. `npx prettier --check docs/current-goal.md docs/current-actions.md` passed, and
+`git diff --check` passed. Runtime checks were not run because this action changed documentation
+only.
+
+**Action 1 review stop (2026-09-12):** The Phase 5 tracking and architecture audit are complete and
+the action is Ready for review. Action 2 remains Pending and prepared but has not been activated or
+implemented.
+
+**Action 1 review approval (2026-09-12):** The user approved the tracking and audit implementation
+after its verification evidence was recorded. Action 1 is Completed. Action 2 remains Pending and
+prepared as the next action; it has not been activated or implemented.
+
+### Action 2 — Define the translation maintenance contract
+
+**Status:** Completed
+
+**Purpose:** Specify the supported entity/field matrix, derived status vocabulary, required locales,
+fallback preview semantics, validation, upsert, and English fallback protection in one reusable
+contract.
+
+**Action 2 activation (2026-09-12):** The user approved the prepared next action. Action 2 is now
+active and is the only Phase 5 runtime action authorized for implementation. Actions 3–8 remain
+pending.
+
+**Action 2 implementation (2026-09-12):** Added the reusable
+`src/features/translationMaintenance/translationMaintenanceContract.js` boundary and its focused
+tests. The contract supports exercises, global exercise variants, muscles, equipment, and movement
+patterns; exposes names as the currently supported localized field; derives `complete`, `missing-en`,
+`missing-pt-BR`, and `incomplete` from actual translation-row values; and resolves preview text as
+active locale → English → canonical fallback. It validates positive stable IDs, supported `en` /
+`pt-BR` locales, required non-empty names, and outer-whitespace trimming. It formalizes upsert-only
+maintenance with deletion disabled, so the English fallback cannot be removed through this workflow.
+Optional localized description columns remain excluded until their read paths are integrated.
+
+**Action 2 verification (2026-09-12):** The focused contract suite passed 6/6 tests, covering the
+entity matrix, status derivation, fallback preview, validation, unsupported values, and fallback
+mutation policy. `npm run check:types`, `npm run format:check`, `npm run lint`, and `git diff --check`
+passed. Browser type-checking and full repository tests were not run because Action 2 added no
+browser code or database/repository integration; those checks remain part of the later integration
+and verification actions.
+
+**Action 2 review stop (2026-09-12):** The translation maintenance contract is implemented and
+verified within the approved scope. Action 2 is Ready for review. Action 3 remains Pending and has
+not been activated or implemented.
+
+**Action 2 review approval (2026-09-12):** The user approved the contract implementation after its
+verification evidence was recorded. Action 2 is Completed. Action 3 remains Pending and prepared as
+the next action; it has not been activated or implemented.
+
+### Action 3 — Add the completeness query/service boundary
+
+**Status:** Completed
+
+**Purpose:** Implement parameterized repository/service logic for per-record status, filtered search,
+entity type, and lightweight counts while excluding archived/private/user-owned content.
+
+**Action 3 activation (2026-09-12):** The user approved the prepared next action. Action 3 is now
+active and is the only Phase 5 runtime action authorized for implementation. Actions 4–8 remain
+pending.
+
+**Action 3 implementation (2026-09-12):** Added the parameterized
+`src/features/translationMaintenance/queries.js` and `repository.js` read boundary plus
+`getTranslationOverview.js`. The query combines the five supported global catalog entity types,
+searches English, Portuguese, and canonical names, filters by entity type, excludes archived
+exercises/variants and private variants, and returns stable IDs with separate translation values.
+The service applies the shared Action 2 status and fallback-preview contract, supports status
+filtering, and derives total/status/entity counts without duplicating entity or status definitions.
+
+**Action 3 verification (2026-09-12):** Focused translation-maintenance and contract tests passed
+10/10, covering SQL scope, parameterized search/entity filters, invalid filters, status derivation,
+counts, fallback, entity coverage, and validation policy. `npm run check:types`,
+`npm run format:check`, `npm run lint`, and `git diff --check` passed. Browser type-checking was not
+run because no browser code changed. Full database/HTTP tests remain part of later integration and
+verification actions because this action added a read boundary tested with fakes only.
+
+**Action 3 review stop (2026-09-12):** The completeness query/service boundary is implemented and
+verified within the approved scope. Action 3 is Ready for review. Action 4 remains Pending and has
+not been activated or implemented.
+
+**Action 3 review approval (2026-09-12):** The user approved the completeness query/service
+implementation after its verification evidence was recorded. Action 3 is Completed. Action 4
+remains Pending and prepared as the next action; it has not been activated or implemented.
+
+### Action 4 — Add the admin translation overview
+
+**Status:** Completed
+
+**Purpose:** Add a concise authorized overview with accessible status, search/filter controls, counts,
+fallback visibility, and links into the maintenance workflow, reusing existing application chrome
+and Library visual/form conventions.
+
+**Action 4 activation (2026-09-12):** The user approved the prepared next action. Action 4 is now
+active and is the only Phase 5 runtime action authorized for implementation. Actions 5–8 remain
+pending.
+
+**Action 4 implementation (2026-09-12):** Added the admin-only `/admin/translations` overview using
+the Action 3 overview service and the shared application chrome. The page presents the supported
+catalog scope, derived status counts, entity/status/search filters, separate English and Portuguese
+values, explicit missing/fallback markers, and an empty state. Added localized English and
+Brazilian Portuguese copy, an admin navigation destination, and a Library admin-scope link. The
+rendering uses semantic form labels, table headers/caption, keyboard-reachable horizontal overflow,
+escaped values, responsive status/filter layouts, and mobile-stacked filter actions. No translation
+mutation controls were added; those remain scoped to Action 5.
+
+**Action 4 verification (2026-09-12):** Focused schema, CSS, page-render, view-model, and
+application-chrome tests passed 14/14. `npm run check:types`, `npm run check:browser-types`,
+`npm run format:check`, `npm run lint`, and `git diff --check` passed. The elevated full repository
+test suite passed 319/319 tests, including database setup and loopback HTTP tests; the initial
+sandboxed attempt was blocked only by local PostgreSQL/loopback `EPERM` restrictions. Responsive
+behavior was verified from the source-level CSS contracts and focused assertions; no live browser
+executable was available in this environment for screenshot inspection, so rendered browser
+appearance remains a manual follow-up. No database/schema reset was needed.
+
+**Action 4 review stop (2026-09-12):** The admin translation overview is implemented and verified
+within the approved scope. Action 4 is Ready for review. Action 5 remains Pending and prepared but
+has not been activated or implemented.
+
+**Action 4 review approval (2026-09-12):** The user approved the admin translation overview after
+its focused and full verification evidence was recorded. Action 4 is Completed. Action 5 remains
+Pending and prepared as the next action; it has not been activated or implemented.
+
+### Action 5 — Add single-record translation editing
+
+**Status:** Completed
+
+**Purpose:** Let admins add/update supported `en` and `pt-BR` localized fields through validated,
+CSRF-protected server routes and repository transactions without changing canonical identity or
+relationships.
+
+**Action 5 activation (2026-09-12):** The user approved the prepared next action. Action 5 is now
+active and is the only Phase 5 runtime action authorized for implementation. Actions 6–8 remain
+pending.
+
+**Action 5 implementation (2026-09-12):** Added dedicated editor GET/PATCH routes under
+`/admin/translations/:entityType/:entityId`, reusing the existing `requireAdmin`, CSRF, parameter,
+and body-validation middleware. Added a repository query/upsert boundary and service for the
+approved name-only `en` / `pt-BR` contract. Each update is scoped to an active global catalog
+record, uses a parameterized upsert on the stable `(entity, locale)` key, and leaves canonical
+names, IDs, relationships, ownership, and user-authored content untouched. The overview now links
+each record to the editor. Added localized English/Portuguese forms with independent locale saves,
+fallback guidance, validation feedback, escaped values, semantic labels, stable-ID context, and
+responsive stacked mobile layout. No deletion or localized description editing was introduced.
+
+**Action 5 verification (2026-09-12):** Focused translation editing, schema, rendering, view-model,
+and CSS tests passed 12/12. `npm run check:types`, `npm run check:browser-types`,
+`npm run format:check`, `npm run lint`, and `git diff --check` passed. Elevated `npm run verify`
+passed all 327 repository tests, including database setup and loopback HTTP tests. Responsive
+behavior was verified from source-level CSS contracts and focused assertions; no live browser
+executable was available for screenshot inspection, so rendered browser appearance remains a
+manual follow-up. No database/schema reset was needed.
+
+**Action 5 review stop (2026-09-12):** Single-record translation editing is implemented and
+verified within the approved scope. Action 5 is Ready for review. Action 6 remains Pending and
+prepared but has not been activated or implemented.
+
+**Action 5 review approval (2026-09-12):** The user approved single-record translation editing
+after its focused and full verification evidence was recorded. Action 5 is Completed. Action 6
+remains Pending and prepared as the next action; it has not been activated or implemented.
+
+### Action 6 — Integrate global catalog creation/editing
+
+**Status:** Completed
+
+**Action 6 activation (2026-09-12):** The user approved the prepared next action. Action 6 is now
+active and is the only Phase 5 runtime action authorized for implementation. Actions 7–8 remain
+pending.
+
+**Verified delta:** Existing admin exercise creation and global-variant creation write canonical
+catalog rows without translation rows, while existing global edits update canonical names without
+synchronizing the English translation. The admin Library is already the shared global catalog
+management surface, and translation upserts accept a transaction client. Private variants are
+filtered from administrator Library data and remain outside this integration.
+
+**Implementation scope:** Reuse the existing transaction services and translation repository to
+create or synchronize English rows atomically for global exercises and variants. Add localized,
+direct links from the existing admin catalog controls to the approved translation editor. Add
+focused service, view-model, and rendered-template coverage for synchronization, transaction
+rollback, translation-editor identity, and private-content exclusion.
+
+**Action 6 implementation (2026-09-12):** Global exercise creation now returns the created
+exercise/variant rows and upserts English translations for both inside the existing transaction.
+Global variant creation now uses a transaction service that inserts the variant and its English row
+together. Existing global exercise/variant editing synchronizes the English translation rows with
+the canonical name in the same transaction; Portuguese translations remain independently editable.
+The admin Library's existing global catalog now links each global exercise and variant directly to
+the approved translation editor. Private variants remain without translation links and outside the
+translation write path.
+
+**Action 6 verification (2026-09-12):** Focused service, translation-maintenance, Library
+view-model/render, CSS, and browser-interaction tests passed (45/45). `npm run format:check`,
+`npm run lint`, `npm run check:types`, `npm run check:browser-types`, `git diff --check`, and the
+elevated complete `npm run verify` passed; the complete repository suite passed all 331 tests.
+The initial sandboxed full run reproduced the environment's PostgreSQL/loopback `EPERM` failures
+(327 passed, 2 failed, 3 cancelled), then the approved elevated run passed those same checks.
+No browser executable is available for live viewport or assistive-technology inspection; that
+manual limitation remains for Action 7.
+
+**Action 6 review stop (2026-09-12):** Global catalog creation/editing is integrated with the
+translation workflow within the approved scope. Action 6 is Ready for review. Actions 7–8 remain
+pending and have not been activated or implemented.
+
+**Action 6 approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 6 is Completed. Action 7 remains Pending and prepared as the
+next action; it has not been activated or implemented.
+
+**Purpose:** Connect existing global exercise/variant creation and editing to the approved
+translation workflow where necessary, without exposing user-owned/custom content or duplicating
+catalog management experiences.
+
+### Action 7 — Security, accessibility, and regression audit
+
+**Status:** Completed
+
+**Action 7 activation (2026-09-12):** The user approved the prepared next action. Action 7 is now
+active and is the only Phase 5 runtime action authorized for implementation. Action 8 remains
+pending.
+
+**Verified audit baseline (2026-09-12):** Authorization and CSRF boundaries are present on the
+admin translation routes; schema validation, escaped shared fields, semantic headings/labels,
+fallback status text, and private-content filters are present in the implementation. The first
+focused HTTP audit exposed one repairable regression in the shared variant translation SQL: its
+parent exercise join used the variant ID instead of `exercise_id`, so global variant translation
+upserts incorrectly returned no row and rolled back global exercise creation. The focused audit
+also requires end-to-end assertions for admin-only access, CSRF rejection, fallback preservation,
+and private-variant exclusion.
+
+**Action 7 repairs and coverage (2026-09-12):** Corrected the global exercise-variant translation
+join to use the variant's stable `exercise_id` parent relationship. Corrected the translation editor
+form to pass the existing query-string method-override contract and retained `entityType` in the
+editor view model so generated actions cannot lose their entity route. Added HTTP coverage for
+authenticated-user and guest denial, CSRF rejection, admin overview/editor access, validated
+translation upsert, English fallback preservation, and private-variant exclusion. Added focused
+regression assertions for the corrected SQL and rendered form action.
+
+**Purpose:** Verify direct unauthorized access, guest/user/admin behavior, validation/escaping,
+fallback, ownership, ID/relationship preservation, existing catalog search/rendering, and responsive
+keyboard-accessible maintenance states.
+
+**Action 7 verification (2026-09-12):** The focused authorization and translation-maintenance HTTP
+tests passed 2/2. Focused translation, catalog-creation/update, view, and responsive CSS tests passed
+14/14. `npm run verify` passed formatting, lint, server type-check, browser type-check, and all 331
+repository tests. `git diff --check` passed. The complete HTTP application suite reached 64 tests:
+59 passed and 5 failed in authentication/workout-history/progress scenarios outside this action's
+translation paths; their causes were not investigated as part of this scoped audit. The two Action 7
+HTTP tests passed in the same suite. No live
+browser executable or assistive-technology runner is available, so live viewport and interaction
+inspection at approximately 390px, an intermediate pressure width, and desktop remain unavailable;
+static responsive contracts and rendered accessibility assertions passed. No database reset,
+production mutation, deployment, push, or commit was performed.
+
+**Action 7 review stop (2026-09-12):** The security, accessibility, and regression audit is
+implemented and verified within the available repository and HTTP evidence. Action 7 is Ready for
+review. Action 8 remains Pending and has not been activated or implemented.
+
+**Action 7 review approval (2026-09-12):** The user approved the implementation after the recorded
+verification evidence passed. Action 7 is Completed. Action 8 remains Pending and prepared as the
+next action; it has not been activated or implemented.
+
+### Action 8 — Final verification and tracking synchronization
+
+**Status:** Completed
+
+**Action 8 activation (2026-09-12):** The user approved the prepared next action. Action 8 is now
+active and is the only Phase 5 runtime action authorized for implementation.
+
+**Purpose:** Run focused and repository verification, compare admin completeness with the existing
+catalog completeness contract, document limitations/deferred work, and prepare Phase 5 for review
+without claiming completion before explicit approval.
+
+**Action 8 completion matrix (2026-09-12):**
+
+1. **Verified:** Both tracking files describe the Phase 5 objective, scope, non-goals, constraints,
+   action history, and current review state.
+2. **Verified:** The shared maintenance contract defines five global entity types—exercises, global
+   exercise variants, muscles, equipment, and movement patterns—with the supported localized field
+   limited to the required `name`. The same five families are covered by the existing authored
+   Portuguese manifest/vocabulary completeness contract. The admin contract derives live database
+   status; the authored contract validates expected manifest/seed keys, so they are complementary
+   checks rather than duplicated status logic.
+3. **Verified:** Admin overview filters and counts expose per-record `complete`, `missing-en`,
+   `missing-pt-BR`, and `incomplete` states, with search and entity/status filtering.
+4. **Verified:** Overview status and counts are derived through the reusable maintenance contract,
+   repository, mapper, and overview service rather than duplicated in the templates.
+5. **Verified:** Admin-only validated upsert routes add or update supported `en` and `pt-BR` names
+   through parameterized repository queries.
+6. **Verified:** Authenticated ordinary users and guests receive denial on the maintenance overview;
+   CSRF protection covers mutation, and the HTTP audit confirms the boundary.
+7. **Verified:** Stable IDs, canonical values, relationships, and ownership predicates are retained;
+   private variants are excluded from the global maintenance query and cannot be opened by the admin
+   editor route.
+8. **Verified:** Upsert-only mutation disallows deletion, and the editor preserves English rows and
+   canonical fallback visibility when Portuguese is absent.
+9. **Verified:** Full repository verification and the Action 7 HTTP audit cover global catalog
+   creation/update synchronization, translation fallback, catalog search/rendering, and Library
+   behavior without changing user-owned content or stable relationship identifiers.
+10. **Verified with static/rendering limit:** Escaped values, semantic headings/labels, status
+    feedback, labelled table overflow, keyboard focus styling, responsive filter/layout contracts,
+    and reduced-motion-safe presentation are covered by render and CSS tests. No live browser or
+    assistive-technology runner is available for viewport inspection at approximately 390px,
+    intermediate pressure width, or desktop.
+11. **Partially verified with precise limit:** `npm run verify` passed formatting, lint, server and
+    browser type-checks, and all 331 repository tests. Action 7 focused HTTP coverage passed 2/2,
+    but the complete 64-test HTTP application suite had 59 passes and 5 failures in authentication,
+    workout-history, and progress scenarios outside the translation-maintenance paths; those causes
+    were not investigated in this scoped goal. `git diff --check` passed.
+12. **Verified/documented:** Deferred work includes localized description fields whose read paths are
+    not integrated, bulk import/export and audit history, additional locales, and live browser/
+    assistive-technology inspection. The full-suite HTTP failures remain an explicitly recorded
+    follow-up rather than silently treated as Phase 5 evidence.
+
+**Action 8 verification (2026-09-12):** Re-ran `npm run verify` with approved local PostgreSQL
+access; formatting, lint, both type-check projects, and all 331 repository tests passed. Rechecked
+the focused Action 7 HTTP tests at 2/2 and the complete HTTP application suite at 59/64, with the
+five out-of-scope failures recorded in the completion matrix. `npx prettier --check
+docs/current-goal.md docs/current-actions.md` and `git diff --check` passed. No database reset,
+production mutation, deployment, push, or commit was performed.
+
+**Action 8 review stop (2026-09-12):** Final verification, the completeness-contract comparison,
+criterion-by-criterion matrix, limitations, and deferred work are synchronized. Action 8 is Ready
+for review. Phase 5 awaits explicit final goal approval; no further action remains pending.
+
+**Action 8 review approval (2026-09-12):** The user approved the final verification and tracking
+synchronization after the recorded evidence passed. Action 8 is Completed. Phase 5 is Ready for
+final review; no further action remains pending.
+
+## Resume here
+
+Action 1 is **Completed**. Action 2 is **Completed**. Action 3 is **Completed**. Action 4 is
+**Completed**. Action 5 is **Completed**. Action 6 is **Completed**. Action 7 is **Completed**.
+Action 8 is **Completed**. Phase 5 is **Completed** on 2026-09-12.
+
+## Historical Phase 4 record
 
 ### Action 1 — Update goal tracking and audit
 

@@ -1,0 +1,71 @@
+<%
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match);
+	const { pageFeedback, heading, record, localeForms, backHref, savedMessage, formNote } = locals.components;
+%>
+
+<main class="main translation-maintenance translation-maintenance--edit">
+	<%- include("../partials/shared/components/pageHeading", { heading }) %>
+	<%- include("../partials/shared/components/pageFeedback", { pageFeedback }) %>
+
+	<% if (savedMessage) { %>
+		<p class="translation-maintenance__saved" role="status"><%= savedMessage %></p>
+	<% } %>
+
+	<section class="translation-maintenance__record" aria-labelledby="translation-record-heading">
+		<div>
+			<p class="translation-maintenance__eyebrow"><%= translate("translationMaintenance.recordEyebrow", { defaultValue: "Catalog record" }) %></p>
+			<h2 id="translation-record-heading"><%= record.entityLabel %></h2>
+			<p class="translation-maintenance__record-name"><%= record.canonicalName %></p>
+		</div>
+		<dl class="translation-maintenance__record-facts">
+			<div><dt><%= translate("translationMaintenance.recordId", { defaultValue: "Stable ID" }) %></dt><dd>#<%= record.id %></dd></div>
+			<div><dt><%= translate("translationMaintenance.statusColumn", { defaultValue: "Status" }) %></dt><dd><span class="translation-maintenance__status" data-status="<%= record.status %>"><%= record.statusLabel %></span></dd></div>
+		</dl>
+		<a class="translation-maintenance__back-link" href="<%= backHref %>"><%= translate("translationMaintenance.backToOverview", { defaultValue: "Back to translation overview" }) %></a>
+	</section>
+
+	<section class="translation-maintenance__editor" aria-labelledby="translation-editor-heading">
+		<div class="translation-maintenance__section-heading">
+			<div>
+				<p class="translation-maintenance__eyebrow"><%= translate("translationMaintenance.editEyebrow", { defaultValue: "Reviewed content" }) %></p>
+				<h2 id="translation-editor-heading"><%= translate("translationMaintenance.editHeading", { defaultValue: "Edit translations" }) %></h2>
+			</div>
+		</div>
+		<p class="translation-maintenance__form-note"><%= formNote %></p>
+
+		<div class="translation-maintenance__locale-grid">
+			<% localeForms.forEach(localeForm => { %>
+				<section class="translation-maintenance__locale" aria-labelledby="<%= localeForm.locale %>-translation-heading">
+					<div class="translation-maintenance__locale-header">
+						<div>
+							<h3 id="<%= localeForm.locale %>-translation-heading"><%= localeForm.label %></h3>
+							<p><%= localeForm.description %></p>
+						</div>
+						<span class="translation-maintenance__locale-code"><%= localeForm.locale %></span>
+					</div>
+					<% if (localeForm.previewLabel) { %>
+						<p class="translation-maintenance__preview" role="status"><%= localeForm.previewLabel %></p>
+					<% } %>
+					<form class="translation-maintenance__locale-form" method="POST" action="/admin/translations/<%= encodeURIComponent(record.entityType) %>/<%= record.id %>?_method=PATCH">
+						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" />
+						<input type="hidden" name="locale" value="<%= localeForm.locale %>" />
+						<%- include("../partials/shared/components/form/field", { field: {
+							id: `${localeForm.locale}-translation-name`,
+							name: "name",
+							label: translate("translationMaintenance.nameLabel", { locale: localeForm.label, defaultValue: "{{locale}} name" }),
+							value: localeForm.value,
+							required: true,
+							error: localeForm.error,
+							attributes: { maxlength: 100, autocomplete: "off" }
+						}, t: translate }) %>
+						<div class="translation-maintenance__locale-actions">
+							<button class="shared-button shared-button--primary" type="submit"><%= translate("translationMaintenance.saveTranslation", { defaultValue: "Save translation" }) %></button>
+						</div>
+					</form>
+				</section>
+			<% }) %>
+		</div>
+	</section>
+</main>

@@ -77,11 +77,12 @@ test("administrator navigation remains permission-scoped and active", async () =
 		},
 	});
 
-	assert.equal((adminHtml.match(/class="primary-navigation__link"/g) ?? []).length, 6);
+	assert.equal((adminHtml.match(/class="primary-navigation__link"/g) ?? []).length, 7);
 	assert.match(
 		adminHtml,
 		/href="\/admin\/library\/exercises"[\s\S]*?aria-current="page"/,
 	);
+	assert.doesNotMatch(memberHtml, /\/admin\/translations/);
 	assert.doesNotMatch(memberHtml, /\/admin\/library\/exercises/);
 	assert.equal((memberHtml.match(/aria-current="page"/g) ?? []).length, 1);
 });

@@ -1,0 +1,100 @@
+<%
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match);
+	const maintenance = locals.translationMaintenance;
+%>
+
+<main class="main translation-maintenance">
+	<%- include("../partials/shared/components/pageHeading", { heading: maintenance.heading }) %>
+
+	<aside class="translation-maintenance__scope" aria-label="<%= translate("translationMaintenance.scopeLabel", { defaultValue: "Translation maintenance scope" }) %>">
+		<span class="translation-maintenance__scope-marker" aria-hidden="true">!</span>
+		<p><%= maintenance.scopeDescription %></p>
+		<a href="/admin/library/exercises"><%= translate("translationMaintenance.backToCatalog", { defaultValue: "Back to exercise catalog" }) %></a>
+	</aside>
+
+	<section class="translation-maintenance__summary" aria-labelledby="translation-summary-heading">
+		<div class="translation-maintenance__section-heading">
+			<div>
+				<p class="translation-maintenance__eyebrow"><%= translate("translationMaintenance.coverageEyebrow", { defaultValue: "Coverage" }) %></p>
+				<h2 id="translation-summary-heading"><%= translate("translationMaintenance.summaryHeading", { defaultValue: "Catalog translation status" }) %></h2>
+			</div>
+			<span class="translation-maintenance__result-count"><%= maintenance.resultLabel %></span>
+		</div>
+		<ul class="translation-maintenance__status-grid">
+			<% maintenance.statusCards.forEach(card => { %>
+				<li class="translation-maintenance__status-card" data-status="<%= card.status %>">
+					<strong><%= card.count %></strong>
+					<span><%= card.label %></span>
+				</li>
+			<% }) %>
+		</ul>
+	</section>
+
+	<section class="translation-maintenance__filters" aria-labelledby="translation-filters-heading">
+		<div class="translation-maintenance__section-heading">
+			<div>
+				<p class="translation-maintenance__eyebrow"><%= translate("translationMaintenance.filtersEyebrow", { defaultValue: "Find work" }) %></p>
+				<h2 id="translation-filters-heading"><%= translate("translationMaintenance.filtersHeading", { defaultValue: "Filter translation coverage" }) %></h2>
+			</div>
+		</div>
+		<form class="translation-maintenance__filter-form" method="GET" action="/admin/translations">
+			<div class="translation-maintenance__filter-fields">
+				<div class="form-field">
+					<label class="form-field__label" for="translation-search"><%= translate("translationMaintenance.searchLabel", { defaultValue: "Search catalog names" }) %></label>
+					<input class="form-input" id="translation-search" name="search" type="search" value="<%= maintenance.filters.search ?? "" %>" placeholder="<%= translate("translationMaintenance.searchPlaceholder", { defaultValue: "English, Portuguese, or canonical name" }) %>" maxlength="100" />
+				</div>
+				<div class="form-field">
+					<label class="form-field__label" for="translation-entity"><%= translate("translationMaintenance.entityLabel", { defaultValue: "Catalog type" }) %></label>
+					<select class="form-select" id="translation-entity" name="entityType">
+						<% maintenance.filters.entityOptions.forEach(option => { %><option value="<%= option.value %>"<%= option.value === (maintenance.filters.entityType ?? "") ? " selected" : "" %>><%= option.label %></option><% }) %>
+					</select>
+				</div>
+				<div class="form-field">
+					<label class="form-field__label" for="translation-status"><%= translate("translationMaintenance.statusLabel", { defaultValue: "Status" }) %></label>
+					<select class="form-select" id="translation-status" name="status">
+						<% maintenance.filters.statusOptions.forEach(option => { %><option value="<%= option.value %>"<%= option.value === (maintenance.filters.status ?? "") ? " selected" : "" %>><%= option.label %></option><% }) %>
+					</select>
+				</div>
+			</div>
+			<div class="translation-maintenance__filter-actions">
+				<a class="history-text-action" href="/admin/translations"><%= translate("translationMaintenance.clearFilters", { defaultValue: "Clear filters" }) %></a>
+				<button class="shared-button shared-button--primary" type="submit"><%= translate("translationMaintenance.applyFilters", { defaultValue: "Apply filters" }) %></button>
+			</div>
+		</form>
+	</section>
+
+	<section class="translation-maintenance__results" aria-labelledby="translation-results-heading">
+		<div class="translation-maintenance__section-heading">
+			<div>
+				<p class="translation-maintenance__eyebrow"><%= translate("translationMaintenance.resultsEyebrow", { defaultValue: "Catalog records" }) %></p>
+				<h2 id="translation-results-heading"><%= translate("translationMaintenance.resultsHeading", { defaultValue: "Translation coverage" }) %></h2>
+			</div>
+		</div>
+		<% if (maintenance.noResults) { %>
+			<div class="translation-maintenance__empty" role="status">
+				<strong><%= translate("translationMaintenance.noResults", { defaultValue: "No catalog records match these filters." }) %></strong>
+				<p><%= translate("translationMaintenance.noResultsDescription", { defaultValue: "Try clearing a filter or searching for another catalog name." }) %></p>
+			</div>
+		<% } else { %>
+			<div class="translation-maintenance__table-wrap" role="region" aria-labelledby="translation-results-heading" tabindex="0">
+				<table class="translation-maintenance__table">
+					<caption><%= translate("translationMaintenance.tableCaption", { defaultValue: "Application-managed catalog translation coverage" }) %></caption>
+					<thead><tr><th scope="col"><%= translate("translationMaintenance.entityColumn", { defaultValue: "Entity" }) %></th><th scope="col"><%= translate("translationMaintenance.englishColumn", { defaultValue: "English" }) %></th><th scope="col"><%= translate("translationMaintenance.portugueseColumn", { defaultValue: "Português" }) %></th><th scope="col"><%= translate("translationMaintenance.statusColumn", { defaultValue: "Status" }) %></th><th scope="col"><span class="visually-hidden"><%= translate("translationMaintenance.editColumn", { defaultValue: "Edit" }) %></span></th></tr></thead>
+					<tbody>
+						<% maintenance.records.forEach(record => { %>
+							<tr>
+								<th scope="row"><span class="translation-maintenance__entity-name"><%= record.entityLabel %></span><span class="translation-maintenance__entity-canonical"><%= record.canonicalName %> · #<%= record.id %></span></th>
+								<td class="<%= record.english.isMissing ? "translation-maintenance__missing" : "" %>"><span><%= record.english.value %></span><% if (record.english.fallbackLabel) { %><small><%= record.english.fallbackLabel %></small><% } %></td>
+								<td class="<%= record.portuguese.isMissing ? "translation-maintenance__missing" : "" %>"><span><%= record.portuguese.value %></span><% if (record.portuguese.fallbackLabel) { %><small><%= record.portuguese.fallbackLabel %></small><% } %></td>
+									<td><span class="translation-maintenance__status" data-status="<%= record.status %>"><%= record.statusLabel %></span></td>
+									<td><a class="translation-maintenance__edit-link" href="<%= record.editHref %>"><%= translate("translationMaintenance.edit", { defaultValue: "Edit" }) %></a></td>
+							</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			</div>
+		<% } %>
+	</section>
+</main>

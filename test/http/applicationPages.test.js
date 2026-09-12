@@ -2552,6 +2552,16 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			).rows[0].count,
 			1,
 		);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT locale, name FROM exercise_translations
+					 WHERE exercise_id = (SELECT id FROM exercises WHERE name = 'Admin Bodyweight Hinge')
+					 ORDER BY locale`,
+				)
+			).rows,
+			[{ locale: "en", name: "Admin Bodyweight Hinge" }],
+		);
 		const exerciseVariant = (
 			await db.query(`
 				SELECT exercise.id, variant.id AS variant_id, variant.equipment_id
@@ -2585,6 +2595,25 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			).rows[0],
 			{ name: "Admin Bodyweight Hinge Updated", equipment_id: null },
 		);
+		assert.deepEqual(
+			(
+				await db.query(
+					`SELECT entity.locale, entity.name
+					 FROM exercise_translations AS entity
+					 WHERE entity.exercise_id = $1
+					 UNION ALL
+					 SELECT variant.locale, variant.name
+					 FROM exercise_variant_translations AS variant
+					 WHERE variant.exercise_variant_id = $2
+					 ORDER BY locale`,
+					[exerciseVariant.id, exerciseVariant.variant_id],
+				)
+			).rows,
+			[
+				{ locale: "en", name: "Admin Bodyweight Hinge Updated" },
+				{ locale: "en", name: "Admin Bodyweight Hinge Updated" },
+			],
+		);
 		const exercise = { id: exerciseVariant.id };
 		const globalVariant = await admin.request(
 			`/admin/library/exercises/${exercise.id}/variants`,
@@ -2606,6 +2635,14 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			).rows[0].owner_user_id,
 			null,
 		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT locale, name FROM exercise_variant_translations WHERE exercise_variant_id = (SELECT id FROM exercise_variants WHERE name = 'Trap Bar Deadlift')",
+				)
+			).rows,
+			[{ locale: "en", name: "Trap Bar Deadlift" }],
+		);
 		const archived = await admin.request(
 			`/admin/library/exercises/${exercise.id}/archive`,
 			{ method: "POST", form: { _csrf: csrfFrom(page.text) } },
@@ -2616,6 +2653,101 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				.rows[0].is_archived,
 			true,
 		);
+	});
+
+	test("translation maintenance preserves admin boundaries, CSRF, fallback, and private scope", async () => {
+		const standard = agent();
+		await login(standard);
+		assert.equal((await standard.request("/admin/translations")).response.status, 403);
+
+		const guest = agent();
+		await enterGuest(guest);
+		assert.equal((await guest.request("/admin/translations")).response.status, 403);
+
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const overview = await admin.request("/admin/translations?status=missing-pt-BR");
+		assert.equal(overview.response.status, 200);
+		assert.match(overview.text, /Translation maintenance/);
+		assert.match(overview.text, /Missing Portuguese/);
+
+		const exercise = (
+			await db.query(
+				"SELECT id, name FROM exercises WHERE is_archived = FALSE ORDER BY id LIMIT 1",
+			)
+		).rows[0];
+		const editor = await admin.request(`/admin/translations/exercise/${exercise.id}`);
+		assert.equal(editor.response.status, 200);
+		assert.match(editor.text, /name="locale" value="pt-BR"/);
+
+		const missingCsrf = await admin.request(
+			`/admin/translations/exercise/${exercise.id}`,
+			{
+				method: "POST",
+				form: { _method: "PATCH", locale: "pt-BR", name: "Nome sem token" },
+			},
+		);
+		assert.equal(missingCsrf.response.status, 403);
+
+		const saved = await admin.request(
+			`/admin/translations/exercise/${exercise.id}?_method=PATCH`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(editor.text),
+					locale: "pt-BR",
+					name: "Nome revisado",
+				},
+			},
+		);
+		assert.equal(saved.response.status, 302);
+		assert.match(saved.response.headers.get("location"), /saved=pt-BR/);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT name FROM exercise_translations WHERE exercise_id = $1 AND locale = 'en'",
+					[exercise.id],
+				)
+			).rows[0],
+			{ name: exercise.name },
+		);
+		assert.deepEqual(
+			(
+				await db.query(
+					"SELECT name FROM exercise_translations WHERE exercise_id = $1 AND locale = 'pt-BR'",
+					[exercise.id],
+				)
+			).rows[0],
+			{ name: "Nome revisado" },
+		);
+
+		const user = (
+			await db.query("SELECT id FROM users WHERE email = 'user-one@example.com'")
+		).rows[0];
+		const privateVariant = (
+			await db.query(
+				`INSERT INTO exercise_variants (name, exercise_id, owner_user_id)
+				 VALUES ('Private audit variant', $1, $2) RETURNING id`,
+				[exercise.id, user.id],
+			)
+		).rows[0];
+		const privateEditor = await admin.request(
+			`/admin/translations/exercise_variant/${privateVariant.id}`,
+		);
+		assert.equal(privateEditor.response.status, 404);
+
+		const invalidLocale = await admin.request(
+			`/admin/translations/exercise/${exercise.id}?_method=PATCH`,
+			{
+				method: "POST",
+				form: {
+					_csrf: csrfFrom(editor.text),
+					locale: "fr",
+					name: "Unsupported",
+				},
+			},
+		);
+		assert.equal(invalidLocale.response.status, 422);
 	});
 
 	test("Library deletes only owned sessions and archives referenced templates", async () => {
