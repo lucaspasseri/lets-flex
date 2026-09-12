@@ -42,6 +42,8 @@ function createExercise({
 		entityType: "exercise",
 		baseName: exerciseTemplate.name,
 		movementPattern: movementPattern?.name,
+		matchBaseName: exerciseTemplate.canonicalName,
+		matchMovementPattern: movementPattern?.canonicalName,
 		environment: firstVariant?.environment,
 		label: exerciseTemplate.name,
 		presentation: "initial",
@@ -66,11 +68,19 @@ function createExercise({
 				? toCapitalizedString(variant.environment).replaceAll("_", " ")
 				: "Not specified";
 			const scopeLabel = isPrivateOwner ? "Private" : "Global";
+			const equipmentSearchLabels = [
+				equipmentLabel,
+				equipment?.canonicalName,
+				equipment?.category,
+			];
 			const media = resolveMedia({
 				entityType: "exercise",
 				variantName: variant.name,
 				baseName: exerciseTemplate.name,
 				movementPattern: movementPattern?.name,
+				matchVariantName: variant.canonicalName,
+				matchBaseName: exerciseTemplate.canonicalName,
+				matchMovementPattern: movementPattern?.canonicalName,
 				environment: variant.environment,
 				label: variant.name,
 				presentation: "initial",
@@ -87,8 +97,8 @@ function createExercise({
 				notes: variant.notes,
 				searchKeyWord: [
 					variant.name,
-					equipmentLabel,
-					equipment?.category,
+					variant.canonicalName,
+					...equipmentSearchLabels,
 					environmentLabel,
 					variant.setupDescription,
 					variant.notes,
@@ -136,10 +146,13 @@ function createExercise({
 	const variantCount = variants.length;
 	const baseSearchKeyWord = [
 		exerciseTemplate.name,
+		exerciseTemplate.canonicalName,
 		movementPattern?.name,
+		movementPattern?.canonicalName,
 		movementPattern?.notes,
 		...muscles.flatMap((muscle) => [
 			muscle.commonName,
+			muscle.canonicalCommonName,
 			muscle.scientificName,
 			muscle.bodyRegion,
 		]),

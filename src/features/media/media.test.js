@@ -59,6 +59,22 @@ test("an exercise variant inherits the base exercise media", () => {
 	assert.match(media.alt, /^Dumbbell Bench Press — /);
 });
 
+test("localized labels use canonical manifest keys without losing translated alt text", () => {
+	const media = resolveMedia({
+		entityType: "exercise",
+		variantName: "Supino com barra",
+		baseName: "Supino",
+		matchVariantName: "Barbell Bench Press",
+		matchBaseName: "Bench Press",
+		matchMovementPattern: "Push",
+		label: "Supino com barra",
+	});
+
+	assert.equal(media.src, "/media/exercise-barbell-bench-press.svg");
+	assert.equal(media.matchedKey, "barbell-bench-press");
+	assert.equal(media.alt, "Barbell bench press exercise illustration");
+});
+
 test("movement and environment fallbacks are selected before category fallback", () => {
 	const movement = resolveMedia({
 		entityType: "exercise",

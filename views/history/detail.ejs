@@ -1,28 +1,29 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
 <main class="main workout-history workout-history-detail" data-workout-history-detail>
-	<a class="history-back-link" href="<%= backHref %>"><span aria-hidden="true">←</span> Back to workout history</a>
+	<a class="history-back-link" href="<%= backHref %>"><span aria-hidden="true">←</span> <%= translate("history.backToHistory", { defaultValue: "Back to workout history" }) %></a>
 	<%- include("../partials/shared/components/pageHeading", { heading }) %>
 
 	<section class="history-summary" aria-labelledby="history-summary-heading" data-status="<%= summary.status %>">
 		<div class="history-section-heading">
-			<div><p class="history-eyebrow">At a glance</p><h2 id="history-summary-heading">Session summary</h2></div>
+			<div><p class="history-eyebrow"><%= translate("history.atAGlance", { defaultValue: "At a glance" }) %></p><h2 id="history-summary-heading"><%= translate("history.sessionSummary", { defaultValue: "Session summary" }) %></h2></div>
 			<span class="history-status" data-status="<%= summary.status %>"><span aria-hidden="true"></span><%= summary.statusLabel %></span>
 		</div>
 		<dl class="history-summary__facts">
-			<div><dt>Status</dt><dd><%= summary.statusLabel %></dd></div>
+			<div><dt><%= translate("history.status", { defaultValue: "Status" }) %></dt><dd><%= summary.statusLabel %></dd></div>
 			<div>
 				<dt><%= summary.historyDate.context %></dt>
 				<dd><% if (summary.historyDate.value) { %><time datetime="<%= summary.historyDate.value %>"><%= summary.historyDate.label %></time><% } else { %><%= summary.historyDate.label %><% } %></dd>
 			</div>
-			<% if (summary.scheduledDate) { %><div><dt>Originally scheduled</dt><dd><time datetime="<%= summary.scheduledDate.value %>"><%= summary.scheduledDate.label %></time></dd></div><% } %>
-			<% if (summary.startedAt.value) { %><div><dt>Started</dt><dd><time datetime="<%= summary.startedAt.value %>"><%= summary.startedAt.label %></time></dd></div><% } %>
-			<% if (summary.finishedAt.value) { %><div><dt>Finished</dt><dd><time datetime="<%= summary.finishedAt.value %>"><%= summary.finishedAt.label %></time></dd></div><% } %>
+			<% if (summary.scheduledDate) { %><div><dt><%= translate("history.originallyScheduledShort", { defaultValue: "Originally scheduled" }) %></dt><dd><time datetime="<%= summary.scheduledDate.value %>"><%= summary.scheduledDate.label %></time></dd></div><% } %>
+			<% if (summary.startedAt.value) { %><div><dt><%= translate("history.started", { defaultValue: "Started" }) %></dt><dd><time datetime="<%= summary.startedAt.value %>"><%= summary.startedAt.label %></time></dd></div><% } %>
+			<% if (summary.finishedAt.value) { %><div><dt><%= translate("history.finished", { defaultValue: "Finished" }) %></dt><dd><time datetime="<%= summary.finishedAt.value %>"><%= summary.finishedAt.label %></time></dd></div><% } %>
 		</dl>
-		<% if (summary.notes) { %><div class="history-note"><h3>Session notes</h3><p><%= summary.notes %></p></div><% } %>
+		<% if (summary.notes) { %><div class="history-note"><h3><%= translate("history.sessionNotes", { defaultValue: "Session notes" }) %></h3><p><%= summary.notes %></p></div><% } %>
 	</section>
 
 	<section class="history-steps" aria-labelledby="history-steps-heading">
 		<div class="history-section-heading">
-			<div><p class="history-eyebrow">Recorded performance</p><h2 id="history-steps-heading">Exercise results</h2></div>
+			<div><p class="history-eyebrow"><%= translate("progress.recordedPerformance", { defaultValue: "Recorded performance" }) %></p><h2 id="history-steps-heading"><%= translate("history.exerciseResults", { defaultValue: "Exercise results" }) %></h2></div>
 			<% if (steps.length) { %><span class="history-results__page"><%= steps.length %> <%= steps.length === 1 ? "step" : "steps" %></span><% } %>
 		</div>
 		<% if (steps.length) { %>
@@ -33,41 +34,41 @@
 							<header class="history-step__header">
 								<div class="history-step__number" aria-hidden="true"><%= step.order %></div>
 								<div class="history-step__title">
-									<p>Step <%= step.order %></p>
+									<p><%= translate("history.step", { defaultValue: "Step" }) %> <%= step.order %></p>
 									<h3><%= step.title %></h3>
-									<% if (step.exerciseName) { %><span>Exercise: <%= step.exerciseName %></span><% } %>
-									<% if (step.name) { %><span>Plan label: <%= step.name %></span><% } %>
+									<% if (step.exerciseName) { %><span><%= translate("history.exerciseLabel", { defaultValue: "Exercise:" }) %> <%= step.exerciseName %></span><% } %>
+									<% if (step.name) { %><span><%= translate("history.planLabel", { defaultValue: "Plan label:" }) %> <%= step.name %></span><% } %>
 								</div>
 								<span class="history-status history-status--step" data-status="<%= step.statusLabel.toLowerCase() %>"><span aria-hidden="true"></span><%= step.statusLabel %></span>
 							</header>
 
 							<div class="history-step__content">
-								<section class="history-prescription" aria-label="Planned prescription">
-									<h4>Planned</h4>
+								<section class="history-prescription" aria-label="<%= translate("history.planned", { defaultValue: "Planned" }) %>">
+									<h4><%= translate("history.planned", { defaultValue: "Planned" }) %></h4>
 									<dl>
-										<div><dt>Sets</dt><dd><%= step.planned.sets ?? "—" %></dd></div>
-										<div><dt>Repetitions</dt><dd><%= step.planned.reps ?? "—" %></dd></div>
-										<div><dt>Load</dt><dd><%= step.planned.loadValue ?? "—" %><% if (step.planned.loadValue != null && step.planned.loadUnit) { %> <%= step.planned.loadUnit %><% } %></dd></div>
-										<% if (step.completedAt.value) { %><div class="history-prescription__resolved"><dt>Resolved</dt><dd><time datetime="<%= step.completedAt.value %>"><%= step.completedAt.label %></time></dd></div><% } %>
+										<div><dt><%= translate("history.set", { defaultValue: "Set" }) %>s</dt><dd><%= step.planned.sets ?? "—" %></dd></div>
+										<div><dt><%= translate("history.repetitions", { defaultValue: "Repetitions" }) %></dt><dd><%= step.planned.reps ?? "—" %></dd></div>
+										<div><dt><%= translate("history.load", { defaultValue: "Load" }) %></dt><dd><%= step.planned.loadValue ?? "—" %><% if (step.planned.loadValue != null && step.planned.loadUnit) { %> <%= step.planned.loadUnit %><% } %></dd></div>
+										<% if (step.completedAt.value) { %><div class="history-prescription__resolved"><dt><%= translate("history.resolved", { defaultValue: "Resolved" }) %></dt><dd><time datetime="<%= step.completedAt.value %>"><%= step.completedAt.label %></time></dd></div><% } %>
 									</dl>
 								</section>
 
-								<section class="history-performance" aria-label="Performed sets">
-									<h4>Performed</h4>
+								<section class="history-performance" aria-label="<%= translate("history.performed", { defaultValue: "Performed" }) %>">
+									<h4><%= translate("history.performed", { defaultValue: "Performed" }) %></h4>
 									<% if (step.sets.length) { %>
-										<div class="history-table-scroll" tabindex="0" role="region" aria-label="Performed sets for <%= step.title %>">
+										<div class="history-table-scroll" tabindex="0" role="region" aria-label="<%= translate("history.performedSetsFor", { title: step.title, defaultValue: "Performed sets for {{title}}" }) %>">
 											<table>
-												<caption>Performed sets for <%= step.title %></caption>
-												<thead><tr><th scope="col">Set</th><th scope="col">Repetitions</th><th scope="col">Load</th></tr></thead>
+													<caption><%= translate("history.performedSetsFor", { title: step.title, defaultValue: "Performed sets for {{title}}" }) %></caption>
+													<thead><tr><th scope="col"><%= translate("history.set", { defaultValue: "Set" }) %></th><th scope="col"><%= translate("history.repetitions", { defaultValue: "Repetitions" }) %></th><th scope="col"><%= translate("history.load", { defaultValue: "Load" }) %></th></tr></thead>
 												<tbody>
 													<% step.sets.forEach(set => { %><tr><th scope="row"><%= set.order %></th><td><%= set.reps ?? "—" %></td><td><%= set.loadValue ?? "—" %><% if (set.loadValue != null && set.loadUnit) { %> <%= set.loadUnit %><% } %></td></tr><% }) %>
 												</tbody>
 											</table>
 										</div>
-									<% } else { %><p class="history-performance__empty">No performed sets were recorded for this step.</p><% } %>
+									<% } else { %><p class="history-performance__empty"><%= translate("history.noPerformedSets", { defaultValue: "No performed sets were recorded for this step." }) %></p><% } %>
 								</section>
 							</div>
-							<% if (step.notes) { %><div class="history-note history-note--step"><h4>Step notes</h4><p><%= step.notes %></p></div><% } %>
+							<% if (step.notes) { %><div class="history-note history-note--step"><h4><%= translate("history.stepNotes", { defaultValue: "Step notes" }) %></h4><p><%= step.notes %></p></div><% } %>
 						</article>
 					</li>
 				<% }) %>

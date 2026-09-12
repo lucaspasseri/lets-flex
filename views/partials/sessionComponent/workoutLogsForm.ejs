@@ -1,8 +1,9 @@
+<% const t = typeof translate === "function" ? translate : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
 <div class="logs-form-container" data-workout-log-form data-max-sets="<%= workoutLogForm.maxRows %>">
 	<div class="sets-container">
 		<div class="sets-container__heading">
-			<div><h4>Completed sets</h4><p>Adjust the plan to match the work you actually performed.</p></div>
-			<span class="sets-container__count" aria-live="polite" data-set-count><%= workoutLogForm.rows.length %> <%= workoutLogForm.rows.length === 1 ? 'set' : 'sets' %> ready</span>
+			<div><h4><%= t("workout.completedSets", { defaultValue: "Completed sets" }) %></h4><p><%= t("workout.adjustPlan", { defaultValue: "Adjust the plan to match the work you actually performed." }) %></p></div>
+			<span class="sets-container__count" aria-live="polite" data-set-count><%= t("workout.setCount", { count: workoutLogForm.rows.length, defaultValue: "{{count}} sets ready" }) %></span>
 		</div>
 		<form method="POST" action="<%= workoutLogForm.performAction %>" id="<%= workoutLogForm.formId %>" class="workout-log-form" data-workout-perform-form>
 			<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
@@ -11,21 +12,21 @@
 			<% if (workoutLogForm.errors?.fieldErrors?.daysDifference || workoutLogForm.errors?.fieldErrors?.workoutSessionId) { %><p class="form-field__error workout-log-form__error" role="alert"><%= workoutLogForm.errors.fieldErrors.daysDifference ?? workoutLogForm.errors.fieldErrors.workoutSessionId %></p><% } %>
 			<% if (workoutLogForm.errors?.fieldErrors?.logFormRows || workoutLogForm.errors?.formErrors?.length) { %><p class="form-field__error workout-log-form__error" role="alert"><%= workoutLogForm.errors.fieldErrors.logFormRows ?? workoutLogForm.errors.formErrors[0] %></p><% } %>
 			<div class="workout-log-form__rows" data-set-list>
-				<% workoutLogForm.rows.forEach(row => { %><%- include("workoutLogsFormRow", { row }) %><% }) %>
+				<% workoutLogForm.rows.forEach(row => { %><%- include("workoutLogsFormRow", { row, translate: t }) %><% }) %>
 			</div>
 		</form>
 		<%- include('../shared/components/button/button', { button: { label: "Add another set", type: "button", variant: "secondary", alternativeClassname: "add-row", attributes: { "data-action": "add-set", "aria-describedby": "set-limit-help" } } }) %>
-		<p class="sets-container__help" id="set-limit-help">Add up to <%= workoutLogForm.maxRows %> sets. Repetitions and load are optional. <%= workoutLogForm.loadGuidance %>.</p>
+		<p class="sets-container__help" id="set-limit-help"><%= t("workout.setLimitHelp", { max: workoutLogForm.maxRows, defaultValue: "Add up to {{max}} sets. Repetitions and load are optional." }) %> <%= workoutLogForm.loadGuidance %>.</p>
 	</div>
 	<div class="step-log-button-container">
-		<%- include('../shared/components/button/button', { button: { label: "Complete step", type: "submit", attributes: { form: workoutLogForm.formId, "data-workout-submit": true, "data-loading-label": "Saving step…" }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "performed", icon: { attributes: { "aria-hidden": true } } }) } }) %>
+		<%- include('../shared/components/button/button', { button: { label: t("workout.completeStep", { defaultValue: "Complete step" }), type: "submit", attributes: { form: workoutLogForm.formId, "data-workout-submit": true, "data-loading-label": t("workout.savingStep", { defaultValue: "Saving step…" }) }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "performed", icon: { attributes: { "aria-hidden": true } } }) } }) %>
 		<form method="POST" action="<%= workoutLogForm.skipAction %>" data-workout-action-form>
 			<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 			<input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>">
 			<input type="hidden" name="workoutSessionId" value="<%= workoutLogForm.workoutSessionId %>">
-			<%- include('../shared/components/button/button', { button: { label: "Skip this step", type: "submit", variant: "secondary", attributes: { "data-workout-submit": true, "data-loading-label": "Skipping…" }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "skipped", icon: { attributes: { "aria-hidden": true } } }) } }) %>
+			<%- include('../shared/components/button/button', { button: { label: t("workout.skipStep", { defaultValue: "Skip this step" }), type: "submit", variant: "secondary", attributes: { "data-workout-submit": true, "data-loading-label": t("workout.skipping", { defaultValue: "Skipping…" }) }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "skipped", icon: { attributes: { "aria-hidden": true } } }) } }) %>
 		</form>
 	</div>
-	<template data-set-row-template><%- include("workoutLogsFormRow", { row: workoutLogForm.templateRow }) %></template>
+	<template data-set-row-template><%- include("workoutLogsFormRow", { row: workoutLogForm.templateRow, translate: t }) %></template>
 	<p class="visually-hidden" aria-live="polite" data-set-announcement></p>
 </div>

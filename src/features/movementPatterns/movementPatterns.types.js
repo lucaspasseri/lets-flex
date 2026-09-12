@@ -4,6 +4,7 @@
  * @typedef {object} MovementPatternRow
  * @property {number} id
  * @property {string} name
+ * @property {"en" | "pt-BR" | "canonical"} [name_locale]
  * @property {string} notes
  */
 
@@ -13,5 +14,7 @@
  * @typedef {object} MovementPatternMapper
  * @property {number} id
  * @property {string} name
+ * @property {"en" | "pt-BR" | "canonical"} [nameLocale]
+ * @property {string} [canonicalName]
  * @property {string} notes
  */

@@ -1,4 +1,7 @@
 <%
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
 	const {
 		id,
 		name,
@@ -8,7 +11,7 @@
 		hint = null,
 		options = [],
 		defaultOption = {
-			label: "Select an option...",
+			label: translate("form.selectOption", { defaultValue: "Select an option..." }),
 			value: ""
 		},
 		error = null,

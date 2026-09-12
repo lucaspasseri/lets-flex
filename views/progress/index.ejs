@@ -1,22 +1,23 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
 <main class="main exercise-progress" data-exercise-progress-page>
 	<%- include("../partials/shared/components/pageHeading", { heading }) %>
 
 	<section class="exercise-progress-filters" aria-labelledby="progress-program-heading">
 		<header class="exercise-progress-section-heading">
 			<div>
-				<p class="exercise-progress-eyebrow">Data scope</p>
-				<h2 id="progress-program-heading">Choose progress data</h2>
+				<p class="exercise-progress-eyebrow"><%= translate("progress.dataScope", { defaultValue: "Data scope" }) %></p>
+				<h2 id="progress-program-heading"><%= translate("progress.chooseProgressData", { defaultValue: "Choose progress data" }) %></h2>
 			</div>
-			<p>Selections stay in the URL so this exact view can be revisited.</p>
+			<p><%= translate("progress.urlNote", { defaultValue: "Selections stay in the URL so this exact view can be revisited." }) %></p>
 		</header>
 		<form class="exercise-progress-program-form" method="GET" action="<%= programFilter.action %>">
 			<%- include("../partials/shared/components/form/field", { field: {
-				id: "progress-program", name: "programId", label: "Program", control: "select",
-				value: programFilter.value ?? "", defaultOption: { label: "Choose a program", value: "" },
-				options: programFilter.options, hint: "Loading another program resets the exercise and date selection."
+				id: "progress-program", name: "programId", label: translate("history.program", { defaultValue: "Program" }), control: "select",
+				value: programFilter.value ?? "", defaultOption: { label: translate("progress.chooseProgram", { defaultValue: "Choose a program" }), value: "" },
+				options: programFilter.options, hint: translate("progress.programHint", { defaultValue: "Loading another program resets the exercise and date selection." })
 			} }) %>
 			<%- include("../partials/shared/components/button/button", { button: {
-				label: "Load exercises", type: "submit", variant: "primary"
+				label: translate("progress.loadExercises", { defaultValue: "Load exercises" }), type: "submit", variant: "primary"
 			} }) %>
 		</form>
 
@@ -25,34 +26,34 @@
 				<input type="hidden" name="programId" value="<%= analysisFilter.programId %>" />
 				<div class="exercise-progress-analysis-fields">
 					<%- include("../partials/shared/components/form/field", { field: {
-						id: "progress-exercise", name: "exerciseKey", label: "Exercise", control: "select",
+						id: "progress-exercise", name: "exerciseKey", label: translate("progress.exercise", { defaultValue: "Exercise" }), control: "select",
 						value: analysisFilter.exerciseKey ?? "", required: true,
-						defaultOption: { label: "Choose an exercise", value: "" },
+						defaultOption: { label: translate("progress.chooseExercise", { defaultValue: "Choose an exercise" }), value: "" },
 						options: analysisFilter.exerciseOptions,
-						hint: "Snapshot labels keep past exercises separate when a template is renamed."
+						hint: translate("progress.exerciseHint", { defaultValue: "Snapshot labels keep past exercises separate when a template is renamed." })
 					} }) %>
 					<%- include("../partials/shared/components/form/field", { field: {
-						id: "progress-from-date", name: "fromDate", label: "From date", type: "date",
-						value: analysisFilter.fromDate ?? "", hint: "Include workouts completed on this UTC date."
+						id: "progress-from-date", name: "fromDate", label: translate("history.fromDate", { defaultValue: "From date" }), type: "date",
+						value: analysisFilter.fromDate ?? "", hint: translate("progress.utcDateHint", { defaultValue: "Include workouts completed on this UTC date." })
 					} }) %>
 					<%- include("../partials/shared/components/form/field", { field: {
-						id: "progress-to-date", name: "toDate", label: "To date", type: "date",
-						value: analysisFilter.toDate ?? "", hint: "Include workouts completed on this UTC date."
+						id: "progress-to-date", name: "toDate", label: translate("history.toDate", { defaultValue: "To date" }), type: "date",
+						value: analysisFilter.toDate ?? "", hint: translate("progress.utcDateHint", { defaultValue: "Include workouts completed on this UTC date." })
 					} }) %>
 					<%- include("../partials/shared/components/form/field", { field: {
-						id: "progress-point-limit", name: "pointLimit", label: "Results shown", control: "select",
+						id: "progress-point-limit", name: "pointLimit", label: translate("progress.resultsShown", { defaultValue: "Results shown" }), control: "select",
 						value: analysisFilter.pointLimit, required: true,
-						defaultOption: { label: "Choose a result limit", value: "" },
+						defaultOption: { label: translate("progress.chooseResultLimit", { defaultValue: "Choose a result limit" }), value: "" },
 						options: analysisFilter.pointLimitOptions,
-						hint: "The summary still covers every matching workout."
+						hint: translate("progress.resultLimitHint", { defaultValue: "The summary still covers every matching workout." })
 					} }) %>
 				</div>
 				<div class="exercise-progress-filter-actions">
 					<%- include("../partials/shared/components/button/button", { button: {
-						label: "Show progress", type: "submit", variant: "primary"
+						label: translate("progress.showProgress", { defaultValue: "Show progress" }), type: "submit", variant: "primary"
 					} }) %>
 					<% if (analysisFilter.hasDateFilters && analysisFilter.clearDatesHref) { %>
-						<a class="exercise-progress-text-action" href="<%= analysisFilter.clearDatesHref %>">Clear dates</a>
+						<a class="exercise-progress-text-action" href="<%= analysisFilter.clearDatesHref %>"><%= translate("progress.clearDates", { defaultValue: "Clear dates" }) %></a>
 					<% } %>
 				</div>
 			</form>
@@ -73,12 +74,12 @@
 	<% if (results.isVisible) { %>
 		<section class="exercise-progress-results" aria-labelledby="progress-results-heading">
 			<header class="exercise-progress-results-header">
-				<p class="exercise-progress-eyebrow">Recorded performance</p>
+				<p class="exercise-progress-eyebrow"><%= translate("progress.recordedPerformance", { defaultValue: "Recorded performance" }) %></p>
 				<h2 id="progress-results-heading"><%= results.selection.title %></h2>
 				<p class="exercise-progress-context"><%= results.selection.availableContext %></p>
 			</header>
 
-			<dl class="exercise-progress-summary" aria-label="Exercise progress summary">
+			<dl class="exercise-progress-summary" aria-label="<%= translate("progress.summary", { defaultValue: "Exercise progress summary" }) %>">
 				<% results.metrics.forEach((metric, index) => { %>
 					<div class="exercise-progress-summary-card<%= index === 0 ? ' exercise-progress-summary-card--primary' : '' %>">
 						<dt><%= metric.label %></dt><dd><%= metric.value %></dd>
@@ -89,8 +90,8 @@
 			<div class="exercise-progress-insights">
 				<section class="exercise-progress-panel" aria-labelledby="progress-coverage-heading">
 					<header class="exercise-progress-panel-heading">
-						<p class="exercise-progress-eyebrow">Completeness</p>
-						<h3 id="progress-coverage-heading">Data coverage</h3>
+						<p class="exercise-progress-eyebrow"><%= translate("progress.completeness", { defaultValue: "Completeness" }) %></p>
+						<h3 id="progress-coverage-heading"><%= translate("progress.dataCoverage", { defaultValue: "Data coverage" }) %></h3>
 					</header>
 					<ul class="exercise-progress-coverage-list">
 						<% results.coverage.forEach((item, index) => { %>
@@ -101,21 +102,21 @@
 
 				<section class="exercise-progress-panel" aria-labelledby="progress-units-heading">
 					<header class="exercise-progress-panel-heading">
-						<p class="exercise-progress-eyebrow">Exact measurements</p>
-						<h3 id="progress-units-heading">Load and volume by unit</h3>
+						<p class="exercise-progress-eyebrow"><%= translate("progress.exactMeasurements", { defaultValue: "Exact measurements" }) %></p>
+						<h3 id="progress-units-heading"><%= translate("progress.loadVolumeByUnit", { defaultValue: "Load and volume by unit" }) %></h3>
 					</header>
 					<% if (results.units.length) { %>
 						<dl class="exercise-progress-units">
 							<% results.units.forEach((unit, index) => { %>
 								<div class="exercise-progress-unit-card">
 									<dt><span aria-hidden="true"><%= index + 1 %></span><%= unit.unit %></dt>
-									<dd><span>Maximum observed load</span><strong><%= unit.maximumLoad %></strong><small><%= unit.loadContext %></small></dd>
-									<dd><span>Recorded volume</span><strong><%= unit.volume %></strong><small><%= unit.volumeContext %></small></dd>
+									<dd><span><%= translate("progress.maximumObservedLoad", { defaultValue: "Maximum observed load" }) %></span><strong><%= unit.maximumLoad %></strong><small><%= unit.loadContext %></small></dd>
+									<dd><span><%= translate("progress.recordedVolume", { defaultValue: "Recorded volume" }) %></span><strong><%= unit.volume %></strong><small><%= unit.volumeContext %></small></dd>
 								</div>
 							<% }) %>
 						</dl>
 					<% } else { %>
-						<p class="exercise-progress-panel-empty">No valid load and unit observations are available in this range.</p>
+						<p class="exercise-progress-panel-empty"><%= translate("progress.noValidLoad", { defaultValue: "No valid load and unit observations are available in this range." }) %></p>
 					<% } %>
 				</section>
 			</div>
@@ -123,21 +124,21 @@
 			<section class="exercise-progress-trend" aria-labelledby="progress-trend-heading">
 				<header class="exercise-progress-section-heading">
 					<div>
-						<p class="exercise-progress-eyebrow">Chronological record</p>
-						<h3 id="progress-trend-heading">Workout trend data</h3>
+						<p class="exercise-progress-eyebrow"><%= translate("progress.chronologicalRecord", { defaultValue: "Chronological record" }) %></p>
+						<h3 id="progress-trend-heading"><%= translate("progress.workoutTrend", { defaultValue: "Workout trend data" }) %></h3>
 					</div>
-					<p>Each row is one finished workout. Same-day workouts remain separate and ordered by completion time.</p>
+					<p><%= translate("progress.trendDescription", { defaultValue: "Each row is one finished workout. Same-day workouts remain separate and ordered by completion time." }) %></p>
 				</header>
 				<% if (results.truncationMessage) { %><p class="exercise-progress-notice"><%= results.truncationMessage %></p><% } %>
-				<div class="exercise-progress-table-scroll" role="region" aria-label="Exercise progress workout table" tabindex="0">
+				<div class="exercise-progress-table-scroll" role="region" aria-label="<%= translate("progress.tableLabel", { defaultValue: "Exercise progress workout table" }) %>" tabindex="0">
 					<table>
-						<caption>Recorded exercise results by finished workout</caption>
+						<caption><%= translate("progress.tableCaption", { defaultValue: "Recorded exercise results by finished workout" }) %></caption>
 						<thead>
 							<tr>
-								<th scope="col">Completion</th>
-								<th scope="col">Workout</th>
-								<th scope="col">Performed work</th>
-								<th scope="col">Load and volume</th>
+								<th scope="col"><%= translate("progress.completion", { defaultValue: "Completion" }) %></th>
+								<th scope="col"><%= translate("progress.workout", { defaultValue: "Workout" }) %></th>
+								<th scope="col"><%= translate("progress.performedWork", { defaultValue: "Performed work" }) %></th>
+								<th scope="col"><%= translate("progress.loadAndVolume", { defaultValue: "Load and volume" }) %></th>
 							</tr>
 						</thead>
 						<tbody>

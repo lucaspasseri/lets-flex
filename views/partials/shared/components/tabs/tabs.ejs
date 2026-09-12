@@ -4,6 +4,9 @@
 		label,
 		tabArr = []
 	} = locals.tabs;
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
 
 	const labelledBy = `labelledby=${id}`
 	const ariaLabel = `aria-label=tabs-${id}`
@@ -21,7 +24,7 @@
 			<% if (label) { %>
 				aria-labelledby="<%= `${id}-label` %>"
 			<% } else { %>
-				aria-label="Tabs"
+				aria-label="<%= translate("tabs.label", { defaultValue: "Tabs" }) %>"
 			<% } %>
 		>
 			<% tabArr.forEach((tab, index) => { %>
@@ -51,5 +54,4 @@
 		<% }) %>
 	</div>
 </div>
-
 

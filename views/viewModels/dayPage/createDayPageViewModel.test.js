@@ -199,6 +199,44 @@ test("day session steps explain bodyweight and unassigned equipment loads", () =
 	);
 });
 
+test("Program Day presents localized catalog labels while retaining canonical media matching", () => {
+	const localizedStep = {
+		...step,
+		movementPattern: "Empurrar",
+		canonicalMovementPattern: "Push",
+		exercise: {
+			...step.exercise,
+			name: "Supino",
+			variantName: "Supino com barra",
+			canonicalName: "Bench Press",
+			canonicalVariantName: "Barbell Bench Press",
+		},
+	};
+	const result = createWorkoutSessionListViewModel({
+		currentDayId: 2,
+		workoutSessions: [
+			{
+				id: 30,
+				trainingDayId: 2,
+				sessionId: 20,
+				order: 1,
+				status: "planned",
+				startedAt: null,
+				finishedAt: null,
+				notes: null,
+				name: "Available",
+				sessionNotes: null,
+				isArchived: false,
+				steps: [{ ...localizedStep, stepLog: null }],
+			},
+		],
+	});
+
+	assert.equal(result.items[0].steps[0].title, "Supino com barra:");
+	assert.equal(result.items[0].steps[0].media.matchedKey, "barbell-bench-press");
+	assert.equal(result.items[0].steps[0].media.initial, "S");
+});
+
 test("day page exposes safe empty states for an invalid selection", () => {
 	const result = createDayPageViewModel({
 		page,

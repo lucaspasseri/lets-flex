@@ -21,6 +21,9 @@
  * @property {string} [variantName]
  * @property {string} [baseName]
  * @property {string} [movementPattern]
+ * @property {string} [matchVariantName] Canonical variant name used for manifest matching.
+ * @property {string} [matchBaseName] Canonical base name used for manifest matching.
+ * @property {string} [matchMovementPattern] Canonical movement pattern used for fallback matching.
  * @property {string} [environment]
  * @property {string} [category]
  * @property {string} [label]

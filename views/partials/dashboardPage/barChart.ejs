@@ -18,23 +18,23 @@
 				</div>
 			</div>
 		<% } else { %>
-			<ul class="analytics-legend" aria-label="Adherence chart legend">
+			<ul class="analytics-legend" aria-label="<%= translate("dashboard.adherenceLegend", { defaultValue: "Adherence chart legend" }) %>">
 				<% barChart.legend.forEach(item => { %>
 					<li><span class="analytics-legend__marker analytics-legend__marker--<%= item.modifier %>" aria-hidden="true"></span><%= item.label %></li>
 				<% }) %>
 			</ul>
 			<div class="adherence-chart" data-adherence-chart data-chart-labels="<%= JSON.stringify(barChart.labels) %>" data-chart-scheduled="<%= JSON.stringify(barChart.scheduledCounts) %>" data-chart-finished="<%= JSON.stringify(barChart.finishedCounts) %>" data-chart-cancelled="<%= JSON.stringify(barChart.cancelledCounts) %>">
-				<p class="adherence-chart__status" role="status" data-chart-status>Visual chart is optional. Complete weekly data is available below.</p>
+				<p class="adherence-chart__status" role="status" data-chart-status><%= translate("dashboard.chartFallback", { defaultValue: "Visual chart is optional. Complete weekly data is available below." }) %></p>
 				<div class="adherence-chart__canvas" hidden data-adherence-chart-container>
 					<canvas hidden data-adherence-chart-canvas role="img" aria-labelledby="<%= barChart.headingId %> <%= barChart.descriptionId %>"></canvas>
 				</div>
 			</div>
 			<details class="analytics-data-disclosure">
-				<summary>View weekly adherence data</summary>
+				<summary><%= translate("dashboard.viewWeeklyData", { defaultValue: "View weekly adherence data" }) %></summary>
 				<div class="analytics-table-scroll">
 					<table>
-						<caption>Scheduled, finished, cancelled, and remaining sessions by program week.</caption>
-						<thead><tr><th scope="col">Program week</th><th scope="col">Scheduled</th><th scope="col">Finished</th><th scope="col">Cancelled</th><th scope="col">Remaining</th></tr></thead>
+						<caption><%= translate("dashboard.weeklyDataCaption", { defaultValue: "Scheduled, finished, cancelled, and remaining sessions by program week." }) %></caption>
+						<thead><tr><th scope="col"><%= translate("dashboard.programWeek", { defaultValue: "Program week" }) %></th><th scope="col"><%= translate("dashboard.scheduled", { defaultValue: "Scheduled" }) %></th><th scope="col"><%= translate("dashboard.finished", { defaultValue: "Finished" }) %></th><th scope="col"><%= translate("dashboard.cancelled", { defaultValue: "Cancelled" }) %></th><th scope="col"><%= translate("dashboard.remaining", { defaultValue: "Remaining" }) %></th></tr></thead>
 						<tbody>
 							<% barChart.rows.forEach(row => { %>
 								<tr><th scope="row"><span><%= row.weekLabel %></span><small><%= row.rangeLabel %> · <%= row.completionLabel %></small></th><td><%= row.scheduledCount %></td><td><%= row.finishedCount %></td><td><%= row.cancelledCount %></td><td><%= row.remainingCount %></td></tr>

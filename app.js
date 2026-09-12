@@ -31,6 +31,8 @@ import workoutHistoryRouter from "./src/interfaces/routes/workoutHistory.js";
 import exerciseProgressRouter from "./src/interfaces/routes/exerciseProgress.js";
 import exerciseVariantsRouter from "./src/interfaces/routes/exerciseVariants.js";
 import { respondWithApplicationRecovery } from "./src/interfaces/applicationRecovery.js";
+import localeRouter from "./src/interfaces/routes/locale.js";
+import { i18nMiddleware } from "./src/infrastructure/i18n/i18n.js";
 
 import playgroundRouter from "./src/interfaces/routes/playground.js";
 
@@ -99,8 +101,10 @@ export function createApp(options = {}) {
 	);
 	app.use(passport.initialize());
 	app.use(passport.session());
+	app.use(i18nMiddleware);
 	app.use(csrfProtection);
 	app.use(exposePrincipal);
+	app.use("/locale", localeRouter);
 
 	app.use(
 		"/auth",

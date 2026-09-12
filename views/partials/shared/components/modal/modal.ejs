@@ -1,5 +1,9 @@
 <%
-	const {id = null, title="Generic modal", showTitle = true, openOnLoad = false, renderContent} = locals?.modal;
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
+	const {id = null, title = null, showTitle = true, openOnLoad = false, renderContent} = locals?.modal;
+	const resolvedTitle = title ?? translate("modal.genericTitle", { defaultValue: "Generic modal" });
 	const titleId = `${id}-title`;
 %>
 
@@ -13,7 +17,7 @@
 	<% if (showTitle) { %>
 		aria-labelledby="<%= titleId %>"
 	<% } else { %>
-		aria-label="<%= title %>"
+		aria-label="<%= resolvedTitle %>"
 	<% } %>
 	class="modal"
 >
@@ -27,7 +31,8 @@
 			<% } %>
 				<%- include("../button/button", {button: { 
 						type: "button",
-						label: "Close modal",
+						labelKey: "modal.close",
+						label: translate("modal.close", { defaultValue: "Close modal" }),
 						renderIcon: () => include("../icons/close"),
 						variant: "secondary",
 						iconOnly: true,

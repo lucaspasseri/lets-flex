@@ -14,6 +14,7 @@ export function toMovementPattern(movement) {
 	return {
 		id: movement.id,
 		name: toCapitalizedString(movement.name),
+		nameLocale: movement.name_locale ?? "canonical",
 		notes: movement.notes,
 	};
 }

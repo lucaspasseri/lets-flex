@@ -29,6 +29,7 @@
  * @typedef {object} GetDayPageDataInput
  * @property {User["id"] | null} userId
  * @property {TrainingDayRow["id"] | null} dayId
+ * @property {string} [locale]
  */
 
 /**

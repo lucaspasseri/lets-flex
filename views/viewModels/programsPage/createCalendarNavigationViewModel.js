@@ -10,13 +10,14 @@ import createSessionStatusMarkersViewModel from "../shared/createSessionStatusMa
  */
 
 /**
- * @param {{currentProgram: Program | null, currentCycle: Cycle | null, trainingDays: TrainingDay[], workoutSessions: WorkoutSession[]}} input
+ * @param {{currentProgram: Program | null, currentCycle: Cycle | null, trainingDays: TrainingDay[], workoutSessions: WorkoutSession[], translate?: Function}} input
  */
 export default function createCalendarNavigationViewModel({
 	currentProgram,
 	currentCycle,
 	trainingDays,
 	workoutSessions,
+	translate,
 }) {
 	return {
 		id: "program-calendar",
@@ -30,6 +31,7 @@ export default function createCalendarNavigationViewModel({
 			const isInCurrentCycle = day.cycleId === currentCycle?.id;
 			const statusMarkers = createSessionStatusMarkersViewModel(
 				workoutSessions.filter((session) => session.trainingDayId === day.id),
+				translate,
 			);
 
 			return {

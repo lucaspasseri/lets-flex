@@ -260,6 +260,35 @@ test("dashboard page makes empty states explicit", async () => {
 	assert.doesNotMatch(html, /bar-chart-canvas/);
 });
 
+test("dashboard workout presentation keeps localized labels and canonical media identity", () => {
+	const localizedWorkout = {
+		...workout,
+		steps: [
+			{
+				...workout.steps[0],
+				movementPattern: "Empurrar",
+				canonicalMovementPattern: "Push",
+				exercise: {
+					...workout.steps[0].exercise,
+					name: "Supino",
+					variantName: "Supino com barra",
+					canonicalName: "Bench Press",
+					canonicalVariantName: "Barbell Bench Press",
+				},
+			},
+		],
+	};
+	const result = createWorkoutSessionViewModel({
+		session: localizedWorkout,
+		sessions: [localizedWorkout],
+		daysDifference: 0,
+	});
+
+	assert.equal(result.session?.steps[0].title, "PRESS (Supino com barra)");
+	assert.equal(result.session?.steps[0].media.matchedKey, "barbell-bench-press");
+	assert.equal(result.session?.steps[0].media.initial, "S");
+});
+
 test("workout component exposes lifecycle-safe controls and resolved progress", () => {
 	/** @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession} selectedWorkoutSession @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession[]} [currentDayWorkoutSessions] */
 	const build = (

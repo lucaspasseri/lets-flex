@@ -119,7 +119,7 @@ class FakeMediaQuery {
 	}
 }
 
-function createHarness({ desktop = false, contentInert = false } = {}) {
+function createHarness({ desktop = false, contentInert = false, labels = {} } = {}) {
 	globalThis.HTMLElement = FakeElement;
 	globalThis.HTMLButtonElement = FakeButtonElement;
 
@@ -154,6 +154,8 @@ function createHarness({ desktop = false, contentInert = false } = {}) {
 	menu.setAttribute("aria-hidden", "true");
 	toggle.setAttribute("aria-expanded", "false");
 	toggle.setAttribute("aria-label", "Open navigation menu");
+	if (labels.open) toggle.setAttribute("data-open-label", labels.open);
+	if (labels.close) toggle.setAttribute("data-close-label", labels.close);
 
 	root.querySelector = (selector) => {
 		if (selector === "[data-application-menu-toggle]") return toggle;
@@ -203,6 +205,21 @@ test("mobile menu synchronizes visual, accessibility, and background state", () 
 	assert.equal(content.hasAttribute("inert"), true);
 	assert.equal(body.classList.contains("has-open-navigation"), true);
 	assert.equal(documentRef.activeElement, links[0]);
+});
+
+test("mobile menu uses locale-specific labels for both toggle states", () => {
+	const { toggle, chrome } = createHarness({
+		labels: {
+			open: "Abrir menu de navegação",
+			close: "Fechar menu de navegação",
+		},
+	});
+
+	toggle.dispatch("click");
+	assert.equal(toggle.getAttribute("aria-label"), "Fechar menu de navegação");
+	toggle.dispatch("click");
+	assert.equal(toggle.getAttribute("aria-label"), "Abrir menu de navegação");
+	assert.equal(chrome.isOpen, false);
 });
 
 test("Escape closes the menu, unlocks content, and restores trigger focus", () => {

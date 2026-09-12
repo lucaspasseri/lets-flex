@@ -50,6 +50,8 @@ async function showList(req, res) {
 			page: res.locals.page,
 			data,
 			filters,
+			translate: res.locals.t,
+			language: res.locals.language,
 		}),
 	);
 }
@@ -79,6 +81,8 @@ async function showDetail(req, res) {
 				toDate: query.toDate,
 			},
 			returnPage: query.page,
+			translate: res.locals.t,
+			language: res.locals.language,
 		}),
 	);
 }
@@ -106,6 +110,8 @@ function handleError(error, _req, res, next) {
 			page: res.locals.page,
 			currentUser: res.locals.authUser ?? null,
 			state: notFound ? "not-found" : "failure",
+			translate: res.locals.t,
+			language: res.locals.language,
 		}),
 	);
 }

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import ejs from "ejs";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const chromePath = path.resolve("views/partials/pages/applicationChrome.ejs");
 const layoutPath = path.resolve("views/layouts/pageShell.ejs");
@@ -30,6 +31,9 @@ test("application chrome exposes one controlled navigation surface", async () =>
 	);
 	assert.equal((html.match(/<nav class="primary-navigation"/g) ?? []).length, 1);
 	assert.equal((html.match(/class="primary-navigation__link"/g) ?? []).length, 5);
+	assert.equal((html.match(/action="\/locale"/g) ?? []).length, 2);
+	assert.match(html, /aria-labelledby="language-switcher-label"/);
+	assert.match(html, /aria-pressed="true"/);
 	assert.equal((html.match(/href="\/profile"/g) ?? []).length, 1);
 	assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
 	assert.match(
@@ -82,6 +86,23 @@ test("administrator navigation remains permission-scoped and active", async () =
 	assert.equal((memberHtml.match(/aria-current="page"/g) ?? []).length, 1);
 });
 
+test("application chrome localizes navigation and menu accessibility labels", async () => {
+	const html = await renderFile(chromePath, {
+		language: "pt-BR",
+		t: i18n.getFixedT("pt-BR"),
+		shell: {
+			currentUser: { name: "Membro", role: "member" },
+			activeNavigation: "library",
+		},
+	});
+
+	assert.match(html, /aria-label="Principal"/);
+	assert.match(html, />Painel</);
+	assert.match(html, />Biblioteca</);
+	assert.match(html, /data-open-label="Abrir menu de navegação"/);
+	assert.match(html, /data-close-label="Fechar menu de navegação"/);
+});
+
 test("authenticated layout composes chrome, content, and overlays once", () => {
 	const layout = fs.readFileSync(layoutPath, "utf8");
 
@@ -103,6 +124,7 @@ test("chrome styles keep closed navigation inert-compatible without display anim
 	assert.match(css, /\.application-menu\.is-open\s*{[\s\S]*?visibility: visible;/);
 	assert.match(css, /@media \(min-width: 48rem\)/);
 	assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+	assert.match(css, /\.language-switcher__option:focus-visible/);
 	assert.doesNotMatch(css, /transition:\s*all/);
 });
 

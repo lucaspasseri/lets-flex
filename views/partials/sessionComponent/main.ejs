@@ -45,7 +45,7 @@
 				<h3 id="current-step-title"><%= workout.currentStep.title %></h3>
 				<p>Record what you completed, or skip this step to keep moving.</p>
 			</header>
-			<%- include("workoutLogsForm", { workoutLogForm: workout.currentStep }) %>
+			<%- include("workoutLogsForm", { workoutLogForm: workout.currentStep, translate }) %>
 		</section>
 	<% } else if (workout.showMissingLogs) { %>
 		<section class="session-outcome session-outcome--error" role="alert">

@@ -1,4 +1,21 @@
-export function initializeSessionForm(form) {
+import { createBrowserTranslator } from "../../i18n.js";
+
+const FALLBACK_MESSAGES = {
+	workout: {
+		selectStepAndExercise: "Select both a step type and an exercise.",
+		noSteps: "No steps added yet.",
+		stepsAdded: { one: "{{count}} step added.", other: "{{count}} steps added." },
+		unknown: "Unknown",
+		moveUp: "Move up",
+		moveDown: "Move down",
+		remove: "Remove",
+	},
+};
+
+export function initializeSessionForm(
+	form,
+	translate = createBrowserTranslator(form, FALLBACK_MESSAGES),
+) {
 	const addButton = form.querySelector("[data-add-session-step]");
 	const list = form.querySelector("[data-session-step-list]");
 	const emptyMessage = form.querySelector("[data-session-step-list-message]");
@@ -25,7 +42,7 @@ export function initializeSessionForm(form) {
 
 	addButton.addEventListener("click", () => {
 		if (!stepType.value || !exercise.value) {
-			errorMessage.textContent = "Select both a step type and an exercise.";
+			errorMessage.textContent = translate("workout.selectStepAndExercise");
 			errorMessage.hidden = false;
 			return;
 		}
@@ -43,6 +60,7 @@ export function initializeSessionForm(form) {
 					exerciseLabel: selectedLabel(exercise),
 				},
 				updateList,
+				translate,
 			),
 		);
 		updateList();
@@ -70,7 +88,9 @@ export function initializeSessionForm(form) {
 		emptyMessage.removeAttribute("data-step-error");
 		emptyMessage.removeAttribute("role");
 		emptyMessage.textContent =
-			items.length === 0 ? "No steps added yet." : `${items.length} step(s) added.`;
+			items.length === 0
+				? translate("workout.noSteps")
+				: translate("workout.stepsAdded", { count: items.length });
 		emptyMessage.hidden = false;
 	}
 
@@ -81,10 +101,11 @@ export function initializeSessionForm(form) {
 				createStepItem(
 					{
 						...step,
-						stepTypeLabel: optionLabel(stepType, step.stepTypeId),
-						exerciseLabel: optionLabel(exercise, step.exerciseVariantId),
+						stepTypeLabel: optionLabel(stepType, step.stepTypeId, translate),
+						exerciseLabel: optionLabel(exercise, step.exerciseVariantId, translate),
 					},
 					updateList,
+					translate,
 				),
 			);
 		}
@@ -96,7 +117,7 @@ export function initializeSessionForm(form) {
 
 export const initializeCreateSessionForm = initializeSessionForm;
 
-function createStepItem(step, updateList) {
+function createStepItem(step, updateList, translate) {
 	const item = document.createElement("li");
 	item.className = "form-collection__item session-step-draft";
 	const summary = document.createElement("p");
@@ -114,9 +135,9 @@ function createStepItem(step, updateList) {
 	const actions = document.createElement("div");
 	actions.className = "form-collection__actions";
 	actions.append(
-		actionButton("Move up", "moveStepUp"),
-		actionButton("Move down", "moveStepDown"),
-		actionButton("Remove", "removeSessionStep"),
+		actionButton(translate("workout.moveUp"), "moveStepUp"),
+		actionButton(translate("workout.moveDown"), "moveStepDown"),
+		actionButton(translate("workout.remove"), "removeSessionStep"),
 	);
 	item.append(summary, ...fields, actions);
 	bindActions(item, updateList);
@@ -164,9 +185,9 @@ function selectedLabel(select) {
 	return select.options[select.selectedIndex]?.text ?? "";
 }
 
-function optionLabel(select, value) {
+function optionLabel(select, value, translate) {
 	return (
 		Array.from(select.options).find((option) => String(option.value) === String(value))
-			?.text ?? "Unknown"
+			?.text ?? translate("workout.unknown")
 	);
 }

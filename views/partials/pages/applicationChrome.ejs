@@ -2,28 +2,38 @@
 	const username = locals?.shell?.currentUser?.name ?? locals?.authUser?.name ?? "Guest";
 	const currentUser = locals?.shell?.currentUser ?? locals?.authUser ?? null;
 	const activeNavigation = locals?.shell?.activeNavigation ?? null;
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
 	const profileAccessibleLabel = currentUser
-		? `View profile for ${username}`
-		: "View profile";
+		? translate("account.profileFor", {
+				name: username,
+				defaultValue: `View profile for ${username}`,
+			})
+		: translate("account.viewProfile", { defaultValue: "View profile" });
+	const openNavigationLabel = translate("application.openNavigation", { defaultValue: "Open navigation menu" });
+	const closeNavigationLabel = translate("application.closeNavigation", { defaultValue: "Close navigation menu" });
 	const navigationItems = [
-		{ id: "dashboard", href: "/", label: "Dashboard" },
-		{ id: "history", href: "/history", label: "History" },
-		{ id: "progress", href: "/progress", label: "Progress" },
-		{ id: "programs", href: "/programs", label: "Programs" },
-		{ id: "library", href: "/library", label: "Library" },
-		...(locals?.isAdmin ? [{ id: "admin-exercises", href: "/admin/library/exercises", label: "Manage exercises" }] : []),
+		{ id: "dashboard", href: "/", label: translate("navigation.dashboard", { defaultValue: "Dashboard" }) },
+		{ id: "history", href: "/history", label: translate("navigation.history", { defaultValue: "History" }) },
+		{ id: "progress", href: "/progress", label: translate("navigation.progress", { defaultValue: "Progress" }) },
+		{ id: "programs", href: "/programs", label: translate("navigation.programs", { defaultValue: "Programs" }) },
+		{ id: "library", href: "/library", label: translate("navigation.library", { defaultValue: "Library" }) },
+		...(locals?.isAdmin ? [{ id: "admin-exercises", href: "/admin/library/exercises", label: translate("navigation.manageExercises", { defaultValue: "Manage exercises" }) }] : []),
 	];
 %>
 
 <div class="application-chrome" data-application-chrome>
 	<header class="page-header">
-		<a class="page-header__home" href="/" aria-label="Let's Flex home">
+		<a class="page-header__home" href="/" aria-label="<%= translate("application.home", { defaultValue: "Let's Flex home" }) %>">
 			<%- include("logo"); %>
 		</a>
 		<button
 			type="button"
 			class="page-header__menu-toggle"
-			aria-label="Open navigation menu"
+			aria-label="<%= openNavigationLabel %>"
+			data-open-label="<%= openNavigationLabel %>"
+			data-close-label="<%= closeNavigationLabel %>"
 			aria-expanded="false"
 			aria-controls="application-menu"
 			data-application-menu-toggle
@@ -43,7 +53,7 @@
 		data-application-menu
 		inert
 	>
-		<nav class="primary-navigation" aria-label="Primary">
+		<nav class="primary-navigation" aria-label="<%= translate("navigation.primary", { defaultValue: "Primary" }) %>">
 			<ul class="primary-navigation__list">
 				<% navigationItems.forEach(item => { %>
 					<% const isActive = item.id === activeNavigation; %>
@@ -66,6 +76,7 @@
 		</nav>
 
 		<footer class="application-chrome__footer">
+			<%- include("languageSwitcher") %>
 			<a
 				class="application-chrome__profile"
 				href="/profile"
@@ -86,7 +97,7 @@
 				</span>
 				<span class="application-chrome__identity">
 					<span class="application-chrome__username"><%= username %></span>
-					<% if (currentUser?.role === "guest") { %><span class="application-chrome__status">Temporary workspace</span><% } %>
+				<% if (currentUser?.role === "guest") { %><span class="application-chrome__status"><%= translate("account.temporaryWorkspace", { defaultValue: "Temporary workspace" }) %></span><% } %>
 				</span>
 			</a>
 		</footer>

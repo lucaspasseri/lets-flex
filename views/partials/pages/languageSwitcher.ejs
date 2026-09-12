@@ -1,0 +1,31 @@
+<%
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
+	const currentLocale = ["en", "pt-BR"].includes(locals?.language)
+		? locals.language
+		: "en";
+	const localeOptions = [
+		{ code: "en", label: translate("language.english", { defaultValue: "English" }) },
+		{ code: "pt-BR", label: translate("language.portuguese", { defaultValue: "Português" }) },
+	];
+%>
+
+<section class="language-switcher" aria-labelledby="language-switcher-label">
+	<p id="language-switcher-label" class="language-switcher__label"><%= translate("language.label", { defaultValue: "Language" }) %></p>
+	<div class="language-switcher__options">
+		<% localeOptions.forEach(({ code, label }) => { %>
+			<form method="post" action="/locale" class="language-switcher__form">
+				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" />
+				<input type="hidden" name="locale" value="<%= code %>" />
+				<button
+					type="submit"
+					class="language-switcher__option<%= code === currentLocale ? " is-current" : "" %>"
+					aria-pressed="<%= code === currentLocale %>"
+				>
+					<%= label %><% if (code === currentLocale) { %> <span class="language-switcher__current">(<%= translate("language.current", { defaultValue: "current" }) %>)</span><% } %>
+				</button>
+			</form>
+		<% }) %>
+	</div>
+</section>

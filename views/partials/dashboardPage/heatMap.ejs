@@ -18,7 +18,7 @@
 				</div>
 			</div>
 		<% } else { %>
-			<ul class="analytics-legend" aria-label="Activity intensity legend">
+			<ul class="analytics-legend" aria-label="<%= translate("dashboard.activityLegend", { defaultValue: "Activity intensity legend" }) %>">
 				<% heatmap.legend.forEach(item => { %>
 					<li><span class="analytics-legend__marker analytics-legend__marker--<%= item.modifier %>" aria-hidden="true"><%= item.marker %></span><%= item.label %></li>
 				<% }) %>
@@ -42,11 +42,11 @@
 				</div>
 			</div>
 			<details class="analytics-data-disclosure">
-				<summary>View activity data</summary>
+						<summary><%= translate("dashboard.viewActivityData", { defaultValue: "View activity data" }) %></summary>
 				<div class="analytics-table-scroll">
 					<table>
-						<caption>Dates with finished workouts. Every other date in the program calendar has no finished workouts.</caption>
-						<thead><tr><th scope="col">Date</th><th scope="col">Cycle</th><th scope="col">Finished</th></tr></thead>
+						<caption><%= translate("dashboard.activityCaption", { defaultValue: "Dates with finished workouts. Every other date in the program calendar has no finished workouts." }) %></caption>
+						<thead><tr><th scope="col"><%= translate("history.fromDate", { defaultValue: "Date" }) %></th><th scope="col"><%= translate("dashboard.currentCycle", { defaultValue: "Cycle" }) %></th><th scope="col"><%= translate("dashboard.finished", { defaultValue: "Finished" }) %></th></tr></thead>
 						<tbody>
 							<% heatmap.activityRows.forEach(row => { %><tr><th scope="row"><time datetime="<%= row.dateKey %>"><%= row.dateLabel %></time></th><td><%= row.cycleName %></td><td><%= row.finishedCount %></td></tr><% }) %>
 						</tbody>

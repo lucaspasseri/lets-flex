@@ -60,6 +60,7 @@ export async function renderPrograms(req, res, formState = {}) {
 		page,
 		pageState,
 		data,
+		translate: res.locals.t,
 		...formState,
 	});
 

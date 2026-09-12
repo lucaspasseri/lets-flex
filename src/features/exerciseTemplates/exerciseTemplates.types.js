@@ -10,6 +10,8 @@
  * @typedef {object} ExerciseTemplateMuscleMapper
  * @property {number} id
  * @property {string} commonName
+ * @property {"en" | "pt-BR" | "canonical"} [commonNameLocale]
+ * @property {string} [canonicalCommonName]
  * @property {string} scientificName
  * @property {string} bodyRegion
  * @property {string} referenceUrl
@@ -20,6 +22,8 @@
  * @typedef {object} ExerciseTemplateExerciseVariantMapper
  * @property {ExerciseVariantRow["id"]} id
  * @property {string} name
+ * @property {"en" | "pt-BR" | "canonical"} [nameLocale]
+ * @property {string} [canonicalName]
  * @property {string} setupDescription
  * @property {string} environment
  * @property {string} notes
@@ -33,14 +37,22 @@
  * @typedef {object} ExerciseTemplateRow
  * @property {number} id
  * @property {string} name
+ * @property {"en" | "pt-BR" | "canonical"} [name_locale]
+ * @property {string} [canonical_name]
  * @property {number} movement_pattern_id
  * @property {string} movement_pattern_name
+ * @property {"en" | "pt-BR" | "canonical"} [movement_pattern_name_locale]
+ * @property {string} [canonical_movement_pattern_name]
  * @property {string} movement_pattern_notes
  * @property {number} equipment_id
  * @property {string} equipment_name
+ * @property {"en" | "pt-BR" | "canonical"} [equipment_name_locale]
+ * @property {string | null} [canonical_equipment_name]
  * @property {string} equipment_category
  * @property {number} exercise_variant_id
  * @property {string} exercise_variant_name
+ * @property {"en" | "pt-BR" | "canonical"} [exercise_variant_name_locale]
+ * @property {string} [canonical_exercise_variant_name]
  * @property {string} exercise_variant_setup_description
  * @property {string} exercise_variant_environment
  * @property {string} exercise_variant_notes
@@ -55,6 +67,8 @@
  * @typedef {object} ExerciseTemplateMapper
  * @property {ExerciseTemplateRow["id"]} id
  * @property {string} name
+ * @property {"en" | "pt-BR" | "canonical"} [nameLocale]
+ * @property {string} [canonicalName]
  * @property {MovementPatternMapper} movementPattern
  * @property {EquipmentMapper} equipment
  * @property {ExerciseTemplateExerciseVariantMapper} variant
@@ -89,6 +103,7 @@
  * @typedef {object} ExerciseTemplateItemVariant
  * @property {ExerciseVariantRow["id"]} id
  * @property {string} name
+ * @property {"en" | "pt-BR" | "canonical"} [nameLocale]
  * @property {EquipmentMapper} equipment
  * @property {string} environmentLabel
  * @property {string} setupDescription

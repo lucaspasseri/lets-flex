@@ -28,10 +28,10 @@
 				</dl>
 				<p class="analytics-workload__coverage"><%= workload.repetitionCoverage %></p>
 			</div>
-			<div class="analytics-volume" aria-label="Load volume by unit">
+			<div class="analytics-volume" aria-label="<%= translate("dashboard.loadVolumeByUnit", { defaultValue: "Load volume by unit" }) %>">
 				<div class="analytics-volume__heading">
-					<h4>Load volume</h4>
-					<p>Repetitions × load</p>
+					<h4><%= translate("dashboard.loadVolume", { defaultValue: "Load volume" }) %></h4>
+					<p><%= translate("dashboard.repetitionsLoad", { defaultValue: "Repetitions × load" }) %></p>
 				</div>
 				<% if (workload.volume.isEmpty) { %>
 					<p class="analytics-volume__empty"><%= workload.volume.emptyMessage %></p>

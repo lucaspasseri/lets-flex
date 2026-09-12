@@ -24,11 +24,14 @@ export async function renderDashboard(req, res, formState = {}) {
 		programId,
 		daysDifference,
 		workoutSessionId,
+		locale: res.locals.language,
 	});
 	const dashboard = createDashboardPageViewModel({
 		page: res.locals.page,
 		data,
 		pageState: { userId, programId, daysDifference, workoutSessionId },
+		translate: res.locals.t,
+		language: res.locals.language,
 		...formState,
 	});
 

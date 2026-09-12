@@ -5,6 +5,7 @@ import createExerciseForm from "./createExerciseFormViewModel.js";
 import createDeleteExerciseForm from "./createDeleteExerciseFormViewModel.js";
 import createDeleteSessionForm from "./createDeleteSessionFormViewModel.js";
 import formatDayPageDate from "../dayPage/formatDayPageDate.js";
+import createViewModelTranslator from "../translate.js";
 
 /**
  * @typedef {import("../../../src/types/libraryPage.types.js").LocalsPage} LocalsPage
@@ -14,7 +15,7 @@ import formatDayPageDate from "../dayPage/formatDayPageDate.js";
  */
 
 /**
- * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean}} input
+ * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean, translate?: Function}} input
  * @returns {LibraryPageViewModel}
  */
 export default function createLibraryPageViewModel({
@@ -27,7 +28,9 @@ export default function createLibraryPageViewModel({
 	privateVariantMutationState,
 	pageFeedback = null,
 	managementMode = false,
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const visibleExerciseTemplates = managementMode
 		? data.exerciseTemplates.filter(
 				(exerciseTemplate) => exerciseTemplate.variant?.ownerUserId == null,
@@ -54,9 +57,11 @@ export default function createLibraryPageViewModel({
 			planningContext: sessionCreationContext
 				? {
 						isVisible: true,
-						title: `Create a session for ${dayTitle}`,
-						description:
-							"Build the reusable template here. After creation, you will return to the training day to explicitly assign it.",
+						title: `${t("library.createSessionFor", { defaultValue: "Create a session for {{day}}", day: dayTitle })}`,
+						description: t("library.createSessionDescription", {
+							defaultValue:
+								"Build the reusable template here. After creation, you will return to the training day to explicitly assign it.",
+						}),
 						pathLabel: `${sessionCreationContext.program.name} · ${sessionCreationContext.cycle.name} · ${dayTitle}`,
 						dateLabel:
 							formatDayPageDate(sessionCreationContext.day.scheduledDate) ??
@@ -66,17 +71,21 @@ export default function createLibraryPageViewModel({
 				: { isVisible: false },
 			pageHeading: managementMode
 				? {
-						eyebrow: "Administration",
-						title: "Exercise catalog",
-						description:
-							"Manage the global exercises and sample variants available to every workspace.",
-						meta: "Admin only",
+						eyebrow: t("library.administration", { defaultValue: "Administration" }),
+						title: t("library.exerciseCatalog", { defaultValue: "Exercise catalog" }),
+						description: t("library.catalogDescription", {
+							defaultValue:
+								"Manage the global exercises and sample variants available to every workspace.",
+						}),
+						meta: t("library.adminOnly", { defaultValue: "Admin only" }),
 					}
 				: {
-						eyebrow: "Training assets",
-						title: "Library",
-						description:
-							"Build reusable sessions and personalize global exercises with private variants.",
+						eyebrow: t("library.trainingAssets", { defaultValue: "Training assets" }),
+						title: t("library.title", { defaultValue: "Library" }),
+						description: t("library.description", {
+							defaultValue:
+								"Build reusable sessions and personalize global exercises with private variants.",
+						}),
 					},
 			sessionWorkspace: createSessionWorkspace({
 				sessionArr: data.sessions,

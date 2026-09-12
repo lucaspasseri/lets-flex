@@ -1,4 +1,5 @@
 <%
+	const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match);
 	const {
 		pageFeedback,
 		sessionWorkspace,
@@ -24,32 +25,32 @@
 		<aside class="library-planning-context" aria-labelledby="library-planning-context-title">
 			<span class="library-planning-context__icon" aria-hidden="true"><%- include("partials/shared/components/icons/namedIcon", { name: "calendar-range" }) %></span>
 			<div>
-				<p class="library-planning-context__eyebrow">Training day context</p>
+				<p class="library-planning-context__eyebrow"><%= translate("library.trainingDayContext", { defaultValue: "Training day context" }) %></p>
 				<h2 id="library-planning-context-title"><%= planningContext.title %></h2>
 				<p><%= planningContext.pathLabel %> · <%= planningContext.dateLabel %></p>
 				<p><%= planningContext.description %></p>
 			</div>
-			<a href="<%= planningContext.backHref %>">Return without creating</a>
+			<a href="<%= planningContext.backHref %>"><%= translate("library.returnWithoutCreating", { defaultValue: "Return without creating" }) %></a>
 		</aside>
 	<% } %>
 
 	<% if (managementMode) { %>
-		<aside class="library-admin-scope" aria-label="Administrator access scope">
+		<aside class="library-admin-scope" aria-label="<%= translate("library.adminScope", { defaultValue: "Administrator access scope" }) %>">
 			<span class="library-admin-scope__icon" aria-hidden="true"><%- include("partials/shared/components/icons/namedIcon", { name: "wrench" }) %></span>
-			<div><strong>Global catalog access</strong><p>This view does not expose member or guest profiles, sessions, or private variants.</p></div>
-			<a href="/library">Return to personal Library</a>
+			<div><strong><%= translate("library.globalCatalogAccess", { defaultValue: "Global catalog access" }) %></strong><p><%= translate("library.globalCatalogPrivacy", { defaultValue: "This view does not expose member or guest profiles, sessions, or private variants." }) %></p></div>
+			<a href="/library"><%= translate("library.returnToLibrary", { defaultValue: "Return to personal Library" }) %></a>
 		</aside>
 	<% } %>
 
 	<% if (!managementMode) { %>
 		<div class="library-discovery" data-tabs data-library-section-tabs>
-			<div class="library-discovery__tabs" data-tab-list role="tablist" aria-label="Library content">
+			<div class="library-discovery__tabs" data-tab-list role="tablist" aria-label="<%= translate("library.content", { defaultValue: "Library content" }) %>">
 				<button id="library-sessions-tab" type="button" role="tab" data-tab aria-selected="true" aria-controls="library-sessions-panel" tabindex="0">
-					<span>Sessions</span>
+					<span><%= translate("library.sessions", { defaultValue: "Sessions" }) %></span>
 					<small><%= sessionWorkspace.summaries.items.length %> reusable</small>
 				</button>
 				<button id="library-exercises-tab" type="button" role="tab" data-tab aria-selected="false" aria-controls="library-exercises-panel" tabindex="-1">
-					<span>Exercises</span>
+					<span><%= translate("library.exercises", { defaultValue: "Exercises" }) %></span>
 					<small><%= exerciseTemplates.count %> bases · <%= exerciseTemplates.variantCount %> variants</small>
 				</button>
 			</div>

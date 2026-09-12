@@ -37,6 +37,7 @@ export async function renderLibrary(req, res, formState = {}) {
 		userId,
 		sessionId,
 		sessionCreationDayId,
+		locale: res.locals.language,
 	});
 	if (
 		!managementMode &&
@@ -62,6 +63,7 @@ export async function renderLibrary(req, res, formState = {}) {
 		page,
 		pageState,
 		data,
+		translate: res.locals.t,
 		managementMode,
 		pageFeedback: formState.pageFeedback,
 		...formState,

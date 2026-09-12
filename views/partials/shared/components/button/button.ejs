@@ -3,6 +3,7 @@
 		id = null,
 		type = "button",
 		label = "",
+		labelKey = null,
 		attributes = {},
 		renderIcon = () => {},
 		iconAfterText = false,
@@ -11,6 +12,12 @@
 		disabled = false,
 		alternativeClassname = null
 	} = locals?.button ?? {};
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
+	const resolvedLabel = labelKey
+		? translate(labelKey, { defaultValue: label })
+		: label;
 
 	const variantClasses = {
 		primary: "shared-button--primary",
@@ -43,7 +50,7 @@
 	class="<%= classNames %>"
 
 	<% if (iconOnly) { %>
-		aria-label="<%= label %>"
+		aria-label="<%= resolvedLabel %>"
 	<% } %>
 
 	<% if (disabled) { %>
@@ -63,6 +70,6 @@
 	<% } %>
 
 	<% if (!iconOnly) { %>
-		<span class="shared-button__label"><%= label %></span>
+		<span class="shared-button__label"><%= resolvedLabel %></span>
 	<% } %>
 </button>

@@ -20,6 +20,7 @@
  * @property {number | null} programId
  * @property {number | null} daysDifference
  * @property {number | null} workoutSessionId
+ * @property {string} [locale]
  * @property {Date} [now]
  */
 export {};

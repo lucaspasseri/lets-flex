@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.translate === "function" ? locals.translate : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
 <section class="dashboard-workout <%= currentWorkout.isRestDay ? 'dashboard-workout--rest' : '' %>" data-workout-tracker>
 	<% if (currentWorkout.feedback) { %>
 		<%- include('../sessionComponent/feedback', { feedback: currentWorkout.feedback }) %>
@@ -5,18 +6,18 @@
 	<% if (currentWorkout.isRestDay) { %>
 		<div class="dashboard-empty-state">
 			<span class="dashboard-empty-state__mark" aria-hidden="true">—</span>
-			<p class="dashboard-eyebrow">Recovery</p>
-			<h2>Rest day</h2>
-			<p>No workout sessions are scheduled for this day.</p>
+			<p class="dashboard-eyebrow"><%= translate("dashboard.recovery", { defaultValue: "Recovery" }) %></p>
+			<h2><%= translate("dashboard.restDay", { defaultValue: "Rest day" }) %></h2>
+			<p><%= translate("dashboard.noSessionsToday", { defaultValue: "No workout sessions are scheduled for this day." }) %></p>
 		</div>
 	<% } else { %>
 		<% if (currentWorkout.hasMultipleSessions) { %>
-			<nav class="dashboard-session-picker" aria-label="Workout sessions"><p>Choose session</p><ul>
+			<nav class="dashboard-session-picker" aria-label="<%= translate("dashboard.workoutSessions", { defaultValue: "Workout sessions" }) %>"><p><%= translate("dashboard.chooseSession", { defaultValue: "Choose session" }) %></p><ul>
 				<% currentWorkout.selectors.forEach((selector, index) => { %>
 					<li><a class="dashboard-session-picker__item <%= selector.isActive ? 'is-active' : '' %>" href="<%= selector.href %>" <%- selector.isActive ? 'aria-current="true"' : '' %>><span class="visually-hidden">Workout session </span><%= index + 1 %></a></li>
 				<% }) %>
 			</ul></nav>
 		<% } %>
-		<%- include('../sessionComponent/main', { workout: currentWorkout.session }) %>
+		<%- include('../sessionComponent/main', { workout: currentWorkout.session, translate }) %>
 	<% } %>
 </section>

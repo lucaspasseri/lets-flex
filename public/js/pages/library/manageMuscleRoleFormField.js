@@ -1,4 +1,21 @@
-export function initializeMuscleRoleForm(form) {
+import { createBrowserTranslator } from "../../i18n.js";
+
+const FALLBACK_MESSAGES = {
+	workout: {
+		noMuscleRelations: "No muscle relation found",
+		muscleRelationsAdded: {
+			one: "{{count}} muscle relation added",
+			other: "{{count}} muscle relations added",
+		},
+		remove: "Remove",
+		unknown: "Unknown",
+	},
+};
+
+export function initializeMuscleRoleForm(
+	form,
+	translate = createBrowserTranslator(form, FALLBACK_MESSAGES),
+) {
 	const addButton = form.querySelector("[data-add-muscle-relation]");
 	const list = form.querySelector("[data-muscle-list]");
 	const muscleSelect = form.querySelector('[name="muscleId"]');
@@ -16,6 +33,7 @@ export function initializeMuscleRoleForm(form) {
 				roleLabel: selectedLabel(roleSelect),
 			},
 			updateList,
+			translate,
 		);
 		list.append(item);
 		updateList();
@@ -40,8 +58,8 @@ export function initializeMuscleRoleForm(form) {
 		message.removeAttribute("role");
 		message.textContent =
 			items.length === 0
-				? "No muscle relation found"
-				: `${items.length} muscle relation(s) added`;
+				? translate("workout.noMuscleRelations")
+				: translate("workout.muscleRelationsAdded", { count: items.length });
 	}
 
 	/** @param {Array<{muscleId: string | number, muscleRoleId: string | number}>} relations */
@@ -52,10 +70,11 @@ export function initializeMuscleRoleForm(form) {
 				createRelationItem(
 					{
 						...relation,
-						muscleLabel: optionLabel(muscleSelect, relation.muscleId),
-						roleLabel: optionLabel(roleSelect, relation.muscleRoleId),
+						muscleLabel: optionLabel(muscleSelect, relation.muscleId, translate),
+						roleLabel: optionLabel(roleSelect, relation.muscleRoleId, translate),
 					},
 					updateList,
+					translate,
 				),
 			);
 		}
@@ -66,7 +85,7 @@ export function initializeMuscleRoleForm(form) {
 	updateList(false);
 }
 
-function createRelationItem(relation, updateList) {
+function createRelationItem(relation, updateList, translate) {
 	const item = document.createElement("li");
 	item.className = "form-collection__item";
 	const summary = document.createElement("p");
@@ -75,7 +94,7 @@ function createRelationItem(relation, updateList) {
 		summary,
 		createHiddenInput("muscleId", relation.muscleId),
 		createHiddenInput("muscleRoleId", relation.muscleRoleId),
-		createRemoveButton(() => {
+		createRemoveButton(translate, () => {
 			item.remove();
 			updateList();
 		}),
@@ -91,20 +110,20 @@ function createHiddenInput(field, value) {
 	return input;
 }
 
-function createRemoveButton(remove) {
+function createRemoveButton(translate, remove) {
 	const button = document.createElement("button");
 	button.type = "button";
-	button.textContent = "Remove";
+	button.textContent = translate("workout.remove");
 	button.className = "form-collection__remove";
 	button.dataset.removeMuscleRelation = "";
 	button.addEventListener("click", remove);
 	return button;
 }
 
-function optionLabel(select, value) {
+function optionLabel(select, value, translate) {
 	return (
 		Array.from(select.options).find((option) => String(option.value) === String(value))
-			?.text ?? "Unknown"
+			?.text ?? translate("workout.unknown")
 	);
 }
 

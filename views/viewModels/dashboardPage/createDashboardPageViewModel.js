@@ -6,8 +6,9 @@ import createHeatmapViewModel from "./createHeatmapViewModel.js";
 import createBarChartViewModel from "./createBarChartViewModel.js";
 import createAnalyticsSummaryViewModel from "./createAnalyticsSummaryViewModel.js";
 import createWorkloadViewModel from "./createWorkloadViewModel.js";
+import createViewModelTranslator from "../translate.js";
 
-/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null}} input */
+/** @param {{page: Record<string, *>, pageState: {userId: number | null, programId: number | null, daysDifference: number | null, workoutSessionId: number | null}, data: import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData, workoutLogFormState?: any, actionFormState?: any, workoutFeedback?: {tone: "error" | "success", title: string, message: string} | null, translate?: Function, language?: string}} input */
 export default function createDashboardPageViewModel({
 	page,
 	pageState,
@@ -15,13 +16,18 @@ export default function createDashboardPageViewModel({
 	workoutLogFormState,
 	actionFormState,
 	workoutFeedback,
+	translate,
+	language,
 }) {
+	const t = createViewModelTranslator(translate);
 	const components = {
-		status: createDashboardStatusViewModel(data),
+		status: createDashboardStatusViewModel(data, language),
 		programBanner: createProgramBannerViewModel(data),
 		dateNavigation: createDateNavigationViewModel({
 			...data,
 			daysDifference: pageState.daysDifference,
+			translate,
+			language,
 		}),
 		currentWorkout: createWorkoutSessionViewModel({
 			session: data.selectedWorkoutSession,
@@ -30,11 +36,12 @@ export default function createDashboardPageViewModel({
 			workoutLogFormState,
 			actionFormState,
 			workoutFeedback,
+			translate,
 		}),
-		analyticsSummary: createAnalyticsSummaryViewModel(data),
-		heatmap: createHeatmapViewModel(data),
-		barChart: createBarChartViewModel(data),
-		workload: createWorkloadViewModel(data),
+		analyticsSummary: createAnalyticsSummaryViewModel(data, t, language),
+		heatmap: createHeatmapViewModel(data, t, language),
+		barChart: createBarChartViewModel(data, t, language),
+		workload: createWorkloadViewModel(data, t, language),
 	};
 
 	const resolvedPageState = {
@@ -43,7 +50,10 @@ export default function createDashboardPageViewModel({
 	};
 
 	return {
-		page: { ...page, title: "Dashboard · Let's Flex!" },
+		page: {
+			...page,
+			title: `${t("dashboard.title", { defaultValue: "Dashboard" })} · Let's Flex!`,
+		},
 		pageState: resolvedPageState,
 		shell: { currentUser: data.currentUser, activeNavigation: "dashboard" },
 		components,

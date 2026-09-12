@@ -1,35 +1,36 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
 <main class="main workout-history" data-workout-history-page>
 	<%- include("../partials/shared/components/pageHeading", { heading }) %>
 
 	<section class="history-filter" aria-labelledby="history-filters-heading">
 		<div class="history-section-heading">
 			<div>
-				<p class="history-eyebrow">Find a workout</p>
-				<h2 id="history-filters-heading">Filter history</h2>
+				<p class="history-eyebrow"><%= translate("history.findWorkout", { defaultValue: "Find a workout" }) %></p>
+				<h2 id="history-filters-heading"><%= translate("history.filterHistory", { defaultValue: "Filter history" }) %></h2>
 			</div>
-			<% if (filters.hasFilters) { %><span class="history-filter__state">Filters applied</span><% } %>
+			<% if (filters.hasFilters) { %><span class="history-filter__state"><%= translate("history.filtersApplied", { defaultValue: "Filters applied" }) %></span><% } %>
 		</div>
 		<form method="GET" action="<%= filters.action %>" class="history-filter__form">
 			<div class="history-filter__fields">
 				<%- include("../partials/shared/components/form/field", { field: {
-					id: "history-program", name: "programId", label: "Program", control: "select",
-					value: filters.values.programId ?? "", defaultOption: { label: "All programs", value: "" },
-					options: filters.programOptions, hint: "Show terminal sessions from one program."
+					id: "history-program", name: "programId", label: translate("history.program", { defaultValue: "Program" }), control: "select",
+					value: filters.values.programId ?? "", defaultOption: { label: translate("history.allPrograms", { defaultValue: "All programs" }), value: "" },
+					options: filters.programOptions, hint: translate("history.showProgramSessions", { defaultValue: "Show terminal sessions from one program." })
 				} }) %>
 				<%- include("../partials/shared/components/form/field", { field: {
-					id: "history-from-date", name: "fromDate", label: "From date", type: "date",
-					value: filters.values.fromDate ?? "", hint: "Include sessions on this date."
+					id: "history-from-date", name: "fromDate", label: translate("history.fromDate", { defaultValue: "From date" }), type: "date",
+					value: filters.values.fromDate ?? "", hint: translate("history.includeSessionsOnDate", { defaultValue: "Include sessions on this date." })
 				} }) %>
 				<%- include("../partials/shared/components/form/field", { field: {
-					id: "history-to-date", name: "toDate", label: "To date", type: "date",
-					value: filters.values.toDate ?? "", hint: "Include sessions on this date."
+					id: "history-to-date", name: "toDate", label: translate("history.toDate", { defaultValue: "To date" }), type: "date",
+					value: filters.values.toDate ?? "", hint: translate("history.includeSessionsOnDate", { defaultValue: "Include sessions on this date." })
 				} }) %>
 			</div>
 			<div class="history-filter__actions">
 				<%- include("../partials/shared/components/button/button", { button: {
-					label: "Apply filters", type: "submit", variant: "primary"
+					label: translate("history.applyFilters", { defaultValue: "Apply filters" }), type: "submit", variant: "primary"
 				} }) %>
-				<% if (filters.hasFilters) { %><a class="history-text-action" href="<%= filters.clearHref %>">Clear filters</a><% } %>
+				<% if (filters.hasFilters) { %><a class="history-text-action" href="<%= filters.clearHref %>"><%= translate("history.clearFilters", { defaultValue: "Clear filters" }) %></a><% } %>
 			</div>
 		</form>
 	</section>
@@ -37,10 +38,10 @@
 	<section class="history-results" aria-labelledby="history-results-heading" aria-live="polite">
 		<div class="history-section-heading history-section-heading--results">
 			<div>
-				<p class="history-eyebrow">Training record</p>
-				<h2 id="history-results-heading">Sessions</h2>
+				<p class="history-eyebrow"><%= translate("history.eyebrow", { defaultValue: "Training record" }) %></p>
+				<h2 id="history-results-heading"><%= translate("history.sessions", { defaultValue: "Sessions" }) %></h2>
 			</div>
-			<% if (pagination.totalPages > 1) { %><span class="history-results__page">Page <%= pagination.page %> of <%= pagination.totalPages %></span><% } %>
+			<% if (pagination.totalPages > 1) { %><span class="history-results__page"><%= translate("history.pageOf", { page: pagination.page, totalPages: pagination.totalPages, defaultValue: "Page {{page}} of {{totalPages}}" }) %></span><% } %>
 		</div>
 		<% if (results.items.length) { %>
 			<ol class="history-list">
@@ -60,8 +61,8 @@
 										<% if (item.historyDate.value) { %><time datetime="<%= item.historyDate.value %>"><%= item.historyDate.label %></time><% } else { %><strong><%= item.historyDate.label %></strong><% } %>
 									</div>
 								</header>
-								<% if (item.scheduledDate) { %><p class="history-card__scheduled">Originally scheduled for <time datetime="<%= item.scheduledDate.value %>"><%= item.scheduledDate.label %></time></p><% } %>
-								<ul class="history-card__metrics" aria-label="Exercise result summary">
+								<% if (item.scheduledDate) { %><p class="history-card__scheduled"><%= translate("history.originallyScheduled", { defaultValue: "Originally scheduled for" }) %> <time datetime="<%= item.scheduledDate.value %>"><%= item.scheduledDate.label %></time></p><% } %>
+								<ul class="history-card__metrics" aria-label="<%= translate("history.exerciseResultSummary", { defaultValue: "Exercise result summary" }) %>">
 									<% item.stepCounts.forEach(metric => { %><li><strong><%= metric.value %></strong><span><%= metric.label %></span></li><% }) %>
 								</ul>
 								<span class="history-card__summary"><%= item.stepSummary %></span>
@@ -75,16 +76,16 @@
 				<span class="history-empty-state__mark" aria-hidden="true">—</span>
 				<h3><%= results.empty.title %></h3>
 				<p><%= results.empty.message %></p>
-				<% if (pagination.firstHref) { %><a class="history-primary-action" href="<%= pagination.firstHref %>">Return to the first page</a><% } %>
+				<% if (pagination.firstHref) { %><a class="history-primary-action" href="<%= pagination.firstHref %>"><%= translate("history.returnFirstPage", { defaultValue: "Return to the first page" }) %></a><% } %>
 			</div>
 		<% } %>
 	</section>
 
 	<% if (pagination.totalPages > 1) { %>
-		<nav class="history-pagination" aria-label="Workout history pages">
-			<% if (pagination.previousHref) { %><a href="<%= pagination.previousHref %>" rel="prev"><span aria-hidden="true">←</span> Previous</a><% } else { %><span></span><% } %>
-			<span aria-current="page">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
-			<% if (pagination.nextHref) { %><a href="<%= pagination.nextHref %>" rel="next">Next <span aria-hidden="true">→</span></a><% } else { %><span></span><% } %>
+		<nav class="history-pagination" aria-label="<%= translate("history.pages", { defaultValue: "Workout history pages" }) %>">
+			<% if (pagination.previousHref) { %><a href="<%= pagination.previousHref %>" rel="prev"><span aria-hidden="true">←</span> <%= translate("history.previous", { defaultValue: "Previous" }) %></a><% } else { %><span></span><% } %>
+			<span aria-current="page"><%= translate("history.pageOf", { page: pagination.page, totalPages: pagination.totalPages, defaultValue: "Page {{page}} of {{totalPages}}" }) %></span>
+			<% if (pagination.nextHref) { %><a href="<%= pagination.nextHref %>" rel="next"><%= translate("history.next", { defaultValue: "Next" }) %> <span aria-hidden="true">→</span></a><% } else { %><span></span><% } %>
 		</nav>
 	<% } %>
 </main>

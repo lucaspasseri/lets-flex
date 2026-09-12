@@ -23,6 +23,9 @@ Copy `.env.sample` to `.env` for local development and set:
 - `GUEST_TTL_DAYS=15` and `GUEST_CLEANUP_BATCH_SIZE=100` for generated guests.
 - `ADMIN_EMAIL` and `ADMIN_PASSWORD` when running the explicit database setup.
 - `ALLOW_DATABASE_RESET=true` only when deliberately resetting development data.
+- `ALLOW_DATABASE_MIGRATION=true` only when deliberately applying an existing-database migration.
+- `ALLOW_PRODUCTION_DATABASE_MIGRATION=true` as a separate explicit confirmation for a reviewed
+  production migration; this never authorizes reset.
 
 The component playground is available outside production only.
 
@@ -31,8 +34,16 @@ The component playground is available outside production only.
 The application is currently in a disposable-data development phase. `db/schema.js`
 is the authoritative current schema, while `db/seed.js` is the one canonical seed
 and reset entry point for reference data, the exercise catalog, global samples, and
-the initial administrator. `npm run db:reset` applies the current schema and complete
-seed in one transaction, producing a usable database without historical migrations.
+the initial administrator. `npm run db:reset` applies the latest schema and complete
+seed in one transaction, producing a usable database without replaying historical migrations.
+`npm run db:seed:sql` prints the canonical seed SQL, and `npm run db:setup:sql` prints the latest
+schema followed by that seed for intentional clean-database provisioning.
+
+Existing databases use `npm run db:migrate` with `ALLOW_DATABASE_MIGRATION=true`; production also
+requires `ALLOW_PRODUCTION_DATABASE_MIGRATION=true`. Migrations are additive and transactional,
+while fresh/reset databases use the latest schema and seed directly. Do not run reset for
+production, and do not run migration commands without verifying the exact target and reviewed
+deployment plan.
 
 The reset command refuses to run when `NODE_ENV=production` or unless
 `ALLOW_DATABASE_RESET=true` is set. It also requires `NODE_ENV=development` or
@@ -40,7 +51,8 @@ The reset command refuses to run when `NODE_ENV=production` or unless
 local, or test. Before using that opt-in, verify that `DATABASE_URL` identifies the intended
 disposable database.
 For ordinary development schema changes, update the current schema and canonical
-seed as needed, run the authorized reset, verify the result, and run relevant tests.
+seed as needed, run the authorized reset, verify the result, and run relevant tests. For a
+non-disposable database, add and review a versioned migration instead of resetting it.
 
 The administrator email is normalized and its environment-provided password is
 hashed with the same Argon2id service used by Passport authentication. The hash

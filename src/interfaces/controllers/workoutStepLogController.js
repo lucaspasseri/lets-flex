@@ -52,14 +52,20 @@ async function perform(req, res, next) {
 async function respondToStepConflict(req, res, error) {
 	if (!(error instanceof WorkoutStepLogLifecycleError)) return false;
 
-	const message = `This workout step can no longer be ${error.action === "skip" ? "skipped" : "performed"}.`;
+	const action = error.action === "skip" ? "skippedAction" : "performedAction";
+	const message = res.locals.t("workout.stepConflict", {
+		action: res.locals.t(`workout.${action}`, {
+			defaultValue: action,
+		}),
+		defaultValue: "This workout step can no longer be {{action}}.",
+	});
 	res.status(409);
 	await renderDashboard(req, res, {
 		daysDifference: req.validatedBody?.daysDifference,
 		workoutSessionId: req.validatedBody?.workoutSessionId,
 		workoutFeedback: {
 			tone: "error",
-			title: "Step not saved",
+			title: res.locals.t("workout.stepNotSaved", { defaultValue: "Step not saved" }),
 			message,
 		},
 	});

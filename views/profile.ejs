@@ -1,6 +1,7 @@
 <%
-	const roleLabels = { admin: "Administrator", user: "Member", guest: "Guest" };
-	const roleLabel = roleLabels[currentUser.role] ?? "Member";
+	const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match);
+	const roleLabels = { admin: translate("profile.administratorRole", { defaultValue: "Administrator" }), user: translate("profile.member", { defaultValue: "Member" }), guest: translate("profile.guest", { defaultValue: "Guest" }) };
+	const roleLabel = roleLabels[currentUser.role] ?? roleLabels.user;
 	const isGuest = currentUser.role === "guest";
 	const isAdmin = currentUser.role === "admin";
 	const methods = locals.authenticationMethods ?? {
@@ -17,9 +18,9 @@
 
 <main class="main profile" data-profile-page data-profile-role="<%= currentUser.role %>">
 	<%- include("partials/shared/components/pageHeading", { heading: {
-		eyebrow: "Account",
-		title: "Profile",
-		description: "Review the identity and access level attached to this workspace.",
+			eyebrow: translate("profile.eyebrow", { defaultValue: "Account" }),
+			title: translate("profile.title", { defaultValue: "Profile" }),
+			description: translate("profile.description", { defaultValue: "Review the identity and access level attached to this workspace." }),
 		meta: roleLabel
 	} }) %>
 
@@ -29,13 +30,13 @@
 				<%- include("partials/shared/components/icons/namedIcon", { name: "user-round" }) %>
 			</div>
 			<div class="profile-identity__copy">
-				<p class="profile-card__eyebrow">Current identity</p>
+				<p class="profile-card__eyebrow"><%= translate("profile.currentIdentity", { defaultValue: "Current identity" }) %></p>
 				<h2 id="profile-identity-heading"><%= currentUser.name %></h2>
-				<p><%= isGuest ? "Temporary workspace" : currentUser.email %></p>
+				<p><%= isGuest ? translate("profile.temporaryWorkspace", { defaultValue: "Temporary workspace" }) : currentUser.email %></p>
 			</div>
 			<dl class="profile-facts">
-				<div><dt>Access</dt><dd><%= roleLabel %></dd></div>
-				<div><dt>Storage</dt><dd><%= isGuest ? "Temporary" : "Persistent" %></dd></div>
+				<div><dt><%= translate("profile.access", { defaultValue: "Access" }) %></dt><dd><%= roleLabel %></dd></div>
+				<div><dt><%= translate("profile.storage", { defaultValue: "Storage" }) %></dt><dd><%= isGuest ? translate("profile.temporary", { defaultValue: "Temporary" }) : translate("profile.persistent", { defaultValue: "Persistent" }) %></dd></div>
 			</dl>
 		</section>
 
@@ -46,9 +47,9 @@
 						<%- include("partials/shared/components/icons/namedIcon", { name: "user-round" }) %>
 					</div>
 					<div>
-						<p class="profile-card__eyebrow">Account access</p>
-						<h2 id="authentication-methods-heading">Authentication methods</h2>
-						<p>Connect sign-in methods intentionally. Provider email addresses never merge accounts.</p>
+						<p class="profile-card__eyebrow"><%= translate("profile.accountAccess", { defaultValue: "Account access" }) %></p>
+						<h2 id="authentication-methods-heading"><%= translate("profile.authenticationMethods", { defaultValue: "Authentication methods" }) %></h2>
+						<p><%= translate("profile.authenticationDescription", { defaultValue: "Connect sign-in methods intentionally. Provider email addresses never merge accounts." }) %></p>
 						<% if (linkMessage) { %>
 							<p class="profile-link-message profile-link-message--<%= linkMessage.type %>" role="status"><%= linkMessage.text %></p>
 						<% } %>
@@ -78,9 +79,9 @@
 						<% if (methods.password.showAddForm) { %>
 							<form class="profile-password-form" method="POST" action="/profile/password">
 								<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-								<%- include("partials/shared/components/form/field", { field: { id: "new-password", name: "password", label: "New password", type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
-								<%- include("partials/shared/components/form/field", { field: { id: "confirm-password", name: "confirmPassword", label: "Confirm password", type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
-								<%- include("partials/shared/components/button/button", { button: { label: "Add a password", type: "submit", variant: "primary" } }) %>
+								<%- include("partials/shared/components/form/field", { field: { id: "new-password", name: "password", label: translate("profile.newPassword", { defaultValue: "New password" }), type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
+								<%- include("partials/shared/components/form/field", { field: { id: "confirm-password", name: "confirmPassword", label: translate("profile.confirmPassword", { defaultValue: "Confirm password" }), type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
+								<%- include("partials/shared/components/button/button", { button: { label: translate("profile.addPassword", { defaultValue: "Add a password" }), type: "submit", variant: "primary" } }) %>
 							</form>
 						<% } %>
 					</div>
@@ -93,11 +94,11 @@
 						<%- include("partials/shared/components/icons/namedIcon", { name: "calendar-x" }) %>
 					</div>
 					<div>
-						<p class="profile-card__eyebrow">Temporary data</p>
-						<h2 id="guest-workspace-heading">Guest workspace</h2>
-						<p>Your programs, sessions, and private variants remain isolated from other guests, but they are automatically removed after expiration.</p>
-						<% if (expirationLabel) { %><p class="profile-card__status" role="status">Expires <strong><%= expirationLabel %></strong></p><% } %>
-						<a class="profile-card__link" href="/auth/login?tab=signup&amp;returnTo=/profile">Create a permanent account</a>
+						<p class="profile-card__eyebrow"><%= translate("profile.temporaryData", { defaultValue: "Temporary data" }) %></p>
+						<h2 id="guest-workspace-heading"><%= translate("profile.guestWorkspace", { defaultValue: "Guest workspace" }) %></h2>
+						<p><%= translate("profile.guestDescription", { defaultValue: "Your programs, sessions, and private variants remain isolated from other guests, but they are automatically removed after expiration." }) %></p>
+						<% if (expirationLabel) { %><p class="profile-card__status" role="status"><%= translate("profile.expires", { defaultValue: "Expires" }) %> <strong><%= expirationLabel %></strong></p><% } %>
+						<a class="profile-card__link" href="/auth/login?tab=signup&amp;returnTo=/profile"><%= translate("profile.createPermanent", { defaultValue: "Create a permanent account" }) %></a>
 					</div>
 				</section>
 			<% } %>
@@ -108,10 +109,10 @@
 						<%- include("partials/shared/components/icons/namedIcon", { name: "wrench" }) %>
 					</div>
 					<div>
-						<p class="profile-card__eyebrow">Administrator</p>
-						<h2 id="admin-tools-heading">Exercise catalog tools</h2>
-						<p>Your administrator access is limited to managing global exercises and sample variants.</p>
-						<a class="profile-card__link" href="/admin/library/exercises">Manage exercise catalog</a>
+						<p class="profile-card__eyebrow"><%= translate("profile.administrator", { defaultValue: "Administrator" }) %></p>
+						<h2 id="admin-tools-heading"><%= translate("profile.catalogTools", { defaultValue: "Exercise catalog tools" }) %></h2>
+						<p><%= translate("profile.adminDescription", { defaultValue: "Your administrator access is limited to managing global exercises and sample variants." }) %></p>
+						<a class="profile-card__link" href="/admin/library/exercises"><%= translate("profile.manageCatalog", { defaultValue: "Manage exercise catalog" }) %></a>
 					</div>
 				</section>
 			<% } %>
@@ -121,13 +122,13 @@
 					<%- include("partials/shared/components/icons/namedIcon", { name: "user-round-x" }) %>
 				</div>
 				<div>
-					<p class="profile-card__eyebrow">Session</p>
-					<h2 id="session-controls-heading">Sign out safely</h2>
-					<p>End this browser session. Signing out does not grant access to or remove another account's private data.</p>
+					<p class="profile-card__eyebrow"><%= translate("profile.session", { defaultValue: "Session" }) %></p>
+					<h2 id="session-controls-heading"><%= translate("profile.signOutSafely", { defaultValue: "Sign out safely" }) %></h2>
+					<p><%= translate("profile.signOutDescription", { defaultValue: "End this browser session. Signing out does not grant access to or remove another account's private data." }) %></p>
 					<form method="POST" action="/auth/logout">
 						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 						<%- include("partials/shared/components/button/button", { button: {
-							label: "Sign out",
+							label: translate("profile.signOut", { defaultValue: "Sign out" }),
 							type: "submit",
 							variant: "dangerGhost"
 						} }) %>

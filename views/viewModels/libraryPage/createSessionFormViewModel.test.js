@@ -69,6 +69,31 @@ test("session exercise choices distinguish variants while preserving their ident
 	);
 });
 
+test("localized catalog labels render in exercise choices without changing submitted IDs", () => {
+	const form = createSessionFormViewModel({
+		stepTypes: [],
+		exerciseTemplates: [
+			{
+				...squat,
+				name: "Agachamento",
+				variant: {
+					id: 41,
+					name: "Agachamento com barra",
+					setupDescription: "",
+					environment: "Gym",
+					notes: "",
+					ownerUserId: null,
+					isArchived: false,
+				},
+			},
+		],
+	});
+
+	assert.deepEqual(form.fields.exerciseOptions, [
+		{ label: "Agachamento — Agachamento com barra", value: 41 },
+	]);
+});
+
 test("contextual creation preserves only the owned day identity and changes return signposting", () => {
 	const form = createSessionFormViewModel({
 		stepTypes: [],

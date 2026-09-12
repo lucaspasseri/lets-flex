@@ -1,11 +1,11 @@
-<% const { status, programBanner, dateNavigation, currentWorkout, analyticsSummary, heatmap, barChart, workload } = locals.components; %>
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); const { status, programBanner, dateNavigation, currentWorkout, analyticsSummary, heatmap, barChart, workload } = locals.components; %>
 <main class="main dashboard" data-dashboard-page>
-	<%- include("partials/dashboardPage/noActiveProgramSection", { status }) %>
+	<%- include("partials/dashboardPage/noActiveProgramSection", { status, translate }) %>
 	<% if (programBanner.isVisible) { %>
 		<div class="dashboard__active-program">
-			<%- include("partials/dashboardPage/currentProgramBanner", { programBanner }) %>
-			<%- include("partials/dashboardPage/dateSection", { dateNavigation }) %>
-			<%- include("partials/dashboardPage/currentWorkoutSession", { currentWorkout }) %>
+			<%- include("partials/dashboardPage/currentProgramBanner", { programBanner, translate }) %>
+			<%- include("partials/dashboardPage/dateSection", { dateNavigation, translate }) %>
+			<%- include("partials/dashboardPage/currentWorkoutSession", { currentWorkout, translate }) %>
 		</div>
 	<% } %>
 	<% if (analyticsSummary.isVisible) { %>
@@ -15,12 +15,12 @@
 				<h2 id="<%= analyticsSummary.headingId %>"><%= analyticsSummary.title %></h2>
 				<p><%= analyticsSummary.description %></p>
 			</header>
-			<%- include("partials/dashboardPage/analyticsSummary", { analyticsSummary }) %>
+			<%- include("partials/dashboardPage/analyticsSummary", { analyticsSummary, translate }) %>
 			<div class="dashboard__metrics">
-				<%- include("partials/dashboardPage/heatMap", { heatmap }) %>
-				<%- include("partials/dashboardPage/barChart", { barChart }) %>
+				<%- include("partials/dashboardPage/heatMap", { heatmap, translate }) %>
+				<%- include("partials/dashboardPage/barChart", { barChart, translate }) %>
 			</div>
-			<%- include("partials/dashboardPage/workload", { workload }) %>
+			<%- include("partials/dashboardPage/workload", { workload, translate }) %>
 		</section>
 	<% } %>
 </main>

@@ -1,4 +1,13 @@
+import { createBrowserTranslator } from "../../i18n.js";
+
 const programsPage = document.querySelector("[data-programs-page]");
+const translate = createBrowserTranslator(document, {
+	workout: {
+		deleteEntityTitle: "Delete {{entity}} “{{name}}”?",
+		deleteEntityDescription:
+			"This permanently deletes {{entity}} “{{name}}” and its dependent training data.",
+	},
+});
 
 const setCalendarTransitionSource = (item) => {
 	const transitionName = item.dataset.viewTransitionName;
@@ -36,9 +45,9 @@ if (programsPage) {
 		form.action = `/${values.entity}s/${values.id}?_method=DELETE`;
 		const heading = form.querySelector(".form-header h3");
 		const description = form.querySelector(".form-header span");
-		if (heading) heading.textContent = `Delete ${values.entity} “${values.name}”?`;
+		if (heading) heading.textContent = translate("programs.deleteEntityTitle", values);
 		if (description)
-			description.textContent = `This permanently deletes ${values.entity} “${values.name}” and its dependent training data.`;
+			description.textContent = translate("programs.deleteEntityDescription", values);
 	});
 
 	window.addEventListener("pagereveal", () => {

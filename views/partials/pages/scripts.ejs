@@ -1,1 +1,40 @@
+<%
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match);
+	const browserMessage = (key, fallback) => ({
+		one: translate(`${key}_one`, { defaultValue: fallback }),
+		other: translate(`${key}_other`, { defaultValue: fallback }),
+	});
+	const browserMessages = {
+		workout: {
+			setTitle: browserMessage("workout.setTitle", "Set {{count}}"),
+			setCount: browserMessage("workout.setCount", "{{count}} sets ready"),
+			setAdded: translate("workout.setAdded", { defaultValue: "Set {{count}} added." }),
+			setRemoved: browserMessage("workout.setRemoved", "Set {{number}} removed. {{count}} sets remain."),
+			removeSet: translate("workout.removeSet", { defaultValue: "Remove set {{count}}" }),
+			selectStepAndExercise: translate("workout.selectStepAndExercise", { defaultValue: "Select both a step type and an exercise." }),
+			noSteps: translate("workout.noSteps", { defaultValue: "No steps added yet." }),
+			stepsAdded: browserMessage("workout.stepsAdded", "{{count}} steps added."),
+			noMuscleRelations: translate("workout.noMuscleRelations", { defaultValue: "No muscle relation found" }),
+			muscleRelationsAdded: browserMessage("workout.muscleRelationsAdded", "{{count}} muscle relations added"),
+			unknown: translate("workout.unknown", { defaultValue: "Unknown" }),
+			moveUp: translate("workout.moveUp", { defaultValue: "Move up" }),
+			moveDown: translate("workout.moveDown", { defaultValue: "Move down" }),
+			remove: translate("workout.remove", { defaultValue: "Remove" }),
+		},
+		chart: {
+			fallback: translate("workout.chartFallback", { defaultValue: "Visual chart unavailable. Complete weekly data remains available below." }),
+			loading: translate("workout.chartLoading", { defaultValue: "Preparing visual chart… Weekly data is available below." }),
+			scheduled: translate("workout.scheduled", { defaultValue: "Scheduled" }),
+			finished: translate("workout.finished", { defaultValue: "Finished" }),
+			cancelled: translate("workout.cancelled", { defaultValue: "Cancelled" }),
+		},
+		programs: {
+			deleteEntityTitle: translate("workout.deleteEntityTitle", { defaultValue: "Delete {{entity}} “{{name}}”?" }),
+			deleteEntityDescription: translate("workout.deleteEntityDescription", { defaultValue: "This permanently deletes {{entity}} “{{name}}” and its dependent training data." }),
+		},
+	};
+%>
+<script type="application/json" data-i18n-messages><%- JSON.stringify(browserMessages).replaceAll("<", "\\u003c") %></script>
 <script src="/js/app.js" type="module"></script>

@@ -3,6 +3,8 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 import { seedSql } from "./seed.js";
+import { schemaSql } from "./schema.js";
+import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
 import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
 
@@ -26,9 +28,26 @@ test("complete seed SQL command prints the fully resolved seedSql export", () =>
 	assert.equal(result.stdout, seedSql);
 	assert.match(result.stdout, /INSERT INTO "step_types"/);
 	assert.ok(result.stdout.includes(catalogSeedSql.trim()));
+	assert.ok(result.stdout.includes(catalogTranslationSeedSql.trim()));
+	assert.match(result.stdout, /'pt-BR'/);
 	assert.ok(result.stdout.includes(starterWorkoutSeedSql.trim()));
 	assert.doesNotMatch(result.stdout, /\$\{[^}]+\}/);
 	assert.doesNotMatch(result.stdout, /^\s*import\s/m);
+});
+
+test("complete setup SQL combines the latest schema and canonical seed", () => {
+	const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+	const result = spawnSync(npmCommand, ["run", "--silent", "db:setup:sql"], {
+		cwd: process.cwd(),
+		encoding: "utf8",
+	});
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.equal(result.stderr, "");
+	assert.equal(result.stdout, `${schemaSql.trim()}\n\n${seedSql.trim()}\n`);
+	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS exercise_translations/);
+	assert.ok(result.stdout.includes(catalogTranslationSeedSql.trim()));
+	assert.match(result.stdout, /'pt-BR'/);
 });
 
 test("database reset refuses production even when explicitly requested", () => {

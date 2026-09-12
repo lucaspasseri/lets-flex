@@ -14,15 +14,15 @@ import getOwnedTrainingDayContext from "./getOwnedTrainingDayContext.js";
  */
 
 /**
- * @param {GetDayPageDataInput} input
+ * @param {GetDayPageDataInput & {locale?: string}} input
  * @returns {Promise<DayPageData>}
  */
 
-async function getDayPageData({ userId, dayId }) {
+async function getDayPageData({ userId, dayId, locale }) {
 	const [user, context, sessionArr] = await Promise.all([
 		usersRepository.findById({ userId }),
 		getOwnedTrainingDayContext({ userId, dayId }),
-		sessionsRepository.findVisibleForUser({ userId }),
+		sessionsRepository.findVisibleForUser({ userId, locale }),
 	]);
 	const dayArr = context
 		? await trainingDaysRepository.findAllByProgramId({
@@ -35,6 +35,7 @@ async function getDayPageData({ userId, dayId }) {
 	const workoutSessionArr = day
 		? await workoutSessionsRepository.findAllByTrainingDayId({
 				trainingDayId: day.id,
+				locale,
 			})
 		: [];
 

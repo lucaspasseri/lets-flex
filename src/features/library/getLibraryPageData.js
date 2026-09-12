@@ -28,6 +28,7 @@ import getOwnedTrainingDayContext from "../day/getOwnedTrainingDayContext.js";
  * @property {User["id"] | null} userId
  * @property {SessionRow["id"] | null} sessionId
  * @property {number | null} [sessionCreationDayId]
+ * @property {string} [locale]
  */
 
 /**
@@ -35,7 +36,12 @@ import getOwnedTrainingDayContext from "../day/getOwnedTrainingDayContext.js";
  * @returns {Promise<LibraryPageData>}
  */
 
-async function getLibraryPageData({ userId, sessionId, sessionCreationDayId = null }) {
+async function getLibraryPageData({
+	userId,
+	sessionId,
+	sessionCreationDayId = null,
+	locale,
+}) {
 	const [
 		user,
 		sessionArr,
@@ -48,12 +54,12 @@ async function getLibraryPageData({ userId, sessionId, sessionCreationDayId = nu
 		sessionCreationContext,
 	] = await Promise.all([
 		usersRepository.findById({ userId }),
-		sessionsRepository.findVisibleForUser({ userId }),
-		equipmentsRepository.findAll(),
-		movementPatternsRepository.findAll(),
-		musclesRepository.findAll(),
+		sessionsRepository.findVisibleForUser({ userId, locale }),
+		equipmentsRepository.findAll({ locale }),
+		movementPatternsRepository.findAll({ locale }),
+		musclesRepository.findAll({ locale }),
 		muscleRolesRepository.findAll(),
-		exerciseTemplatesRepository.findAllForUser({ userId }),
+		exerciseTemplatesRepository.findAllForUser({ userId, locale }),
 		stepTypesRepository.findAll(),
 		getOwnedTrainingDayContext({ dayId: sessionCreationDayId, userId }),
 	]);

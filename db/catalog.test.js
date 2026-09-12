@@ -102,6 +102,33 @@ integration("canonical database setup", { concurrency: false }, () => {
 		).rows[0];
 
 		assert.deepEqual(counts, { bases: 78, variants: 129, prime_movers: 78 });
+		const translationCounts = (
+			await db.query(`
+				SELECT
+					(SELECT COUNT(*)::int FROM exercise_translations WHERE locale = 'en') AS exercises,
+					(SELECT COUNT(*)::int FROM exercise_variant_translations WHERE locale = 'en') AS variants,
+					(SELECT COUNT(*)::int FROM muscle_translations WHERE locale = 'en') AS muscles,
+					(SELECT COUNT(*)::int FROM equipment_translations WHERE locale = 'en') AS equipment,
+					(SELECT COUNT(*)::int FROM movement_pattern_translations WHERE locale = 'en') AS movement_patterns,
+					(SELECT COUNT(*)::int FROM exercise_translations WHERE locale = 'pt-BR') AS pt_exercises,
+					(SELECT COUNT(*)::int FROM exercise_variant_translations WHERE locale = 'pt-BR') AS pt_variants,
+					(SELECT COUNT(*)::int FROM muscle_translations WHERE locale = 'pt-BR') AS pt_muscles,
+					(SELECT COUNT(*)::int FROM equipment_translations WHERE locale = 'pt-BR') AS pt_equipment,
+					(SELECT COUNT(*)::int FROM movement_pattern_translations WHERE locale = 'pt-BR') AS pt_movement_patterns
+			`)
+		).rows[0];
+		assert.deepEqual(translationCounts, {
+			exercises: 78,
+			variants: 129,
+			muscles: 24,
+			equipment: 28,
+			movement_patterns: 8,
+			pt_exercises: 78,
+			pt_variants: 129,
+			pt_muscles: 24,
+			pt_equipment: 28,
+			pt_movement_patterns: 8,
+		});
 		assert.equal(
 			(
 				await db.query(

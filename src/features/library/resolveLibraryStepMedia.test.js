@@ -31,3 +31,22 @@ test("Library step type supplies category fallback context", () => {
 	assert.equal(resolveLibraryStepMedia(step("Cooldown")).initial, "B");
 	assert.equal(resolveLibraryStepMedia(step("Cardio")).src, null);
 });
+
+test("Library media keeps canonical artwork matching for localized catalog labels", () => {
+	const media = resolveLibraryStepMedia({
+		...step("Exercise", "Supino"),
+		movementPattern: "Empurrar",
+		canonicalMovementPattern: "Push",
+		exercise: {
+			name: "Supino",
+			variantName: "Supino com barra",
+			canonicalName: "Bench Press",
+			canonicalVariantName: "Barbell Bench Press",
+			environment: "gym_or_home",
+		},
+	});
+
+	assert.equal(media.initial, "S");
+	assert.equal(media.matchedKey, "barbell-bench-press");
+	assert.equal(media.alt, "Supino com barra — initial tile");
+});

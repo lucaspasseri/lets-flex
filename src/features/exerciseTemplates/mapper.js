@@ -22,16 +22,24 @@ export function toExerciseTemplateSeed(exercise) {
 	return {
 		id: exercise.id,
 		name: exercise.name,
+		nameLocale: exercise.name_locale ?? "canonical",
+		canonicalName: exercise.canonical_name ?? exercise.name,
 
 		movementPattern: {
 			id: exercise.movement_pattern_id,
 			name: toCapitalizedString(exercise.movement_pattern_name),
+			nameLocale: exercise.movement_pattern_name_locale ?? "canonical",
+			canonicalName: toCapitalizedString(
+				exercise.canonical_movement_pattern_name ?? exercise.movement_pattern_name,
+			),
 			notes: exercise.movement_pattern_notes,
 		},
 
 		equipment: {
 			id: exercise.equipment_id,
 			name: exercise.equipment_name,
+			nameLocale: exercise.equipment_name_locale ?? "canonical",
+			canonicalName: exercise.canonical_equipment_name ?? exercise.equipment_name,
 			category: toCapitalizedString(exercise.equipment_category),
 		},
 
@@ -40,6 +48,9 @@ export function toExerciseTemplateSeed(exercise) {
 			ownerUserId: exercise.exercise_variant_owner_user_id ?? null,
 			isArchived: exercise.exercise_variant_is_archived ?? false,
 			name: exercise.exercise_variant_name,
+			nameLocale: exercise.exercise_variant_name_locale ?? "canonical",
+			canonicalName:
+				exercise.canonical_exercise_variant_name ?? exercise.exercise_variant_name,
 			setupDescription: exercise.exercise_variant_setup_description,
 			environment: exercise.exercise_variant_environment,
 			notes: exercise.exercise_variant_notes,

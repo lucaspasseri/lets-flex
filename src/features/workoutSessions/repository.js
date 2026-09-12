@@ -1,4 +1,5 @@
 import pool from "../../../db/pool.js";
+import { normalizeCatalogLocale } from "../catalogLocalization/catalogLocalization.js";
 import * as queries from "./queries.js";
 
 /**
@@ -10,6 +11,7 @@ import * as queries from "./queries.js";
 /**
  * @typedef {object} FindAllByTrainingDayIdInput
  * @property {TrainingDayRow["id"]} trainingDayId
+ * @property {string} [locale]
  */
 
 /** @param {{sessionId: number, trainingDayId: number, userId: number, notes: string}} input @param {DatabaseClient} [db] */
@@ -55,8 +57,11 @@ export async function findByIdForUser({ workoutSessionId, userId }, db = pool) {
  * @returns {Promise<WorkoutSessionRow[]>}
  */
 
-export async function findAllByTrainingDayId({ trainingDayId }, db = pool) {
-	const { rows } = await db.query(queries.findAll(), [trainingDayId]);
+export async function findAllByTrainingDayId({ trainingDayId, locale }, db = pool) {
+	const { rows } = await db.query(queries.findAll(), [
+		trainingDayId,
+		normalizeCatalogLocale(locale),
+	]);
 	return rows;
 }
 

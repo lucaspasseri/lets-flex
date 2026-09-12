@@ -146,6 +146,50 @@ test("administrator grouping keeps variant edit identities and one base archive 
 	);
 });
 
+test("localized catalog labels remain presentation-ready while media uses canonical identity", () => {
+	const viewModel = createExerciseTemplates({
+		exerciseTemplateArr: [
+			{
+				...exerciseTemplate({
+					exerciseId: 1,
+					baseName: "Supino",
+					variantId: 10,
+					variantName: "Supino com barra",
+					ownerUserId: null,
+				}),
+				canonicalName: "Bench Press",
+				movementPattern: {
+					id: 1,
+					name: "Empurrar",
+					canonicalName: "Push",
+					notes: "Pressione para longe",
+				},
+				variant: {
+					...exerciseTemplate({
+						exerciseId: 1,
+						baseName: "Supino",
+						variantId: 10,
+						variantName: "Supino com barra",
+					}).variant,
+					canonicalName: "Barbell Bench Press",
+				},
+			},
+		],
+		actorUserId: 1,
+		managementMode: false,
+	});
+
+	assert.equal(viewModel.items[0].baseName, "Supino");
+	assert.equal(viewModel.items[0].details.variants[0].name, "Supino com barra");
+	assert.match(viewModel.items[0].baseSearchKeyWord, /Bench Press/);
+	assert.match(viewModel.items[0].searchKeyWord, /Barbell Bench Press/);
+	assert.equal(
+		viewModel.items[0].details.variants[0].media.matchedKey,
+		"barbell-bench-press",
+	);
+	assert.equal(viewModel.items[0].details.variants[0].media.initial, "S");
+});
+
 test("canonical catalog projects 78 base exercises and 129 nested variants", () => {
 	let nextVariantId = 1;
 	const exerciseTemplateArr = catalogManifest.flatMap((exercise, exerciseIndex) =>

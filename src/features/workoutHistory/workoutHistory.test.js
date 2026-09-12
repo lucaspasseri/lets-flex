@@ -176,6 +176,7 @@ test("history detail maps immutable snapshots, ordered sets, notes, and units", 
 	assert.deepEqual(calls[0].parameters, [41, 12]);
 	assert.match(calls[0].sql, /p\.user_id = \$2/);
 	assert.doesNotMatch(calls[0].sql, /JOIN sessions|JOIN session_steps/);
+	assert.doesNotMatch(calls[0].sql, /_translations/);
 	assert.deepEqual(detail?.steps[0], {
 		id: 5,
 		order: 1,

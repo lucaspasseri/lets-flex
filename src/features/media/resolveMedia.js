@@ -46,7 +46,8 @@ export function resolveMedia(request) {
 	}
 
 	for (const fallback of fallbackSections) {
-		const value = request[fallback.property];
+		const value =
+			request[`match${capitalize(fallback.property)}`] ?? request[fallback.property];
 		if (!value) continue;
 		const key = toMediaKey(value);
 		const entry = getEntry(fallback.section, key);
@@ -78,12 +79,12 @@ export function resolveMedia(request) {
  */
 function getExactCandidates(request) {
 	if (request.entityType === "exercise") {
+		const variantName = request.matchVariantName ?? request.variantName;
+		const baseName = request.matchBaseName ?? request.baseName;
 		return [
-			...(request.variantName
-				? [createCandidate("exerciseVariant", request.variantName, false)]
-				: []),
-			...(request.baseName
-				? [createCandidate("exercise", request.baseName, Boolean(request.variantName))]
+			...(variantName ? [createCandidate("exerciseVariant", variantName, false)] : []),
+			...(baseName
+				? [createCandidate("exercise", baseName, Boolean(variantName))]
 				: []),
 			...(request.key ? [createCandidate("exercise", request.key, false)] : []),
 		];
@@ -93,6 +94,11 @@ function getExactCandidates(request) {
 	return request.key
 		? [createCandidate(entitySection(request.entityType), request.key, false)]
 		: [];
+}
+
+/** @param {string} value @returns {string} */
+function capitalize(value) {
+	return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 /**

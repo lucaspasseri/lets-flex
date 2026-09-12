@@ -1,5 +1,14 @@
-const FALLBACK_MESSAGE =
-	"Visual chart unavailable. Complete weekly data remains available below.";
+import { createBrowserTranslator } from "../../i18n.js";
+
+const FALLBACK_MESSAGES = {
+	chart: {
+		fallback: "Visual chart unavailable. Complete weekly data remains available below.",
+		loading: "Preparing visual chart… Weekly data is available below.",
+		scheduled: "Scheduled",
+		finished: "Finished",
+		cancelled: "Cancelled",
+	},
+};
 
 /** @param {HTMLElement} root @param {string} key */
 function parseSeries(root, key) {
@@ -11,12 +20,12 @@ function parseSeries(root, key) {
 }
 
 /** @param {HTMLElement} root @param {HTMLCanvasElement} canvas @param {HTMLElement} container @param {HTMLElement} status */
-function showFallback(root, canvas, container, status) {
+function showFallback(root, canvas, container, status, translate) {
 	root.dataset.chartState = "unavailable";
 	canvas.hidden = true;
 	container.hidden = true;
 	status.hidden = false;
-	status.textContent = FALLBACK_MESSAGE;
+	status.textContent = translate("chart.fallback");
 }
 
 /**
@@ -24,9 +33,12 @@ function showFallback(root, canvas, container, status) {
  * available and does not expose provider or implementation details.
  *
  * @param {HTMLElement} root
- * @param {{ChartConstructor?: any, readColor?: (name: string) => string, reducedMotion?: boolean}} [options]
+ * @param {{ChartConstructor?: any, readColor?: (name: string) => string, reducedMotion?: boolean, translate?: Function}} [options]
  */
 export function initializeAdherenceChart(root, options = {}) {
+	const translate =
+		options.translate ??
+		createBrowserTranslator(/** @type {any} */ (root), FALLBACK_MESSAGES);
 	const canvas = /** @type {HTMLCanvasElement | null} */ (
 		root.querySelector("[data-adherence-chart-canvas]")
 	);
@@ -40,13 +52,13 @@ export function initializeAdherenceChart(root, options = {}) {
 
 	root.dataset.chartState = "loading";
 	status.hidden = false;
-	status.textContent = "Preparing visual chart… Weekly data is available below.";
+	status.textContent = translate("chart.loading");
 
 	const ChartConstructor = Object.hasOwn(options, "ChartConstructor")
 		? options.ChartConstructor
 		: globalThis.Chart;
 	if (typeof ChartConstructor !== "function") {
-		showFallback(root, canvas, container, status);
+		showFallback(root, canvas, container, status, translate);
 		return null;
 	}
 
@@ -86,7 +98,7 @@ export function initializeAdherenceChart(root, options = {}) {
 				labels,
 				datasets: [
 					{
-						label: "Scheduled",
+						label: translate("chart.scheduled"),
 						data: scheduled,
 						backgroundColor: "transparent",
 						borderColor: actionColor,
@@ -95,7 +107,7 @@ export function initializeAdherenceChart(root, options = {}) {
 						borderSkipped: false,
 					},
 					{
-						label: "Finished",
+						label: translate("chart.finished"),
 						data: finished,
 						backgroundColor: successColor,
 						borderColor: successColor,
@@ -103,7 +115,7 @@ export function initializeAdherenceChart(root, options = {}) {
 						borderRadius: 7,
 					},
 					{
-						label: "Cancelled",
+						label: translate("chart.cancelled"),
 						data: cancelled,
 						backgroundColor: "transparent",
 						borderColor: dangerColor,
@@ -139,7 +151,7 @@ export function initializeAdherenceChart(root, options = {}) {
 		root.dataset.chartState = "ready";
 		return chart;
 	} catch {
-		showFallback(root, canvas, container, status);
+		showFallback(root, canvas, container, status, translate);
 		return null;
 	}
 }

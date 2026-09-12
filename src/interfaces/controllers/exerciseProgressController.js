@@ -39,6 +39,8 @@ async function show(req, res) {
 			page: res.locals.page,
 			data,
 			query,
+			translate: res.locals.t,
+			language: res.locals.language,
 		}),
 	);
 }
@@ -66,6 +68,7 @@ function handleError(error, _req, res, next) {
 			page: res.locals.page,
 			currentUser: res.locals.authUser ?? null,
 			state: notFound ? "not-found" : "failure",
+			translate: res.locals.t,
 		}),
 	);
 }

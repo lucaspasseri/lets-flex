@@ -5,6 +5,7 @@ import createProgramFormViewModel from "./createProgramFormViewModel.js";
 import createCycleFormViewModel from "./createCycleFormViewModel.js";
 import createDeleteEntityFormViewModel from "./createDeleteEntityFormViewModel.js";
 import createHierarchyGuideViewModel from "./createHierarchyGuideViewModel.js";
+import createViewModelTranslator from "../translate.js";
 
 /**
  * @typedef {import("../../../src/features/programs/programsPage.types.js").CreateProgramsPageViewModelInput} CreateProgramsPageViewModelInput
@@ -12,7 +13,7 @@ import createHierarchyGuideViewModel from "./createHierarchyGuideViewModel.js";
  */
 
 /**
- * @param {CreateProgramsPageViewModelInput} input
+ * @param {CreateProgramsPageViewModelInput & {translate?: Function}} input
  * @returns {ProgramsPageViewModel}
  */
 export default function createProgramsPageViewModel({
@@ -22,7 +23,9 @@ export default function createProgramsPageViewModel({
 	programFormState,
 	cycleFormState,
 	pageFeedback = null,
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const {
 		currentUser,
 		programs,
@@ -33,7 +36,10 @@ export default function createProgramsPageViewModel({
 	} = data;
 
 	return {
-		page: { ...page, title: "Programs · Let's Flex!" },
+		page: {
+			...page,
+			title: `${t("programs.title", { defaultValue: "Programs" })} · Let's Flex!`,
+		},
 		pageState,
 		shell: {
 			currentUser,
@@ -42,10 +48,12 @@ export default function createProgramsPageViewModel({
 		components: {
 			pageFeedback,
 			pageHeading: {
-				eyebrow: "Training plans",
-				title: "Programs",
-				description:
-					"Build from an overall goal down to the session assigned to each training day.",
+				eyebrow: t("programs.eyebrow", { defaultValue: "Training plans" }),
+				title: t("programs.title", { defaultValue: "Programs" }),
+				description: t("programs.description", {
+					defaultValue:
+						"Build from an overall goal down to the session assigned to each training day.",
+				}),
 			},
 			hierarchyGuide: createHierarchyGuideViewModel({
 				currentProgram: programs.current,
@@ -68,6 +76,7 @@ export default function createProgramsPageViewModel({
 				currentCycle: cycles.current,
 				trainingDays,
 				workoutSessions,
+				translate,
 			}),
 			createProgramForm: createProgramFormViewModel({
 				goals,
@@ -82,9 +91,15 @@ export default function createProgramsPageViewModel({
 			deleteCycleForm: createDeleteEntityFormViewModel("cycle"),
 			noActiveUser: {
 				isVisible: currentUser === null,
-				title: "No active profile",
-				description: "Create or select a profile before managing training programs.",
-				action: { label: "Choose a profile", href: "/profile", icon: "plus" },
+				title: t("programs.noActiveProfile", { defaultValue: "No active profile" }),
+				description: t("programs.noActiveProfileDescription", {
+					defaultValue: "Create or select a profile before managing training programs.",
+				}),
+				action: {
+					label: t("programs.chooseProfile", { defaultValue: "Choose a profile" }),
+					href: "/profile",
+					icon: "plus",
+				},
 			},
 		},
 	};

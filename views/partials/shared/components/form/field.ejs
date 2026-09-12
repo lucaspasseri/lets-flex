@@ -1,5 +1,8 @@
 <%
 	const field = locals?.field ?? {};
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => options.defaultValue ?? "";
 
 	const {
 		id,
@@ -11,15 +14,19 @@
 		required = false,
 		disabled = false,
 		options = [],
-		defaultOption = {
-			label: "Select an option...",
-			value: ""
-		},
-		hint = required ? "(required)" : "(optional)",
+		defaultOption = null,
+		hint = null,
 		error = null,
 		attributes = {},
 		className = null
 	} = field;
+	const resolvedDefaultOption = defaultOption ?? {
+		label: translate("form.selectOption", { defaultValue: "Select an option..." }),
+		value: ""
+	};
+	const resolvedHint = hint ?? (required
+		? translate("form.requiredHint", { defaultValue: "(required)" })
+		: translate("form.optionalHint", { defaultValue: "(optional)" }));
 
 	const controlPaths = {
 		input: "controls/input",
@@ -46,7 +53,9 @@
 	<label class="form-field__label" for="<%= id %>">
 		<span><%= label %></span>
 		<span class="form-field__requirement">
-			<%= required ? "Required" : "Optional" %>
+			<%= required
+				? translate("form.required", { defaultValue: "Required" })
+				: translate("form.optional", { defaultValue: "Optional" }) %>
 		</span>
 	</label>
 
@@ -59,16 +68,16 @@
 			required,
 			disabled,
 			options,
-			defaultOption,
-			hint,
+			defaultOption: resolvedDefaultOption,
+			hint: resolvedHint,
 			error,
 			attributes
 		}
 	}) %>
 
-	<% if (hint) { %>
+	<% if (resolvedHint) { %>
 		<p class="form-field__hint" id="<%= `${id}-hint` %>">
-			<%= hint %>
+			<%= resolvedHint %>
 		</p>
 	<% } %>
 

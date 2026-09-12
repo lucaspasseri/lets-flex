@@ -3,7 +3,20 @@ import test from "node:test";
 
 import createSessionWorkspace from "./createSessionWorkspaceViewModel.js";
 
-function session({ id, name, movement, equipment, muscle, notes, variantName }) {
+function session({
+	id,
+	name,
+	movement,
+	canonicalMovement = movement,
+	equipment,
+	canonicalEquipment = equipment,
+	muscle,
+	canonicalMuscle = muscle,
+	notes,
+	variantName,
+	canonicalVariantName = variantName,
+	canonicalExerciseName = movement,
+}) {
 	return /** @type {any} */ ({
 		id,
 		name,
@@ -21,17 +34,27 @@ function session({ id, name, movement, equipment, muscle, notes, variantName }) 
 				loadValue: 40,
 				loadUnit: "kg",
 				movementPattern: movement,
+				canonicalMovementPattern: canonicalMovement,
 				exercise: {
 					name: movement,
+					canonicalName: canonicalExerciseName,
 					variantName,
+					canonicalVariantName,
 					setupDescription: "Brace first",
 					environment: "gym_or_home",
 					notes: "Controlled tempo",
 				},
-				equipment: equipment ? { name: equipment, category: "Free weight" } : {},
+				equipment: equipment
+					? {
+							name: equipment,
+							canonicalName: canonicalEquipment,
+							category: "Free weight",
+						}
+					: {},
 				muscles: [
 					{
 						commonName: muscle,
+						canonicalCommonName: canonicalMuscle,
 						scientificName: `${muscle} scientific`,
 						bodyPart: "Torso",
 					},
@@ -104,6 +127,39 @@ test("session discovery omits facets that cannot narrow the visible collection",
 	});
 
 	assert.deepEqual(viewModel.discovery.filters, []);
+});
+
+test("session discovery keeps English catalog names searchable under a localized display", () => {
+	const viewModel = createSessionWorkspace({
+		sessionArr: [
+			session({
+				id: 1,
+				name: "Força inferior",
+				movement: "Agachamento",
+				canonicalMovement: "Squat",
+				equipment: "Barra",
+				canonicalEquipment: "Barbell",
+				muscle: "Quadríceps",
+				canonicalMuscle: "Quadriceps",
+				variantName: "Agachamento com barra",
+				canonicalVariantName: "Barbell back squat",
+				canonicalExerciseName: "Squat",
+				notes: "Técnica",
+			}),
+		],
+		activeSession: null,
+		actorUserId: 7,
+	});
+
+	const summary = viewModel.summaries.items[0];
+	assert.match(summary.searchKeyWord, /Agachamento/);
+	assert.match(summary.searchKeyWord, /Squat/);
+	assert.match(summary.searchKeyWord, /Barbell back squat/);
+	assert.deepEqual(summary.filters, {
+		movement: ["Agachamento"],
+		muscle: ["Quadríceps"],
+		equipment: ["Barra"],
+	});
 });
 
 test("session discovery preserves large collections and long names for the scrollable list", () => {

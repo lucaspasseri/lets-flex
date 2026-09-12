@@ -1,11 +1,11 @@
 <header class="dashboard-program <%= programBanner.isOutsideProgram ? 'dashboard-program--outside' : '' %>">
 	<div class="dashboard-program__primary">
-		<p class="dashboard-eyebrow">Current program</p>
-		<h1><%= programBanner.isOutsideProgram ? "Outside the scope of the program" : programBanner.programName %></h1>
+		<p class="dashboard-eyebrow"><%= translate("dashboard.currentProgram", { defaultValue: "Current program" }) %></p>
+		<h1><%= programBanner.isOutsideProgram ? translate("dashboard.outsideProgram", { defaultValue: "Outside the scope of the program" }) : programBanner.programName %></h1>
 	</div>
 	<% if (programBanner.cycleName) { %>
 		<div class="dashboard-program__cycle">
-			<p class="dashboard-eyebrow">Current cycle</p>
+			<p class="dashboard-eyebrow"><%= translate("dashboard.currentCycle", { defaultValue: "Current cycle" }) %></p>
 			<p class="dashboard-program__cycle-name"><%= programBanner.cycleName %></p>
 		</div>
 	<% } %>

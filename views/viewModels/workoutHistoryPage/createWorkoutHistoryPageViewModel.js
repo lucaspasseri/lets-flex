@@ -1,9 +1,17 @@
-function formatDate(dateKey) {
-	if (!dateKey) return "Date unavailable";
+import createViewModelTranslator from "../translate.js";
+
+/** @param {string | null | undefined} dateKey @param {string} [language] @param {Function} [translate] */
+function formatDate(dateKey, language = "en", translate) {
+	const t =
+		typeof translate === "function"
+			? translate
+			: (_key, options) => options?.defaultValue ?? _key;
+	if (!dateKey)
+		return t("history.dateUnavailable", { defaultValue: "Date unavailable" });
 	const date = new Date(`${dateKey}T00:00:00.000Z`);
 	return Number.isNaN(date.valueOf())
-		? "Date unavailable"
-		: new Intl.DateTimeFormat("en", {
+		? t("history.dateUnavailable", { defaultValue: "Date unavailable" })
+		: new Intl.DateTimeFormat(language, {
 				dateStyle: "medium",
 				timeZone: "UTC",
 			}).format(date);
@@ -15,15 +23,20 @@ function toIsoTimestamp(value) {
 	return Number.isNaN(date.valueOf()) ? null : date.toISOString();
 }
 
-function formatTimestamp(value) {
+/** @param {string | Date | null | undefined} value @param {string} [language] @param {Function} [translate] */
+function formatTimestamp(value, language = "en", translate) {
+	const t =
+		typeof translate === "function"
+			? translate
+			: (_key, options) => options?.defaultValue ?? _key;
 	const iso = toIsoTimestamp(value);
 	return iso
-		? `${new Intl.DateTimeFormat("en", {
+		? `${new Intl.DateTimeFormat(language, {
 				dateStyle: "medium",
 				timeStyle: "short",
 				timeZone: "UTC",
 			}).format(new Date(iso))} UTC`
-		: "Not recorded";
+		: t("history.notRecorded", { defaultValue: "Not recorded" });
 }
 
 function appendFilters(parameters, filters) {
@@ -48,9 +61,16 @@ function detailUrl(id, filters, page) {
 }
 
 /**
- * @param {{page: Record<string, unknown>, data: {currentUser: import("../../../src/features/users/users.types.js").User | null, programs: import("../../../src/features/programs/programs.types.js").Program[], history: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryPage}, filters: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryFilters}} input
+ * @param {{page: Record<string, unknown>, data: {currentUser: import("../../../src/features/users/users.types.js").User | null, programs: import("../../../src/features/programs/programs.types.js").Program[], history: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryPage}, filters: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryFilters, translate?: Function, language?: string}} input
  */
-export function createWorkoutHistoryListPageViewModel({ page, data, filters }) {
+export function createWorkoutHistoryListPageViewModel({
+	page,
+	data,
+	filters,
+	translate,
+	language,
+}) {
+	const t = createViewModelTranslator(translate);
 	const hasFilters = Boolean(filters.programId || filters.fromDate || filters.toDate);
 	const programOptions = data.programs.map((program) => ({
 		value: program.id,
@@ -68,32 +88,60 @@ export function createWorkoutHistoryListPageViewModel({ page, data, filters }) {
 		title: item.sessionName,
 		programName: item.programName ?? "Unnamed program",
 		status: item.status,
-		statusLabel: item.status === "cancelled" ? "Cancelled" : "Finished",
+		statusLabel:
+			item.status === "cancelled"
+				? t("history.cancelled", { defaultValue: "Cancelled" })
+				: t("history.finished", { defaultValue: "Finished" }),
 		historyDate: {
 			value: item.historyDate,
-			label: formatDate(item.historyDate),
-			context: item.status === "finished" ? "Completed" : "Scheduled",
+			label: formatDate(item.historyDate, language, t),
+			context:
+				item.status === "finished"
+					? t("history.completed", { defaultValue: "Completed" })
+					: t("history.planned", { defaultValue: "Scheduled" }),
 		},
 		scheduledDate:
 			item.status === "finished" && item.scheduledDate
-				? { value: item.scheduledDate, label: formatDate(item.scheduledDate) }
+				? {
+						value: item.scheduledDate,
+						label: formatDate(item.scheduledDate, language, t),
+					}
 				: null,
-		stepSummary: `${item.performedStepCount} completed · ${item.skippedStepCount} skipped · ${item.stepCount} total`,
+		stepSummary: t("history.stepSummary", {
+			performed: item.performedStepCount,
+			skipped: item.skippedStepCount,
+			total: item.stepCount,
+			defaultValue: "{{performed}} completed · {{skipped}} skipped · {{total}} total",
+		}),
 		stepCounts: [
-			{ label: "Completed", value: item.performedStepCount },
-			{ label: "Skipped", value: item.skippedStepCount },
-			{ label: "Total", value: item.stepCount },
+			{
+				label: t("history.completed", { defaultValue: "Completed" }),
+				value: item.performedStepCount,
+			},
+			{
+				label: t("history.skipped", { defaultValue: "Skipped" }),
+				value: item.skippedStepCount,
+			},
+			{ label: t("history.total", { defaultValue: "Total" }), value: item.stepCount },
 		],
 	}));
 
 	return {
-		page: { ...page, title: "Workout history · Let's Flex!" },
+		page: {
+			...page,
+			title: `${t("history.title", { defaultValue: "Workout history" })} · Let's Flex!`,
+		},
 		shell: { currentUser: data.currentUser, activeNavigation: "history" },
 		heading: {
-			eyebrow: "Training record",
-			title: "Workout history",
-			description: "Review finished and cancelled sessions from your programs.",
-			meta: `${data.history.totalCount} ${data.history.totalCount === 1 ? "session" : "sessions"}`,
+			eyebrow: t("history.eyebrow", { defaultValue: "Training record" }),
+			title: t("history.title", { defaultValue: "Workout history" }),
+			description: t("history.description", {
+				defaultValue: "Review finished and cancelled sessions from your programs.",
+			}),
+			meta: t("history.sessionsCount", {
+				count: data.history.totalCount,
+				defaultValue: "{{count}} sessions",
+			}),
 		},
 		filters: {
 			action: "/history",
@@ -129,24 +177,42 @@ export function createWorkoutHistoryListPageViewModel({ page, data, filters }) {
 }
 
 /**
- * @param {{page: Record<string, unknown>, currentUser: import("../../../src/features/users/users.types.js").User | null, state: "not-found" | "failure"}} input
+ * @param {{page: Record<string, unknown>, currentUser: import("../../../src/features/users/users.types.js").User | null, state: "not-found" | "failure", translate?: Function, language?: string}} input
  */
-export function createWorkoutHistoryStatePageViewModel({ page, currentUser, state }) {
+export function createWorkoutHistoryStatePageViewModel({
+	page,
+	currentUser,
+	state,
+	translate,
+}) {
+	const t = createViewModelTranslator(translate);
 	const notFound = state === "not-found";
 	return {
 		page: {
 			...page,
-			title: `${notFound ? "Workout not found" : "History unavailable"} · Let's Flex!`,
+			title: `${t(notFound ? "history.workoutNotFound" : "history.unavailable", { defaultValue: notFound ? "Workout not found" : "History unavailable" })} · Let's Flex!`,
 		},
 		shell: { currentUser, activeNavigation: "history" },
 		state: {
 			kind: state,
-			eyebrow: notFound ? "Workout history" : "Temporary problem",
-			title: notFound ? "Workout not found" : "History is unavailable",
+			eyebrow: notFound
+				? t("history.title", { defaultValue: "Workout history" })
+				: t("history.temporaryProblem", { defaultValue: "Temporary problem" }),
+			title: notFound
+				? t("history.workoutNotFound", { defaultValue: "Workout not found" })
+				: t("history.unavailableTitle", { defaultValue: "History is unavailable" }),
 			message: notFound
-				? "This workout is unavailable. It may not exist or may not belong to this account."
-				: "We couldn't load workout history right now. Your workout data has not been changed.",
-			actionLabel: notFound ? "Return to workout history" : "Try workout history again",
+				? t("history.notFoundMessage", {
+						defaultValue:
+							"This workout is unavailable. It may not exist or may not belong to this account.",
+					})
+				: t("history.failureMessage", {
+						defaultValue:
+							"We couldn't load workout history right now. Your workout data has not been changed.",
+					}),
+			actionLabel: notFound
+				? t("history.backToHistory", { defaultValue: "Return to workout history" })
+				: t("history.retry", { defaultValue: "Try workout history again" }),
 			actionHref: "/history",
 		},
 	};
@@ -159,7 +225,7 @@ function stepTitle(step) {
 }
 
 /** @param {import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryStep} step */
-function toStepViewModel(step) {
+function toStepViewModel(step, t, language) {
 	return {
 		id: step.id,
 		order: step.order,
@@ -172,10 +238,10 @@ function toStepViewModel(step) {
 		stepTypeName: step.stepTypeName,
 		statusLabel:
 			step.status === "performed"
-				? "Completed"
+				? t("history.completed", { defaultValue: "Completed" })
 				: step.status === "skipped"
-					? "Skipped"
-					: "Recorded",
+					? t("history.skipped", { defaultValue: "Skipped" })
+					: t("history.recorded", { defaultValue: "Recorded" }),
 		planned: {
 			sets: step.plannedSets,
 			reps: step.plannedReps,
@@ -184,7 +250,7 @@ function toStepViewModel(step) {
 		},
 		completedAt: {
 			value: toIsoTimestamp(step.completedAt),
-			label: formatTimestamp(step.completedAt),
+			label: formatTimestamp(step.completedAt, language, t),
 		},
 		notes: step.notes,
 		sets: step.sets,
@@ -192,7 +258,7 @@ function toStepViewModel(step) {
 }
 
 /**
- * @param {{page: Record<string, unknown>, currentUser: import("../../../src/features/users/users.types.js").User | null, history: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryDetail, returnFilters: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryFilters, returnPage: number}} input
+ * @param {{page: Record<string, unknown>, currentUser: import("../../../src/features/users/users.types.js").User | null, history: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryDetail, returnFilters: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryFilters, returnPage: number, translate?: Function, language?: string}} input
  */
 export function createWorkoutHistoryDetailPageViewModel({
 	page,
@@ -200,47 +266,72 @@ export function createWorkoutHistoryDetailPageViewModel({
 	history,
 	returnFilters,
 	returnPage,
+	translate,
+	language,
 }) {
+	const t = createViewModelTranslator(translate);
 	return {
-		page: { ...page, title: `${history.sessionName} · Workout history · Let's Flex!` },
+		page: {
+			...page,
+			title: `${history.sessionName} · ${t("history.title", { defaultValue: "Workout history" })} · Let's Flex!`,
+		},
 		shell: { currentUser, activeNavigation: "history" },
 		backHref: historyUrl(returnFilters, returnPage),
 		heading: {
-			eyebrow: "Workout history",
+			eyebrow: t("history.title", { defaultValue: "Workout history" }),
 			title: history.sessionName,
 			description: history.programName ?? "Unnamed program",
-			meta: history.status === "cancelled" ? "Cancelled" : "Finished",
+			meta:
+				history.status === "cancelled"
+					? t("history.cancelled", { defaultValue: "Cancelled" })
+					: t("history.finished", { defaultValue: "Finished" }),
 		},
 		summary: {
 			status: history.status,
-			statusLabel: history.status === "cancelled" ? "Cancelled" : "Finished",
+			statusLabel:
+				history.status === "cancelled"
+					? t("history.cancelled", { defaultValue: "Cancelled" })
+					: t("history.finished", { defaultValue: "Finished" }),
 			historyDate: {
 				value: history.historyDate,
-				label: formatDate(history.historyDate),
-				context: history.status === "finished" ? "Completed" : "Scheduled",
+				label: formatDate(history.historyDate, language, t),
+				context:
+					history.status === "finished"
+						? t("history.completed", { defaultValue: "Completed" })
+						: t("history.planned", { defaultValue: "Scheduled" }),
 			},
 			scheduledDate:
 				history.status === "finished" && history.scheduledDate
-					? { value: history.scheduledDate, label: formatDate(history.scheduledDate) }
+					? {
+							value: history.scheduledDate,
+							label: formatDate(history.scheduledDate, language, t),
+						}
 					: null,
 			startedAt: {
 				value: toIsoTimestamp(history.startedAt),
-				label: formatTimestamp(history.startedAt),
+				label: formatTimestamp(history.startedAt, language, t),
 			},
 			finishedAt: {
 				value: toIsoTimestamp(history.finishedAt),
-				label: formatTimestamp(history.finishedAt),
+				label: formatTimestamp(history.finishedAt, language, t),
 			},
 			notes: history.notes,
 		},
-		steps: history.steps.map(toStepViewModel),
+		steps: history.steps.map((step) => toStepViewModel(step, t, language)),
 		emptySteps: {
 			title:
-				history.status === "cancelled" ? "No workout results" : "No exercises recorded",
+				history.status === "cancelled"
+					? t("history.noWorkoutResults", { defaultValue: "No workout results" })
+					: t("history.noExercisesRecorded", { defaultValue: "No exercises recorded" }),
 			message:
 				history.status === "cancelled"
-					? "This session was cancelled before exercise results were recorded."
-					: "This workout was finished without exercise steps.",
+					? t("workout.emptyCancelledMessage", {
+							defaultValue:
+								"This session was cancelled before exercise results were recorded.",
+						})
+					: t("workout.finishedWithoutWorkoutSteps", {
+							defaultValue: "This workout was finished without exercise steps.",
+						}),
 		},
 	};
 }

@@ -21,6 +21,7 @@ export default async function getDashboardPageData({
 	programId,
 	daysDifference,
 	workoutSessionId,
+	locale,
 	now = new Date(),
 }) {
 	const selectedDate = addDays(now, daysDifference ?? 0);
@@ -64,6 +65,7 @@ export default async function getDashboardPageData({
 	const currentDayWorkoutSessionRows = trainingDayRow?.id
 		? await workoutSessionsRepository.findAllByTrainingDayId({
 				trainingDayId: trainingDayRow.id,
+				locale,
 			})
 		: [];
 	const currentUser = userRow ? userMapper.toLoggedUser(userRow) : null;

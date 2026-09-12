@@ -1,12 +1,12 @@
-const numberFormatter = new Intl.NumberFormat("en-US");
-
-/** @param {number} value */
-function formatNumber(value) {
-	return numberFormatter.format(value);
-}
-
-/** @param {import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData} input */
-export default function createAnalyticsSummaryViewModel({ currentProgram, analytics }) {
+/** @param {import("../../../src/features/dashboard/dashboardPage.types.js").DashboardPageData} input @param {Function} [translate] */
+export default function createAnalyticsSummaryViewModel(
+	{ currentProgram, analytics },
+	translate,
+	language = "en",
+) {
+	const t = createViewModelTranslator(translate);
+	const numberFormatter = new Intl.NumberFormat(language);
+	const formatNumber = (value) => numberFormatter.format(value);
 	const scheduledCount = analytics.adherence.reduce(
 		(sum, week) => sum + week.scheduledCount,
 		0,
@@ -38,39 +38,68 @@ export default function createAnalyticsSummaryViewModel({ currentProgram, analyt
 	return {
 		isVisible: Boolean(currentProgram),
 		headingId: "program-analytics-heading",
-		eyebrow: "Program analytics",
-		title: "Training at a glance",
-		description: `Progress signals for ${currentProgram?.name ?? "your selected program"}, calculated from recorded workout history.`,
+		eyebrow: t("dashboard.analyticsEyebrow", { defaultValue: "Program analytics" }),
+		title: t("dashboard.analyticsTitle", { defaultValue: "Training at a glance" }),
+		description: t("dashboard.analyticsDescription", {
+			program: currentProgram?.name ?? "your selected program",
+			defaultValue:
+				"Progress signals for {{program}}, calculated from recorded workout history.",
+		}),
 		isEmpty,
 		emptyState: {
-			title: "Your progress story starts here",
-			message:
-				"Finish a scheduled workout and record its sets to unlock activity, adherence, and workload insights.",
+			title: t("dashboard.progressStoryTitle", {
+				defaultValue: "Your progress story starts here",
+			}),
+			message: t("dashboard.progressStoryMessage", {
+				defaultValue:
+					"Finish a scheduled workout and record its sets to unlock activity, adherence, and workload insights.",
+			}),
 		},
 		primaryMetric: {
-			label: "Program adherence",
+			label: t("dashboard.programAdherence", { defaultValue: "Program adherence" }),
 			value: completionPercentage === null ? "—" : `${completionPercentage}%`,
 			context:
 				scheduledCount === 0
-					? "No sessions are scheduled inside this program yet."
-					: `${formatNumber(finishedScheduledCount)} of ${formatNumber(scheduledCount)} scheduled sessions finished${cancelledCount > 0 ? ` · ${formatNumber(cancelledCount)} cancelled` : ""}.`,
+					? t("dashboard.noScheduledSessions", {
+							defaultValue: "No sessions are scheduled inside this program yet.",
+						})
+					: t("dashboard.adherenceSummary", {
+							finished: formatNumber(finishedScheduledCount),
+							scheduled: formatNumber(scheduledCount),
+							cancelled:
+								cancelledCount > 0
+									? t("dashboard.cancelledSummary", {
+											count: formatNumber(cancelledCount),
+											defaultValue: " · {{count}} cancelled",
+										})
+									: "",
+							defaultValue:
+								"{{finished}} of {{scheduled}} scheduled sessions finished{{cancelled}}.",
+						}),
 		},
 		metrics: [
 			{
-				label: "Finished workouts",
+				label: t("dashboard.finishedWorkouts", { defaultValue: "Finished workouts" }),
 				value: formatNumber(finishedActivityCount),
-				context: "Attributed to actual completion date",
+				context: t("dashboard.completionDateContext", {
+					defaultValue: "Attributed to actual completion date",
+				}),
 			},
 			{
-				label: "Active days",
+				label: t("dashboard.activeDays", { defaultValue: "Active days" }),
 				value: formatNumber(activeDayCount),
-				context: "Days with at least one finished workout",
+				context: t("dashboard.activeDaysContext", {
+					defaultValue: "Days with at least one finished workout",
+				}),
 			},
 			{
-				label: "Performed steps",
+				label: t("dashboard.performedSteps", { defaultValue: "Performed steps" }),
 				value: formatNumber(analytics.performedWork.performedStepCount),
-				context: "Exercises recorded as performed",
+				context: t("dashboard.performedStepsContext", {
+					defaultValue: "Exercises recorded as performed",
+				}),
 			},
 		],
 	};
 }
+import createViewModelTranslator from "../translate.js";

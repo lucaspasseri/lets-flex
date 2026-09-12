@@ -1,75 +1,76 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
 <main class="auth-page">
 	<section class="auth-panel" aria-labelledby="sign-in-heading">
 		<div class="auth-introduction">
-			<a class="auth-introduction__brand" href="/auth/login" aria-label="Let's Flex sign in">
+			<a class="auth-introduction__brand" href="/auth/login" aria-label="<%= translate("auth.brandLabel", { defaultValue: "Let's Flex sign in" }) %>">
 				<span class="auth-introduction__logo"><%- include("partials/pages/logo") %></span>
 				<span>LET'S FLEX</span>
 			</a>
 			<div class="auth-introduction__copy">
-				<p class="auth-eyebrow">Your training workspace</p>
-				<h1>Plan with purpose.<br>Train with clarity.</h1>
-				<p>Build reusable sessions, organize training cycles, and keep each workout in one focused place.</p>
+				<p class="auth-eyebrow"><%= translate("auth.workspaceEyebrow", { defaultValue: "Your training workspace" }) %></p>
+				<h1><%- translate("auth.workspaceTitle", { defaultValue: "Plan with purpose.<br>Train with clarity." }) %></h1>
+				<p><%= translate("auth.workspaceDescription", { defaultValue: "Build reusable sessions, organize training cycles, and keep each workout in one focused place." }) %></p>
 			</div>
-			<ul class="auth-feature-list" aria-label="Application features">
-				<li><span aria-hidden="true">01</span> Build a personal exercise library</li>
-				<li><span aria-hidden="true">02</span> Plan programs and training days</li>
-				<li><span aria-hidden="true">03</span> Record each workout as you go</li>
+			<ul class="auth-feature-list" aria-label="<%= translate("auth.featuresLabel", { defaultValue: "Application features" }) %>">
+				<li><span aria-hidden="true">01</span> <%= translate("auth.featureLibrary", { defaultValue: "Build a personal exercise library" }) %></li>
+				<li><span aria-hidden="true">02</span> <%= translate("auth.featurePrograms", { defaultValue: "Plan programs and training days" }) %></li>
+				<li><span aria-hidden="true">03</span> <%= translate("auth.featureWorkouts", { defaultValue: "Record each workout as you go" }) %></li>
 			</ul>
 		</div>
 
 		<div class="auth-actions" data-tabs>
 			<header class="auth-actions__header">
-				<p class="auth-eyebrow">Your account</p>
-				<h2 id="sign-in-heading">Continue to Let's Flex</h2>
+				<p class="auth-eyebrow"><%= translate("auth.accountEyebrow", { defaultValue: "Your account" }) %></p>
+				<h2 id="sign-in-heading"><%= translate("auth.continueTitle", { defaultValue: "Continue to Let's Flex" }) %></h2>
 			</header>
 			<% if (typeof statusMessage !== "undefined" && statusMessage) { %><div class="auth-status" role="status" aria-live="polite"><%= statusMessage %></div><% } %>
 
 			<a class="auth-google" href="<%= googleAuthUrl %>">
 				<span class="auth-google__mark" aria-hidden="true">G</span>
-				<span>Continue with Google</span>
+				<span><%= translate("auth.continueGoogle", { defaultValue: "Continue with Google" }) %></span>
 			</a>
 
-			<div class="auth-divider"><span>or use email</span></div>
+			<div class="auth-divider"><span><%= translate("auth.orUseEmail", { defaultValue: "or use email" }) %></span></div>
 
-			<div class="auth-tab-list" data-tab-list role="tablist" aria-label="Account access">
-				<button id="auth-signin-tab" data-tab type="button" role="tab" aria-controls="auth-signin-panel" aria-selected="<%= activeTab === 'signin' %>" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>">Sign in</button>
-				<button id="auth-signup-tab" data-tab type="button" role="tab" aria-controls="auth-signup-panel" aria-selected="<%= activeTab === 'signup' %>" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>">Sign up</button>
+			<div class="auth-tab-list" data-tab-list role="tablist" aria-label="<%= translate("auth.accountAccess", { defaultValue: "Account access" }) %>">
+				<button id="auth-signin-tab" data-tab type="button" role="tab" aria-controls="auth-signin-panel" aria-selected="<%= activeTab === 'signin' %>" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>"><%= translate("auth.signIn", { defaultValue: "Sign in" }) %></button>
+				<button id="auth-signup-tab" data-tab type="button" role="tab" aria-controls="auth-signup-panel" aria-selected="<%= activeTab === 'signup' %>" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>"><%= translate("auth.signUp", { defaultValue: "Sign up" }) %></button>
 			</div>
 
 			<section id="auth-signin-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signin-tab" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>" <%= activeTab === 'signin' ? '' : 'hidden' %>>
-				<p class="auth-tab-panel__intro">Use your administrator or member account to continue.</p>
-				<% if (errors.length && activeTab === "signin") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title">We couldn't sign you in</p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
+				<p class="auth-tab-panel__intro"><%= translate("auth.signInIntro", { defaultValue: "Use your administrator or member account to continue." }) %></p>
+				<% if (errors.length && activeTab === "signin") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title"><%= translate("auth.signInFailed", { defaultValue: "We couldn't sign you in" }) %></p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
 				<form class="form auth-form" method="POST" action="/auth/login">
 					<input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input type="hidden" name="returnTo" value="<%= returnTo %>" />
-					<%- include("partials/shared/components/form/field", { field: { id: "login-email", name: "email", label: "Email address", control: "input", type: "email", required: true, value: activeTab === "signin" ? email : "", hint: "Use the email assigned to your account.", attributes: { autocomplete: "username", autofocus: activeTab === "signin" } } }) %>
-					<%- include("partials/shared/components/form/field", { field: { id: "login-password", name: "password", label: "Password", control: "input", type: "password", required: true, hint: "Passwords are case-sensitive.", attributes: { autocomplete: "current-password" } } }) %>
-					<%- include("partials/shared/components/button/button", { button: { label: "Sign in to Let's Flex", type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
+					<%- include("partials/shared/components/form/field", { field: { id: "login-email", name: "email", label: translate("auth.email", { defaultValue: "Email address" }), control: "input", type: "email", required: true, value: activeTab === "signin" ? email : "", hint: translate("auth.emailSignInHint", { defaultValue: "Use the email assigned to your account." }), attributes: { autocomplete: "username", autofocus: activeTab === "signin" } } }) %>
+					<%- include("partials/shared/components/form/field", { field: { id: "login-password", name: "password", label: translate("auth.password", { defaultValue: "Password" }), control: "input", type: "password", required: true, hint: translate("auth.passwordHint", { defaultValue: "Passwords are case-sensitive." }), attributes: { autocomplete: "current-password" } } }) %>
+					<%- include("partials/shared/components/button/button", { button: { label: translate("auth.signInSubmit", { defaultValue: "Sign in to Let's Flex" }), type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
 				</form>
-				<p class="auth-form-link"><a href="/auth/password-reset/request">Forgot password?</a></p>
+				<p class="auth-form-link"><a href="/auth/password-reset/request"><%= translate("auth.forgotPassword", { defaultValue: "Forgot password?" }) %></a></p>
 			</section>
 
 			<section id="auth-signup-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signup-tab" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>" <%= activeTab === 'signup' ? '' : 'hidden' %>>
-				<p class="auth-tab-panel__intro">Create a permanent personal training workspace.</p>
-				<% if (errors.length && activeTab === "signup") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title">We couldn't create your account</p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
+				<p class="auth-tab-panel__intro"><%= translate("auth.signUpIntro", { defaultValue: "Create a permanent personal training workspace." }) %></p>
+				<% if (errors.length && activeTab === "signup") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title"><%= translate("auth.signUpFailed", { defaultValue: "We couldn't create your account" }) %></p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
 				<form class="form auth-form" method="POST" action="/auth/register">
 					<input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input type="hidden" name="returnTo" value="<%= returnTo %>" />
-					<%- include("partials/shared/components/form/field", { field: { id: "registration-email", name: "email", label: "Email address", control: "input", type: "email", required: true, value: activeTab === "signup" ? email : "", hint: "You'll use this email to sign in.", attributes: { autocomplete: "username", autofocus: activeTab === "signup" } } }) %>
-					<%- include("partials/shared/components/form/field", { field: { id: "registration-password", name: "password", label: "Password", control: "input", type: "password", required: true, hint: "Use at least 12 characters.", attributes: { autocomplete: "new-password", minlength: 12 } } }) %>
-					<%- include("partials/shared/components/button/button", { button: { label: "Create account", type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
+					<%- include("partials/shared/components/form/field", { field: { id: "registration-email", name: "email", label: translate("auth.email", { defaultValue: "Email address" }), control: "input", type: "email", required: true, value: activeTab === "signup" ? email : "", hint: translate("auth.emailSignUpHint", { defaultValue: "You'll use this email to sign in." }), attributes: { autocomplete: "username", autofocus: activeTab === "signup" } } }) %>
+					<%- include("partials/shared/components/form/field", { field: { id: "registration-password", name: "password", label: translate("auth.password", { defaultValue: "Password" }), control: "input", type: "password", required: true, hint: translate("auth.passwordLengthHint", { defaultValue: "Use at least 12 characters." }), attributes: { autocomplete: "new-password", minlength: 12 } } }) %>
+					<%- include("partials/shared/components/button/button", { button: { label: translate("auth.createAccount", { defaultValue: "Create account" }), type: "submit", variant: "primary", alternativeClassname: "auth-form__submit" } }) %>
 				</form>
 			</section>
 
-			<div class="auth-divider"><span>or explore first</span></div>
+			<div class="auth-divider"><span><%= translate("auth.orExploreFirst", { defaultValue: "or explore first" }) %></span></div>
 
 			<div class="auth-guest">
 				<div>
-					<h3>Continue as a guest</h3>
-					<p>Start with a private temporary workspace. Guest data expires after 15 days and cannot be recovered.</p>
+					<h3><%= translate("auth.continueGuest", { defaultValue: "Continue as a guest" }) %></h3>
+					<p><%= translate("auth.guestDescription", { defaultValue: "Start with a private temporary workspace. Guest data expires after 15 days and cannot be recovered." }) %></p>
 				</div>
 				<form method="POST" action="/auth/guest">
 					<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 					<%- include("partials/shared/components/button/button", { button: {
-						label: "Enter temporary workspace",
+						label: translate("auth.enterGuest", { defaultValue: "Enter temporary workspace" }),
 						type: "submit",
 						variant: "secondary",
 						alternativeClassname: "auth-guest__button"

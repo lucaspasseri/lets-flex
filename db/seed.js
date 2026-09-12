@@ -6,6 +6,7 @@ import normalizeEmail from "../src/features/auth/normalizeEmail.js";
 import { hashPassword } from "../src/features/auth/passwordService.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
 import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
+import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 
 export const seedSql = `
 INSERT INTO "step_types" ("name")
@@ -104,6 +105,7 @@ INSERT INTO "muscle_roles" ("name", "description") VALUES
   ('secondary_mover', 'Contributes to movement but not as dominant as the prime mover');
 
 ${catalogSeedSql}
+${catalogTranslationSeedSql}
 ${starterWorkoutSeedSql}
 `;
 

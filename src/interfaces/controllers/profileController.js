@@ -21,6 +21,7 @@ async function renderProfile(req, res, state = {}) {
 	const currentUser = userMapper.toLoggedUser(row);
 	const authenticationMethods = createAuthenticationMethodsViewModel(
 		await getAuthenticationMethods({ userId: row.id }),
+		res.locals.t,
 	);
 	const googleLinkMessages = {
 		connected: { type: "success", text: "Google is now connected to this account." },

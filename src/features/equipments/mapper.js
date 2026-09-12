@@ -14,6 +14,7 @@ export function toEquipment(equipment) {
 	return {
 		id: equipment.id,
 		name: equipment.name,
+		nameLocale: equipment.name_locale ?? "canonical",
 		category: toCapitalizedString(equipment.category)?.replaceAll("_", " "),
 	};
 }

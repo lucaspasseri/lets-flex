@@ -1,9 +1,9 @@
-<nav class="dashboard-calendar" aria-label="Training dates">
+<nav class="dashboard-calendar" aria-label="<%= translate("dashboard.trainingDates", { defaultValue: "Training dates" }) %>">
 	<div class="dashboard-section-heading">
-		<div><p class="dashboard-eyebrow">Schedule</p><h2>Training week</h2></div>
+		<div><p class="dashboard-eyebrow"><%= translate("dashboard.schedule", { defaultValue: "Schedule" }) %></p><h2><%= translate("dashboard.trainingWeek", { defaultValue: "Training week" }) %></h2></div>
 		<div class="dashboard-calendar__controls">
-			<a href="<%= dateNavigation.previousHref %>" class="dashboard-calendar__arrow" aria-label="Previous day"><span aria-hidden="true">&larr;</span></a>
-			<a href="<%= dateNavigation.nextHref %>" class="dashboard-calendar__arrow" aria-label="Next day"><span aria-hidden="true">&rarr;</span></a>
+			<a href="<%= dateNavigation.previousHref %>" class="dashboard-calendar__arrow" aria-label="<%= translate("dashboard.previousDay", { defaultValue: "Previous day" }) %>"><span aria-hidden="true">&larr;</span></a>
+			<a href="<%= dateNavigation.nextHref %>" class="dashboard-calendar__arrow" aria-label="<%= translate("dashboard.nextDay", { defaultValue: "Next day" }) %>"><span aria-hidden="true">&rarr;</span></a>
 		</div>
 	</div>
 	<ol class="dashboard-calendar__rail">

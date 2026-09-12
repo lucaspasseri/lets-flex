@@ -4,6 +4,8 @@
  * @typedef {object} MuscleRow
  * @property {number} id
  * @property {string} common_name
+ * @property {"en" | "pt-BR" | "canonical"} [common_name_locale]
+ * @property {string} [canonical_common_name]
  * @property {string} scientific_name
  * @property {string} body_region
  * @property {string} reference_url
@@ -15,6 +17,8 @@
  * @typedef {object} MuscleMapper
  * @property {MuscleRow["id"]} id
  * @property {string} commonName
+ * @property {"en" | "pt-BR" | "canonical"} [commonNameLocale]
+ * @property {string} [canonicalCommonName]
  * @property {string} scientificName
  * @property {string} bodyPart
  * @property {string} referenceUrl

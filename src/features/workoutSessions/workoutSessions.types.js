@@ -40,12 +40,20 @@
  * @property {number} step_order
  * @property {string} step_type_name
  * @property {string} exercise_variant_name
+ * @property {"en" | "pt-BR" | "canonical"} [exercise_variant_name_locale]
+ * @property {string} [canonical_exercise_variant_name]
  * @property {string} exercise_variant_setup_description
  * @property {string} exercise_variant_environment
  * @property {string} exercise_variant_notes
  * @property {string} exercise_name
+ * @property {"en" | "pt-BR" | "canonical"} [exercise_name_locale]
+ * @property {string} [canonical_exercise_name]
  * @property {string} movement_pattern_name
+ * @property {"en" | "pt-BR" | "canonical"} [movement_pattern_name_locale]
+ * @property {string} [canonical_movement_pattern_name]
  * @property {string} equipment_name
+ * @property {"en" | "pt-BR" | "canonical"} [equipment_name_locale]
+ * @property {string | null} [canonical_equipment_name]
  * @property {string} equipment_category
  * @property {StepLogRow | null} step_log
  * @property {MuscleRow[]} muscles

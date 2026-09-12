@@ -157,7 +157,9 @@ export default function createApplicationChrome(root, options = {}) {
 		toggle.setAttribute("aria-expanded", String(expanded));
 		toggle.setAttribute(
 			"aria-label",
-			expanded ? "Close navigation menu" : "Open navigation menu",
+			expanded
+				? (toggle.getAttribute("data-close-label") ?? "Close navigation menu")
+				: (toggle.getAttribute("data-open-label") ?? "Open navigation menu"),
 		);
 	}
 

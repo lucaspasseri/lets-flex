@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => options.defaultValue ?? ""; %>
 <% if (locals.pageFeedback) { %>
 	<section
 		class="page-feedback page-feedback--<%= pageFeedback.tone ?? 'error' %>"
@@ -5,7 +6,7 @@
 		tabindex="-1"
 		aria-labelledby="<%= pageFeedback.id ?? 'page-feedback-title' %>"
 	>
-		<p class="page-feedback__eyebrow"><%= pageFeedback.eyebrow ?? 'Action not completed' %></p>
+		<p class="page-feedback__eyebrow"><%= pageFeedback.eyebrow ?? translate("feedback.actionNotCompleted", { defaultValue: "Action not completed" }) %></p>
 		<h2 id="<%= pageFeedback.id ?? 'page-feedback-title' %>"><%= pageFeedback.title %></h2>
 		<p><%= pageFeedback.message %></p>
 	</section>

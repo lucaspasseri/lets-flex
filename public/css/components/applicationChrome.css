@@ -73,6 +73,7 @@
 .page-header__home:focus-visible,
 .page-header__menu-toggle:focus-visible,
 .primary-navigation__link:focus-visible,
+.language-switcher__option:focus-visible,
 .application-chrome__profile:focus-visible {
 	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
 	outline-offset: 3px;
@@ -216,6 +217,62 @@
 	margin-inline: auto;
 	padding-top: 1rem;
 	border-top: 1px solid var(--color-border);
+}
+
+.language-switcher {
+	display: grid;
+	gap: 0.45rem;
+	margin-bottom: 0.9rem;
+}
+
+.language-switcher__label {
+	margin: 0;
+	color: var(--color-text-muted);
+	font-size: 0.68rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.language-switcher__options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.language-switcher__form {
+	display: contents;
+}
+
+.language-switcher__option {
+	min-height: 2.5rem;
+	padding: 0.45rem 0.7rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.6rem;
+	background: transparent;
+	color: var(--color-text-muted);
+	font: inherit;
+	font-size: 0.78rem;
+	cursor: pointer;
+	transition:
+		border-color 160ms ease,
+		background-color 160ms ease,
+		color 160ms ease;
+}
+
+.language-switcher__option:hover,
+.language-switcher__option.is-current {
+	border-color: color-mix(in srgb, var(--color-action) 60%, var(--color-border));
+	background: color-mix(in srgb, var(--color-action) 9%, transparent);
+	color: var(--color-text);
+}
+
+.language-switcher__option.is-current {
+	color: var(--color-action);
+}
+
+.language-switcher__current {
+	font-size: 0.68rem;
 }
 
 .application-chrome__profile {
@@ -409,6 +466,10 @@
 		border-top-color: color-mix(in srgb, var(--color-border) 72%, transparent);
 	}
 
+	.language-switcher {
+		margin-bottom: 0.8rem;
+	}
+
 	.application-chrome__profile {
 		min-height: 3.5rem;
 		padding: 0.35rem;
@@ -478,6 +539,10 @@
 	.application-chrome__footer {
 		padding-top: 0.75rem;
 	}
+
+	.language-switcher {
+		margin-bottom: 0.65rem;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -485,6 +550,7 @@
 	.page-header__menu-icon > span,
 	.application-menu,
 	.primary-navigation__link,
+	.language-switcher__option,
 	.application-chrome__profile {
 		transition: none;
 	}

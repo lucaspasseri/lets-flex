@@ -19,12 +19,20 @@
  * @property {string} step_type_name
  * @property {number} [exercise_variant_id]
  * @property {string} exercise_variant_name
+ * @property {"en" | "pt-BR" | "canonical"} [exercise_variant_name_locale]
+ * @property {string} [canonical_exercise_variant_name]
  * @property {string} exercise_variant_setup_description
  * @property {string} exercise_variant_environment
  * @property {string} exercise_variant_notes
  * @property {string} exercise_name
+ * @property {"en" | "pt-BR" | "canonical"} [exercise_name_locale]
+ * @property {string} [canonical_exercise_name]
  * @property {string} movement_pattern_name
+ * @property {"en" | "pt-BR" | "canonical"} [movement_pattern_name_locale]
+ * @property {string} [canonical_movement_pattern_name]
  * @property {string} equipment_name
+ * @property {"en" | "pt-BR" | "canonical"} [equipment_name_locale]
+ * @property {string | null} [canonical_equipment_name]
  * @property {string} equipment_category
  * @property {MuscleRow[]} muscles
  */
@@ -54,15 +62,13 @@
  */
 
 /**
- * @typedef {object} SessionMapperStepMuscle
- * @property {string} name
- * @property {string} variantName
- */
-
-/**
  * @typedef {object} SessionMapperStepExercise
  * @property {string} name
  * @property {string} variantName
+ * @property {string} [canonicalName]
+ * @property {string} [canonicalVariantName]
+ * @property {"en" | "pt-BR" | "canonical"} [nameLocale]
+ * @property {"en" | "pt-BR" | "canonical"} [variantNameLocale]
  * @property {string} setupDescription
  * @property {string} environment
  * @property {string} notes
@@ -72,6 +78,8 @@
  * @typedef {object} SessionMapperStepEquipment
  * @property {string} name
  * @property {string} category
+ * @property {"en" | "pt-BR" | "canonical"} [nameLocale]
+ * @property {string} [canonicalName]
  */
 
 /**
@@ -89,6 +97,8 @@
  * @property {number | null} loadValue
  * @property {string | null} loadUnit
  * @property {string} movementPattern
+ * @property {"en" | "pt-BR" | "canonical"} [movementPatternLocale]
+ * @property {string} [canonicalMovementPattern]
  * @property {SessionMapperStepExercise} exercise
  * @property {SessionMapperStepEquipment} equipment
  * @property {MuscleMapper[]} muscles

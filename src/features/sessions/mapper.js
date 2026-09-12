@@ -42,15 +42,26 @@ export function toSessionMapperStepSeed(step) {
 		loadValue: step.load_value,
 		loadUnit: step.load_unit,
 		movementPattern: toCapitalizedString(step.movement_pattern_name),
+		movementPatternLocale: step.movement_pattern_name_locale ?? "canonical",
+		canonicalMovementPattern: toCapitalizedString(
+			step.canonical_movement_pattern_name ?? step.movement_pattern_name,
+		),
 		exercise: {
 			name: step.exercise_name,
+			nameLocale: step.exercise_name_locale ?? "canonical",
+			canonicalName: step.canonical_exercise_name ?? step.exercise_name,
 			variantName: step.exercise_variant_name,
+			variantNameLocale: step.exercise_variant_name_locale ?? "canonical",
+			canonicalVariantName:
+				step.canonical_exercise_variant_name ?? step.exercise_variant_name,
 			setupDescription: step.exercise_variant_setup_description,
 			environment: step.exercise_variant_environment,
 			notes: step.exercise_variant_notes,
 		},
 		equipment: {
 			name: step.equipment_name,
+			nameLocale: step.equipment_name_locale ?? "canonical",
+			canonicalName: step.canonical_equipment_name ?? step.equipment_name,
 			category: toCapitalizedString(step.equipment_category).replaceAll("_", " "),
 		},
 		muscles: (step.muscles ?? []).map(toMuscle),

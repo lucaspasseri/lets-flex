@@ -1,4 +1,18 @@
+import { createBrowserTranslator } from "../../i18n.js";
 const ROW_CONTEXT_PATTERN = /logFormRows\[(?:\d+|template)\]/g;
+
+const FALLBACK_MESSAGES = {
+	workout: {
+		setTitle: { one: "Set {{count}}", other: "Set {{count}}" },
+		setCount: { one: "{{count}} set ready", other: "{{count}} sets ready" },
+		setAdded: "Set {{count}} added.",
+		setRemoved: {
+			one: "Set {{number}} removed. {{count}} set remains.",
+			other: "Set {{number}} removed. {{count}} sets remain.",
+		},
+		removeSet: "Remove set {{count}}",
+	},
+};
 
 function setSubmissionPending(button) {
 	if (!button) return;
@@ -10,7 +24,10 @@ function setSubmissionPending(button) {
 	}
 }
 
-export function initializeWorkoutLogForm(root) {
+export function initializeWorkoutLogForm(
+	root,
+	translate = createBrowserTranslator(root, FALLBACK_MESSAGES),
+) {
 	const form = root.querySelector("[data-workout-perform-form]");
 	const setList = root.querySelector("[data-set-list]");
 	const rowTemplate = root.querySelector("[data-set-row-template]");
@@ -31,7 +48,7 @@ export function initializeWorkoutLogForm(root) {
 		currentRows.forEach((row, index) => {
 			const number = index + 1;
 			const title = row.querySelector("[data-set-title]");
-			if (title) title.textContent = `Set ${number}`;
+			if (title) title.textContent = translate("workout.setTitle", { count: number });
 
 			row
 				.querySelectorAll("[id], [name], [for], [aria-describedby]")
@@ -50,13 +67,18 @@ export function initializeWorkoutLogForm(root) {
 			const removeButton = row.querySelector('[data-action="remove-set"]');
 			if (removeButton) {
 				removeButton.disabled = currentRows.length <= 1;
-				removeButton.setAttribute("aria-label", `Remove set ${number}`);
+				removeButton.setAttribute(
+					"aria-label",
+					translate("workout.removeSet", { count: number }),
+				);
 			}
 		});
 
 		addSetButton.disabled = currentRows.length >= maxSets;
 		if (setCount) {
-			setCount.textContent = `${currentRows.length} ${currentRows.length === 1 ? "set" : "sets"} ready`;
+			setCount.textContent = translate("workout.setCount", {
+				count: currentRows.length,
+			});
 		}
 	}
 
@@ -66,7 +88,7 @@ export function initializeWorkoutLogForm(root) {
 		reindexRows();
 		const currentRows = rows();
 		currentRows.at(-1)?.querySelector(".form-input, .form-select")?.focus();
-		announce(`Set ${currentRows.length} added.`);
+		announce(translate("workout.setAdded", { count: currentRows.length }));
 	});
 
 	setList.addEventListener("click", (event) => {
@@ -82,7 +104,10 @@ export function initializeWorkoutLogForm(root) {
 		const focusRow = remainingRows[Math.min(removedIndex, remainingRows.length - 1)];
 		focusRow?.querySelector('[data-action="remove-set"]')?.focus();
 		announce(
-			`Set ${removedIndex + 1} removed. ${remainingRows.length} ${remainingRows.length === 1 ? "set remains" : "sets remain"}.`,
+			translate("workout.setRemoved", {
+				number: removedIndex + 1,
+				count: remainingRows.length,
+			}),
 		);
 	});
 
@@ -91,7 +116,10 @@ export function initializeWorkoutLogForm(root) {
 
 export function initializeWorkoutTracker(root) {
 	root.querySelector("[data-workout-feedback]")?.focus();
-	root.querySelectorAll("[data-workout-log-form]").forEach(initializeWorkoutLogForm);
+	const translate = createBrowserTranslator(root, FALLBACK_MESSAGES);
+	root
+		.querySelectorAll("[data-workout-log-form]")
+		.forEach((form) => initializeWorkoutLogForm(form, translate));
 	root
 		.querySelectorAll("[data-workout-action-form], [data-workout-perform-form]")
 		.forEach((form) => {

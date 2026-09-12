@@ -14,7 +14,29 @@
  * @param {ZodError} error
  * @returns {ValidationErrors}
  */
-export function formatValidationErrors(error) {
+/** @param {ZodError} error @param {Function} [translate] */
+export function formatValidationErrors(error, translate) {
+	return formatValidationErrorsForLocale(error, translate);
+}
+
+const VALIDATION_KEYS = new Map([
+	["Choose a valid workout session.", "validation.validWorkoutSession"],
+	["Choose a valid workout step.", "validation.validWorkoutStep"],
+	["Choose a valid load unit.", "validation.validLoadUnit"],
+	["Add at least one set.", "validation.atLeastOneSet"],
+	["A step cannot contain more than 100 sets.", "validation.maximumWorkoutSets"],
+	["Choose a valid exercise.", "validation.validExercise"],
+	["Choose a valid result limit.", "validation.validResultLimit"],
+	["Choose a valid start date.", "validation.validStartDate"],
+	["Choose a valid end date.", "validation.validEndDate"],
+	[
+		"The start date must be on or before the end date.",
+		"validation.startDateBeforeEndDate",
+	],
+]);
+
+/** @param {ZodError} error @param {Function} [translate] @returns {ValidationErrors} */
+function formatValidationErrorsForLocale(error, translate) {
 	/** @type {Record<string, string>} */
 	const fieldErrors = {};
 	/** @type {string[]} */
@@ -22,11 +44,16 @@ export function formatValidationErrors(error) {
 
 	for (const issue of error.issues) {
 		const fieldName = issue.path.map(String).join(".");
+		const key = VALIDATION_KEYS.get(issue.message);
+		const message =
+			key && typeof translate === "function"
+				? translate(key, { defaultValue: issue.message })
+				: issue.message;
 
 		if (fieldName) {
-			fieldErrors[fieldName] ??= issue.message;
+			fieldErrors[fieldName] ??= message;
 		} else {
-			formErrors.push(issue.message);
+			formErrors.push(message);
 		}
 	}
 
@@ -48,7 +75,7 @@ export default function validateRequestBody(schema, onInvalid) {
 		if (!result.success) {
 			try {
 				await onInvalid(req, res, {
-					errors: formatValidationErrors(result.error),
+					errors: formatValidationErrorsForLocale(result.error, res.locals?.t),
 					submittedValues: req.body,
 				});
 			} catch (error) {

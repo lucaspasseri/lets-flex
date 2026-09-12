@@ -28,7 +28,7 @@ export async function renderDay(req, res, formState = {}) {
 		toNullableNumber(sessionState?.dayId);
 	const sessionId = toNullableNumber(validatedQuery.sessionId);
 
-	const data = await getDayPageData({ userId, dayId });
+	const data = await getDayPageData({ userId, dayId, locale: res.locals.language });
 	const programId = data.program?.id ?? null;
 	const cycleId = data.cycle?.id ?? null;
 
@@ -43,7 +43,13 @@ export async function renderDay(req, res, formState = {}) {
 	const page = res.locals.page;
 	const pageState = { userId, programId, cycleId, dayId, sessionId };
 
-	const dayPage = createDayPageViewModel({ page, pageState, data, ...formState });
+	const dayPage = createDayPageViewModel({
+		page,
+		pageState,
+		data,
+		translate: res.locals.t,
+		...formState,
+	});
 
 	res.render("day", dayPage);
 }

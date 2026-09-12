@@ -1,4 +1,5 @@
 import pool from "../../../db/pool.js";
+import { normalizeCatalogLocale } from "../catalogLocalization/catalogLocalization.js";
 import * as queries from "./queries.js";
 
 /**
@@ -7,8 +8,8 @@ import * as queries from "./queries.js";
  * @typedef {import("./sessions.types.js").SessionRow} SessionRow
  */
 
-/** @param {{userId: number | null}} input @param {any} db */
-export async function findVisibleForUser({ userId }, db = pool) {
+/** @param {{userId: number | null, locale?: string}} input @param {any} db */
+export async function findVisibleForUser({ userId, locale }, db = pool) {
 	const { rows } = await db.query(
 		queries.findAllQuery().replace(
 			"ORDER BY se.id;",
@@ -27,7 +28,7 @@ export async function findVisibleForUser({ userId }, db = pool) {
 					)
 					ORDER BY se.id;`,
 		),
-		[userId],
+		[userId, normalizeCatalogLocale(locale)],
 	);
 	return rows;
 }
