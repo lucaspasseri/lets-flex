@@ -127,7 +127,7 @@
 						<div class="session-step__content">
 				<header class="session-step__header<%= step.media ? ' session-step__header--with-media' : '' %>">
 								<% if (step.media) { %>
-								<%- include("../../shared/components/media", { media: step.media, className: "session-step__media", variant: "icon", decorative: true }) %>
+								<%- include("../../shared/components/media", { media: step.media, className: "session-step__media", variant: "icon", decorative: true, loading: "lazy", decoding: "async" }) %>
 								<% } %>
 
 								<div class="session-step__identity">

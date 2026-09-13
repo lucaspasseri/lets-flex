@@ -1,10 +1,10 @@
-# Curated media assets
+# Legacy static media manifest
 
-Curated media assets are local, lightweight SVG illustrations. Use lowercase kebab-case names,
-keep primary artwork at a 3:2 ratio (`960 × 640`), and register each asset in
-`src/features/media/mediaManifest.js` with useful alt text and its media match type.
+This directory contains the small Phase 1 static SVG manifest. It remains a resolver fallback and
+is not the workflow for newly curated Phase 3 catalog assets.
 
-The resolver deliberately supports representative coverage plus inheritance and fallbacks. It uses
-an initial-based presentation when no suitable entity, movement, environment, or category artwork
-exists; do not add a generic image merely to fill the frame. Do not add a database reference or
-page-local lookup for an asset.
+For the active visual rules, accepted formats, presentation geometry, accessibility, provenance,
+and future human-reviewed AI experiments, follow [the media style guide](../../docs/media-style-guide.md).
+
+New representative raster assets should use the Phase 2 admin media-management workflow and the
+normal resolver. Do not add page-local paths or generic media merely to fill a frame.

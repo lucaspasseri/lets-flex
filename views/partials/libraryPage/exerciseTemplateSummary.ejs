@@ -2,7 +2,7 @@
 
 <span class="exercise-template__summary">
 	<% if (details.media) { %>
-		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__summary-media", variant: "icon", decorative: true }) %>
+		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__summary-media", variant: "icon", density: "compact", decorative: true, loading: "lazy", decoding: "async" }) %>
 	<% } %>
 	<span class="exercise-template__identity">
 		<span class="exercise-template__eyebrow">Base exercise</span>

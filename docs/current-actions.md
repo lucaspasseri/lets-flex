@@ -2,1933 +2,442 @@
 
 ## Current goal
 
-### Phase 2 — Build Admin Media Management
+### Phase 4 — Populate and Operationalize the Media Catalog
 
-Expose the completed Phase 1 media foundation through an admin-only workflow for validated upload,
-asset reuse, direct assignment, replacement, removal, preview, and localized accessibility
-metadata, while preserving resolver inheritance, fallbacks, authorization, and layout stability.
+Expand the verified media system from Phase 3’s representative set into broad, deliberate catalog coverage while preserving reuse, inheritance, provenance, conservative anatomy standards, and the compact text-first interface.
 
 ## Goal status
 
-Phase 2 is **Completed** on 2026-09-12.
+Phase 4 is **Completed** on 2026-09-13. Actions 1–6 are completed, including the focused Admin → Manage Media responsive-layout correction.
 
 ## Planning evidence
 
-- **Verified:** Phase 1 provides `media_assets` and `entity_media`, `mediaRepository.js`, an
-  ID-backed resolver with variant inheritance, the shared media partial, and bounded presentation
-  CSS. Supported assignable entities are exercises, exercise variants, muscles, equipment, and
-  movement patterns.
-- **Verified:** `exercise_variants.environment` is a string; no environment entity should be added.
-- **Verified:** `requireAdmin` protects existing admin routes and CSRF middleware protects all
-  state-changing requests through the session token. Existing admin entry points are the exercise
-  Library and translation maintenance pages.
-- **Verified:** the current media asset has only shared `alt_text`; the translation architecture
-  supports `en` and `pt-BR` catalog records, but localized media metadata does not yet persist.
-- **Verified:** Phase 1 uses stable storage keys and local public assets, but no dedicated upload
-  adapter or multipart upload flow exists.
+- **Verified catalog baseline:** the configured local development database contains 78 base exercises, 129 global variants, 28 equipment entities, 8 movement patterns, and 24 muscles. Every base and global variant has a movement-pattern relationship; environments remain seven variant string values rather than manageable entities.
+- **Verified effective coverage:** 1 base exercise and 7 variants have persistent direct assignments; 56 bases and 90 variants resolve through five direct movement-pattern assignments; 1 variant inherits its base; 4 variants use the static gym-environment fallback; no listed entity currently resolves through a category fallback; 21 bases and 27 variants remain initial. Equipment is 4 direct/24 initial, movement patterns 5 direct/3 initial, and muscles 2 direct/22 initial.
+- **Verified reuse:** current persistent resolution remains direct → base exercise → movement pattern, then the established static contextual/initial resolver. The shared `media.ejs` geometry and existing user-facing surfaces are already covered structurally from Phase 3. The admin management screen already supports entity-type/name search, previewed effective source, uploads, reuse, and safe direct-assignment removal.
+- **Verified documentation discrepancy:** the Phase 3 provenance record documents PNG assets 4–20 and says no muscle media is assigned, while the live development database also has JPEG assets 1–3. Assets 1 and 3 are directly assigned to Abs and Abductors; asset 2 is unassigned; asset 3 has no localized-alt records. Their source/provenance is not recorded in repository documentation. This is an audit/repair candidate, not an assumed valid curation set and not authorization for deletion.
+- **Verified targets:** complete the 8-item movement-pattern visual family so all real bases/variants have effective pattern coverage; curate documented Tier 1 base exercises directly; target coherent direct coverage of all 28 equipment records unless a quality exception is documented; use deliberate variant inheritance; and do not expand muscle coverage without a coherent, source-verified anatomical set.
+- **Unknown:** no catalog usage/frequency telemetry was found in this planning pass. Tier 1 selection must therefore be justified from real catalog role and visual-recognition value, not claimed popularity.
+- **Known limitation:** the Phase 3 environment had no browser executable or browser-test dependency, so live narrow/intermediate/desktop, pointer-state, and assistive-technology review remains unverified. Structural EJS/CSS/a11y contracts are available; later work must not represent them as rendered evidence.
 
 ## Delta classification
 
-- **Already satisfied / reuse:** persistent media schema, primary assignment uniqueness, entity
-  target validation, direct/inherited/contextual/initial resolution, shared rendering, admin role
-  middleware, CSRF, catalog IDs, and locale normalization.
-- **Add:** admin media domain operations, safe raster upload/parser and storage adapter, localized
-  alt metadata, admin route/controller/view model/UI, and focused HTTP/resolver integration tests.
-- **Modify:** media schema/repository only for localized alt metadata; admin navigation/catalog
-  entry point; resolver/view model inputs where admin status needs direct/effective provenance.
-- **Preserve:** assignment replacement without asset deletion, Phase 1 fallback order, bounded
-  user-facing layouts, ownership boundaries, and disposable schema-plus-seed lifecycle.
+- **Already satisfied / reuse:** persistent media schema, management service, authorization/CSRF/storage safeguards, localized-alt boundary, direct/base/movement/contextual/initial resolver precedence, shared media presentation, Phase 3 style guide, and 17 reviewed PNG assignments.
+- **Modify:** media documentation must become an operational coverage guide; the management experience may need a narrowly evidenced coverage-state refinement; legacy documentation must be reconciled with the actual asset store.
+- **Add:** catalog-tier mapping, coherent curated coverage batches, movement-pattern completion, equipment coverage, deliberate variant decisions, safe asset/assignment health audit, final coverage reporting, and any focused supporting tests.
+- **Repair:** determine and safely resolve any verified legacy JPEG provenance/localization/storage/assignment issue. No repair is presumed before the audit establishes its exact condition and impact.
+- **Explicitly defer:** environment entities, automatic/runtimes AI generation, full DAM behavior, arbitrary bulk operations, and broad muscle population without verified anatomical sources.
 
-## Proposed Phase 2 action sequence
+## Proposed Phase 4 action sequence
 
-Only the prepared next action may be activated after explicit user approval. One action may be
-active at a time.
-
-### Action 1 — Verify foundation and design admin workflow
+### Action 1 — Catalog audit and coverage plan
 
 **Status:** Completed
 
-**Purpose:** Confirm the implementation boundary, select the existing admin/catalog entry point,
-define supported entity labels and direct/effective/fallback states, finalize upload/storage and
-localized-alt decisions, and add the Phase 2 tracking baseline.
+**Purpose:** Turn the verified aggregate baseline into a practical, entity-level coverage strategy before curation begins. Document tier membership, category batches, target state for each real catalog family, direct-versus-inherited rationale, and the exact legacy-asset audit boundary.
 
-**Acceptance criteria:** The actual Phase 1 contracts and admin/auth architecture are documented;
-unsupported environment management is explicit; the smallest cohesive route/service/UI sequence is
-prepared; security-sensitive decisions cover MIME/content/size/path validation, CSRF, and admin-only
-authorization; no runtime code is changed before the action plan gate.
+**Acceptance criteria:** The current catalog counts and effective-coverage baseline are recorded; Tier 1/2/3 selections use actual entities and do not claim unverified popularity; targets cover all eight movement patterns, the 28 equipment records, exercise inheritance, and conservative muscles; planned batches use coherent visual families; the existing admin workflow is assessed against the real curation task; the provenance discrepancy is recorded without data mutation; `docs/current-goal.md`, this record, and the operational media guidance reflect the plan.
 
-**Activation (2026-09-12):** The user approved the proposed Phase 2 action plan. Action 1 became the
-only active action.
+**Boundaries:** Read-only audit and documentation/planning only. Do not upload/assign assets, modify persistent data, reset the database, add a workflow feature, alter user-facing surfaces, or activate Action 2.
 
-**Verified audit and design (2026-09-12):** Phase 1 uses `media_assets` and `entity_media` with a
-single replaceable `primary` assignment, stable storage keys, and application-side validation for
-the supported polymorphic entity contract. `resolveEntityMedia` already provides direct assignment,
-variant-to-exercise inheritance, movement-pattern fallback, existing environment/category context,
-and initial fallback behavior. The shared media partial and bounded CSS are reusable for an admin
-preview. Existing `requireAdmin` and session CSRF middleware protect the current admin routes; the
-existing admin Library and translation maintenance pages are the appropriate integration structure.
+**Activation (2026-09-12):** The user approved Action 1. It is the only active action; its approved scope remains the documented read-only audit and operational planning boundary.
 
-The supported Phase 2 entity types are exercises, exercise variants, muscles, equipment, and
-movement patterns. Environment management is explicitly unsupported because
-`exercise_variants.environment` is a string, not an entity. Localized catalog data supports `en`
-and `pt-BR`, while media currently has only shared `alt_text`; Phase 2 therefore needs a localized
-metadata extension rather than duplicated assets.
+**Implementation (2026-09-12):** Performed the read-only resolver audit against the local development catalog and documented the results in `docs/media-catalog-coverage-plan.md`. The plan records every supported entity category, all direct/base/movement/environment/category/initial states, 29 actual Tier 1 base-exercise candidates, 35 Tier 2 candidates, 14 intentional Tier 3 candidates, all 28 equipment records in four coherent batches, the three unassigned movement-pattern gaps, default variant inheritance, and the explicit no-expansion muscle/environment policy. It also defines the admin curation sequence and legacy JPEG audit evidence required before any safe mutation.
 
-**Confirmed design decisions:** Accept PNG, JPEG, and WebP only; reject SVG because no safe upload
-sanitization boundary exists. Generate storage keys server-side, validate both declared type and
-file signatures/dimensions, and keep upload persistence behind an application-owned local storage
-adapter compatible with existing media storage keys. Prefer existing-asset reuse, make replacement
-change only the assignment, and defer permanent asset deletion. Use one shared asset with localized
-English and Portuguese alt text and deterministic locale-to-English/default fallback. Preserve the
-canonical schema-plus-seed lifecycle and do not add a migration, reset production data, or add AI,
-gallery, bulk, or unrelated catalog scope.
+Updated `docs/current-goal.md` with the category-fallback result and linked the operational plan from `docs/media-style-guide.md`. The style guide now correctly records the Phase 3 shared initial-geometry repair rather than retaining its superseded pre-repair note. No runtime code, asset, storage, database record, dependency, production target, reset, bulk operation, commit, push, or deployment was changed.
 
-**Security boundary review:** `requireAdmin` is required on the GET editor and every mutation;
-global CSRF protection remains required for state changes. Uploads must enforce a size limit, parse
-content rather than trusting filenames/MIME headers, reject traversal or client storage paths, and
-avoid logging file contents or sensitive request data. Replacement/removal must be atomic at the
-assignment boundary and must never delete a reusable asset implicitly.
+**Verification (2026-09-12):** The catalog baseline was derived from read-only local PostgreSQL `SELECT` queries and the current resolver. Source manifest inspection confirmed the 78-base/129-variant/28-equipment/8-pattern/24-muscle inventory and exact tier membership. `npx prettier --check docs/current-goal.md docs/current-actions.md docs/media-style-guide.md docs/media-catalog-coverage-plan.md` and `git diff --check` passed after formatting. The final documentation diff was inspected. No code checks apply because this action changes documentation only.
 
-**Verification:** The repository audit, relevant UI/general guidance review, delta classification,
-and Phase 2 tracking update are complete. Documentation passed Prettier and `git diff --check`.
-No runtime files, database contents, dependencies, or production data were changed.
+**Review stop (2026-09-12):** Action 1 is ready for review. Action 2 remains pending and was not activated or implemented.
 
-**Review stop (2026-09-12):** Action 1 was ready for review. Action 2 remained pending and was not
-activated or implemented.
+**Completion (2026-09-12):** The user approved Action 1 after the complete baseline, entity-tier map, operational workflow, legacy-audit boundary, and documentation verification were reviewed. Final documentation verification repeated the Prettier check and `git diff --check` successfully. Action 2 remains pending and was not activated or implemented.
 
-**Completion (2026-09-12):** The user approved Action 1 after the documented audit, design
-decisions, security-boundary review, and documentation verification. Action 1 is complete; no
-runtime implementation was included.
-
-### Action 2 — Admin media domain operations
+### Action 2 — Tier 1 base exercise and equipment coverage
 
 **Status:** Completed
 
-**Purpose:** Implement validated asset creation/upload, reusable asset selection, assignment and
-replacement, assignment removal, localized alt metadata, storage-key generation, and atomic
-failure behavior behind feature-owned services/repositories.
+**Purpose:** Curate the approved Tier 1 base-exercise and equipment batches through the existing management service, maximizing useful downstream inheritance and minimizing duplicate binaries.
 
-**Acceptance criteria:** Supported raster uploads are content-validated and size-limited; malformed
-or unsupported requests fail safely; replacement preserves old reusable assets; remove restores the
-resolver chain; invalid entities/assets/roles leave no partial state; focused domain/repository
-tests pass.
+**Acceptance criteria:** Every curated asset has reviewed suitability, provenance, managed storage, and required meaningful localized metadata; direct base/existing asset reuse is chosen deliberately; direct assignment count is not treated as the goal; no undocumented source or uncontrolled mutation is used.
 
-**Implementation (2026-09-12):** Added `media_asset_alt_texts` to the authoritative disposable
-schema with `en`/`pt-BR` constraints and cascade behavior. Extended the media repository with
-localized metadata replacement, asset lookup/listing, and fixed-allowlist entity existence checks.
-The ID-backed resolver now selects localized alt text deterministically: Portuguese prefers
-Portuguese and falls back to English; English uses English, then the existing asset/default label
-fallback.
+**Activation (2026-09-12):** The user approved Action 2. Curate only the Tier 1 base-exercise and equipment batches documented in `docs/media-catalog-coverage-plan.md`, using the established human-reviewed external-generation and admin-management workflow. Do not activate Action 3, change muscle assignments, reset the database, or introduce runtime generation.
 
-Added `mediaUpload.js` for server-side PNG, JPEG, and WebP validation, including an 8 MB limit,
-filename/path checks, signatures, dimensions, and dimension bounds. SVG is intentionally rejected
-because no safe sanitization boundary exists. Added `mediaStorage.js` as a local application-owned
-adapter that generates UUID storage keys under `/media/uploads`, writes with exclusive creation,
-and exposes cleanup without accepting client paths. Added `manageMedia.js` for transactional upload
-and assignment, reusable-asset assignment/replacement, assignment removal, localized labels, and
-rollback cleanup. Replacement never deletes the previous reusable asset; removal deletes only the
-entity assignment.
+**Scale discovery (2026-09-12):** The approved Tier 1 plan contains 29 direct-base candidates plus all 28 equipment records. Under the required one-distinct-asset-at-a-time generation and human-review workflow, completing all 57 entities in one action would create a materially larger mutation/review batch than Phase 3’s 17 assets. No asset was generated, uploaded, assigned, replaced, or deleted after this discovery. A user decision is needed on whether to retain one 57-entity Action 2 batch or revise it into explicit, reviewable curation batches before implementation continues.
 
-Added focused tests for schema contracts, localized repository behavior, upload validation and
-storage, transactional success/rollback, reuse, replacement, removal, invalid IDs/entities, and
-localized resolver fallback.
+**Full-batch confirmation (2026-09-12):** The user explicitly retained the 57-entity Action 2 scope. Curation proceeds through reviewed individual assets and the existing transactional management service; it remains one active action until its complete review evidence is recorded.
 
-**Verification (2026-09-12):** Focused media/schema/domain suite passed **24/24**. `npm run
-check:types`, `npm run check:browser-types`, `npm run lint`, `npm run format:check`, and
-`git diff --check` passed. No new production dependency was added. The full `npm test` suite and
-database reset/seed verification were not run because they may mutate the disposable database and
-the user explicitly requested no database reset or mutation without separate authorization.
+**Implementation in progress (2026-09-12–13):** Reviewed and assigned direct base media for Overhead Press (asset 21), Pull Up (22), Lat Pulldown (23), Deadlift (24), and Squat (25). Each is an original project-created PNG generated through the built-in image tool, checked for the established non-photorealistic charcoal/coral/teal editorial language, readable subject/equipment identity, absent visible text/logos/watermarks, and no obvious unsafe form. Each was stored by `createAndAssignUploadedMedia` under a generated `/media/uploads` key with both English and Brazilian Portuguese alt records.
 
-**Review stop (2026-09-12):** Action 2 was ready for review. Action 3 remained pending and was not
-activated or implemented.
+Reused reviewed Phase 3 assets through `assignExistingMedia` for compatible Tier 1 bases: Bodyweight Push Up → Push Up (asset 6), One-Arm Dumbbell Row → Row (7), Bilateral Leg Press → Leg Press (8), Bodyweight Glute Bridge → Hip Extension (10), and Treadmill Running → Running (11). These create direct base assignments without duplicate files and preserve their existing direct variant assignments. No existing direct assignment was replaced; no legacy JPEG, muscle, environment, reset, or uncontrolled bulk operation was touched.
 
-**Completion (2026-09-12):** The user approved Action 2 after focused upload, storage, repository,
-resolver, transaction, localization, formatting, lint, type, and diff verification. Action 2 is
-complete. The full/database suite remains intentionally unrun because separate database mutation
-authorization was not granted.
+The reviewed lower-body batch added Romanian Deadlift (asset 26), Forward Lunge (27), Reverse Lunge (28), and Split Squat (29) as direct base assignments with both localized alt records through the same service.
 
-### Action 3 — Admin management UI
+The reviewed accessory/core batch added Chest Fly (asset 30), Lateral Raise (31), Biceps Curl (32), and Triceps Pushdown (33) with both localized alt records. The user added a collection-level diversity requirement on 2026-09-13: remaining human-subject prompts must naturally broaden representation across skin tones, ethnic backgrounds, and visible physical characteristics while preserving the established visual family and avoiding stereotypes. The operational plan now records that requirement.
 
-**Status:** Changes requested
+The next reviewed set added Suspension Trainer (TRX, asset 34), Ab Wheel (35), and Medicine Ball (36) as isolated equipment assets, then Leg Extension (37) and Leg Curl (38) as direct base-exercise assignments. Each generated file is a reviewed original project-created PNG, stored and assigned by `createAndAssignUploadedMedia` with English and Brazilian Portuguese alt text. The Leg Extension and Leg Curl prompts applied the collection-level diversity requirement while keeping form, machine geometry, framing, and visual treatment consistent. No prior assignment was replaced.
 
-**Purpose:** Integrate a simple admin media editor into the existing admin structure with entity
-selection, current direct/effective media, source explanation, role, preview, upload/reuse actions,
-localized alt fields, removal feedback, validation errors, and accessible responsive forms.
+Plank (asset 39) was then reviewed and assigned as a direct base-exercise asset. Its high-plank alignment is legible from a full-body side view, it has both localized alt records, and its human subject broadens the visual collection without changing the catalog’s editorial treatment.
 
-**Acceptance criteria:** Admins can understand what will happen on replacement/removal; controls use
-shared components and CSRF; accessible labels/focus/errors and direct/inherited/fallback status are
-covered by view/browser tests; no user-facing media layout contracts change.
+Kettlebell Swing (40), Farmer Carry (41), Walking (42), and Cycling (43) are the next reviewed direct base assignments. Each uses the same managed-storage and localized-metadata workflow. The exercise depictions were accepted only after review for clear hip-hinge, loaded-carry, gait, or stationary-bike technique respectively; the set also intentionally broadens age, skin tone, and body-build representation without stereotype-driven treatment.
 
-**Activation (2026-09-12):** The user approved the completed Action 2 and explicitly approved the
-next action. Action 3 became the only active action for implementation.
+Jump Rope (44), Elliptical Training (45), and Rowing (46) complete the approved 29-item Tier 1 direct-base list. Each has a reviewed 1536 × 1024 PNG, managed storage, one direct assignment, and English/Brazilian Portuguese alt text. The final cardio illustrations preserve readable rope, pedal/handle, or indoor-rower cues, and the full Tier 1 base set now benefits its compatible variants through the existing resolver inheritance.
 
-**Implementation (2026-09-12):** Added the admin-only `/admin/media` route family and navigation
-entry, reusing the existing session/authentication, `requireAdmin`, CSRF, EJS shell, shared media,
-form, button, and feedback components. The page provides bounded entity selection/search for global
-exercises, global exercise variants, muscles, equipment, and movement patterns; it shows the current
-preview, direct/effective source, role, dimensions, and variant base-exercise context. It provides
-validated upload, reusable-asset assignment, replacement, localized English and Portuguese alt
-text, and assignment-removal forms with clear fallback guidance.
+Equipment curation then began with the reviewed selectorized-machine group: Smith Machine (47), Cable Machine (48), Leg Press Machine (49), and Chest Press Machine (50). Each isolated object has managed PNG storage, one direct assignment, and both localized alt records. Review confirmed the named machine’s distinct structural cues and absence of text, logos, or brand marks.
 
-Added a bounded single-file multipart parser before CSRF validation so the existing session CSRF
-middleware can validate multipart forms. Added responsive media-management CSS with visible focus
-states and mobile form/preview layouts. Added matching English and Brazilian Portuguese resource
-keys. Private exercise variants are excluded from option lookup and assignment existence checks;
-the existing user-facing media layout contract remains unchanged.
+The next selectorized-machine group added Hack Squat Machine (51), Leg Extension Machine (52), Leg Curl Machine (53), and Rear Delt Machine (54). Their reviews explicitly distinguished the hack-squat shoulder sled, leg-extension shin roller, prone leg-curl bench, and reverse-pec-deck chest support from adjacent catalog machinery; each asset again uses the normal managed-storage and localized-metadata path.
 
-**Verification (2026-09-12):** Database-free focused media, repository, upload, storage, resolver,
-multipart, schema, localization, view, navigation, and CSS-contract suite passed **41/41**.
-`npm run check:types`, `npm run check:browser-types`, `npm run lint`, `npm run format:check`, and
-`git diff --check` passed. The full `npm test` run remains unavailable because its canonical
-database setup cannot connect in this environment and its application listen test is blocked by
-the sandbox; no database reset or seed mutation was attempted. Live visual browser verification
-remains unavailable; rendered EJS contracts and responsive CSS assertions are covered.
+Lat Pulldown Machine (55), Pull-up Bar (56), Dip Bar (57), and Jump Rope (58) form the next reviewed equipment group. These records distinguish the overhead-pulley seat, solitary high bar, paired parallel bars, and complete adjustable rope respectively; all are stored and assigned through the same controlled service with localized metadata.
 
-**Review stop (2026-09-12):** Action 3 is ready for review. Action 4 remains pending and was not
-activated or implemented.
+The cardio-equipment group added Treadmill (59), Stationary Bike (60), Elliptical Trainer (61), and Rowing Machine (62). Review confirmed their named mechanisms—belt, flywheel/saddle, linked handles/pedals, and rail/seat/handle respectively—remain visually distinct with blank displays and no branding. Each has a direct managed assignment and localized metadata.
 
-**Completion (2026-09-12):** The user approved Action 3 after the documented admin route, view,
-multipart, localization, accessibility, responsive CSS, focused test, type, lint, formatting, and
-diff verification. Action 3 is complete; Action 4 remains pending and was not activated or
+Flat Bench (63), Incline Bench (64), Decline Bench (65), Squat Rack (66), and Power Rack (67) complete the 28-item Tier 1 equipment list. The reviewed silhouettes deliberately distinguish a horizontal pad, elevated adjustable back, decline plus ankle rollers, two-post open rack, and four-post enclosed rack. Each is a managed localized PNG with one direct assignment. Final complete-batch verification is in progress.
+
+**Final verification (2026-09-13):** The focused `node --test src/features/media/manageMedia.test.js src/features/media/mediaRepository.test.js` suite passed all 13 tests, covering atomic managed upload/assignment, rollback cleanup, safe reusable-asset assignment, removal behavior, entity validation, and localized metadata. The final local-development coverage query confirms all 29 planned Tier 1 base exercises and all 28 equipment records each have exactly one direct assignment, both `en` and `pt-BR` alt records, and a present application-managed file. It checked all 57 Tier 1 storage keys. `npx prettier --check docs/current-actions.md docs/media-asset-provenance.md` and `git diff --check` passed after the final provenance update. No runtime code, resolver precedence, legacy asset, muscle, environment, production target, reset, commit, push, or deployment changed.
+
+**Review stop (2026-09-13):** Action 2 is ready for review. Action 3 remains pending and was not activated.
+
+**Completion (2026-09-13):** The user approved Action 2 after review of the full Tier 1 base-exercise and equipment coverage, provenance, localized metadata, managed-file, and focused management-service verification. Its 29/29 Tier 1 base exercises and 28/28 equipment records retain one direct managed assignment with both required localized alt records. Action 3 remains pending and was not activated.
+
+### Action 3 — Movement patterns and conservative supporting categories
+
+**Status:** Completed
+
+**Purpose:** Complete the coherent 8-item movement-pattern family, then resolve supporting-category work only where the Action 1 plan and quality evidence support it.
+
+**Acceptance criteria:** Carry, Lunge, and Rotation close the documented pattern gaps without mixing visual families; every real movement pattern has coherent direct media; exercise effective coverage is remeasured; muscle and environment decisions preserve the documented conservative boundaries.
+
+**Activation (2026-09-13):** The user explicitly approved the prepared next action. Action 3 is now the only active action. No Action 3 implementation has begun in this activation step.
+
+**Implementation (2026-09-13):** Generated and human-reviewed three 1536 × 1024 PNG illustrations through the built-in image-generation workflow, using the established lower-density charcoal/coral/teal movement-pattern family as the style reference. The Lunge, Carry, and Rotation images each show a clear, static, safe-looking representative pose and introduce varied adult subjects across skin tones, hair, age cues, and builds without stereotype-driven depiction. Assets 68–70 were each created and assigned through `createAndAssignUploadedMedia`, which writes the managed file and atomically creates its asset, both localized alt records, and direct primary assignment. The new direct pattern assignments are Lunge (asset 68), Carry (69), and Rotation (70); their managed keys and localized descriptions are recorded in `docs/media-asset-provenance.md`.
+
+**Conservative supporting-category decision (2026-09-13):** No muscle media was added, reassigned, or deleted. The pre-existing JPEG assignments remain documented provenance/anatomy audit findings rather than accepted Phase 4 curation. Environments remain contextual strings, so no environment entity or assignment was introduced.
+
+**Verification (2026-09-13):** Read-only local-development queries confirm all 8/8 real movement patterns now have exactly one direct primary assignment, both `en` and `pt-BR` localized-alt records, and a present application-managed 1536 × 1024 PNG file. The same resolver-precedence measurement reports 78 base exercises: 29 direct and 49 movement-pattern inherited, with 0 lacking persistent coverage; and 129 global variants: 7 direct, 48 base inherited, and 74 movement-pattern inherited, with 0 lacking persistent coverage. The focused `node --test src/features/media/manageMedia.test.js src/features/media/mediaRepository.test.js src/features/media/resolveEntityMedia.test.js` suite passed all 19 tests, including transaction rollback, localized metadata, and direct/base/pattern resolver precedence. No runtime code, resolver precedence, legacy asset, environment model, reset, production target, commit, push, or deployment changed.
+
+**Review stop (2026-09-13):** Action 3 is ready for review. Action 4 remains pending and was not activated.
+
+**Completion (2026-09-13):** The user approved Action 3 after review of the cohesive three-asset completion of the movement-pattern family, managed-file and localized-alt records, conservative muscle/environment boundary, resolver-coverage measurement, and focused transaction/resolver tests. All 8 real movement patterns retain a direct managed assignment with both required localized alt records. Action 4 remains pending and was not activated.
+
+### Action 4 — Variant decisions and intentional fallback gaps
+
+**Status:** Completed
+
+**Purpose:** Review real variants after base/pattern coverage and add direct overrides only for meaningful recognition differences, leaving low-value duplication on inheritance or intentional fallback.
+
+**Acceptance criteria:** Each added direct variant has a recorded distinction; relevant inherited and fallback gaps are documented; asset reuse is preferred where intentional; no artificial 100% direct-assignment target is introduced.
+
+**Activation (2026-09-13):** The user explicitly approved the prepared next action. Action 4 is now the only active action. No Action 4 implementation has begun in this activation step.
+
+**Verified delta and implementation (2026-09-13):** The repository/DB audit found that six previously direct global variants were no longer meaningful overrides after Action 2 assigned their exact visual asset directly to the parent base: Bodyweight Push Up, One-Arm Dumbbell Row, Bilateral Leg Press, Bodyweight Glute Bridge, and Treadmill Running each used the same asset as its base; Barbell Bench Press used a separate asset but depicted the same barbell flat-bench setup as the Bench Press base. This reopens only those direct-assignment decisions, not the accepted media system. `removeAssignedMedia` removed the six direct variant assignments transactionally and preserved every underlying asset. Their effective presentation now inherits the already direct base asset without a visual regression. Asset 5, the former Barbell Bench Press variant image, remains an unassigned reusable asset rather than being deleted.
+
+**Retained and intentional decisions (2026-09-13):** Goblet Squat remains the sole direct global-variant override because its kettlebell-at-chest setup materially differs from the barbell back-squat base. The remaining 128 variants intentionally use base or completed movement-pattern inheritance: additional machine, cable, band, unilateral, outdoor, track, and treadmill labels did not warrant a new direct image without a reviewed visual distinction that base/pattern media could not communicate. No new asset, direct-assignment target, or artificial coverage threshold was introduced.
+
+**Verification (2026-09-13):** Read-only local-development queries confirm the six removed variants resolve through a direct base assignment, Goblet Squat retains its direct asset, and all corresponding media assets remain present; asset 5 has zero assignments and is preserved. The final global-variant state is 129 total: 1 direct, 54 base inherited, 74 movement-pattern inherited, and 0 without persistent coverage. The focused `node --test src/features/media/manageMedia.test.js src/features/media/mediaRepository.test.js src/features/media/resolveEntityMedia.test.js` suite passed all 19 tests, including transactional removal and direct/base/pattern precedence. No runtime code, resolver precedence, file, muscle, environment, reset, production target, commit, push, or deployment changed.
+
+**Review stop (2026-09-13):** Action 4 is ready for review. Action 5 remains pending and was not activated.
+
+**Completion (2026-09-13):** The user approved Action 4 after review of the focused direct-versus-inherited audit, six safe direct-assignment removals, retained Goblet Squat override, asset-preservation evidence, full global-variant coverage measurement, and focused transaction/resolver tests. The six affected variants inherit their base media, asset 5 remains reusable and unassigned, and Action 5 remains pending and was not activated.
+
+### Action 5 — Evidence-led curation workflow refinement
+
+**Status:** Completed
+
+**Purpose:** Improve the admin path only if Actions 1–4 demonstrate a concrete catalog-curation bottleneck.
+
+**Acceptance criteria:** Any addition is narrowly scoped (for example coverage-state filtering, compact navigation, or reviewable safe reuse/batching), preserves service validation/authorization/CSRF, does not silently overwrite direct assignments, and has focused tests. If the current workflow is sufficient, record that finding and make no speculative feature change.
+
+**Activation (2026-09-13):** The user explicitly approved the prepared next action. Action 5 is now the only active action. No Action 5 implementation has begun in this activation step.
+
+**Verified bottleneck and implementation (2026-09-13):** The completed curation work did not establish a need for coverage-state filtering, batch mutation, or navigation redesign: type/name selection, direct/effective preview, upload, reuse, and safe removal supported Actions 2–4. It did establish one concrete reuse defect: `getMediaManagementPage` used the repository default of 50 most-recent assets, so the 70-asset local catalog excluded intentionally preserved reusable asset 5. The page now requests the repository's existing bounded 100-asset maximum. Reusable option labels now prefer the active-locale meaningful alt text (with English fallback) rather than opaque ID/dimension/MIME text, allowing native select typing to identify an asset without creating a new search or mutation path. Authorization, CSRF, upload, assignment/replacement, removal, resolver precedence, and the 100-item repository cap are unchanged.
+
+**Verification (2026-09-13):** A read-only local-development page-data query confirmed the prior 50-item list covered IDs 70–21 and excluded asset 5; after the change it covers all 70 current assets through ID 1 and includes `#5 · Illustration of a barbell bench press variation on a flat bench.`. `node --test views/mediaManagement.test.js src/features/media/mediaRepository.test.js src/features/media/manageMedia.test.js` passed all 18 tests. `npm run check:types`, `npm run lint`, `npm run format:check`, and `git diff --check` passed. Rendered browser-width review remains unavailable because no browser executable is present; the existing EJS/CSS structure and focused render contracts remain unchanged. No database record, runtime media assignment, bulk operation, production target, reset, commit, push, or deployment changed.
+
+**Review stop (2026-09-13):** Action 5 is ready for review. Action 6 remains pending and was not activated.
+
+**Completion (2026-09-13):** The user approved Action 5 after review of the demonstrated reusable-asset discovery limit, the bounded 100-item and localized-label refinement, local page-data evidence, focused render/domain tests, type/lint/format checks, and browser-verification limitation. Action 6 remains pending and was not activated.
+
+### Action 6 — Asset health, performance, responsive verification, and final-review preparation
+
+**Status:** Completed
+
+**Purpose:** Audit asset/assignment health and duplicates; verify provenance, localization, accessibility, performance, and mixed states; run applicable checks; then record final coverage and known limitations.
+
+**Acceptance criteria:** Broken-media and legacy findings are resolved safely or explicitly deferred; no potentially reusable asset is silently deleted; final direct/inherited/contextual/initial counts and intentional gaps are recorded; media-heavy surfaces are verified to the available evidence standard; exact test/check outcomes and browser/database limitations are documented; tracking records are ready for review without marking the goal complete.
+
+**Activation (2026-09-13):** The user explicitly approved the prepared next action. Action 6 is now the only active action. No Action 6 implementation has begun in this activation step.
+
+**Asset health and conservative legacy repair (2026-09-13):** Read-only inspection found 70
+application-managed records/files totaling 113,375,117 bytes (35,203–2,195,217 bytes each). Every
+storage key resolved safely under `public`, every file was readable and matched its stored MIME type
+and dimensions, and SHA-256 comparison found no byte-identical duplicate. All 66 active direct
+assignments have both `en` and `pt-BR` localized-alt records. Assets 1, 2, 3, and 5 are now
+unassigned and preserved. Assets 1 and 3 were the only legacy direct assignments: asset 1 had
+placeholder localized text plus incompatible photographic anatomy-overlay treatment; asset 3 had no
+localized text, unknown provenance, and incompatible anatomy graphics. The existing transactional
+removal service removed only those Abs/Abductors assignments. No media record or file was deleted,
+reassigned, or claimed to have provenance that is not documented. Assets 1–3 remain deferred for
+source/license review; asset 5 remains the reviewed reusable Barbell Bench Press illustration.
+
+**Final coverage measurement (2026-09-13):** Using the live resolver with its established direct →
+base-exercise → movement-pattern → contextual/initial order, the local development catalog resolves
+as follows: 78 base exercises — 29 direct, 49 movement-pattern inherited; 129 global variants — 1
+direct (Goblet Squat), 54 base-exercise inherited, 74 movement-pattern inherited; 28 equipment —
+28 direct; 8 movement patterns — 8 direct; 24 muscles — 24 initial fallback. There are no unresolved
+base exercises/variants and no environment/category fallback in these catalog measurements. Muscle
+initial fallback remains deliberate because no coherent, source-verified anatomical set exists.
+
+**Performance, accessibility, and responsive evidence (2026-09-13):** The shared media component
+already provides width/height metadata and fixed compact frame geometry. The Library can render the
+catalog and nested variants together, so its collection thumbnails and selected-session step icons
+now request native `loading="lazy"` and `decoding="async"`; current-workout and selected admin
+preview media remain eager. The shared component test covers the requested attributes. Full
+repository structural CSS/view coverage passed, including media geometry, failure fallback,
+responsive Library, selected-session, current-workout, Day, and admin-media contracts. No browser
+executable or browser-test runner is available locally, so live narrow/intermediate/desktop visual,
+network-waterfall, pointer, and assistive-technology checks remain unavailable rather than claimed.
+
+**Verification (2026-09-13):** The focused media/view suite passed 30/30. `npm run verify` passed:
+format, lint, both type checks, and 379/379 repository tests, including the canonical local test
+database setup. The full `npm run test:http` suite exercised the local test database and passed
+60/65; its five existing failures are outside this action: invalid Google OAuth profile copy;
+exercise-progress unit copy; workout-history unit copy; lifecycle analytics count copy; and
+cancelled-session copy. `git diff --check` passed. The initial sandbox runs could not open the local
+PostgreSQL socket; the same suites passed when rerun with approved local database access. No reset,
+production target, commit, push, deployment, resolver-precedence change, or unrelated repair was
+performed.
+
+**Review stop (2026-09-13):** Action 6 is ready for review. The goal remains Active and is not
+marked complete pending explicit approval of this final action.
+
+**Completion (2026-09-13):** The user approved Action 6 after review of the conservative legacy
+assignment repair, preserved assets, final resolver and localization counts, collection-media
+performance refinement, responsive/accessibility evidence, and recorded limitations. Final
+verification passed: `npm run verify` completed format, lint, both type checks, and 379/379 tests
+with the local test database; `git diff --check` passed. All actions are complete. Phase 4 is ready
+for final review and is not marked completed pending explicit goal approval.
+
+**Changes requested (2026-09-13):** The user requested a smaller, compact exercise-media footprint
+on the Library Exercises tab and Admin → Manage Exercises surface, while preserving aspect ratio,
+readability, and responsive behavior. They also requested that Admin → Manage Media become
+search-first: no full supported-entity catalog should render before an entity is selected, and the
+editor/details should appear only after a compact, navigable selection step. Preserve existing
+media assignment behavior, authorization, and functionality. This reopens only Action 6 because
+the final-review request changes its UI/UX acceptance evidence; no other completed action is
+reopened.
+
+**Implementation (2026-09-13):** The shared media component now supports a compact density while
+retaining its requested icon or 3:2 thumbnail aspect ratio. Library exercise summaries, selected
+exercise details, and variant rows use that compact density, so both the Library Exercises tab and
+Admin → Manage Exercises present less visually dominant media without changing other media-enabled
+surfaces. Admin → Manage Media is now search-first: an administrator may optionally narrow by
+entity type, enters a required name search, and sees at most 20 matching records. The page renders
+no entity cards and does not load reusable assets until an entity is selected. Selection keeps its
+search context; the existing selected-entity editor, direct/effective preview, upload, reuse,
+replacement, removal, CSRF fields, authorization, and localized metadata behavior are unchanged.
+
+**Verification (2026-09-13):** Focused media, Library, Admin Media, repository, and render/CSS
+contracts passed 31/31. The full `npm run verify` suite passed format, lint, both type checks, and
+382/382 tests with approved local PostgreSQL access; `git diff --check` passed. A read-only local
+development page-data check confirmed the blank page returns 0 options/0 reusable assets, a
+`bench` search returns 14 options/0 assets, and a selected entity returns 0 options with the 70
+reusable assets needed by the editor. Browser rendering remains unavailable because this
+environment has no browser executable; structural responsive/focus/geometry contracts are covered,
+but live small/intermediate/large viewport inspection remains explicitly unavailable.
+
+**Review stop (2026-09-13):** The requested UI/UX corrections are ready for review. Phase 4
+remains Active pending explicit approval of this reopened Action 6.
+
+**Changes requested (2026-09-13):** The user reported that the compact exercise-media change did
+not produce compact rendered media on Library → Exercises or Admin → Manage Exercises, and that
+the search-first Admin → Manage Media change made the normal entity list empty and name filtering
+required. Repository inspection confirms both regressions: the new loader returns no options until
+`search` is nonempty and the template makes the field required; an older, more-specific generic
+`width: 100%` rule overrides the compact media width. This correction restores the previous
+server-rendered selection baseline with optional filtering and fixes the shared sizing rule. It does
+not reopen media operations, resolver precedence, authorization, CSRF, storage, or catalog data.
+
+**Regression-correction implementation (2026-09-13):** Restored normal server-rendered Manage
+Media selection: the page now loads supported catalog options on first open, an empty name filter
+matches those normal options, and the name field is explicitly optional. The existing type filter
+remains an optional narrowing control; selecting an entity keeps its current editor,
+effective-media preview, upload, reuse, replacement, removal, authorization, and CSRF behavior.
+Read-only local-development page data confirms 238 available options with an empty search and 28
+when narrowed to Equipment. No selected entity or reusable-assets editor is rendered until a
+selection is made.
+
+The actual media-sizing defect was a selector-cascade issue, not a missing density value: the
+generic direct-media rule had higher specificity and forced `width: 100%`, defeating compact icon
+and thumbnail dimensions. That generic fill rule now applies only to nested-frame content. The
+shared compact exercise icon is bounded to 2.25rem square and the shared compact thumbnail to
+3.25rem × 2.1667rem; compact variant rows reserve the same 2.25rem column, leaving the remaining
+width for long names and metadata. Image, inherited, and initial presentations retain their
+requested shared geometry and aspect ratios without a Library/Admin page-specific override.
+
+**Regression-correction verification (2026-09-13):** Focused media, Library, Admin Media,
+repository, and view tests passed 30/30. `npm run verify` passed format, lint, server/browser type
+checks, and 381/381 tests with approved local PostgreSQL access; `git diff --check` passed. The
+initial sandbox full run could not open the local PostgreSQL socket, so its database tests were
+cancelled; the approved rerun passed. No browser executable is installed in this environment, so
+live small/intermediate/large rendered-dimension inspection remains unavailable. Per the user's
+requirement, the sizing issue is not recorded as resolved from CSS or unit tests alone; Action 6
+therefore remains **Changes requested** pending manual rendered verification in a browser-capable
+environment.
+
+**Comprehensive regression/UX audit requested (2026-09-13):** The user expanded the correction to
+one cohesive verification pass for the Library Sessions workspace, Library Exercises catalog and
+exercise-template forms, Admin → Manage Exercises, and Admin → Manage Media. The pass must trace
+representative generated-media paths end to end, document actual fallback precedence, preserve all
+valid assigned assets and operational safeguards, inspect shared layout causes before adding CSS,
+and produce one consolidated browser-verification checklist. No database reset, reseed, bulk
+assignment, generated-media regeneration, resolver-precedence redesign, authorization/CSRF/storage
+change, commit, push, or deployment is authorized.
+
+**Audit progress (2026-09-13):** Repository tracing confirms Library and Admin exercise pages both
+load persistent assignments once per page and pass them to the same ID-backed resolver. The shared
+resolver checks direct entity → base exercise (variants only) → movement pattern → existing
+contextual manifest fallback → initial tile. The compact media component controls only rendered
+frame geometry and cannot replace an assigned image. The known selector-cascade sizing repair is
+present. Catalog asset/assignment health and the remaining template/layout surfaces are under
+read-only and structural review; browser rendering is still unavailable locally.
+
+**Comprehensive audit findings and correction (2026-09-13):** The end-to-end source path is
+intact: Library/Admin controllers pre-load persistent assignments; `createMediaResolver` applies
+the ID-backed resolver; Library view models retain the resolved asset; and the shared media
+component only chooses presentation geometry. The verified fallback order is direct entity → base
+exercise for variants → movement pattern → existing static contextual manifest fallback → initial
+tile. Direct, base-inherited, movement-inherited, localized-alt, and initial states are covered by
+focused resolver/view tests; no compact-density or template change affects priority.
+
+The audit found all 70 retained managed files in `public/media/uploads`, including every
+provenance-recorded generated PNG. A read-only query of the configured `lets_flex` development
+database, however, returned 78 exercises and 129 variants but **0** `media_assets` and **0**
+`entity_media` rows. The canonical fresh-database test deliberately expects the same zero media
+rows. Therefore generated images are not missing from storage and are not bypassed by the current
+resolver; their historical assignments are absent from this development database, so it correctly
+renders fallback media. Recreating the 66 historical direct assignments would be a bulk data
+recovery/import operation and is not performed without explicit authorization.
+
+**Scoped recovery authorized (2026-09-13):** The user explicitly authorized recovery of the
+documented project-generated media catalog into the confirmed local `lets_flex` development
+database. The authorized target is assets 4–70 and their 66 documented direct assignments only;
+asset 5 remains intentionally unassigned, and legacy assets 1–3 plus their removed muscle
+assignments remain excluded. Recovery will validate every stored PNG and mapped catalog entity
+before one atomic insert transaction restores asset records, localized metadata, and assignments.
+
+**Scoped recovery implementation and verification (2026-09-13):** The confirmed local
+`lets_flex` target was empty before recovery. One transaction inserted assets 4–70 with their
+existing stable storage keys, 134 localized `en`/`pt-BR` alt-text records, and the 66 documented
+direct assignments; it reset only the local media identity sequences to the restored maxima. Every
+documented PNG passed the existing upload inspector at 1536 × 1024 before writing, and every entity
+target resolved exactly once. Asset 5 remains unassigned; no legacy asset (1–3), legacy muscle
+assignment, schema, seed, file, or production data changed. The resulting distribution is 29
+exercise, 1 exercise-variant, 28 equipment, and 8 movement-pattern assignments; all 67 restored
+assets have both localized alt records. Direct Bench Press, direct Goblet Squat, direct Forward
+Lunge, the Admin Media Portuguese preview, and the Library Bench Press/base-inherited variant view
+model all return their documented generated PNGs through the shared resolver.
+
+The static responsive/layout review found no additional Library Sessions, Library Exercises, Admin
+Manage Exercises, or Admin Manage Media layout defect requiring a page-specific override. The
+existing shared grids preserve text width, wrap long names/metadata, collapse before the Session
+list is over-compressed, retain selected/current/empty states, and reuse the bounded compact
+exercise-media dimensions. The exercise-template modal already provides one labelled, grouped,
+error-aware workflow with native controls, dynamic muscle rows, and destructive actions. One
+shared form defect was corrected: long dynamically added muscle-role labels previously remained
+ellipsis-truncated after the narrow single-column reflow. The shared form rule now bounds desktop
+text and wraps it at narrow widths, with focused regression coverage. Admin Manage Media continues
+to show the default entity list with optional search/type narrowing and preserves its editor,
+assignment, reuse, removal, authorization, and CSRF contracts.
+
+**Verification (2026-09-13):** Focused resolver, shared-media, Library, session-workspace, Admin
+Media, and form-layout coverage passed 46/46. `npm run verify` passed format, lint, both type
+checks, and 382/382 tests using the local test database. Recovery preflight and post-recovery
+application-boundary checks passed as recorded above; `git diff --check` is pending final diff
+inspection. No browser executable is installed, so rendered inspection at 390px, an intermediate
+width, and desktop remains a consolidated manual check—not a basis for claiming visual completion.
+
+**Review stop (2026-09-13):** Action 6 is **Ready for review**. The remaining browser checklist is
+consolidated in the final handoff; no additional action is activated or implemented.
+
+**Changes requested (2026-09-13):** Browser review confirms the recovered generated images and
+both Library tabs render correctly; those areas are explicitly preserved. The remaining Admin →
+Manage Media defects are local to the selected-entity workflow: the current-media preview is too
+tall, and the selected entity/editor follows the entire unbounded entity list. Reopen only Action 6
+to use a compact bounded preview and keep the selected entity, assignment details, and existing
+upload/reuse/removal controls beside the filterable entity browser on wider layouts and before the
+list on narrow layouts. No media data, resolver, mutation, validation, CSRF, authorization, or
+Library change is authorized.
+
+**Selected-entity correction (2026-09-13):** The oversized preview came from rendering the shared
+full exercise frame inside an Admin box with only a minimum height. The new shared `preview`
+variant fills a fixed Admin preview container with `object-fit: contain`, so image and fallback
+presentations are bounded to 15rem wide by 10rem high and cannot grow with intrinsic source
+dimensions. The resolver and stored media remain unchanged.
+
+The page now has a two-area workspace at 960px and wider: the optional-filter entity browser is an
+independent scroll region and the selected entity, source details, compact preview, upload/reuse
+controls, and removal control occupy the adjacent editor area. Below 960px the sections stack; once
+selected, the editor appears before the browser so the post-selection workflow does not require
+crossing the entire list. Existing filters, selection links, localized metadata, valid upload,
+reuse/replacement, removal, validation, authorization, and CSRF forms are preserved.
+
+**Verification (2026-09-13):** Focused shared-media, Admin CSS, and Admin view contracts passed
+17/17. `npm run verify` passed Prettier, ESLint, both server/browser type checks, and 383/383 tests
+with the configured local test PostgreSQL database. `git diff --check` passed. The initial sandbox
+full run could not connect to that database, then the approved rerun passed. No browser executable
+is available in this environment, so manual rendered inspection remains required at 390px, an
+intermediate width below 960px, and a desktop width of at least 960px; verify the bounded preview,
+desktop browser/editor pairing, narrow selected-editor ordering, and existing media operations.
+
+**Review stop (2026-09-13):** Action 6 is **Ready for review**. No further action is activated or
 implemented.
 
-### Action 4 — End-to-end resolver integration
+**Completion (2026-09-13):** The user approved the focused selected-entity and responsive-layout
+corrections after review. Action 6 is complete: recovered media data, Library layouts, entity
+selection, optional filters, bounded previews, media forms, assignment operations, authorization,
+and CSRF behavior remain preserved; Admin Media now reflows from available application-content
+width rather than squeezing nested grids. The recorded final verification remains 17/17 focused
+contracts and 383/383 repository tests, plus format, lint, both type checks, and `git diff --check`.
 
-**Status:** Completed
+**Final-review preparation (2026-09-13):** Phase 4 is **Ready for final review**. Completion
+criteria 1–7 and 9–10 are met by the recorded catalog coverage, provenance, health, workflow, and
+verification evidence. Criterion 8 is met to the available evidence: shared responsive and media
+contracts are verified, and the user has reviewed the rendered corrections; this environment still
+has no browser executable, so its live-rendering limitation remains explicitly documented. The
+intentionally deferred legacy source/license review, source-verified muscle set, environment
+entities, and unrelated HTTP assertion repairs remain excluded. No next action is prepared or
+activated.
 
-**Purpose:** Prove admin changes flow through the existing resolver and representative normal pages
-without synchronization or page-local lookup rules.
+**Goal completion (2026-09-13):** The user approved Phase 4 after final review. The goal is
+**Completed**; no new goal or action is activated by this approval.
 
-**Acceptance criteria:** Exercise assignment renders in Library; variant assignment overrides base;
-variant removal returns to base/movement/fallback behavior; reusable assets remain valid for other
-assignments; supported entity records without assignments remain safe; focused HTTP checks pass.
+**Changes requested (2026-09-13):** Browser review confirms the current Admin → Manage Media
+workflow, desktop hierarchy, and narrow/mobile behavior are correct. At intermediate available
+content widths, however, nested two-column entity, editor, and localized-field grids still remain
+side by side too long and become squeezed. Reopen only Action 6 to replace viewport-based sizing
+with a smallest cohesive available-width responsive correction; preserve the entity browser,
+optional filters, selection, bounded preview, editor forms/actions, media operations, resolver,
+authorization, CSRF, assignments, uploads, Library, and unrelated Admin layouts.
 
-**Activation (2026-09-12):** The user approved the completed Action 3 and explicitly approved the
-next action. Action 4 is now the only active action.
+**Responsive-layout correction (2026-09-13):** The squeeze was caused by Media Management using
+viewport breakpoints despite being rendered inside the responsive application-content column, while
+its nested entity, editor, and localized-field grids kept equal two-column tracks down to separate
+smaller viewport thresholds. The page now uses the existing `application-content` container query:
+the entity browser/editor workspace is side by side only at 64rem of available content width and
+stacks below that threshold. Entity and editor grids use `auto-fit` with 18rem and 20rem minimum
+tracks respectively, and are explicitly single-column at 52rem or less. Selector/localized fields
+also use intrinsic 16rem minimum tracks; facts use 14rem tracks; actions wrap rather than shrink.
+The 15rem × 10rem preview remains bounded.
 
-**Implementation (2026-09-12):** Added HTTP coverage for the admin media workflow using the
-configured safe test database. The test verifies guests and regular users receive forbidden
-responses, missing CSRF is rejected, an admin can assign reusable assets, the assigned base
-exercise renders through `/admin/library/exercises`, a global variant inherits that assignment,
-a direct variant assignment overrides it, removing the variant assignment restores base media,
-the removed asset remains reusable, and an unassigned supported muscle remains a safe initial
-fallback. No page-local resolver or synchronization path was added.
+**Verification (2026-09-13):** Focused shared-media, Admin CSS, and Admin view contracts passed
+17/17. `npm run verify` passed Prettier, ESLint, both server/browser type checks, and 383/383 tests
+with the configured local test PostgreSQL database. `git diff --check` passed. No browser executable
+is available in this environment, so manual rendered inspection is still required around the 52rem
+and 64rem available-content transitions, including representative 390px, 600px, 768px, 900px,
+1024px, and wide-desktop windows.
 
-**Verification (2026-09-12):** The isolated Action 4 HTTP integration test passed **1/1** with
-the test database and loopback server. The complete existing `npm run test:http` suite ran 60/65
-tests successfully; its five failures are unrelated pre-existing Google-profile and progress/
-history assertions, while the new media integration test passed. Earlier database-free focused
-media/resolver/view coverage passed 41/41. `npm run check:types`, `npm run check:browser-types`,
-`npm run lint`, `npm run format:check`, and `git diff --check` passed. The test database was reset
-by the existing safe HTTP harness only; production data was not targeted.
-
-**Review stop (2026-09-12):** Action 4 is ready for review. Action 5 remains pending and was not
-activated or implemented.
-
-**Completion (2026-09-12):** The user approved Action 4 after the isolated HTTP integration test
-passed and the full-suite limitation was documented. Action 4 is complete; Action 5 remains
-pending and was not activated or implemented.
-
-### Action 5 — Verification and cleanup
-
-**Status:** Completed
-
-**Purpose:** Inspect duplication and authorization boundaries, run the repository verification
-matrix and database checks, document unavailable browser/manual checks and deferred work, and stop at
-the final review gate.
-
-**Acceptance criteria:** Every applicable check has an explicit result, tracking matches the code,
-Phase 2 remains Ready for final review rather than Completed, and no AI/gallery/bulk or unrelated
-scope has been introduced.
-
-**Activation (2026-09-12):** The user approved the completed Action 4 and explicitly approved the
-next action. Action 5 is now the only active action.
-
-**Changes requested (2026-09-12):** Manual UX review found that the required mixed entity select
-does not scale as the supported catalog grows. The correction must add an optional entity-type
-filter, optional case-insensitive partial name search, clear type/name identification, deliberate
-selection without accidental assignment, useful empty results, and responsive/keyboard-accessible
-presentation. Preserve all authorization, CSRF, private-variant, assignment, resolver, and
-translation behavior; do not change the schema or unrelated media workflows. Action 5 remains
-active for this focused correction and must return to Ready for review without completing Phase 2.
-
-**Changes requested (2026-09-12, feedback correction):** Manual testing found contradictory
-feedback after a successful media assignment: the shared partial supplied its default “Action not
-completed” eyebrow and error styling because the media controller omitted explicit `tone` and
-`eyebrow` values, even though it supplied a success title/message. Correct the feedback state at
-the controller/shared-component boundary, verify actual persistence for assignment, replacement,
-upload, and removal semantics, and keep validation failures explicitly separate. Do not complete
-Action 5 or Phase 2 until this correction is verified.
-
-**Implementation (2026-09-12):** Replaced the long mixed selection control with a server-rendered
-GET filter form and explicit result links. Administrators can optionally filter by supported entity
-type and search by name; repository queries use trimmed case-insensitive partial matching via
-`ILIKE`. Each result visibly presents its type, name, and ID, selected results expose
-`aria-current`, and empty matches have a clear status message. Result links retain the active
-filters and only open the editor; they do not submit or alter any media assignment. Existing
-mutation forms, resolver behavior, authorization, CSRF, private-variant exclusion, and i18n were
-left unchanged.
-
-**Implementation (2026-09-12, feedback correction):** Made media feedback explicit by operation
-state: successful upload, existing-asset assignment, replacement, and removal use `tone: success`,
-a success eyebrow, success-specific localized copy, and `role="status"`; validation failures use
-`tone: error`, the existing alert semantics, a failure title, and specific field/form validation
-messages. Added the shared page-feedback success treatment using the existing teal semantic color.
-The redirect success state is produced only after the service call returns successfully; invalid
-submissions render the error state without success copy. No persistence, authorization, CSRF,
-ownership, resolver, or schema behavior changed.
-
-**Verification (2026-09-12):** Focused feedback, view, shared-component, and CSS tests passed
-**9/9**. `npm test` passed **372/372**, including canonical schema/seed setup and PostgreSQL-backed
-tests; the isolated media HTTP integration test passed **1/1**, including actual assignment
-persistence, success feedback after redirect, and validation failure feedback. `npm run
-format:check`, `npm run lint`, `npm run check:types`, `npm run check:browser-types`, and `git diff
---check` all passed. The complete `npm run test:http` run remains **60/65** because five unrelated
-existing assertions fail: invalid Google profile handling, three exercise progress/history flows,
-and planned cancellation; the media integration test is not among those failures.
-
-The scope and authorization audit confirmed that `/admin/media` and all mutations are behind
-`requireAdmin`, global CSRF protection runs before the router, multipart parsing is bounded and
-limited to the upload route’s expected single file, and private exercise variants are excluded
-from both management lookup and assignment existence checks. No new migration, production
-dependency, AI, gallery, bulk, video, or unrelated catalog scope was introduced. No live browser
-executable was available, so visual/manual browser verification remains unavailable; rendered EJS
-contracts and responsive CSS assertions remain covered by focused tests. No further cleanup was
-required.
-
-**Review stop (2026-09-12):** Action 5 was ready for review after the requested entity-selection
-and feedback corrections; no unrelated follow-up was prepared.
-
-**Completion (2026-09-12):** The user approved Action 5 after the entity-selection and feedback
-corrections passed the documented focused, full-suite, and HTTP verification. Action 5 is complete;
-Phase 2 is now **Ready for final review** and the goal itself remains uncompleted pending explicit
-goal approval.
-
-**Goal completion (2026-09-12):** The user approved Phase 2 after the ten completion criteria were
-confirmed against the implementation and recorded verification. Phase 2 is complete. No next goal
-is inferred or activated; future direction remains subject to user approval.
-
-**Final review comparison (2026-09-12):** All ten Phase 2 completion criteria are satisfied by
-the recorded implementation and verification evidence: (1) tracking matches the completed
-implementation and review state; (2) admin-only routes use the existing services; (3) raster upload
-validation and generated storage keys are covered; (4) reuse, replacement, and removal preserve
-asset integrity; (5) direct, inherited, and fallback states are shown with previews; (6) localized
-English/Portuguese alt metadata follows deterministic fallback; (7) authorization and CSRF tests
-cover guests, non-admins, and direct HTTP requests; (8) representative Library/resolver flows cover
-variant inheritance and removal; (9) focused unit, repository, view, CSS/browser-contract, and HTTP
-tests pass; and (10) applicable checks and limitations are recorded with no unrelated scope.
-
-**Unmet criteria and limitations:** No implementation criterion is currently unmet. Live browser
-visual/manual verification was unavailable in this environment and remains explicitly recorded as
-a limitation. The complete HTTP suite remains 60/65 because five unrelated existing assertions
-fail; the Admin Media Manager integration test passes and is not among them.
-
-**Intentionally excluded:** AI generation, recommendations, moderation, automatic population, bulk
-management, galleries, multiple angles, video/animation, cropping/editing, CDN transformations,
-user media, artificial environment entities, permanent physical asset deletion, external storage
-provisioning, and unrelated catalog or admin redesign remain outside Phase 2.
+**Review stop (2026-09-13):** Action 6 is **Ready for review**. No further action is activated or
+implemented.
 
 ## Resume here
 
-Action 1 is **Completed**. Action 2 — Admin media domain operations — is **Completed**. Action 3 —
-Admin management UI — is **Completed**. Action 4 — End-to-end resolver integration — is
-**Completed**. Action 5 — Verification and cleanup — is **Completed** after the focused
-entity-selection and feedback corrections; no later action is prepared.
-
-## Historical Phase 1 record
-
-The completed Phase 1 action records remain below as historical evidence.
-
-## Historical Phase 1 current goal
-
-### Phase 1 — Build the Media Foundation
-
-Establish a reusable, persistent, deterministic media foundation for catalog entities while
-preserving the existing initial-letter fallback, shared rendering boundary, ownership rules, and
-current training surfaces.
-
-## Goal status
-
-Phase 1 is **Completed** on 2026-09-12. Actions 1–4 are **Completed**.
-
-## Planning evidence
-
-- **Verified:** `src/features/media/mediaManifest.js` contains 12 local SVG assets and a placeholder;
-  `resolveMedia.js` centralizes normalized-name matching, exercise variant/base inheritance, and
-  movement/environment/category fallbacks.
-- **Verified:** `views/partials/shared/components/media.ejs` is the shared image/initial rendering
-  boundary with informative and decorative semantics. `mediaFallback.css` bounds icon, thumbnail,
-  and exercise variants; browser fallback behavior is covered by focused tests.
-- **Verified:** Existing consumers are Library exercise summaries/details/variants, Dashboard and
-  Program Day session views, and workout-session headers/current steps/step lists. No standalone
-  History media consumer was found.
-- **Verified:** Exercises, exercise variants, muscles, equipment, and movement patterns are
-  persistent catalog entities. `exercise_variants.environment` is a validated string, not a
-  relational entity. No media tables, assignments, or media repositories exist.
-- **Verified:** Existing migration files are additive and transactional; fresh development setup
-  is generated from `db/schema.js` and `db/seed.js`.
-
-## Delta classification
-
-- **Already satisfied / reuse:** shared media partial, initial fallback, local SVG assets, bounded
-  CSS frame rules, localized canonical matching, and existing representative surface integration.
-- **Add:** persistent reusable media assets, explicit entity assignments, media repository boundary,
-  ID-based resolution, and data-layer constraints/tests.
-- **Modify:** resolver fallback order and view-model inputs so exact assignments are authoritative;
-  shared media metadata must distinguish assets from fallbacks without changing compact layouts.
-- **Preserve:** environment as a string, private/user ownership boundaries, current catalog IDs and
-  relationships, and no media requirement on any entity.
-
-## Confirmed decisions
-
-- Add an explicit `primary` assignment role only; do not introduce gallery/thumbnail role
-  complexity without a demonstrated consumer.
-- Use stable storage keys and a storage/application boundary; do not embed a cloud provider or
-  page-local paths in templates.
-- Use a constrained polymorphic assignment contract for the supported catalog entity types and
-  application-side target validation. Media-asset foreign keys remain database-enforced.
-- Preserve current curated assets and initial fallback. Seed only a small representative set if
-  persistence needs existing visuals for integration tests; do not bulk-populate the catalog.
-- Because development/test data is disposable in this phase, keep media DDL only in the authoritative
-  schema/reset/seed path. Do not add a media migration, reset production, or weaken reset guards.
-- Do not implement admin upload/assignment UI, AI generation, galleries, videos, CDN processing, or
-  artificial environment relationships.
-
-## Proposed Phase 1 action sequence
-
-### Action 1 — Audit and architecture
-
-**Status:** Completed
-
-**Purpose:** Replace the completed translation goal in both tracking files, record the verified
-media baseline, and agree the smallest persistence/resolution architecture before runtime changes.
-
-**Audit findings (2026-09-12):** The existing static manifest is useful but name-keyed rather than
-entity-owned. The resolver already provides deterministic variant → base exercise → movement →
-environment → category → initial fallback behavior. The shared component already supports image and
-initial semantics, and current CSS keeps media bounded. Current database entities cover exercises,
-variants, muscles, equipment, and movement patterns; environment is a string. No persistent media
-model, assignment repository, or database resolver boundary exists. Media is used in Library,
-Dashboard, Program Day, and workout views; History has no current media consumer.
-
-**Proposed architecture:** Add reusable `media_assets` records for storage key, MIME type,
-dimensions, source, and timestamps; add `entity_media` records for supported entity type/id,
-`primary` role, sort order, and asset foreign key. Resolve IDs through one application-owned media
-service, with explicit variant inheritance and existing contextual fallback behavior. Return the
-existing presentation-ready shape, extending it only where needed for fallback type and future
-localized metadata.
-
-**Verification:** Read-only repository audit completed. No runtime, schema, seed, migration, or
-database mutation was performed. Documentation formatting and final diff checks remain part of the
-next verification pass.
-
-**Review approval (2026-09-12):** The user approved the audit and architecture after the recorded
-repository findings and documentation verification. Action 1 is completed. Action 2 remains
-pending and prepared as the next action; it has not been activated or implemented.
-
-### Action 2 — Persistence and deterministic resolver
-
-**Status:** Completed
-
-**Purpose:** Add the canonical schema/reset/seed contract, repositories/services, ID-based exact
-media assignment, variant inheritance, safe contextual/initial fallbacks, and focused data/resolver
-tests.
-
-**Acceptance criteria:** The fresh schema and reset/seed flow converge; constraints cover supported roles,
-positive dimensions, MIME/storage metadata, assignment uniqueness, and asset reuse; missing media is
-normal; variant media overrides base exercise media; malformed optional metadata cannot crash the
-resolver; environment is not modeled as a fake entity.
-
-**Activation (2026-09-12):** The user approved Action 1 and explicitly approved the next action.
-Action 2 is now the only active runtime action; Actions 3–4 remain pending.
-
-**Changes requested (2026-09-12):** The user requested that this development phase use the
-disposable `ALLOW_DATABASE_RESET=true` schema-plus-seed lifecycle rather than a media migration.
-Remove `003_media_foundation`, keep the media DDL in the canonical schema, verify clean reset/seed
-creation and reset safety, and do not mark the action complete until those checks pass.
-
-**Implementation (2026-09-12):** Added the reusable `media_assets` and `entity_media` schema in
-`db/mediaSql.js`, included it in the canonical fresh setup, and kept the existing `db/seed.js`
-schema-plus-seed flow as the only media provisioning path. The asset model stores storage key, MIME type, dimensions, source, optional
-default alt text, and creation time. Assignments support the supported exercise, exercise variant,
-muscle, equipment, and movement-pattern entity types, one replaceable `primary` role, sort order,
-positive IDs, and reusable asset foreign keys. Assignment writes validate the entity table through a
-fixed allowlist and support removal without deleting the reusable asset. No media rows were bulk
-seeded and no database was reset or mutated.
-
-Added `mediaRepository.js` for asset creation, primary assignment replacement/removal, and batched
-assignment lookup. Added `resolveEntityMedia.js` as the ID-backed resolver: direct assignment →
-base exercise assignment for variants → movement-pattern assignment → existing static
-movement/environment/category context → initial-letter fallback. It returns presentation-ready
-metadata and preserves the existing static resolver for compatibility until the shared presentation
-action integrates the async boundary. Environment remains a string context and is not modeled as a
-fake entity.
-
-**Initial implementation verification (2026-09-12):** Focused persistence, schema, resolver, and
-existing media tests passed 26/26. `npm run check:types`, `npm run check:browser-types`,
-`npm run format:check`, `npm run lint`, and `git diff --check` passed. The first sandboxed full
-suite was blocked by local PostgreSQL/loopback `EPERM` restrictions after 338 passes; the approved
-elevated full suite passed 342/342, including fresh schema setup and PostgreSQL-backed catalog tests.
-
-**Revision implementation (2026-09-12):** Removed the media migration and migration export. Added
-explicit empty-database assertions proving that the normal schema-plus-seed reset creates
-`media_assets` and `entity_media` with zero baseline rows. Existing reset guards remain unchanged:
-production is refused, non-development/test runtimes are refused, ambiguous targets are refused,
-and `ALLOW_DATABASE_RESET=true` remains required.
-
-**Revision verification (2026-09-12):** The focused schema/seed, reset-safety, media repository,
-and resolver suite passed 35/35. `npm run verify` passed formatting, lint, server types,
-browser types, and the full test suite at 342/342. The migration file and media migration export
-are absent; no media assignments were bulk seeded. A guarded `ALLOW_DATABASE_RESET=true` reset
-and seed completed successfully against the local `lets_flex_test` database, and a direct
-application smoke request returned `GET /auth/login 200` from that clean state. No production or
-non-test database was mutated.
-
-**Completion (2026-09-12):** The user approved the revised implementation. Action 2 is complete;
-the next action remains pending and has not been activated.
-
-### Action 3 — Shared presentation layer
-
-**Status:** Completed
-
-**Activation (2026-09-12):** The user approved the completed Action 2 and explicitly approved the
-next action. Action 3 became the only active runtime action; Action 4 remained pending.
-
-**Purpose:** Refactor the existing shared component only where the new resolver contract requires
-it, preserve initial fallback semantics, retain compact Library/session/workout bounds, and migrate
-representative view-models without page-local media lookup rules.
-
-**Acceptance criteria:** Real assets and initial fallbacks render through one boundary; explicit
-icon/thumbnail/exercise/detail variants remain bounded; meaningful and decorative accessibility
-semantics are covered; long names and nullable media do not expand or overflow compact surfaces.
-
-**Implementation (2026-09-12):** Added one shared page-level media resolver that batches visible
-exercise, variant, and movement-pattern assignment lookups. Session/workout query mapping now
-retains the stable exercise, variant, and movement-pattern IDs needed by the resolver. Library,
-Program Day, and Dashboard controllers load assignments once and pass the resolver into their
-view-models; unassigned entities retain the existing manifest, contextual fallback, and initial
-letter behavior. Shared consumers now use bounded icon, thumbnail, and current-step thumbnail
-variants so assigned images can render without changing compact layout contracts. Session headers
-remain initial tiles because sessions are not supported persistent media entities.
-
-**Verification (2026-09-12):** Focused media, resolver, Library, Day, Dashboard, and shared-rendering
-tests passed 32/32. `npm run verify` passed formatting, lint, server types, browser types, and the
-full suite at 344/344. Focused HTTP integration coverage for representative Library and application
-pages passed 3/3. No browser executable was available for live viewport capture; rendered EJS
-contracts, bounded CSS variants, responsive regression tests, and accessible image/initial markup
-were verified through the repository test suite.
-
-**Completion (2026-09-12):** The user approved the shared presentation implementation. Action 3 is
-complete; Action 4 was prepared as the next pending action and was subsequently activated after
-approval.
-
-### Action 4 — Verification and tracking synchronization
-
-**Status:** Completed
-
-**Activation (2026-09-12):** The user approved the completed Action 3 and explicitly approved the
-next action. Action 4 is now the only active runtime action.
-
-**Purpose:** Check for duplicated media logic, verify entities without assignments, run focused and
-full repository checks, inspect the final diff, document limitations, and prepare the goal for final
-review without marking it completed automatically.
-
-**Acceptance criteria:** All applicable checks have explicit pass/fail/skipped results; tracking
-files match the repository; deferred Phase 2+ work is recorded; the action and goal statuses stop at
-the required review gate.
-
-**Verification (2026-09-12):** The final media audit found no duplicated persistent-entity lookup
-rules. Library, Program Day, and Dashboard entity media use the shared batched resolver; remaining
-direct static resolver calls are intentional session-header/summary fallbacks because sessions are
-not supported persistent media entities. A clean disposable test database reported zero baseline
-`media_assets` and `entity_media` rows, and an unassigned exercise variant resolved safely through
-the existing movement-pattern fallback. No media migration or bulk media assignment seed is present,
-and `git diff --check` passed.
-
-`npm run verify` passed formatting, lint, server types, browser types, and the full repository suite:
-344/344 tests passed. Focused representative HTTP integration checks passed 3/3. The complete
-`npm run test:http` suite ran 64 tests with 59 passing and 5 failing in unrelated authentication,
-exercise-progress, workout-history, and lifecycle scenarios; no media-specific HTTP failure was
-observed. These failures remain a known verification limitation for the Phase 1 completion matrix
-and were not changed because they are outside Action 4's media scope. A live browser viewport check
-was skipped because no browser executable is available in the environment; EJS rendering contracts,
-bounded CSS variants, responsive regressions, and accessibility markup passed their repository
-tests.
-
-**Review stop (2026-09-12):** Action 4 was ready for review. The Phase 1 goal remained Active until
-the user approved this action; no further action was activated.
-
-**Completion (2026-09-12):** The user approved Action 4 after the recorded verification evidence.
-The final audit, clean-database fallback check, focused checks, full verification suite, diff
-inspection, and tracking synchronization are complete. The five unrelated HTTP failures and the
-unavailable live-browser capture remain explicitly documented limitations for final goal review.
-Phase 1 was ready for final review; no further action was active.
-
-**Goal completion (2026-09-12):** The user approved the Phase 1 final review. The media
-foundation is complete within the approved scope: canonical schema/reset/seed integration, reusable
-asset and assignment persistence, deterministic resolution and fallbacks, shared representative
-surface integration, and verification evidence are recorded above. The documented unrelated HTTP
-failures and unavailable live-browser capture remain limitations rather than unapproved scope
-expansion. No next goal is implied; future direction requires user approval.
-
-## Resume here
-
-Action 1 — Audit and architecture is **Completed**. Action 2 — Persistence and deterministic
-resolver is **Completed**. Action 3 — Shared presentation layer is **Completed**. Action 4 is
-**Completed**. Phase 1 is **Completed**; no next action is active.
-
-## Historical Phase 5 record
-
-The completed translation-maintenance action records are retained below as historical evidence. They
-are not active instructions for this Media Foundation goal.
-
-## Current goal
-
-### Phase 5 — Add translation maintenance and admin tooling
-
-Add a small, secure admin workflow for inspecting and maintaining application-managed `en` and
-`pt-BR` catalog translations while preserving stable identity, relationships, fallback, ownership,
-user-authored content, and existing catalog behavior.
-
-## Goal status
-
-Phase 5 is Completed on 2026-09-12. Actions 1–8 are completed with their verification evidence
-recorded. Phase 4 is completed and approved historical work.
-
-**Phase 5 goal completion (2026-09-12):** The user approved the final review after the completion
-matrix and verification evidence were recorded. Phase 5 delivered the shared translation
-maintenance contract, database-backed overview and counts, admin-only validated upsert workflow,
-global catalog synchronization, fallback and ownership safeguards, accessible responsive maintenance
-views, and regression coverage. The five out-of-scope HTTP failures and unavailable live-browser /
-assistive-technology inspection remain documented limitations; no next goal is implied by this
-completion record.
-
-## Planning evidence
-
-- **Verified:** Five dedicated translation tables exist for exercises, global exercise variants,
-  muscles, equipment, and movement patterns, keyed by stable entity ID and locale.
-- **Verified:** Catalog reads resolve active locale → English → canonical value; unsupported locales
-  normalize to English. Existing seed/read guards exclude private variants from global translation.
-- **Verified:** `requireAdmin` enforces the existing admin role for `/admin/library/exercises`; current
-  admin Library forms manage canonical exercises and global variants but not translations.
-- **Verified gap:** No reusable database-backed completeness query/service or admin translation list
-  currently exists. Existing completeness checks validate authored manifest/seed coverage only.
-- **Verified gap:** Existing translation tables include optional localized description columns, while
-  current Portuguese seed/read behavior uses names; the supported editable field set must be chosen
-  explicitly.
-- **Verified boundary:** UI resource files remain source-controlled; user-owned variants, authored
-  names/notes, sessions/programs, and historical/external content are outside this goal.
-
-## Confirmed decisions
-
-- Reuse the Phase 3 translation tables, catalog localization helpers, existing Library/admin forms,
-  CSRF and `requireAdmin` boundaries, and the established i18next presentation architecture.
-- Derive completeness from translation availability rather than adding persisted status columns.
-- Keep stable IDs, canonical/internal values, relationships, calculations, authorization, and user
-  content locale-neutral and unchanged.
-- Use explicit reviewed translations only; no machine translation, SaaS/CMS, or external API.
-- Stop at each active action’s review gate before activating the next action.
-
-## Proposed Phase 5 action sequence
-
-### Action 1 — Update goal tracking and audit
-
-**Status:** Completed
-
-**Purpose:** Establish Phase 5 as the active goal, preserve Phase 3/4 history, and record the
-verified translation schema, fallback, ownership, existing admin routes, catalog flows, and current
-completeness checks before runtime implementation.
-
-**Acceptance criteria:**
-
-- Both tracking files explicitly describe Phase 5 objective, scope, non-goals, completion criteria,
-  constraints, and current status.
-- The audit identifies supported global entity types, localized fields, fallback behavior, existing
-  admin authorization, private-content exclusions, and the verified implementation delta.
-- No broad runtime implementation occurs before the action plan is approved.
-
-**Action 1 activation (2026-09-12):** The user approved the proposed Phase 5 action plan. Action 1
-was activated as the only authorized action; Actions 2–8 remain pending.
-
-**Action 1 implementation and audit evidence (2026-09-12):** Updated `docs/current-goal.md` to make
-Phase 5 the active goal and retained Phase 4 and Phase 3 records as historical context. Inspected
-the Phase 3 translation schema, seed/migration contract, catalog localization joins, fallback
-behavior, global/private variant ownership, existing `/admin/library/exercises` routes and forms,
-the `requireAdmin` authorization middleware, source-controlled UI resources, and current manifest/
-seed completeness tests. The verified Phase 5 delta is a reusable database-backed completeness
-contract plus concise admin overview and safe single-record translation maintenance. Supported
-entities are exercises, global exercise variants, muscles, equipment, and movement patterns.
-Existing translation tables expose name fields and optional description columns; current Portuguese
-seed/read behavior uses names, so the editable field contract remains explicitly scoped for Action 2.
-No runtime, schema, seed, database, route, or user-content implementation was performed in this
-audit action.
-
-**Action 1 verification (2026-09-12):** Confirmed both tracking files explicitly describe Phase 5,
-its objective, scope, non-goals, completion criteria, constraints, verified baseline, and action
-status. Confirmed the proposed actions contain only the verified maintenance delta and preserve the
-existing identity, ownership, fallback, authorization, UI-resource, and database lifecycle
-boundaries. `npx prettier --check docs/current-goal.md docs/current-actions.md` passed, and
-`git diff --check` passed. Runtime checks were not run because this action changed documentation
-only.
-
-**Action 1 review stop (2026-09-12):** The Phase 5 tracking and architecture audit are complete and
-the action is Ready for review. Action 2 remains Pending and prepared but has not been activated or
-implemented.
-
-**Action 1 review approval (2026-09-12):** The user approved the tracking and audit implementation
-after its verification evidence was recorded. Action 1 is Completed. Action 2 remains Pending and
-prepared as the next action; it has not been activated or implemented.
-
-### Action 2 — Define the translation maintenance contract
-
-**Status:** Completed
-
-**Purpose:** Specify the supported entity/field matrix, derived status vocabulary, required locales,
-fallback preview semantics, validation, upsert, and English fallback protection in one reusable
-contract.
-
-**Action 2 activation (2026-09-12):** The user approved the prepared next action. Action 2 is now
-active and is the only Phase 5 runtime action authorized for implementation. Actions 3–8 remain
-pending.
-
-**Action 2 implementation (2026-09-12):** Added the reusable
-`src/features/translationMaintenance/translationMaintenanceContract.js` boundary and its focused
-tests. The contract supports exercises, global exercise variants, muscles, equipment, and movement
-patterns; exposes names as the currently supported localized field; derives `complete`, `missing-en`,
-`missing-pt-BR`, and `incomplete` from actual translation-row values; and resolves preview text as
-active locale → English → canonical fallback. It validates positive stable IDs, supported `en` /
-`pt-BR` locales, required non-empty names, and outer-whitespace trimming. It formalizes upsert-only
-maintenance with deletion disabled, so the English fallback cannot be removed through this workflow.
-Optional localized description columns remain excluded until their read paths are integrated.
-
-**Action 2 verification (2026-09-12):** The focused contract suite passed 6/6 tests, covering the
-entity matrix, status derivation, fallback preview, validation, unsupported values, and fallback
-mutation policy. `npm run check:types`, `npm run format:check`, `npm run lint`, and `git diff --check`
-passed. Browser type-checking and full repository tests were not run because Action 2 added no
-browser code or database/repository integration; those checks remain part of the later integration
-and verification actions.
-
-**Action 2 review stop (2026-09-12):** The translation maintenance contract is implemented and
-verified within the approved scope. Action 2 is Ready for review. Action 3 remains Pending and has
-not been activated or implemented.
-
-**Action 2 review approval (2026-09-12):** The user approved the contract implementation after its
-verification evidence was recorded. Action 2 is Completed. Action 3 remains Pending and prepared as
-the next action; it has not been activated or implemented.
-
-### Action 3 — Add the completeness query/service boundary
-
-**Status:** Completed
-
-**Purpose:** Implement parameterized repository/service logic for per-record status, filtered search,
-entity type, and lightweight counts while excluding archived/private/user-owned content.
-
-**Action 3 activation (2026-09-12):** The user approved the prepared next action. Action 3 is now
-active and is the only Phase 5 runtime action authorized for implementation. Actions 4–8 remain
-pending.
-
-**Action 3 implementation (2026-09-12):** Added the parameterized
-`src/features/translationMaintenance/queries.js` and `repository.js` read boundary plus
-`getTranslationOverview.js`. The query combines the five supported global catalog entity types,
-searches English, Portuguese, and canonical names, filters by entity type, excludes archived
-exercises/variants and private variants, and returns stable IDs with separate translation values.
-The service applies the shared Action 2 status and fallback-preview contract, supports status
-filtering, and derives total/status/entity counts without duplicating entity or status definitions.
-
-**Action 3 verification (2026-09-12):** Focused translation-maintenance and contract tests passed
-10/10, covering SQL scope, parameterized search/entity filters, invalid filters, status derivation,
-counts, fallback, entity coverage, and validation policy. `npm run check:types`,
-`npm run format:check`, `npm run lint`, and `git diff --check` passed. Browser type-checking was not
-run because no browser code changed. Full database/HTTP tests remain part of later integration and
-verification actions because this action added a read boundary tested with fakes only.
-
-**Action 3 review stop (2026-09-12):** The completeness query/service boundary is implemented and
-verified within the approved scope. Action 3 is Ready for review. Action 4 remains Pending and has
-not been activated or implemented.
-
-**Action 3 review approval (2026-09-12):** The user approved the completeness query/service
-implementation after its verification evidence was recorded. Action 3 is Completed. Action 4
-remains Pending and prepared as the next action; it has not been activated or implemented.
-
-### Action 4 — Add the admin translation overview
-
-**Status:** Completed
-
-**Purpose:** Add a concise authorized overview with accessible status, search/filter controls, counts,
-fallback visibility, and links into the maintenance workflow, reusing existing application chrome
-and Library visual/form conventions.
-
-**Action 4 activation (2026-09-12):** The user approved the prepared next action. Action 4 is now
-active and is the only Phase 5 runtime action authorized for implementation. Actions 5–8 remain
-pending.
-
-**Action 4 implementation (2026-09-12):** Added the admin-only `/admin/translations` overview using
-the Action 3 overview service and the shared application chrome. The page presents the supported
-catalog scope, derived status counts, entity/status/search filters, separate English and Portuguese
-values, explicit missing/fallback markers, and an empty state. Added localized English and
-Brazilian Portuguese copy, an admin navigation destination, and a Library admin-scope link. The
-rendering uses semantic form labels, table headers/caption, keyboard-reachable horizontal overflow,
-escaped values, responsive status/filter layouts, and mobile-stacked filter actions. No translation
-mutation controls were added; those remain scoped to Action 5.
-
-**Action 4 verification (2026-09-12):** Focused schema, CSS, page-render, view-model, and
-application-chrome tests passed 14/14. `npm run check:types`, `npm run check:browser-types`,
-`npm run format:check`, `npm run lint`, and `git diff --check` passed. The elevated full repository
-test suite passed 319/319 tests, including database setup and loopback HTTP tests; the initial
-sandboxed attempt was blocked only by local PostgreSQL/loopback `EPERM` restrictions. Responsive
-behavior was verified from the source-level CSS contracts and focused assertions; no live browser
-executable was available in this environment for screenshot inspection, so rendered browser
-appearance remains a manual follow-up. No database/schema reset was needed.
-
-**Action 4 review stop (2026-09-12):** The admin translation overview is implemented and verified
-within the approved scope. Action 4 is Ready for review. Action 5 remains Pending and prepared but
-has not been activated or implemented.
-
-**Action 4 review approval (2026-09-12):** The user approved the admin translation overview after
-its focused and full verification evidence was recorded. Action 4 is Completed. Action 5 remains
-Pending and prepared as the next action; it has not been activated or implemented.
-
-### Action 5 — Add single-record translation editing
-
-**Status:** Completed
-
-**Purpose:** Let admins add/update supported `en` and `pt-BR` localized fields through validated,
-CSRF-protected server routes and repository transactions without changing canonical identity or
-relationships.
-
-**Action 5 activation (2026-09-12):** The user approved the prepared next action. Action 5 is now
-active and is the only Phase 5 runtime action authorized for implementation. Actions 6–8 remain
-pending.
-
-**Action 5 implementation (2026-09-12):** Added dedicated editor GET/PATCH routes under
-`/admin/translations/:entityType/:entityId`, reusing the existing `requireAdmin`, CSRF, parameter,
-and body-validation middleware. Added a repository query/upsert boundary and service for the
-approved name-only `en` / `pt-BR` contract. Each update is scoped to an active global catalog
-record, uses a parameterized upsert on the stable `(entity, locale)` key, and leaves canonical
-names, IDs, relationships, ownership, and user-authored content untouched. The overview now links
-each record to the editor. Added localized English/Portuguese forms with independent locale saves,
-fallback guidance, validation feedback, escaped values, semantic labels, stable-ID context, and
-responsive stacked mobile layout. No deletion or localized description editing was introduced.
-
-**Action 5 verification (2026-09-12):** Focused translation editing, schema, rendering, view-model,
-and CSS tests passed 12/12. `npm run check:types`, `npm run check:browser-types`,
-`npm run format:check`, `npm run lint`, and `git diff --check` passed. Elevated `npm run verify`
-passed all 327 repository tests, including database setup and loopback HTTP tests. Responsive
-behavior was verified from source-level CSS contracts and focused assertions; no live browser
-executable was available for screenshot inspection, so rendered browser appearance remains a
-manual follow-up. No database/schema reset was needed.
-
-**Action 5 review stop (2026-09-12):** Single-record translation editing is implemented and
-verified within the approved scope. Action 5 is Ready for review. Action 6 remains Pending and
-prepared but has not been activated or implemented.
-
-**Action 5 review approval (2026-09-12):** The user approved single-record translation editing
-after its focused and full verification evidence was recorded. Action 5 is Completed. Action 6
-remains Pending and prepared as the next action; it has not been activated or implemented.
-
-### Action 6 — Integrate global catalog creation/editing
-
-**Status:** Completed
-
-**Action 6 activation (2026-09-12):** The user approved the prepared next action. Action 6 is now
-active and is the only Phase 5 runtime action authorized for implementation. Actions 7–8 remain
-pending.
-
-**Verified delta:** Existing admin exercise creation and global-variant creation write canonical
-catalog rows without translation rows, while existing global edits update canonical names without
-synchronizing the English translation. The admin Library is already the shared global catalog
-management surface, and translation upserts accept a transaction client. Private variants are
-filtered from administrator Library data and remain outside this integration.
-
-**Implementation scope:** Reuse the existing transaction services and translation repository to
-create or synchronize English rows atomically for global exercises and variants. Add localized,
-direct links from the existing admin catalog controls to the approved translation editor. Add
-focused service, view-model, and rendered-template coverage for synchronization, transaction
-rollback, translation-editor identity, and private-content exclusion.
-
-**Action 6 implementation (2026-09-12):** Global exercise creation now returns the created
-exercise/variant rows and upserts English translations for both inside the existing transaction.
-Global variant creation now uses a transaction service that inserts the variant and its English row
-together. Existing global exercise/variant editing synchronizes the English translation rows with
-the canonical name in the same transaction; Portuguese translations remain independently editable.
-The admin Library's existing global catalog now links each global exercise and variant directly to
-the approved translation editor. Private variants remain without translation links and outside the
-translation write path.
-
-**Action 6 verification (2026-09-12):** Focused service, translation-maintenance, Library
-view-model/render, CSS, and browser-interaction tests passed (45/45). `npm run format:check`,
-`npm run lint`, `npm run check:types`, `npm run check:browser-types`, `git diff --check`, and the
-elevated complete `npm run verify` passed; the complete repository suite passed all 331 tests.
-The initial sandboxed full run reproduced the environment's PostgreSQL/loopback `EPERM` failures
-(327 passed, 2 failed, 3 cancelled), then the approved elevated run passed those same checks.
-No browser executable is available for live viewport or assistive-technology inspection; that
-manual limitation remains for Action 7.
-
-**Action 6 review stop (2026-09-12):** Global catalog creation/editing is integrated with the
-translation workflow within the approved scope. Action 6 is Ready for review. Actions 7–8 remain
-pending and have not been activated or implemented.
-
-**Action 6 approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 6 is Completed. Action 7 remains Pending and prepared as the
-next action; it has not been activated or implemented.
-
-**Purpose:** Connect existing global exercise/variant creation and editing to the approved
-translation workflow where necessary, without exposing user-owned/custom content or duplicating
-catalog management experiences.
-
-### Action 7 — Security, accessibility, and regression audit
-
-**Status:** Completed
-
-**Action 7 activation (2026-09-12):** The user approved the prepared next action. Action 7 is now
-active and is the only Phase 5 runtime action authorized for implementation. Action 8 remains
-pending.
-
-**Verified audit baseline (2026-09-12):** Authorization and CSRF boundaries are present on the
-admin translation routes; schema validation, escaped shared fields, semantic headings/labels,
-fallback status text, and private-content filters are present in the implementation. The first
-focused HTTP audit exposed one repairable regression in the shared variant translation SQL: its
-parent exercise join used the variant ID instead of `exercise_id`, so global variant translation
-upserts incorrectly returned no row and rolled back global exercise creation. The focused audit
-also requires end-to-end assertions for admin-only access, CSRF rejection, fallback preservation,
-and private-variant exclusion.
-
-**Action 7 repairs and coverage (2026-09-12):** Corrected the global exercise-variant translation
-join to use the variant's stable `exercise_id` parent relationship. Corrected the translation editor
-form to pass the existing query-string method-override contract and retained `entityType` in the
-editor view model so generated actions cannot lose their entity route. Added HTTP coverage for
-authenticated-user and guest denial, CSRF rejection, admin overview/editor access, validated
-translation upsert, English fallback preservation, and private-variant exclusion. Added focused
-regression assertions for the corrected SQL and rendered form action.
-
-**Purpose:** Verify direct unauthorized access, guest/user/admin behavior, validation/escaping,
-fallback, ownership, ID/relationship preservation, existing catalog search/rendering, and responsive
-keyboard-accessible maintenance states.
-
-**Action 7 verification (2026-09-12):** The focused authorization and translation-maintenance HTTP
-tests passed 2/2. Focused translation, catalog-creation/update, view, and responsive CSS tests passed
-14/14. `npm run verify` passed formatting, lint, server type-check, browser type-check, and all 331
-repository tests. `git diff --check` passed. The complete HTTP application suite reached 64 tests:
-59 passed and 5 failed in authentication/workout-history/progress scenarios outside this action's
-translation paths; their causes were not investigated as part of this scoped audit. The two Action 7
-HTTP tests passed in the same suite. No live
-browser executable or assistive-technology runner is available, so live viewport and interaction
-inspection at approximately 390px, an intermediate pressure width, and desktop remain unavailable;
-static responsive contracts and rendered accessibility assertions passed. No database reset,
-production mutation, deployment, push, or commit was performed.
-
-**Action 7 review stop (2026-09-12):** The security, accessibility, and regression audit is
-implemented and verified within the available repository and HTTP evidence. Action 7 is Ready for
-review. Action 8 remains Pending and has not been activated or implemented.
-
-**Action 7 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 7 is Completed. Action 8 remains Pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 8 — Final verification and tracking synchronization
-
-**Status:** Completed
-
-**Action 8 activation (2026-09-12):** The user approved the prepared next action. Action 8 is now
-active and is the only Phase 5 runtime action authorized for implementation.
-
-**Purpose:** Run focused and repository verification, compare admin completeness with the existing
-catalog completeness contract, document limitations/deferred work, and prepare Phase 5 for review
-without claiming completion before explicit approval.
-
-**Action 8 completion matrix (2026-09-12):**
-
-1. **Verified:** Both tracking files describe the Phase 5 objective, scope, non-goals, constraints,
-   action history, and current review state.
-2. **Verified:** The shared maintenance contract defines five global entity types—exercises, global
-   exercise variants, muscles, equipment, and movement patterns—with the supported localized field
-   limited to the required `name`. The same five families are covered by the existing authored
-   Portuguese manifest/vocabulary completeness contract. The admin contract derives live database
-   status; the authored contract validates expected manifest/seed keys, so they are complementary
-   checks rather than duplicated status logic.
-3. **Verified:** Admin overview filters and counts expose per-record `complete`, `missing-en`,
-   `missing-pt-BR`, and `incomplete` states, with search and entity/status filtering.
-4. **Verified:** Overview status and counts are derived through the reusable maintenance contract,
-   repository, mapper, and overview service rather than duplicated in the templates.
-5. **Verified:** Admin-only validated upsert routes add or update supported `en` and `pt-BR` names
-   through parameterized repository queries.
-6. **Verified:** Authenticated ordinary users and guests receive denial on the maintenance overview;
-   CSRF protection covers mutation, and the HTTP audit confirms the boundary.
-7. **Verified:** Stable IDs, canonical values, relationships, and ownership predicates are retained;
-   private variants are excluded from the global maintenance query and cannot be opened by the admin
-   editor route.
-8. **Verified:** Upsert-only mutation disallows deletion, and the editor preserves English rows and
-   canonical fallback visibility when Portuguese is absent.
-9. **Verified:** Full repository verification and the Action 7 HTTP audit cover global catalog
-   creation/update synchronization, translation fallback, catalog search/rendering, and Library
-   behavior without changing user-owned content or stable relationship identifiers.
-10. **Verified with static/rendering limit:** Escaped values, semantic headings/labels, status
-    feedback, labelled table overflow, keyboard focus styling, responsive filter/layout contracts,
-    and reduced-motion-safe presentation are covered by render and CSS tests. No live browser or
-    assistive-technology runner is available for viewport inspection at approximately 390px,
-    intermediate pressure width, or desktop.
-11. **Partially verified with precise limit:** `npm run verify` passed formatting, lint, server and
-    browser type-checks, and all 331 repository tests. Action 7 focused HTTP coverage passed 2/2,
-    but the complete 64-test HTTP application suite had 59 passes and 5 failures in authentication,
-    workout-history, and progress scenarios outside the translation-maintenance paths; those causes
-    were not investigated in this scoped goal. `git diff --check` passed.
-12. **Verified/documented:** Deferred work includes localized description fields whose read paths are
-    not integrated, bulk import/export and audit history, additional locales, and live browser/
-    assistive-technology inspection. The full-suite HTTP failures remain an explicitly recorded
-    follow-up rather than silently treated as Phase 5 evidence.
-
-**Action 8 verification (2026-09-12):** Re-ran `npm run verify` with approved local PostgreSQL
-access; formatting, lint, both type-check projects, and all 331 repository tests passed. Rechecked
-the focused Action 7 HTTP tests at 2/2 and the complete HTTP application suite at 59/64, with the
-five out-of-scope failures recorded in the completion matrix. `npx prettier --check
-docs/current-goal.md docs/current-actions.md` and `git diff --check` passed. No database reset,
-production mutation, deployment, push, or commit was performed.
-
-**Action 8 review stop (2026-09-12):** Final verification, the completeness-contract comparison,
-criterion-by-criterion matrix, limitations, and deferred work are synchronized. Action 8 is Ready
-for review. Phase 5 awaits explicit final goal approval; no further action remains pending.
-
-**Action 8 review approval (2026-09-12):** The user approved the final verification and tracking
-synchronization after the recorded evidence passed. Action 8 is Completed. Phase 5 is Ready for
-final review; no further action remains pending.
-
-## Resume here
-
-Action 1 is **Completed**. Action 2 is **Completed**. Action 3 is **Completed**. Action 4 is
-**Completed**. Action 5 is **Completed**. Action 6 is **Completed**. Action 7 is **Completed**.
-Action 8 is **Completed**. Phase 5 is **Completed** on 2026-09-12.
-
-## Historical Phase 4 record
-
-### Action 1 — Update goal tracking and audit
-
-**Status:** Completed
-
-**Purpose:** Record Phase 4 as the active goal, inspect completed Phase 1–3 behavior, audit
-locale-sensitive presentation/mixed-language surfaces, and classify the verified implementation delta
-before code changes begin.
-
-**Acceptance criteria:**
-
-- `docs/current-goal.md` explicitly describes Phase 4 objective, scope, non-goals, completion criteria,
-  constraints, and current status.
-- This file records the Phase 4 action sequence and keeps statuses synchronized with actual work.
-- Existing i18n, catalog localization, locale persistence, document language, security, ownership,
-  user-content, and browser-message contracts are documented as reusable boundaries.
-- Formatting, dynamic copy, validation/errors, auth/account/email, accessibility, client-side,
-  analytics, responsive, mixed-language, and completeness findings are classified by priority.
-- No broad application implementation occurs in this audit action.
-
-**Action 1 implementation and audit evidence (2026-09-11):** Updated `docs/current-goal.md` and
-this file before executable Phase 4 implementation. Inspected the completed i18next middleware and
-resource contract, shared EJS layout/document language, locale persistence route, Phase 3 catalog
-localization/query/mapper boundaries, auth routes/controllers/passport strategy, validation schemas,
-password-reset service/email delivery, dashboard analytics/chart view models, browser i18n/search/
-workout scripts, accessibility-facing templates, and existing translation tests. Classified the
-existing locale infrastructure and catalog identity/ownership boundaries as reusable; identified
-direct date/number/duration formatting, manual pluralization, hard-coded auth/email messages,
-browser/chart dynamic copy, and leaf-key-only completeness checks as the Phase 4 delta. Confirmed
-user-authored content, external/provider-owned text, stable measurement symbols, persisted values,
-security semantics, and analytics calculations remain outside translation scope.
-
-**Action 1 verification (2026-09-11):** Both tracking files and the recorded baseline were inspected
-against the Phase 4 request and repository evidence. `git diff --check` passed. No runtime code,
-schema, seed data, database, route, email delivery, or user content was changed. Executable code
-checks are deferred until an implementation action changes code.
-
-**Action 1 review stop (2026-09-11):** Phase 4 tracking and the verified audit baseline are
-complete. Action 1 is ready for review. Action 2 remains pending and has not been activated or
-implemented.
-
-**Action 1 review approval (2026-09-12):** The user approved the recorded tracking and audit
-baseline after verification evidence was available. Action 1 is complete. Action 2 remains pending
-and is prepared as the next action; it has not been activated or implemented.
-
-### Action 2 — Centralize locale-sensitive formatting
-
-**Status:** Completed
-
-**Purpose:** Add or refine shared presentation helpers for dates, times, numbers, percentages,
-durations, and application-owned workout unit/count labels, then migrate high-impact usages.
-
-**Action 2 activation (2026-09-12):** The user approved the prepared next action. Action 2 was
-activated and was the only action authorized for implementation in this work cycle. Actions 3–9
-remain pending.
-
-**Action 2 progress (2026-09-12):** The initial implementation audit confirms that several view
-models already use `Intl` locally, but date-only helpers and analytics/workload/progress/history
-formatters duplicate locale construction and some fixed-format helpers remain locale-insensitive.
-The implementation centralized those presentation calls without changing stored date keys, numeric
-calculations, unit identifiers, or translated sentence/pluralization scope reserved for Action 3.
-
-**Action 2 implementation (2026-09-12):** Added the shared `src/infrastructure/i18n/formatLocale.js`
-presentation boundary for locale-aware dates/times, numbers, percentages, durations, and long-form
-measurements, with UTC anchoring for date-only values and stable `kg`/`lb` symbols for workout
-labels. Migrated high-impact dashboard analytics/workload/navigation, Programs, Day, Library,
-workout-session, progress, workout-history, and guest-profile expiration presentation paths to
-receive the active language. Preserved stored date keys, numeric calculations, persisted unit
-identifiers, catalog identity, and user-authored content.
-
-**Action 2 verification (2026-09-12):** Focused locale/presentation tests passed (46 tests), with
-English and Brazilian Portuguese date, decimal, percentage, duration, measurement, load, progress,
-history, dashboard, Day, Programs, Library, and profile coverage. `npm run check:types`,
-`npm run check:browser-types`, `npm run lint`, `npm run format:check`, and `git diff --check` passed.
-The elevated full `npm test` run passed all 288 tests, including PostgreSQL-backed setup and the
-locale-persistence HTTP test. The initial sandboxed `npm run verify` could not access loopback
-PostgreSQL/HTTP resources (`EPERM`); the same complete test phase passed with the approved elevated
-local verification.
-
-**Action 2 review stop (2026-09-12):** Centralized formatting and the approved high-impact
-migrations are complete and verified. Action 2 is ready for review. Actions 3–9 remain pending and
-have not been activated or implemented.
-
-**Action 2 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 2 is complete. Action 3 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 3 — Dynamic copy and pluralization
-
-**Status:** Completed
-
-**Purpose:** Replace application-owned count-dependent and sentence-fragment construction with
-localized pluralization/interpolation while preserving stable symbols and user content.
-
-**Action 3 activation (2026-09-12):** The user approved the prepared next action. Action 3 is now
-active and is the only action authorized for implementation in this work cycle. Actions 4–9 remain
-pending.
-
-**Acceptance criteria:**
-
-- Count-dependent application copy uses the established translation boundary and reviewed
-  `one`/`other` resources for English and Brazilian Portuguese.
-- Dynamic workout, library, Programs, Day, history, progress, and analytics labels preserve
-  interpolation and stable measurement symbols while localizing grammatical copy.
-- Server-rendered and browser-generated Library counters consume the existing server-provided
-  browser message contract and do not revert to English after interaction.
-- User-authored content, catalog identity, persisted values, calculations, relationships, and
-  authorization behavior remain unchanged.
-
-**Action 3 implementation (2026-09-12):** Added the shared count translation helper and reviewed
-plural resources for workout prescriptions/progress, dashboard assignment/adherence/workload,
-Programs cycle/hierarchy counts, Library session/exercise/variant/set/step counts, history step
-counts, and progress occurrence summaries. Migrated server-rendered view models and EJS surfaces
-away from manual singular/plural branches and direct count fragments, including session details,
-Library tabs, history details, and progress rows. Updated the existing browser message contract and
-Library search/filter counters so locale-provided messages remain active during filtering. Kept
-`kg`/`lb` symbols, IDs, stored values, analytics calculations, and user content unchanged.
-
-**Action 3 verification (2026-09-12):** Focused dynamic-copy, Library, dashboard, Day, Programs,
-progress, history, and rendering tests passed (49 tests), including a new test proving that browser
-Library counters consume a Portuguese message payload. `npm run format:check`, `npm run lint`,
-`npm run check:types`, `npm run check:browser-types`, and `git diff --check` passed. The translation
-resource leaf-key audit found matching `en`/`pt-BR` structures with 550 keys. The complete elevated
-`npm run verify` passed all static checks and all 289 repository tests. A preceding sandboxed run
-could not access local PostgreSQL/HTTP loopback resources (`EPERM`); the same test suite passed with
-approved elevated local access.
-
-**Action 3 review stop (2026-09-12):** Dynamic copy and pluralization implementation is complete
-and verified. Action 3 is ready for review. Actions 4–9 remain pending and have not been activated
-or implemented.
-
-**Action 3 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 3 is complete. Action 4 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 4 — Validation, errors, and notifications
-
-**Status:** Completed
-
-**Purpose:** Localize major application-controlled validation, safe error, success, confirmation, and
-notification messages without translating logs, stack traces, or raw provider errors.
-
-**Action 4 activation (2026-09-12):** The user approved the prepared next action. Action 4 is now
-active and is the only action authorized for implementation in this work cycle. Actions 5–9 remain
-pending.
-
-**Acceptance criteria:**
-
-- Application-owned validation literals are mapped to reviewed English and Brazilian Portuguese
-  resources at the request/presentation boundary, while unknown Zod/provider/internal text keeps its
-  safe existing fallback behavior.
-- Recovery responses and contextual mutation failures localize HTML, JSON, and plain-text copy
-  without exposing raw database, provider, stack-trace, or internal error details.
-- Major Programs, Library, workout-session, and locale-switch validation/error/confirmation paths
-  use stable translation keys and preserve status codes, redirects, submitted values, identities,
-  and authorization behavior.
-- Auth/account/provider copy remains assigned to Action 5; no success path or security-sensitive
-  behavior is changed here unless it is already covered by the shared application boundary.
-
-**Action 4 implementation (2026-09-12):** Added the shared application-owned message translator
-with safe default interpolation. Expanded the validation presentation map and both locale resources
-for route/query envelopes, program/cycle/day/session/exercise/workout identifiers, form constraints,
-date ranges, reps, loads, and relationship errors. Localized application recovery states across HTML,
-JSON, and plain responses; added locale-aware contextual mutation fallbacks; and migrated major
-Programs, Library, session-template, exercise-variant, workout lifecycle, Library-context, and
-locale-switch feedback paths. Replaced raw known not-found exception messages in rendered form errors
-with safe localized copy. Localized workout deletion confirmation labels while preserving authored
-session names and all mutation contracts.
-
-**Action 4 verification (2026-09-12):** Focused validation, recovery, contextual mutation, and
-deletion tests passed (21 tests), including Portuguese translation-boundary coverage. Application
-types, browser types, lint, formatting, and `git diff --check` passed. The complete elevated
-`npm run verify` passed all static checks and all 293 repository tests. The initial sandboxed verify
-could not access loopback PostgreSQL/HTTP resources (`EPERM`); the same complete suite passed with
-approved elevated local access. The final locale leaf-key audit found matching `en`/`pt-BR`
-structures with 663 keys and no missing or extra keys.
-
-**Action 4 review stop (2026-09-12):** Validation, safe error, contextual mutation, recovery, and
-confirmation copy are implemented and verified. Action 4 is ready for review. Action 5 remains
-pending and has not been activated or implemented.
-
-**Action 4 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 4 is complete. Action 5 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 5 — Auth/account/email localization
-
-**Status:** Completed
-
-**Purpose:** Audit and localize authentication/account states and generated auth email copy where
-reliable locale context exists, preserving generic responses, tokens, URLs, sessions, and secrecy.
-
-**Action 5 activation (2026-09-12):** The user approved the prepared next action. Action 5 is now
-active and is the only action authorized for implementation in this work cycle. Actions 6–9 remain
-pending.
-
-**Verified delta-first baseline (2026-09-12):** Authentication and profile templates already use
-the shared translation function for most labels, descriptions, forms, and accessible names. The
-remaining application-owned copy is injected by auth/profile controllers: schema errors, generic
-credential and registration failures, password-reset status/invalid-token messages, Google failure
-states, profile provider-link statuses, and password-add errors. The reset email service hard-codes
-English subject/body/lifetime copy and its delivery payload carries no locale; the password-reset
-request already has reliable request-local language context. Provider errors and feature-layer
-exception messages are not safe presentation contracts and must be mapped to generic reviewed copy.
-
-**Proposed Action 5 delta:** Add reviewed auth/profile/email resources; translate auth validation and
-controller-owned status/error messages at presentation boundaries; map known provider/account errors
-to safe localized messages; pass the active locale into reset-email delivery; and add focused tests
-for validation, profile/auth states, localized email output, token secrecy, and generic failures.
-
-**Acceptance criteria:**
-
-- Auth and password validation, generic credential failures, registration conflicts, reset states, and
-  Google/account statuses use reviewed English and Brazilian Portuguese resources at presentation
-  boundaries.
-- Provider, database, and feature-layer exception details are not exposed as user-facing auth copy;
-  generic login/reset behavior and anti-enumeration responses remain intact.
-- Password-reset email subject, text, HTML, and lifetime wording use the active locale when request
-  context is available and fall back safely to English for context-free callers.
-- Reset tokens, reset URLs, session rotation/invalidation, CSRF/rate-limit boundaries, email
-  recipient handling, and secret-free delivery diagnostics remain unchanged.
-- Existing authentication/profile semantics and responsive/accessibility structure remain intact;
-  no unrelated visual redesign is included.
-
-**Action 5 implementation (2026-09-12):** Added shared auth-validation translation mapping and
-reviewed auth, profile, and email resources. Localized controller-owned sign-in, registration,
-Google, password-reset, and profile-link/password-add statuses while replacing raw known exception
-messages with safe application copy and keeping invalid credentials generic. Carried the reliable
-request locale through password-reset delivery and localized Resend subject, plain text, HTML, and
-one/other lifetime wording; context-free email calls continue to use English. Preserved reset token
-and URL generation, session/security behavior, provider boundaries, and recipient/diagnostic secrecy.
-The existing profile/auth EJS structure and shared form/accessibility contracts were reused without
-CSS or layout changes.
-
-**Action 5 verification (2026-09-12):** Focused auth validation, profile/auth rendering, feature
-authentication, and Resend email tests passed 19/19, including Portuguese validation/status/email
-copy and secret-free provider rejection coverage. `npm run check:types`,
-`npm run check:browser-types`, `npm run lint`, `npm run format:check`, and `git diff --check`
-passed. The complete elevated `npm run verify` passed all static checks and all 295 repository
-tests. The final locale leaf-key audit found matching `en`/`pt-BR` structures with 700 keys and no
-missing or extra keys. No real email was sent; the initial sandbox database/HTTP limitation was
-resolved by approved elevated local verification.
-
-**Action 5 review stop (2026-09-12):** Authentication, account, and locale-aware reset-email copy
-are implemented and verified. Action 5 is ready for review. Actions 6–9 remain pending and have
-not been activated or implemented.
-
-**Action 5 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 5 is complete. Action 6 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 6 — Client-side, accessibility, and analytics copy
-
-**Status:** Completed
-
-**Purpose:** Localize remaining browser-generated application UI, accessible names/descriptions, and
-Chart.js/analytics labels and fallback copy through the existing shared boundary.
-
-**Action 6 activation (2026-09-12):** The user approved the prepared next action. Action 6 is now
-active and is the only action authorized for implementation in this work cycle. Actions 7–9 remain
-pending.
-
-**Action 6 implementation (2026-09-12):** Extended the established presentation boundary across
-browser and accessibility-facing output. Chart week labels, numeric tooltip values, heatmap markers,
-cycle summaries, and analytics table counts now use the active locale while chart metric arrays and
-analytics calculations remain unchanged. Localized remaining application-owned navigation/list
-accessible names for training-day navigation, program/cycle collections, calendar day links, the
-Library session-template region, contextual session creation, and the heatmap data-table hint.
-Nested EJS includes now receive the existing request translator explicitly. User-authored names,
-stable IDs, form values, persisted metrics, and stable measurement symbols remain unchanged.
-
-**Action 6 verification (2026-09-12):** Focused browser, analytics, Programs, Day, Library, and
-rendering tests passed (20/20), including Brazilian Portuguese chart/heatmap labels and tooltip
-number formatting. `npm run check:types`, `npm run check:browser-types`, `npm run lint`,
-`npm run format:check`, and `git diff --check` passed. The complete elevated `npm run verify`
-passed all 296 repository tests. The initial sandboxed full run was unable to access local PostgreSQL
-and loopback HTTP resources (`EPERM`); the same complete verification passed with approved elevated
-local access. No browser automation dependency is present, so new viewport screenshots and live
-assistive-technology inspection were not available; those responsive/mixed-language checks remain
-with Action 7.
-
-**Action 6 review stop (2026-09-12):** Client-side, accessibility, and analytics copy are
-implemented and verified within the approved boundary. Action 6 is ready for review. Actions 7–9
-remain pending and have not been activated or implemented.
-
-**Action 6 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 6 is complete. Action 7 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 7 — Responsive and mixed-language audit
-
-**Status:** Completed
-
-**Purpose:** Verify representative English and Portuguese guest/authenticated/auth screens and
-interaction states at supported widths, correcting only proven translated-copy regressions and mixed
-application language.
-
-**Action 7 activation (2026-09-12):** The user approved the prepared next action. Action 7 is now
-active and is the only action authorized for implementation in this work cycle. Actions 8–9 remain
-pending.
-
-**Action 7 implementation (2026-09-12):** Audited representative authenticated Library, Day,
-Dashboard/workout, Programs, and shared interaction surfaces in both locale paths. The audit found
-proven mixed-language regressions in Library discovery, session/exercise detail, session assignment,
-workout lifecycle/cancellation, Programs navigation, and Library creation forms. Routed those labels,
-descriptions, hints, empty states, accessible names, and action controls through the established
-server translator, including private/global variant and administrator exercise forms. Added matching
-reviewed English and Brazilian Portuguese resources and regression assertions for Portuguese Library,
-Day, Dashboard/workout, and selected-session detail output. Stable catalog labels, IDs, submitted form
-values, ownership, authorization, and user-authored content remain unchanged.
-
-**Action 7 responsive and mixed-language verification (2026-09-12):** The focused Library and
-translation checks passed 14/14 after the final form corrections. The repository-wide literal audit
-found no obvious remaining hard-coded application-owned English in the reviewed EJS surfaces; any
-remaining English found outside that pattern is intentional fallback/resource text, catalog or
-user-authored content, or outside the reviewed application-owned copy boundary. Existing static
-responsive contracts for pressure widths, navigation, Library, Programs, Day, workout, history,
-progress, media, and accessibility passed as part of the full suite. No live browser executable or
-assistive-technology runner is available in this workspace, so viewport screenshots and live
-interaction inspection at approximately 390px, an intermediate pressure width, and desktop remain
-unavailable; no CSS/layout redesign was introduced because no repository-level responsive defect was
-proven.
-
-**Action 7 verification (2026-09-12):** `npm run verify` passed formatting, lint, server type-check,
-browser type-check, and all 300 repository tests, including PostgreSQL-backed setup and HTTP tests.
-`git diff --check` passed. The initial sandboxed full run was environment-limited by denied loopback
-PostgreSQL/HTTP access (`EPERM`); the same complete verification passed with approved elevated local
-access. No database reset, production mutation, deployment, push, or commit was performed.
-
-**Action 7 review stop (2026-09-12):** The responsive and mixed-language audit is implemented and
-verified within the available static/rendering evidence. Action 7 is ready for review. Action 8
-remains pending and has not been activated or implemented.
-
-**Action 7 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 7 is complete. Action 8 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 8 — Completeness and regression verification
-
-**Status:** Completed
-
-**Purpose:** Strengthen translation completeness/missing-key detection and run focused, static,
-regression, and environment-available verification across the Phase 4 contract.
-
-**Action 8 activation (2026-09-12):** The user approved the prepared next action. Action 8 is now
-active and is the only action authorized for implementation in this work cycle. Action 9 remains
-pending.
-
-**Action 8 implementation (2026-09-12):** Strengthened the common-resource contract so English and
-Brazilian Portuguese must preserve the same namespace/object shape and every leaf value must be a
-non-empty string in both locales. Added a production-source translation-reference audit covering
-literal server, EJS, and browser translation calls, including plural-family references, so missing
-application keys fail the test suite before reaching production. Added explicit chart and Programs
-browser-message resources and corrected verified missing Library, workout-form, and Programs keys.
-Preserved i18next English fallback, browser message interpolation, catalog/user-content boundaries,
-stable IDs, calculations, and runtime behavior.
-
-**Action 8 verification (2026-09-12):** Focused i18n resource and fallback checks passed 11/11.
-`npm run verify` passed formatting, lint, server type-check, browser type-check, and all 303
-repository tests, including PostgreSQL-backed setup and HTTP tests. `git diff --check` passed. The
-initial sandboxed full run was environment-limited by denied loopback PostgreSQL/HTTP access
-(`EPERM`); the same complete verification passed with approved elevated local access. No database
-reset, production mutation, deployment, push, or commit was performed.
-
-**Action 8 review stop (2026-09-12):** Translation completeness and regression verification are
-implemented and verified. Action 8 is ready for review. Action 9 remains pending and has not been
-activated or implemented.
-
-**Action 8 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 8 is complete. Action 9 remains pending and prepared as the
-next action; it has not been activated or implemented.
-
-### Action 9 — Final tracking synchronization and review preparation
-
-**Status:** Completed
-
-**Purpose:** Record the actual implementation, audit classifications, verification results,
-environment limitations, intentional exclusions, and criterion-by-criterion Phase 4 status before
-the final review gate.
-
-**Action 9 activation (2026-09-12):** The user approved the prepared next action. Action 9 is now
-active and is the only action authorized for implementation in this work cycle.
-
-**Action 9 implementation and completion matrix (2026-09-12):** Reconciled the Phase 4 goal and
-action records with the repository, tests, and approved Action 1–8 evidence:
-
-1. **Verified:** `docs/current-goal.md` and `docs/current-actions.md` describe the Phase 4 scope,
-   constraints, action statuses, approval history, and current review gate.
-2. **Verified:** Dates, times, numbers, percentages, durations, measurements, and workout count
-   labels use the shared locale-aware presentation boundary; stored values and calculations remain
-   locale-neutral.
-3. **Verified:** Application-owned dynamic copy uses reviewed interpolation and plural resources,
-   including server-rendered and browser-generated Library counters.
-4. **Verified:** Validation, recovery, mutation, confirmation, authentication, and account messages
-   use localized application boundaries without exposing internal/provider details.
-5. **Verified with documented limitation:** Password-reset email copy uses the request locale when
-   reliably supplied; context-free email calls remain English because no user locale is available in
-   those call paths. Token, URL, secrecy, anti-enumeration, and delivery behavior are preserved.
-6. **Verified:** Accessible names/descriptions, browser-generated UI, chart/analytics labels, and
-   document language use the active locale; browser message interpolation remains intact.
-7. **Verified:** Stable IDs, relationships, ownership, authorization, persisted data, analytics
-   calculations, catalog identity, user-authored content, and authentication behavior are unchanged.
-8. **Verified:** Locale detection, session persistence, English fallback, and locale switching are
-   covered by middleware and HTTP tests for guest/authenticated request paths.
-9. **Partially verified with precise limit:** Static responsive contracts and rendered component
-   tests pass for guest/authenticated surfaces at supported pressure widths. No live browser
-   executable is available, so viewport screenshots and live interaction inspection at mobile,
-   intermediate, and desktop widths were not possible; no known major repository-level responsive
-   regression remains from the available evidence.
-10. **Verified with classifications:** The mixed-language audit resolved obvious application-owned
-    literals in reviewed surfaces. Remaining English is intentional fallback/resource text,
-    catalog or user-authored content, external/provider-owned content, or the documented context-free
-    email limitation.
-11. **Verified:** Required translation keys are checked for matching namespace shape, non-empty
-    values in both locales, literal production references, plural families, and safe missing-key
-    fallback behavior.
-12. **Verified:** Focused checks, server/browser type checks, lint, formatting, full regression
-    verification, PostgreSQL-backed setup, HTTP tests, and `git diff --check` passed. The sandboxed
-    PostgreSQL/HTTP attempt was environment-limited by `EPERM`; approved elevated local verification
-    passed the same suite. No database reset, production mutation, deployment, push, or commit was
-    performed.
-13. **Verified:** Actions 1–9 are approved and complete, and the user explicitly approved the Phase
-    4 goal. Phase 4 is complete with the documented live-browser and context-free email limitations.
-
-**Action 9 verification (2026-09-12):** The final matrix and both tracking files were inspected
-against the current repository state. `npm run verify` passed all static checks and 303 repository
-tests before this documentation-only synchronization; `git diff --check` passed afterward. No live
-browser or assistive-technology runner is available, as recorded above.
-
-**Action 9 review stop (2026-09-12):** Phase 4 tracking, completion-criterion comparison,
-intentional-exclusion classification, and verification evidence are synchronized. Action 9 is ready
-for review. The Phase 4 goal remains active pending explicit approval of this final action.
-
-**Action 9 review approval (2026-09-12):** The user approved the implementation after the recorded
-verification evidence passed. Action 9 is complete, and Phase 4 is ready for final review. The live
-browser/assistive-technology limitation and context-free email limitation remain explicitly recorded
-in the completion matrix; no other unmet completion criterion was identified.
-
-**Phase 4 final approval (2026-09-12):** The user approved the goal after the completion matrix and
-verification evidence were recorded. Phase 4 is complete. The remaining live-browser/
-assistive-technology and context-free email limitations are intentional, documented boundaries;
-no other unmet completion criterion was identified.
-
-## Historical Phase 3 record
-
-### Action 1 — Goal tracking and domain audit
-
-**Status:** Completed
-
-**Purpose:** Establish the Phase 3 goal tracking required before implementation, inspect the current
-schema/seed/query/mapper/view-model/search/media/ownership paths, classify entities by ownership and
-translation strategy, and record the schema workflow constraint.
-
-**Acceptance criteria:**
-
-- `docs/current-goal.md` explicitly describes Phase 3 objective, scope, non-goals, completion
-  criteria, constraints, and current status.
-- This file records the small reviewable Phase 3 action sequence and stays synchronized with the
-  implementation status.
-- Global catalog, enum/code, user-owned, historical, and application-UI values are classified from
-  direct repository evidence rather than table names alone.
-- Existing repositories/queries, mappers/view models, Library search/filtering, form ID contracts,
-  media resolution, creation/update workflows, and history/snapshot boundaries are documented as
-  reuse points or risks.
-- The absence of a migration runner and the conflict between the requested no-reset migration path
-  and the repository’s authoritative reset setup are explicitly recorded for resolution before
-  schema work.
-- No domain schema or application behavior is changed by this action.
-
-**Implementation and audit evidence (2026-09-11):** Updated both tracking files before any Phase 3
-schema/application implementation. Inspected `db/schema.js`, `db/seed.js`, the exercise catalog
-manifest/seed SQL, catalog repositories and mappers, Library data/view-model/search paths, exercise
-and variant creation/update ownership workflows, session joins, workout/history snapshot queries,
-and the centralized media resolver. Classified global catalog rows, fixed internal codes, mixed
-global/user content, and user/historical content in `current-goal.md`. Confirmed that raw names are
-currently selected in SQL, localized display lookup does not yet exist, Library filtering uses
-presentation-derived search text, form values are stable IDs, and media keys are name-derived.
-
-**Verification evidence (2026-09-11):** Documentation and repository audit completed. The changed
-tracking files were inspected against the Phase 3 request and current repository state. No runtime
-code, schema, seed data, database, route, or user content was changed. Code checks are deferred
-until an implementation action changes executable files.
-
-**Review approval (2026-09-11):** The user approved Action 1 after its audit and documentation
-verification evidence were recorded. Action 1 is complete. Action 2 remains pending and has not
-been activated or implemented.
-
-### Action 2 — Define and implement the localization data model
-
-**Status:** Completed
-
-**Purpose:** Resolve the schema workflow constraint, then implement the smallest explicit normalized
-translation model for the agreed global catalog entities, including constraints, indexes, fallback
-contract, compatibility, rollback, and fresh-seed behavior.
-
-**Acceptance criteria:**
-
-- The chosen model is explicit and avoids one translation table per entity unless repository evidence
-  supports it; no polymorphic abstraction is added speculatively.
-- Existing IDs, foreign keys, ownership, exercise/media relationships, workout references, and
-  history remain valid; no language-duplicate entities are created.
-- English backfill and fresh seed behavior are deterministic; missing Portuguese rows remain safe.
-- The approved schema-evolution path, deployment order, and rollback expectations are documented.
-- Focused schema/seed/repository tests pass without resetting a user or production database.
-
-### Action 3 — Backfill English catalog content and align fresh seed
-
-**Status:** Completed
-
-**Purpose:** Populate the canonical English translation contract from existing global catalog values
-without destructive cleanup, and make fresh development/test setup reproducible.
-
-**Acceptance criteria:**
-
-- Existing IDs and English behavior remain intact through the backfill.
-- Global rows receive deterministic English translations; user-owned rows are excluded.
-- Seed and compatibility tests prove the same contract for fresh and existing data paths.
-
-**Delta verification (2026-09-11):** This action is already satisfied by the completed Action 2
-implementation. `catalogTranslationSeedSql` is used by the canonical `seedSql` and deterministically
-inserts English rows for all current application-managed exercises, muscles, equipment, and movement
-patterns, plus global variants selected by `owner_user_id IS NULL`. The same shared schema and seed
-SQL are used by `db/schema.js`, `db:setup:sql`, and migration `001_catalog_translations`; legacy
-canonical columns remain intact. No additional backfill or parallel implementation was added.
-
-**Verification evidence (2026-09-11):** Focused schema/migration/seed/lifecycle tests passed 10/10;
-server type-check and full formatting passed; `git diff --check` passed. Database row-count
-assertions remain present but could not be executed without a configured test database, and no
-database reset or migration was run.
-
-**Review stop (2026-09-11):** Action 3 is ready for review. Action 4 remains pending and has not
-been activated or implemented.
-
-**Review approval (2026-09-11):** The user approved Action 3 after its reuse verification evidence
-was recorded. Action 3 is complete. Action 4 remains pending and has not been activated or
-implemented.
-
-### Action 4 — Add reviewed Brazilian Portuguese catalog translations
-
-**Status:** Completed
-
-**Purpose:** Add consistent Brazilian Portuguese labels for the in-scope global catalog. Long-form
-global descriptions/setup text remain fallback content unless separately approved and reviewed.
-
-**Acceptance criteria:**
-
-- Terminology is reviewed for natural, consistent Brazilian fitness usage.
-- No machine translation or user-content translation is introduced.
-- Completeness tests distinguish required global rows from user-owned/custom rows.
-
-**Action 4 activation (2026-09-11):** The user approved the prepared next action. Action 4 is now
-active and is the only action being implemented in this work cycle. Actions 5–9 remain pending.
-
-**Action 4 implementation (2026-09-11):** Added an authored Brazilian Portuguese terminology map
-for every current application-managed exercise, global exercise variant, muscle, equipment, and
-movement-pattern label. The map validates exact coverage against the canonical catalog manifest and
-vocabulary, rejects missing/extra/blank entries, and generates deterministic `pt-BR` seed SQL by
-joining stable English source names to existing IDs. Global variants are explicitly restricted by
-`owner_user_id IS NULL`; user-owned/custom variants are not translated. SQL literals escape
-apostrophes safely. This action populates names only: global variant setup descriptions and
-movement-pattern notes remain English fallback, and no machine translation or user-content
-translation was added.
-
-The canonical fresh-database seed now includes the reviewed Portuguese rows. Existing databases
-receive them through additive migration `002_catalog_translations_pt_br` after the completed
-schema/English migration `001_catalog_translations`; migration 001 remains English-only so the
-historical action boundary does not drift. Both paths use the same generated Portuguese SQL, with
-idempotent upserts and no entity duplication or relationship changes.
-
-**Action 4 verification (2026-09-11):** Focused catalog/seed/migration tests passed 11/11. The
-completeness test verifies 78 exercises, 129 global variants, 24 muscles, 28 equipment rows, and 8
-movement patterns, including representative accented terminology and apostrophe escaping. Server
-and browser type checks, lint, formatting, and `git diff --check` passed. The full suite reached 271
-tests: 266 passed, 2 failed because the sandbox denied loopback `listen` with `EPERM` (including the
-associated cleanup failure), and 3 database setup tests were cancelled because PostgreSQL connection
-attempts were denied with `EPERM`. No reset, migration execution, production provisioning, or
-database mutation was performed.
-
-**Action 4 review stop (2026-09-11):** The authored Portuguese catalog labels, completeness boundary,
-fresh-seed path, and existing-database migration are implemented and verified within the available
-environment. Action 4 is ready for review. Action 5 remains pending and has not been activated or
-implemented.
-
-**Action 4 review approval (2026-09-11):** The user approved the implementation after its
-verification evidence was recorded. Action 4 is complete. Action 5 remains pending and is prepared
-as the next action; it has not been activated or implemented.
-
-### Action 5 — Centralize locale-aware catalog access
-
-**Status:** Completed
-
-**Purpose:** Update shared repository/query/mapper boundaries to resolve active-locale labels,
-English fallback, and safe canonical fallback without controller- or template-specific joins.
-
-**Acceptance criteria:**
-
-- Catalog reads use one reusable contract with bounded query count and appropriate indexes.
-- View models receive presentation-ready localized labels while raw IDs/codes remain available for
-  forms and machine contracts.
-- Missing Portuguese translations do not fail pages and remain detectable.
-
-**Action 5 activation (2026-09-11):** The user approved the prepared next action. Action 5 became
-active and was the only action implemented in this work cycle. Actions 6–9 remain pending.
-
-**Action 5 implementation (2026-09-11):** Added the shared catalog localization contract in
-`src/features/catalogLocalization/catalogLocalization.js`. It normalizes request locale values to
-`en`/`pt-BR` and provides one indexed lateral-join pattern resolving active locale, then English,
-then the canonical database value. Each lookup also exposes its resolved locale as `pt-BR`, `en`, or
-`canonical`, so missing translations remain detectable without breaking a page.
-
-Applied the contract to exercise-template, equipment, muscle, movement-pattern, session, and
-workout-session reads. Locale is passed from the existing i18n request locals through Library, Day,
-and Dashboard data loaders; mappers preserve stable IDs and expose resolved-locale metadata. Session
-and program names, user-owned variant names, setup/notes text, historical snapshots, authorization,
-analytics identities, and media name keys remain unchanged.
-
-**Action 5 verification (2026-09-11):** Focused localization/repository, catalog translation, seed,
-and migration tests passed 16/16. `npm run verify` completed formatting, lint, server type-check,
-browser type-check, and the full suite: 276 tests total, 271 passed, 2 failed because the sandbox
-denied loopback `listen` with `EPERM` (including its cleanup failure), and 3 database setup tests
-were cancelled because PostgreSQL connections were denied with `EPERM`. `git diff --check` passed.
-No database reset, migration execution, production provisioning, or database mutation was performed.
-
-**Action 5 review stop (2026-09-11):** The centralized locale-aware repository/query/mapper
-contract and locale plumbing are implemented and verified within the available environment. Action 5
-is ready for review. Action 6 remains pending and has not been activated or implemented.
-
-**Action 5 review approval (2026-09-11):** The user approved the implementation after its
-verification evidence was recorded. Action 5 is complete. Action 6 remains pending and is prepared
-as the next action; it has not been activated or implemented.
-
-### Action 6 — Integrate major application surfaces
-
-**Status:** Completed
-
-**Purpose:** Render localized catalog labels on Library, forms, Dashboard/current workout, Program
-Day, History/Progress, accessibility labels, and media-adjacent presentation where applicable.
-
-**Acceptance criteria:**
-
-- The active locale changes only catalog presentation; UI translation continues through Phase 1/2
-  i18n resources.
-- Existing ownership, CRUD, workout, media, layout, accessibility, and nullable-data behavior stays
-  intact.
-- No EJS template performs translation-table lookup or locale-specific business logic.
-
-**Action 6 activation (2026-09-11):** The user approved the prepared next action. Action 6 became
-active and was the only action implemented in this work cycle. Actions 7–9 remain pending.
-
-**Action 6 implementation (2026-09-11):** Integrated the localized catalog values already supplied
-by Action 5 into the major presentation boundaries. Library exercise/session view models and forms
-now consume localized exercise, variant, movement-pattern, equipment, and muscle labels without
-changing submitted IDs or ownership actions. Dashboard/current-workout and Program Day steps expose
-localized catalog labels, prescriptions, and accessible initial-media labels. Canonical exercise,
-variant, and movement-pattern names now travel as non-presentational media identity fields so
-localized labels cannot break the existing manifest matches or fallback order.
-
-History and Progress were verified against their snapshot-backed repositories and view models. Their
-exercise/session labels remain historical snapshot content rather than being relinked to current
-catalog translations, preserving the approved user/history boundary and reversible progress keys.
-No EJS template was given translation-table access or locale-specific business logic.
-
-**Action 6 verification (2026-09-11):** Focused localization, media, Library, form, Dashboard, and
-Program Day coverage passed, including translated-label presentation with canonical media matching.
-`npm run verify` completed formatting, lint, server type-check, browser type-check, and the full
-suite: 282 tests total, 277 passed, 2 failed because the sandbox denied loopback `listen` with
-`EPERM`, and 3 database setup tests were cancelled because PostgreSQL connections were denied with
-`EPERM`. `git diff --check` passed. Existing EJS render tests passed. No live browser executable is
-available in this workspace, so rendered inspection at approximately 390px, an intermediate
-pressure width, and desktop remains unavailable; no layout/CSS redesign was introduced.
-
-**Action 6 review stop (2026-09-11):** Major catalog-backed surfaces are integrated within the
-approved presentation and ownership boundaries. Action 6 is ready for review. Action 7 remains
-pending and has not been activated or implemented.
-
-**Action 6 review approval (2026-09-11):** The user approved the implementation after its
-verification evidence was recorded. Action 6 is complete. Action 7 remains pending and has not
-been activated or implemented.
-
-### Action 7 — Search, forms, relationships, and sorting
-
-**Status:** Completed
-
-**Purpose:** Extend the existing Library discovery behavior and catalog forms so localized labels
-are searchable/sortable while stable IDs and relational submissions remain unchanged.
-
-**Acceptance criteria:**
-
-- Active-locale names search successfully; English fallback names remain discoverable where practical.
-- Filters and sorting use localized display values without changing underlying values or IDs.
-- Form options display localized labels and submit stable numeric identifiers.
-- Exercise → variant → equipment/muscle/movement relationships remain unchanged.
-
-**Action 7 activation (2026-09-11):** The user approved the prepared next action. Action 7 is now
-active and is the only action being implemented in this work cycle. Actions 8–9 remain pending.
-
-**Action 7 implementation (2026-09-11):** Extended the existing Library discovery metadata so
-active-locale catalog labels remain searchable and filter values remain localized, while canonical
-English catalog names are included as search-only terms where the repository already exposes stable
-identity fields. This covers exercise bases, variants, movement patterns, equipment, muscles, and
-session-step metadata. Existing localized-label sorting for exercise bases, variants, and filter
-options remains in the view-model boundary; no session ordering or user-authored content was
-rewritten.
-
-Confirmed the existing Library forms continue to present localized catalog labels while submitting
-stable numeric exercise, variant, movement-pattern, equipment, muscle, and role IDs. The existing
-browser search/filter component was reused unchanged, so independent filters, clear behavior,
-variant visibility, keyboard/focus behavior, and empty states retain their established contracts.
-No relationship, ownership, authorization, route, or database write behavior changed.
-
-**Action 7 verification (2026-09-11):** Focused search, filter, form, catalog-query, and view-model
-tests passed 24/24. `npm run verify` completed formatting, lint, server type-check, browser
-type-check, and the full suite: 284 tests total, 279 passed, 2 failed because the sandbox denied
-loopback `listen` with `EPERM`, and 3 database setup tests were cancelled because PostgreSQL
-connections were denied with `EPERM`. `git diff --check` passed. Existing EJS render and browser
-interaction tests passed. No live browser executable is available in this workspace, so manual
-inspection at approximately 390px, an intermediate pressure width, and desktop remains unavailable;
-the action introduced no CSS or layout changes.
-
-**Action 7 review stop (2026-09-11):** Localized search/filter/form behavior is integrated within
-the existing presentation and relationship boundaries. Action 7 is ready for review. Action 8
-remains pending and has not been activated or implemented.
-
-**Action 7 review approval (2026-09-11):** The user approved the implementation after its
-verification evidence was recorded. Action 7 is complete. Action 8 remains pending and has not
-been activated or implemented.
-
-### Action 8 — Completeness, regression, and performance audit
-
-**Status:** Completed
-
-**Purpose:** Detect missing global translations, mixed-locale output, accidental user-content
-translation, locale-dependent business logic, query-count regressions, and media/history breakage.
-
-**Acceptance criteria:**
-
-- Representative English/Portuguese resolution, fallback, ID/relationship, seeded-content,
-  user-content, search, form, media, and history tests pass.
-- Catalog-heavy query behavior has no obvious N+1 regression and any material change is documented.
-- Relevant format, lint, server/browser type, HTTP/render, database, full-suite, and diff checks pass
-  or are precisely recorded as environment-limited.
-
-**Action 8 activation (2026-09-11):** The user approved the prepared next action. Action 8 is now
-active and is the only action being implemented in this work cycle. Action 9 remains pending.
-
-**Action 8 implementation (2026-09-11):** Audited the translation boundary, representative
-localized view-model/form/media paths, and history/progress snapshot paths. The existing catalog
-repositories issue one database read per catalog aggregate and use the shared active-locale →
-English → canonical fallback contract. Added a read-side ownership guard to every exercise-variant
-translation join so a stray translation row cannot localize a private/custom variant; authored
-translation seed coverage remains global-only. Added query-shape assertions for five bounded
-`LEFT JOIN LATERAL ... LIMIT 1` lookups per catalog-heavy aggregate, one repository call per read,
-and no translation joins in immutable history snapshot reads.
-
-**Action 8 verification (2026-09-11):** Focused localization, seed/completeness, search/form,
-media, Dashboard, Program Day, History, Progress, render, and browser-interaction checks passed
-63/63. `npm run verify` passed formatting, lint, server type-check, and browser type-check; its full
-suite reached 284 tests with 279 passed, 2 failed because the sandbox denied loopback `listen` with
-`EPERM`, and 3 database setup tests cancelled because PostgreSQL connections were denied with
-`EPERM`. The dedicated `npm run test:http` suite reached the same sandbox PostgreSQL/loopback
-limitation and cancelled all 63 HTTP tests before execution. `git diff --check` passed. No database
-reset, migration, production mutation, deployment, push, or commit was performed; no live browser
-executable is available for manual viewport verification.
-
-**Action 8 review stop (2026-09-11):** The completeness, ownership-boundary, query-count,
-fallback, search/form, media, history/progress, and regression audit is complete within the
-available environment. Action 8 is ready for review. Action 9 remains pending and has not been
-activated or implemented.
-
-**Action 8 review approval (2026-09-11):** The user approved the recorded implementation and
-verification evidence. Action 8 is complete. Action 9 remains pending and has not been activated
-or implemented.
-
-### Action 9 — Final tracking synchronization and review preparation
-
-**Status:** Completed
-
-**Purpose:** Compare every completion criterion with evidence, record deferred candidates and
-environment limitations, synchronize both tracking files, and stop at the final review gate.
-
-**Acceptance criteria:**
-
-- Both tracking files match the actual implementation and every action status.
-- Entity strategies, schema/backfill/fallback behavior, user-content boundary, search/forms,
-  terminology, tests, and deferred work are included in the final record.
-- Phase 3 is not reported complete before explicit user approval.
-
-**Action 9 activation (2026-09-11):** The user approved the prepared next action. Action 9 is now
-active and is the only action being implemented in this work cycle.
-
-**Action 9 completion matrix (2026-09-11):** Compared the Phase 3 completion criteria with the
-repository, tests, and recorded Action 1–8 evidence:
-
-1. **Verified:** This file and `docs/current-goal.md` describe the same Phase 3 outcome, action
-   statuses, approval history, resume point, and environment limitations.
-2. **Verified:** Entity strategies and terminology decisions are documented for database-backed
-   catalog entities, resource-backed codes, mixed session content, and user-owned/history content.
-3. **Verified:** Active-locale catalog reads select `pt-BR`, then English, then canonical values;
-   unsupported locales normalize to English. Seed/completeness tests cover the managed catalog.
-4. **Verified:** Stable IDs, foreign keys, ownership predicates, canonical media matching fields,
-   snapshot labels, and progress identities remain separate from localized display values.
-5. **Verified:** No language-duplicate entities are introduced; Portuguese seed data is global-only,
-   private variants are excluded at seed and read time, and snapshot/user-authored content remains
-   unchanged.
-6. **Verified by setup/migration SQL and tests; database execution environment-limited:** Fresh
-   setup and the opt-in migration use the shared translation schema/seed contract. PostgreSQL row
-   count and live migration assertions could not run because the environment denied connections.
-7. **Verified:** Locale access is centralized in the catalog helper and repository/query boundaries;
-   Library, forms, Dashboard/current workout, Program Day, History/Progress, media labels, and
-   accessibility-facing outputs use the established presentation boundaries.
-8. **Verified:** Active-locale and English search coverage, localized sorting/filter display, and
-   stable numeric form values are covered by focused tests.
-9. **Verified:** Translation completeness validation covers 78 exercises, 129 global variants,
-   24 muscles, 28 equipment rows, and 8 movement patterns for both authored catalog maps and seed
-   expectations.
-10. **Verified:** Brazilian Portuguese terminology is authored in the catalog translation map and
-    completeness tests cover representative accented terms and SQL apostrophe escaping.
-11. **Partially verified with precise limits:** Focused checks passed 63/63; formatting, lint,
-    server/browser type checks, and diff checks passed. The full suite reached 284 tests with 279
-    passed, 2 sandbox `listen` failures, and 3 PostgreSQL setup cancellations. The dedicated HTTP
-    suite cancelled all 63 tests at the same sandbox PostgreSQL/loopback boundary. No live browser
-    executable is available for viewport inspection.
-12. **Verified:** All prior actions and Action 9 are tracked without claiming Phase 3 complete;
-    final goal completion remains gated on explicit user approval.
-
-**Action 9 deferred and excluded work (2026-09-11):** Global session-template names and long-form
-setup/notes remain deferred by the approved classification and terminology scope. User-owned
-exercise/variant names, sessions, programs, planning fields, notes, workout logs, and historical
-snapshots are intentionally not translated. Live PostgreSQL integration/migration execution,
-HTTP execution, and manual browser viewport inspection require an environment with the relevant
-services and capabilities; they were not bypassed through database reset or production mutation.
-
-**Action 9 verification (2026-09-11):** Inspected both tracking files and the final repository diff
-after synchronizing the matrix. `git diff --check` passed; documentation formatting was checked by
-the repository formatter. No executable code, schema, seed, database, route, or user content was
-changed in Action 9.
-
-**Action 9 review stop (2026-09-11):** The final tracking synchronization, criterion comparison,
-deferred-work record, and environment limitation record are complete. Action 9 is ready for review.
-The Phase 3 goal remains active and is not reported complete. No subsequent action is activated.
-
-**Action 9 review approval (2026-09-11):** The user approved the final tracking synchronization
-and recorded verification evidence. Action 9 is complete. Phase 3 is ready for final review and has
-not been marked complete.
-
-## Progress log
-
-**Action 1 audit and tracking (2026-09-11):** Phase 3 tracking was established before any domain
-localization implementation. Direct repository evidence shows global seeded catalog rows for
-exercises, global exercise variants, muscles, equipment, and movement patterns; fixed code-like
-values for step types, muscle roles, and known environments; and mixed or user-owned records for
-custom exercises/variants and session/planning/history content. Raw catalog names currently flow
-through SQL, mappers, Library view models, forms, workout/session joins, and history/media paths.
-The selected delta is therefore a centralized translation contract plus presentation integration;
-no duplicate entities or mechanical name replacement is authorized.
-
-**Action 1 review stop (2026-09-11):** The audit and required tracking updates were complete and
-the action was presented for review. The user approved the action; it is now completed. Action 2
-was prepared as the next action.
-
-**Action 2 activation (2026-09-11):** The user approved the prepared next action. Action 2 is now
-active and is the only action being implemented in this work cycle. Actions 3–9 remain pending.
-
-**Audit correction (2026-09-11):** Direct route and repository inspection showed that
-`created_by_user_id` on exercises is not a user-ownership boundary: exercise creation is admin-only
-and active exercises are broadly visible. The model/backfill will treat current exercises as
-application-managed; private-content exclusion applies to variants with a non-null
-`owner_user_id` and to owned sessions/planning/history content.
-
-**Action 2 implementation (2026-09-11):** Added explicit normalized translation tables for
-application-managed exercises, global exercise variants, muscles, equipment, and movement
-patterns. Each table uses a stable entity foreign key, supported `en`/`pt-BR` locale constraint,
-non-empty trimmed display name, and `(entity_id, locale)` primary key; variant setup text and
-movement-pattern notes are retained as optional translated fields. Existing canonical `name`
-columns remain intact for compatibility and safe fallback. Fresh schema setup includes the tables,
-and seed SQL deterministically backfills English rows while excluding private variants.
-
-Added `db/migrations/001_catalog_translations.js` and the opt-in `npm run db:migrate` runner for
-existing databases. The migration is transactional, records applied versions, preserves existing
-IDs/relationships, requires a separate production opt-in, and refuses ambiguous non-production
-targets.
-Existing databases must apply it before code begins reading translation tables; fresh development
-setup continues through `db:reset`. The migration is additive, leaves legacy canonical columns for
-fallback/rollback safety, rolls back a failed transaction, and intentionally has no destructive down
-migration. No reset, migration execution, or database mutation was performed in this workspace.
-
-**Action 2 verification (2026-09-11):** Focused schema/migration/seed/lifecycle tests passed 10/10.
-Server type-check, browser type-check, lint, full formatting, and `git diff --check` passed. The
-full repository run reached 268 subtests: 265 passed; two application tests failed because the
-sandbox denied loopback `listen` with `EPERM` (with the associated cleanup failure), and three
-database setup tests were cancelled because PostgreSQL connection attempts were denied with
-`EPERM`. Database integration assertions for seeded translation counts are present but could not be
-exercised without a configured test database; no database mutation was attempted. Portuguese
-translation population, locale-aware repositories, and application-surface integration remain
-deferred to Actions 3–6.
-
-**Changes applied (2026-09-11):** Made `db/catalogTranslationsSql.js` the single source for
-translation-table DDL consumed by both `db/schema.js` and the versioned migration. Added the
-read-only `npm run db:setup:sql` command, which emits the latest schema followed by canonical seed
-SQL for intentional clean-database provisioning; `npm run db:seed:sql` remains the canonical seed
-output. Kept `db:reset` as the complete development/test schema-plus-seed transaction, so a fresh
-reset does not require `db:migrate` afterward. Production migrations now require both
-`ALLOW_DATABASE_MIGRATION=true` and the separate `ALLOW_PRODUCTION_DATABASE_MIGRATION=true`, plus
-a valid PostgreSQL URL; reset remains production-blocked.
-
-**Correction verification (2026-09-11):** The lifecycle/setup tests passed 10/10, including exact
-schema-plus-seed output, shared DDL-source assertions, production migration confirmation, and reset
-safety checks. No reset, migration, production provisioning, or database mutation was performed.
-
-**Action 2 review stop (2026-09-11):** The localization data model, fresh-seed contract, and
-non-destructive migration path are implemented and verified within the available environment.
-Action 2 is ready for review. Action 3 remains pending and has not been activated or implemented.
-
-**Changes requested (2026-09-11):** Before approving Action 2, verify the reset-versus-migration
-lifecycle, canonical `db:seed:sql` behavior, production provisioning path, and whether duplicated
-translation DDL can drift between `db/schema.js` and the migration module. Make only the smallest
-corrections required to prove that fresh/reset and existing-database workflows converge without
-weakening reset or production safeguards.
-
-**Review stop after requested changes (2026-09-11):** The requested lifecycle verification and
-corrections are complete. Action 2 is ready for review again. Action 3 remains pending and has not
-been activated or implemented.
-
-**Review approval (2026-09-11):** The user approved Action 2 after the lifecycle corrections and
-verification evidence were recorded. Action 2 is complete. Action 3 remains pending and has not
-been activated or implemented.
-
-## Resume here
-
-Action 1 is **Completed**. Action 2 is **Completed**. Action 3 is **Completed**. Action 4 is
-**Completed**. Action 5 is **Completed**. Action 6 is **Completed**. Action 7 is **Pending** and
-prepared as the next action; Actions 8–9 remain **Pending** and have not been
-activated. Phase 3 historical action records remain preserved under `Historical Phase 3 record`.
+Actions 1–6 are **Completed**. Phase 4 is **Completed**. No next action is prepared or active.

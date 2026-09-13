@@ -67,18 +67,26 @@ test("media management view renders shared controls, CSRF fields, and direct sta
 	assert.match(html, /<main class="main media-management">/);
 	assert.match(html, /name="entityType"/);
 	assert.match(html, /name="search"/);
+	assert.doesNotMatch(html, /name="search"[^>]*required/);
 	assert.match(html, /media-management__result-type">Exercise<\/span>/);
 	assert.match(html, /media-management__result-name">Bench Press<\/span>/);
 	assert.match(html, /media-management__result-type">Global exercise variant<\/span>/);
-	assert.match(html, /href="\/admin\/media\?entity=exercise%3A42"/);
+	assert.match(html, /href="\/admin\/media\?entity=exercise%3A42(?:&amp;|")/);
 	assert.match(html, /name="media" type="file"/);
 	assert.match(html, /accept="image\/png,image\/jpeg,image\/webp"/);
 	assert.equal((html.match(/name="_csrf"/g) ?? []).length, 3);
 	assert.match(html, /This entity uses its own primary media assignment\./);
+	assert.match(
+		html,
+		/media-management__workspace media-management__workspace--has-selection/,
+	);
+	assert.match(html, /media-management__selection[\s\S]*?media-management__entity/);
+	assert.match(html, /class="media-frame__content media-frame--preview"/);
 	assert.match(html, /Upload replacement/);
 	assert.match(html, /Remove direct assignment/);
 	assert.match(html, /for="upload-alt-en"/);
 	assert.match(html, /for="existing-alt-pt-br"/);
+	assert.match(html, /#7 · Bench press/);
 });
 
 test("media management view explains inherited media and hides removal when no direct assignment exists", async () => {
@@ -117,6 +125,38 @@ test("media management view explains inherited media and hides removal when no d
 	);
 });
 
+test("media management initial preview retains the shared bounded-preview frame", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: {
+			...baseData,
+			selected: selectedData({
+				directAssignment: undefined,
+				effectiveSource: "initial",
+				effectiveMedia: {
+					src: null,
+					alt: "Unassigned exercise — initial tile",
+					width: 1536,
+					height: 1024,
+					presentation: "initial",
+					mediaType: "initial",
+					initial: "U",
+					isFallback: true,
+				},
+			}),
+		},
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(
+		html,
+		/class="media-frame__initial media-frame--initial media-frame--preview"/,
+	);
+	assert.match(html, /data-media-presentation="initial"/);
+	assert.doesNotMatch(html, /<img/);
+});
+
 test("media management view communicates an empty filtered result", async () => {
 	const viewModel = createMediaManagementPageViewModel({
 		page: { title: "Media management" },
@@ -134,6 +174,24 @@ test("media management view communicates an empty filtered result", async () => 
 	assert.match(html, /No catalog entities match these filters\./);
 	assert.match(html, /Try another name or choose All supported types\./);
 	assert.doesNotMatch(html, /name="entity"/);
+});
+
+test("media management presents selectable entities before optional name filtering", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: { ...baseData, search: "", selected: null },
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(html, /Select an entity to review its media\./);
+	assert.match(html, /media-management__result-list/);
+	assert.match(
+		html,
+		/media-management__workspace">[\s\S]*?media-management__selector[\s\S]*?media-management__selection/,
+	);
+	assert.match(html, /media-management__result-link/);
+	assert.doesNotMatch(html, /name="media" type="file"/);
 });
 
 test("media management feedback renders success and failure as distinct states", async () => {

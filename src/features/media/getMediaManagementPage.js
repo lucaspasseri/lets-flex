@@ -23,8 +23,13 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 	const normalizedLocale = /** @type {"en" | "pt-BR"} */ (
 		input.locale === "pt-BR" ? "pt-BR" : "en"
 	);
+	const normalizedSearch = typeof input.search === "string" ? input.search.trim() : "";
 	const options = await findMediaManagementEntityOptions(
-		{ locale: input.locale, entityType: input.entityTypeFilter, search: input.search },
+		{
+			locale: input.locale,
+			entityType: input.entityTypeFilter,
+			search: normalizedSearch,
+		},
 		db,
 	);
 	const selected =
@@ -40,7 +45,7 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 					db,
 				)
 			: null;
-	const assets = await findMediaAssets({}, db);
+	const assets = selected ? await findMediaAssets({ limit: 100 }, db) : [];
 
 	if (!selected) {
 		return {
@@ -49,7 +54,7 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 			selected: null,
 			entityType:
 				typeof input.entityTypeFilter === "string" ? input.entityTypeFilter : "",
-			search: typeof input.search === "string" ? input.search : "",
+			search: normalizedSearch,
 		};
 	}
 
@@ -91,7 +96,7 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 		assets,
 		entityType:
 			typeof input.entityTypeFilter === "string" ? input.entityTypeFilter : "",
-		search: typeof input.search === "string" ? input.search : "",
+		search: normalizedSearch,
 		selected: {
 			...selected,
 			request,

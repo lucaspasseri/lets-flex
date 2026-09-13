@@ -21,7 +21,8 @@
 		<a href="/admin/library/exercises"><%= translate("mediaManagement.backToCatalog", { defaultValue: "Back to exercise catalog" }) %></a>
 	</aside>
 
-	<section class="media-management__selector" aria-labelledby="media-selector-heading">
+	<div class="media-management__workspace<%= selected ? " media-management__workspace--has-selection" : "" %>">
+		<section class="media-management__selector" aria-labelledby="media-selector-heading">
 		<div class="media-management__section-heading">
 			<div>
 				<p class="media-management__eyebrow"><%= translate("mediaManagement.selectorEyebrow", { defaultValue: "Choose a record" }) %></p>
@@ -62,15 +63,16 @@
 				</div>
 			<% } %>
 		</section>
-	</section>
+		</section>
 
-	<% if (!selected) { %>
-		<div class="media-management__empty" role="status">
-			<strong><%= translate("mediaManagement.selectPrompt", { defaultValue: "Select an entity to review its media." }) %></strong>
-			<p><%= translate("mediaManagement.selectPromptDescription", { defaultValue: "The editor will show direct assignments, inherited media, fallback behavior, and available management actions." }) %></p>
-		</div>
-	<% } else { %>
-		<section class="media-management__entity" aria-labelledby="media-entity-heading">
+		<div class="media-management__selection">
+			<% if (!selected) { %>
+				<div class="media-management__empty" role="status">
+					<strong><%= translate("mediaManagement.selectPrompt", { defaultValue: "Select an entity to review its media." }) %></strong>
+					<p><%= translate("mediaManagement.selectPromptDescription", { defaultValue: "The editor will show direct assignments, inherited media, fallback behavior, and available management actions." }) %></p>
+				</div>
+			<% } else { %>
+				<section class="media-management__entity" aria-labelledby="media-entity-heading">
 			<div class="media-management__entity-heading">
 				<div>
 					<p class="media-management__eyebrow"><%= selected.entityTypeLabel %> · #<%= selected.entityId %></p>
@@ -82,7 +84,7 @@
 			<div class="media-management__entity-grid">
 				<div class="media-management__preview-column">
 					<div class="media-management__preview" aria-label="<%= translate("mediaManagement.previewLabel", { defaultValue: "Current media preview" }) %>">
-						<%- include("../partials/shared/components/media", { media: selected.effectiveMedia, variant: "exercise" }) %>
+						<%- include("../partials/shared/components/media", { media: selected.effectiveMedia, inFrame: true, variant: "preview" }) %>
 					</div>
 					<p class="media-management__preview-caption"><%= selected.effectiveSourceDetail %></p>
 				</div>
@@ -93,9 +95,9 @@
 					<div><dt><%= translate("mediaManagement.dimensionsLabel", { defaultValue: "Dimensions" }) %></dt><dd><%= selected.effectiveMedia.width %> × <%= selected.effectiveMedia.height %></dd></div>
 				</dl>
 			</div>
-		</section>
+				</section>
 
-		<div class="media-management__editor-grid">
+				<div class="media-management__editor-grid">
 			<section class="media-management__panel" aria-labelledby="media-upload-heading">
 				<div class="media-management__section-heading"><div><p class="media-management__eyebrow"><%= translate("mediaManagement.uploadEyebrow", { defaultValue: "New asset" }) %></p><h2 id="media-upload-heading"><%= selected.direct ? translate("mediaManagement.replaceHeading", { defaultValue: "Replace direct media" }) : translate("mediaManagement.uploadHeading", { defaultValue: "Add direct media" }) %></h2></div></div>
 				<p class="media-management__panel-description"><%= translate("mediaManagement.uploadDescription", { defaultValue: "Upload a validated PNG, JPEG, or WebP. The previous asset remains reusable when you replace an assignment." }) %></p>
@@ -136,11 +138,13 @@
 					<p class="media-management__inline-empty"><%= translate("mediaManagement.noAssets", { defaultValue: "No reusable uploaded assets are available yet." }) %></p>
 				<% } %>
 			</section>
-		</div>
+				</div>
 
-		<section class="media-management__removal" aria-labelledby="media-removal-heading">
+				<section class="media-management__removal" aria-labelledby="media-removal-heading">
 			<div><p class="media-management__eyebrow"><%= translate("mediaManagement.removalEyebrow", { defaultValue: "Assignment control" }) %></p><h2 id="media-removal-heading"><%= translate("mediaManagement.removalHeading", { defaultValue: "Remove direct media" }) %></h2><p><%= selected.direct ? translate("mediaManagement.removeDescription", { defaultValue: "Removing this assignment keeps the asset and restores inherited or fallback media for this entity." }) : translate("mediaManagement.noDirectDescription", { defaultValue: "There is no direct assignment to remove. The preview shows the current inherited or fallback result." }) %></p><% if (removeFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% removeFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %></div>
 			<% if (selected.canRemove) { %><form method="POST" action="/admin/media/remove"><input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" /><input type="hidden" name="entityType" value="<%= selected.entityTypeValue %>" /><input type="hidden" name="entityId" value="<%= selected.entityValue %>" /><button class="shared-button shared-button--danger-ghost" type="submit"><%= translate("mediaManagement.removeAction", { defaultValue: "Remove direct assignment" }) %></button></form><% } %>
-		</section>
-	<% } %>
+				</section>
+			<% } %>
+		</div>
+	</div>
 </main>

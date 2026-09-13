@@ -142,12 +142,17 @@ export default function createMediaManagementPageViewModel({
 						canRemove: Boolean(direct),
 					}
 				: null,
-			assets: data.assets.map((asset) => ({
-				id: asset.id,
-				label: `#${asset.id} · ${asset.width}×${asset.height} · ${asset.mime_type}`,
-				selected: String(asset.id) === String(selectedAssetId),
-				altText: asset.alt_texts?.[locale] ?? asset.alt_texts?.en ?? null,
-			})),
+			assets: data.assets.map((asset) => {
+				const altText = asset.alt_texts?.[locale] ?? asset.alt_texts?.en ?? null;
+				return {
+					id: asset.id,
+					label: altText
+						? `#${asset.id} · ${altText}`
+						: `#${asset.id} · ${asset.width}×${asset.height} · ${asset.mime_type}`,
+					selected: String(asset.id) === String(selectedAssetId),
+					altText,
+				};
+			}),
 			forms: {
 				upload: {
 					values: {

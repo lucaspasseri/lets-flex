@@ -219,6 +219,7 @@
 }
 
 .form-collection__item p {
+	min-width: 0;
 	margin: 0;
 	overflow: hidden;
 	color: var(--color-text);
@@ -291,6 +292,12 @@
 
 	.form-collection__item {
 		grid-template-columns: 1fr;
+	}
+
+	.form-collection__item p {
+		overflow-wrap: anywhere;
+		text-overflow: clip;
+		white-space: normal;
 	}
 
 	.form-collection__actions {

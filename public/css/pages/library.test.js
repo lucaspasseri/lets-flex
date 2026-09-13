@@ -13,7 +13,7 @@ const sessionStylesheetPath = new URL(
 );
 const mediaStylesheetPath = new URL("../components/mediaFallback.css", import.meta.url);
 
-test("Library media uses one fixed initial tile contract without image layout rules", async () => {
+test("Library relies on the shared requested-geometry contract without page-local overrides", async () => {
 	const [libraryCss, exerciseCss, sessionCss, mediaCss] = await Promise.all([
 		readFile(stylesheetPath, "utf8"),
 		readFile(exerciseStylesheetPath, "utf8"),
@@ -21,12 +21,16 @@ test("Library media uses one fixed initial tile contract without image layout ru
 		readFile(mediaStylesheetPath, "utf8"),
 	]);
 
-	assert.match(
+	assert.doesNotMatch(
 		mediaCss,
-		/\.media-frame--initial,[\s\S]*\.media-frame__initial\s*\{[\s\S]*width:\s*2\.75rem[\s\S]*height:\s*2\.75rem[\s\S]*aspect-ratio:\s*auto/,
+		/\.media-frame--initial,[\s\S]*?\.media-frame__initial\s*\{[^}]*(?:^|\n)\s*(?:width|height|aspect-ratio)\s*:/,
 	);
 	assert.doesNotMatch(libraryCss, /media-frame--initial/);
 	assert.doesNotMatch(exerciseCss, /\.exercise-template__media\s*\{[^}]*aspect-ratio/);
+	assert.match(
+		exerciseCss,
+		/\.exercise-variant\s*\{[\s\S]*grid-template-columns:\s*2\.25rem minmax\(0, 1fr\)/,
+	);
 	assert.doesNotMatch(sessionCss, /\.session-(?:summary|details|step)__media img/);
 	assert.doesNotMatch(
 		sessionCss,

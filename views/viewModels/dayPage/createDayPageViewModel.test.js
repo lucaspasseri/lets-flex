@@ -272,6 +272,88 @@ test("Program Day presents localized catalog labels while retaining canonical me
 	assert.equal(result.items[0].steps[0].media.initial, "S");
 });
 
+test("Program Day keeps direct, inherited, and initial step media in shared compact frames", async () => {
+	const mediaSteps = [101, 102, 103].map((exerciseVariantId, index) => ({
+		...step,
+		id: 80 + index,
+		order: index + 1,
+		exerciseVariantId,
+		exerciseId: 12,
+		movementPatternId: 1,
+		exercise: {
+			...step.exercise,
+			variantName: [
+				"Barbell Bench Press",
+				"Dumbbell Bench Press",
+				"Unlisted Bench Press",
+			][index],
+		},
+		stepLog: null,
+	}));
+	const image = (src, isFallback = false) => ({
+		src,
+		alt: "Bench press illustration",
+		width: 1536,
+		height: 1024,
+		presentation: "image",
+		isFallback,
+	});
+	const initial = {
+		src: null,
+		alt: "Unlisted Bench Press — initial tile",
+		presentation: "initial",
+		initial: "U",
+		isFallback: true,
+	};
+	const mediaResolver = (request) =>
+		request.entityId === 101
+			? image("/media/uploads/direct-bench.png")
+			: request.entityId === 102
+				? image("/media/uploads/base-bench.png", true)
+				: initial;
+	const workoutSessionList = createWorkoutSessionListViewModel({
+		currentDayId: 2,
+		workoutSessions: [
+			{
+				id: 30,
+				trainingDayId: 2,
+				sessionId: 20,
+				order: 1,
+				status: "planned",
+				startedAt: null,
+				finishedAt: null,
+				notes: null,
+				name: "Available",
+				sessionNotes: null,
+				isArchived: false,
+				steps: mediaSteps,
+			},
+		],
+		mediaResolver,
+	});
+	const html = await ejs.renderFile(
+		path.resolve("views/partials/dayPage/workoutSessionList.ejs"),
+		{ workoutSessionList },
+	);
+
+	assert.equal(
+		workoutSessionList.items[0].steps[0].media.src,
+		"/media/uploads/direct-bench.png",
+	);
+	assert.equal(
+		workoutSessionList.items[0].steps[1].media.src,
+		"/media/uploads/base-bench.png",
+	);
+	assert.equal(workoutSessionList.items[0].steps[1].media.isFallback, true);
+	assert.equal(workoutSessionList.items[0].steps[2].media.presentation, "initial");
+	assert.match(html, /src="\/media\/uploads\/direct-bench\.png"/);
+	assert.match(html, /src="\/media\/uploads\/base-bench\.png"/);
+	assert.match(
+		html,
+		/workout-step__media media-frame media-frame--initial media-frame--icon/,
+	);
+});
+
 test("day page exposes safe empty states for an invalid selection", () => {
 	const result = createDayPageViewModel({
 		page,

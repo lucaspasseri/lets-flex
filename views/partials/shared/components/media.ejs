@@ -5,22 +5,23 @@
 		decorative = false,
 		loading = null,
 		decoding = null,
+		density = "default",
 		inFrame = false,
 		variant = "thumbnail",
 	} = locals ?? {};
 	const isInitial = variant === "initial" || media?.presentation === "initial";
 	const presentationClass = isInitial ? "media-frame--initial" : "";
-	const variantClass =
-		variant === "initial"
-			? ""
-			: ["icon", "thumbnail", "exercise"].includes(variant)
-				? `media-frame--${variant}`
-				: "media-frame--thumbnail";
+	const normalizedVariant = ["icon", "thumbnail", "exercise", "preview"].includes(variant)
+		? variant
+		: "icon";
+	const variantClass = `media-frame--${normalizedVariant}`;
+	const densityClass = density === "compact" ? "media-frame--compact" : "";
 	const elementClass = [
 		className,
 		inFrame ? "media-frame__content" : "media-frame",
 		presentationClass,
 		variantClass,
+		densityClass,
 	]
 		.filter(Boolean)
 		.join(" ");
@@ -29,6 +30,7 @@
 		inFrame ? "media-frame__initial" : "media-frame",
 		presentationClass,
 		variantClass,
+		densityClass,
 	]
 		.filter(Boolean)
 		.join(" ");

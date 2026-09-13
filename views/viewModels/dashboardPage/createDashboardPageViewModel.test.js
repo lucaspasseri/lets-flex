@@ -290,6 +290,74 @@ test("dashboard workout presentation keeps localized labels and canonical media 
 	assert.equal(result.session?.steps[0].media.initial, "S");
 });
 
+test("dashboard workout renders direct, inherited, and initial step media through the shared contract", async () => {
+	const mediaSteps = [101, 102, 103].map((exerciseVariantId, index) => ({
+		...workout.steps[0],
+		id: 70 + index,
+		order: index + 1,
+		exerciseVariantId,
+		exerciseId: 12,
+		movementPatternId: 1,
+		exercise: {
+			...workout.steps[0].exercise,
+			variantName: [
+				"Barbell Bench Press",
+				"Dumbbell Bench Press",
+				"Unlisted Bench Press",
+			][index],
+		},
+	}));
+	const image = (src, isFallback = false) => ({
+		src,
+		alt: "Bench press illustration",
+		width: 1536,
+		height: 1024,
+		presentation: "image",
+		isFallback,
+	});
+	const initial = {
+		src: null,
+		alt: "Unlisted Bench Press — initial tile",
+		presentation: "initial",
+		initial: "U",
+		isFallback: true,
+	};
+	const mediaResolver = (request) =>
+		request.entityId === 101
+			? image("/media/uploads/direct-bench.png")
+			: request.entityId === 102
+				? image("/media/uploads/base-bench.png", true)
+				: initial;
+	const currentWorkout = createWorkoutSessionViewModel({
+		session: { ...workout, steps: mediaSteps },
+		sessions: [{ ...workout, steps: mediaSteps }],
+		daysDifference: 0,
+		mediaResolver,
+	});
+	const html = await ejs.renderFile(
+		path.resolve("views/partials/dashboardPage/currentWorkoutSession.ejs"),
+		{ currentWorkout, csrfToken: "test-token" },
+	);
+
+	assert.equal(
+		currentWorkout.session?.steps[0].media.src,
+		"/media/uploads/direct-bench.png",
+	);
+	assert.equal(
+		currentWorkout.session?.steps[1].media.src,
+		"/media/uploads/base-bench.png",
+	);
+	assert.equal(currentWorkout.session?.steps[1].media.isFallback, true);
+	assert.equal(currentWorkout.session?.steps[2].media.presentation, "initial");
+	assert.match(html, /src="\/media\/uploads\/direct-bench\.png"/);
+	assert.match(html, /src="\/media\/uploads\/base-bench\.png"/);
+	assert.match(
+		html,
+		/session-step__media media-frame media-frame--initial media-frame--icon/,
+	);
+	assert.match(html, /current-workout-step__media media-frame media-frame--thumbnail/);
+});
+
 test("workout component exposes lifecycle-safe controls and resolved progress", () => {
 	/** @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession} selectedWorkoutSession @param {import("../../../src/features/workoutSessions/workoutSessions.types.js").WorkoutSession[]} [currentDayWorkoutSessions] */
 	const build = (

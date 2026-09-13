@@ -264,6 +264,117 @@ test("personal exercise markup identifies private scope and retains owner action
 	assert.doesNotMatch(html, /data-update-exercise-template/);
 });
 
+test("Library keeps direct, inherited, and initial media in the shared compact frames", async () => {
+	const libraryMediaData = {
+		...data,
+		exerciseTemplates: [
+			{
+				id: 12,
+				name: "Bench Press",
+				movementPattern: { id: 1, name: "Push", notes: "Upper body" },
+				equipment: { id: 1, name: "Barbell", category: "Free weight" },
+				muscles: [],
+				variant: {
+					id: 24,
+					name: "Barbell Bench Press",
+					setupDescription: "Use a stable bench setup.",
+					environment: "Gym",
+					notes: "",
+					ownerUserId: null,
+					isArchived: false,
+				},
+			},
+			{
+				id: 12,
+				name: "Bench Press",
+				movementPattern: { id: 1, name: "Push", notes: "Upper body" },
+				equipment: { id: 2, name: "Dumbbell", category: "Free weight" },
+				muscles: [],
+				variant: {
+					id: 25,
+					name: "Dumbbell Bench Press",
+					setupDescription: "Keep the dumbbells controlled.",
+					environment: "Gym",
+					notes: "",
+					ownerUserId: null,
+					isArchived: false,
+				},
+			},
+			{
+				id: 12,
+				name: "Bench Press",
+				movementPattern: { id: 1, name: "Push", notes: "Upper body" },
+				equipment: null,
+				muscles: [],
+				variant: {
+					id: 999,
+					name: "Long Unassigned Bench Press Variant With A Readable Name",
+					setupDescription: "",
+					environment: "Home",
+					notes: "",
+					ownerUserId: null,
+					isArchived: false,
+				},
+			},
+		],
+	};
+	const image = (src, alt, isFallback = false) => ({
+		src,
+		alt,
+		width: 1536,
+		height: 1024,
+		presentation: "image",
+		isFallback,
+	});
+	const initial = {
+		src: null,
+		alt: "Long Unassigned Bench Press Variant With A Readable Name — initial tile",
+		presentation: "initial",
+		initial: "L",
+		isFallback: true,
+	};
+	const mediaResolver = (request) => {
+		if (request.entityType === "exercise") {
+			return image("/media/uploads/base-bench.png", "Bench press illustration");
+		}
+		if (request.entityId === 24) {
+			return image(
+				"/media/uploads/barbell-bench.png",
+				"Barbell bench press illustration",
+			);
+		}
+		if (request.entityId === 25) {
+			return image("/media/uploads/base-bench.png", "Bench press illustration", true);
+		}
+		return initial;
+	};
+	const viewModel = createLibraryPageViewModel({
+		page,
+		pageState: { userId: null, sessionId: null },
+		data: /** @type {any} */ (libraryMediaData),
+		mediaResolver,
+	});
+	const renderFile =
+		/** @type {(filename: string, data: object) => Promise<string>} */ (ejs.renderFile);
+	const html = await renderFile(path.resolve("views/library.ejs"), {
+		...viewModel,
+		csrfToken: "test-token",
+		contentFor: () => "",
+	});
+
+	assert.match(html, /src="\/media\/uploads\/barbell-bench\.png"/);
+	assert.equal(
+		(html.match(/src="\/media\/uploads\/base-bench\.png"/g) ?? []).length,
+		3,
+	);
+	assert.match(html, /exercise-template__media media-frame media-frame--thumbnail/);
+	assert.match(
+		html,
+		/exercise-variant__media media-frame media-frame--initial media-frame--icon/,
+	);
+	assert.match(html, /Long Unassigned Bench Press Variant With A Readable Name/);
+});
+
 test("administrator library state is catalog-only and excludes private variants", async () => {
 	const adminData = {
 		...data,
