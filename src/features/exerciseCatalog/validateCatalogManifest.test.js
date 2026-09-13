@@ -9,6 +9,7 @@ import {
 import { validateCatalogManifest } from "./validateCatalogManifest.js";
 
 const cloneManifest = () => structuredClone(catalogManifest);
+const cloneVocabulary = () => structuredClone(catalogVocabulary);
 
 test("canonical catalog satisfies the approved manifest contract", () => {
 	const result = validateCatalogManifest(catalogManifest, catalogVocabulary);
@@ -41,6 +42,26 @@ test("canonical catalog identifies and enriches the existing sample entries", ()
 			?.equipment,
 		null,
 	);
+	assert.equal(pushUp?.catalogKey, "push-up");
+	assert.equal(
+		pushUp?.variants.find((variant) => variant.name === "Bodyweight Push Up")
+			?.catalogKey,
+		"bodyweight-push-up",
+	);
+	assert.deepEqual(catalogVocabulary.catalogEntries.movementPatterns[0], {
+		catalogKey: "push",
+		name: "push",
+	});
+});
+
+test("catalog keys remain stable when display names change", () => {
+	const renamed = cloneManifest();
+	renamed[0].name = "Press Up";
+	renamed[0].variants[0].name = "Unweighted Press Up";
+
+	assert.doesNotThrow(() => validateCatalogManifest(renamed, catalogVocabulary));
+	assert.equal(renamed[0].catalogKey, "push-up");
+	assert.equal(renamed[0].variants[0].catalogKey, "bodyweight-push-up");
 });
 
 test("canonical catalog covers approved equipment and foundational use cases", () => {
@@ -106,7 +127,9 @@ test("validation rejects unresolved vocabulary references and missing metadata",
 	);
 
 	const missingPrimeMover = cloneManifest();
-	missingPrimeMover[0].muscles = [{ name: "Chest", role: "synergist" }];
+	missingPrimeMover[0].muscles = [
+		{ catalogKey: "chest", name: "Chest", role: "synergist" },
+	];
 	assert.throws(
 		() => validateCatalogManifest(missingPrimeMover, catalogVocabulary),
 		/must have a prime mover/,
@@ -133,6 +156,45 @@ test("validation rejects exact and normalized duplicate names", () => {
 	assert.throws(
 		() => validateCatalogManifest(normalizedDuplicate, catalogVocabulary),
 		/Normalized duplicate base exercise names/,
+	);
+});
+
+test("validation rejects missing, malformed, and duplicate catalog keys", () => {
+	const missing = cloneManifest();
+	missing[0].catalogKey = "";
+	assert.throws(
+		() => validateCatalogManifest(missing, catalogVocabulary),
+		/base exercise Push Up catalog key must be lowercase ASCII kebab-case/,
+	);
+
+	const malformed = cloneManifest();
+	malformed[0].variants[0].catalogKey = "Bodyweight Push Up";
+	assert.throws(
+		() => validateCatalogManifest(malformed, catalogVocabulary),
+		/global variant Bodyweight Push Up catalog key must be lowercase ASCII kebab-case/,
+	);
+
+	const duplicate = cloneManifest();
+	duplicate[1].catalogKey = duplicate[0].catalogKey;
+	assert.throws(
+		() => validateCatalogManifest(duplicate, catalogVocabulary),
+		/Duplicate base exercise catalog key: push-up/,
+	);
+});
+
+test("validation rejects malformed or mismatched static catalog key sources", () => {
+	const malformed = cloneVocabulary();
+	malformed.catalogEntries.equipment[0].catalogKey = "Barbell";
+	assert.throws(
+		() => validateCatalogManifest(catalogManifest, malformed),
+		/equipment Barbell catalog key must be lowercase ASCII kebab-case/,
+	);
+
+	const mismatched = cloneVocabulary();
+	mismatched.catalogEntries.muscles[0].name = "Pectorals";
+	assert.throws(
+		() => validateCatalogManifest(catalogManifest, mismatched),
+		/muscles catalog entries must preserve vocabulary order/,
 	);
 });
 

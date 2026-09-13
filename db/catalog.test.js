@@ -22,17 +22,20 @@ const integration = databaseIsSafe ? describe : describe.skip;
 async function assertManagedCatalogMatchesManifest(db) {
 	const expectedBases = catalogManifest
 		.map((exercise) => ({
+			catalog_key: exercise.catalogKey,
 			name: exercise.name,
-			movement_pattern: exercise.movementPattern,
-			muscle: exercise.muscles[0].name,
+			movement_pattern_key: exercise.movementPatternCatalogKey,
+			muscle_key: exercise.muscles[0].catalogKey,
 		}))
 		.sort((left, right) => left.name.localeCompare(right.name));
 	const expectedVariants = catalogManifest
 		.flatMap((exercise) =>
 			exercise.variants.map((variant) => ({
+				exercise_key: exercise.catalogKey,
+				catalog_key: variant.catalogKey,
 				exercise_name: exercise.name,
 				name: variant.name,
-				equipment: variant.equipment,
+				equipment_key: variant.equipmentCatalogKey,
 				setup_description: variant.setupDescription,
 				environment: variant.environment,
 			})),
@@ -43,7 +46,9 @@ async function assertManagedCatalogMatchesManifest(db) {
 
 	const actualBases = (
 		await db.query(
-			`SELECT exercise.name, pattern.name AS movement_pattern, muscle.common_name AS muscle
+			`SELECT exercise.catalog_key, exercise.name,
+			        pattern.catalog_key AS movement_pattern_key,
+			        muscle.catalog_key AS muscle_key
 			 FROM exercises exercise
 			 JOIN movement_patterns pattern ON pattern.id = exercise.movement_pattern_id
 			 JOIN exercise_muscles relationship ON relationship.exercise_id = exercise.id
@@ -56,7 +61,9 @@ async function assertManagedCatalogMatchesManifest(db) {
 	).rows;
 	const actualVariants = (
 		await db.query(
-			`SELECT exercise.name AS exercise_name, variant.name, equipment.name AS equipment,
+			`SELECT exercise.catalog_key AS exercise_key, variant.catalog_key,
+			        exercise.name AS exercise_name, variant.name,
+			        equipment.catalog_key AS equipment_key,
 			        variant.setup_description, variant.environment
 			 FROM exercise_variants variant
 			 JOIN exercises exercise ON exercise.id = variant.exercise_id
@@ -69,6 +76,46 @@ async function assertManagedCatalogMatchesManifest(db) {
 
 	assert.deepEqual(actualBases, expectedBases);
 	assert.deepEqual(actualVariants, expectedVariants);
+}
+
+/** @param {Client} db */
+async function catalogRelationshipSnapshot(db) {
+	const { rows } = await db.query(`
+		SELECT kind, catalog_key, related_catalog_key, locale, name
+		FROM (
+			SELECT 'exercise' AS kind, exercise.catalog_key,
+				pattern.catalog_key AS related_catalog_key, NULL::text AS locale, exercise.name
+			FROM exercises AS exercise
+			JOIN movement_patterns AS pattern ON pattern.id = exercise.movement_pattern_id
+			WHERE exercise.catalog_key IS NOT NULL
+
+			UNION ALL
+
+			SELECT 'exercise_variant', variant.catalog_key, exercise.catalog_key, NULL::text,
+				variant.name
+			FROM exercise_variants AS variant
+			JOIN exercises AS exercise ON exercise.id = variant.exercise_id
+			WHERE variant.catalog_key IS NOT NULL
+
+			UNION ALL
+
+			SELECT 'exercise_pt', exercise.catalog_key, NULL::text, translation.locale,
+				translation.name
+			FROM exercise_translations AS translation
+			JOIN exercises AS exercise ON exercise.id = translation.exercise_id
+			WHERE translation.locale = 'pt-BR'
+
+			UNION ALL
+
+			SELECT 'starter_variant', variant.catalog_key, NULL::text, NULL::text, step.name
+			FROM session_steps AS step
+			JOIN sessions AS session ON session.id = step.session_id
+			JOIN exercise_variants AS variant ON variant.id = step.exercise_variant_id
+			WHERE session.name = 'Sample Full Body Session'
+		) AS snapshot
+		ORDER BY kind, catalog_key, related_catalog_key NULLS FIRST, locale NULLS FIRST, name
+	`);
+	return rows;
 }
 
 integration("canonical database setup", { concurrency: false }, () => {
@@ -102,6 +149,33 @@ integration("canonical database setup", { concurrency: false }, () => {
 		).rows[0];
 
 		assert.deepEqual(counts, { bases: 78, variants: 129, prime_movers: 78 });
+		const catalogKeyCounts = (
+			await db.query(`
+				SELECT
+					(SELECT COUNT(*)::int FROM exercises WHERE catalog_key IS NOT NULL) AS exercises,
+					(SELECT COUNT(DISTINCT catalog_key)::int FROM exercises) AS distinct_exercises,
+					(SELECT COUNT(*)::int FROM exercise_variants WHERE catalog_key IS NOT NULL) AS variants,
+					(SELECT COUNT(DISTINCT catalog_key)::int FROM exercise_variants) AS distinct_variants,
+					(SELECT COUNT(*)::int FROM muscles WHERE catalog_key IS NOT NULL) AS muscles,
+					(SELECT COUNT(DISTINCT catalog_key)::int FROM muscles) AS distinct_muscles,
+					(SELECT COUNT(*)::int FROM equipments WHERE catalog_key IS NOT NULL) AS equipment,
+					(SELECT COUNT(DISTINCT catalog_key)::int FROM equipments) AS distinct_equipment,
+					(SELECT COUNT(*)::int FROM movement_patterns WHERE catalog_key IS NOT NULL) AS movement_patterns,
+					(SELECT COUNT(DISTINCT catalog_key)::int FROM movement_patterns) AS distinct_movement_patterns
+			`)
+		).rows[0];
+		assert.deepEqual(catalogKeyCounts, {
+			exercises: 78,
+			distinct_exercises: 78,
+			variants: 129,
+			distinct_variants: 129,
+			muscles: 24,
+			distinct_muscles: 24,
+			equipment: 28,
+			distinct_equipment: 28,
+			movement_patterns: 8,
+			distinct_movement_patterns: 8,
+		});
 		const translationCounts = (
 			await db.query(`
 				SELECT
@@ -162,6 +236,15 @@ integration("canonical database setup", { concurrency: false }, () => {
 		await assertManagedCatalogMatchesManifest(db);
 	});
 
+	test("repeated clean setups preserve catalog-key relationships", async () => {
+		const firstSnapshot = await catalogRelationshipSnapshot(db);
+
+		await db.query(schemaSql);
+		await db.query(seedSql);
+
+		assert.deepEqual(await catalogRelationshipSnapshot(db), firstSnapshot);
+	});
+
 	test("fresh database contains the ordered global starter workout", async () => {
 		const sessions = (
 			await db.query(
@@ -174,7 +257,7 @@ integration("canonical database setup", { concurrency: false }, () => {
 
 		const steps = (
 			await db.query(
-				`SELECT step.name, variant.name AS variant_name, step.sets, step.reps,
+				`SELECT step.name, variant.catalog_key, variant.name AS variant_name, step.sets, step.reps,
 				        step.step_order, type.name AS step_type
 				 FROM session_steps AS step
 				 JOIN sessions AS session ON session.id = step.session_id
@@ -188,6 +271,7 @@ integration("canonical database setup", { concurrency: false }, () => {
 		assert.deepEqual(steps, [
 			{
 				name: "Box squats",
+				catalog_key: "bodyweight-box-squat",
 				variant_name: "Bodyweight Box Squat",
 				sets: 3,
 				reps: 10,
@@ -196,6 +280,7 @@ integration("canonical database setup", { concurrency: false }, () => {
 			},
 			{
 				name: "Push ups",
+				catalog_key: "bodyweight-push-up",
 				variant_name: "Bodyweight Push Up",
 				sets: 3,
 				reps: 10,
@@ -204,6 +289,7 @@ integration("canonical database setup", { concurrency: false }, () => {
 			},
 			{
 				name: "One-arm rows",
+				catalog_key: "one-arm-dumbbell-row",
 				variant_name: "One-Arm Dumbbell Row",
 				sets: 3,
 				reps: 10,
@@ -212,6 +298,7 @@ integration("canonical database setup", { concurrency: false }, () => {
 			},
 			{
 				name: "Glute bridges",
+				catalog_key: "bodyweight-glute-bridge",
 				variant_name: "Bodyweight Glute Bridge",
 				sets: 3,
 				reps: 12,

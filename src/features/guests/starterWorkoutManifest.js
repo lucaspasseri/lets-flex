@@ -1,5 +1,5 @@
-const exerciseStep = (name, variantName, sets, reps) =>
-	Object.freeze({ name, variantName, sets, reps });
+const exerciseStep = (name, variantCatalogKey, sets, reps) =>
+	Object.freeze({ name, variantCatalogKey, sets, reps });
 
 export const starterWorkoutManifest = Object.freeze({
 	goalName: "general_fitness",
@@ -10,9 +10,9 @@ export const starterWorkoutManifest = Object.freeze({
 	sessionName: "Sample Full Body Session",
 	sessionNotes: "A short, read-only full-body session for learning the workout flow.",
 	steps: Object.freeze([
-		exerciseStep("Box squats", "Bodyweight Box Squat", 3, 10),
-		exerciseStep("Push ups", "Bodyweight Push Up", 3, 10),
-		exerciseStep("One-arm rows", "One-Arm Dumbbell Row", 3, 10),
-		exerciseStep("Glute bridges", "Bodyweight Glute Bridge", 3, 12),
+		exerciseStep("Box squats", "bodyweight-box-squat", 3, 10),
+		exerciseStep("Push ups", "bodyweight-push-up", 3, 10),
+		exerciseStep("One-arm rows", "one-arm-dumbbell-row", 3, 10),
+		exerciseStep("Glute bridges", "bodyweight-glute-bridge", 3, 12),
 	]),
 });

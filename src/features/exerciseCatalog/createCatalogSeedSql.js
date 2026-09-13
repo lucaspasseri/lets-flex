@@ -13,31 +13,41 @@ export function createCatalogSeedSql(
 ) {
 	validateCatalogManifest(manifest, vocabulary);
 
-	const bases = manifest.map((exercise) => [exercise.name, exercise.movementPattern]);
+	const bases = manifest.map((exercise) => [
+		exercise.catalogKey,
+		exercise.name,
+		exercise.movementPatternCatalogKey,
+	]);
 	const variants = manifest.flatMap((exercise) =>
 		exercise.variants.map((exerciseVariant) => [
-			exercise.name,
+			exercise.catalogKey,
+			exerciseVariant.catalogKey,
 			exerciseVariant.name,
-			exerciseVariant.equipment ?? "",
+			exerciseVariant.equipmentCatalogKey ?? "",
 			exerciseVariant.setupDescription,
 			exerciseVariant.environment,
 		]),
 	);
 	const muscles = manifest.flatMap((exercise) =>
-		exercise.muscles.map((muscle) => [exercise.name, muscle.name, muscle.role]),
+		exercise.muscles.map((muscle) => [
+			exercise.catalogKey,
+			muscle.catalogKey,
+			muscle.role,
+		]),
 	);
 
 	return `
-INSERT INTO exercises (name, movement_pattern_id)
-SELECT catalog.name, movement_patterns.id
+INSERT INTO exercises (catalog_key, name, movement_pattern_id)
+SELECT catalog.catalog_key, catalog.name, movement_patterns.id
 FROM (VALUES
 ${valuesSql(bases)}
-) AS catalog(name, movement_pattern_name)
-JOIN movement_patterns ON movement_patterns.name = catalog.movement_pattern_name;
+) AS catalog(catalog_key, name, movement_pattern_key)
+JOIN movement_patterns ON movement_patterns.catalog_key = catalog.movement_pattern_key;
 
 INSERT INTO exercise_variants (
 	exercise_id,
 	equipment_id,
+	catalog_key,
 	name,
 	setup_description,
 	environment,
@@ -46,24 +56,25 @@ INSERT INTO exercise_variants (
 SELECT
 	exercises.id,
 	equipments.id,
+	catalog.catalog_key,
 	catalog.variant_name,
 	catalog.setup_description,
 	catalog.environment,
 	'Foundational global catalog variant.'
 FROM (VALUES
 ${valuesSql(variants)}
-) AS catalog(exercise_name, variant_name, equipment_name, setup_description, environment)
-JOIN exercises ON exercises.name = catalog.exercise_name
+) AS catalog(exercise_key, catalog_key, variant_name, equipment_key, setup_description, environment)
+JOIN exercises ON exercises.catalog_key = catalog.exercise_key
 LEFT JOIN equipments
-	ON equipments.name = NULLIF(catalog.equipment_name, '');
+	ON equipments.catalog_key = NULLIF(catalog.equipment_key, '');
 
 INSERT INTO exercise_muscles (exercise_id, muscle_id, muscle_role_id)
 SELECT exercises.id, muscles.id, muscle_roles.id
 FROM (VALUES
 ${valuesSql(muscles)}
-) AS catalog(exercise_name, muscle_name, muscle_role_name)
-JOIN exercises ON exercises.name = catalog.exercise_name
-JOIN muscles ON muscles.common_name = catalog.muscle_name
+) AS catalog(exercise_key, muscle_key, muscle_role_name)
+JOIN exercises ON exercises.catalog_key = catalog.exercise_key
+JOIN muscles ON muscles.catalog_key = catalog.muscle_key
 JOIN muscle_roles ON muscle_roles.name = catalog.muscle_role_name;
 `;
 }

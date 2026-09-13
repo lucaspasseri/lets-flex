@@ -2,4 +2,5 @@ node_modules
 .env
 .env.test
 public/media/uploads/
+var/media/candidates/
 imagesSample

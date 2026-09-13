@@ -3,6 +3,7 @@ import test from "node:test";
 
 import { schemaSql } from "./schema.js";
 import { mediaSchemaSql } from "./mediaSql.js";
+import { mediaGenerationSchemaSql } from "./mediaGenerationSql.js";
 
 test("media schema uses reusable assets and explicit supported entity assignments", () => {
 	assert.match(mediaSchemaSql, /CREATE TABLE IF NOT EXISTS media_assets/);
@@ -26,4 +27,19 @@ test("media assignments support removal without deleting reusable assets", () =>
 	assert.match(mediaSchemaSql, /ON DELETE RESTRICT/);
 	assert.match(mediaSchemaSql, /entity_media_entity_id_positive/);
 	assert.match(mediaSchemaSql, /entity_media_sort_order_valid/);
+});
+
+test("generated candidates remain distinct from approved media assets", () => {
+	assert.match(
+		mediaGenerationSchemaSql,
+		/CREATE TABLE IF NOT EXISTS media_generation_candidates/,
+	);
+	assert.match(mediaGenerationSchemaSql, /pending_review', 'approved', 'rejected/);
+	assert.match(
+		mediaGenerationSchemaSql,
+		/entity_type IN \('exercise', 'exercise_variant', 'equipment', 'movement_pattern'\)/,
+	);
+	assert.match(mediaGenerationSchemaSql, /REFERENCES media_assets\(id\)/);
+	assert.match(mediaGenerationSchemaSql, /private_file_removed_at TIMESTAMPTZ/);
+	assert.ok(schemaSql.includes(mediaGenerationSchemaSql.trim()));
 });

@@ -120,10 +120,11 @@ export async function findMediaManagementEntity(
 			entity.name AS canonical_name, entity.exercise_id AS parent_exercise_id,
 			parent.name AS parent_name,
 			parent.movement_pattern_id, movement.name AS movement_pattern,
-			entity.environment
+			entity.environment, entity.setup_description, equipment.name AS equipment_name
 			FROM exercise_variants AS entity
 			JOIN exercises AS parent ON parent.id = entity.exercise_id
 			LEFT JOIN movement_patterns AS movement ON movement.id = parent.movement_pattern_id
+			LEFT JOIN equipments AS equipment ON equipment.id = entity.equipment_id
 			${localizedNameJoins.exercise_variant}
 			WHERE entity.owner_user_id IS NULL AND entity.id = $2`,
 		muscle: `SELECT 'muscle' AS entity_type, entity.id AS entity_id,

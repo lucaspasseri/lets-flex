@@ -8,80 +8,83 @@ const muscleRoleNames = [
 	"secondary_mover",
 ];
 
-const movementPatternNames = [
-	"push",
-	"pull",
-	"squat",
-	"hinge",
-	"lunge",
-	"carry",
-	"rotation",
-	"gait",
-];
+const movementPatterns = Object.freeze([
+	{ catalogKey: "push", name: "push" },
+	{ catalogKey: "pull", name: "pull" },
+	{ catalogKey: "squat", name: "squat" },
+	{ catalogKey: "hinge", name: "hinge" },
+	{ catalogKey: "lunge", name: "lunge" },
+	{ catalogKey: "carry", name: "carry" },
+	{ catalogKey: "rotation", name: "rotation" },
+	{ catalogKey: "gait", name: "gait" },
+]);
 
-const muscleNames = [
-	"Chest",
-	"Upper Chest",
-	"Lower Chest",
-	"Upper Back",
-	"Lats",
-	"Mid Back",
-	"Lower Back",
-	"Front Delts",
-	"Side Delts",
-	"Rear Delts",
-	"Biceps",
-	"Triceps",
-	"Forearms",
-	"Abs",
-	"Obliques",
-	"Deep Core",
-	"Glutes",
-	"Glute Med",
-	"Quads",
-	"Hamstrings",
-	"Adductors",
-	"Abductors",
-	"Calves",
-	"Soleus",
-];
+const muscles = Object.freeze([
+	{ catalogKey: "chest", name: "Chest" },
+	{ catalogKey: "upper-chest", name: "Upper Chest" },
+	{ catalogKey: "lower-chest", name: "Lower Chest" },
+	{ catalogKey: "upper-back", name: "Upper Back" },
+	{ catalogKey: "lats", name: "Lats" },
+	{ catalogKey: "mid-back", name: "Mid Back" },
+	{ catalogKey: "lower-back", name: "Lower Back" },
+	{ catalogKey: "front-delts", name: "Front Delts" },
+	{ catalogKey: "side-delts", name: "Side Delts" },
+	{ catalogKey: "rear-delts", name: "Rear Delts" },
+	{ catalogKey: "biceps", name: "Biceps" },
+	{ catalogKey: "triceps", name: "Triceps" },
+	{ catalogKey: "forearms", name: "Forearms" },
+	{ catalogKey: "abs", name: "Abs" },
+	{ catalogKey: "obliques", name: "Obliques" },
+	{ catalogKey: "deep-core", name: "Deep Core" },
+	{ catalogKey: "glutes", name: "Glutes" },
+	{ catalogKey: "glute-med", name: "Glute Med" },
+	{ catalogKey: "quads", name: "Quads" },
+	{ catalogKey: "hamstrings", name: "Hamstrings" },
+	{ catalogKey: "adductors", name: "Adductors" },
+	{ catalogKey: "abductors", name: "Abductors" },
+	{ catalogKey: "calves", name: "Calves" },
+	{ catalogKey: "soleus", name: "Soleus" },
+]);
 
-const equipmentNames = [
-	"Barbell",
-	"Dumbbell",
-	"Kettlebell",
-	"Smith Machine",
-	"Cable Machine",
-	"Leg Press Machine",
-	"Chest Press Machine",
-	"Hack Squat Machine",
-	"Leg Extension Machine",
-	"Leg Curl Machine",
-	"Rear Delt Machine",
-	"Lat Pulldown Machine",
-	"Pull-up Bar",
-	"Dip Bar",
-	"Resistance Band",
-	"Suspension Trainer (TRX)",
-	"Ab Wheel",
-	"Medicine Ball",
-	"Jump Rope",
-	"Treadmill",
-	"Stationary Bike",
-	"Elliptical Trainer",
-	"Rowing Machine",
-	"Flat Bench",
-	"Incline Bench",
-	"Decline Bench",
-	"Squat Rack",
-	"Power Rack",
-];
+const equipment = Object.freeze([
+	{ catalogKey: "barbell", name: "Barbell" },
+	{ catalogKey: "dumbbell", name: "Dumbbell" },
+	{ catalogKey: "kettlebell", name: "Kettlebell" },
+	{ catalogKey: "smith-machine", name: "Smith Machine" },
+	{ catalogKey: "cable-machine", name: "Cable Machine" },
+	{ catalogKey: "leg-press-machine", name: "Leg Press Machine" },
+	{ catalogKey: "chest-press-machine", name: "Chest Press Machine" },
+	{ catalogKey: "hack-squat-machine", name: "Hack Squat Machine" },
+	{ catalogKey: "leg-extension-machine", name: "Leg Extension Machine" },
+	{ catalogKey: "leg-curl-machine", name: "Leg Curl Machine" },
+	{ catalogKey: "rear-delt-machine", name: "Rear Delt Machine" },
+	{ catalogKey: "lat-pulldown-machine", name: "Lat Pulldown Machine" },
+	{ catalogKey: "pull-up-bar", name: "Pull-up Bar" },
+	{ catalogKey: "dip-bar", name: "Dip Bar" },
+	{ catalogKey: "resistance-band", name: "Resistance Band" },
+	{ catalogKey: "suspension-trainer-trx", name: "Suspension Trainer (TRX)" },
+	{ catalogKey: "ab-wheel", name: "Ab Wheel" },
+	{ catalogKey: "medicine-ball", name: "Medicine Ball" },
+	{ catalogKey: "jump-rope", name: "Jump Rope" },
+	{ catalogKey: "treadmill", name: "Treadmill" },
+	{ catalogKey: "stationary-bike", name: "Stationary Bike" },
+	{ catalogKey: "elliptical-trainer", name: "Elliptical Trainer" },
+	{ catalogKey: "rowing-machine", name: "Rowing Machine" },
+	{ catalogKey: "flat-bench", name: "Flat Bench" },
+	{ catalogKey: "incline-bench", name: "Incline Bench" },
+	{ catalogKey: "decline-bench", name: "Decline Bench" },
+	{ catalogKey: "squat-rack", name: "Squat Rack" },
+	{ catalogKey: "power-rack", name: "Power Rack" },
+]);
+
+const namesOf = (entries) => Object.freeze(entries.map((entry) => entry.name));
 
 export const catalogVocabulary = Object.freeze({
-	movementPatterns: Object.freeze(movementPatternNames),
-	muscles: Object.freeze(muscleNames),
+	movementPatterns: namesOf(movementPatterns),
+	muscles: namesOf(muscles),
 	muscleRoles: Object.freeze(muscleRoleNames),
-	equipment: Object.freeze(equipmentNames),
+	equipment: namesOf(equipment),
+	catalogEntries: Object.freeze({ movementPatterns, muscles, equipment }),
 	environments: Object.freeze([
 		"gym",
 		"home",
@@ -93,902 +96,1329 @@ export const catalogVocabulary = Object.freeze({
 	]),
 });
 
-const variant = (name, equipment, setupDescription, environment = "gym_or_home") => ({
+const variant = (
+	catalogKey,
 	name,
+	equipmentCatalogKey,
+	equipment,
+	setupDescription,
+	environment = "gym_or_home",
+) => ({
+	catalogKey,
+	name,
+	equipmentCatalogKey,
 	equipment,
 	setupDescription,
 	environment,
 });
 
-const base = (name, movementPattern, primeMover, variants) => ({
+const base = (
+	catalogKey,
 	name,
+	movementPatternCatalogKey,
 	movementPattern,
-	muscles: [{ name: primeMover, role: "prime_mover" }],
+	primeMoverCatalogKey,
+	primeMover,
+	variants,
+) => ({
+	catalogKey,
+	name,
+	movementPatternCatalogKey,
+	movementPattern,
+	muscles: [
+		{ catalogKey: primeMoverCatalogKey, name: primeMover, role: "prime_mover" },
+	],
 	variants,
 });
 
 export const catalogManifest = Object.freeze([
-	base("Push Up", "push", "Chest", [
-		variant("Bodyweight Push Up", null, "Hands beneath shoulders with a braced trunk."),
+	base("push-up", "Push Up", "push", "push", "chest", "Chest", [
 		variant(
+			"bodyweight-push-up",
+			"Bodyweight Push Up",
+			null,
+			null,
+			"Hands beneath shoulders with a braced trunk.",
+		),
+		variant(
+			"resistance-band-push-up",
 			"Resistance Band Push Up",
+			"resistance-band",
 			"Resistance Band",
 			"Loop a band across the upper back and anchor each end beneath the hands.",
 		),
 	]),
-	base("Bench Press", "push", "Chest", [
+	base("bench-press", "Bench Press", "push", "push", "chest", "Chest", [
 		variant(
+			"barbell-bench-press",
 			"Barbell Bench Press",
+			"barbell",
 			"Barbell",
 			"Lie on a flat bench with the bar over the mid-chest.",
 			"gym",
 		),
 		variant(
+			"dumbbell-bench-press",
 			"Dumbbell Bench Press",
+			"dumbbell",
 			"Dumbbell",
 			"Lie on a flat bench with one dumbbell in each hand.",
 			"gym",
 		),
 	]),
-	base("Overhead Press", "push", "Front Delts", [
+	base(
+		"overhead-press",
+		"Overhead Press",
+		"push",
+		"push",
+		"front-delts",
+		"Front Delts",
+		[
+			variant(
+				"barbell-overhead-press",
+				"Barbell Overhead Press",
+				"barbell",
+				"Barbell",
+				"Stand with the bar at upper-chest height and brace the trunk.",
+				"gym",
+			),
+			variant(
+				"dumbbell-overhead-press",
+				"Dumbbell Overhead Press",
+				"dumbbell",
+				"Dumbbell",
+				"Stand or sit with dumbbells held at shoulder height.",
+			),
+		],
+	),
+	base("pull-up", "Pull Up", "pull", "pull", "lats", "Lats", [
 		variant(
-			"Barbell Overhead Press",
-			"Barbell",
-			"Stand with the bar at upper-chest height and brace the trunk.",
-			"gym",
-		),
-		variant(
-			"Dumbbell Overhead Press",
-			"Dumbbell",
-			"Stand or sit with dumbbells held at shoulder height.",
-		),
-	]),
-	base("Pull Up", "pull", "Lats", [
-		variant(
+			"bodyweight-pull-up",
 			"Bodyweight Pull Up",
+			"pull-up-bar",
 			"Pull-up Bar",
 			"Hang from a pull-up bar with a secure overhand grip.",
 		),
 		variant(
+			"band-assisted-pull-up",
 			"Band-Assisted Pull Up",
+			"resistance-band",
 			"Resistance Band",
 			"Secure a band to a pull-up bar and place a foot or knee in the loop.",
 		),
 	]),
-	base("Lat Pulldown", "pull", "Lats", [
+	base("lat-pulldown", "Lat Pulldown", "pull", "pull", "lats", "Lats", [
 		variant(
+			"machine-lat-pulldown",
 			"Machine Lat Pulldown",
+			"lat-pulldown-machine",
 			"Lat Pulldown Machine",
 			"Sit with thighs secured and take an overhand grip on the bar.",
 			"gym",
 		),
 		variant(
+			"resistance-band-lat-pulldown",
 			"Resistance Band Lat Pulldown",
+			"resistance-band",
 			"Resistance Band",
 			"Anchor the band overhead and kneel or sit beneath the anchor.",
 		),
 	]),
-	base("Row", "pull", "Mid Back", [
+	base("row", "Row", "pull", "pull", "mid-back", "Mid Back", [
 		variant(
+			"barbell-bent-over-row",
 			"Barbell Bent-Over Row",
+			"barbell",
 			"Barbell",
 			"Hinge to a stable torso angle and hold the bar below the shoulders.",
 			"gym",
 		),
 		variant(
+			"one-arm-dumbbell-row",
 			"One-Arm Dumbbell Row",
+			"dumbbell",
 			"Dumbbell",
 			"Support one hand on a stable surface and hold the dumbbell below the shoulder.",
 		),
 	]),
-	base("Inverted Row", "pull", "Mid Back", [
+	base("inverted-row", "Inverted Row", "pull", "pull", "mid-back", "Mid Back", [
 		variant(
+			"suspension-trainer-inverted-row",
 			"Suspension Trainer Inverted Row",
+			"suspension-trainer-trx",
 			"Suspension Trainer (TRX)",
 			"Set the handles around waist height and lean back with a rigid body.",
 		),
 		variant(
+			"bar-inverted-row",
 			"Bar Inverted Row",
+			"power-rack",
 			"Power Rack",
 			"Set a secured bar around waist height and position the chest beneath it.",
 			"gym",
 		),
 	]),
-	base("Squat", "squat", "Quads", [
+	base("squat", "Squat", "squat", "squat", "quads", "Quads", [
 		variant(
+			"barbell-back-squat",
 			"Barbell Back Squat",
+			"barbell",
 			"Barbell",
 			"Barbell supported across the upper back.",
 			"gym",
 		),
 		variant(
+			"goblet-squat",
 			"Goblet Squat",
+			"kettlebell",
 			"Kettlebell",
 			"Hold the kettlebell close to the chest and stand with a comfortable stance.",
 		),
 	]),
-	base("Box Squat", "squat", "Quads", [
+	base("box-squat", "Box Squat", "squat", "squat", "quads", "Quads", [
 		variant(
+			"bodyweight-box-squat",
 			"Bodyweight Box Squat",
+			null,
 			null,
 			"Stand in front of a stable seat set to a comfortable depth.",
 			"home",
 		),
 		variant(
+			"dumbbell-box-squat",
 			"Dumbbell Box Squat",
+			"dumbbell",
 			"Dumbbell",
 			"Stand in front of a stable box while holding dumbbells at the sides.",
 		),
 	]),
-	base("Leg Press", "squat", "Quads", [
+	base("leg-press", "Leg Press", "squat", "squat", "quads", "Quads", [
 		variant(
+			"bilateral-leg-press",
 			"Bilateral Leg Press",
+			"leg-press-machine",
 			"Leg Press Machine",
 			"Place both feet securely on the platform at a comfortable width.",
 			"gym",
 		),
 		variant(
+			"single-leg-press",
 			"Single-Leg Press",
+			"leg-press-machine",
 			"Leg Press Machine",
 			"Place one foot securely on the platform and keep the pelvis supported.",
 			"gym",
 		),
 	]),
-	base("Deadlift", "hinge", "Glutes", [
+	base("deadlift", "Deadlift", "hinge", "hinge", "glutes", "Glutes", [
 		variant(
+			"barbell-deadlift",
 			"Barbell Deadlift",
+			"barbell",
 			"Barbell",
 			"Set the bar over the mid-foot and take a balanced grip outside the legs.",
 			"gym",
 		),
 		variant(
+			"kettlebell-deadlift",
 			"Kettlebell Deadlift",
+			"kettlebell",
 			"Kettlebell",
 			"Place the kettlebell between the feet and hinge to reach the handle.",
 		),
 	]),
-	base("Romanian Deadlift", "hinge", "Hamstrings", [
+	base(
+		"romanian-deadlift",
+		"Romanian Deadlift",
+		"hinge",
+		"hinge",
+		"hamstrings",
+		"Hamstrings",
+		[
+			variant(
+				"barbell-romanian-deadlift",
+				"Barbell Romanian Deadlift",
+				"barbell",
+				"Barbell",
+				"Hold the bar at hip height and begin from a tall, braced stance.",
+				"gym",
+			),
+			variant(
+				"dumbbell-romanian-deadlift",
+				"Dumbbell Romanian Deadlift",
+				"dumbbell",
+				"Dumbbell",
+				"Hold dumbbells in front of the thighs and begin from a tall stance.",
+			),
+		],
+	),
+	base("hip-extension", "Hip Extension", "hinge", "hinge", "glutes", "Glutes", [
 		variant(
-			"Barbell Romanian Deadlift",
-			"Barbell",
-			"Hold the bar at hip height and begin from a tall, braced stance.",
-			"gym",
-		),
-		variant(
-			"Dumbbell Romanian Deadlift",
-			"Dumbbell",
-			"Hold dumbbells in front of the thighs and begin from a tall stance.",
-		),
-	]),
-	base("Hip Extension", "hinge", "Glutes", [
-		variant(
+			"bodyweight-glute-bridge",
 			"Bodyweight Glute Bridge",
+			null,
 			null,
 			"Lie on the back with knees bent and feet planted near the hips.",
 			"home",
 		),
 		variant(
+			"barbell-hip-thrust",
 			"Barbell Hip Thrust",
+			"barbell",
 			"Barbell",
 			"Support the upper back on a stable bench and position the padded bar across the hips.",
 			"gym",
 		),
 	]),
-	base("Forward Lunge", "lunge", "Quads", [
+	base("forward-lunge", "Forward Lunge", "lunge", "lunge", "quads", "Quads", [
 		variant(
+			"bodyweight-forward-lunge",
 			"Bodyweight Forward Lunge",
+			null,
 			null,
 			"Stand tall with clear space to step forward.",
 		),
 		variant(
+			"dumbbell-forward-lunge",
 			"Dumbbell Forward Lunge",
+			"dumbbell",
 			"Dumbbell",
 			"Stand tall holding dumbbells at the sides with clear space ahead.",
 		),
 	]),
-	base("Reverse Lunge", "lunge", "Glutes", [
+	base("reverse-lunge", "Reverse Lunge", "lunge", "lunge", "glutes", "Glutes", [
 		variant(
+			"bodyweight-reverse-lunge",
 			"Bodyweight Reverse Lunge",
+			null,
 			null,
 			"Stand tall with clear space to step backward.",
 		),
 		variant(
+			"dumbbell-reverse-lunge",
 			"Dumbbell Reverse Lunge",
+			"dumbbell",
 			"Dumbbell",
 			"Stand tall holding dumbbells at the sides with clear space behind.",
 		),
 	]),
-	base("Split Squat", "lunge", "Quads", [
+	base("split-squat", "Split Squat", "lunge", "lunge", "quads", "Quads", [
 		variant(
+			"bodyweight-split-squat",
 			"Bodyweight Split Squat",
+			null,
 			null,
 			"Take a stable staggered stance with both feet remaining planted.",
 		),
 		variant(
+			"dumbbell-split-squat",
 			"Dumbbell Split Squat",
+			"dumbbell",
 			"Dumbbell",
 			"Take a stable staggered stance while holding dumbbells at the sides.",
 		),
 	]),
-	base("Wood Chop", "rotation", "Obliques", [
+	base("wood-chop", "Wood Chop", "rotation", "rotation", "obliques", "Obliques", [
 		variant(
+			"cable-wood-chop",
 			"Cable Wood Chop",
+			"cable-machine",
 			"Cable Machine",
 			"Set the cable above shoulder height and stand side-on to the machine.",
 			"gym",
 		),
 		variant(
+			"resistance-band-wood-chop",
 			"Resistance Band Wood Chop",
+			"resistance-band",
 			"Resistance Band",
 			"Anchor the band above shoulder height and stand side-on to the anchor.",
 		),
 	]),
-	base("Anti-Rotation Press", "rotation", "Obliques", [
+	base(
+		"anti-rotation-press",
+		"Anti-Rotation Press",
+		"rotation",
+		"rotation",
+		"obliques",
+		"Obliques",
+		[
+			variant(
+				"cable-anti-rotation-press",
+				"Cable Anti-Rotation Press",
+				"cable-machine",
+				"Cable Machine",
+				"Set the cable at chest height and stand side-on with a stable stance.",
+				"gym",
+			),
+			variant(
+				"resistance-band-anti-rotation-press",
+				"Resistance Band Anti-Rotation Press",
+				"resistance-band",
+				"Resistance Band",
+				"Anchor the band at chest height and stand side-on with a stable stance.",
+			),
+		],
+	),
+	base(
+		"incline-bench-press",
+		"Incline Bench Press",
+		"push",
+		"push",
+		"upper-chest",
+		"Upper Chest",
+		[
+			variant(
+				"barbell-incline-bench-press",
+				"Barbell Incline Bench Press",
+				"barbell",
+				"Barbell",
+				"Set the bar above the upper chest on an incline bench.",
+				"gym",
+			),
+			variant(
+				"dumbbell-incline-bench-press",
+				"Dumbbell Incline Bench Press",
+				"dumbbell",
+				"Dumbbell",
+				"Lie on an incline bench with dumbbells aligned over the upper chest.",
+				"gym",
+			),
+			variant(
+				"smith-machine-incline-press",
+				"Smith Machine Incline Press",
+				"smith-machine",
+				"Smith Machine",
+				"Set the Smith bar over the upper chest on an incline bench.",
+				"gym",
+			),
+		],
+	),
+	base(
+		"decline-bench-press",
+		"Decline Bench Press",
+		"push",
+		"push",
+		"lower-chest",
+		"Lower Chest",
+		[
+			variant(
+				"barbell-decline-bench-press",
+				"Barbell Decline Bench Press",
+				"barbell",
+				"Barbell",
+				"Secure the legs on a decline bench and lower the bar toward the lower chest.",
+				"gym",
+			),
+			variant(
+				"dumbbell-decline-bench-press",
+				"Dumbbell Decline Bench Press",
+				"dumbbell",
+				"Dumbbell",
+				"Lie on a decline bench with dumbbells over the lower chest.",
+				"gym",
+			),
+		],
+	),
+	base("chest-fly", "Chest Fly", "push", "push", "chest", "Chest", [
 		variant(
-			"Cable Anti-Rotation Press",
-			"Cable Machine",
-			"Set the cable at chest height and stand side-on with a stable stance.",
-			"gym",
-		),
-		variant(
-			"Resistance Band Anti-Rotation Press",
-			"Resistance Band",
-			"Anchor the band at chest height and stand side-on with a stable stance.",
-		),
-	]),
-	base("Incline Bench Press", "push", "Upper Chest", [
-		variant(
-			"Barbell Incline Bench Press",
-			"Barbell",
-			"Set the bar above the upper chest on an incline bench.",
-			"gym",
-		),
-		variant(
-			"Dumbbell Incline Bench Press",
-			"Dumbbell",
-			"Lie on an incline bench with dumbbells aligned over the upper chest.",
-			"gym",
-		),
-		variant(
-			"Smith Machine Incline Press",
-			"Smith Machine",
-			"Set the Smith bar over the upper chest on an incline bench.",
-			"gym",
-		),
-	]),
-	base("Decline Bench Press", "push", "Lower Chest", [
-		variant(
-			"Barbell Decline Bench Press",
-			"Barbell",
-			"Secure the legs on a decline bench and lower the bar toward the lower chest.",
-			"gym",
-		),
-		variant(
-			"Dumbbell Decline Bench Press",
-			"Dumbbell",
-			"Lie on a decline bench with dumbbells over the lower chest.",
-			"gym",
-		),
-	]),
-	base("Chest Fly", "push", "Chest", [
-		variant(
+			"cable-chest-fly",
 			"Cable Chest Fly",
+			"cable-machine",
 			"Cable Machine",
 			"Set both pulleys at chest height and bring the handles together with a soft elbow bend.",
 			"gym",
 		),
 		variant(
+			"dumbbell-chest-fly",
 			"Dumbbell Chest Fly",
+			"dumbbell",
 			"Dumbbell",
 			"Lie on a flat bench with dumbbells above the chest and controlled arm arcs.",
 			"gym",
 		),
 	]),
-	base("Dip", "push", "Triceps", [
+	base("dip", "Dip", "push", "push", "triceps", "Triceps", [
 		variant(
+			"bodyweight-dip",
 			"Bodyweight Dip",
+			"dip-bar",
 			"Dip Bar",
 			"Support the body on parallel bars and lower with the shoulders controlled.",
 			"gym",
 		),
 		variant(
+			"band-assisted-dip",
 			"Band-Assisted Dip",
+			"resistance-band",
 			"Resistance Band",
 			"Loop a resistance band over the dip bars to reduce the load during the descent.",
 			"gym",
 		),
 	]),
-	base("Close-Grip Bench Press", "push", "Triceps", [
+	base(
+		"close-grip-bench-press",
+		"Close-Grip Bench Press",
+		"push",
+		"push",
+		"triceps",
+		"Triceps",
+		[
+			variant(
+				"barbell-close-grip-bench-press",
+				"Barbell Close-Grip Bench Press",
+				"barbell",
+				"Barbell",
+				"Use a narrow, comfortable grip and lower the bar toward the mid-chest.",
+				"gym",
+			),
+			variant(
+				"smith-machine-close-grip-press",
+				"Smith Machine Close-Grip Press",
+				"smith-machine",
+				"Smith Machine",
+				"Set the Smith bar above the mid-chest with a narrow, comfortable grip.",
+				"gym",
+			),
+		],
+	),
+	base(
+		"chest-supported-row",
+		"Chest-Supported Row",
+		"pull",
+		"pull",
+		"mid-back",
+		"Mid Back",
+		[
+			variant(
+				"dumbbell-chest-supported-row",
+				"Dumbbell Chest-Supported Row",
+				"dumbbell",
+				"Dumbbell",
+				"Lie chest-down on an incline bench and row the dumbbells toward the ribs.",
+				"gym",
+			),
+			variant(
+				"machine-chest-supported-row",
+				"Machine Chest-Supported Row",
+				"chest-press-machine",
+				"Chest Press Machine",
+				"Set the chest pad and row the handles while keeping the torso supported.",
+				"gym",
+			),
+		],
+	),
+	base("seated-cable-row", "Seated Cable Row", "pull", "pull", "mid-back", "Mid Back", [
 		variant(
-			"Barbell Close-Grip Bench Press",
-			"Barbell",
-			"Use a narrow, comfortable grip and lower the bar toward the mid-chest.",
-			"gym",
-		),
-		variant(
-			"Smith Machine Close-Grip Press",
-			"Smith Machine",
-			"Set the Smith bar above the mid-chest with a narrow, comfortable grip.",
-			"gym",
-		),
-	]),
-	base("Chest-Supported Row", "pull", "Mid Back", [
-		variant(
-			"Dumbbell Chest-Supported Row",
-			"Dumbbell",
-			"Lie chest-down on an incline bench and row the dumbbells toward the ribs.",
-			"gym",
-		),
-		variant(
-			"Machine Chest-Supported Row",
-			"Chest Press Machine",
-			"Set the chest pad and row the handles while keeping the torso supported.",
-			"gym",
-		),
-	]),
-	base("Seated Cable Row", "pull", "Mid Back", [
-		variant(
+			"close-grip-seated-cable-row",
 			"Close-Grip Seated Cable Row",
+			"cable-machine",
 			"Cable Machine",
 			"Sit tall with feet braced and pull the close handle toward the lower ribs.",
 			"gym",
 		),
 	]),
-	base("Single-Arm Lat Pulldown", "pull", "Lats", [
+	base(
+		"single-arm-lat-pulldown",
+		"Single-Arm Lat Pulldown",
+		"pull",
+		"pull",
+		"lats",
+		"Lats",
+		[
+			variant(
+				"single-arm-cable-lat-pulldown",
+				"Single-Arm Cable Lat Pulldown",
+				"cable-machine",
+				"Cable Machine",
+				"Kneel or sit beside a high pulley and pull one handle toward the side of the ribs.",
+				"gym",
+			),
+		],
+	),
+	base(
+		"straight-arm-pulldown",
+		"Straight-Arm Pulldown",
+		"pull",
+		"pull",
+		"lats",
+		"Lats",
+		[
+			variant(
+				"cable-straight-arm-pulldown",
+				"Cable Straight-Arm Pulldown",
+				"cable-machine",
+				"Cable Machine",
+				"Stand facing a high pulley and sweep the straight arms toward the thighs.",
+				"gym",
+			),
+			variant(
+				"band-straight-arm-pulldown",
+				"Band Straight-Arm Pulldown",
+				"resistance-band",
+				"Resistance Band",
+				"Anchor a band overhead and sweep the straight arms down toward the thighs.",
+			),
+		],
+	),
+	base("face-pull", "Face Pull", "pull", "pull", "rear-delts", "Rear Delts", [
 		variant(
-			"Single-Arm Cable Lat Pulldown",
-			"Cable Machine",
-			"Kneel or sit beside a high pulley and pull one handle toward the side of the ribs.",
-			"gym",
-		),
-	]),
-	base("Straight-Arm Pulldown", "pull", "Lats", [
-		variant(
-			"Cable Straight-Arm Pulldown",
-			"Cable Machine",
-			"Stand facing a high pulley and sweep the straight arms toward the thighs.",
-			"gym",
-		),
-		variant(
-			"Band Straight-Arm Pulldown",
-			"Resistance Band",
-			"Anchor a band overhead and sweep the straight arms down toward the thighs.",
-		),
-	]),
-	base("Face Pull", "pull", "Rear Delts", [
-		variant(
+			"cable-face-pull",
 			"Cable Face Pull",
+			"cable-machine",
 			"Cable Machine",
 			"Set the rope at face height and pull toward the forehead with the elbows high.",
 			"gym",
 		),
 		variant(
+			"band-face-pull",
 			"Band Face Pull",
+			"resistance-band",
 			"Resistance Band",
 			"Anchor a band at face height and pull the handles toward the forehead.",
 		),
 	]),
-	base("Lateral Raise", "push", "Side Delts", [
+	base("lateral-raise", "Lateral Raise", "push", "push", "side-delts", "Side Delts", [
 		variant(
+			"dumbbell-lateral-raise",
 			"Dumbbell Lateral Raise",
+			"dumbbell",
 			"Dumbbell",
 			"Raise the dumbbells out to the sides with a slight elbow bend and controlled tempo.",
 		),
 		variant(
+			"cable-lateral-raise",
 			"Cable Lateral Raise",
+			"cable-machine",
 			"Cable Machine",
 			"Stand side-on to a low pulley and raise one arm through the lateral plane.",
 			"gym",
 		),
 	]),
-	base("Rear Delt Fly", "pull", "Rear Delts", [
+	base("rear-delt-fly", "Rear Delt Fly", "pull", "pull", "rear-delts", "Rear Delts", [
 		variant(
+			"dumbbell-rear-delt-fly",
 			"Dumbbell Rear Delt Fly",
+			"dumbbell",
 			"Dumbbell",
 			"Hinge or sit supported and open the dumbbells out to shoulder height.",
 		),
 		variant(
+			"machine-rear-delt-fly",
 			"Machine Rear Delt Fly",
+			"rear-delt-machine",
 			"Rear Delt Machine",
 			"Face the machine pad and open the handles with the rear shoulders.",
 			"gym",
 		),
 	]),
-	base("Biceps Curl", "pull", "Biceps", [
+	base("biceps-curl", "Biceps Curl", "pull", "pull", "biceps", "Biceps", [
 		variant(
+			"barbell-biceps-curl",
 			"Barbell Biceps Curl",
+			"barbell",
 			"Barbell",
 			"Stand tall and curl the bar without swinging the trunk.",
 			"gym",
 		),
 	]),
-	base("Hammer Curl", "pull", "Biceps", [
+	base("hammer-curl", "Hammer Curl", "pull", "pull", "biceps", "Biceps", [
 		variant(
+			"dumbbell-hammer-curl",
 			"Dumbbell Hammer Curl",
+			"dumbbell",
 			"Dumbbell",
 			"Curl the dumbbells with neutral palms and the elbows close to the sides.",
 		),
 	]),
-	base("Triceps Pushdown", "push", "Triceps", [
+	base("triceps-pushdown", "Triceps Pushdown", "push", "push", "triceps", "Triceps", [
 		variant(
+			"cable-triceps-pushdown",
 			"Cable Triceps Pushdown",
+			"cable-machine",
 			"Cable Machine",
 			"Set the cable high and extend the elbows while keeping the upper arms still.",
 			"gym",
 		),
 		variant(
+			"band-triceps-pushdown",
 			"Band Triceps Pushdown",
+			"resistance-band",
 			"Resistance Band",
 			"Anchor a band overhead and press the handles down by extending the elbows.",
 		),
 	]),
-	base("Overhead Triceps Extension", "push", "Triceps", [
+	base(
+		"overhead-triceps-extension",
+		"Overhead Triceps Extension",
+		"push",
+		"push",
+		"triceps",
+		"Triceps",
+		[
+			variant(
+				"dumbbell-overhead-triceps-extension",
+				"Dumbbell Overhead Triceps Extension",
+				"dumbbell",
+				"Dumbbell",
+				"Hold one dumbbell overhead and lower it behind the head with the elbows steady.",
+			),
+			variant(
+				"cable-overhead-triceps-extension",
+				"Cable Overhead Triceps Extension",
+				"cable-machine",
+				"Cable Machine",
+				"Face away from a low pulley and extend the handle overhead.",
+				"gym",
+			),
+		],
+	),
+	base("front-squat", "Front Squat", "squat", "squat", "quads", "Quads", [
 		variant(
-			"Dumbbell Overhead Triceps Extension",
-			"Dumbbell",
-			"Hold one dumbbell overhead and lower it behind the head with the elbows steady.",
-		),
-		variant(
-			"Cable Overhead Triceps Extension",
-			"Cable Machine",
-			"Face away from a low pulley and extend the handle overhead.",
-			"gym",
-		),
-	]),
-	base("Front Squat", "squat", "Quads", [
-		variant(
+			"barbell-front-squat",
 			"Barbell Front Squat",
+			"barbell",
 			"Barbell",
 			"Rest the bar across the front shoulders and squat with an upright torso.",
 			"gym",
 		),
 		variant(
+			"smith-machine-front-squat",
 			"Smith Machine Front Squat",
+			"smith-machine",
 			"Smith Machine",
 			"Set the Smith bar across the front shoulders and squat along its guided path.",
 			"gym",
 		),
 	]),
-	base("Hack Squat", "squat", "Quads", [
+	base("hack-squat", "Hack Squat", "squat", "squat", "quads", "Quads", [
 		variant(
+			"smith-machine-hack-squat",
 			"Smith Machine Hack Squat",
+			"smith-machine",
 			"Smith Machine",
 			"Position the feet forward under the Smith bar and squat with the back supported by the setup.",
 			"gym",
 		),
 		variant(
+			"machine-hack-squat",
 			"Machine Hack Squat",
+			"hack-squat-machine",
 			"Hack Squat Machine",
 			"Set the shoulders into the machine pads and squat through a controlled range.",
 			"gym",
 		),
 	]),
-	base("Leg Extension", "squat", "Quads", [
+	base("leg-extension", "Leg Extension", "squat", "squat", "quads", "Quads", [
 		variant(
+			"machine-leg-extension",
 			"Machine Leg Extension",
+			"leg-extension-machine",
 			"Leg Extension Machine",
 			"Adjust the pad above the ankles and extend the knees without lifting the hips.",
 			"gym",
 		),
 	]),
-	base("Leg Curl", "hinge", "Hamstrings", [
+	base("leg-curl", "Leg Curl", "hinge", "hinge", "hamstrings", "Hamstrings", [
 		variant(
+			"lying-leg-curl",
 			"Lying Leg Curl",
+			"leg-curl-machine",
 			"Leg Curl Machine",
 			"Lie face-down with the pad above the ankles and curl the heels toward the hips.",
 			"gym",
 		),
 		variant(
+			"seated-leg-curl",
 			"Seated Leg Curl",
+			"leg-curl-machine",
 			"Leg Curl Machine",
 			"Set the thigh pad and curl the lower legs while keeping the hips supported.",
 			"gym",
 		),
 	]),
-	base("Good Morning", "hinge", "Hamstrings", [
+	base("good-morning", "Good Morning", "hinge", "hinge", "hamstrings", "Hamstrings", [
 		variant(
+			"barbell-good-morning",
 			"Barbell Good Morning",
+			"barbell",
 			"Barbell",
 			"Place a light bar across the upper back and hinge with a braced, neutral spine.",
 			"gym",
 		),
 	]),
-	base("Nordic Curl", "hinge", "Hamstrings", [
+	base("nordic-curl", "Nordic Curl", "hinge", "hinge", "hamstrings", "Hamstrings", [
 		variant(
+			"bodyweight-nordic-curl",
 			"Bodyweight Nordic Curl",
+			null,
 			null,
 			"Anchor the ankles and lower the body slowly from a tall kneeling position.",
 			"gym_or_home",
 		),
 	]),
-	base("Step Up", "lunge", "Glutes", [
+	base("step-up", "Step Up", "lunge", "lunge", "glutes", "Glutes", [
 		variant(
+			"bodyweight-step-up",
 			"Bodyweight Step Up",
+			null,
 			null,
 			"Step onto a stable platform and stand tall through the working leg.",
 		),
 		variant(
+			"dumbbell-step-up",
 			"Dumbbell Step Up",
+			"dumbbell",
 			"Dumbbell",
 			"Step onto a stable platform while holding dumbbells at the sides.",
 		),
 	]),
-	base("Cable Kickback", "hinge", "Glutes", [
+	base("cable-kickback", "Cable Kickback", "hinge", "hinge", "glutes", "Glutes", [
 		variant(
+			"cable-glute-kickback",
 			"Cable Glute Kickback",
+			"cable-machine",
 			"Cable Machine",
 			"Attach an ankle strap low and extend the leg back without arching the lower back.",
 			"gym",
 		),
 		variant(
+			"band-glute-kickback",
 			"Band Glute Kickback",
+			"resistance-band",
 			"Resistance Band",
 			"Secure a band low and extend one leg back with the pelvis level.",
 		),
 	]),
-	base("Standing Calf Raise", "hinge", "Calves", [
+	base(
+		"standing-calf-raise",
+		"Standing Calf Raise",
+		"hinge",
+		"hinge",
+		"calves",
+		"Calves",
+		[
+			variant(
+				"barbell-standing-calf-raise",
+				"Barbell Standing Calf Raise",
+				"barbell",
+				"Barbell",
+				"Stand securely with the bar supported and rise through the balls of both feet.",
+				"gym",
+			),
+			variant(
+				"smith-machine-calf-raise",
+				"Smith Machine Calf Raise",
+				"smith-machine",
+				"Smith Machine",
+				"Stand under the Smith bar and raise both heels through a controlled range.",
+				"gym",
+			),
+		],
+	),
+	base("seated-calf-raise", "Seated Calf Raise", "hinge", "hinge", "soleus", "Soleus", [
 		variant(
-			"Barbell Standing Calf Raise",
-			"Barbell",
-			"Stand securely with the bar supported and rise through the balls of both feet.",
-			"gym",
-		),
-		variant(
-			"Smith Machine Calf Raise",
-			"Smith Machine",
-			"Stand under the Smith bar and raise both heels through a controlled range.",
-			"gym",
-		),
-	]),
-	base("Seated Calf Raise", "hinge", "Soleus", [
-		variant(
+			"dumbbell-seated-calf-raise",
 			"Dumbbell Seated Calf Raise",
+			"dumbbell",
 			"Dumbbell",
 			"Sit with a dumbbell across the thigh and raise the heel while keeping the forefoot planted.",
 		),
 	]),
-	base("Plank", "carry", "Deep Core", [
+	base("plank", "Plank", "carry", "carry", "deep-core", "Deep Core", [
 		variant(
+			"bodyweight-forearm-plank",
 			"Bodyweight Forearm Plank",
+			null,
 			null,
 			"Support the body on the forearms and toes while keeping the trunk braced.",
 		),
 		variant(
+			"suspension-trainer-plank",
 			"Suspension Trainer Plank",
+			"suspension-trainer-trx",
 			"Suspension Trainer (TRX)",
 			"Place the feet in suspension straps and hold a straight, braced body.",
 		),
 	]),
-	base("Dead Bug", "rotation", "Deep Core", [
+	base("dead-bug", "Dead Bug", "rotation", "rotation", "deep-core", "Deep Core", [
 		variant(
+			"bodyweight-dead-bug",
 			"Bodyweight Dead Bug",
+			null,
 			null,
 			"Lie on the back and alternate lowering opposite limbs while keeping the ribs controlled.",
 		),
 		variant(
+			"band-resisted-dead-bug",
 			"Band-Resisted Dead Bug",
+			"resistance-band",
 			"Resistance Band",
 			"Anchor a band behind the shoulders and move opposite limbs without losing trunk position.",
 		),
 	]),
-	base("Hanging Knee Raise", "rotation", "Abs", [
+	base(
+		"hanging-knee-raise",
+		"Hanging Knee Raise",
+		"rotation",
+		"rotation",
+		"abs",
+		"Abs",
+		[
+			variant(
+				"pull-up-bar-hanging-knee-raise",
+				"Pull-up Bar Hanging Knee Raise",
+				"pull-up-bar",
+				"Pull-up Bar",
+				"Hang from a secure bar and raise the knees without swinging.",
+				"gym",
+			),
+		],
+	),
+	base("ab-rollout", "Ab Rollout", "rotation", "rotation", "abs", "Abs", [
 		variant(
-			"Pull-up Bar Hanging Knee Raise",
-			"Pull-up Bar",
-			"Hang from a secure bar and raise the knees without swinging.",
-			"gym",
-		),
-	]),
-	base("Ab Rollout", "rotation", "Abs", [
-		variant(
+			"ab-wheel-rollout",
 			"Ab Wheel Rollout",
+			"ab-wheel",
 			"Ab Wheel",
 			"Kneel behind the wheel and roll forward only as far as the trunk stays braced.",
 		),
 		variant(
+			"barbell-rollout",
 			"Barbell Rollout",
+			"barbell",
 			"Barbell",
 			"Kneel behind a lightly loaded barbell and roll forward with controlled trunk tension.",
 			"gym",
 		),
 	]),
-	base("Power Clean", "hinge", "Glutes", [
+	base("power-clean", "Power Clean", "hinge", "hinge", "glutes", "Glutes", [
 		variant(
+			"barbell-power-clean",
 			"Barbell Power Clean",
+			"barbell",
 			"Barbell",
 			"Start from the floor and drive the bar upward before receiving it in a partial squat.",
 			"gym",
 		),
 	]),
-	base("Kettlebell Swing", "hinge", "Glutes", [
+	base("kettlebell-swing", "Kettlebell Swing", "hinge", "hinge", "glutes", "Glutes", [
 		variant(
+			"two-hand-kettlebell-swing",
 			"Two-Hand Kettlebell Swing",
+			"kettlebell",
 			"Kettlebell",
 			"Hike the kettlebell and drive the hips to swing it to chest height.",
 		),
 	]),
-	base("Farmer Carry", "carry", "Forearms", [
+	base("farmer-carry", "Farmer Carry", "carry", "carry", "forearms", "Forearms", [
 		variant(
+			"dumbbell-farmer-carry",
 			"Dumbbell Farmer Carry",
+			"dumbbell",
 			"Dumbbell",
 			"Walk tall while carrying equal dumbbells with a steady, braced trunk.",
 		),
 		variant(
+			"kettlebell-farmer-carry",
 			"Kettlebell Farmer Carry",
+			"kettlebell",
 			"Kettlebell",
 			"Walk tall while carrying kettlebells at the sides with controlled steps.",
 		),
 	]),
-	base("Push Press", "push", "Front Delts", [
+	base("push-press", "Push Press", "push", "push", "front-delts", "Front Delts", [
 		variant(
+			"barbell-push-press",
 			"Barbell Push Press",
+			"barbell",
 			"Barbell",
 			"Dip and drive the bar overhead while keeping the trunk stacked.",
 			"gym",
 		),
 		variant(
+			"dumbbell-push-press",
 			"Dumbbell Push Press",
+			"dumbbell",
 			"Dumbbell",
 			"Use a shallow leg drive to press dumbbells overhead with control.",
 		),
 	]),
-	base("Dynamic March", "gait", "Deep Core", [
+	base("dynamic-march", "Dynamic March", "gait", "gait", "deep-core", "Deep Core", [
 		variant(
+			"bodyweight-dynamic-march",
 			"Bodyweight Dynamic March",
+			null,
 			null,
 			"March in place with tall posture and deliberate arm and knee action.",
 			"gym_or_home",
 		),
 	]),
-	base("Jumping Jack", "gait", "Calves", [
+	base("jumping-jack", "Jumping Jack", "gait", "gait", "calves", "Calves", [
 		variant(
+			"bodyweight-jumping-jack",
 			"Bodyweight Jumping Jack",
+			null,
 			null,
 			"Jump the feet apart and together while lifting and lowering the arms.",
 			"gym_or_home",
 		),
 	]),
-	base("Inchworm", "hinge", "Hamstrings", [
+	base("inchworm", "Inchworm", "hinge", "hinge", "hamstrings", "Hamstrings", [
 		variant(
+			"bodyweight-inchworm",
 			"Bodyweight Inchworm",
+			null,
 			null,
 			"Hinge to the floor, walk the hands to a plank, then return to standing.",
 			"gym_or_home",
 		),
 	]),
-	base("High Knees", "gait", "Quads", [
+	base("high-knees", "High Knees", "gait", "gait", "quads", "Quads", [
 		variant(
+			"bodyweight-high-knees",
 			"Bodyweight High Knees",
+			null,
 			null,
 			"Run in place while lifting the knees comfortably and keeping the trunk tall.",
 			"gym_or_home",
 		),
 	]),
-	base("Arm Circles", "push", "Front Delts", [
+	base("arm-circles", "Arm Circles", "push", "push", "front-delts", "Front Delts", [
 		variant(
+			"bodyweight-arm-circles",
 			"Bodyweight Arm Circles",
+			null,
 			null,
 			"Stand tall and make controlled circles with the arms through a comfortable range.",
 			"gym_or_home",
 		),
 	]),
-	base("World's Greatest Stretch", "lunge", "Glute Med", [
+	base(
+		"world-s-greatest-stretch",
+		"World's Greatest Stretch",
+		"lunge",
+		"lunge",
+		"glute-med",
+		"Glute Med",
+		[
+			variant(
+				"bodyweight-world-s-greatest-stretch",
+				"Bodyweight World's Greatest Stretch",
+				null,
+				null,
+				"Step into a lunge, rotate toward the forward leg, and move through each side slowly.",
+				"gym_or_home",
+			),
+		],
+	),
+	base("cat-cow", "Cat-Cow", "rotation", "rotation", "lower-back", "Lower Back", [
 		variant(
-			"Bodyweight World's Greatest Stretch",
-			null,
-			"Step into a lunge, rotate toward the forward leg, and move through each side slowly.",
-			"gym_or_home",
-		),
-	]),
-	base("Cat-Cow", "rotation", "Lower Back", [
-		variant(
+			"bodyweight-cat-cow",
 			"Bodyweight Cat-Cow",
+			null,
 			null,
 			"On hands and knees, alternate gentle spinal flexion and extension with the breath.",
 			"gym_or_home",
 		),
 	]),
-	base("Thoracic Rotation", "rotation", "Upper Back", [
+	base(
+		"thoracic-rotation",
+		"Thoracic Rotation",
+		"rotation",
+		"rotation",
+		"upper-back",
+		"Upper Back",
+		[
+			variant(
+				"quadruped-thoracic-rotation",
+				"Quadruped Thoracic Rotation",
+				null,
+				null,
+				"From hands and knees, rotate one arm toward the ceiling without shifting the hips.",
+				"gym_or_home",
+			),
+		],
+	),
+	base(
+		"90-90-hip-switch",
+		"90/90 Hip Switch",
+		"rotation",
+		"rotation",
+		"glute-med",
+		"Glute Med",
+		[
+			variant(
+				"bodyweight-90-90-hip-switch",
+				"Bodyweight 90/90 Hip Switch",
+				null,
+				null,
+				"Sit with both knees bent and rotate between sides while keeping the movement controlled.",
+				"gym_or_home",
+			),
+		],
+	),
+	base("ankle-rock", "Ankle Rock", "lunge", "lunge", "calves", "Calves", [
 		variant(
-			"Quadruped Thoracic Rotation",
-			null,
-			"From hands and knees, rotate one arm toward the ceiling without shifting the hips.",
-			"gym_or_home",
-		),
-	]),
-	base("90/90 Hip Switch", "rotation", "Glute Med", [
-		variant(
-			"Bodyweight 90/90 Hip Switch",
-			null,
-			"Sit with both knees bent and rotate between sides while keeping the movement controlled.",
-			"gym_or_home",
-		),
-	]),
-	base("Ankle Rock", "lunge", "Calves", [
-		variant(
+			"bodyweight-ankle-rock",
 			"Bodyweight Ankle Rock",
+			null,
 			null,
 			"With the foot planted, glide the knee forward over the toes without lifting the heel.",
 			"gym_or_home",
 		),
 	]),
-	base("Hamstring Stretch", "hinge", "Hamstrings", [
+	base(
+		"hamstring-stretch",
+		"Hamstring Stretch",
+		"hinge",
+		"hinge",
+		"hamstrings",
+		"Hamstrings",
+		[
+			variant(
+				"standing-hamstring-stretch",
+				"Standing Hamstring Stretch",
+				null,
+				null,
+				"Place one heel forward and hinge gently until a comfortable hamstring stretch is felt.",
+				"gym_or_home",
+			),
+		],
+	),
+	base("couch-stretch", "Couch Stretch", "lunge", "lunge", "quads", "Quads", [
 		variant(
-			"Standing Hamstring Stretch",
-			null,
-			"Place one heel forward and hinge gently until a comfortable hamstring stretch is felt.",
-			"gym_or_home",
-		),
-	]),
-	base("Couch Stretch", "lunge", "Quads", [
-		variant(
+			"bodyweight-couch-stretch",
 			"Bodyweight Couch Stretch",
+			null,
 			null,
 			"Place the shin near a wall or couch and settle into a controlled half-kneeling stretch.",
 			"home",
 		),
 	]),
-	base("Child's Pose", "hinge", "Lower Back", [
+	base("child-s-pose", "Child's Pose", "hinge", "hinge", "lower-back", "Lower Back", [
 		variant(
+			"bodyweight-child-s-pose",
 			"Bodyweight Child's Pose",
+			null,
 			null,
 			"Sit the hips toward the heels and reach the arms forward while breathing comfortably.",
 			"gym_or_home",
 		),
 	]),
-	base("Shoulder CAR", "rotation", "Front Delts", [
+	base(
+		"shoulder-car",
+		"Shoulder CAR",
+		"rotation",
+		"rotation",
+		"front-delts",
+		"Front Delts",
+		[
+			variant(
+				"bodyweight-shoulder-car",
+				"Bodyweight Shoulder CAR",
+				null,
+				null,
+				"Move one arm slowly through its largest comfortable circle while keeping the ribs controlled.",
+				"gym_or_home",
+			),
+		],
+	),
+	base(
+		"cooldown-breathing",
+		"Cooldown Breathing",
+		"rotation",
+		"rotation",
+		"deep-core",
+		"Deep Core",
+		[
+			variant(
+				"bodyweight-cooldown-breathing",
+				"Bodyweight Cooldown Breathing",
+				null,
+				null,
+				"Settle into a comfortable position and use slow, relaxed breaths to bring the session down gradually.",
+				"gym_or_home",
+			),
+		],
+	),
+	base("running", "Running", "gait", "gait", "calves", "Calves", [
 		variant(
-			"Bodyweight Shoulder CAR",
-			null,
-			"Move one arm slowly through its largest comfortable circle while keeping the ribs controlled.",
-			"gym_or_home",
-		),
-	]),
-	base("Cooldown Breathing", "rotation", "Deep Core", [
-		variant(
-			"Bodyweight Cooldown Breathing",
-			null,
-			"Settle into a comfortable position and use slow, relaxed breaths to bring the session down gradually.",
-			"gym_or_home",
-		),
-	]),
-	base("Running", "gait", "Calves", [
-		variant(
+			"outdoor-running",
 			"Outdoor Running",
+			null,
 			null,
 			"Run on a clear outdoor route at a pace suited to the session.",
 			"outdoors",
 		),
 		variant(
+			"treadmill-running",
 			"Treadmill Running",
+			"treadmill",
 			"Treadmill",
 			"Run on a treadmill with a gradual warm-up and a pace suited to the session.",
 			"treadmill",
 		),
 		variant(
+			"track-running",
 			"Track Running",
+			null,
 			null,
 			"Run on a marked track and adjust pace or laps to the session goal.",
 			"track",
 		),
 		variant(
+			"beach-running",
 			"Beach Running",
+			null,
 			null,
 			"Run on a safe, firm section of beach and adjust pace for the surface.",
 			"beach",
 		),
 	]),
-	base("Walking", "gait", "Calves", [
+	base("walking", "Walking", "gait", "gait", "calves", "Calves", [
 		variant(
+			"outdoor-walking",
 			"Outdoor Walking",
+			null,
 			null,
 			"Walk outdoors at a comfortable, steady pace.",
 			"outdoors",
 		),
 		variant(
+			"treadmill-walking",
 			"Treadmill Walking",
+			"treadmill",
 			"Treadmill",
 			"Walk on a treadmill at a pace that allows controlled posture.",
 			"treadmill",
 		),
 		variant(
+			"incline-treadmill-walking",
 			"Incline Treadmill Walking",
+			"treadmill",
 			"Treadmill",
 			"Walk on a treadmill with a moderate incline and controlled, even steps.",
 			"treadmill",
 		),
 	]),
-	base("Easy Jog", "gait", "Calves", [
+	base("easy-jog", "Easy Jog", "gait", "gait", "calves", "Calves", [
 		variant(
+			"outdoor-easy-jog",
 			"Outdoor Easy Jog",
+			null,
 			null,
 			"Jog outdoors at an easy conversational pace.",
 			"outdoors",
 		),
 		variant(
+			"track-easy-jog",
 			"Track Easy Jog",
+			null,
 			null,
 			"Jog on a track at an easy conversational pace.",
 			"track",
 		),
 	]),
-	base("Recovery Walk", "gait", "Calves", [
+	base("recovery-walk", "Recovery Walk", "gait", "gait", "calves", "Calves", [
 		variant(
+			"outdoor-recovery-walk",
 			"Outdoor Recovery Walk",
+			null,
 			null,
 			"Walk outdoors at an easy pace that supports active recovery.",
 			"outdoors",
 		),
 		variant(
+			"treadmill-recovery-walk",
 			"Treadmill Recovery Walk",
+			"treadmill",
 			"Treadmill",
 			"Walk on a treadmill at an easy pace with relaxed, controlled steps.",
 			"treadmill",
 		),
 	]),
-	base("Cycling", "gait", "Quads", [
+	base("cycling", "Cycling", "gait", "gait", "quads", "Quads", [
 		variant(
+			"stationary-bike-cycling",
 			"Stationary Bike Cycling",
+			"stationary-bike",
 			"Stationary Bike",
 			"Adjust the saddle and pedal smoothly at a sustainable effort.",
 			"gym",
 		),
 		variant(
+			"outdoor-cycling",
 			"Outdoor Cycling",
+			null,
 			null,
 			"Cycle on a clear outdoor route with a sustainable effort.",
 			"outdoors",
 		),
 	]),
-	base("Jump Rope", "gait", "Calves", [
+	base("jump-rope", "Jump Rope", "gait", "gait", "calves", "Calves", [
 		variant(
+			"jump-rope",
 			"Jump Rope",
+			"jump-rope",
 			"Jump Rope",
 			"Use small, elastic hops and turn the rope at a steady rhythm.",
 			"gym_or_home",
 		),
 	]),
-	base("Shuttle Run", "gait", "Quads", [
+	base("shuttle-run", "Shuttle Run", "gait", "gait", "quads", "Quads", [
 		variant(
+			"track-shuttle-run",
 			"Track Shuttle Run",
+			null,
 			null,
 			"Run between marked points on a track with controlled turns.",
 			"track",
 		),
 		variant(
+			"outdoor-shuttle-run",
 			"Outdoor Shuttle Run",
+			null,
 			null,
 			"Run between safe outdoor markers with controlled accelerations and turns.",
 			"outdoors",
 		),
 	]),
-	base("Elliptical Training", "gait", "Quads", [
+	base("elliptical-training", "Elliptical Training", "gait", "gait", "quads", "Quads", [
 		variant(
+			"machine-elliptical-training",
 			"Machine Elliptical Training",
+			"elliptical-trainer",
 			"Elliptical Trainer",
 			"Set a sustainable resistance and move smoothly through the elliptical stride.",
 			"gym",
 		),
 	]),
-	base("Rowing", "pull", "Quads", [
+	base("rowing", "Rowing", "pull", "pull", "quads", "Quads", [
 		variant(
+			"indoor-rowing-machine",
 			"Indoor Rowing Machine",
+			"rowing-machine",
 			"Rowing Machine",
 			"Drive with the legs, then open the hips and finish with the arms on each stroke.",
 			"gym",
 		),
 	]),
-	base("Balance Reach", "lunge", "Glute Med", [
+	base("balance-reach", "Balance Reach", "lunge", "lunge", "glute-med", "Glute Med", [
 		variant(
+			"single-leg-balance-reach",
 			"Single-Leg Balance Reach",
+			null,
 			null,
 			"Balance on one leg and reach the free leg or hands while keeping the pelvis level.",
 			"gym_or_home",
 		),
 	]),
-	base("Bear Crawl", "carry", "Deep Core", [
+	base("bear-crawl", "Bear Crawl", "carry", "carry", "deep-core", "Deep Core", [
 		variant(
+			"bodyweight-bear-crawl",
 			"Bodyweight Bear Crawl",
+			null,
 			null,
 			"Move on hands and feet with the knees hovering low and the trunk steady.",
 			"gym_or_home",

@@ -4,6 +4,11 @@
 
 Media helps people recognize training content; it does not decorate every available space. This guide defines the visual and operational standard for new catalog media. It applies to developers, administrators, and any future human-reviewed asset-generation work.
 
+For the Phase 5 AI-assisted candidate workflow, read this guide with the operational
+[AI media-generation design](./ai-media-generation.md). The design defines supported entities,
+prompt boundaries, review, provenance, and the rule that unapproved candidates never render to
+normal users.
+
 ## Core direction
 
 Use a restrained, editorial illustration language that belongs with Let’s Flex’s dark palette:

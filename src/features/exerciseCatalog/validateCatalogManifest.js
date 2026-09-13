@@ -9,6 +9,8 @@ const minimumPatternCounts = Object.freeze({
 	gait: 10,
 });
 
+const catalogKeyPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
 const normalizeName = (name) =>
 	name
 		.normalize("NFKD")
@@ -18,6 +20,100 @@ const normalizeName = (name) =>
 function assertNonEmptyString(value, label) {
 	if (typeof value !== "string" || value.trim() !== value || value.length === 0) {
 		throw new Error(`${label} must be a non-empty trimmed string`);
+	}
+}
+
+function assertCatalogKey(value, label) {
+	if (typeof value !== "string" || !catalogKeyPattern.test(value)) {
+		throw new Error(`${label} catalog key must be lowercase ASCII kebab-case`);
+	}
+}
+
+function assertUniqueCatalogKeys(items, label) {
+	const keys = new Set();
+	for (const item of items) {
+		assertCatalogKey(item.catalogKey, `${label} ${item.name ?? "entry"}`);
+		if (keys.has(item.catalogKey)) {
+			throw new Error(`Duplicate ${label} catalog key: ${item.catalogKey}`);
+		}
+		keys.add(item.catalogKey);
+	}
+}
+
+function assertCatalogVocabularyEntries(vocabulary) {
+	const sources = [
+		["movementPatterns", "movementPatterns"],
+		["muscles", "muscles"],
+		["equipment", "equipment"],
+	];
+
+	for (const [vocabularyName, entryName] of sources) {
+		const names = vocabulary[vocabularyName];
+		const entries = vocabulary.catalogEntries?.[entryName];
+		if (!Array.isArray(entries) || entries.length !== names.length) {
+			throw new Error(`${vocabularyName} catalog entries must match the vocabulary`);
+		}
+		assertUniqueCatalogKeys(entries, vocabularyName);
+		const entryNames = entries.map((entry) => entry.name);
+		assertUniqueNames(entries, vocabularyName);
+		if (entryNames.some((name, index) => name !== names[index])) {
+			throw new Error(
+				`${vocabularyName} catalog entries must preserve vocabulary order`,
+			);
+		}
+	}
+}
+
+function assertCatalogReferences(manifest, vocabulary) {
+	const movementPatternKeys = new Set(
+		vocabulary.catalogEntries.movementPatterns.map((entry) => entry.catalogKey),
+	);
+	const muscleKeys = new Set(
+		vocabulary.catalogEntries.muscles.map((entry) => entry.catalogKey),
+	);
+	const equipmentKeys = new Set(
+		vocabulary.catalogEntries.equipment.map((entry) => entry.catalogKey),
+	);
+
+	for (const exercise of manifest) {
+		assertCatalogKey(
+			exercise.movementPatternCatalogKey,
+			`${exercise.name} movement pattern`,
+		);
+		if (!movementPatternKeys.has(exercise.movementPatternCatalogKey)) {
+			throw new Error(
+				`Unknown movement pattern catalog key for ${exercise.name}: ${exercise.movementPatternCatalogKey}`,
+			);
+		}
+
+		for (const muscle of exercise.muscles ?? []) {
+			assertCatalogKey(muscle.catalogKey, `${exercise.name} muscle`);
+			if (!muscleKeys.has(muscle.catalogKey)) {
+				throw new Error(
+					`Unknown muscle catalog key for ${exercise.name}: ${muscle.catalogKey}`,
+				);
+			}
+		}
+
+		for (const exerciseVariant of exercise.variants ?? []) {
+			if (exerciseVariant.equipment === null) {
+				if (exerciseVariant.equipmentCatalogKey !== null) {
+					throw new Error(
+						`${exerciseVariant.name} must not have equipment catalog key without equipment`,
+					);
+				}
+				continue;
+			}
+			assertCatalogKey(
+				exerciseVariant.equipmentCatalogKey,
+				`${exerciseVariant.name} equipment`,
+			);
+			if (!equipmentKeys.has(exerciseVariant.equipmentCatalogKey)) {
+				throw new Error(
+					`Unknown equipment catalog key for ${exerciseVariant.name}: ${exerciseVariant.equipmentCatalogKey}`,
+				);
+			}
+		}
 	}
 }
 
@@ -59,6 +155,9 @@ export function validateCatalogManifest(manifest, vocabulary) {
 
 	assertUniqueNames(manifest, "base exercise");
 	assertUniqueNames(variants, "global variant");
+	assertUniqueCatalogKeys(manifest, "base exercise");
+	assertUniqueCatalogKeys(variants, "global variant");
+	assertCatalogVocabularyEntries(vocabulary);
 
 	if (variants.length < 100) {
 		throw new Error("Catalog must contain at least 100 global variants");
@@ -117,6 +216,8 @@ export function validateCatalogManifest(manifest, vocabulary) {
 			}
 		}
 	}
+
+	assertCatalogReferences(manifest, vocabulary);
 
 	for (const [pattern, count] of Object.entries(minimumPatternCounts)) {
 		if ((patternCounts.get(pattern) ?? 0) < count) {

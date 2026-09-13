@@ -6,10 +6,16 @@ import { getSessionState } from "../middleware/getSessionState.js";
 import { getUrlAndPath } from "../middleware/getUrlAndPath.js";
 import validateRequestBody from "../middleware/validateRequestBody.js";
 import validateRequestQuery from "../middleware/validateRequestQuery.js";
+import validateRequestParams from "../middleware/validateRequestParams.js";
 import {
+	approveMediaGenerationCandidateBodySchema,
 	existingMediaBodySchema,
+	generateMediaBodySchema,
+	mediaGenerationCandidateParamsSchema,
 	mediaManagementQuerySchema,
 	mediaUploadBodySchema,
+	regenerateMediaBodySchema,
+	rejectMediaGenerationCandidateBodySchema,
 	removeMediaBodySchema,
 } from "../validation/mediaManagementSchemas.js";
 
@@ -47,6 +53,45 @@ router.post(
 		mediaManagementController.showRemoveValidationErrors,
 	),
 	mediaManagementController.remove,
+);
+router.post(
+	"/generate",
+	validateRequestBody(
+		generateMediaBodySchema,
+		mediaManagementController.showGenerationValidationErrors,
+	),
+	mediaManagementController.generate,
+);
+router.post(
+	"/regenerate",
+	validateRequestBody(
+		regenerateMediaBodySchema,
+		mediaManagementController.showGenerationValidationErrors,
+	),
+	mediaManagementController.regenerate,
+);
+router.get(
+	"/candidates/:candidateId/file",
+	validateRequestParams(mediaGenerationCandidateParamsSchema),
+	mediaManagementController.previewCandidate,
+);
+router.post(
+	"/candidates/:candidateId/reject",
+	validateRequestParams(mediaGenerationCandidateParamsSchema),
+	validateRequestBody(
+		rejectMediaGenerationCandidateBodySchema,
+		mediaManagementController.showRejectValidationErrors,
+	),
+	mediaManagementController.rejectCandidate,
+);
+router.post(
+	"/candidates/:candidateId/approve",
+	validateRequestParams(mediaGenerationCandidateParamsSchema),
+	validateRequestBody(
+		approveMediaGenerationCandidateBodySchema,
+		mediaManagementController.showApprovalValidationErrors,
+	),
+	mediaManagementController.approveCandidate,
 );
 
 export default router;

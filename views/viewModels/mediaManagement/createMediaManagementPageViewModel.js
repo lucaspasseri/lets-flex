@@ -90,6 +90,7 @@ export default function createMediaManagementPageViewModel({
 		),
 	}));
 	const selectedSource = selected ? sourceLabel(t, selected.effectiveSource) : null;
+	const generationCandidate = selected?.generationCandidate ?? null;
 
 	return {
 		page,
@@ -140,6 +141,22 @@ export default function createMediaManagementPageViewModel({
 						entityValue: selected.entity_id,
 						entityReference: selectedEntityValue,
 						canRemove: Boolean(direct),
+						canGenerate: selected.canGenerate !== false,
+						generationCandidate: generationCandidate
+							? {
+									id: generationCandidate.id,
+									previewSrc: `/admin/media/candidates/${generationCandidate.id}/file`,
+									alt: t("mediaManagement.candidateAlt", {
+										name: selected.name,
+										defaultValue: `Generated candidate for ${selected.name}`,
+									}),
+									width: generationCandidate.width,
+									height: generationCandidate.height,
+									provider: generationCandidate.provider,
+									model: generationCandidate.provider_model,
+									preset: generationCandidate.preset,
+								}
+							: null,
 					}
 				: null,
 			assets: data.assets.map((asset) => {
@@ -179,6 +196,18 @@ export default function createMediaManagementPageViewModel({
 				},
 				remove: {
 					errors: formState?.kind === "remove" ? formState.errors : null,
+				},
+				generation: {
+					values: { refinement: fieldValue(formState, "refinement", "") },
+					errors: formState?.kind === "generation" ? formState.errors : null,
+					nonce: data.generationNonce ?? "",
+				},
+				approval: {
+					values: {
+						altTextEn: fieldValue(formState, "altTextEn", ""),
+						altTextPtBr: fieldValue(formState, "altTextPtBr", ""),
+					},
+					errors: formState?.kind === "approval" ? formState.errors : null,
 				},
 			},
 			sourceLabels: {

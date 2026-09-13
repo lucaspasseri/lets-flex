@@ -4,6 +4,8 @@ import {
 	findMediaManagementEntity,
 	findMediaManagementEntityOptions,
 } from "./mediaManagementRepository.js";
+import { findLatestPendingMediaGenerationCandidate } from "./mediaGenerationCandidates.js";
+import { supportsMediaGenerationEntity } from "./mediaGenerationPolicy.js";
 import { resolveEntityMediaFromAssignments } from "./resolveEntityMedia.js";
 
 /** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
@@ -67,7 +69,13 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 			? [{ entityType: "movement_pattern", entityId: selected.movement_pattern_id }]
 			: []),
 	];
-	const assignments = await findPrimaryMediaAssignments(candidates, db);
+	const [assignments, generationCandidate] = await Promise.all([
+		findPrimaryMediaAssignments(candidates, db),
+		findLatestPendingMediaGenerationCandidate(
+			{ entityType: selected.entity_type, entityId: selected.entity_id },
+			db,
+		),
+	]);
 	const request = {
 		entityType: selected.entity_type,
 		entityId: selected.entity_id,
@@ -99,6 +107,7 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 		search: normalizedSearch,
 		selected: {
 			...selected,
+			canGenerate: supportsMediaGenerationEntity(selected.entity_type),
 			request,
 			directAssignment,
 			effectiveMedia,
@@ -109,6 +118,7 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 				en: directAssignment?.alt_text_en ?? null,
 				"pt-BR": directAssignment?.alt_text_pt_br ?? null,
 			},
+			generationCandidate,
 		},
 	};
 }

@@ -74,7 +74,9 @@ test("media management view renders shared controls, CSRF fields, and direct sta
 	assert.match(html, /href="\/admin\/media\?entity=exercise%3A42(?:&amp;|")/);
 	assert.match(html, /name="media" type="file"/);
 	assert.match(html, /accept="image\/png,image\/jpeg,image\/webp"/);
-	assert.equal((html.match(/name="_csrf"/g) ?? []).length, 3);
+	assert.equal((html.match(/name="_csrf"/g) ?? []).length, 4);
+	assert.match(html, /Generate private candidate/);
+	assert.match(html, /name="requestNonce"/);
 	assert.match(html, /This entity uses its own primary media assignment\./);
 	assert.match(
 		html,
@@ -87,6 +89,64 @@ test("media management view renders shared controls, CSRF fields, and direct sta
 	assert.match(html, /for="upload-alt-en"/);
 	assert.match(html, /for="existing-alt-pt-br"/);
 	assert.match(html, /#7 · Bench press/);
+});
+
+test("media management does not offer AI generation for muscles", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: {
+			...baseData,
+			selected: selectedData({
+				entity_type: "muscle",
+				entity_id: 14,
+				name: "Triceps brachii",
+				canGenerate: false,
+			}),
+		},
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(html, /AI generation is unavailable for muscles\./);
+	assert.match(
+		html,
+		/Generated anatomy is outside this workflow’s reliability boundary\./,
+	);
+	assert.doesNotMatch(html, /action="\/admin\/media\/generate"/);
+	assert.doesNotMatch(html, /name="requestNonce"/);
+});
+
+test("media management compares a private pending candidate without exposing it as public media", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: {
+			...baseData,
+			selected: selectedData({
+				generationCandidate: {
+					id: 91,
+					width: 1536,
+					height: 1024,
+					provider: "openai",
+					provider_model: "gpt-image-2.5-flare",
+					preset: "exercise-editorial",
+				},
+			}),
+		},
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(html, /Review generated candidate/);
+	assert.match(html, /src="\/admin\/media\/candidates\/91\/file"/);
+	assert.match(html, /Current active media/);
+	assert.match(html, /Reject and remove candidate/);
+	assert.match(html, /Generate replacement candidate/);
+	assert.match(html, /action="\/admin\/media\/regenerate"/);
+	assert.match(html, /Approve and assign/);
+	assert.match(html, /name="altTextEn"/);
+	assert.match(html, /name="altTextPtBr"/);
+	assert.match(html, /previous asset remains reusable/i);
+	assert.doesNotMatch(html, /\/media\/uploads\/91/);
 });
 
 test("media management view explains inherited media and hides removal when no direct assignment exists", async () => {

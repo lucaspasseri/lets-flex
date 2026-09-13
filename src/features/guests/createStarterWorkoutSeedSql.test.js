@@ -12,31 +12,31 @@ test("starter workout is a short ordered full-body catalog sequence", () => {
 	assert.deepEqual(starterWorkoutManifest.steps, [
 		{
 			name: "Box squats",
-			variantName: "Bodyweight Box Squat",
+			variantCatalogKey: "bodyweight-box-squat",
 			sets: 3,
 			reps: 10,
 		},
 		{
 			name: "Push ups",
-			variantName: "Bodyweight Push Up",
+			variantCatalogKey: "bodyweight-push-up",
 			sets: 3,
 			reps: 10,
 		},
 		{
 			name: "One-arm rows",
-			variantName: "One-Arm Dumbbell Row",
+			variantCatalogKey: "one-arm-dumbbell-row",
 			sets: 3,
 			reps: 10,
 		},
 		{
 			name: "Glute bridges",
-			variantName: "Bodyweight Glute Bridge",
+			variantCatalogKey: "bodyweight-glute-bridge",
 			sets: 3,
 			reps: 12,
 		},
 	]);
 	assert.equal(
-		new Set(starterWorkoutManifest.steps.map((step) => step.variantName)).size,
+		new Set(starterWorkoutManifest.steps.map((step) => step.variantCatalogKey)).size,
 		4,
 	);
 	assert.match(starterWorkoutSeedSql, /starter\.step_order/);
@@ -49,24 +49,27 @@ test("starter seed rejects unknown and duplicate catalog variants", () => {
 			...starterWorkoutManifest.steps.slice(0, 3),
 			{
 				...starterWorkoutManifest.steps[3],
-				variantName: "Imaginary Exercise",
+				variantCatalogKey: "imaginary-exercise",
 			},
 		],
 	};
 	assert.throws(
 		() => createStarterWorkoutSeedSql(unknown, catalogManifest),
-		/Unknown starter workout variant/,
+		/Unknown starter workout variant catalog key/,
 	);
 
 	const duplicate = {
 		...starterWorkoutManifest,
 		steps: [
 			...starterWorkoutManifest.steps.slice(0, 3),
-			{ ...starterWorkoutManifest.steps[3], variantName: "Bodyweight Push Up" },
+			{
+				...starterWorkoutManifest.steps[3],
+				variantCatalogKey: "bodyweight-push-up",
+			},
 		],
 	};
 	assert.throws(
 		() => createStarterWorkoutSeedSql(duplicate, catalogManifest),
-		/Duplicate starter workout variant/,
+		/Duplicate starter workout variant catalog key/,
 	);
 });

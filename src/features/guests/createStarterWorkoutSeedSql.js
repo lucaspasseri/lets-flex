@@ -8,19 +8,23 @@ function validateStarterWorkout(manifest, catalog) {
 		throw new Error("Starter workout must contain four or five exercise steps");
 	}
 
-	const globalVariantNames = new Set(
+	const globalVariantCatalogKeys = new Set(
 		catalog.flatMap((exercise) =>
-			exercise.variants.map((exerciseVariant) => exerciseVariant.name),
+			exercise.variants.map((exerciseVariant) => exerciseVariant.catalogKey),
 		),
 	);
-	const selectedVariantNames = new Set();
+	const selectedVariantCatalogKeys = new Set();
 
 	for (const step of manifest.steps) {
-		if (!globalVariantNames.has(step.variantName)) {
-			throw new Error(`Unknown starter workout variant: ${step.variantName}`);
+		if (!globalVariantCatalogKeys.has(step.variantCatalogKey)) {
+			throw new Error(
+				`Unknown starter workout variant catalog key: ${step.variantCatalogKey}`,
+			);
 		}
-		if (selectedVariantNames.has(step.variantName)) {
-			throw new Error(`Duplicate starter workout variant: ${step.variantName}`);
+		if (selectedVariantCatalogKeys.has(step.variantCatalogKey)) {
+			throw new Error(
+				`Duplicate starter workout variant catalog key: ${step.variantCatalogKey}`,
+			);
 		}
 		if (!Number.isInteger(step.sets) || step.sets < 1) {
 			throw new Error(`Invalid starter workout sets: ${step.name}`);
@@ -28,7 +32,7 @@ function validateStarterWorkout(manifest, catalog) {
 		if (!Number.isInteger(step.reps) || step.reps < 1) {
 			throw new Error(`Invalid starter workout reps: ${step.name}`);
 		}
-		selectedVariantNames.add(step.variantName);
+		selectedVariantCatalogKeys.add(step.variantCatalogKey);
 	}
 }
 
@@ -41,7 +45,7 @@ export function createStarterWorkoutSeedSql(
 	const stepRows = manifest.steps
 		.map(
 			(step, index) =>
-				`(${sqlString(step.variantName)}, ${sqlString(step.name)}, ${step.sets}, ${step.reps}, ${index + 1})`,
+				`(${sqlString(step.variantCatalogKey)}, ${sqlString(step.name)}, ${step.sets}, ${step.reps}, ${index + 1})`,
 		)
 		.join(",\n");
 
@@ -62,14 +66,14 @@ SELECT
 	starter.step_order
 FROM (VALUES
 ${stepRows}
-) AS starter(variant_name, name, sets, reps, step_order)
+) AS starter(variant_catalog_key, name, sets, reps, step_order)
 JOIN sessions AS session
 	ON session.name = ${sqlString(manifest.sessionName)}
 	AND session.owner_user_id IS NULL
 	AND session.is_archived = FALSE
 JOIN step_types AS step_type ON step_type.name = 'exercise'
 JOIN exercise_variants AS variant
-	ON variant.name = starter.variant_name
+	ON variant.catalog_key = starter.variant_catalog_key
 	AND variant.owner_user_id IS NULL
 	AND variant.is_archived = FALSE;
 `;

@@ -17,6 +17,17 @@ const databaseIsSafe = (() => {
 })();
 const integration = databaseIsSafe ? describe : describe.skip;
 
+function generatedPngFixture() {
+	const buffer = Buffer.alloc(45);
+	Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(buffer);
+	buffer.writeUInt32BE(13, 8);
+	buffer.write("IHDR", 12, "ascii");
+	buffer.writeUInt32BE(1536, 16);
+	buffer.writeUInt32BE(1024, 20);
+	buffer.write("IEND", 37, "ascii");
+	return buffer;
+}
+
 integration("authentication and authorization", { concurrency: false }, () => {
 	let db;
 	let server;
@@ -26,6 +37,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	let passwordHash;
 	let passwordResetDeliveries;
 	let emailService;
+	let generationProviderRequests;
 
 	before(async () => {
 		process.env.DATABASE_URL = testDatabaseUrl;
@@ -38,11 +50,35 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		process.env.PASSWORD_RESET_TTL_MS = "1800000";
 		emailService = new FakeEmailService();
 		passwordResetDeliveries = emailService.deliveries;
+		generationProviderRequests = [];
 		passwordHash = await hashPassword("correct horse battery staple");
 		db = new Client({ connectionString: testDatabaseUrl });
 		await db.connect();
 		const { createApp } = await import("../../app.js");
-		server = createApp({ emailService }).listen(0, "127.0.0.1");
+		server = createApp({
+			emailService,
+			mediaGenerationDependencies: {
+				provider: {
+					async generate(input) {
+						generationProviderRequests.push(input);
+						return {
+							buffer: generatedPngFixture(),
+							mimeType: "image/png",
+							provider: "test-image-provider",
+							model: "test-image-model",
+						};
+					},
+				},
+				storage: {
+					async save() {
+						return {
+							storageKey: "http-generated-candidate.png",
+							async remove() {},
+						};
+					},
+				},
+			},
+		}).listen(0, "127.0.0.1");
 		await new Promise((resolve, reject) => {
 			server.once("listening", resolve);
 			server.once("error", reject);
@@ -124,6 +160,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 
 	beforeEach(async () => {
 		emailService.clear();
+		generationProviderRequests = [];
 		await db.query(schemaSql);
 		await db.query(seedSql);
 		await db.query(
@@ -2754,6 +2791,33 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		const standard = agent();
 		await login(standard);
 		assert.equal((await standard.request("/admin/media")).response.status, 403);
+		assert.equal(
+			(
+				await standard.request("/admin/media/generate", {
+					method: "POST",
+					form: {
+						entityType: "exercise",
+						entityId: "1",
+						requestNonce: "94c4ff6c-f2a3-431c-a26d-52f31f00bc17",
+					},
+				})
+			).response.status,
+			403,
+		);
+		assert.equal(
+			(
+				await standard.request("/admin/media/candidates/1/approve", {
+					method: "POST",
+					form: {
+						entityType: "exercise",
+						entityId: "1",
+						altTextEn: "Bench press",
+						altTextPtBr: "Supino reto",
+					},
+				})
+			).response.status,
+			403,
+		);
 
 		const guest = agent();
 		await enterGuest(guest);
@@ -2761,6 +2825,33 @@ integration("authentication and authorization", { concurrency: false }, () => {
 
 		const admin = agent();
 		await login(admin, "admin@example.com");
+		assert.equal(
+			(
+				await admin.request("/admin/media/generate", {
+					method: "POST",
+					form: {
+						entityType: "exercise",
+						entityId: "1",
+						requestNonce: "94c4ff6c-f2a3-431c-a26d-52f31f00bc17",
+					},
+				})
+			).response.status,
+			403,
+		);
+		assert.equal(
+			(
+				await admin.request("/admin/media/candidates/1/approve", {
+					method: "POST",
+					form: {
+						entityType: "exercise",
+						entityId: "1",
+						altTextEn: "Bench press",
+						altTextPtBr: "Supino reto",
+					},
+				})
+			).response.status,
+			403,
+		);
 		const records = (
 			await db.query(`
 				SELECT exercise.id, variant.id AS variant_id
@@ -2912,6 +3003,128 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		const emptyEntity = await admin.request(`/admin/media?entity=muscle:${muscle.id}`);
 		assert.equal(emptyEntity.response.status, 200);
 		assert.match(emptyEntity.text, /data-media-presentation="initial"/);
+
+		const reportedMuscle = (await db.query("SELECT id FROM muscles WHERE id = 14"))
+			.rows[0];
+		assert.ok(reportedMuscle, "the canonical catalog includes muscle #14");
+		const musclePage = await admin.request("/admin/media?entity=muscle:14");
+		assert.equal(musclePage.response.status, 200);
+		assert.doesNotMatch(musclePage.text, /action="\/admin\/media\/generate"/);
+		const requestNonce = "b2026505-81e9-4be5-9dd2-cddc773eaac1";
+		const sessionCookie = decodeURIComponent(admin.cookie());
+		const sessionId = sessionCookie.match(/lets_flex_session=s:([^.]*)/)?.[1];
+		assert.ok(sessionId, "admin session cookie should contain the session ID");
+		const sessionRow = (
+			await db.query(`SELECT sess FROM "session" WHERE sid = $1`, [sessionId])
+		).rows[0];
+		assert.ok(sessionRow, "admin session should be persisted");
+		sessionRow.sess.state ??= {};
+		sessionRow.sess.state.mediaGenerationNonces ??= {};
+		sessionRow.sess.state.mediaGenerationNonces["muscle:14"] = requestNonce;
+		await db.query(`UPDATE "session" SET sess = $2::json WHERE sid = $1`, [
+			sessionId,
+			JSON.stringify(sessionRow.sess),
+		]);
+		const candidatesBefore = (
+			await db.query(
+				"SELECT count(*)::int AS count FROM media_generation_candidates WHERE entity_type = 'muscle' AND entity_id = 14",
+			)
+		).rows[0].count;
+		const unsupportedGeneration = await admin.request("/admin/media/generate", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(musclePage.text),
+				entityType: "muscle",
+				entityId: "14",
+				requestNonce,
+				refinement: "",
+			},
+		});
+		assert.equal(unsupportedGeneration.response.status, 422);
+		assert.match(
+			unsupportedGeneration.text,
+			/AI generation supports exercises, global variants, equipment, and movement patterns\./,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM media_generation_candidates WHERE entity_type = 'muscle' AND entity_id = 14",
+				)
+			).rows[0].count,
+			candidatesBefore,
+		);
+
+		const equipment = (await db.query("SELECT id FROM equipments WHERE id = 14"))
+			.rows[0];
+		assert.ok(equipment, "the canonical catalog includes equipment #14");
+		const equipmentPage = await admin.request("/admin/media?entity=equipment:14");
+		assert.equal(equipmentPage.response.status, 200);
+		assert.match(equipmentPage.text, /action="\/admin\/media\/generate"/);
+		const equipmentNonce = equipmentPage.text.match(
+			/name="requestNonce" value="([^"]+)"/,
+		)?.[1];
+		assert.ok(equipmentNonce, "supported equipment should receive a generation nonce");
+		const generatedEquipment = await admin.request("/admin/media/generate", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(equipmentPage.text),
+				entityType: "equipment",
+				entityId: "14",
+				requestNonce: equipmentNonce,
+				refinement: "",
+			},
+		});
+		assert.equal(generatedEquipment.response.status, 302);
+		assert.match(
+			generatedEquipment.response.headers.get("location") ?? "",
+			/\/admin\/media\?entity=equipment%3A14&saved=generate/,
+		);
+		assert.equal(generationProviderRequests.length, 1);
+		assert.equal(generationProviderRequests[0]?.preset, "equipment-editorial");
+		assert.doesNotMatch(
+			generationProviderRequests[0]?.prompt ?? "",
+			/Optional visual preference/,
+		);
+		const generatedCandidate = (
+			await db.query(
+				`SELECT entity_type, entity_id, status, provider, provider_model, preset
+				FROM media_generation_candidates
+				WHERE entity_type = 'equipment' AND entity_id = 14`,
+			)
+		).rows[0];
+		assert.deepEqual(generatedCandidate, {
+			entity_type: "equipment",
+			entity_id: 14,
+			status: "pending_review",
+			provider: "test-image-provider",
+			provider_model: "test-image-model",
+			preset: "equipment-editorial",
+		});
+		const replayedGeneration = await admin.request("/admin/media/generate", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(equipmentPage.text),
+				entityType: "equipment",
+				entityId: "14",
+				requestNonce: equipmentNonce,
+				refinement: "",
+			},
+		});
+		assert.equal(replayedGeneration.response.status, 409);
+		assert.equal(generationProviderRequests.length, 1);
+		const secondEquipmentPage = await admin.request("/admin/media?entity=equipment:14");
+		const mismatchedGeneration = await admin.request("/admin/media/generate", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(secondEquipmentPage.text),
+				entityType: "equipment",
+				entityId: "14",
+				requestNonce: "a3d8b3fd-c01a-414d-a1fa-0d7d45eef005",
+				refinement: "",
+			},
+		});
+		assert.equal(mismatchedGeneration.response.status, 409);
+		assert.equal(generationProviderRequests.length, 1);
 	});
 
 	test("Library deletes only owned sessions and archives referenced templates", async () => {

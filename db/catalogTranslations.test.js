@@ -72,11 +72,15 @@ test("Brazilian Portuguese catalog translations are complete and global-only", (
 	assert.doesNotMatch(catalogTranslationPortugueseSeedSql, /setup_description/);
 	assert.match(
 		createPortugueseCatalogTranslationSeedSql(),
-		/\('Push Up', 'Flexão de braço'\)/,
+		/\('push-up', 'Flexão de braço'\)/,
 	);
 	assert.match(
 		catalogTranslationPortugueseSeedSql,
-		/\('World''s Greatest Stretch', 'Maior alongamento do mundo'\)/,
+		/\('world-s-greatest-stretch', 'Maior alongamento do mundo'\)/,
+	);
+	assert.match(
+		catalogTranslationPortugueseSeedSql,
+		/JOIN exercises ON exercises\.catalog_key = translations\.catalog_key/,
 	);
 });
 

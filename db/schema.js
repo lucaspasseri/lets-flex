@@ -1,8 +1,10 @@
 import { catalogTranslationSchemaSql } from "./catalogTranslationsSql.js";
+import { mediaGenerationSchemaSql } from "./mediaGenerationSql.js";
 import { mediaSchemaSql } from "./mediaSql.js";
 
 export const schemaSql = `
 DROP TABLE IF EXISTS "session" CASCADE;
+DROP TABLE IF EXISTS media_generation_candidates CASCADE;
 DROP TABLE IF EXISTS entity_media CASCADE;
 DROP TABLE IF EXISTS media_asset_alt_texts CASCADE;
 DROP TABLE IF EXISTS media_assets CASCADE;
@@ -163,31 +165,45 @@ CREATE TABLE step_types (
 
 CREATE TABLE movement_patterns (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	catalog_key VARCHAR(100) NOT NULL UNIQUE,
 	name VARCHAR NOT NULL UNIQUE,
-	notes TEXT
+	notes TEXT,
+	CONSTRAINT movement_patterns_catalog_key_format
+		CHECK (catalog_key ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
 
 CREATE TABLE equipments (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	catalog_key VARCHAR(100) NOT NULL UNIQUE,
 	name VARCHAR NOT NULL,
-	category VARCHAR
+	category VARCHAR,
+	CONSTRAINT equipments_catalog_key_format
+		CHECK (catalog_key ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
 
 CREATE TABLE exercises (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	catalog_key VARCHAR(150),
 	name VARCHAR NOT NULL,
 	movement_pattern_id INTEGER REFERENCES movement_patterns(id),
 	is_archived BOOLEAN NOT NULL DEFAULT FALSE,
 	created_by_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+	CONSTRAINT exercises_catalog_key_format
+		CHECK (catalog_key IS NULL OR catalog_key ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
+
+CREATE UNIQUE INDEX exercises_catalog_key_unique
+ON exercises (catalog_key)
+WHERE catalog_key IS NOT NULL;
 
 CREATE TABLE exercise_variants (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	exercise_id INTEGER NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
 	owner_user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
 	equipment_id INTEGER REFERENCES equipments(id) ON DELETE SET NULL,
+	catalog_key VARCHAR(150),
 	name VARCHAR NOT NULL,
 	setup_description TEXT,
 	environment VARCHAR,
@@ -195,7 +211,9 @@ CREATE TABLE exercise_variants (
 	is_archived BOOLEAN NOT NULL DEFAULT FALSE,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-	CONSTRAINT exercise_variants_trimmed_name CHECK (name = BTRIM(name) AND name <> '')
+	CONSTRAINT exercise_variants_trimmed_name CHECK (name = BTRIM(name) AND name <> ''),
+	CONSTRAINT exercise_variants_catalog_key_format
+		CHECK (catalog_key IS NULL OR catalog_key ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
 
 CREATE UNIQUE INDEX exercise_variants_private_name_unique
@@ -205,6 +223,10 @@ WHERE owner_user_id IS NOT NULL;
 CREATE UNIQUE INDEX exercise_variants_global_name_unique
 ON exercise_variants (exercise_id, LOWER(name))
 WHERE owner_user_id IS NULL;
+
+CREATE UNIQUE INDEX exercise_variants_catalog_key_unique
+ON exercise_variants (catalog_key)
+WHERE catalog_key IS NOT NULL;
 
 CREATE INDEX exercise_variants_owner_idx
 ON exercise_variants (owner_user_id, exercise_id);
@@ -347,10 +369,13 @@ CREATE TABLE workout_set_logs (
 
 CREATE TABLE muscles (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	catalog_key VARCHAR(100) NOT NULL UNIQUE,
 	common_name VARCHAR NOT NULL,
 	scientific_name VARCHAR,
 	body_region VARCHAR,
-	reference_url VARCHAR
+	reference_url VARCHAR,
+	CONSTRAINT muscles_catalog_key_format
+		CHECK (catalog_key ~ '^[a-z0-9]+(-[a-z0-9]+)*$')
 );
 
 CREATE TABLE muscle_roles (
@@ -377,6 +402,8 @@ CREATE TABLE exercise_muscles (
 );
 
 ${mediaSchemaSql}
+
+${mediaGenerationSchemaSql}
 
 ${catalogTranslationSchemaSql}
 
