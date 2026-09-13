@@ -155,3 +155,27 @@ test("malformed optional alt text does not crash the resolver", async () => {
 
 	assert.equal(media.alt, "Bench Press image");
 });
+
+test("localized alt text prefers the requested locale and falls back to English", async () => {
+	const localizedAsset = {
+		...asset,
+		entity_type: "exercise",
+		entity_id: 9,
+		alt_text: null,
+		alt_text_en: "Bench press illustration",
+		alt_text_pt_br: "Ilustração de supino",
+	};
+	const db = fakeDatabase([localizedAsset]);
+
+	const portuguese = await resolveEntityMedia(
+		{ entityType: "exercise", entityId: 9, label: "Supino", locale: "pt-BR" },
+		/** @type {any} */ (db),
+	);
+	const missingPortuguese = await resolveEntityMedia(
+		{ entityType: "exercise", entityId: 9, label: "Supino", locale: "pt-BR" },
+		/** @type {any} */ (fakeDatabase([{ ...localizedAsset, alt_text_pt_br: null }])),
+	);
+
+	assert.equal(portuguese.alt, "Ilustração de supino");
+	assert.equal(missingPortuguese.alt, "Bench press illustration");
+});

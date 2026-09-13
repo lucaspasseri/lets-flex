@@ -10,6 +10,8 @@ test("media schema uses reusable assets and explicit supported entity assignment
 	assert.match(mediaSchemaSql, /width INTEGER NOT NULL/);
 	assert.match(mediaSchemaSql, /height INTEGER NOT NULL/);
 	assert.match(mediaSchemaSql, /REFERENCES media_assets\(id\)/);
+	assert.match(mediaSchemaSql, /CREATE TABLE IF NOT EXISTS media_asset_alt_texts/);
+	assert.match(mediaSchemaSql, /locale IN \('en', 'pt-BR'\)/);
 	assert.match(mediaSchemaSql, /UNIQUE \(entity_type, entity_id, role\)/);
 	assert.match(
 		mediaSchemaSql,

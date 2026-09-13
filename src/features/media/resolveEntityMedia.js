@@ -117,7 +117,10 @@ function toResolvedMedia(asset, request, matchedEntityType, fallbackType, isFall
 
 	return {
 		src: asset.storage_key,
-		alt: asset.alt_text?.trim() || label + " image",
+		alt:
+			localizedAltText(asset, request.locale) ||
+			asset.alt_text?.trim() ||
+			label + " image",
 		width: asset.width,
 		height: asset.height,
 		aspectRatio: asset.width / asset.height,
@@ -131,6 +134,20 @@ function toResolvedMedia(asset, request, matchedEntityType, fallbackType, isFall
 		matchedId: asset.entity_id,
 		isFallback,
 	};
+}
+
+/**
+ * @param {Record<string, any>} asset
+ * @param {"en" | "pt-BR" | undefined} locale
+ * @returns {string | null}
+ */
+function localizedAltText(asset, locale) {
+	const preferred = locale === "pt-BR" ? asset.alt_text_pt_br : asset.alt_text_en;
+	const fallbackValues = locale === "pt-BR" ? [asset.alt_text_en] : [];
+	for (const value of [preferred, ...fallbackValues]) {
+		if (typeof value === "string" && value.trim() !== "") return value.trim();
+	}
+	return null;
 }
 
 /** @param {string} entityType @returns {"base-exercise" | "movement-pattern" | "environment" | "category" | "initial"} */

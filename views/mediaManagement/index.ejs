@@ -1,0 +1,146 @@
+<%
+	const translate = typeof locals?.t === "function"
+		? locals.t
+		: (_key, options = {}) => String(options.defaultValue ?? "");
+	const management = locals.mediaManagement;
+	const selected = management.selected;
+	const uploadErrors = management.forms.upload.errors?.fieldErrors ?? {};
+	const uploadFormErrors = management.forms.upload.errors?.formErrors ?? [];
+	const existingErrors = management.forms.existing.errors?.fieldErrors ?? {};
+	const existingFormErrors = management.forms.existing.errors?.formErrors ?? [];
+	const removeFormErrors = management.forms.remove?.errors?.formErrors ?? [];
+%>
+
+<main class="main media-management">
+	<%- include("../partials/shared/components/pageHeading", { heading: management.heading }) %>
+	<%- include("../partials/shared/components/pageFeedback", { pageFeedback: management.pageFeedback }) %>
+
+	<aside class="media-management__scope" aria-label="<%= translate("mediaManagement.scopeLabel", { defaultValue: "Media management scope" }) %>">
+		<span class="media-management__scope-marker" aria-hidden="true">!</span>
+		<p><%= management.scopeDescription %></p>
+		<a href="/admin/library/exercises"><%= translate("mediaManagement.backToCatalog", { defaultValue: "Back to exercise catalog" }) %></a>
+	</aside>
+
+	<section class="media-management__selector" aria-labelledby="media-selector-heading">
+		<div class="media-management__section-heading">
+			<div>
+				<p class="media-management__eyebrow"><%= translate("mediaManagement.selectorEyebrow", { defaultValue: "Choose a record" }) %></p>
+				<h2 id="media-selector-heading"><%= translate("mediaManagement.selectorHeading", { defaultValue: "Select catalog entity" }) %></h2>
+			</div>
+		</div>
+		<form class="media-management__selector-form" method="GET" action="/admin/media">
+			<div class="media-management__selector-fields">
+				<div class="form-field">
+					<label class="form-field__label" for="media-entity-type"><span><%= translate("mediaManagement.entityTypeLabel", { defaultValue: "Entity type" }) %></span><span class="form-field__requirement"><%= translate("form.optional", { defaultValue: "Optional" }) %></span></label>
+					<select class="form-select" id="media-entity-type" name="entityType">
+						<option value=""><%= translate("mediaManagement.allEntityTypes", { defaultValue: "All supported types" }) %></option>
+						<% management.selector.entityTypeOptions.forEach(option => { %><option value="<%= option.value %>"<%= option.value === management.selector.entityType ? " selected" : "" %>><%= option.label %></option><% }) %>
+					</select>
+				</div>
+				<div class="form-field">
+					<label class="form-field__label" for="media-search"><span><%= translate("mediaManagement.searchLabel", { defaultValue: "Search by name" }) %></span><span class="form-field__requirement"><%= translate("form.optional", { defaultValue: "Optional" }) %></span></label>
+					<input class="form-input" id="media-search" name="search" type="search" value="<%= management.selector.search %>" maxlength="100" placeholder="<%= translate("mediaManagement.searchPlaceholder", { defaultValue: "Search by name" }) %>" />
+				</div>
+			</div>
+			<div class="media-management__selector-actions"><a class="history-text-action" href="/admin/media"><%= translate("mediaManagement.clearFilters", { defaultValue: "Clear filters" }) %></a><button class="shared-button shared-button--primary" type="submit"><%= translate("mediaManagement.applyFilters", { defaultValue: "Filter entities" }) %></button></div>
+		</form>
+		<section class="media-management__results" aria-labelledby="media-results-heading">
+			<div class="media-management__section-heading">
+				<div>
+					<p class="media-management__eyebrow"><%= translate("mediaManagement.resultsEyebrow", { defaultValue: "Matching records" }) %></p>
+					<h3 id="media-results-heading"><%= translate("mediaManagement.resultsHeading", { defaultValue: "Choose an entity to open" }) %></h3>
+				</div>
+			</div>
+			<% if (management.selector.options.length) { %>
+				<ul class="media-management__result-list">
+					<% management.selector.options.forEach(option => { %><li><a class="media-management__result-link<%= option.value === management.selector.selected ? " is-selected" : "" %>" href="<%= option.href %>"<%= option.value === management.selector.selected ? ' aria-current="page"' : "" %>><span class="media-management__result-type"><%= option.typeLabel %></span><span class="media-management__result-name"><%= option.name %></span><span class="media-management__result-id">#<%= option.id %></span><% if (option.value === management.selector.selected) { %><span class="visually-hidden"> — <%= translate("mediaManagement.selectedEntity", { defaultValue: "Selected" }) %></span><% } %></a></li><% }) %>
+				</ul>
+			<% } else { %>
+				<div class="media-management__empty" role="status">
+					<strong><%= translate("mediaManagement.noEntityResults", { defaultValue: "No catalog entities match these filters." }) %></strong>
+					<p><%= translate("mediaManagement.noEntityResultsDescription", { defaultValue: "Try another name or choose All supported types. Select a result to open its media editor." }) %></p>
+				</div>
+			<% } %>
+		</section>
+	</section>
+
+	<% if (!selected) { %>
+		<div class="media-management__empty" role="status">
+			<strong><%= translate("mediaManagement.selectPrompt", { defaultValue: "Select an entity to review its media." }) %></strong>
+			<p><%= translate("mediaManagement.selectPromptDescription", { defaultValue: "The editor will show direct assignments, inherited media, fallback behavior, and available management actions." }) %></p>
+		</div>
+	<% } else { %>
+		<section class="media-management__entity" aria-labelledby="media-entity-heading">
+			<div class="media-management__entity-heading">
+				<div>
+					<p class="media-management__eyebrow"><%= selected.entityTypeLabel %> · #<%= selected.entityId %></p>
+					<h2 id="media-entity-heading"><%= selected.name %></h2>
+					<% if (selected.parentName) { %><p class="media-management__entity-parent"><%= translate("mediaManagement.baseExercise", { defaultValue: "Base exercise" }) %>: <%= selected.parentName %></p><% } %>
+				</div>
+				<span class="media-management__entity-status"><%= selected.effectiveSource %></span>
+			</div>
+			<div class="media-management__entity-grid">
+				<div class="media-management__preview-column">
+					<div class="media-management__preview" aria-label="<%= translate("mediaManagement.previewLabel", { defaultValue: "Current media preview" }) %>">
+						<%- include("../partials/shared/components/media", { media: selected.effectiveMedia, variant: "exercise" }) %>
+					</div>
+					<p class="media-management__preview-caption"><%= selected.effectiveSourceDetail %></p>
+				</div>
+				<dl class="media-management__facts">
+					<div><dt><%= translate("mediaManagement.sourceLabel", { defaultValue: "Source" }) %></dt><dd><%= selected.effectiveSource %></dd></div>
+					<div><dt><%= translate("mediaManagement.roleLabel", { defaultValue: "Role" }) %></dt><dd><%= translate("mediaManagement.primaryRole", { defaultValue: "Primary" }) %></dd></div>
+					<div><dt><%= translate("mediaManagement.mediaTypeLabel", { defaultValue: "Presentation" }) %></dt><dd><%= selected.effectiveMedia.mediaType === "image" ? translate("mediaManagement.image", { defaultValue: "Image" }) : translate("mediaManagement.initial", { defaultValue: "Initial fallback" }) %></dd></div>
+					<div><dt><%= translate("mediaManagement.dimensionsLabel", { defaultValue: "Dimensions" }) %></dt><dd><%= selected.effectiveMedia.width %> × <%= selected.effectiveMedia.height %></dd></div>
+				</dl>
+			</div>
+		</section>
+
+		<div class="media-management__editor-grid">
+			<section class="media-management__panel" aria-labelledby="media-upload-heading">
+				<div class="media-management__section-heading"><div><p class="media-management__eyebrow"><%= translate("mediaManagement.uploadEyebrow", { defaultValue: "New asset" }) %></p><h2 id="media-upload-heading"><%= selected.direct ? translate("mediaManagement.replaceHeading", { defaultValue: "Replace direct media" }) : translate("mediaManagement.uploadHeading", { defaultValue: "Add direct media" }) %></h2></div></div>
+				<p class="media-management__panel-description"><%= translate("mediaManagement.uploadDescription", { defaultValue: "Upload a validated PNG, JPEG, or WebP. The previous asset remains reusable when you replace an assignment." }) %></p>
+				<form class="media-management__form" method="POST" action="/admin/media/upload" enctype="multipart/form-data">
+					<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" />
+					<input type="hidden" name="entityType" value="<%= selected.entityTypeValue %>" />
+					<input type="hidden" name="entityId" value="<%= selected.entityValue %>" />
+					<% if (uploadFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% uploadFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %>
+					<div class="form-field<%= uploadErrors.file ? " form-field--error" : "" %>">
+						<label class="form-field__label" for="media-file"><span><%= translate("mediaManagement.fileLabel", { defaultValue: "Image file" }) %></span><span class="form-field__requirement"><%= translate("form.required", { defaultValue: "Required" }) %></span></label>
+						<input class="form-input media-management__file-input" id="media-file" name="media" type="file" accept="image/png,image/jpeg,image/webp" required aria-describedby="media-file-hint<%= uploadErrors.file ? " media-file-error" : "" %>" />
+						<p class="form-field__hint" id="media-file-hint"><%= translate("mediaManagement.fileHint", { defaultValue: "PNG, JPEG, or WebP · 8 MB maximum · SVG is not accepted" }) %></p>
+						<% if (uploadErrors.file) { %><p class="form-field__error" id="media-file-error"><%= uploadErrors.file %></p><% } %>
+					</div>
+					<div class="media-management__localized-fields">
+						<%- include("../partials/shared/components/form/field", { field: { id: "upload-alt-en", name: "altTextEn", control: "textarea", label: translate("mediaManagement.englishAlt", { defaultValue: "English alt text" }), value: management.forms.upload.values.altTextEn, hint: translate("mediaManagement.altHint", { defaultValue: "Describe meaningful media; leave blank to use the entity label." }), error: uploadErrors.altTextEn } }) %>
+						<%- include("../partials/shared/components/form/field", { field: { id: "upload-alt-pt-br", name: "altTextPtBr", control: "textarea", label: translate("mediaManagement.portugueseAlt", { defaultValue: "Português (Brasil) alt text" }), value: management.forms.upload.values.altTextPtBr, hint: translate("mediaManagement.altHint", { defaultValue: "Describe meaningful media; leave blank to use the entity label." }), error: uploadErrors.altTextPtBr } }) %>
+					</div>
+					<div class="media-management__form-actions"><button class="shared-button shared-button--primary" type="submit"><%= selected.direct ? translate("mediaManagement.replaceAction", { defaultValue: "Upload replacement" }) : translate("mediaManagement.assignAction", { defaultValue: "Upload and assign" }) %></button></div>
+				</form>
+			</section>
+
+			<section class="media-management__panel" aria-labelledby="media-existing-heading">
+				<div class="media-management__section-heading"><div><p class="media-management__eyebrow"><%= translate("mediaManagement.reuseEyebrow", { defaultValue: "Reusable assets" }) %></p><h2 id="media-existing-heading"><%= translate("mediaManagement.reuseHeading", { defaultValue: "Use existing media" }) %></h2></div></div>
+				<p class="media-management__panel-description"><%= translate("mediaManagement.reuseDescription", { defaultValue: "Choose an existing asset to assign it here. Reuse does not create another media record." }) %></p>
+				<% if (management.assets.length) { %>
+					<form class="media-management__form" method="POST" action="/admin/media/assign">
+						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" /><input type="hidden" name="entityType" value="<%= selected.entityTypeValue %>" /><input type="hidden" name="entityId" value="<%= selected.entityValue %>" />
+						<% if (existingFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% existingFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %>
+						<%- include("../partials/shared/components/form/field", { field: { id: "media-asset", name: "mediaAssetId", control: "select", label: translate("mediaManagement.assetLabel", { defaultValue: "Existing asset" }), required: true, value: management.forms.existing.values.mediaAssetId, options: management.assets.map(asset => ({ value: asset.id, label: asset.label })) , error: existingErrors.mediaAssetId } }) %>
+						<div class="media-management__localized-fields">
+							<%- include("../partials/shared/components/form/field", { field: { id: "existing-alt-en", name: "altTextEn", control: "textarea", label: translate("mediaManagement.englishAlt", { defaultValue: "English alt text" }), value: management.forms.existing.values.altTextEn, hint: translate("mediaManagement.altHint", { defaultValue: "Describe meaningful media; leave blank to use the entity label." }), error: existingErrors.altTextEn } }) %>
+							<%- include("../partials/shared/components/form/field", { field: { id: "existing-alt-pt-br", name: "altTextPtBr", control: "textarea", label: translate("mediaManagement.portugueseAlt", { defaultValue: "Português (Brasil) alt text" }), value: management.forms.existing.values.altTextPtBr, hint: translate("mediaManagement.altHint", { defaultValue: "Describe meaningful media; leave blank to use the entity label." }), error: existingErrors.altTextPtBr } }) %>
+						</div>
+						<div class="media-management__form-actions"><button class="shared-button shared-button--secondary" type="submit"><%= translate("mediaManagement.useExistingAction", { defaultValue: "Assign existing asset" }) %></button></div>
+					</form>
+				<% } else { %>
+					<p class="media-management__inline-empty"><%= translate("mediaManagement.noAssets", { defaultValue: "No reusable uploaded assets are available yet." }) %></p>
+				<% } %>
+			</section>
+		</div>
+
+		<section class="media-management__removal" aria-labelledby="media-removal-heading">
+			<div><p class="media-management__eyebrow"><%= translate("mediaManagement.removalEyebrow", { defaultValue: "Assignment control" }) %></p><h2 id="media-removal-heading"><%= translate("mediaManagement.removalHeading", { defaultValue: "Remove direct media" }) %></h2><p><%= selected.direct ? translate("mediaManagement.removeDescription", { defaultValue: "Removing this assignment keeps the asset and restores inherited or fallback media for this entity." }) : translate("mediaManagement.noDirectDescription", { defaultValue: "There is no direct assignment to remove. The preview shows the current inherited or fallback result." }) %></p><% if (removeFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% removeFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %></div>
+			<% if (selected.canRemove) { %><form method="POST" action="/admin/media/remove"><input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" /><input type="hidden" name="entityType" value="<%= selected.entityTypeValue %>" /><input type="hidden" name="entityId" value="<%= selected.entityValue %>" /><button class="shared-button shared-button--danger-ghost" type="submit"><%= translate("mediaManagement.removeAction", { defaultValue: "Remove direct assignment" }) %></button></form><% } %>
+		</section>
+	<% } %>
+</main>

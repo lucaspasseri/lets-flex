@@ -31,9 +31,11 @@ import workoutHistoryRouter from "./src/interfaces/routes/workoutHistory.js";
 import exerciseProgressRouter from "./src/interfaces/routes/exerciseProgress.js";
 import exerciseVariantsRouter from "./src/interfaces/routes/exerciseVariants.js";
 import translationMaintenanceRouter from "./src/interfaces/routes/translationMaintenance.js";
+import mediaManagementRouter from "./src/interfaces/routes/mediaManagement.js";
 import { respondWithApplicationRecovery } from "./src/interfaces/applicationRecovery.js";
 import localeRouter from "./src/interfaces/routes/locale.js";
 import { i18nMiddleware } from "./src/infrastructure/i18n/i18n.js";
+import parseMultipartForm from "./src/interfaces/middleware/parseMultipartForm.js";
 
 import playgroundRouter from "./src/interfaces/routes/playground.js";
 
@@ -103,6 +105,7 @@ export function createApp(options = {}) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 	app.use(i18nMiddleware);
+	app.use(parseMultipartForm());
 	app.use(csrfProtection);
 	app.use(exposePrincipal);
 	app.use("/locale", localeRouter);
@@ -125,6 +128,7 @@ export function createApp(options = {}) {
 	app.use("/sessions", sessionRouter);
 	app.use("/admin/library/exercises", exerciseTemplatesRouter);
 	app.use("/admin/translations", translationMaintenanceRouter);
+	app.use("/admin/media", mediaManagementRouter);
 	app.use("/", exerciseVariantsRouter);
 	app.use("/workout_sessions", workoutSessionsRouter);
 	app.use("/workout_step_logs", workoutStepLogRouter);

@@ -7,147 +7,130 @@ stable training relationships, ownership boundaries, and the focused strength-tr
 
 ## Current goal
 
-### Phase 1 — Build the Media Foundation
+### Phase 2 — Build Admin Media Management
 
-Create a clean, predictable, and extensible media foundation so catalog entities can use managed
-visual assets without hard-coded image paths or page-specific fallback rules.
+Expose the existing media foundation through a secure, small admin workflow so authorized
+administrators can review, create, assign, replace, and remove media for supported catalog entities.
 
 ## Status
 
-Phase 1 is **Completed** on 2026-09-12. Actions 1–4 are **Completed**.
+Phase 2 is **Completed** on 2026-09-12.
+
+Manual UX review identified and the completed Action 5 corrections resolved focused refinements in
+the Admin Media Manager: the previous mixed entity select did not scale for fast catalog discovery,
+and success feedback was styled as an error. The goal is complete with the documented automated
+verification and limitations.
 
 ## Problem being solved
 
-The current implementation has useful curated local assets and a shared initial-letter component,
-but media assignments are inferred from normalized names in a static manifest. That prevents
-explicit replacement/removal and makes persistent entity ownership of media impossible. The
-presentation boundary is shared, while the source of truth is not yet entity data.
+Phase 1 added reusable media assets, explicit primary assignments, deterministic inheritance, and a
+shared presentation contract, but no product workflow can manage those records. Administrators
+currently cannot tell whether an entity’s visible media is direct, inherited, or fallback, and they
+cannot safely upload or change an assignment through the application.
 
 ## Intended outcome
 
-Catalog entities can resolve optional media through one deterministic, presentation-ready contract.
-Assets are reusable database records, assignments are explicit, exercise variants inherit base
-exercise media when appropriate, and all missing-media cases remain safe, stable initial fallbacks.
-The foundation remains ready for later curation, uploads, localization, or administration without
-coupling those workflows to templates.
+Administrators can manage supported catalog media from the existing admin area. Uploads become
+validated reusable assets through an application-owned storage boundary; assignments use the Phase
+1 repository and resolver; replacement preserves reusable assets; removal restores inheritance or
+fallback; localized accessibility metadata follows the existing English/Portuguese architecture;
+and normal user-facing layouts and authorization boundaries remain unchanged.
 
 ## Scope
 
-- Audit the current manifest, resolver, shared component, local assets, fallbacks, consuming
-  surfaces, duplicated lookup boundaries, and tests.
-- Add an additive reusable `media_assets` / `entity_media` persistence model with explicit primary
-  assignments and referential integrity for media assets.
-- Support exercises, exercise variants, muscles, equipment, and movement patterns as assignable
-  entity types. Keep the resolver boundary open for environments without treating the current
-  `exercise_variants.environment` string as a relational entity.
-- Resolve direct media, variant-to-exercise inheritance, appropriate catalog fallback, and the
-  intentional initial-letter fallback deterministically.
-- Keep storage access behind an application-owned boundary using storage keys/paths rather than
-  embedding provider logic in pages.
-- Preserve and reuse the shared media component, add only demonstrated bounded presentation
-  variants, and integrate representative Library, Dashboard, Program Day, and workout surfaces.
-- Define the accessibility contract for meaningful and decorative media and add focused persistence,
-  resolver, rendering, and bounded-layout regression tests.
+- Audit and reuse the Phase 1 media schema, repository, resolver, shared component, supported entity
+  contract, and fallback behavior.
+- Add admin-only server operations for safe raster-image upload, existing-asset selection,
+  assignment/replacement, assignment removal, and localized alt metadata.
+- Integrate management into the existing admin/catalog navigation with entity selection and a clear
+  direct/effective/fallback status and representative preview.
+- Validate entity existence, supported roles and MIME/content/size constraints server-side; preserve
+  CSRF protection and `requireAdmin` for every mutation.
+- Verify normal surfaces resolve admin changes for exercises, exercise variants, equipment, muscles,
+  and movement patterns without page-local media lookup rules.
 
 ## Explicitly out of scope
 
-- AI image generation, prompt generation, moderation, or automatic catalog population.
-- Admin upload or assignment interfaces, drag-and-drop, bulk media management, or galleries.
-- Multiple exercise angles, videos, animation, user workout photos, CDN/image transformation
-  infrastructure, or external cloud storage provisioning.
-- Replacing every existing initial fallback or redesigning pages around images.
-- Artificial environment entities, unrelated catalog redesign, or destructive database resets.
+- AI generation, recommendations, moderation, automatic population, bulk management, galleries,
+  multiple angles, video, animation, cropping/editing, CDN transformations, or user media.
+- Artificial environment entities; `exercise_variants.environment` remains a string fallback
+  context.
+- Permanent physical asset deletion in this phase unless safe reference checks are demonstrably
+  simple and necessary; removing an assignment must not delete a reusable asset.
+- External cloud-storage provisioning or a new production dependency without explicit approval.
+- Redesigning unrelated admin or user-facing pages, changing normal media dimensions, or changing
+  catalog ownership/permission behavior.
 
-## Verified current baseline
+## Verified current baseline and delta
 
-- `src/features/media/mediaManifest.js` contains 12 local SVG assets plus an initial placeholder;
-  `resolveMedia.js` matches exercise variants, base exercises, muscles, equipment, movement
-  patterns, environments, and categories by normalized names.
-- Existing exercise resolution is deterministic: variant asset → base exercise asset → movement
-  pattern → environment → category → initial fallback. Localized labels can provide canonical
-  matching keys.
-- `views/partials/shared/components/media.ejs` is the shared rendering boundary. It supports image
-  and initial presentations with informative/decorative semantics, while `mediaFallback.css` bounds
-  icon, thumbnail, and exercise frames.
-- Media is currently consumed by Library exercise summaries/details/variants, Dashboard and Program
-  Day session views, and workout-session headers/current steps/step lists. History and standalone
-  catalog pages do not currently render this component.
-- The database has persistent exercises, exercise variants, muscles, equipment, and movement
-  patterns. `exercise_variants.environment` is a validated string; no persistent environment table
-  exists. No media tables or media repositories exist.
-- The canonical development/test lifecycle is `schemaSql` followed by `seedSql` when the explicit
-  reset safety boundary allows it. Media tables belong to that disposable reset path; this phase
-  does not add a media migration or mutate an existing database.
+- **Reuse:** Phase 1 `media_assets` / `entity_media`, `mediaRepository.js`, ID-backed resolver,
+  shared `media.ejs`, bounded media CSS, supported catalog IDs, and deterministic fallback order.
+- **Reuse:** existing `requireAdmin`, session CSRF middleware, admin Library and translation routes,
+  EJS/page-shell structure, shared form/button/modal components, and i18next locale contract.
+- **Add:** admin media routes/controllers/view models, upload/storage boundary, operation validation,
+  localized media metadata persistence, and focused authorization/upload/assignment tests.
+- **Modify:** media asset schema/repository only where localized metadata or upload provenance needs
+  it; existing admin navigation and catalog entry points to expose the workflow; integration tests
+  to prove resolver behavior after mutations.
+- **Preserve:** direct assignment precedence, variant-to-exercise inheritance, movement/context/
+  initial fallback, entity ownership boundaries, compact layouts, and disposable schema-plus-seed
+  lifecycle. No current environment entity is invented.
 
 ## Confirmed decisions and limitations
 
-- Preserve the current initial-letter fallback and local assets while moving exact entity
-  assignments behind persistent records. Existing useful behavior is reused, not discarded.
-- Use polymorphic entity assignments with a constrained entity-type contract because the supported
-  catalog tables have different foreign-key targets; application validation will verify the target
-  entity while media-asset foreign keys remain database-enforced.
-- Store stable storage keys and presentation metadata at the media boundary. Locale-specific alt
-  text remains a future metadata extension unless the current implementation requires a minimal
-  default field now.
-- Keep category/environment artwork as fallback context only where the repository has no persistent
-  entity model; do not create artificial relationships to satisfy this phase.
+- Accept PNG, JPEG, and WebP raster images only unless repository evidence establishes a safe SVG
+  sanitization path; do not trust client filenames, MIME types, or storage paths alone.
+- Use generated storage keys and a small local application-owned storage adapter compatible with the
+  existing stable storage-key contract. Normal pages continue to consume resolver metadata, not
+  upload paths.
+- Prefer reusable existing assets when practical. Replacement changes only the assignment; asset
+  deletion is a separate concern and is deferred by default.
+- Store one shared asset with localized English and Portuguese alt text rather than duplicating
+  locale-specific files. Missing localized text follows an explicit locale-to-English/default-alt
+  fallback.
+- Keep the development database lifecycle authoritative in `db/schema.js` and `db/seed.js`; do not
+  add a migration or reset production data.
+- No live browser executable was available during the Phase 1 audit; Phase 2 UI verification must
+  record that limitation if it remains.
 
 ## Completion criteria
 
-Phase 1 is ready for final review only when:
+Phase 2 is ready for final review only when:
 
-1. This goal and the action tracker accurately describe the final implementation and status.
-2. A reusable persistent media model supports explicit reusable assignments without image columns on
-   catalog tables.
-3. The supported entity types can be assigned media and entities without media remain valid.
-4. One deterministic resolver returns a presentation-ready contract, including variant inheritance,
-   safe missing-media behavior, and intentional fallback metadata.
-5. The initial-letter fallback remains stable, compact, network-independent, and accessible.
-6. Shared presentation variants have bounded dimensions and do not depend on source proportions.
-7. Representative current surfaces use the centralized path without page-local lookup rules.
-8. Focused data-layer, resolver, rendering, accessibility, and layout-regression tests pass.
-9. Applicable formatting, lint, type, browser-type, database, HTTP, and full checks pass.
-10. No AI-generation, admin-management, gallery, bulk-population, or other Phase 2+ scope leaks
-    into the implementation.
-
-## Final review matrix
-
-Recorded 2026-09-12 after Action 4 approval:
-
-- **Met:** The goal and action tracker describe the final implementation and statuses.
-- **Met:** Persistent reusable media assets and explicit assignments are implemented.
-- **Met:** Supported entities can be assigned media and unassigned entities remain valid.
-- **Met:** Deterministic resolution, variant inheritance, safe fallbacks, and fallback metadata
-  are covered by focused tests and the clean-database check.
-- **Met:** Initial fallback behavior remains stable, compact, network-independent, and accessible.
-- **Met:** Shared presentation variants are bounded and representative surfaces use the centralized
-  resolver path.
-- **Met:** Focused data-layer, resolver, rendering, accessibility, and layout-regression tests pass.
-- **Partially met:** Formatting, lint, types, browser types, database, and full repository checks
-  pass. The complete HTTP suite is 59/64, with five unrelated authentication/progress/history
-  lifecycle failures documented in Action 4; focused representative HTTP checks are 3/3.
-- **Skipped:** Live browser viewport capture was unavailable because no browser executable exists
-  in the environment; repository rendering and responsive regression checks pass.
-- **Met:** No migration, bulk population, admin management, gallery, or other Phase 2+ scope leak
-  was introduced.
-
-## Goal completion
-
-Completed on 2026-09-12 after final review approval. The approved media foundation includes the
-canonical disposable schema/reset/seed path, reusable media assets and explicit assignments,
-deterministic entity resolution with safe fallback behavior, centralized representative-surface
-presentation, and the recorded verification evidence. The five unrelated HTTP failures and the
-unavailable live-browser capture remain documented limitations; no additional scope was introduced.
-No next goal is implied by this completion.
+1. This goal and its action tracker describe the real implementation and review status.
+2. Admin-only GET and mutation routes manage supported entity assignments through Phase 1 services.
+3. Valid raster uploads create reusable assets with generated safe keys and validated dimensions;
+   invalid type, size, filename/path, and malformed-content cases fail safely server-side.
+4. Existing assets can be selected where supported; replacement leaves prior reusable references
+   intact; removal leaves no broken image state.
+5. Direct, inherited, and fallback media are visibly distinguished in the admin UI with a preview.
+6. English/Portuguese localized alt metadata persists and follows deterministic fallback behavior.
+7. Guests and non-admin authenticated users cannot access management pages or mutations, including
+   direct HTTP requests; CSRF rejection remains effective.
+8. Admin changes resolve correctly on representative normal surfaces, including variant inheritance
+   after removal, with stable bounded layouts.
+9. Focused unit, repository, view, browser, and HTTP tests cover authorization, validation,
+   assignment/replacement/removal, reuse, localization, integrity, and resolver integration.
+10. Applicable format, lint, type, browser-type, database, HTTP, and full checks are recorded with
+    limitations; no AI or unrelated scope has leaked in.
 
 ## Historical context
 
-Phase 5 translation maintenance and admin tooling was completed and approved on 2026-09-12 before
-this goal was opened. Its stable catalog IDs, localization joins, ownership boundaries, migration
-safeguards, and shared UI conventions are preserved as implementation context rather than reopened.
+Phase 1 media foundation and Phase 5 translation maintenance/admin tooling were completed and
+approved on 2026-09-12. Their stable catalog IDs, localization joins, ownership boundaries, CSRF
+and authorization safeguards, media resolver, shared UI conventions, and documented verification
+limitations are preserved as implementation context rather than reopened wholesale.
 
 ## Resume here
 
-Action 1 — Audit and architecture is **Completed**. Action 2 — persistence and deterministic
-resolver is **Completed**. Action 3 — shared presentation layer — is **Completed**. Action 4 is
-**Completed**. Phase 1 is **Completed**; no next action is active.
+Action 1 — Verify foundation and design the admin workflow is **Completed**. Action 2 — Admin media
+domain operations — is **Completed**. Action 3 — Admin management UI — is **Completed**.
+Action 4 — End-to-end resolver integration — is **Completed**. Action 5 — Verification and cleanup
+— is **Completed** after the entity-selection and feedback corrections.
+
+**Completion (2026-09-12):** The user approved the Phase 2 goal after all ten completion criteria
+were compared against the implementation and verification evidence. Admin media management is
+complete, including secure raster upload, reusable assignment/replacement/removal, localized alt
+metadata, resolver integration, scalable entity selection, and explicit success/error feedback.
+Known limitations remain documented: live browser verification was unavailable, and five unrelated
+existing HTTP assertions continue to fail.

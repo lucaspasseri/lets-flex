@@ -11,6 +11,12 @@
 	overflow-wrap: anywhere;
 }
 
+.page-feedback--success {
+	border-color: color-mix(in srgb, var(--color-accent) 42%, var(--color-border));
+	border-left-color: var(--color-accent);
+	background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+}
+
 .page-feedback > * {
 	min-width: 0;
 	white-space: normal;
@@ -23,6 +29,10 @@
 	font-weight: 750;
 	letter-spacing: 0.1em;
 	text-transform: uppercase;
+}
+
+.page-feedback--success .page-feedback__eyebrow {
+	color: var(--color-accent);
 }
 
 .page-feedback h2,

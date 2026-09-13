@@ -4,6 +4,7 @@ import { mediaSchemaSql } from "./mediaSql.js";
 export const schemaSql = `
 DROP TABLE IF EXISTS "session" CASCADE;
 DROP TABLE IF EXISTS entity_media CASCADE;
+DROP TABLE IF EXISTS media_asset_alt_texts CASCADE;
 DROP TABLE IF EXISTS media_assets CASCADE;
 DROP TABLE IF EXISTS guest_creation_limits CASCADE;
 DROP TABLE IF EXISTS password_reset_request_limits CASCADE;

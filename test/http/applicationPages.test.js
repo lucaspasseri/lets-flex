@@ -2750,6 +2750,170 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(invalidLocale.response.status, 422);
 	});
 
+	test("admin media assignments flow through Library inheritance and preserve reusable assets", async () => {
+		const standard = agent();
+		await login(standard);
+		assert.equal((await standard.request("/admin/media")).response.status, 403);
+
+		const guest = agent();
+		await enterGuest(guest);
+		assert.equal((await guest.request("/admin/media")).response.status, 403);
+
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const records = (
+			await db.query(`
+				SELECT exercise.id, variant.id AS variant_id
+				FROM exercises AS exercise
+				JOIN exercise_variants AS variant ON variant.exercise_id = exercise.id
+				WHERE exercise.is_archived = FALSE
+				  AND variant.owner_user_id IS NULL
+				  AND variant.is_archived = FALSE
+				ORDER BY exercise.id, variant.id
+				LIMIT 1`)
+		).rows[0];
+		assert.ok(records);
+
+		const assets = (
+			await db.query(`
+				INSERT INTO media_assets
+					(storage_key, mime_type, width, height, source)
+				VALUES
+					('/media/uploads/http-base.png', 'image/png', 640, 480, 'http-test'),
+					('/media/uploads/http-variant.png', 'image/png', 800, 600, 'http-test')
+				RETURNING id, storage_key
+			`)
+		).rows;
+		const baseAsset = assets.find((asset) =>
+			asset.storage_key.endsWith("http-base.png"),
+		);
+		const variantAsset = assets.find((asset) =>
+			asset.storage_key.endsWith("http-variant.png"),
+		);
+		assert.ok(baseAsset);
+		assert.ok(variantAsset);
+
+		const basePage = await admin.request(`/admin/media?entity=exercise:${records.id}`);
+		assert.equal(basePage.response.status, 200);
+		assert.match(basePage.text, /No direct assignment is set for this entity\./);
+
+		const missingCsrf = await admin.request("/admin/media/assign", {
+			method: "POST",
+			form: {
+				entityType: "exercise",
+				entityId: String(records.id),
+				mediaAssetId: String(baseAsset.id),
+			},
+		});
+		assert.equal(missingCsrf.response.status, 403);
+
+		const baseAssignment = await admin.request("/admin/media/assign", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(basePage.text),
+				entityType: "exercise",
+				entityId: String(records.id),
+				mediaAssetId: String(baseAsset.id),
+				altTextEn: "Base exercise media",
+				altTextPtBr: "Mídia do exercício base",
+			},
+		});
+		assert.equal(baseAssignment.response.status, 302);
+		const baseSuccessPage = await admin.request(
+			baseAssignment.response.headers.get("location"),
+		);
+		assert.match(baseSuccessPage.text, /class="page-feedback page-feedback--success"/);
+		assert.match(baseSuccessPage.text, /role="status"/);
+		assert.match(baseSuccessPage.text, />Success<\/p>/);
+		assert.match(
+			baseSuccessPage.text,
+			/The existing media was assigned to this entity\./,
+		);
+		assert.doesNotMatch(
+			baseSuccessPage.text,
+			/Action not completed|Review the information/,
+		);
+
+		const invalidAssignment = await admin.request("/admin/media/assign", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(baseSuccessPage.text),
+				entityType: "exercise",
+				entityId: String(records.id),
+				mediaAssetId: "",
+			},
+		});
+		assert.equal(invalidAssignment.response.status, 422);
+		assert.match(invalidAssignment.text, /class="page-feedback page-feedback--error"/);
+		assert.match(invalidAssignment.text, /Action not completed/);
+		assert.match(invalidAssignment.text, /Media could not be updated/);
+		assert.doesNotMatch(
+			invalidAssignment.text,
+			/Media updated|The existing media was assigned/,
+		);
+
+		const baseLibrary = await admin.request("/admin/library/exercises");
+		assert.match(baseLibrary.text, /src="\/media\/uploads\/http-base\.png"/);
+
+		const variantPage = await admin.request(
+			`/admin/media?entity=exercise_variant:${records.variant_id}`,
+		);
+		assert.equal(variantPage.response.status, 200);
+		assert.match(variantPage.text, /No direct assignment is set for this entity\./);
+		assert.match(variantPage.text, /src="\/media\/uploads\/http-base\.png"/);
+
+		const variantAssignment = await admin.request("/admin/media/assign", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(variantPage.text),
+				entityType: "exercise_variant",
+				entityId: String(records.variant_id),
+				mediaAssetId: String(variantAsset.id),
+				altTextEn: "Variant exercise media",
+			},
+		});
+		assert.equal(variantAssignment.response.status, 302);
+
+		const overriddenLibrary = await admin.request("/admin/library/exercises");
+		assert.match(overriddenLibrary.text, /src="\/media\/uploads\/http-variant\.png"/);
+		assert.match(overriddenLibrary.text, /src="\/media\/uploads\/http-base\.png"/);
+
+		const variantWithDirectMedia = await admin.request(
+			`/admin/media?entity=exercise_variant:${records.variant_id}`,
+		);
+		const removed = await admin.request("/admin/media/remove", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(variantWithDirectMedia.text),
+				entityType: "exercise_variant",
+				entityId: String(records.variant_id),
+			},
+		});
+		assert.equal(removed.response.status, 302);
+
+		const inheritedLibrary = await admin.request("/admin/library/exercises");
+		assert.doesNotMatch(
+			inheritedLibrary.text,
+			/src="\/media\/uploads\/http-variant\.png"/,
+		);
+		assert.match(inheritedLibrary.text, /src="\/media\/uploads\/http-base\.png"/);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM media_assets WHERE id = $1",
+					[variantAsset.id],
+				)
+			).rows[0].count,
+			1,
+		);
+
+		const muscle = (await db.query("SELECT id FROM muscles ORDER BY id LIMIT 1"))
+			.rows[0];
+		const emptyEntity = await admin.request(`/admin/media?entity=muscle:${muscle.id}`);
+		assert.equal(emptyEntity.response.status, 200);
+		assert.match(emptyEntity.text, /data-media-presentation="initial"/);
+	});
+
 	test("Library deletes only owned sessions and archives referenced templates", async () => {
 		const guest = agent();
 		await enterGuest(guest);

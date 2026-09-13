@@ -27,6 +27,7 @@
  * @property {string} [environment]
  * @property {string} [category]
  * @property {string} [label]
+ * @property {"en" | "pt-BR"} [locale]
  * @property {"image" | "initial"} [presentation]
  */
 
@@ -83,6 +84,7 @@
  * @property {string} [environment]
  * @property {string} [category]
  * @property {string} [label]
+ * @property {"en" | "pt-BR"} [locale]
  * @property {"image" | "initial"} [presentation]
  */
 

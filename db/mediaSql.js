@@ -21,6 +21,23 @@ CREATE TABLE IF NOT EXISTS media_assets (
 		CHECK (alt_text IS NULL OR alt_text = BTRIM(alt_text))
 );
 
+CREATE TABLE IF NOT EXISTS media_asset_alt_texts (
+	media_asset_id INTEGER NOT NULL
+		REFERENCES media_assets(id)
+		ON DELETE CASCADE,
+	locale VARCHAR(10) NOT NULL,
+	alt_text TEXT NOT NULL,
+
+	PRIMARY KEY (media_asset_id, locale),
+	CONSTRAINT media_asset_alt_texts_locale_supported
+		CHECK (locale IN ('en', 'pt-BR')),
+	CONSTRAINT media_asset_alt_texts_value_trimmed
+		CHECK (alt_text = BTRIM(alt_text) AND alt_text <> '')
+);
+
+CREATE INDEX IF NOT EXISTS media_asset_alt_texts_locale_idx
+	ON media_asset_alt_texts (locale, media_asset_id);
+
 CREATE TABLE IF NOT EXISTS entity_media (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	media_asset_id INTEGER NOT NULL

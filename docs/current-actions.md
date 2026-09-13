@@ -2,6 +2,345 @@
 
 ## Current goal
 
+### Phase 2 — Build Admin Media Management
+
+Expose the completed Phase 1 media foundation through an admin-only workflow for validated upload,
+asset reuse, direct assignment, replacement, removal, preview, and localized accessibility
+metadata, while preserving resolver inheritance, fallbacks, authorization, and layout stability.
+
+## Goal status
+
+Phase 2 is **Completed** on 2026-09-12.
+
+## Planning evidence
+
+- **Verified:** Phase 1 provides `media_assets` and `entity_media`, `mediaRepository.js`, an
+  ID-backed resolver with variant inheritance, the shared media partial, and bounded presentation
+  CSS. Supported assignable entities are exercises, exercise variants, muscles, equipment, and
+  movement patterns.
+- **Verified:** `exercise_variants.environment` is a string; no environment entity should be added.
+- **Verified:** `requireAdmin` protects existing admin routes and CSRF middleware protects all
+  state-changing requests through the session token. Existing admin entry points are the exercise
+  Library and translation maintenance pages.
+- **Verified:** the current media asset has only shared `alt_text`; the translation architecture
+  supports `en` and `pt-BR` catalog records, but localized media metadata does not yet persist.
+- **Verified:** Phase 1 uses stable storage keys and local public assets, but no dedicated upload
+  adapter or multipart upload flow exists.
+
+## Delta classification
+
+- **Already satisfied / reuse:** persistent media schema, primary assignment uniqueness, entity
+  target validation, direct/inherited/contextual/initial resolution, shared rendering, admin role
+  middleware, CSRF, catalog IDs, and locale normalization.
+- **Add:** admin media domain operations, safe raster upload/parser and storage adapter, localized
+  alt metadata, admin route/controller/view model/UI, and focused HTTP/resolver integration tests.
+- **Modify:** media schema/repository only for localized alt metadata; admin navigation/catalog
+  entry point; resolver/view model inputs where admin status needs direct/effective provenance.
+- **Preserve:** assignment replacement without asset deletion, Phase 1 fallback order, bounded
+  user-facing layouts, ownership boundaries, and disposable schema-plus-seed lifecycle.
+
+## Proposed Phase 2 action sequence
+
+Only the prepared next action may be activated after explicit user approval. One action may be
+active at a time.
+
+### Action 1 — Verify foundation and design admin workflow
+
+**Status:** Completed
+
+**Purpose:** Confirm the implementation boundary, select the existing admin/catalog entry point,
+define supported entity labels and direct/effective/fallback states, finalize upload/storage and
+localized-alt decisions, and add the Phase 2 tracking baseline.
+
+**Acceptance criteria:** The actual Phase 1 contracts and admin/auth architecture are documented;
+unsupported environment management is explicit; the smallest cohesive route/service/UI sequence is
+prepared; security-sensitive decisions cover MIME/content/size/path validation, CSRF, and admin-only
+authorization; no runtime code is changed before the action plan gate.
+
+**Activation (2026-09-12):** The user approved the proposed Phase 2 action plan. Action 1 became the
+only active action.
+
+**Verified audit and design (2026-09-12):** Phase 1 uses `media_assets` and `entity_media` with a
+single replaceable `primary` assignment, stable storage keys, and application-side validation for
+the supported polymorphic entity contract. `resolveEntityMedia` already provides direct assignment,
+variant-to-exercise inheritance, movement-pattern fallback, existing environment/category context,
+and initial fallback behavior. The shared media partial and bounded CSS are reusable for an admin
+preview. Existing `requireAdmin` and session CSRF middleware protect the current admin routes; the
+existing admin Library and translation maintenance pages are the appropriate integration structure.
+
+The supported Phase 2 entity types are exercises, exercise variants, muscles, equipment, and
+movement patterns. Environment management is explicitly unsupported because
+`exercise_variants.environment` is a string, not an entity. Localized catalog data supports `en`
+and `pt-BR`, while media currently has only shared `alt_text`; Phase 2 therefore needs a localized
+metadata extension rather than duplicated assets.
+
+**Confirmed design decisions:** Accept PNG, JPEG, and WebP only; reject SVG because no safe upload
+sanitization boundary exists. Generate storage keys server-side, validate both declared type and
+file signatures/dimensions, and keep upload persistence behind an application-owned local storage
+adapter compatible with existing media storage keys. Prefer existing-asset reuse, make replacement
+change only the assignment, and defer permanent asset deletion. Use one shared asset with localized
+English and Portuguese alt text and deterministic locale-to-English/default fallback. Preserve the
+canonical schema-plus-seed lifecycle and do not add a migration, reset production data, or add AI,
+gallery, bulk, or unrelated catalog scope.
+
+**Security boundary review:** `requireAdmin` is required on the GET editor and every mutation;
+global CSRF protection remains required for state changes. Uploads must enforce a size limit, parse
+content rather than trusting filenames/MIME headers, reject traversal or client storage paths, and
+avoid logging file contents or sensitive request data. Replacement/removal must be atomic at the
+assignment boundary and must never delete a reusable asset implicitly.
+
+**Verification:** The repository audit, relevant UI/general guidance review, delta classification,
+and Phase 2 tracking update are complete. Documentation passed Prettier and `git diff --check`.
+No runtime files, database contents, dependencies, or production data were changed.
+
+**Review stop (2026-09-12):** Action 1 was ready for review. Action 2 remained pending and was not
+activated or implemented.
+
+**Completion (2026-09-12):** The user approved Action 1 after the documented audit, design
+decisions, security-boundary review, and documentation verification. Action 1 is complete; no
+runtime implementation was included.
+
+### Action 2 — Admin media domain operations
+
+**Status:** Completed
+
+**Purpose:** Implement validated asset creation/upload, reusable asset selection, assignment and
+replacement, assignment removal, localized alt metadata, storage-key generation, and atomic
+failure behavior behind feature-owned services/repositories.
+
+**Acceptance criteria:** Supported raster uploads are content-validated and size-limited; malformed
+or unsupported requests fail safely; replacement preserves old reusable assets; remove restores the
+resolver chain; invalid entities/assets/roles leave no partial state; focused domain/repository
+tests pass.
+
+**Implementation (2026-09-12):** Added `media_asset_alt_texts` to the authoritative disposable
+schema with `en`/`pt-BR` constraints and cascade behavior. Extended the media repository with
+localized metadata replacement, asset lookup/listing, and fixed-allowlist entity existence checks.
+The ID-backed resolver now selects localized alt text deterministically: Portuguese prefers
+Portuguese and falls back to English; English uses English, then the existing asset/default label
+fallback.
+
+Added `mediaUpload.js` for server-side PNG, JPEG, and WebP validation, including an 8 MB limit,
+filename/path checks, signatures, dimensions, and dimension bounds. SVG is intentionally rejected
+because no safe sanitization boundary exists. Added `mediaStorage.js` as a local application-owned
+adapter that generates UUID storage keys under `/media/uploads`, writes with exclusive creation,
+and exposes cleanup without accepting client paths. Added `manageMedia.js` for transactional upload
+and assignment, reusable-asset assignment/replacement, assignment removal, localized labels, and
+rollback cleanup. Replacement never deletes the previous reusable asset; removal deletes only the
+entity assignment.
+
+Added focused tests for schema contracts, localized repository behavior, upload validation and
+storage, transactional success/rollback, reuse, replacement, removal, invalid IDs/entities, and
+localized resolver fallback.
+
+**Verification (2026-09-12):** Focused media/schema/domain suite passed **24/24**. `npm run
+check:types`, `npm run check:browser-types`, `npm run lint`, `npm run format:check`, and
+`git diff --check` passed. No new production dependency was added. The full `npm test` suite and
+database reset/seed verification were not run because they may mutate the disposable database and
+the user explicitly requested no database reset or mutation without separate authorization.
+
+**Review stop (2026-09-12):** Action 2 was ready for review. Action 3 remained pending and was not
+activated or implemented.
+
+**Completion (2026-09-12):** The user approved Action 2 after focused upload, storage, repository,
+resolver, transaction, localization, formatting, lint, type, and diff verification. Action 2 is
+complete. The full/database suite remains intentionally unrun because separate database mutation
+authorization was not granted.
+
+### Action 3 — Admin management UI
+
+**Status:** Changes requested
+
+**Purpose:** Integrate a simple admin media editor into the existing admin structure with entity
+selection, current direct/effective media, source explanation, role, preview, upload/reuse actions,
+localized alt fields, removal feedback, validation errors, and accessible responsive forms.
+
+**Acceptance criteria:** Admins can understand what will happen on replacement/removal; controls use
+shared components and CSRF; accessible labels/focus/errors and direct/inherited/fallback status are
+covered by view/browser tests; no user-facing media layout contracts change.
+
+**Activation (2026-09-12):** The user approved the completed Action 2 and explicitly approved the
+next action. Action 3 became the only active action for implementation.
+
+**Implementation (2026-09-12):** Added the admin-only `/admin/media` route family and navigation
+entry, reusing the existing session/authentication, `requireAdmin`, CSRF, EJS shell, shared media,
+form, button, and feedback components. The page provides bounded entity selection/search for global
+exercises, global exercise variants, muscles, equipment, and movement patterns; it shows the current
+preview, direct/effective source, role, dimensions, and variant base-exercise context. It provides
+validated upload, reusable-asset assignment, replacement, localized English and Portuguese alt
+text, and assignment-removal forms with clear fallback guidance.
+
+Added a bounded single-file multipart parser before CSRF validation so the existing session CSRF
+middleware can validate multipart forms. Added responsive media-management CSS with visible focus
+states and mobile form/preview layouts. Added matching English and Brazilian Portuguese resource
+keys. Private exercise variants are excluded from option lookup and assignment existence checks;
+the existing user-facing media layout contract remains unchanged.
+
+**Verification (2026-09-12):** Database-free focused media, repository, upload, storage, resolver,
+multipart, schema, localization, view, navigation, and CSS-contract suite passed **41/41**.
+`npm run check:types`, `npm run check:browser-types`, `npm run lint`, `npm run format:check`, and
+`git diff --check` passed. The full `npm test` run remains unavailable because its canonical
+database setup cannot connect in this environment and its application listen test is blocked by
+the sandbox; no database reset or seed mutation was attempted. Live visual browser verification
+remains unavailable; rendered EJS contracts and responsive CSS assertions are covered.
+
+**Review stop (2026-09-12):** Action 3 is ready for review. Action 4 remains pending and was not
+activated or implemented.
+
+**Completion (2026-09-12):** The user approved Action 3 after the documented admin route, view,
+multipart, localization, accessibility, responsive CSS, focused test, type, lint, formatting, and
+diff verification. Action 3 is complete; Action 4 remains pending and was not activated or
+implemented.
+
+### Action 4 — End-to-end resolver integration
+
+**Status:** Completed
+
+**Purpose:** Prove admin changes flow through the existing resolver and representative normal pages
+without synchronization or page-local lookup rules.
+
+**Acceptance criteria:** Exercise assignment renders in Library; variant assignment overrides base;
+variant removal returns to base/movement/fallback behavior; reusable assets remain valid for other
+assignments; supported entity records without assignments remain safe; focused HTTP checks pass.
+
+**Activation (2026-09-12):** The user approved the completed Action 3 and explicitly approved the
+next action. Action 4 is now the only active action.
+
+**Implementation (2026-09-12):** Added HTTP coverage for the admin media workflow using the
+configured safe test database. The test verifies guests and regular users receive forbidden
+responses, missing CSRF is rejected, an admin can assign reusable assets, the assigned base
+exercise renders through `/admin/library/exercises`, a global variant inherits that assignment,
+a direct variant assignment overrides it, removing the variant assignment restores base media,
+the removed asset remains reusable, and an unassigned supported muscle remains a safe initial
+fallback. No page-local resolver or synchronization path was added.
+
+**Verification (2026-09-12):** The isolated Action 4 HTTP integration test passed **1/1** with
+the test database and loopback server. The complete existing `npm run test:http` suite ran 60/65
+tests successfully; its five failures are unrelated pre-existing Google-profile and progress/
+history assertions, while the new media integration test passed. Earlier database-free focused
+media/resolver/view coverage passed 41/41. `npm run check:types`, `npm run check:browser-types`,
+`npm run lint`, `npm run format:check`, and `git diff --check` passed. The test database was reset
+by the existing safe HTTP harness only; production data was not targeted.
+
+**Review stop (2026-09-12):** Action 4 is ready for review. Action 5 remains pending and was not
+activated or implemented.
+
+**Completion (2026-09-12):** The user approved Action 4 after the isolated HTTP integration test
+passed and the full-suite limitation was documented. Action 4 is complete; Action 5 remains
+pending and was not activated or implemented.
+
+### Action 5 — Verification and cleanup
+
+**Status:** Completed
+
+**Purpose:** Inspect duplication and authorization boundaries, run the repository verification
+matrix and database checks, document unavailable browser/manual checks and deferred work, and stop at
+the final review gate.
+
+**Acceptance criteria:** Every applicable check has an explicit result, tracking matches the code,
+Phase 2 remains Ready for final review rather than Completed, and no AI/gallery/bulk or unrelated
+scope has been introduced.
+
+**Activation (2026-09-12):** The user approved the completed Action 4 and explicitly approved the
+next action. Action 5 is now the only active action.
+
+**Changes requested (2026-09-12):** Manual UX review found that the required mixed entity select
+does not scale as the supported catalog grows. The correction must add an optional entity-type
+filter, optional case-insensitive partial name search, clear type/name identification, deliberate
+selection without accidental assignment, useful empty results, and responsive/keyboard-accessible
+presentation. Preserve all authorization, CSRF, private-variant, assignment, resolver, and
+translation behavior; do not change the schema or unrelated media workflows. Action 5 remains
+active for this focused correction and must return to Ready for review without completing Phase 2.
+
+**Changes requested (2026-09-12, feedback correction):** Manual testing found contradictory
+feedback after a successful media assignment: the shared partial supplied its default “Action not
+completed” eyebrow and error styling because the media controller omitted explicit `tone` and
+`eyebrow` values, even though it supplied a success title/message. Correct the feedback state at
+the controller/shared-component boundary, verify actual persistence for assignment, replacement,
+upload, and removal semantics, and keep validation failures explicitly separate. Do not complete
+Action 5 or Phase 2 until this correction is verified.
+
+**Implementation (2026-09-12):** Replaced the long mixed selection control with a server-rendered
+GET filter form and explicit result links. Administrators can optionally filter by supported entity
+type and search by name; repository queries use trimmed case-insensitive partial matching via
+`ILIKE`. Each result visibly presents its type, name, and ID, selected results expose
+`aria-current`, and empty matches have a clear status message. Result links retain the active
+filters and only open the editor; they do not submit or alter any media assignment. Existing
+mutation forms, resolver behavior, authorization, CSRF, private-variant exclusion, and i18n were
+left unchanged.
+
+**Implementation (2026-09-12, feedback correction):** Made media feedback explicit by operation
+state: successful upload, existing-asset assignment, replacement, and removal use `tone: success`,
+a success eyebrow, success-specific localized copy, and `role="status"`; validation failures use
+`tone: error`, the existing alert semantics, a failure title, and specific field/form validation
+messages. Added the shared page-feedback success treatment using the existing teal semantic color.
+The redirect success state is produced only after the service call returns successfully; invalid
+submissions render the error state without success copy. No persistence, authorization, CSRF,
+ownership, resolver, or schema behavior changed.
+
+**Verification (2026-09-12):** Focused feedback, view, shared-component, and CSS tests passed
+**9/9**. `npm test` passed **372/372**, including canonical schema/seed setup and PostgreSQL-backed
+tests; the isolated media HTTP integration test passed **1/1**, including actual assignment
+persistence, success feedback after redirect, and validation failure feedback. `npm run
+format:check`, `npm run lint`, `npm run check:types`, `npm run check:browser-types`, and `git diff
+--check` all passed. The complete `npm run test:http` run remains **60/65** because five unrelated
+existing assertions fail: invalid Google profile handling, three exercise progress/history flows,
+and planned cancellation; the media integration test is not among those failures.
+
+The scope and authorization audit confirmed that `/admin/media` and all mutations are behind
+`requireAdmin`, global CSRF protection runs before the router, multipart parsing is bounded and
+limited to the upload route’s expected single file, and private exercise variants are excluded
+from both management lookup and assignment existence checks. No new migration, production
+dependency, AI, gallery, bulk, video, or unrelated catalog scope was introduced. No live browser
+executable was available, so visual/manual browser verification remains unavailable; rendered EJS
+contracts and responsive CSS assertions remain covered by focused tests. No further cleanup was
+required.
+
+**Review stop (2026-09-12):** Action 5 was ready for review after the requested entity-selection
+and feedback corrections; no unrelated follow-up was prepared.
+
+**Completion (2026-09-12):** The user approved Action 5 after the entity-selection and feedback
+corrections passed the documented focused, full-suite, and HTTP verification. Action 5 is complete;
+Phase 2 is now **Ready for final review** and the goal itself remains uncompleted pending explicit
+goal approval.
+
+**Goal completion (2026-09-12):** The user approved Phase 2 after the ten completion criteria were
+confirmed against the implementation and recorded verification. Phase 2 is complete. No next goal
+is inferred or activated; future direction remains subject to user approval.
+
+**Final review comparison (2026-09-12):** All ten Phase 2 completion criteria are satisfied by
+the recorded implementation and verification evidence: (1) tracking matches the completed
+implementation and review state; (2) admin-only routes use the existing services; (3) raster upload
+validation and generated storage keys are covered; (4) reuse, replacement, and removal preserve
+asset integrity; (5) direct, inherited, and fallback states are shown with previews; (6) localized
+English/Portuguese alt metadata follows deterministic fallback; (7) authorization and CSRF tests
+cover guests, non-admins, and direct HTTP requests; (8) representative Library/resolver flows cover
+variant inheritance and removal; (9) focused unit, repository, view, CSS/browser-contract, and HTTP
+tests pass; and (10) applicable checks and limitations are recorded with no unrelated scope.
+
+**Unmet criteria and limitations:** No implementation criterion is currently unmet. Live browser
+visual/manual verification was unavailable in this environment and remains explicitly recorded as
+a limitation. The complete HTTP suite remains 60/65 because five unrelated existing assertions
+fail; the Admin Media Manager integration test passes and is not among them.
+
+**Intentionally excluded:** AI generation, recommendations, moderation, automatic population, bulk
+management, galleries, multiple angles, video/animation, cropping/editing, CDN transformations,
+user media, artificial environment entities, permanent physical asset deletion, external storage
+provisioning, and unrelated catalog or admin redesign remain outside Phase 2.
+
+## Resume here
+
+Action 1 is **Completed**. Action 2 — Admin media domain operations — is **Completed**. Action 3 —
+Admin management UI — is **Completed**. Action 4 — End-to-end resolver integration — is
+**Completed**. Action 5 — Verification and cleanup — is **Completed** after the focused
+entity-selection and feedback corrections; no later action is prepared.
+
+## Historical Phase 1 record
+
+The completed Phase 1 action records remain below as historical evidence.
+
+## Historical Phase 1 current goal
+
 ### Phase 1 — Build the Media Foundation
 
 Establish a reusable, persistent, deterministic media foundation for catalog entities while

@@ -5,8 +5,12 @@ import {
 	assertAssignableMediaEntityType,
 	assignPrimaryMedia,
 	createMediaAsset,
+	findMediaAssetById,
+	findMediaAssets,
 	findPrimaryMediaAssignments,
+	mediaEntityExists,
 	removePrimaryMedia,
+	replaceMediaAssetAltTexts,
 } from "./mediaRepository.js";
 
 function fakeDatabase(rows = []) {
@@ -102,4 +106,58 @@ test("empty candidate lookup does not query the database", async () => {
 	const db = fakeDatabase();
 	assert.deepEqual(await findPrimaryMediaAssignments([], /** @type {any} */ (db)), []);
 	assert.equal(db.calls.length, 0);
+});
+
+test("localized asset metadata can be replaced without duplicating the asset", async () => {
+	const db = fakeDatabase([
+		{ id: 7, alt_texts: { en: "Bench press", "pt-BR": "Supino" } },
+	]);
+	await replaceMediaAssetAltTexts(
+		{
+			mediaAssetId: 7,
+			altTexts: { en: " Bench press ", "pt-BR": "Supino" },
+		},
+		/** @type {any} */ (db),
+	);
+
+	assert.match(db.calls[0].text, /DELETE FROM media_asset_alt_texts/);
+	assert.deepEqual(db.calls[0].values, [7]);
+	assert.equal(db.calls.length, 3);
+	assert.deepEqual(db.calls[1].values, [7, "en", "Bench press"]);
+	assert.deepEqual(db.calls[2].values, [7, "pt-BR", "Supino"]);
+});
+
+test("asset lookup returns localized metadata through the media repository boundary", async () => {
+	const db = fakeDatabase([{ id: 7, alt_texts: { en: "Bench press" } }]);
+	const asset = await findMediaAssetById(7, /** @type {any} */ (db));
+
+	assert.deepEqual(asset.alt_texts, { en: "Bench press" });
+	assert.match(db.calls[0].text, /jsonb_object_agg/);
+	assert.deepEqual(db.calls[0].values, [7]);
+});
+
+test("asset listing is bounded before the limit reaches SQL", async () => {
+	const db = fakeDatabase([{ id: 7 }]);
+	const assets = await findMediaAssets({ limit: 1000 }, /** @type {any} */ (db));
+
+	assert.deepEqual(assets, [{ id: 7 }]);
+	assert.deepEqual(db.calls[0].values, [100]);
+});
+
+test("entity existence checks use the fixed supported-table allowlist", async () => {
+	const db = {
+		async query(text, values) {
+			assert.match(text, /FROM equipments AS entity/);
+			assert.deepEqual(values, [2]);
+			return { rowCount: 1 };
+		},
+	};
+
+	assert.equal(
+		await mediaEntityExists(
+			{ entityType: "equipment", entityId: 2 },
+			/** @type {any} */ (db),
+		),
+		true,
+	);
 });

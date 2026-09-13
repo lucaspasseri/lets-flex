@@ -2,7 +2,7 @@
 <% if (locals.pageFeedback) { %>
 	<section
 		class="page-feedback page-feedback--<%= pageFeedback.tone ?? 'error' %>"
-		role="alert"
+		role="<%= pageFeedback.tone === 'success' ? 'status' : 'alert' %>"
 		tabindex="-1"
 		aria-labelledby="<%= pageFeedback.id ?? 'page-feedback-title' %>"
 	>
