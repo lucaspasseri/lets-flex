@@ -7,14 +7,14 @@ review, not a permanent redesign or an approved design system.
 
 ### User-facing inventory
 
-| Surface | Route/view | Useful coverage |
-| --- | --- | --- |
-| Dashboard | `/` · `views/index.ejs` | onboarding, program state, date navigation, workout, metrics, charts, empty states |
-| Programs | `/programs` · `views/programs.ejs` | hierarchy, entity switchers, calendar, create/delete modals |
-| Training Day | `/day` · `views/day.ejs` | day navigation, session list, cancel modal, workout entry point |
-| Library | `/library` · `views/library.ejs` | tabs, search/filter, master/detail workspace, media, CRUD forms/modals |
-| History / Progress | `/history`, `/progress` | filters, result/detail states, metrics, pagination, data-dense reading |
-| Profile / auth | `/profile`, `/login`, `/register`, password reset | forms, account actions, feedback, guest/auth states |
+| Surface            | Route/view                                        | Useful coverage                                                                    |
+| ------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Dashboard          | `/` · `views/index.ejs`                           | onboarding, program state, date navigation, workout, metrics, charts, empty states |
+| Programs           | `/programs` · `views/programs.ejs`                | hierarchy, entity switchers, calendar, create/delete modals                        |
+| Training Day       | `/day` · `views/day.ejs`                          | day navigation, session list, cancel modal, workout entry point                    |
+| Library            | `/library` · `views/library.ejs`                  | tabs, search/filter, master/detail workspace, media, CRUD forms/modals             |
+| History / Progress | `/history`, `/progress`                           | filters, result/detail states, metrics, pagination, data-dense reading             |
+| Profile / auth     | `/profile`, `/login`, `/register`, password reset | forms, account actions, feedback, guest/auth states                                |
 
 ### Verified patterns and opportunities
 
