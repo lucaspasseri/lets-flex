@@ -236,6 +236,81 @@ test("media management view communicates an empty filtered result", async () => 
 	assert.doesNotMatch(html, /name="entity"/);
 });
 
+test("media management exposes canonical state and promotion only for an eligible assigned asset", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: {
+			...baseData,
+			assets: [
+				{
+					id: 7,
+					storage_key: "/media/uploads/bench.png",
+					width: 960,
+					height: 640,
+					mime_type: "image/png",
+					alt_texts: { en: "Bench press", "pt-BR": "Supino" },
+				},
+				{
+					id: 8,
+					storage_key: "/media/uploads/other.png",
+					width: 960,
+					height: 640,
+					mime_type: "image/png",
+					alt_texts: { en: "Other image" },
+				},
+			],
+			selected: selectedData({
+				directAssignment: {
+					media_asset_id: 7,
+					storage_key: "/media/uploads/bench.png",
+					mime_type: "image/png",
+					alt_text_en: "Bench press",
+					alt_text_pt_br: "Supino",
+				},
+				canonicalEntry: { path: "/media/catalog/promoted/exercise-bench-abc.png" },
+			}),
+		},
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(html, /Assigned · not canonical/);
+	assert.match(html, /Unassigned/);
+	assert.match(html, /action="\/admin\/media\/canonical"/);
+	assert.match(html, /Make canonical/);
+	assert.match(html, /name="mediaAssetId" value="7"/);
+});
+
+test("media management replaces promotion with canonical state when the direct asset is canonical", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: {
+			...baseData,
+			assets: [
+				{
+					...baseData.assets[0],
+					storage_key: "/media/catalog/promoted/exercise-bench-abc.png",
+				},
+			],
+			selected: selectedData({
+				directAssignment: {
+					media_asset_id: 7,
+					storage_key: "/media/catalog/promoted/exercise-bench-abc.png",
+					mime_type: "image/png",
+					alt_text_en: "Bench press",
+					alt_text_pt_br: "Supino",
+				},
+				canonicalEntry: { path: "/media/catalog/promoted/exercise-bench-abc.png" },
+			}),
+		},
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(html, /This image is canonical for this entity\./);
+	assert.doesNotMatch(html, /action="\/admin\/media\/canonical"/);
+});
+
 test("media management presents selectable entities before optional name filtering", async () => {
 	const viewModel = createMediaManagementPageViewModel({
 		page: { title: "Media management" },

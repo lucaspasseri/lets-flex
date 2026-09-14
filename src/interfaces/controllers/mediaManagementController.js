@@ -23,6 +23,10 @@ import {
 	approveMediaGenerationCandidate,
 	MediaGenerationApprovalError,
 } from "../../features/media/approveMediaGenerationCandidate.js";
+import {
+	MediaCanonicalPromotionError,
+	promoteMediaToCanonical,
+} from "../../features/media/promoteMediaToCanonical.js";
 import createMediaManagementPageViewModel from "../../../views/viewModels/mediaManagement/createMediaManagementPageViewModel.js";
 
 /** @typedef {import("express").Request & {validatedQuery?: {entity?: string, entityType?: string, search?: string, saved?: string}, validatedBody?: Record<string, any>, validatedParams?: {candidateId: number}, file?: Record<string, any>}} MediaManagementRequest */
@@ -33,7 +37,12 @@ function selectionFromReference(reference) {
 	return { entityType, entityId: Number(entityId) };
 }
 
-export function createMediaManagementPageFeedback(translate, tone, operation) {
+export function createMediaManagementPageFeedback(
+	translate,
+	tone,
+	operation,
+	context = {},
+) {
 	const isSuccess = tone === "success";
 	const feedbackTone = isSuccess ? "success" : "error";
 	const successMessages = {
@@ -54,6 +63,11 @@ export function createMediaManagementPageFeedback(translate, tone, operation) {
 		}),
 		approve: translate("mediaManagement.approveSuccess", {
 			defaultValue: "The generated image was approved and assigned to this entity.",
+		}),
+		canonical: translate("mediaManagement.canonicalSuccess", {
+			entityName: context.entityName ?? "this entity",
+			imageLabel: context.imageLabel ?? "The selected image",
+			defaultValue: `${context.imageLabel ?? "The selected image"} is now canonical for ${context.entityName ?? "this entity"}.`,
 		}),
 	};
 	return {
@@ -103,6 +117,11 @@ function mediaGenerationDependencies(req) {
 	return req.app.locals.mediaGenerationDependencies ?? {};
 }
 
+/** @param {MediaManagementRequest} req */
+function mediaPromotionDependencies(req) {
+	return req.app.locals.mediaPromotionDependencies ?? {};
+}
+
 function createGenerationNonce(req, selected) {
 	if (!selected) return null;
 	const state = /** @type {any} */ (req.session).state;
@@ -117,11 +136,13 @@ function createGenerationNonce(req, selected) {
 async function renderPage(req, res, state = {}) {
 	const query = req.validatedQuery ?? {};
 	const selection = selectionFromReference(state.entityReference ?? query.entity);
+	const promotionDependencies = mediaPromotionDependencies(req);
 	const data = await getMediaManagementPage({
 		...selection,
 		entityTypeFilter: query.entityType,
 		search: state.search ?? query.search,
 		locale: res.locals.language,
+		canonicalMediaManifestStore: promotionDependencies.manifestStore,
 	});
 	if (selection.entityType && !data.selected) {
 		respondWithApplicationRecovery(req, res, { kind: "notFound" });
@@ -148,7 +169,12 @@ async function renderPage(req, res, state = {}) {
 			pageFeedback:
 				state.pageFeedback ??
 				(query.saved
-					? createMediaManagementPageFeedback(res.locals.t, "success", query.saved)
+					? createMediaManagementPageFeedback(res.locals.t, "success", query.saved, {
+							entityName: data.selected?.name,
+							imageLabel: data.selected?.directAssignment?.alt_text_en
+								? `“${data.selected.directAssignment.alt_text_en}”`
+								: undefined,
+						})
 					: null),
 			translate: res.locals.t,
 		}),
@@ -229,6 +255,42 @@ async function assign(req, res) {
 		throw error;
 	}
 	redirectAfterMutation(res, body, "assign");
+}
+
+/** @param {MediaManagementRequest} req @param {import("express").Response} res */
+async function promote(req, res) {
+	const body = req.validatedBody;
+	if (!body) throw new Error("Canonical media request was not validated.");
+	try {
+		await promoteMediaToCanonical(
+			{
+				mediaAssetId: body.mediaAssetId,
+				entityType: body.entityType,
+				entityId: body.entityId,
+			},
+			mediaPromotionDependencies(req),
+		);
+	} catch (error) {
+		if (error instanceof MediaCanonicalPromotionError) {
+			if (error.code === "entity_not_found" || error.code === "asset_not_found") {
+				respondWithApplicationRecovery(req, res, { kind: "notFound" });
+				return;
+			}
+			res.status(422);
+			await renderPage(req, res, {
+				entityReference: `${body.entityType}:${body.entityId}`,
+				formState: {
+					kind: "canonical",
+					values: body,
+					errors: { fieldErrors: {}, formErrors: [error.message] },
+				},
+				pageFeedback: createMediaManagementPageFeedback(res.locals.t, "error"),
+			});
+			return;
+		}
+		throw error;
+	}
+	redirectAfterMutation(res, body, "canonical");
 }
 
 /** @param {MediaManagementRequest} req @param {import("express").Response} res */
@@ -464,6 +526,7 @@ export const mediaManagementController = {
 	show: asyncHandler(show),
 	upload: asyncHandler(upload),
 	assign: asyncHandler(assign),
+	promote: asyncHandler(promote),
 	remove: asyncHandler(remove),
 	generate: asyncHandler(generate),
 	regenerate: asyncHandler(regenerate),
@@ -474,6 +537,8 @@ export const mediaManagementController = {
 		showValidationErrors(req, res, result, "upload"),
 	showExistingValidationErrors: (req, res, result) =>
 		showValidationErrors(req, res, result, "existing"),
+	showCanonicalValidationErrors: (req, res, result) =>
+		showValidationErrors(req, res, result, "canonical"),
 	showRemoveValidationErrors: (req, res, result) =>
 		showValidationErrors(req, res, result, "remove"),
 	showGenerationValidationErrors: (req, res, result) =>

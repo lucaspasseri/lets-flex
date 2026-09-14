@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -26,5 +26,34 @@ test("local media storage generates a safe public key and removes only its store
 		await assert.rejects(() => readFile(path.join(rootDirectory, filename)));
 	} finally {
 		await rm(rootDirectory, { recursive: true, force: true });
+	}
+});
+
+test("local media storage reads only keys inside its configured public boundary", async () => {
+	const mediaRoot = await mkdtemp(path.join(os.tmpdir(), "lets-flex-media-read-"));
+	try {
+		const uploadRoot = path.join(mediaRoot, "uploads");
+		await mkdir(uploadRoot, { recursive: true });
+		await writeFile(path.join(uploadRoot, "existing.png"), "image bytes");
+		const storage = createLocalMediaStorage({
+			rootDirectory: uploadRoot,
+			publicPrefix: "/media/uploads",
+			readRootDirectory: mediaRoot,
+			readPublicPrefix: "/media",
+		});
+
+		assert.equal(await storage.exists("/media/uploads/existing.png"), true);
+		assert.equal(
+			await storage
+				.read("/media/uploads/existing.png")
+				.then((buffer) => buffer.toString()),
+			"image bytes",
+		);
+		await assert.rejects(
+			() => storage.read("/media/../../outside.png"),
+			/Storage key is outside the local media boundary/,
+		);
+	} finally {
+		await rm(mediaRoot, { recursive: true, force: true });
 	}
 });

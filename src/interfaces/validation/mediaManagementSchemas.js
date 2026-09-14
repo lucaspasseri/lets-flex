@@ -42,7 +42,7 @@ export const mediaManagementQuerySchema = z.object({
 		z.string().max(100, "Catalog search is too long.").optional(),
 	),
 	saved: z
-		.enum(["upload", "assign", "remove", "generate", "reject", "approve"])
+		.enum(["upload", "assign", "remove", "generate", "reject", "approve", "canonical"])
 		.optional(),
 });
 
@@ -63,6 +63,12 @@ export const existingMediaBodySchema = z.object({
 	mediaAssetId: z.coerce.number().int().positive("Choose a valid media asset."),
 	altTextEn: altText,
 	altTextPtBr: altText,
+});
+
+export const canonicalMediaBodySchema = z.object({
+	entityType: supportedEntityType,
+	entityId: positiveId,
+	mediaAssetId: z.coerce.number().int().positive("Choose a valid media asset."),
 });
 
 export const removeMediaBodySchema = z.object({

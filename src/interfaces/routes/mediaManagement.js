@@ -9,6 +9,7 @@ import validateRequestQuery from "../middleware/validateRequestQuery.js";
 import validateRequestParams from "../middleware/validateRequestParams.js";
 import {
 	approveMediaGenerationCandidateBodySchema,
+	canonicalMediaBodySchema,
 	existingMediaBodySchema,
 	generateMediaBodySchema,
 	mediaGenerationCandidateParamsSchema,
@@ -45,6 +46,14 @@ router.post(
 		mediaManagementController.showExistingValidationErrors,
 	),
 	mediaManagementController.assign,
+);
+router.post(
+	"/canonical",
+	validateRequestBody(
+		canonicalMediaBodySchema,
+		mediaManagementController.showCanonicalValidationErrors,
+	),
+	mediaManagementController.promote,
 );
 router.post(
 	"/remove",

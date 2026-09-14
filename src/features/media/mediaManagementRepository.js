@@ -107,6 +107,7 @@ export async function findMediaManagementEntity(
 	const normalizedLocale = normalizeCatalogLocale(locale);
 	const query = {
 		exercise: `SELECT 'exercise' AS entity_type, entity.id AS entity_id,
+			entity.catalog_key,
 			COALESCE(translation.name, entity.name) AS name,
 			entity.name AS canonical_name, NULL::integer AS parent_exercise_id,
 			entity.movement_pattern_id, movement.name AS movement_pattern,
@@ -116,6 +117,7 @@ export async function findMediaManagementEntity(
 			${localizedNameJoins.exercise}
 			WHERE entity.id = $2`,
 		exercise_variant: `SELECT 'exercise_variant' AS entity_type, entity.id AS entity_id,
+			entity.catalog_key,
 			COALESCE(translation.name, entity.name) AS name,
 			entity.name AS canonical_name, entity.exercise_id AS parent_exercise_id,
 			parent.name AS parent_name,
@@ -128,6 +130,7 @@ export async function findMediaManagementEntity(
 			${localizedNameJoins.exercise_variant}
 			WHERE entity.owner_user_id IS NULL AND entity.id = $2`,
 		muscle: `SELECT 'muscle' AS entity_type, entity.id AS entity_id,
+			entity.catalog_key,
 			COALESCE(translation.name, entity.common_name) AS name,
 			entity.common_name AS canonical_name, NULL::integer AS parent_exercise_id,
 			NULL::integer AS movement_pattern_id, NULL::text AS movement_pattern,
@@ -136,6 +139,7 @@ export async function findMediaManagementEntity(
 			${localizedNameJoins.muscle}
 			WHERE entity.id = $2`,
 		equipment: `SELECT 'equipment' AS entity_type, entity.id AS entity_id,
+			entity.catalog_key,
 			COALESCE(translation.name, entity.name) AS name,
 			entity.name AS canonical_name, NULL::integer AS parent_exercise_id,
 			NULL::integer AS movement_pattern_id, NULL::text AS movement_pattern,
@@ -144,6 +148,7 @@ export async function findMediaManagementEntity(
 			${localizedNameJoins.equipment}
 			WHERE entity.id = $2`,
 		movement_pattern: `SELECT 'movement_pattern' AS entity_type, entity.id AS entity_id,
+			entity.catalog_key,
 			COALESCE(translation.name, entity.name) AS name,
 			entity.name AS canonical_name, NULL::integer AS parent_exercise_id,
 			NULL::integer AS movement_pattern_id, NULL::text AS movement_pattern,

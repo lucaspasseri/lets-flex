@@ -12,6 +12,7 @@
 .media-management__entity,
 .media-management__panel,
 .media-management__generation,
+.media-management__canonical,
 .media-management__removal {
 	min-width: 0;
 	border: 1px solid var(--color-border);
@@ -204,6 +205,68 @@
 	color: var(--color-action);
 	font-size: 0.7rem;
 	font-weight: 750;
+}
+
+.media-management__entity-statuses {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.45rem;
+}
+
+.media-management__entity-status--canonical,
+.media-management__canonical-badge {
+	border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+	color: var(--color-accent);
+}
+
+.media-management__canonical {
+	display: grid;
+	gap: 1rem;
+	padding: clamp(1rem, 3vw, 1.4rem);
+	border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+}
+
+.media-management__canonical-badge {
+	flex: 0 0 auto;
+	padding: 0.35rem 0.65rem;
+	border: 1px solid;
+	border-radius: 999px;
+	font-size: 0.7rem;
+	font-weight: 750;
+}
+
+.media-management__canonical-state {
+	display: grid;
+	gap: 0.3rem;
+	padding: 0.8rem 0.9rem;
+	border-inline-start: 3px solid var(--color-action);
+	background: color-mix(in srgb, var(--color-action) 7%, var(--color-page));
+}
+
+.media-management__canonical-state--active {
+	border-color: var(--color-accent);
+	background: color-mix(in srgb, var(--color-accent) 8%, var(--color-page));
+}
+
+.media-management__canonical-state p,
+.media-management__canonical-selection {
+	color: var(--color-text-muted);
+	font-size: 0.8rem;
+	line-height: 1.45;
+}
+
+.media-management__canonical-selection {
+	display: grid;
+	gap: 0.2rem;
+	padding: 0.75rem 0.85rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.7rem;
+	background: var(--color-page);
+}
+
+.media-management__canonical-selection strong {
+	color: var(--color-text);
 }
 
 .media-management__entity-parent {
@@ -462,6 +525,10 @@
 	.media-management__entity-heading {
 		align-items: start;
 		flex-direction: column;
+	}
+
+	.media-management__entity-statuses {
+		justify-content: flex-start;
 	}
 
 	.media-management__selector-actions,

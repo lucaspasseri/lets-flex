@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
 	approveMediaGenerationCandidateBodySchema,
+	canonicalMediaBodySchema,
 	existingMediaBodySchema,
 	generateMediaBodySchema,
 	mediaGenerationCandidateParamsSchema,
@@ -35,6 +36,14 @@ test("media management schemas normalize supported entity and optional alt-text 
 			altTextPtBr: undefined,
 		},
 	);
+	assert.deepEqual(
+		canonicalMediaBodySchema.parse({
+			entityType: "exercise",
+			entityId: "9",
+			mediaAssetId: "12",
+		}),
+		{ entityType: "exercise", entityId: 9, mediaAssetId: 12 },
+	);
 });
 
 test("media management schemas reject unsupported entities, IDs, assets, and long alt text", () => {
@@ -45,6 +54,13 @@ test("media management schemas reject unsupported entities, IDs, assets, and lon
 	);
 	assert.throws(() =>
 		existingMediaBodySchema.parse({
+			entityType: "exercise",
+			entityId: "9",
+			mediaAssetId: "0",
+		}),
+	);
+	assert.throws(() =>
+		canonicalMediaBodySchema.parse({
 			entityType: "exercise",
 			entityId: "9",
 			mediaAssetId: "0",

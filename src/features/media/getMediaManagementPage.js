@@ -7,6 +7,7 @@ import {
 import { findLatestPendingMediaGenerationCandidate } from "./mediaGenerationCandidates.js";
 import { supportsMediaGenerationEntity } from "./mediaGenerationPolicy.js";
 import { resolveEntityMediaFromAssignments } from "./resolveEntityMedia.js";
+import { readCanonicalMediaManifest } from "./canonicalMediaManifestStore.js";
 
 /** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
 
@@ -14,7 +15,7 @@ import { resolveEntityMediaFromAssignments } from "./resolveEntityMedia.js";
  * Load the data needed by the admin editor. The effective preview uses the same assignment
  * resolver as normal application pages and never exposes database rows to the view directly.
  *
- * @param {{entityType?: unknown, entityTypeFilter?: unknown, entityId?: unknown, search?: unknown, locale?: unknown}} [input]
+ * @param {{entityType?: unknown, entityTypeFilter?: unknown, entityId?: unknown, search?: unknown, locale?: unknown, canonicalMediaManifestStore?: {read: () => Promise<ReadonlyArray<import("./media.types.js").CanonicalMediaManifestEntry>>}}} [input]
  * @param {DatabaseClient} [db]
  */
 export default async function getMediaManagementPage(input = {}, db = pool) {
@@ -26,6 +27,8 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 		input.locale === "pt-BR" ? "pt-BR" : "en"
 	);
 	const normalizedSearch = typeof input.search === "string" ? input.search.trim() : "";
+	const readManifest =
+		input.canonicalMediaManifestStore?.read ?? readCanonicalMediaManifest;
 	const options = await findMediaManagementEntityOptions(
 		{
 			locale: input.locale,
@@ -69,12 +72,13 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 			? [{ entityType: "movement_pattern", entityId: selected.movement_pattern_id }]
 			: []),
 	];
-	const [assignments, generationCandidate] = await Promise.all([
+	const [assignments, generationCandidate, canonicalManifest] = await Promise.all([
 		findPrimaryMediaAssignments(candidates, db),
 		findLatestPendingMediaGenerationCandidate(
 			{ entityType: selected.entity_type, entityId: selected.entity_id },
 			db,
 		),
+		readManifest(),
 	]);
 	const request = {
 		entityType: selected.entity_type,
@@ -98,6 +102,11 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 			assignment.entity_type === selected.entity_type &&
 			assignment.entity_id === selected.entity_id,
 	);
+	const canonicalEntry = canonicalManifest.find(
+		(entry) =>
+			entry.entityType === selected.entity_type &&
+			entry.entityKey === selected.catalog_key,
+	);
 
 	return {
 		options,
@@ -110,6 +119,7 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 			canGenerate: supportsMediaGenerationEntity(selected.entity_type),
 			request,
 			directAssignment,
+			canonicalEntry: canonicalEntry ?? null,
 			effectiveMedia,
 			effectiveSource: effectiveMedia.isFallback
 				? effectiveMedia.fallbackType

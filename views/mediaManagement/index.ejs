@@ -9,6 +9,7 @@
 	const existingErrors = management.forms.existing.errors?.fieldErrors ?? {};
 	const existingFormErrors = management.forms.existing.errors?.formErrors ?? [];
 	const removeFormErrors = management.forms.remove?.errors?.formErrors ?? [];
+	const canonicalFormErrors = management.forms.canonical?.errors?.formErrors ?? [];
 %>
 
 <main class="main media-management">
@@ -79,7 +80,10 @@
 					<h2 id="media-entity-heading"><%= selected.name %></h2>
 					<% if (selected.parentName) { %><p class="media-management__entity-parent"><%= translate("mediaManagement.baseExercise", { defaultValue: "Base exercise" }) %>: <%= selected.parentName %></p><% } %>
 				</div>
-				<span class="media-management__entity-status"><%= selected.effectiveSource %></span>
+				<div class="media-management__entity-statuses">
+					<span class="media-management__entity-status"><%= selected.effectiveSource %></span>
+					<span class="media-management__entity-status media-management__entity-status--canonical"><%= selected.canonicalStatusLabel %></span>
+				</div>
 			</div>
 			<div class="media-management__entity-grid">
 				<div class="media-management__preview-column">
@@ -165,6 +169,43 @@
 				<% } %>
 			</section>
 				</div>
+
+				<section class="media-management__canonical" aria-labelledby="media-canonical-heading">
+					<div class="media-management__section-heading">
+						<div>
+							<p class="media-management__eyebrow"><%= translate("mediaManagement.canonicalEyebrow", { defaultValue: "Durable catalog state" }) %></p>
+							<h2 id="media-canonical-heading"><%= translate("mediaManagement.canonicalHeading", { defaultValue: "Canonical media" }) %></h2>
+						</div>
+						<span class="media-management__canonical-badge"><%= selected.canonicalStatusLabel %></span>
+					</div>
+					<% if (selected.directIsCanonical) { %>
+						<div class="media-management__canonical-state media-management__canonical-state--active" role="status">
+							<strong><%= translate("mediaManagement.canonicalActiveTitle", { defaultValue: "This image is canonical for this entity." }) %></strong>
+							<p><%= translate("mediaManagement.canonicalActiveDescription", { defaultValue: "It is the durable source used to reconstruct this relationship after a database reset." }) %></p>
+						</div>
+					<% } else if (selected.canPromote) { %>
+						<p class="media-management__panel-description"><%= translate("mediaManagement.canonicalDescription", { defaultValue: "Promotion copies the selected direct asset into the durable catalog source. Uploading or assigning alone does not make an image canonical." }) %></p>
+						<% if (canonicalFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% canonicalFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %>
+						<form class="media-management__form" method="POST" action="/admin/media/canonical">
+							<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" />
+							<input type="hidden" name="entityType" value="<%= selected.entityTypeValue %>" />
+							<input type="hidden" name="entityId" value="<%= selected.entityValue %>" />
+							<input type="hidden" name="mediaAssetId" value="<%= selected.direct.media_asset_id %>" />
+							<div class="media-management__canonical-selection"><span><%= translate("mediaManagement.promotingLabel", { defaultValue: "Selected asset" }) %></span><strong><%= selected.directAssetLabel %></strong></div>
+							<div class="media-management__form-actions"><button class="shared-button shared-button--primary" type="submit"><%= translate("mediaManagement.makeCanonicalAction", { defaultValue: "Make canonical" }) %></button></div>
+						</form>
+					<% } else if (selected.direct) { %>
+						<div class="media-management__canonical-state" role="status">
+							<strong><%= translate("mediaManagement.canonicalNotReadyTitle", { defaultValue: "Assigned, not canonical" }) %></strong>
+							<p><%= translate("mediaManagement.canonicalNotReadyDescription", { defaultValue: "Add English and Brazilian Portuguese descriptions and use a supported image type before promotion." }) %></p>
+						</div>
+					<% } else { %>
+						<div class="media-management__canonical-state" role="status">
+							<strong><%= translate("mediaManagement.canonicalUnassignedTitle", { defaultValue: "No direct asset is assigned." }) %></strong>
+							<p><%= translate("mediaManagement.canonicalUnassignedDescription", { defaultValue: "Upload or assign an asset first, then review it here before making it canonical." }) %></p>
+						</div>
+					<% } %>
+				</section>
 
 				<section class="media-management__removal" aria-labelledby="media-removal-heading">
 			<div><p class="media-management__eyebrow"><%= translate("mediaManagement.removalEyebrow", { defaultValue: "Assignment control" }) %></p><h2 id="media-removal-heading"><%= translate("mediaManagement.removalHeading", { defaultValue: "Remove direct media" }) %></h2><p><%= selected.direct ? translate("mediaManagement.removeDescription", { defaultValue: "Removing this assignment keeps the asset and restores inherited or fallback media for this entity." }) : translate("mediaManagement.noDirectDescription", { defaultValue: "There is no direct assignment to remove. The preview shows the current inherited or fallback result." }) %></p><% if (removeFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% removeFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %></div>

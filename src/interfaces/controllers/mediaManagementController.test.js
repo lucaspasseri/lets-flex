@@ -28,6 +28,20 @@ test("media operation feedback uses explicit success semantics for upload, assig
 	}
 });
 
+test("canonical feedback names the image and entity", () => {
+	const feedback = createMediaManagementPageFeedback(
+		translate,
+		"success",
+		"canonical",
+		{
+			entityName: "Bench Press",
+			imageLabel: "“Bench press”",
+		},
+	);
+
+	assert.equal(feedback.message, "“Bench press” is now canonical for Bench Press.");
+});
+
 test("media validation feedback uses explicit error semantics and never success copy", () => {
 	const feedback = createMediaManagementPageFeedback(translate, "error");
 

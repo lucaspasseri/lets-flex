@@ -16,6 +16,13 @@ const entityTypeDefaults = Object.freeze({
 	movement_pattern: "Movement pattern",
 });
 
+const canonicalMimeTypes = new Set([
+	"image/png",
+	"image/jpeg",
+	"image/webp",
+	"image/svg+xml",
+]);
+
 function entityLabel(t, entityType) {
 	return t(`mediaManagement.entities.${entityLabelKeys[entityType] ?? "exercise"}`, {
 		defaultValue: entityType,
@@ -53,6 +60,12 @@ function fieldValue(formState, name, fallback = "") {
 	return formState?.values?.[name] ?? fallback;
 }
 
+function hasLocalizedCanonicalAltText(asset) {
+	return [asset?.alt_text_en, asset?.alt_text_pt_br].every(
+		(value) => typeof value === "string" && value.trim() !== "",
+	);
+}
+
 /**
  * @param {{page: object, currentUser: object | null, data: any, formState?: any, pageFeedback?: any, translate?: Function}} input
  */
@@ -72,6 +85,15 @@ export default function createMediaManagementPageViewModel({
 		? `${selected.entity_type}:${selected.entity_id}`
 		: "";
 	const selectedAssetId = fieldValue(formState, "mediaAssetId", direct?.media_asset_id);
+	const canonicalStorageKey = selected?.canonicalEntry?.path ?? null;
+	const directIsCanonical = Boolean(
+		direct && canonicalStorageKey && direct.storage_key === canonicalStorageKey,
+	);
+	const directIsEligible = Boolean(
+		direct &&
+		canonicalMimeTypes.has(direct.mime_type) &&
+		hasLocalizedCanonicalAltText(direct),
+	);
 	const entityTypeOptions = Object.entries(entityLabelKeys).map(([value]) => ({
 		value,
 		label: entityTypeLabel(t, value),
@@ -126,6 +148,21 @@ export default function createMediaManagementPageViewModel({
 						canonicalName: selected.canonical_name,
 						parentName: selected.parent_name ?? null,
 						direct,
+						canonicalEntry: selected.canonicalEntry ?? null,
+						canonicalStorageKey,
+						directIsCanonical,
+						directIsEligible,
+						canPromote: Boolean(direct && !directIsCanonical && directIsEligible),
+						canonicalStatusLabel: directIsCanonical
+							? t("mediaManagement.canonicalStatus", { defaultValue: "Canonical" })
+							: direct
+								? t("mediaManagement.assignedNotCanonicalStatus", {
+										defaultValue: "Assigned · not canonical",
+									})
+								: t("mediaManagement.unassignedStatus", { defaultValue: "Unassigned" }),
+						directAssetLabel: direct
+							? `#${direct.media_asset_id}${direct.alt_text_en ? ` · ${direct.alt_text_en}` : ""}`
+							: null,
 						effectiveMedia: selected.effectiveMedia,
 						effectiveSource: selectedSource,
 						effectiveSourceDetail: selected.effectiveMedia.isFallback
@@ -161,13 +198,35 @@ export default function createMediaManagementPageViewModel({
 				: null,
 			assets: data.assets.map((asset) => {
 				const altText = asset.alt_texts?.[locale] ?? asset.alt_texts?.en ?? null;
+				const isCanonical = Boolean(
+					canonicalStorageKey && asset.storage_key === canonicalStorageKey,
+				);
+				const isAssigned = Boolean(direct && asset.id === direct.media_asset_id);
+				const status = isCanonical
+					? "canonical"
+					: isAssigned
+						? "assigned"
+						: "unassigned";
+				const statusLabel = {
+					canonical: t("mediaManagement.canonicalStatus", {
+						defaultValue: "Canonical",
+					}),
+					assigned: t("mediaManagement.assignedNotCanonicalStatus", {
+						defaultValue: "Assigned · not canonical",
+					}),
+					unassigned: t("mediaManagement.unassignedStatus", {
+						defaultValue: "Unassigned",
+					}),
+				}[status];
 				return {
 					id: asset.id,
-					label: altText
-						? `#${asset.id} · ${altText}`
-						: `#${asset.id} · ${asset.width}×${asset.height} · ${asset.mime_type}`,
+					label: `${altText ? `#${asset.id} · ${altText}` : `#${asset.id} · ${asset.width}×${asset.height} · ${asset.mime_type}`} · ${statusLabel}`,
 					selected: String(asset.id) === String(selectedAssetId),
 					altText,
+					status,
+					statusLabel,
+					isCanonical,
+					isAssigned,
 				};
 			}),
 			forms: {
@@ -196,6 +255,9 @@ export default function createMediaManagementPageViewModel({
 				},
 				remove: {
 					errors: formState?.kind === "remove" ? formState.errors : null,
+				},
+				canonical: {
+					errors: formState?.kind === "canonical" ? formState.errors : null,
 				},
 				generation: {
 					values: { refinement: fieldValue(formState, "refinement", "") },

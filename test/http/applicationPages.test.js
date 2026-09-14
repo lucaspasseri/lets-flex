@@ -38,6 +38,43 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	let passwordResetDeliveries;
 	let emailService;
 	let generationProviderRequests;
+	let promotionManifest = [];
+	let initialPromotionManifest = [];
+	const promotionSourceStorage = {
+		async exists(storageKey) {
+			return storageKey === "/media/uploads/http-canonical.png";
+		},
+		async read() {
+			return Buffer.from("http canonical source image");
+		},
+	};
+	const promotionCanonicalStorage = {
+		async exists() {
+			return false;
+		},
+		async read() {
+			return Buffer.from("http canonical source image");
+		},
+		async save(_buffer, { extension, filename }) {
+			return {
+				storageKey: `/media/catalog/promoted/${filename}.${extension}`,
+				async remove() {},
+			};
+		},
+	};
+	const promotionManifestStore = {
+		async read() {
+			return structuredClone(promotionManifest);
+		},
+		async update(callback) {
+			const previous = structuredClone(promotionManifest);
+			promotionManifest = await callback(structuredClone(promotionManifest));
+			return { previous, manifest: structuredClone(promotionManifest) };
+		},
+		async write(next) {
+			promotionManifest = structuredClone(next);
+		},
+	};
 
 	before(async () => {
 		process.env.DATABASE_URL = testDatabaseUrl;
@@ -54,6 +91,10 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		passwordHash = await hashPassword("correct horse battery staple");
 		db = new Client({ connectionString: testDatabaseUrl });
 		await db.connect();
+		const { readCanonicalMediaManifest } =
+			await import("../../src/features/media/canonicalMediaManifestStore.js");
+		initialPromotionManifest = await readCanonicalMediaManifest();
+		promotionManifest = structuredClone(initialPromotionManifest);
 		const { createApp } = await import("../../app.js");
 		server = createApp({
 			emailService,
@@ -77,6 +118,11 @@ integration("authentication and authorization", { concurrency: false }, () => {
 						};
 					},
 				},
+			},
+			mediaPromotionDependencies: {
+				sourceStorage: promotionSourceStorage,
+				canonicalStorage: promotionCanonicalStorage,
+				manifestStore: promotionManifestStore,
 			},
 		}).listen(0, "127.0.0.1");
 		await new Promise((resolve, reject) => {
@@ -161,6 +207,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	beforeEach(async () => {
 		emailService.clear();
 		generationProviderRequests = [];
+		promotionManifest = structuredClone(initialPromotionManifest);
 		await db.query(schemaSql);
 		await db.query(seedSql);
 		await db.query(
@@ -3190,6 +3237,121 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		});
 		assert.equal(mismatchedGeneration.response.status, 409);
 		assert.equal(generationProviderRequests.length, 1);
+	});
+
+	test("canonical media promotion is admin-only, CSRF-protected, and durable at the HTTP boundary", async () => {
+		const entity = (
+			await db.query(
+				`INSERT INTO exercises (catalog_key, name)
+				 VALUES ('http-canonical-promotion', 'HTTP Canonical Promotion')
+				 RETURNING id`,
+			)
+		).rows[0];
+		const asset = (
+			await db.query(
+				`INSERT INTO media_assets
+					(storage_key, mime_type, width, height, source)
+				 VALUES ('/media/uploads/http-canonical.png', 'image/png', 640, 480, 'http-test')
+				 RETURNING id`,
+			)
+		).rows[0];
+		await db.query(
+			`INSERT INTO media_asset_alt_texts (media_asset_id, locale, alt_text)
+			 VALUES ($1, 'en', 'HTTP canonical image'), ($1, 'pt-BR', 'Imagem canônica HTTP')`,
+			[asset.id],
+		);
+		await db.query(
+			`INSERT INTO entity_media (media_asset_id, entity_type, entity_id, role)
+			 VALUES ($1, 'exercise', $2, 'primary')`,
+			[asset.id, entity.id],
+		);
+
+		const standard = agent();
+		await login(standard);
+		assert.equal(
+			(
+				await standard.request("/admin/media/canonical", {
+					method: "POST",
+					form: {
+						entityType: "exercise",
+						entityId: String(entity.id),
+						mediaAssetId: String(asset.id),
+					},
+				})
+			).response.status,
+			403,
+		);
+
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const page = await admin.request(`/admin/media?entity=exercise:${entity.id}`);
+		assert.equal(page.response.status, 200);
+		assert.match(page.text, /Assigned · not canonical/);
+		assert.match(page.text, /Make canonical/);
+
+		const missingCsrf = await admin.request("/admin/media/canonical", {
+			method: "POST",
+			form: {
+				entityType: "exercise",
+				entityId: String(entity.id),
+				mediaAssetId: String(asset.id),
+			},
+		});
+		assert.equal(missingCsrf.response.status, 403);
+
+		const invalid = await admin.request("/admin/media/canonical", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				entityType: "exercise",
+				entityId: String(entity.id),
+				mediaAssetId: "0",
+			},
+		});
+		assert.equal(invalid.response.status, 422);
+		assert.match(invalid.text, /class="page-feedback page-feedback--error"/);
+
+		const promoted = await admin.request("/admin/media/canonical", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				entityType: "exercise",
+				entityId: String(entity.id),
+				mediaAssetId: String(asset.id),
+			},
+		});
+		assert.equal(promoted.response.status, 302);
+		assert.match(
+			promoted.response.headers.get("location") ?? "",
+			/\/admin\/media\?entity=exercise%3A\d+&saved=canonical/,
+		);
+
+		const successPage = await admin.request(promoted.response.headers.get("location"));
+		assert.match(
+			successPage.text,
+			/“HTTP canonical image” is now canonical for HTTP Canonical Promotion\./,
+		);
+		assert.match(successPage.text, /Canonical/);
+		const assignment = (
+			await db.query(
+				`SELECT media_assets.storage_key, media_assets.source
+				 FROM entity_media
+				 JOIN media_assets ON media_assets.id = entity_media.media_asset_id
+				 WHERE entity_media.entity_type = 'exercise' AND entity_media.entity_id = $1`,
+				[entity.id],
+			)
+		).rows[0];
+		assert.equal(assignment.source, "curated");
+		assert.match(
+			assignment.storage_key,
+			/\/media\/catalog\/promoted\/exercise-http-canonical-promotion-/,
+		);
+		assert.equal(
+			(await promotionManifestStore.read()).find(
+				(entry) => entry.entityKey === "http-canonical-promotion",
+			)?.path,
+			assignment.storage_key,
+		);
 	});
 
 	test("Library deletes only owned sessions and archives referenced templates", async () => {

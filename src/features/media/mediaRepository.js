@@ -156,6 +156,28 @@ export async function mediaEntityExists({ entityType, entityId }, db = pool) {
 }
 
 /**
+ * Resolve a supported global entity to the stable key required by durable canonical media.
+ * Private exercise variants and catalog rows without a key are intentionally not canonicalizable.
+ *
+ * @param {{entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityId: number}} input
+ * @param {DatabaseClient} [db]
+ */
+export async function findMediaEntityCatalogRecord(
+	{ entityType, entityId },
+	db = pool,
+) {
+	assertAssignableMediaEntityType(entityType);
+	const { table: entityTable, where = "TRUE" } = entityDefinitions[entityType];
+	const { rows } = await db.query(
+		`SELECT entity.id, entity.catalog_key
+		 FROM ${entityTable} AS entity
+		 WHERE ${where} AND entity.id = $1`,
+		[entityId],
+	);
+	return rows[0] ?? null;
+}
+
+/**
  * Assign or replace the primary asset for one existing supported entity.
  *
  * @param {{mediaAssetId: number, entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityId: number, sortOrder?: number}} input

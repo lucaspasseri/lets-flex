@@ -13,7 +13,12 @@ const entityDefinitions = Object.freeze({
 });
 
 const catalogKeyPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const canonicalMimeTypes = new Set(["image/png", "image/svg+xml"]);
+const canonicalMimeTypes = new Set([
+	"image/png",
+	"image/jpeg",
+	"image/webp",
+	"image/svg+xml",
+]);
 const publicDirectory = path.resolve(
 	path.dirname(fileURLToPath(import.meta.url)),
 	"../public",

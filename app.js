@@ -45,6 +45,7 @@ const __dirname = path.dirname(__filename);
 export function createApp(options = {}) {
 	const app = express();
 	app.locals.mediaGenerationDependencies = options.mediaGenerationDependencies ?? {};
+	app.locals.mediaPromotionDependencies = options.mediaPromotionDependencies ?? {};
 	const passport = options.passport ?? createPassport();
 	let emailService = options.emailService;
 	if (!emailService) {
