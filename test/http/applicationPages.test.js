@@ -47,6 +47,13 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		async read() {
 			return Buffer.from("http canonical source image");
 		},
+		async put() {
+			return { storageKey: "/media/uploads/unused.png" };
+		},
+		async delete() {},
+		getPublicUrl(storageKey) {
+			return storageKey;
+		},
 	};
 	const promotionCanonicalStorage = {
 		async exists() {
@@ -55,11 +62,29 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		async read() {
 			return Buffer.from("http canonical source image");
 		},
-		async save(_buffer, { extension, filename }) {
-			return {
-				storageKey: `/media/catalog/promoted/${filename}.${extension}`,
-				async remove() {},
-			};
+		async put(_buffer, { extension, filename }) {
+			return { storageKey: `/media/catalog/promoted/${filename}.${extension}` };
+		},
+		async delete() {},
+		getPublicUrl(storageKey) {
+			return storageKey;
+		},
+	};
+	const promotionObjectStorage = {
+		async exists(storageKey) {
+			return storageKey === "assets/http-muscle-22.jpg";
+		},
+		async read() {
+			return Buffer.from("http muscle object");
+		},
+		async put() {
+			throw new Error("object-backed promotion must not upload");
+		},
+		async delete() {
+			throw new Error("object-backed promotion must not delete");
+		},
+		getPublicUrl(storageKey) {
+			return storageKey;
 		},
 	};
 	const promotionManifestStore = {
@@ -120,6 +145,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				},
 			},
 			mediaPromotionDependencies: {
+				objectStorage: promotionObjectStorage,
 				sourceStorage: promotionSourceStorage,
 				canonicalStorage: promotionCanonicalStorage,
 				manifestStore: promotionManifestStore,
@@ -3351,6 +3377,87 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				(entry) => entry.entityKey === "http-canonical-promotion",
 			)?.path,
 			assignment.storage_key,
+		);
+	});
+
+	test("canonical promotion reuses an existing object-backed muscle asset at the HTTP boundary", async () => {
+		const asset = (
+			await db.query(
+				`INSERT INTO media_assets
+					(storage_key, mime_type, width, height, source)
+				 VALUES ('assets/http-muscle-22.jpg', 'image/jpeg', 1124, 1092, 'admin-upload')
+				 RETURNING id, storage_key`,
+			)
+		).rows[0];
+		assert.equal(asset.id, 71);
+		await db.query(
+			`INSERT INTO media_asset_alt_texts (media_asset_id, locale, alt_text)
+			 VALUES ($1, 'en', 'HTTP muscle image'), ($1, 'pt-BR', 'Imagem do músculo HTTP')`,
+			[asset.id],
+		);
+		await db.query(
+			`UPDATE entity_media
+			 SET media_asset_id = $1
+			 WHERE entity_type = 'muscle' AND entity_id = 22 AND role = 'primary'`,
+			[asset.id],
+		);
+
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const page = await admin.request("/admin/media?entity=muscle:22");
+		assert.equal(page.response.status, 200);
+		assert.match(page.text, /Make canonical/);
+
+		const promoted = await admin.request("/admin/media/canonical", {
+			method: "POST",
+			form: {
+				_csrf: csrfFrom(page.text),
+				entityType: "muscle",
+				entityId: "22",
+				mediaAssetId: "71",
+			},
+		});
+		assert.equal(promoted.response.status, 302);
+		assert.match(
+			promoted.response.headers.get("location") ?? "",
+			/\/admin\/media\?entity=muscle%3A22&saved=canonical/,
+		);
+
+		const assignment = (
+			await db.query(
+				`SELECT entity_media.media_asset_id, media_assets.storage_key
+				 FROM entity_media
+				 JOIN media_assets ON media_assets.id = entity_media.media_asset_id
+				 WHERE entity_media.entity_type = 'muscle'
+				   AND entity_media.entity_id = 22
+				   AND entity_media.role = 'primary'`,
+			)
+		).rows[0];
+		assert.deepEqual(assignment, {
+			media_asset_id: 71,
+			storage_key: "assets/http-muscle-22.jpg",
+		});
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM media_assets WHERE storage_key = $1",
+					["assets/http-muscle-22.jpg"],
+				)
+			).rows[0].count,
+			1,
+		);
+
+		const successPage = await admin.request(promoted.response.headers.get("location"));
+		assert.equal(successPage.response.status, 200);
+		assert.match(successPage.text, /HTTP muscle image/);
+		assert.match(successPage.text, /This image is canonical for this entity\./);
+		assert.doesNotMatch(successPage.text, /Make canonical/);
+		assert.match(successPage.text, /src="assets\/http-muscle-22\.jpg"/);
+		assert.equal(
+			(await promotionManifestStore.read()).find(
+				(entry) => entry.entityType === "muscle" && entry.entityKey === "abductors",
+			)?.storageKey,
+			"assets/http-muscle-22.jpg",
 		);
 	});
 

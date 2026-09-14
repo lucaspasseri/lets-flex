@@ -9,13 +9,13 @@ import {
 	replaceMediaAssetAltTexts,
 } from "./mediaRepository.js";
 import { MediaUploadValidationError, inspectUploadedImage } from "./mediaUpload.js";
-import { createLocalMediaStorage } from "./mediaStorage.js";
+import { assertMediaStorage, compensateMediaStorageWrite } from "./storage/storage.js";
 
 /** @typedef {import("pg").Pool} DatabasePool */
 /** @typedef {import("pg").PoolClient} DatabaseClient */
+/** @typedef {import("./storage/storage.js").MediaStorage} MediaStorage */
 /** @typedef {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} MediaAssignableEntityType */
 
-const defaultStorage = createLocalMediaStorage();
 const MAX_ALT_TEXT_LENGTH = 500;
 const SUPPORTED_ENTITY_TYPES = new Set([
 	"exercise",
@@ -114,7 +114,7 @@ function validateMediaAssetId(mediaAssetId) {
  * assignment or intentionally leave a storage object behind.
  *
  * @param {{entityType: string, entityId: number, file: Record<string, any>, altTexts?: unknown}} input
- * @param {{db?: DatabasePool, storage?: ReturnType<typeof createLocalMediaStorage>}} [dependencies]
+ * @param {{db?: DatabasePool, storage?: MediaStorage}} [dependencies]
  */
 export async function createAndAssignUploadedMedia(input, dependencies = {}) {
 	const entityType = validateEntityIdentity(input.entityType, input.entityId);
@@ -130,8 +130,8 @@ export async function createAndAssignUploadedMedia(input, dependencies = {}) {
 		);
 	}
 
-	const storage = dependencies.storage ?? defaultStorage;
-	const stored = await storage.save(inspected.buffer, {
+	const storage = assertMediaStorage(dependencies.storage);
+	const stored = await storage.put(inspected.buffer, {
 		extension: inspected.extension,
 	});
 	try {
@@ -160,8 +160,7 @@ export async function createAndAssignUploadedMedia(input, dependencies = {}) {
 			return { asset, assignment };
 		});
 	} catch (error) {
-		await stored.remove().catch(() => {});
-		throw error;
+		return compensateMediaStorageWrite(storage, stored.storageKey, error);
 	}
 }
 

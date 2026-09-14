@@ -10,12 +10,13 @@ import { resolveEntityMediaFromAssignments } from "./resolveEntityMedia.js";
 import { readCanonicalMediaManifest } from "./canonicalMediaManifestStore.js";
 
 /** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
+/** @typedef {import("./storage/mediaUrl.js").MediaUrlResolver} MediaUrlResolver */
 
 /**
  * Load the data needed by the admin editor. The effective preview uses the same assignment
  * resolver as normal application pages and never exposes database rows to the view directly.
  *
- * @param {{entityType?: unknown, entityTypeFilter?: unknown, entityId?: unknown, search?: unknown, locale?: unknown, canonicalMediaManifestStore?: {read: () => Promise<ReadonlyArray<import("./media.types.js").CanonicalMediaManifestEntry>>}}} [input]
+ * @param {{entityType?: unknown, entityTypeFilter?: unknown, entityId?: unknown, search?: unknown, locale?: unknown, mediaUrlResolver?: MediaUrlResolver, canonicalMediaManifestStore?: {read: () => Promise<ReadonlyArray<import("./media.types.js").CanonicalMediaManifestEntry>>}}} [input]
  * @param {DatabaseClient} [db]
  */
 export default async function getMediaManagementPage(input = {}, db = pool) {
@@ -96,7 +97,9 @@ export default async function getMediaManagementPage(input = {}, db = pool) {
 		label: selected.name,
 		locale: normalizedLocale,
 	};
-	const effectiveMedia = resolveEntityMediaFromAssignments(request, assignments);
+	const effectiveMedia = resolveEntityMediaFromAssignments(request, assignments, {
+		mediaUrlResolver: input.mediaUrlResolver,
+	});
 	const directAssignment = assignments.find(
 		(assignment) =>
 			assignment.entity_type === selected.entity_type &&

@@ -1,204 +1,95 @@
 # Current Goal
 
-## Goal: Canonical Media Promotion
+## Goal: Professional object storage for media
 
 ### Status
 
-**Completed** on 2026-09-14 after explicit user approval. Actions 1, 2, and 3 are completed.
-
-### Completion outcome
-
-Canonical Media Promotion is complete. Authorized admins can explicitly promote eligible reviewed
-media from Manage Media; promotion uses stable catalog identity, deterministic repository-controlled
-canonical storage, transactional primary-assignment replacement, idempotency, and durable seed
-reconstruction. Authorization, CSRF, validation, localized feedback, reset reproducibility, and
-application startup verification are recorded in this document and `docs/current-actions.md`.
-
-No next goal is established by this completion. The repository has documented browser-check
-limitations and unrelated HTTP integration failures, but neither implies a required follow-up
-priority without user direction.
+**Active.** Actions 1–12 are **Completed** after explicit user approval and verification. No next
+action is currently prepared.
 
 ### Objective
 
-Allow an authorized admin to explicitly promote a reviewed media asset with **Make canonical** so
-that it becomes the entity's authoritative primary image, replaces any previous canonical image
-predictably, and is reconstructed after:
+Separate media metadata and entity relationships from media bytes and application runtime
+storage. Introduce Cloudflare R2 as the first provider through the AWS SDK for JavaScript v3,
+while keeping application layers behind a small provider-independent storage boundary.
+
+The production target is:
 
 ```text
-npm run db:reset → schema → seed → canonical media reconstruction → npm run dev
+PostgreSQL  → media metadata, canonical assignments, entity relationships
+Object store → image bytes
+Application  → provider-independent storage boundary and configured public URLs
 ```
 
-Extend the existing Manage Media workflow and local storage boundary. Do not introduce object
-storage, migrations, galleries, user-owned media, or unrelated media redesign.
+The existing canonical-media workflow, resolver fallbacks, admin media operations, and
+`npm run db:reset` behavior must remain predictable. Database reset may rebuild PostgreSQL
+metadata and relationships, but must never reset or delete object-storage contents.
 
-### Verified current architecture
+### Important invariants
 
-- `media_assets` stores reusable renderable records with storage key, MIME type, dimensions, source,
-  and localized alt text. It has no canonical flag or approval state; existing rows are treated as
-  approved renderable assets by the current application boundary.
-- `entity_media` is the current runtime assignment table. It permits only `primary` assignments and
-  enforces one `(entity_type, entity_id, role)` row, so `assignPrimaryMedia` already replaces an
-  assignment transactionally and idempotently. Removing an assignment does not remove its asset.
-- `media_generation_candidates` distinguishes pending/rejected/approved generated candidates.
-  Approval creates a normal media asset and primary assignment, but does not create durable reset
-  state.
-- `canonicalMediaManifest` is the source consumed by `db/mediaSeedSql.js`; the seed resolves its
-  stable `entityKey`/`catalog_key` values to fresh numeric IDs and reconstructs `media_assets`,
-  `entity_media`, and localized alt-text rows.
-- Stable `catalog_key` values are available for the five supported global entity types:
-  `exercise`, `exercise_variant`, `muscle`, `equipment`, and `movement_pattern`. Global variants are
-  restricted to `owner_user_id IS NULL`.
-- Admin Manage Media currently supports upload-and-assign, assign-existing, remove-assignment,
-  generated-candidate review, and approval. Its routes already use `requireAdmin`, CSRF-protected
-  state-changing forms, Zod validation, transactional media services, and clear page feedback.
-- The existing local media storage abstraction generates upload keys and removes failed writes, but
-  does not yet expose the read/copy or existence operations needed to promote an existing asset into
-  repository-controlled canonical media.
-- Runtime uploads live under ignored `public/media/uploads`. Their database rows and assignments
-  disappear on reset, and the files are not a reliable canonical source. The current source-
-  controlled catalog files and manifest entries are the reliable reset boundary.
+- PostgreSQL owns media metadata and relationships. Object storage owns media bytes. Database
+  resets must never implicitly reset object storage.
+- Canonical promotion changes media meaning/assignment and should not normally require moving,
+  duplicating, renaming, or reuploading a stored object.
+- Persist stable object keys, not Cloudflare-specific URLs. Public URLs are derived from
+  configuration at the application boundary.
+- Credentials remain server-side and development and production buckets/credentials remain
+  explicitly isolated.
+- Existing admin authorization, CSRF protection, upload validation, MIME checks, and cleanup
+  safeguards remain intact.
 
-### Delta classification
+### Historical related work
 
-- **Already satisfied / reuse:** supported entity validation, stable catalog identifiers, unique
-  primary assignment constraint, transactional assignment replacement, local media storage, admin
-  authorization, CSRF protection, localized alt text, resolver/fallback behavior, canonical seed
-  SQL, and existing Manage Media UI structure.
-- **Modify:** canonical manifest representation must support durable promoted entries without the
-  web server blindly rewriting `mediaManifest.js`; local storage must support the small promotion
-  file operations; the seed must consume the resulting canonical state without numeric IDs.
-- **Add:** canonical promotion service, stable-key entity lookup for promotion, explicit route and
-  validation, current/assigned/not-canonical UI state, replacement feedback, and focused tests.
-- **Repair / safeguard:** verify missing source files and invalid asset/entity combinations fail
-  without committing an assignment or deleting files still referenced elsewhere.
+Canonical Media Promotion was completed on 2026-09-14 immediately before this goal. Its verified
+repository baseline is reusable: stable catalog identifiers, the `media_assets`/`entity_media`
+model, transactional primary-assignment replacement, durable canonical manifest state, and the
+Manage Media promotion workflow. That work intentionally used local storage; this goal addresses
+the explicitly deferred provider/storage gap rather than redesigning canonical behavior.
 
-### Canonical representation decision
+### Action status
 
-The proposed single durable canonical source is one repository-controlled canonical media data file
-containing the complete stable-key manifest. The existing exported `canonicalMediaManifest` remains
-the application/seed-facing derived value from that source; it is not a second promotion overlay.
-Promotion will copy the selected local asset through the storage boundary to a deterministic
-catalog key, update the canonical data atomically, and assign the resulting canonical asset in the
-current transaction. Existing source-controlled files remain valid entries. The implementation
-must make the write boundary explicit and refuse or clearly report environments where the durable
-canonical data/file location is not writable; it must not silently rewrite production application
-source.
+1. **Audit the current media/storage flow — Completed.** Findings and verification evidence are
+   recorded in `docs/current-actions.md`; no runtime behavior was changed.
+2. **Introduce the provider-independent storage boundary — Completed.** Preserve local behavior
+   while moving provider-specific/file-system operations behind the application-owned contract.
+3. **Add the S3-compatible R2 implementation — Completed.** Use `@aws-sdk/client-s3`; no
+   presigned browser uploads.
+4. **Verify R2 with a controlled development asset — Completed.** Use only an explicitly selected
+   development bucket and disposable test object.
+5. **Define and validate the object-key strategy — Completed.** Decide the stable key format before
+   bulk migration or unnecessary renames.
+6. **Migrate existing development canonical media — Completed.** Make the import rerunnable and
+   retain local source files until verification is complete.
+7. **Switch media reads to configured public URLs — Completed.** Preserve presentation-ready view
+   models and resolver fallbacks. The configured development public-domain fetch is now verified.
+8. **Move new Admin Media writes to R2 — Completed.** Define compensation for remote-write/DB-write
+   partial failures and reference-aware deletion.
+9. **Regression-test canonical promotion with R2-backed media — Completed.** Promotion changes
+   database meaning/assignment while leaving the object unchanged; focused tests, the full suite,
+   and real development R2-backed read/identity/byte verification passed.
+10. **Verify database-reset reconstruction — Completed.** The guarded disposable reset
+    reconstructs 70 media assets, 70 assignments, and 140 localized rows with manifest-matching
+    R2 keys; the existing object remains byte-identical and application startup/resolution pass.
+11. **Prepare production configuration/custom-domain steps — Completed.** Documented the manual
+    production R2, public-domain, Render, isolation, rollout, and verification handoff without
+    mutating Cloudflare, Render, DNS, or production infrastructure.
+12. **Remove mutable local uploads as the persistent runtime store — Completed.** Production now
+    rejects the local persistent-media adapter while development and fallback behavior remain.
 
-The existing `mediaManifest` contextual fallback remains a resolver fallback, not an alternative
-canonical assignment source. Runtime uploads remain reusable input assets and are not canonical
-until explicitly promoted.
+### Scope and explicit deferrals
 
-### Action 1 implementation
+In scope: a small local adapter, one S3-compatible R2 adapter, configured public URL derivation,
+safe development migration/import, admin read/write integration, cleanup behavior, reset
+reconstruction, focused tests, and documentation.
 
-- The 68-entry canonical manifest now lives in the single repository-controlled
-  `data/canonical-media.json` source. `canonicalMediaManifest` and the resolver derive from that
-  data, while the seed continues to resolve stable keys to fresh IDs.
-- `canonicalMediaManifestStore` provides fresh reads, serialized in-process updates, and atomic
-  same-directory temporary-file replacement. It is the explicit maintenance boundary for durable
-  canonical metadata and does not rewrite `mediaManifest.js`.
-- `LocalMediaStorage` now exposes bounded `exists`/`read` operations and deterministic filenames in
-  addition to its existing save/remove contract. Promotion copies bytes to a content-addressed
-  `/media/catalog/promoted/...` key; prior files and reusable assets remain untouched.
-- `promoteMediaToCanonical` validates the supported entity, stable catalog key, asset metadata,
-  source file, MIME type, localized alt text, and deterministic destination. It writes the manifest,
-  creates a curated canonical asset, replaces the target's unique primary assignment transactionally,
-  and compensates the manifest/file when the database write fails. Re-promoting the current
-  canonical asset is idempotent.
-- The seed accepts the existing validated upload formats (`png`, `jpeg`, `webp`) in addition to the
-  existing SVG contract, so a promoted local asset remains reconstructable after reset.
+Deferred: presigned/direct browser uploads, multipart large-file uploads, image transformations,
+CDN optimization beyond basic delivery, lifecycle policies, complex garbage collection,
+cross-region replication, other providers, production mutation/deployment, galleries, and broad
+media-domain redesign.
 
-### Constraints
+### External/manual boundary
 
-- Use the existing schema → seed lifecycle; do not add a migration for this development-phase
-  workflow.
-- Preserve the current five supported entity types, stable-key seed lookups, localized metadata,
-  resolver inheritance/fallback behavior, uploads, assignment/removal, candidate review, and
-  existing auth/CSRF protections.
-- Keep one local storage implementation and expose only operations needed by promotion. Keep domain
-  logic independent of `public/media/...` paths so a later R2/S3 implementation can replace local
-  storage without redesigning promotion rules.
-- Do not delete an old file or reusable database asset merely because it is no longer canonical.
-- Do not implicitly promote on upload, assignment, or candidate approval; promotion must be an
-  intentional admin action.
-- Do not add remote providers, image transformations, galleries, user-owned media, or unrelated
-  layout cleanup.
-- Stop at **Ready for review** after implementation and verification. Do not mark this goal or its
-  action complete without explicit user approval.
-
-### Planned actions
-
-1. Implement the durable canonical data representation, local storage operations, stable entity
-   resolution, transactional/idempotent promotion service, and seed/reconstruction integration.
-2. Extend Manage Media with explicit **Make canonical** controls and visible canonical,
-   assigned-but-not-canonical, and unassigned states plus entity/image-specific success feedback.
-3. Add focused unit, repository, HTTP, authorization, CSRF, replacement, idempotency, stable-key,
-   file-integrity, and reset-reconstruction coverage; run the full verification matrix and record
-   manual/browser limitations.
-
-### Action 3 implementation and verification
-
-- Added HTTP-boundary coverage for admin authorization, CSRF, invalid input, successful canonical
-  promotion, entity/image-specific feedback, durable assignment replacement, and manifest persistence.
-- `npm run verify` passed with 422/422 automated tests. The focused canonical HTTP test passed 1/1;
-  the broader HTTP file also contains five unrelated pre-existing failures, which were documented
-  in `docs/current-actions.md` and left unchanged.
-- Two guarded development resets produced identical seeded counts and relationship hash, and the
-  development server started successfully with `GET /` returning `302`.
-- No browser executable or visual browser tool was available, so representative-width visual,
-  keyboard, and assistive-technology checks remain explicitly unperformed.
-
-### Final acceptance-criteria comparison
-
-- **Admin promotion and safe rejection:** Satisfied by the protected route, validation/controller
-  coverage, service tests, and focused HTTP assertions for non-admin, CSRF, invalid, and successful
-  requests.
-- **One predictable canonical primary with idempotent replacement:** Satisfied by the transactional
-  promotion service and replacement/idempotency tests; prior reusable assets and unrelated
-  assignments remain preserved.
-- **Stable reconstruction identity:** Satisfied by stable catalog-key resolution, manifest tests,
-  and seed reconstruction coverage without relying on transient numeric IDs.
-- **Reset and startup reconstruction:** Satisfied by the canonical database tests, two identical
-  guarded reset snapshots, and successful development startup. The focused HTTP test also verifies
-  the durable manifest/assignment boundary.
-- **Single canonical representation:** Satisfied; the implementation uses the repository-controlled
-  canonical data source and existing seed path without a competing flag, manifest, or runtime source
-  rewrite.
-- **Existing media and application behavior:** The full automated suite passed 422/422. The broader
-  HTTP file still has five unrelated pre-existing failures, documented in `docs/current-actions.md`;
-  they were not changed or attributed to this goal.
-- **Relevant automated and manual verification:** Relevant automated checks passed. Browser visual,
-  keyboard, and assistive-technology checks were unavailable and remain explicitly unperformed.
-- **Tracking documentation:** Satisfied; both current-goal and current-actions records contain the
-  final decisions, evidence, limitations, and review status.
-
-### Final review notes
-
-The approved scope is complete. The remaining browser walkthrough is an environment limitation,
-and the five unrelated HTTP failures are intentionally excluded from this goal. No production
-database mutation, migration, remote storage, gallery, user-owned media, or unrelated redesign was
-introduced.
-
-### Acceptance criteria
-
-- An admin can explicitly promote an eligible reviewed asset to canonical for each supported entity
-  type; non-admins and malformed/unsupported/missing entities or assets are rejected safely.
-- Exactly one canonical primary image exists per entity; replacement is predictable, idempotent, and
-  preserves unrelated assignments and reusable prior assets.
-- Promotion uses stable entity identity for durable state and does not depend on transient numeric
-  IDs during reconstruction.
-- The selected canonical image and relationship survive a clean `npm run db:reset` and normal app
-  startup through the existing seed/reconstruction path.
-- No competing canonical flag, manifest, seed system, or runtime source rewrite is introduced.
-- Existing media upload, assignment, removal, approval, localized alt text, resolver/fallback,
-  Library, Manage Exercises, Dashboard/workout, authorization, CSRF, and reset behavior remains
-  intact.
-- Relevant automated checks pass; the Manage Media workflow is manually verified where browser
-  tooling is available, with unavailable visual checks explicitly documented.
-- `docs/current-goal.md` and `docs/current-actions.md` reflect the final decisions, evidence,
-  verification, and review status.
-
-### Explicit exclusions
-
-Cloudflare R2/S3 or another remote provider, CDN architecture, image transformations, automatic
-generation changes, galleries, user-owned media, broad schema redesign, ordinary migrations,
-production mutation/deployment, and automatic continuation into another goal.
+Cloudflare account credentials, R2 bucket creation/policies, custom domains/DNS, Render environment
+variables, and production changes are user-controlled. The implementation may prepare exact
+configuration and verification commands but must stop before mutating those systems without
+explicit authorization.

@@ -86,8 +86,13 @@ export default function createMediaManagementPageViewModel({
 		: "";
 	const selectedAssetId = fieldValue(formState, "mediaAssetId", direct?.media_asset_id);
 	const canonicalStorageKey = selected?.canonicalEntry?.path ?? null;
+	const canonicalStorageKeys = new Set(
+		[selected?.canonicalEntry?.path, selected?.canonicalEntry?.storageKey].filter(
+			(value) => typeof value === "string",
+		),
+	);
 	const directIsCanonical = Boolean(
-		direct && canonicalStorageKey && direct.storage_key === canonicalStorageKey,
+		direct && canonicalStorageKeys.has(direct.storage_key),
 	);
 	const directIsEligible = Boolean(
 		direct &&
@@ -198,9 +203,7 @@ export default function createMediaManagementPageViewModel({
 				: null,
 			assets: data.assets.map((asset) => {
 				const altText = asset.alt_texts?.[locale] ?? asset.alt_texts?.en ?? null;
-				const isCanonical = Boolean(
-					canonicalStorageKey && asset.storage_key === canonicalStorageKey,
-				);
+				const isCanonical = canonicalStorageKeys.has(asset.storage_key);
 				const isAssigned = Boolean(direct && asset.id === direct.media_asset_id);
 				const status = isCanonical
 					? "canonical"

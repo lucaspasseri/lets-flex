@@ -52,9 +52,19 @@ test("uploaded media is persisted and assigned atomically through generated stor
 	]);
 	const storageCalls = [];
 	const storage = {
-		async save(buffer, metadata) {
+		async put(buffer, metadata) {
 			storageCalls.push({ buffer, metadata });
-			return { storageKey: "/media/uploads/generated.png", async remove() {} };
+			return { storageKey: "/media/uploads/generated.png" };
+		},
+		async delete() {},
+		async exists() {
+			return true;
+		},
+		async read() {
+			return Buffer.alloc(0);
+		},
+		getPublicUrl(storageKey) {
+			return storageKey;
 		},
 	};
 
@@ -83,13 +93,20 @@ test("failed assignment rolls back and cleans the newly stored file", async () =
 	const db = fakePool([[{ id: 7 }], [], [], []]);
 	let removed = false;
 	const storage = {
-		async save() {
-			return {
-				storageKey: "/media/uploads/generated.png",
-				async remove() {
-					removed = true;
-				},
-			};
+		async put() {
+			return { storageKey: "/media/uploads/generated.png" };
+		},
+		async delete() {
+			removed = true;
+		},
+		async exists() {
+			return true;
+		},
+		async read() {
+			return Buffer.alloc(0);
+		},
+		getPublicUrl(storageKey) {
+			return storageKey;
 		},
 	};
 

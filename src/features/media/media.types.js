@@ -15,6 +15,7 @@
  * @property {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} entityType
  * @property {string} entityKey
  * @property {string} path
+ * @property {string} [storageKey] Provider-neutral object key after remote migration.
  * @property {"primary"} role
  * @property {string} mimeType
  * @property {number} width
@@ -52,6 +53,7 @@
  *
  * @typedef {object} MediaManifestEntry
  * @property {string | null} src
+ * @property {string} [storageKey] Provider-neutral key used to derive a remote public URL.
  * @property {string} alt
  * @property {number} width
  * @property {number} height

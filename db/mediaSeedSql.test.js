@@ -34,6 +34,7 @@ test("canonical media manifest resolves all supported assignments through catalo
 	assert.match(mediaSeedSql, /'barbell-bench-press'/);
 	assert.match(mediaSeedSql, /'goblet-squat'/);
 	assert.match(mediaSeedSql, /'rotation'/);
+	assert.match(mediaSeedSql, /'assets\/c6842d88-a584-48c5-9c20-f4b270d25413\.svg'/);
 	assert.doesNotMatch(mediaSeedSql, /uploads\//);
 });
 

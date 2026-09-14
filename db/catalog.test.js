@@ -143,7 +143,7 @@ function expectedMediaRelationshipSnapshot() {
 		.map((entry) => ({
 			entity_type: entry.entityType,
 			catalog_key: entry.entityKey,
-			storage_key: entry.path,
+			storage_key: entry.storageKey ?? entry.path,
 		}))
 		.sort(
 			(left, right) =>

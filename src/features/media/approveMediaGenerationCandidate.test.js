@@ -90,9 +90,19 @@ test("approval creates a normal asset and replaces only the primary assignment a
 			},
 		}),
 		publicStorage: /** @type {any} */ ({
-			async save(_buffer, metadata) {
-				events.push(`save:${metadata.extension}`);
-				return { storageKey: "/media/uploads/approved.png", async remove() {} };
+			async put(_buffer, metadata) {
+				events.push(`put:${metadata.extension}`);
+				return { storageKey: "/media/uploads/approved.png" };
+			},
+			async delete() {},
+			async exists() {
+				return true;
+			},
+			async read() {
+				return Buffer.alloc(0);
+			},
+			getPublicUrl(storageKey) {
+				return storageKey;
 			},
 		}),
 	});
@@ -102,7 +112,7 @@ test("approval creates a normal asset and replaces only the primary assignment a
 	assert.equal(result.privateCleanupPending, false);
 	assert.deepEqual(events, [
 		"read:d2a1437a-b927-4cff-8a76-1207f9e8631c.png",
-		"save:png",
+		"put:png",
 		"remove:d2a1437a-b927-4cff-8a76-1207f9e8631c.png",
 	]);
 	assert.ok(
@@ -156,13 +166,20 @@ test("approval rollback removes the new public file and preserves the pending pr
 					},
 				}),
 				publicStorage: /** @type {any} */ ({
-					async save() {
-						return {
-							storageKey: "/media/uploads/approved.png",
-							async remove() {
-								publicRemoved = true;
-							},
-						};
+					async put() {
+						return { storageKey: "/media/uploads/approved.png" };
+					},
+					async delete() {
+						publicRemoved = true;
+					},
+					async exists() {
+						return true;
+					},
+					async read() {
+						return Buffer.alloc(0);
+					},
+					getPublicUrl(storageKey) {
+						return storageKey;
 					},
 				}),
 			}),

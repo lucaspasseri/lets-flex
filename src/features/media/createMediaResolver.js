@@ -4,6 +4,7 @@ import { resolveMedia as resolveStaticMedia } from "./resolveMedia.js";
 /** @typedef {import("./media.types.js").EntityMediaRequest} EntityMediaRequest */
 /** @typedef {import("./media.types.js").MediaRequest} MediaRequest */
 /** @typedef {import("./media.types.js").ResolvedMedia} ResolvedMedia */
+/** @typedef {import("./storage/mediaUrl.js").MediaUrlResolver} MediaUrlResolver */
 
 /**
  * Create the shared synchronous presentation resolver used by view-models.
@@ -11,14 +12,15 @@ import { resolveMedia as resolveStaticMedia } from "./resolveMedia.js";
  * entity IDs retain the existing manifest-only contract.
  *
  * @param {Array<Record<string, any>>} [assignments]
+ * @param {{mediaUrlResolver?: MediaUrlResolver}} [options]
  * @returns {(request: EntityMediaRequest | MediaRequest) => ResolvedMedia}
  */
-export default function createMediaResolver(assignments = []) {
+export default function createMediaResolver(assignments = [], options = {}) {
 	return (request) => {
 		if (hasEntityIdentity(request)) {
-			return resolveEntityMediaFromAssignments(request, assignments);
+			return resolveEntityMediaFromAssignments(request, assignments, options);
 		}
-		return resolveStaticMedia(request);
+		return resolveStaticMedia(request, options);
 	};
 }
 

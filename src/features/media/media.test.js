@@ -9,11 +9,11 @@ import { validateMediaManifest } from "./validateMediaManifest.js";
 test("the curated manifest has valid local asset metadata and files", async () => {
 	const result = validateMediaManifest(mediaManifest);
 
-	assert.equal(result.assetCount, 76);
-	assert.equal(result.sources.length, 75);
+	assert.equal(result.assetCount, 78);
+	assert.equal(result.sources.length, 77);
 	assert.ok(result.sources.every((source) => source.startsWith("/media/")));
 
-	assert.equal(canonicalMediaManifest.length, 68);
+	assert.equal(canonicalMediaManifest.length, 70);
 	const assets = await Promise.all(
 		canonicalMediaManifest.map(async (entry) => {
 			const fileUrl = new URL(`../../../public${entry.path}`, import.meta.url);
@@ -27,6 +27,7 @@ test("the curated manifest has valid local asset metadata and files", async () =
 				asset
 					.subarray(0, 8)
 					.equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ||
+				asset.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])) ||
 				asset.toString("utf8").startsWith("<svg "),
 		),
 	);

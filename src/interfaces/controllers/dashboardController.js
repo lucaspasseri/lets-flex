@@ -34,7 +34,9 @@ export async function renderDashboard(req, res, formState = {}) {
 	const dashboard = createDashboardPageViewModel({
 		page: res.locals.page,
 		data,
-		mediaResolver: createMediaResolver(mediaAssignments),
+		mediaResolver: createMediaResolver(mediaAssignments, {
+			mediaUrlResolver: req.app.locals.mediaUrlResolver,
+		}),
 		pageState: { userId, programId, daysDifference, workoutSessionId },
 		translate: res.locals.t,
 		language: res.locals.language,

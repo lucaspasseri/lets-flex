@@ -11,10 +11,11 @@ const catalogSection = Object.freeze({
 	movement_pattern: "movementPattern",
 });
 
-/** @param {string} src @param {string} alt @param {string} matchType */
-const mediaAsset = (src, alt, matchType) =>
+/** @param {string} src @param {string} alt @param {string} matchType @param {string} [storageKey] */
+const mediaAsset = (src, alt, matchType, storageKey) =>
 	/** @type {MediaManifestEntry} */ ({
 		src,
+		...(storageKey ? { storageKey } : {}),
 		alt,
 		width: 960,
 		height: 640,
@@ -42,6 +43,7 @@ for (const entry of canonicalMediaManifest) {
 		entry.path,
 		entry.alt,
 		entry.entityType,
+		entry.storageKey,
 	);
 }
 

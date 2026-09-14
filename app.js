@@ -36,6 +36,10 @@ import { respondWithApplicationRecovery } from "./src/interfaces/applicationReco
 import localeRouter from "./src/interfaces/routes/locale.js";
 import { i18nMiddleware } from "./src/infrastructure/i18n/i18n.js";
 import parseMultipartForm from "./src/interfaces/middleware/parseMultipartForm.js";
+import { createLocalMediaStorage } from "./src/features/media/storage/localStorage.js";
+import { assertMediaStorage } from "./src/features/media/storage/storage.js";
+import { createMediaStorageFromEnvironment } from "./src/features/media/storage/mediaStorageFactory.js";
+import { createMediaUrlResolverFromEnvironment } from "./src/features/media/storage/mediaUrl.js";
 
 import playgroundRouter from "./src/interfaces/routes/playground.js";
 
@@ -45,7 +49,33 @@ const __dirname = path.dirname(__filename);
 export function createApp(options = {}) {
 	const app = express();
 	app.locals.mediaGenerationDependencies = options.mediaGenerationDependencies ?? {};
-	app.locals.mediaPromotionDependencies = options.mediaPromotionDependencies ?? {};
+	app.locals.mediaStorage = assertMediaStorage(
+		options.mediaStorage ?? createMediaStorageFromEnvironment(),
+	);
+	app.locals.mediaUrlResolver =
+		options.mediaUrlResolver ?? createMediaUrlResolverFromEnvironment();
+	const configuredPromotionDependencies = options.mediaPromotionDependencies ?? {};
+	app.locals.mediaPromotionDependencies = {
+		...configuredPromotionDependencies,
+		objectStorage:
+			configuredPromotionDependencies.objectStorage ?? app.locals.mediaStorage,
+		sourceStorage:
+			configuredPromotionDependencies.sourceStorage ??
+			createLocalMediaStorage({
+				rootDirectory: path.join(__dirname, "public/media/uploads"),
+				publicPrefix: "/media/uploads",
+				readRootDirectory: path.join(__dirname, "public/media"),
+				readPublicPrefix: "/media",
+			}),
+		canonicalStorage:
+			configuredPromotionDependencies.canonicalStorage ??
+			createLocalMediaStorage({
+				rootDirectory: path.join(__dirname, "public/media/catalog/promoted"),
+				publicPrefix: "/media/catalog/promoted",
+				readRootDirectory: path.join(__dirname, "public/media"),
+				readPublicPrefix: "/media",
+			}),
+	};
 	const passport = options.passport ?? createPassport();
 	let emailService = options.emailService;
 	if (!emailService) {

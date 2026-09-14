@@ -4,6 +4,7 @@ import { resolveMedia as resolveStaticMedia } from "./resolveMedia.js";
 /** @typedef {import("./media.types.js").EntityMediaRequest} EntityMediaRequest */
 /** @typedef {import("./media.types.js").ResolvedMedia} ResolvedMedia */
 /** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
+/** @typedef {import("./storage/mediaUrl.js").MediaUrlResolver} MediaUrlResolver */
 
 /**
  * Resolve persistent media first, then use the existing contextual manifest
@@ -11,11 +12,12 @@ import { resolveMedia as resolveStaticMedia } from "./resolveMedia.js";
  *
  * @param {EntityMediaRequest} request
  * @param {DatabaseClient} [db]
+ * @param {{mediaUrlResolver?: MediaUrlResolver}} [options]
  * @returns {Promise<ResolvedMedia>}
  */
-export async function resolveEntityMedia(request, db) {
+export async function resolveEntityMedia(request, db, options = {}) {
 	const assignments = await findPrimaryMediaAssignments(getCandidates(request), db);
-	return resolveEntityMediaFromAssignments(request, assignments);
+	return resolveEntityMediaFromAssignments(request, assignments, options);
 }
 
 /**
@@ -24,9 +26,10 @@ export async function resolveEntityMedia(request, db) {
  *
  * @param {EntityMediaRequest} request
  * @param {Array<Record<string, any>>} assignments
+ * @param {{mediaUrlResolver?: MediaUrlResolver}} [options]
  * @returns {ResolvedMedia}
  */
-export function resolveEntityMediaFromAssignments(request, assignments) {
+export function resolveEntityMediaFromAssignments(request, assignments, options = {}) {
 	const candidates = getCandidates(request);
 	const byCandidate = new Map(
 		assignments.map((assignment) => [
@@ -44,6 +47,7 @@ export function resolveEntityMediaFromAssignments(request, assignments) {
 				candidate.entityType,
 				index === 0 ? "none" : fallbackTypeFor(candidate.entityType),
 				index !== 0,
+				options,
 			);
 		}
 	}
@@ -54,7 +58,7 @@ export function resolveEntityMediaFromAssignments(request, assignments) {
 			request.entityType === "exercise_variant" ? "exercise" : request.entityType,
 		key: request.entityId ? String(request.entityId) : undefined,
 	};
-	const resolved = resolveStaticMedia(/** @type {any} */ (legacyRequest));
+	const resolved = resolveStaticMedia(/** @type {any} */ (legacyRequest), options);
 	return {
 		...resolved,
 		mediaType: resolved.presentation,
@@ -89,9 +93,17 @@ function getCandidates(request) {
  * @param {string} matchedEntityType
  * @param {"none" | "base-exercise" | "movement-pattern" | "environment" | "category" | "initial"} fallbackType
  * @param {boolean} isFallback
+ * @param {{mediaUrlResolver?: MediaUrlResolver}} [options]
  * @returns {ResolvedMedia}
  */
-function toResolvedMedia(asset, request, matchedEntityType, fallbackType, isFallback) {
+function toResolvedMedia(
+	asset,
+	request,
+	matchedEntityType,
+	fallbackType,
+	isFallback,
+	options = {},
+) {
 	const label = request.label?.trim() || "Training content";
 	const presentation = request.presentation ?? "image";
 	const mediaType = presentation === "initial" ? "initial" : "image";
@@ -116,7 +128,9 @@ function toResolvedMedia(asset, request, matchedEntityType, fallbackType, isFall
 	}
 
 	return {
-		src: asset.storage_key,
+		src:
+			options.mediaUrlResolver?.(asset.storage_key, asset.storage_key) ??
+			asset.storage_key,
 		alt:
 			localizedAltText(asset, request.locale) ||
 			asset.alt_text?.trim() ||

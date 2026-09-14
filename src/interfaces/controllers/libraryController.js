@@ -78,7 +78,9 @@ export async function renderLibrary(req, res, formState = {}) {
 		page,
 		pageState,
 		data,
-		mediaResolver: createMediaResolver(mediaAssignments),
+		mediaResolver: createMediaResolver(mediaAssignments, {
+			mediaUrlResolver: req.app.locals.mediaUrlResolver,
+		}),
 		translate: res.locals.t,
 		language: res.locals.language,
 		managementMode,

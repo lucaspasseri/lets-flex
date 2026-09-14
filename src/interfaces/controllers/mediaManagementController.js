@@ -122,6 +122,11 @@ function mediaPromotionDependencies(req) {
 	return req.app.locals.mediaPromotionDependencies ?? {};
 }
 
+/** @param {MediaManagementRequest} req */
+function mediaStorageDependencies(req) {
+	return { storage: req.app.locals.mediaStorage };
+}
+
 function createGenerationNonce(req, selected) {
 	if (!selected) return null;
 	const state = /** @type {any} */ (req.session).state;
@@ -142,6 +147,7 @@ async function renderPage(req, res, state = {}) {
 		entityTypeFilter: query.entityType,
 		search: state.search ?? query.search,
 		locale: res.locals.language,
+		mediaUrlResolver: req.app.locals.mediaUrlResolver,
 		canonicalMediaManifestStore: promotionDependencies.manifestStore,
 	});
 	if (selection.entityType && !data.selected) {
@@ -191,12 +197,15 @@ async function upload(req, res) {
 	const body = req.validatedBody;
 	if (!body) throw new Error("Media upload request was not validated.");
 	try {
-		await createAndAssignUploadedMedia({
-			entityType: body.entityType,
-			entityId: body.entityId,
-			file: req.file ?? {},
-			altTexts: { en: body.altTextEn, "pt-BR": body.altTextPtBr },
-		});
+		await createAndAssignUploadedMedia(
+			{
+				entityType: body.entityType,
+				entityId: body.entityId,
+				file: req.file ?? {},
+				altTexts: { en: body.altTextEn, "pt-BR": body.altTextPtBr },
+			},
+			mediaStorageDependencies(req),
+		);
 	} catch (error) {
 		if (error instanceof MediaManagementNotFoundError) {
 			respondWithApplicationRecovery(req, res, { kind: "notFound" });
@@ -468,13 +477,16 @@ async function approveCandidate(req, res) {
 	const body = req.validatedBody;
 	if (!body) throw new Error("Candidate approval request was not validated.");
 	try {
-		await approveMediaGenerationCandidate({
-			candidateId: req.validatedParams?.candidateId ?? 0,
-			entityType: body.entityType,
-			entityId: body.entityId,
-			reviewerUserId: /** @type {any} */ (req.user).id,
-			altTexts: { en: body.altTextEn, "pt-BR": body.altTextPtBr },
-		});
+		await approveMediaGenerationCandidate(
+			{
+				candidateId: req.validatedParams?.candidateId ?? 0,
+				entityType: body.entityType,
+				entityId: body.entityId,
+				reviewerUserId: /** @type {any} */ (req.user).id,
+				altTexts: { en: body.altTextEn, "pt-BR": body.altTextPtBr },
+			},
+			{ publicStorage: mediaStorageDependencies(req).storage },
+		);
 	} catch (error) {
 		if (error instanceof MediaGenerationApprovalError) {
 			if (error.code === "candidate_not_found") {

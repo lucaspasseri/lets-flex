@@ -311,6 +311,39 @@ test("media management replaces promotion with canonical state when the direct a
 	assert.doesNotMatch(html, /action="\/admin\/media\/canonical"/);
 });
 
+test("media management recognizes a canonical object key beside its compatibility path", async () => {
+	const viewModel = createMediaManagementPageViewModel({
+		page: { title: "Media management" },
+		currentUser: { id: 1, role: "admin" },
+		data: {
+			...baseData,
+			assets: [
+				{
+					...baseData.assets[0],
+					storage_key: "assets/reviewed-bench-press.png",
+				},
+			],
+			selected: selectedData({
+				directAssignment: {
+					media_asset_id: 7,
+					storage_key: "assets/reviewed-bench-press.png",
+					mime_type: "image/png",
+					alt_text_en: "Bench press",
+					alt_text_pt_br: "Supino",
+				},
+				canonicalEntry: {
+					path: "/media/catalog/promoted/exercise-bench-abc.png",
+					storageKey: "assets/reviewed-bench-press.png",
+				},
+			}),
+		},
+	});
+	const html = await renderFile(pagePath, { ...viewModel, csrfToken: "csrf-value" });
+
+	assert.match(html, /This image is canonical for this entity\./);
+	assert.doesNotMatch(html, /action="\/admin\/media\/canonical"/);
+});
+
 test("media management presents selectable entities before optional name filtering", async () => {
 	const viewModel = createMediaManagementPageViewModel({
 		page: { title: "Media management" },

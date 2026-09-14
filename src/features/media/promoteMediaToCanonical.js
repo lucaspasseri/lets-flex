@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import path from "node:path";
 
 import pool from "../../../db/pool.js";
 import {
@@ -13,13 +12,15 @@ import {
 	createCanonicalMediaManifestStore,
 	defaultCanonicalMediaManifestPath,
 } from "./canonicalMediaManifestStore.js";
-import { createLocalMediaStorage } from "./mediaStorage.js";
+import { normalizeMediaObjectKey } from "./storage/mediaObjectKey.js";
+import { assertMediaStorage } from "./storage/storage.js";
 
 /** @typedef {import("pg").Pool} DatabasePool */
 /** @typedef {import("pg").PoolClient} DatabaseClient */
 /** @typedef {import("./media.types.js").CanonicalMediaManifestEntry} CanonicalMediaManifestEntry */
-/** @typedef {{storageKey: string, remove: () => Promise<void>}} StoredMedia */
+/** @typedef {{storageKey: string}} StoredMedia */
 /** @typedef {{previous: ReadonlyArray<CanonicalMediaManifestEntry>, manifest: ReadonlyArray<CanonicalMediaManifestEntry>}} ManifestChange */
+/** @typedef {import("./storage/storage.js").MediaStorage} MediaStorage */
 /** @typedef {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} MediaAssignableEntityType */
 
 const SUPPORTED_ENTITY_TYPES = new Set([
@@ -42,19 +43,6 @@ const MIME_EXTENSIONS = Object.freeze({
 	"image/svg+xml": "svg",
 });
 const CANONICAL_STORAGE_PREFIX = "/media/catalog/promoted";
-const canonicalDirectory = path.resolve(process.cwd(), "public/media/catalog/promoted");
-const sourceStorage = createLocalMediaStorage({
-	rootDirectory: path.resolve(process.cwd(), "public/media/uploads"),
-	publicPrefix: "/media/uploads",
-	readRootDirectory: path.resolve(process.cwd(), "public/media"),
-	readPublicPrefix: "/media",
-});
-const canonicalStorage = createLocalMediaStorage({
-	rootDirectory: canonicalDirectory,
-	publicPrefix: CANONICAL_STORAGE_PREFIX,
-	readRootDirectory: path.resolve(process.cwd(), "public/media"),
-	readPublicPrefix: "/media",
-});
 const defaultManifestStore = createCanonicalMediaManifestStore({
 	filePath: defaultCanonicalMediaManifestPath,
 });
@@ -74,15 +62,13 @@ export class MediaCanonicalPromotionError extends Error {
  * files are never deleted because they may remain reusable elsewhere.
  *
  * @param {{mediaAssetId: number, entityType: string, entityId: number, altTexts?: Partial<Record<"en" | "pt-BR", string>>}} input
- * @param {{db?: DatabasePool, sourceStorage?: ReturnType<typeof createLocalMediaStorage>, canonicalStorage?: ReturnType<typeof createLocalMediaStorage>, manifestStore?: ReturnType<typeof createCanonicalMediaManifestStore>}} [dependencies]
+ * @param {{db?: DatabasePool, objectStorage?: MediaStorage, sourceStorage?: MediaStorage, canonicalStorage?: MediaStorage, manifestStore?: ReturnType<typeof createCanonicalMediaManifestStore>}} [dependencies]
  */
 export async function promoteMediaToCanonical(input, dependencies = {}) {
 	const entityType = validateEntityType(input.entityType);
 	const entityId = validatePositiveInteger(input.entityId, "entity");
 	const mediaAssetId = validatePositiveInteger(input.mediaAssetId, "media asset");
 	const db = dependencies.db ?? pool;
-	const source = dependencies.sourceStorage ?? sourceStorage;
-	const destination = dependencies.canonicalStorage ?? canonicalStorage;
 	const manifestStore = dependencies.manifestStore ?? defaultManifestStore;
 
 	const initialEntity = await findMediaEntityCatalogRecord(
@@ -110,8 +96,15 @@ export async function promoteMediaToCanonical(input, dependencies = {}) {
 		entityType,
 		initialEntity.catalog_key,
 	);
+	const objectStorageKey = getObjectStorageKey(initialAsset.storage_key);
+	const currentCanonicalStorageKey = currentEntry?.storageKey ?? currentEntry?.path;
+	const canonicalCompatibilityPath = currentEntry?.path;
 
-	if (currentEntry?.path === initialAsset.storage_key) {
+	if (
+		currentEntry &&
+		(currentEntry.path === initialAsset.storage_key ||
+			(objectStorageKey && currentCanonicalStorageKey === objectStorageKey))
+	) {
 		return withTransaction(db, async (transaction) => {
 			const entity = await findMediaEntityCatalogRecord(
 				{ entityType, entityId },
@@ -139,37 +132,60 @@ export async function promoteMediaToCanonical(input, dependencies = {}) {
 		});
 	}
 
+	if (objectStorageKey && !canonicalCompatibilityPath) {
+		throw new MediaCanonicalPromotionError(
+			"canonical_path_missing",
+			"An existing canonical compatibility path is required for object-backed promotion.",
+		);
+	}
+	const source = assertMediaStorage(
+		objectStorageKey ? dependencies.objectStorage : dependencies.sourceStorage,
+	);
+	const destination = objectStorageKey
+		? null
+		: assertMediaStorage(dependencies.canonicalStorage);
 	const buffer = await readSourceAsset(source, initialAsset.storage_key);
 	const mimeType = validateMimeType(initialAsset.mime_type);
 	const extension = MIME_EXTENSIONS[mimeType];
 	const digest = createHash("sha256").update(buffer).digest("hex").slice(0, 16);
 	const filename = `${entityType}-${initialEntity.catalog_key}-${digest}`;
-	const destinationKey = `${CANONICAL_STORAGE_PREFIX}/${filename}.${extension}`;
+	const destinationKey = objectStorageKey
+		? objectStorageKey
+		: `${CANONICAL_STORAGE_PREFIX}/${filename}.${extension}`;
 	/** @type {StoredMedia | null} */
-	let stored = null;
+	let stored = objectStorageKey ? { storageKey: objectStorageKey } : null;
 	let ownsStoredFile = false;
 	/** @type {ManifestChange | null} */
 	let manifestChange = null;
 
 	try {
-		if (await destination.exists(destinationKey)) {
-			const existingBytes = await destination.read(destinationKey);
-			if (!existingBytes.equals(buffer)) {
-				throw new MediaCanonicalPromotionError(
-					"canonical_file_conflict",
-					"The deterministic canonical media file already contains different data.",
-				);
+		if (!objectStorageKey) {
+			const localDestination = /** @type {MediaStorage} */ (destination);
+			if (await localDestination.exists(destinationKey)) {
+				const existingBytes = await localDestination.read(destinationKey);
+				if (!existingBytes.equals(buffer)) {
+					throw new MediaCanonicalPromotionError(
+						"canonical_file_conflict",
+						"The deterministic canonical media file already contains different data.",
+					);
+				}
+				stored = { storageKey: destinationKey };
+			} else {
+				stored = await localDestination.put(buffer, { extension, filename });
+				ownsStoredFile = true;
 			}
-			stored = { storageKey: destinationKey, async remove() {} };
-		} else {
-			stored = await destination.save(buffer, { extension, filename });
-			ownsStoredFile = true;
 		}
 
+		if (!stored) throw new Error("Canonical media was not stored.");
+		const canonicalPath = objectStorageKey
+			? canonicalCompatibilityPath
+			: stored.storageKey;
+		if (!canonicalPath) throw new Error("Canonical media path is unavailable.");
 		const entry = createCanonicalEntry({
 			entityType,
 			entityKey: initialEntity.catalog_key,
-			path: stored.storageKey,
+			path: canonicalPath,
+			storageKey: objectStorageKey ?? undefined,
 			mimeType,
 			width: initialAsset.width,
 			height: initialAsset.height,
@@ -188,12 +204,16 @@ export async function promoteMediaToCanonical(input, dependencies = {}) {
 			if (!asset)
 				throw new MediaCanonicalPromotionError("asset_not_found", "media asset");
 			manifestChange = await manifestStore.update((manifest) => {
-				const matchingPath = findManifestEntry(
+				const matchingEntry = findManifestEntry(
 					manifest,
 					entityType,
 					entity.catalog_key,
-				)?.path;
-				if (matchingPath && matchingPath !== entry.path) {
+				);
+				if (
+					matchingEntry &&
+					(matchingEntry.path !== entry.path ||
+						matchingEntry.storageKey !== entry.storageKey)
+				) {
 					return manifest.map((candidate) =>
 						candidate.entityType === entityType &&
 						candidate.entityKey === entity.catalog_key
@@ -201,29 +221,33 @@ export async function promoteMediaToCanonical(input, dependencies = {}) {
 							: candidate,
 					);
 				}
-				if (matchingPath === entry.path) return manifest;
+				if (matchingEntry) return manifest;
 				return [...manifest, entry];
 			});
-			const canonicalAsset = await createMediaAsset(
-				{
-					storageKey: entry.path,
-					mimeType: entry.mimeType,
-					width: entry.width,
-					height: entry.height,
-					source: "curated",
-				},
-				transaction,
-			);
+			const canonicalAsset = objectStorageKey
+				? asset
+				: await createMediaAsset(
+						{
+							storageKey: entry.storageKey ?? entry.path,
+							mimeType: entry.mimeType,
+							width: entry.width,
+							height: entry.height,
+							source: "curated",
+						},
+						transaction,
+					);
 			if (!canonicalAsset) {
 				throw new MediaCanonicalPromotionError(
 					"asset_create_failed",
 					"The canonical media asset could not be created.",
 				);
 			}
-			await replaceMediaAssetAltTexts(
-				{ mediaAssetId: canonicalAsset.id, altTexts: entry.altTexts },
-				transaction,
-			);
+			if (!objectStorageKey) {
+				await replaceMediaAssetAltTexts(
+					{ mediaAssetId: canonicalAsset.id, altTexts: entry.altTexts },
+					transaction,
+				);
+			}
 			const assignment = await assignPrimaryMedia(
 				{ mediaAssetId: canonicalAsset.id, entityType, entityId },
 				transaction,
@@ -245,7 +269,8 @@ export async function promoteMediaToCanonical(input, dependencies = {}) {
 				);
 			}
 		}
-		if (ownsStoredFile && stored) await stored.remove().catch(() => {});
+		if (ownsStoredFile && stored && destination)
+			await destination.delete(stored.storageKey).catch(() => {});
 		throw error;
 	}
 }
@@ -295,7 +320,7 @@ async function readSourceAsset(storage, storageKey) {
 		if (!(await storage.exists(storageKey))) {
 			throw new MediaCanonicalPromotionError(
 				"source_file_missing",
-				"The selected media file is not available in local storage.",
+				"The selected media file is not available in configured storage.",
 			);
 		}
 		return await storage.read(storageKey);
@@ -303,7 +328,7 @@ async function readSourceAsset(storage, storageKey) {
 		if (error instanceof MediaCanonicalPromotionError) throw error;
 		throw new MediaCanonicalPromotionError(
 			"source_file_unavailable",
-			"The selected media file could not be read from local storage.",
+			"The selected media file could not be read from configured storage.",
 		);
 	}
 }
@@ -320,7 +345,7 @@ function validateMimeType(mimeType) {
 }
 
 /**
- * @param {{entityType: MediaAssignableEntityType, entityKey: string, path: string, mimeType: string, width: number, height: number, altTexts: {en: string, "pt-BR": string}}} input
+ * @param {{entityType: MediaAssignableEntityType, entityKey: string, path: string, storageKey?: string, mimeType: string, width: number, height: number, altTexts: {en: string, "pt-BR": string}}} input
  * @returns {CanonicalMediaManifestEntry}
  */
 function createCanonicalEntry(input) {
@@ -328,6 +353,7 @@ function createCanonicalEntry(input) {
 		entityType: input.entityType,
 		entityKey: input.entityKey,
 		path: input.path,
+		...(input.storageKey ? { storageKey: input.storageKey } : {}),
 		role: "primary",
 		mimeType: input.mimeType,
 		width: input.width,
@@ -336,6 +362,12 @@ function createCanonicalEntry(input) {
 		alt: input.altTexts.en,
 		altTexts: input.altTexts,
 	};
+}
+
+/** @param {unknown} value @returns {string | null} */
+function getObjectStorageKey(value) {
+	if (typeof value !== "string" || !value.startsWith("assets/")) return null;
+	return normalizeMediaObjectKey(value);
 }
 
 /** @param {ReadonlyArray<CanonicalMediaManifestEntry>} manifest @param {string} entityType @param {string} entityKey */

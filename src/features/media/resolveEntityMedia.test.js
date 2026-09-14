@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { resolveEntityMedia } from "./resolveEntityMedia.js";
+import { createMediaUrlResolver } from "./storage/mediaUrl.js";
 
 function fakeDatabase(rows) {
 	const calls = [];
@@ -178,4 +179,44 @@ test("localized alt text prefers the requested locale and falls back to English"
 
 	assert.equal(portuguese.alt, "Ilustração de supino");
 	assert.equal(missingPortuguese.alt, "Bench press illustration");
+});
+
+test("remote reads derive configured URLs for migrated canonical assignments and fallbacks", async () => {
+	const mediaUrlResolver = createMediaUrlResolver({
+		remoteReads: true,
+		publicUrlBase: "https://cdn.example.test/media",
+	});
+	const assigned = await resolveEntityMedia(
+		{ entityType: "exercise", entityId: 9, label: "Bench Press" },
+		/** @type {any} */ (
+			fakeDatabase([
+				{
+					...asset,
+					entity_type: "exercise",
+					entity_id: 9,
+					storage_key: "/media/catalog/exercises/bench-press.png",
+				},
+			])
+		),
+		{ mediaUrlResolver },
+	);
+	const fallback = await resolveEntityMedia(
+		{
+			entityType: "exercise",
+			entityId: 99,
+			baseName: "Bench Press",
+			label: "Bench Press",
+		},
+		/** @type {any} */ (fakeDatabase([])),
+		{ mediaUrlResolver },
+	);
+
+	assert.equal(
+		assigned.src,
+		"https://cdn.example.test/media/assets/ce5b3f5e-3d3b-48b4-ab6d-efd0da01303a.png",
+	);
+	assert.equal(
+		fallback.src,
+		"https://cdn.example.test/media/assets/ce5b3f5e-3d3b-48b4-ab6d-efd0da01303a.png",
+	);
 });

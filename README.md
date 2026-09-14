@@ -106,6 +106,27 @@ the service start or pre-deploy command. Use `npm start` for the web service and
 schedule `npm run guests:cleanup` daily. Changing `SESSION_SECRET` invalidates
 all existing sessions.
 
+### Production object storage handoff
+
+Production R2 setup is manual and must use a bucket, access key, and public media domain that are
+separate from development. In Render, set `OBJECT_STORAGE_PROVIDER=r2`, a production-scoped
+`R2_BUCKET_NAME`, `R2_ENDPOINT`, `R2_REGION=auto`, the bucket-scoped R2 access-key secrets, and
+`MEDIA_PUBLIC_URL` to the complete HTTPS custom domain attached to that production bucket.
+
+The bucket name identifies R2 storage only. Browser URLs append the provider-neutral object key to
+`MEDIA_PUBLIC_URL`, for example:
+
+```text
+assets/<UUID>.<extension>
+https://<production-media-domain>/assets/<UUID>.<extension>
+```
+
+Never derive the public hostname from the bucket name or R2 endpoint. Do not put
+`R2_DEVELOPMENT_BUCKET_NAME`, `R2_SMOKE_TEST_CONFIRMATION`, or `ALLOW_DATABASE_RESET` in Render.
+Create the production bucket, least-privilege access key, custom domain, and DNS/TLS configuration
+manually in Cloudflare, then verify the domain and bucket pairing before deployment. No production
+resource is created or changed by repository commands.
+
 Argon2id is smoke-tested with `npm run check:argon2`; CI runs the same check on
 Ubuntu 22.04 with Node 22 before deployment.
 

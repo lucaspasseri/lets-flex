@@ -4,6 +4,7 @@ import { mediaManifest, toMediaKey } from "./mediaManifest.js";
 /** @typedef {import("./media.types.js").MediaEntityType} MediaEntityType */
 /** @typedef {import("./media.types.js").MediaManifestEntry} MediaManifestEntry */
 /** @typedef {import("./media.types.js").ResolvedMedia} ResolvedMedia */
+/** @typedef {import("./storage/mediaUrl.js").MediaUrlResolver} MediaUrlResolver */
 
 const fallbackSections = Object.freeze([
 	{ property: "movementPattern", section: "movementPattern" },
@@ -20,9 +21,10 @@ const fallbackSections = Object.freeze([
  * page features never need their own lookup rules.
  *
  * @param {MediaRequest} request
+ * @param {{mediaUrlResolver?: MediaUrlResolver}} [options]
  * @returns {ResolvedMedia}
  */
-export function resolveMedia(request) {
+export function resolveMedia(request, options = {}) {
 	const label =
 		request.label ??
 		request.variantName ??
@@ -41,6 +43,7 @@ export function resolveMedia(request) {
 				candidate.isFallback,
 				label,
 				request.presentation,
+				options,
 			);
 		}
 	}
@@ -59,6 +62,7 @@ export function resolveMedia(request) {
 				true,
 				label,
 				request.presentation,
+				options,
 			);
 		}
 	}
@@ -70,6 +74,7 @@ export function resolveMedia(request) {
 		true,
 		label,
 		request.presentation,
+		options,
 	);
 }
 
@@ -144,6 +149,7 @@ function getEntry(section, key) {
  * @param {boolean} isFallback
  * @param {string} [label]
  * @param {"image" | "initial"} [presentationOverride]
+ * @param {{mediaUrlResolver?: MediaUrlResolver}} [options]
  * @returns {ResolvedMedia}
  */
 function toResolvedMedia(
@@ -153,6 +159,7 @@ function toResolvedMedia(
 	isFallback,
 	label = "",
 	presentationOverride,
+	options = {},
 ) {
 	const displayLabel = typeof label === "string" ? label.trim() : "";
 	const safeLabel = displayLabel || "Training content";
@@ -161,7 +168,10 @@ function toResolvedMedia(
 
 	return {
 		...entry,
-		src: isInitial ? null : entry.src,
+		src: isInitial
+			? null
+			: (options.mediaUrlResolver?.(entry.storageKey ?? entry.src ?? "", entry.src) ??
+				entry.src),
 		alt: isInitial
 			? `${safeLabel} — initial tile`
 			: isFallback && displayLabel

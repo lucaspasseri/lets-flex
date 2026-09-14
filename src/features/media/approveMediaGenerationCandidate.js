@@ -6,12 +6,13 @@ import {
 } from "./mediaRepository.js";
 import { normalizeMediaAltTexts } from "./manageMedia.js";
 import { inspectUploadedImage } from "./mediaUpload.js";
-import { createLocalMediaStorage } from "./mediaStorage.js";
 import { createPrivateMediaCandidateStorage } from "./mediaCandidateStorage.js";
 import { findPendingMediaGenerationCandidate } from "./mediaGenerationCandidates.js";
+import { assertMediaStorage, compensateMediaStorageWrite } from "./storage/storage.js";
 
 /** @typedef {import("pg").Pool} DatabasePool */
 /** @typedef {import("pg").PoolClient} DatabaseClient */
+/** @typedef {import("./storage/storage.js").MediaStorage} MediaStorage */
 
 export class MediaGenerationApprovalError extends Error {
 	constructor(code, message) {
@@ -66,7 +67,7 @@ async function withTransaction(db, operation) {
  * transaction after the new public asset and localized descriptions exist.
  *
  * @param {{candidateId: number, entityType: string, entityId: number, reviewerUserId: number, altTexts: Record<string, unknown>}} input
- * @param {{db?: DatabasePool, privateStorage?: ReturnType<typeof createPrivateMediaCandidateStorage>, publicStorage?: ReturnType<typeof createLocalMediaStorage>}} [dependencies]
+ * @param {{db?: DatabasePool, privateStorage?: ReturnType<typeof createPrivateMediaCandidateStorage>, publicStorage?: MediaStorage}} [dependencies]
  */
 export async function approveMediaGenerationCandidate(input, dependencies = {}) {
 	if (!Number.isInteger(input.reviewerUserId) || input.reviewerUserId <= 0)
@@ -78,7 +79,7 @@ export async function approveMediaGenerationCandidate(input, dependencies = {}) 
 	const db = dependencies.db ?? pool;
 	const privateStorage =
 		dependencies.privateStorage ?? createPrivateMediaCandidateStorage();
-	const publicStorage = dependencies.publicStorage ?? createLocalMediaStorage();
+	const publicStorage = assertMediaStorage(dependencies.publicStorage);
 	const candidate = await findPendingMediaGenerationCandidate(input.candidateId, db);
 	if (
 		!candidate ||
@@ -105,7 +106,7 @@ export async function approveMediaGenerationCandidate(input, dependencies = {}) 
 		);
 	}
 
-	const stored = await publicStorage.save(inspected.buffer, {
+	const stored = await publicStorage.put(inspected.buffer, {
 		extension: inspected.extension,
 	});
 	let approval;
@@ -167,8 +168,7 @@ export async function approveMediaGenerationCandidate(input, dependencies = {}) 
 			return { candidate: rows[0], asset, assignment };
 		});
 	} catch (error) {
-		await stored.remove().catch(() => {});
-		throw error;
+		return compensateMediaStorageWrite(publicStorage, stored.storageKey, error);
 	}
 
 	let privateCleanupPending = false;

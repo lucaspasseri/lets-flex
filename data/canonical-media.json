@@ -12,7 +12,8 @@
     "altTexts": {
       "en": "Barbell bench press exercise illustration",
       "pt-BR": "Ilustração do exercício supino com barra"
-    }
+    },
+    "storageKey": "assets/c6842d88-a584-48c5-9c20-f4b270d25413.svg"
   },
   {
     "entityType": "muscle",
@@ -27,7 +28,8 @@
     "altTexts": {
       "en": "Chest muscle illustration",
       "pt-BR": "Ilustração do músculo peitoral"
-    }
+    },
+    "storageKey": "assets/ae36d1e5-4e77-4a25-9d22-bc82b93e35d3.svg"
   },
   {
     "entityType": "exercise",
@@ -42,7 +44,8 @@
     "altTexts": {
       "en": "Bench press",
       "pt-BR": "Supino"
-    }
+    },
+    "storageKey": "assets/ce5b3f5e-3d3b-48b4-ab6d-efd0da01303a.png"
   },
   {
     "entityType": "exercise",
@@ -57,7 +60,8 @@
     "altTexts": {
       "en": "Push-up",
       "pt-BR": "Flexão de braços"
-    }
+    },
+    "storageKey": "assets/2103e208-fab0-4090-aac3-43b23831bec2.png"
   },
   {
     "entityType": "exercise",
@@ -72,7 +76,8 @@
     "altTexts": {
       "en": "Row exercise",
       "pt-BR": "Exercício de remada"
-    }
+    },
+    "storageKey": "assets/d3637649-8db4-41f8-ab9a-efda8e04ad7d.png"
   },
   {
     "entityType": "exercise",
@@ -87,7 +92,8 @@
     "altTexts": {
       "en": "Leg press",
       "pt-BR": "Leg press"
-    }
+    },
+    "storageKey": "assets/d5ddd8f7-be5a-407f-882f-5aa730e64065.png"
   },
   {
     "entityType": "exercise_variant",
@@ -102,7 +108,8 @@
     "altTexts": {
       "en": "Goblet squat",
       "pt-BR": "Agachamento goblet"
-    }
+    },
+    "storageKey": "assets/6bd95191-8ef3-4e79-90d2-5a26b87b96bf.png"
   },
   {
     "entityType": "exercise",
@@ -117,7 +124,8 @@
     "altTexts": {
       "en": "Hip extension",
       "pt-BR": "Extensão de quadril"
-    }
+    },
+    "storageKey": "assets/3311f613-fb38-4eff-8e24-e7ba3db222a4.png"
   },
   {
     "entityType": "exercise",
@@ -132,7 +140,8 @@
     "altTexts": {
       "en": "Running",
       "pt-BR": "Corrida"
-    }
+    },
+    "storageKey": "assets/12bccdae-c3c1-4881-87f3-b6740ee342e4.png"
   },
   {
     "entityType": "equipment",
@@ -147,7 +156,8 @@
     "altTexts": {
       "en": "Barbell",
       "pt-BR": "Barra"
-    }
+    },
+    "storageKey": "assets/e325f2ae-2d43-4e6c-97f8-57a1e4e9bef7.png"
   },
   {
     "entityType": "equipment",
@@ -162,7 +172,8 @@
     "altTexts": {
       "en": "Dumbbell",
       "pt-BR": "Halter"
-    }
+    },
+    "storageKey": "assets/42acbe1d-c9ec-4aa9-bc41-4eb145803bd2.png"
   },
   {
     "entityType": "equipment",
@@ -177,7 +188,8 @@
     "altTexts": {
       "en": "Kettlebell",
       "pt-BR": "Kettlebell"
-    }
+    },
+    "storageKey": "assets/17476cd3-0bc4-49cd-b51c-d2c04b756a22.png"
   },
   {
     "entityType": "equipment",
@@ -192,7 +204,8 @@
     "altTexts": {
       "en": "Resistance band",
       "pt-BR": "Faixa elástica"
-    }
+    },
+    "storageKey": "assets/3705dd49-ad48-4259-a0ef-4855b3f722dd.png"
   },
   {
     "entityType": "movement_pattern",
@@ -207,7 +220,8 @@
     "altTexts": {
       "en": "Push movement pattern",
       "pt-BR": "Padrão de movimento de empurrar"
-    }
+    },
+    "storageKey": "assets/69b42526-9ad4-4e6c-ab86-559d39db4b38.png"
   },
   {
     "entityType": "movement_pattern",
@@ -222,7 +236,8 @@
     "altTexts": {
       "en": "Pull movement pattern",
       "pt-BR": "Padrão de movimento de puxar"
-    }
+    },
+    "storageKey": "assets/6a29abbb-a014-4a69-88ed-4499dc21e455.png"
   },
   {
     "entityType": "movement_pattern",
@@ -237,7 +252,8 @@
     "altTexts": {
       "en": "Squat movement pattern",
       "pt-BR": "Padrão de movimento de agachar"
-    }
+    },
+    "storageKey": "assets/1f1ef50f-0277-4d59-b9e7-cb22192defa0.png"
   },
   {
     "entityType": "movement_pattern",
@@ -252,7 +268,8 @@
     "altTexts": {
       "en": "Hinge movement pattern",
       "pt-BR": "Padrão de movimento de dobrar o quadril"
-    }
+    },
+    "storageKey": "assets/9b88ece9-492c-4fe2-a60b-a6785ef4a24d.png"
   },
   {
     "entityType": "movement_pattern",
@@ -267,7 +284,8 @@
     "altTexts": {
       "en": "Gait movement pattern",
       "pt-BR": "Padrão de movimento de marcha"
-    }
+    },
+    "storageKey": "assets/b6f17a38-8e80-4b0c-8970-2ca61a84e77d.png"
   },
   {
     "entityType": "exercise",
@@ -282,7 +300,8 @@
     "altTexts": {
       "en": "Standing barbell overhead press",
       "pt-BR": "Desenvolvimento militar com barra em pé"
-    }
+    },
+    "storageKey": "assets/e8f3d661-3495-4a0a-80f4-392538284f2a.png"
   },
   {
     "entityType": "exercise",
@@ -297,7 +316,8 @@
     "altTexts": {
       "en": "Bodyweight pull-up",
       "pt-BR": "Barra fixa"
-    }
+    },
+    "storageKey": "assets/ccd3705a-b5eb-4ba3-89b9-fbb718e66ebc.png"
   },
   {
     "entityType": "exercise",
@@ -312,7 +332,8 @@
     "altTexts": {
       "en": "Seated lat pulldown",
       "pt-BR": "Puxada na frente em máquina"
-    }
+    },
+    "storageKey": "assets/efd5b000-bd42-4172-a45a-bc450d1ce64a.png"
   },
   {
     "entityType": "exercise",
@@ -327,7 +348,8 @@
     "altTexts": {
       "en": "Conventional barbell deadlift setup",
       "pt-BR": "Levantamento terra convencional com barra"
-    }
+    },
+    "storageKey": "assets/130e569e-704d-47c3-8396-2368acf2d4e8.png"
   },
   {
     "entityType": "exercise",
@@ -342,7 +364,8 @@
     "altTexts": {
       "en": "Barbell back squat",
       "pt-BR": "Agachamento livre com barra"
-    }
+    },
+    "storageKey": "assets/b2f2ead8-33ab-4584-beb8-efa9eb80a19c.png"
   },
   {
     "entityType": "exercise",
@@ -357,7 +380,8 @@
     "altTexts": {
       "en": "Romanian deadlift",
       "pt-BR": "Levantamento terra romeno"
-    }
+    },
+    "storageKey": "assets/340998ba-b0d2-4ee0-b0b2-0cae7d82d282.png"
   },
   {
     "entityType": "exercise",
@@ -372,7 +396,8 @@
     "altTexts": {
       "en": "Forward lunge",
       "pt-BR": "Afundo à frente"
-    }
+    },
+    "storageKey": "assets/34ee5236-0cff-4455-ad04-95252e43d59c.png"
   },
   {
     "entityType": "exercise",
@@ -387,7 +412,8 @@
     "altTexts": {
       "en": "Reverse lunge",
       "pt-BR": "Afundo reverso"
-    }
+    },
+    "storageKey": "assets/03066415-075d-4c20-8290-4876a38d6a20.png"
   },
   {
     "entityType": "exercise",
@@ -402,7 +428,8 @@
     "altTexts": {
       "en": "Split squat",
       "pt-BR": "Agachamento dividido"
-    }
+    },
+    "storageKey": "assets/2e4c1d73-8a56-4b8a-acfc-2935b55cf97a.png"
   },
   {
     "entityType": "exercise",
@@ -417,7 +444,8 @@
     "altTexts": {
       "en": "Chest fly",
       "pt-BR": "Crucifixo"
-    }
+    },
+    "storageKey": "assets/566d2c8d-2192-44be-a14b-adf8406ae7ce.png"
   },
   {
     "entityType": "exercise",
@@ -432,7 +460,8 @@
     "altTexts": {
       "en": "Lateral raise",
       "pt-BR": "Elevação lateral"
-    }
+    },
+    "storageKey": "assets/139cd887-f039-45e9-9cb1-388abde334d7.png"
   },
   {
     "entityType": "exercise",
@@ -447,7 +476,8 @@
     "altTexts": {
       "en": "Biceps curl",
       "pt-BR": "Rosca bíceps"
-    }
+    },
+    "storageKey": "assets/a094de67-4bad-4633-a917-c05d48fb95b2.png"
   },
   {
     "entityType": "exercise",
@@ -462,7 +492,8 @@
     "altTexts": {
       "en": "Cable triceps pushdown",
       "pt-BR": "Tríceps na polia"
-    }
+    },
+    "storageKey": "assets/931521b3-4bce-42c8-b8be-a8c4e5e81edb.png"
   },
   {
     "entityType": "equipment",
@@ -477,7 +508,8 @@
     "altTexts": {
       "en": "Suspension trainer",
       "pt-BR": "Treinador de suspensão"
-    }
+    },
+    "storageKey": "assets/57b52c65-9394-4116-b4a2-a3a53016a7d1.png"
   },
   {
     "entityType": "equipment",
@@ -492,7 +524,8 @@
     "altTexts": {
       "en": "Ab wheel",
       "pt-BR": "Roda abdominal"
-    }
+    },
+    "storageKey": "assets/76d6aa65-6d6d-4be3-bd6f-f7f8d6d1d53a.png"
   },
   {
     "entityType": "equipment",
@@ -507,7 +540,8 @@
     "altTexts": {
       "en": "Textured medicine ball",
       "pt-BR": "Bola medicinal texturizada"
-    }
+    },
+    "storageKey": "assets/59283658-2dba-43db-90af-89adede0da34.png"
   },
   {
     "entityType": "exercise",
@@ -522,7 +556,8 @@
     "altTexts": {
       "en": "Seated leg extension",
       "pt-BR": "Extensão de pernas sentada"
-    }
+    },
+    "storageKey": "assets/239ffd95-f8a0-4d8a-858c-1c70fa5cf26e.png"
   },
   {
     "entityType": "exercise",
@@ -537,7 +572,8 @@
     "altTexts": {
       "en": "Prone leg curl",
       "pt-BR": "Flexão de pernas deitado"
-    }
+    },
+    "storageKey": "assets/95ee5c4f-6b98-462d-aff4-91852434304e.png"
   },
   {
     "entityType": "exercise",
@@ -552,7 +588,8 @@
     "altTexts": {
       "en": "High plank",
       "pt-BR": "Prancha alta"
-    }
+    },
+    "storageKey": "assets/015bb97c-d889-4f81-8ec4-9c5f5084774f.png"
   },
   {
     "entityType": "exercise",
@@ -567,7 +604,8 @@
     "altTexts": {
       "en": "Two-handed kettlebell swing",
       "pt-BR": "Balanço com kettlebell usando as duas mãos"
-    }
+    },
+    "storageKey": "assets/ff30f7ef-a27f-485e-aaa8-66e63928bee0.png"
   },
   {
     "entityType": "exercise",
@@ -582,7 +620,8 @@
     "altTexts": {
       "en": "Farmer carry with two dumbbells",
       "pt-BR": "Caminhada do fazendeiro com dois halteres"
-    }
+    },
+    "storageKey": "assets/e58e3ee0-5f6a-46dd-9293-1cb5437a1f35.png"
   },
   {
     "entityType": "exercise",
@@ -597,7 +636,8 @@
     "altTexts": {
       "en": "Brisk walking",
       "pt-BR": "Caminhada acelerada"
-    }
+    },
+    "storageKey": "assets/d886095e-cfa1-4096-8336-5e71d506bb2c.png"
   },
   {
     "entityType": "exercise",
@@ -612,7 +652,8 @@
     "altTexts": {
       "en": "Stationary cycling",
       "pt-BR": "Ciclismo em bicicleta ergométrica"
-    }
+    },
+    "storageKey": "assets/9bd69c7c-7513-4d63-a7a4-bc79484ec4c1.png"
   },
   {
     "entityType": "exercise",
@@ -627,7 +668,8 @@
     "altTexts": {
       "en": "Jump rope",
       "pt-BR": "Pular corda"
-    }
+    },
+    "storageKey": "assets/7ca15f2b-6887-449a-8fc0-e59326503be8.png"
   },
   {
     "entityType": "exercise",
@@ -642,7 +684,8 @@
     "altTexts": {
       "en": "Elliptical training",
       "pt-BR": "Treino em máquina elíptica"
-    }
+    },
+    "storageKey": "assets/8389125a-5646-4321-91ef-975d6cb605cb.png"
   },
   {
     "entityType": "exercise",
@@ -657,7 +700,8 @@
     "altTexts": {
       "en": "Indoor rowing",
       "pt-BR": "Remo indoor"
-    }
+    },
+    "storageKey": "assets/eab2b0c8-2922-475a-b595-682b36fb285e.png"
   },
   {
     "entityType": "equipment",
@@ -672,7 +716,8 @@
     "altTexts": {
       "en": "Guided-bar Smith machine",
       "pt-BR": "Máquina Smith com barra guiada"
-    }
+    },
+    "storageKey": "assets/c35bc9de-5eff-40f1-a172-3a2e574c2a09.png"
   },
   {
     "entityType": "equipment",
@@ -687,7 +732,8 @@
     "altTexts": {
       "en": "Dual-pulley cable machine",
       "pt-BR": "Máquina de cabos com polias duplas"
-    }
+    },
+    "storageKey": "assets/b8354233-1e72-44e3-b8a0-cf00df1bc429.png"
   },
   {
     "entityType": "equipment",
@@ -702,7 +748,8 @@
     "altTexts": {
       "en": "45-degree sled leg press",
       "pt-BR": "Leg press com trenó a 45 graus"
-    }
+    },
+    "storageKey": "assets/dca4db99-f929-4606-a904-8f4962070121.png"
   },
   {
     "entityType": "equipment",
@@ -717,7 +764,8 @@
     "altTexts": {
       "en": "Seated selectorized chest press",
       "pt-BR": "Máquina de supino sentado com pilha de pesos"
-    }
+    },
+    "storageKey": "assets/0b7b36e0-3f2d-4c84-b841-b5bf2c1c0118.png"
   },
   {
     "entityType": "equipment",
@@ -732,7 +780,8 @@
     "altTexts": {
       "en": "Plate-loaded hack squat",
       "pt-BR": "Hack squat com carga por anilhas"
-    }
+    },
+    "storageKey": "assets/569c4d30-6d78-4044-a2a0-443f2fe48fff.png"
   },
   {
     "entityType": "equipment",
@@ -747,7 +796,8 @@
     "altTexts": {
       "en": "Seated leg extension machine",
       "pt-BR": "Máquina de extensão de pernas sentada"
-    }
+    },
+    "storageKey": "assets/824d30eb-d792-4d34-abe7-571e11d89421.png"
   },
   {
     "entityType": "equipment",
@@ -762,7 +812,8 @@
     "altTexts": {
       "en": "Prone leg curl machine",
       "pt-BR": "Máquina de flexão de pernas deitado"
-    }
+    },
+    "storageKey": "assets/0cb164f2-0183-4b20-8dac-550317d36fdb.png"
   },
   {
     "entityType": "equipment",
@@ -777,7 +828,8 @@
     "altTexts": {
       "en": "Reverse-pec-deck rear delt machine",
       "pt-BR": "Máquina de deltoide posterior reversa"
-    }
+    },
+    "storageKey": "assets/6e42d0c1-c0e2-4626-8baa-9b45136cd30d.png"
   },
   {
     "entityType": "equipment",
@@ -792,7 +844,8 @@
     "altTexts": {
       "en": "Seated lat pulldown machine",
       "pt-BR": "Máquina de puxada na frente sentada"
-    }
+    },
+    "storageKey": "assets/051c745b-2889-4fd9-8217-48eaf719b148.png"
   },
   {
     "entityType": "equipment",
@@ -807,7 +860,8 @@
     "altTexts": {
       "en": "Freestanding pull-up bar station",
       "pt-BR": "Estação de barra fixa independente"
-    }
+    },
+    "storageKey": "assets/4e3a9028-cb5e-44dc-b8a7-e7d688128ca4.png"
   },
   {
     "entityType": "equipment",
@@ -822,7 +876,8 @@
     "altTexts": {
       "en": "Freestanding parallel dip bar station",
       "pt-BR": "Estação de barras paralelas"
-    }
+    },
+    "storageKey": "assets/ecb310d9-d32d-419e-8bfd-dd9291cb1f19.png"
   },
   {
     "entityType": "equipment",
@@ -837,7 +892,8 @@
     "altTexts": {
       "en": "Adjustable jump rope",
       "pt-BR": "Corda de pular ajustável"
-    }
+    },
+    "storageKey": "assets/dad23553-3ed3-4a57-9952-353fa2693db3.png"
   },
   {
     "entityType": "equipment",
@@ -852,7 +908,8 @@
     "altTexts": {
       "en": "Motorized treadmill",
       "pt-BR": "Esteira motorizada"
-    }
+    },
+    "storageKey": "assets/bd5df11f-b5a1-479a-8352-65b52a29d07c.png"
   },
   {
     "entityType": "equipment",
@@ -867,7 +924,8 @@
     "altTexts": {
       "en": "Upright stationary exercise bike",
       "pt-BR": "Bicicleta ergométrica vertical"
-    }
+    },
+    "storageKey": "assets/4095e8ff-2d78-47ba-9f76-671994044658.png"
   },
   {
     "entityType": "equipment",
@@ -882,7 +940,8 @@
     "altTexts": {
       "en": "Elliptical trainer",
       "pt-BR": "Treinador elíptico"
-    }
+    },
+    "storageKey": "assets/277205d9-c1ad-4afd-aa76-b3ab77d517c9.png"
   },
   {
     "entityType": "equipment",
@@ -897,7 +956,8 @@
     "altTexts": {
       "en": "Indoor rowing machine",
       "pt-BR": "Máquina de remo indoor"
-    }
+    },
+    "storageKey": "assets/9ef8c9f2-6d4b-4d8c-9ca6-3733ede17bb7.png"
   },
   {
     "entityType": "equipment",
@@ -912,7 +972,8 @@
     "altTexts": {
       "en": "Flat weight bench",
       "pt-BR": "Banco reto de musculação"
-    }
+    },
+    "storageKey": "assets/0d342a97-8aa7-4d34-a7d3-b6de5f5c80d3.png"
   },
   {
     "entityType": "equipment",
@@ -927,7 +988,8 @@
     "altTexts": {
       "en": "Adjustable incline weight bench",
       "pt-BR": "Banco inclinado ajustável"
-    }
+    },
+    "storageKey": "assets/6e902d49-8170-46ee-a06c-0d58729d61c3.png"
   },
   {
     "entityType": "equipment",
@@ -942,7 +1004,8 @@
     "altTexts": {
       "en": "Decline weight bench with ankle rollers",
       "pt-BR": "Banco declinado com rolos para tornozelos"
-    }
+    },
+    "storageKey": "assets/d98ec878-8670-4105-9c85-7e34f3e85a25.png"
   },
   {
     "entityType": "equipment",
@@ -957,7 +1020,8 @@
     "altTexts": {
       "en": "Open-front squat rack with safety arms",
       "pt-BR": "Rack de agachamento aberto com braços de segurança"
-    }
+    },
+    "storageKey": "assets/850afc0c-6d8a-4731-95b6-2b544b108e82.png"
   },
   {
     "entityType": "equipment",
@@ -972,7 +1036,8 @@
     "altTexts": {
       "en": "Four-post power rack with safety pins",
       "pt-BR": "Power rack de quatro postes com pinos de segurança"
-    }
+    },
+    "storageKey": "assets/2d80b2fa-8a08-490b-ae91-28059d1c3f26.png"
   },
   {
     "entityType": "movement_pattern",
@@ -987,7 +1052,8 @@
     "altTexts": {
       "en": "Lunge movement pattern",
       "pt-BR": "Padrão de movimento de afundo"
-    }
+    },
+    "storageKey": "assets/081e3de1-6055-4684-8158-d74370e081d4.png"
   },
   {
     "entityType": "movement_pattern",
@@ -1002,7 +1068,8 @@
     "altTexts": {
       "en": "Loaded carry movement pattern",
       "pt-BR": "Padrão de movimento de transporte de carga"
-    }
+    },
+    "storageKey": "assets/f13490a7-762a-4909-8d7d-7b3f064bfc5a.png"
   },
   {
     "entityType": "movement_pattern",
@@ -1017,7 +1084,8 @@
     "altTexts": {
       "en": "Trunk rotation movement pattern",
       "pt-BR": "Padrão de movimento de rotação do tronco"
-    }
+    },
+    "storageKey": "assets/398e6c88-4553-4f4d-bcb7-6c4538bb73b4.png"
   },
   {
     "entityType": "muscle",
@@ -1032,16 +1100,18 @@
     "altTexts": {
       "en": "abdomen",
       "pt-BR": "abdominal"
-    }
+    },
+    "storageKey": "assets/8d2152c1-03e1-4ddc-89ee-c0a99bb2e991.jpg"
   },
   {
     "entityType": "muscle",
     "entityKey": "abductors",
     "path": "/media/catalog/promoted/muscle-abductors-f1fe5fead20e2bb4.jpg",
+    "storageKey": "assets/ab2a5fc5-f6ab-468b-9b88-b5bf776bd106.jpg",
     "role": "primary",
     "mimeType": "image/jpeg",
-    "width": 730,
-    "height": 456,
+    "width": 1124,
+    "height": 1092,
     "source": "curated",
     "alt": "123",
     "altTexts": {

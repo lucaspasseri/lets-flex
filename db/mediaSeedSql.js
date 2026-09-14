@@ -128,7 +128,7 @@ export function createMediaSeedSql(manifest = canonicalMediaManifest) {
 	const values = entries
 		.map(
 			(entry) =>
-				`(${sqlString(entry.path)}, ${sqlString(entry.mimeType)}, ${entry.width}, ${entry.height}, ${sqlString(entry.source)}, ${sqlString(entry.alt)}, ${sqlString(entry.entityType)}, ${sqlString(entry.entityKey)}, ${sqlString(entityDefinitions[entry.entityType].table)}, ${sqlString(entry.role)}, ${sqlString(entry.altTexts.en)}, ${sqlString(entry.altTexts["pt-BR"])})`,
+				`(${sqlString(entry.storageKey ?? entry.path)}, ${sqlString(entry.mimeType)}, ${entry.width}, ${entry.height}, ${sqlString(entry.source)}, ${sqlString(entry.alt)}, ${sqlString(entry.entityType)}, ${sqlString(entry.entityKey)}, ${sqlString(entityDefinitions[entry.entityType].table)}, ${sqlString(entry.role)}, ${sqlString(entry.altTexts.en)}, ${sqlString(entry.altTexts["pt-BR"])})`,
 		)
 		.join(",\n");
 	const referenceValues = entries
