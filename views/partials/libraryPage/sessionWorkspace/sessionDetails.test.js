@@ -113,3 +113,34 @@ test("selected-session detail localizes its interface labels", async () => {
 	assert.match(html, /Notas do treinador/);
 	assert.match(html, /Prescrição/);
 });
+
+test("selected-session detail localizes fixed step types without bilingual labels", async () => {
+	const html = await ejs.renderFile(templatePath, {
+		t: i18n.getFixedT("pt-BR"),
+		summariesHeadingId: "session-summaries-title",
+		session: {
+			headingId: "session-details-title-7",
+			name: "Sessão de força",
+			description: "Uma sessão focada.",
+			notes: null,
+			isArchived: false,
+			stats: [],
+			steps: [
+				{
+					order: 1,
+					type: "Exercício",
+					exercise: {
+						name: "Supino",
+						variantName: "Supino com barra",
+					},
+					prescription: { label: "3 séries × 8 repetições" },
+					muscles: [],
+				},
+			],
+			actions: { edit: null, delete: null },
+		},
+	});
+
+	assert.match(html, /session-step__type[\s\S]*Exercício/);
+	assert.doesNotMatch(html, /Exercise \(Exercício\)/);
+});

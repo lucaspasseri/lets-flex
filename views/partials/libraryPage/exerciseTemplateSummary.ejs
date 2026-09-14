@@ -1,3 +1,4 @@
+<% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <% const {baseName="", summary={}, details={}} = locals?.template %>
 
 <span class="exercise-template__summary">
@@ -5,7 +6,7 @@
 		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__summary-media", variant: "icon", density: "compact", decorative: true, loading: "lazy", decoding: "async" }) %>
 	<% } %>
 	<span class="exercise-template__identity">
-		<span class="exercise-template__eyebrow">Base exercise</span>
+		<span class="exercise-template__eyebrow"><%= translate("library.baseExercise", { defaultValue: "Base exercise" }) %></span>
 		<strong class="exercise-template__name"><%= baseName %></strong>
 		<span class="exercise-template__variant-count" data-exercise-variant-count><%= summary.variantCountLabel %></span>
 	</span>

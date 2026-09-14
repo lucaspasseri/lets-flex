@@ -144,7 +144,9 @@ test("history detail maps immutable snapshots, ordered sets, notes, and units", 
 								name: "Main press",
 								stepTypeName: "exercise",
 								exerciseName: "Bench press",
+								exerciseNameTranslation: "Supino reto",
 								exerciseVariantName: "Barbell bench press",
+								exerciseVariantNameTranslation: "Supino reto com barra",
 								plannedSets: 3,
 								plannedReps: 8,
 								plannedLoadValue: 50,
@@ -176,7 +178,8 @@ test("history detail maps immutable snapshots, ordered sets, notes, and units", 
 	assert.deepEqual(calls[0].parameters, [41, 12]);
 	assert.match(calls[0].sql, /p\.user_id = \$2/);
 	assert.doesNotMatch(calls[0].sql, /JOIN sessions|JOIN session_steps/);
-	assert.doesNotMatch(calls[0].sql, /_translations/);
+	assert.match(calls[0].sql, /exercise_translations/);
+	assert.match(calls[0].sql, /exercise_variant_translations/);
 	assert.deepEqual(detail?.steps[0], {
 		id: 5,
 		order: 1,
@@ -184,7 +187,9 @@ test("history detail maps immutable snapshots, ordered sets, notes, and units", 
 		name: "Main press",
 		stepTypeName: "exercise",
 		exerciseName: "Bench press",
+		exerciseNameTranslation: "Supino reto",
 		exerciseVariantName: "Barbell bench press",
+		exerciseVariantNameTranslation: "Supino reto com barra",
 		plannedSets: 3,
 		plannedReps: 8,
 		plannedLoadValue: 50,

@@ -93,17 +93,18 @@
 										<%- include("../shared/components/form/field", { field: {
 											id: `private-variant-${variant.id}-name`,
 											name: "name",
-											label: "Variant name",
+											label: translate("library.variantName", { defaultValue: "Variant name" }),
 											control: "input",
 											type: "text",
 											required: true,
 											value: variant.privateMutation?.name ?? variant.name,
 											error: variant.privateMutation?.error ?? null,
-											hint: "Only you can update this private variant.",
+											hint: translate("library.privateVariantUpdateHint", { defaultValue: "Only you can update this private variant." }),
+											t: translate,
 											attributes: { maxlength: 100, autocomplete: "off" }
 										} }) %>
 										<%- include("../shared/components/button/button", { button: {
-											label: "Save variant",
+											label: translate("actions.save", { defaultValue: "Save" }),
 											type: "submit",
 											variant: "primary"
 										} }) %>
@@ -111,7 +112,7 @@
 									<form class="exercise-template__archive-form" method="POST" action="/exercise-variants/<%= variant.id %>/archive">
 										<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 										<%- include("../shared/components/button/button", { button: {
-											label: "Archive private variant",
+											label: translate("library.archivePrivateVariant", { defaultValue: "Archive private variant" }),
 											type: "submit",
 											variant: "dangerGhost"
 										} }) %>

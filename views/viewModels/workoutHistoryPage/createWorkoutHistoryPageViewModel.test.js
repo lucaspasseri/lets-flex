@@ -4,6 +4,7 @@ import {
 	createWorkoutHistoryDetailPageViewModel,
 	createWorkoutHistoryListPageViewModel,
 } from "./createWorkoutHistoryPageViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const currentUser = /** @type {any} */ ({ id: 1, name: "Member", role: "user" });
 
@@ -142,4 +143,122 @@ test("history detail view model uses snapshot labels and retains the list return
 	assert.equal(viewModel.steps[0].exerciseName, "Bench press");
 	assert.equal(viewModel.summary.historyDate.context, "Completed");
 	assert.equal(viewModel.summary.scheduledDate?.value, "2026-08-12");
+});
+
+test("history localizes step types while preserving user-authored step names", () => {
+	const viewModel = createWorkoutHistoryDetailPageViewModel({
+		page: { path: "/history/9" },
+		currentUser,
+		returnFilters: { programId: null, fromDate: null, toDate: null },
+		returnPage: 1,
+		translate: i18n.getFixedT("pt-BR"),
+		language: "pt-BR",
+		history: /** @type {any} */ ({
+			id: 9,
+			status: "finished",
+			historyDate: "2026-08-14",
+			scheduledDate: null,
+			startedAt: null,
+			finishedAt: null,
+			programId: 4,
+			programName: "Força",
+			sessionName: "Finalizador",
+			notes: null,
+			steps: [
+				{
+					id: 2,
+					order: 1,
+					status: "performed",
+					name: "Box squats",
+					stepTypeName: "exercise",
+					exerciseName: "Box Squat",
+					exerciseNameTranslation: "Agachamento na caixa",
+					exerciseVariantName: "Bodyweight Box Squat",
+					exerciseVariantNameTranslation: "Agachamento na caixa com peso corporal",
+					plannedSets: 3,
+					plannedReps: 8,
+					plannedLoadValue: null,
+					plannedLoadUnit: null,
+					startedAt: null,
+					completedAt: null,
+					notes: null,
+					sets: [],
+				},
+			],
+		}),
+	});
+
+	assert.equal(viewModel.steps[0].stepTypeName, "Exercício");
+	assert.equal(viewModel.steps[0].name, "Box squats");
+	assert.equal(
+		viewModel.steps[0].title,
+		"Bodyweight Box Squat (Agachamento na caixa com peso corporal)",
+	);
+	assert.equal(viewModel.steps[0].exerciseName, "Box Squat (Agachamento na caixa)");
+});
+
+test("history detail keeps catalog names canonical when translations are unavailable or English is active", () => {
+	const history = /** @type {any} */ ({
+		id: 10,
+		status: "finished",
+		historyDate: "2026-08-14",
+		scheduledDate: null,
+		startedAt: null,
+		finishedAt: null,
+		programId: 4,
+		programName: "Strength",
+		sessionName: "Session",
+		notes: null,
+		steps: [
+			{
+				id: 3,
+				order: 1,
+				status: "performed",
+				name: "Custom label",
+				stepTypeName: "exercise",
+				exerciseName: "Box Squat",
+				exerciseVariantName: null,
+				exerciseNameTranslation: null,
+				exerciseVariantNameTranslation: null,
+				plannedSets: null,
+				plannedReps: null,
+				plannedLoadValue: null,
+				plannedLoadUnit: null,
+				startedAt: null,
+				completedAt: null,
+				notes: null,
+				sets: [],
+			},
+		],
+	});
+
+	const portuguese = createWorkoutHistoryDetailPageViewModel({
+		page: {},
+		currentUser,
+		returnFilters: { programId: null, fromDate: null, toDate: null },
+		returnPage: 1,
+		translate: i18n.getFixedT("pt-BR"),
+		language: "pt-BR",
+		history,
+	});
+	const english = createWorkoutHistoryDetailPageViewModel({
+		page: {},
+		currentUser,
+		returnFilters: { programId: null, fromDate: null, toDate: null },
+		returnPage: 1,
+		language: "en",
+		history: {
+			...history,
+			steps: [
+				{
+					...history.steps[0],
+					exerciseNameTranslation: "Agachamento na caixa",
+				},
+			],
+		},
+	});
+
+	assert.equal(portuguese.steps[0].title, "Box Squat");
+	assert.equal(portuguese.steps[0].name, "Custom label");
+	assert.equal(english.steps[0].title, "Box Squat");
 });

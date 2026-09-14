@@ -57,7 +57,7 @@
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createProgramForm.form,
 			slots: {
-				body: include("partials/programsPage/createProgramForm/createProgramFormBody", { createProgramForm }),
+				body: include("partials/programsPage/createProgramForm/createProgramFormBody", { createProgramForm, t: translate }),
 				footer: include("partials/programsPage/createProgramForm/createProgramFormFooter", { createProgramForm })
 			}
 		}})
@@ -73,7 +73,7 @@
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createCycleForm.form,
 			slots: {
-				body: include("partials/programsPage/createCycleForm/createCycleFormBody", { createCycleForm }),
+				body: include("partials/programsPage/createCycleForm/createCycleFormBody", { createCycleForm, t: translate }),
 				footer: include("partials/programsPage/createCycleForm/createCycleFormFooter", { createCycleForm })
 			}
 		}})

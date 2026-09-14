@@ -18,7 +18,7 @@ Each individual prompt named only the listed exercise, equipment item, or moveme
 
 ## Managed assets
 
-| Asset ID | Assigned entity                | Managed storage key                                       | Treatment                                           |
+| Asset ID | Assigned entity                | Historical local upload key                               | Treatment                                           |
 | -------- | ------------------------------ | --------------------------------------------------------- | --------------------------------------------------- |
 | 4        | Exercise: Bench Press          | `/media/uploads/5aa07bcc-d1ad-411f-bb2f-77ca468e4058.png` | Base exercise; direct assignment                    |
 | 5        | Unassigned reusable asset      | `/media/uploads/929f6e62-0747-4480-b21e-c57f9f05cf0e.png` | Preserved after redundant direct assignment removal |
@@ -45,10 +45,11 @@ Each individual prompt named only the listed exercise, equipment item, or moveme
 - An unknown entity resolves to the established initial fallback.
 
 The associated files were recovered from ignored application-managed storage under
-`public/media/uploads`; their UUID names were used only as recovery references, never as catalog
-identity. The 66 assigned reviewed assets now also live under source-controlled
-`public/media/catalog/` paths named by stable catalog key. The ignored upload originals remain
-untouched as runtime/deferred storage. No third-party asset was added.
+`public/media/uploads`; their UUID names were used only as historical recovery references, never as
+catalog identity. The 66 assigned reviewed assets now also live under source-controlled
+`public/media/catalog/` paths named by stable catalog key and have provider-neutral object keys in
+`data/canonical-media.json`. The ignored upload originals remain preserved as local/deferred
+storage. No third-party asset was added.
 
 ## Phase 4 Action 2 — Tier 1 base and equipment curation
 
@@ -59,7 +60,7 @@ asset below was inspected for subject/equipment identity, safe obvious form, abs
 logos, watermarks, and stylistic coherence before it was passed through the normal management
 service.
 
-| Asset ID | Assigned entity                     | Managed storage key                                       | English / Portuguese metadata                                                               |
+| Asset ID | Assigned entity                     | Historical local upload key                               | English / Portuguese metadata                                                               |
 | -------- | ----------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
 | 21       | Exercise: Overhead Press            | `/media/uploads/f8b1d124-116d-408a-86e6-0626120fe1f3.png` | Standing barbell overhead press / desenvolvimento militar com barra em pé                   |
 | 22       | Exercise: Pull Up                   | `/media/uploads/c43670ac-87eb-41e4-9397-aa1fe168f7d9.png` | Bodyweight pull-up / barra fixa                                                             |
@@ -122,15 +123,17 @@ logos, watermarks, UI, or anatomy overlays. The three distinct adult subjects br
 visible range of skin tones, age cues, hair, and body build naturally without stereotype-driven
 depiction.
 
-| Asset ID | Assigned entity            | Managed storage key                                       | English / Portuguese metadata                                                                                                                    |
+| Asset ID | Assigned entity            | Historical local upload key                               | English / Portuguese metadata                                                                                                                    |
 | -------- | -------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 68       | Movement pattern: Lunge    | `/media/uploads/1078dab8-1e49-4df7-a159-3a8d865399c7.png` | Graphic silhouette representing a lunge movement pattern. / Silhueta gráfica que representa o padrão de movimento de afundo.                     |
 | 69       | Movement pattern: Carry    | `/media/uploads/828ba824-1f7c-45be-bac7-dbfbe9574cb3.png` | Graphic silhouette representing a loaded carry movement pattern. / Silhueta gráfica que representa o padrão de movimento de transporte de carga. |
 | 70       | Movement pattern: Rotation | `/media/uploads/947d6e90-0818-4054-ada4-695f03e9f6ba.png` | Graphic silhouette representing a trunk rotation movement pattern. / Silhueta gráfica que representa o padrão de movimento de rotação do tronco. |
 
-The durable recovery references are the managed storage keys above. No muscle asset was added,
-reassigned, or deleted: the pre-existing JPEG muscle records remain a separate provenance/anatomy
-audit finding. Environments remain contextual strings and received no managed assignment.
+The historical upload keys above document the recovery/provenance record; they are not the current
+durable object keys. Current canonical object keys are stored in `data/canonical-media.json` and
+the `media_assets.storage_key` column. No muscle asset was added, reassigned, or deleted: the
+pre-existing JPEG muscle records remain a separate provenance/anatomy audit finding. Environments
+remain contextual strings and received no managed assignment.
 
 ## Phase 4 Action 6 — Legacy retention and final health audit
 
@@ -146,7 +149,7 @@ Read-only verification found 70 present application-managed files, each matching
 type and dimensions, with no unsafe storage key, unreadable object, or byte-identical duplicate.
 The managed collection totals 113,375,117 bytes; individual files range from 35,203 to 2,195,217
 bytes. All 66 active direct assignments have both English and Brazilian Portuguese localized alt
-text records. The canonical seed uses those 66 documented assignments plus the two non-conflicting
-original static assignments (`exercise_variant:barbell-bench-press` and `muscle:chest`), for 68
-seeded assets/primary assignments. The three original static files that overlapped recovered
+text records. The canonical seed uses the 70 current manifest assignments, including the two
+non-conflicting original static assignments (`exercise_variant:barbell-bench-press` and
+`muscle:chest`). The three original static files that overlapped recovered
 reviewed assignments remain in place but are no longer selected by the canonical manifest.

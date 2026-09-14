@@ -1,8 +1,9 @@
 import formatDayPageDate from "./formatDayPageDate.js";
+import createViewModelTranslator from "../translate.js";
 
 /**
  * @typedef {import("../../../src/features/trainingDays/trainingDays.types.js").TrainingDay} TrainingDay
- * @param {{currentDay: TrainingDay | null, days: TrainingDay[], programName?: string | null, cycleName?: string | null, language?: string}} input
+ * @param {{currentDay: TrainingDay | null, days: TrainingDay[], programName?: string | null, cycleName?: string | null, language?: string, translate?: Function}} input
  */
 export default function createDayNavigationViewModel({
 	currentDay,
@@ -10,7 +11,9 @@ export default function createDayNavigationViewModel({
 	programName = null,
 	cycleName = null,
 	language = "en",
+	translate,
 }) {
+	const t = createViewModelTranslator(translate);
 	const currentIndex = currentDay
 		? days.findIndex((day) => day.id === currentDay.id)
 		: -1;
@@ -20,19 +23,41 @@ export default function createDayNavigationViewModel({
 		day
 			? {
 					id: day.id,
-					label: formatDayPageDate(day.scheduledDate, language) ?? "Date pending",
-					name: day.label?.trim() || `Day ${day.dayOrder}`,
-					contextLabel: `Cycle ${day.cycleOrder} · Day ${day.dayOrder}`,
+					label:
+						formatDayPageDate(day.scheduledDate, language) ??
+						t("dashboard.datePending", { defaultValue: "Date pending" }),
+					name:
+						day.label?.trim() ||
+						t("dashboard.dayNumber", {
+							count: day.dayOrder,
+							defaultValue: "Day {{count}}",
+						}),
+					contextLabel: t("dashboard.cycleDay", {
+						cycle: day.cycleOrder,
+						day: day.dayOrder,
+						defaultValue: "Cycle {{cycle}} · Day {{day}}",
+					}),
 					href: `/programs/day?dayId=${day.id}`,
 				}
 			: null;
 
 	return {
 		isVisible: days.length > 0,
-		heading: programName ? `${programName} training days` : "Choose a training day",
+		heading: programName
+			? t("programs.programTrainingDays", {
+					name: programName,
+					defaultValue: "{{name}} training days",
+				})
+			: t("dashboard.chooseTrainingDay", { defaultValue: "Choose a training day" }),
 		description: cycleName
-			? `${cycleName} contains the selected day. You can also open another day in this program.`
-			: "Open another scheduled day in this program.",
+			? t("dashboard.selectedDayDescription", {
+					name: cycleName,
+					defaultValue:
+						"{{name}} contains the selected day. You can also open another day in this program.",
+				})
+			: t("dashboard.otherDayDescription", {
+					defaultValue: "Open another scheduled day in this program.",
+				}),
 		previous: currentIndex > 0 ? toLink(days[currentIndex - 1]) : null,
 		next:
 			currentIndex >= 0 && currentIndex < days.length - 1

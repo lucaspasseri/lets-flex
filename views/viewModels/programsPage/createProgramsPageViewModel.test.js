@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import ejs from "ejs";
 import createProgramsPageViewModel from "./createProgramsPageViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const page = {
 	path: "/programs",
@@ -132,6 +133,33 @@ test("Programs page creates presentation-ready component contracts", () => {
 		{ label: "Position 1", value: 1 },
 		{ label: "Position 2", value: 2 },
 	]);
+});
+
+test("Programs goal options localize while preserving goal IDs", () => {
+	const result = createProgramsPageViewModel({
+		page,
+		pageState: { userId: 1, programId: 10, cycleId: 20 },
+		translate: i18n.getFixedT("pt-BR"),
+		language: "pt-BR",
+		data: {
+			currentUser,
+			programs: { current: program, items: [program] },
+			cycles: { current: cycle, items: [] },
+			trainingDays: [],
+			workoutSessions: [],
+			goals,
+		},
+	});
+
+	assert.deepEqual(result.components.createProgramForm.fields[1].options, [
+		{ label: "Hipertrofia", value: 1 },
+		{ label: "Perda de peso", value: 2 },
+		{ label: "Condicionamento geral", value: 3 },
+	]);
+	assert.equal(
+		result.components.programSwitcher.items[0].metaLabel,
+		"Perda de peso • Começa em 18/08",
+	);
 });
 
 test("Programs page exposes safe empty component states", () => {

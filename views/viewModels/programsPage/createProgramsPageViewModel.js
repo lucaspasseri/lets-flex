@@ -87,14 +87,16 @@ export default function createProgramsPageViewModel({
 			createProgramForm: createProgramFormViewModel({
 				goals,
 				state: programFormState,
+				translate,
 			}),
 			createCycleForm: createCycleFormViewModel({
 				currentProgram: programs.current,
 				cycles: cycles.items,
 				state: cycleFormState,
+				translate,
 			}),
-			deleteProgramForm: createDeleteEntityFormViewModel("program"),
-			deleteCycleForm: createDeleteEntityFormViewModel("cycle"),
+			deleteProgramForm: createDeleteEntityFormViewModel("program", translate),
+			deleteCycleForm: createDeleteEntityFormViewModel("cycle", translate),
 			noActiveUser: {
 				isVisible: currentUser === null,
 				title: t("programs.noActiveProfile", { defaultValue: "No active profile" }),

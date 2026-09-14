@@ -38,6 +38,7 @@
 									<h3><%= step.title %></h3>
 									<% if (step.exerciseName) { %><span><%= translate("history.exerciseLabel", { defaultValue: "Exercise:" }) %> <%= step.exerciseName %></span><% } %>
 									<% if (step.name) { %><span><%= translate("history.planLabel", { defaultValue: "Plan label:" }) %> <%= step.name %></span><% } %>
+									<% if (step.stepTypeName) { %><span><%= translate("history.stepTypeLabel", { defaultValue: "Step type:" }) %> <%= step.stepTypeName %></span><% } %>
 								</div>
 								<span class="history-status history-status--step" data-status="<%= step.statusLabel.toLowerCase() %>"><span aria-hidden="true"></span><%= step.statusLabel %></span>
 							</header>

@@ -42,7 +42,10 @@ export default function createLibraryPageViewModel({
 	const sessionCreationContext = data.sessionCreationContext;
 	const dayTitle = sessionCreationContext
 		? sessionCreationContext.day.label?.trim() ||
-			`Day ${sessionCreationContext.day.dayOrder}`
+			t("dashboard.dayNumber", {
+				count: sessionCreationContext.day.dayOrder,
+				defaultValue: "Day {{count}}",
+			})
 		: null;
 
 	return {
@@ -67,7 +70,7 @@ export default function createLibraryPageViewModel({
 						pathLabel: `${sessionCreationContext.program.name} · ${sessionCreationContext.cycle.name} · ${dayTitle}`,
 						dateLabel:
 							formatDayPageDate(sessionCreationContext.day.scheduledDate, language) ??
-							"Date not scheduled",
+							t("dashboard.dateNotScheduled", { defaultValue: "Date not scheduled" }),
 						backHref: `/programs/day?dayId=${sessionCreationContext.day.id}`,
 					}
 				: { isVisible: false },
@@ -185,8 +188,8 @@ export default function createLibraryPageViewModel({
 				mode: "update",
 				translate,
 			}),
-			deleteExerciseForm: createDeleteExerciseForm(),
-			deleteSessionForm: createDeleteSessionForm(),
+			deleteExerciseForm: createDeleteExerciseForm(translate),
+			deleteSessionForm: createDeleteSessionForm(translate),
 		},
 	};
 }

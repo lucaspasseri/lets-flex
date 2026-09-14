@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import createSessionFormViewModel from "./createSessionFormViewModel.js";
+import { i18n } from "../../../src/infrastructure/i18n/i18n.js";
 
 const squat = {
 	id: 1,
@@ -92,6 +93,54 @@ test("localized catalog labels render in exercise choices without changing submi
 	assert.deepEqual(form.fields.exerciseOptions, [
 		{ label: "Agachamento — Agachamento com barra", value: 41 },
 	]);
+});
+
+test("step type options localize consistently in create and edit forms", () => {
+	const stepTypes = [
+		{ id: 1, name: "exercise" },
+		{ id: 2, name: "warm_up" },
+		{ id: 3, name: "cardio" },
+		{ id: 4, name: "stretching" },
+		{ id: 5, name: "mobility" },
+		{ id: 6, name: "cooldown" },
+	];
+	const translatePt = i18n.getFixedT("pt-BR");
+	const translateEn = i18n.getFixedT("en");
+	const expected = [
+		"Exercício",
+		"Aquecimento",
+		"Cardio",
+		"Alongamento",
+		"Mobilidade",
+		"Desaquecimento",
+	];
+
+	for (const mode of /** @type {const} */ (["create", "update"])) {
+		const form = createSessionFormViewModel({
+			stepTypes,
+			exerciseTemplates: [],
+			mode,
+			translate: translatePt,
+		});
+		assert.deepEqual(
+			form.fields.stepTypeOptions.map((option) => option.label),
+			expected,
+		);
+		assert.deepEqual(
+			form.fields.stepTypeOptions.map((option) => option.value),
+			[1, 2, 3, 4, 5, 6],
+		);
+	}
+
+	const englishForm = createSessionFormViewModel({
+		stepTypes,
+		exerciseTemplates: [],
+		translate: translateEn,
+	});
+	assert.deepEqual(
+		englishForm.fields.stepTypeOptions.map((option) => option.label),
+		["Exercise", "Warm up", "Cardio", "Stretching", "Mobility", "Cooldown"],
+	);
 });
 
 test("contextual creation preserves only the owned day identity and changes return signposting", () => {

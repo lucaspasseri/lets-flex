@@ -60,7 +60,7 @@
 							triggerId: `exercise-template-${template.id}-trigger`,
 							panelId: `exercise-template-${template.id}-panel`,
 							renderHeaderContent: () =>
-								include("./exerciseTemplateSummary", { template }),
+								include("./exerciseTemplateSummary", { template, t: translate }),
 								renderPanel: () =>
 									include("./exerciseTemplateDetails", { template, t: translate })
 						}

@@ -165,7 +165,9 @@ function toResults(progress, t, language) {
 				label: formatDate(occurrence.dateKey, language, t),
 			},
 			finishedAt: formatTimestamp(occurrence.finishedAt, language, t),
-			sessionName: occurrence.sessionName,
+			sessionName:
+				occurrence.sessionName ??
+				t("progress.unnamedSession", { defaultValue: "Workout session" }),
 			performedStepCount: occurrence.performedStepCount,
 			recordedSetCount: occurrence.recordedSetCount,
 			completedRepetitionCount: occurrence.completedRepetitionCount,
@@ -246,7 +248,9 @@ export function createExerciseProgressPageViewModel({
 	const programOptions = data.programs
 		.map((program) => ({
 			value: program.id,
-			label: program.name || "Unnamed program",
+			label:
+				program.name ||
+				t("progress.unnamedProgram", { defaultValue: "Unnamed program" }),
 		}))
 		.sort((left, right) => left.label.localeCompare(right.label));
 	const selectedProgram =
@@ -255,7 +259,10 @@ export function createExerciseProgressPageViewModel({
 		query.programId &&
 		!programOptions.some((option) => option.value === query.programId)
 	) {
-		programOptions.push({ value: query.programId, label: "Unavailable program" });
+		programOptions.push({
+			value: query.programId,
+			label: t("progress.unavailableProgram", { defaultValue: "Unavailable program" }),
+		});
 	}
 
 	const exerciseOptions = data.choices.map((choice) => ({
@@ -271,7 +278,9 @@ export function createExerciseProgressPageViewModel({
 	) {
 		exerciseOptions.push({
 			value: query.exerciseKey,
-			label: "Unavailable exercise",
+			label: t("progress.unavailableExercise", {
+				defaultValue: "Unavailable exercise",
+			}),
 		});
 	}
 

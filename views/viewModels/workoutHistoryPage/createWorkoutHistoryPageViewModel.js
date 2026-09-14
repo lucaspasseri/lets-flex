@@ -1,4 +1,6 @@
 import createViewModelTranslator, { translateCount } from "../translate.js";
+import formatCatalogDisplayName from "../../../src/infrastructure/i18n/formatCatalogDisplayName.js";
+import translateStepTypeLabel from "../../../src/infrastructure/i18n/translateStepTypeLabel.js";
 import {
 	formatLocaleDate,
 	formatLocaleNumber,
@@ -81,19 +83,27 @@ export function createWorkoutHistoryListPageViewModel({
 	const hasFilters = Boolean(filters.programId || filters.fromDate || filters.toDate);
 	const programOptions = data.programs.map((program) => ({
 		value: program.id,
-		label: program.name || "Unnamed program",
+		label:
+			program.name || t("history.unnamedProgram", { defaultValue: "Unnamed program" }),
 	}));
 	if (
 		filters.programId &&
 		!programOptions.some((option) => option.value === filters.programId)
 	) {
-		programOptions.push({ value: filters.programId, label: "Unavailable program" });
+		programOptions.push({
+			value: filters.programId,
+			label: t("history.unavailableProgram", { defaultValue: "Unavailable program" }),
+		});
 	}
+	const unnamedSession = () =>
+		t("history.unnamedSession", { defaultValue: "Workout session" });
 	const items = data.history.items.map((item) => ({
 		id: item.id,
 		href: detailUrl(item.id, filters, data.history.page),
-		title: item.sessionName,
-		programName: item.programName ?? "Unnamed program",
+		title: item.sessionName ?? unnamedSession(),
+		programName:
+			item.programName ??
+			t("history.unnamedProgram", { defaultValue: "Unnamed program" }),
 		status: item.status,
 		statusLabel:
 			item.status === "cancelled"
@@ -161,11 +171,18 @@ export function createWorkoutHistoryListPageViewModel({
 			items,
 			empty: {
 				title: hasFilters
-					? "No sessions match these filters"
-					: "No workout history yet",
+					? t("history.noFilteredSessions", {
+							defaultValue: "No sessions match these filters",
+						})
+					: t("history.noWorkoutHistory", { defaultValue: "No workout history yet" }),
 				message: hasFilters
-					? "Change or clear the filters to see other terminal sessions."
-					: "Finished and cancelled sessions will appear here.",
+					? t("history.noFilteredSessionsDescription", {
+							defaultValue:
+								"Change or clear the filters to see other terminal sessions.",
+						})
+					: t("history.noWorkoutHistoryDescription", {
+							defaultValue: "Finished and cancelled sessions will appear here.",
+						}),
 			},
 		},
 		pagination: {
@@ -225,24 +242,53 @@ export function createWorkoutHistoryStatePageViewModel({
 	};
 }
 
-function stepTitle(step) {
+function stepTitleSource(step, t) {
 	return (
-		step.exerciseVariantName ?? step.exerciseName ?? step.name ?? `Step ${step.order}`
+		step.exerciseVariantName ??
+		step.exerciseName ??
+		step.name ??
+		t("history.stepNumber", { order: step.order, defaultValue: "Step {{order}}" })
 	);
 }
 
-/** @param {import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryStep} step */
+/**
+ * @param {import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryStep} step
+ * @param {Function} t
+ * @param {string | undefined} language
+ */
 function toStepViewModel(step, t, language) {
+	const activeLanguage = language ?? "en";
+	const titleSource = stepTitleSource(step, t);
+	const title = step.exerciseVariantName
+		? formatCatalogDisplayName(
+				step.exerciseVariantName,
+				step.exerciseVariantNameTranslation,
+				activeLanguage,
+			)
+		: step.exerciseName
+			? formatCatalogDisplayName(
+					step.exerciseName,
+					step.exerciseNameTranslation,
+					activeLanguage,
+				)
+			: titleSource;
+	const exerciseName =
+		step.exerciseName && step.exerciseName !== titleSource
+			? formatCatalogDisplayName(
+					step.exerciseName,
+					step.exerciseNameTranslation,
+					activeLanguage,
+				)
+			: null;
 	return {
 		id: step.id,
 		order: step.order,
-		title: stepTitle(step),
-		exerciseName:
-			step.exerciseName && step.exerciseName !== stepTitle(step)
-				? step.exerciseName
-				: null,
-		name: step.name && step.name !== stepTitle(step) ? step.name : null,
-		stepTypeName: step.stepTypeName,
+		title,
+		exerciseName,
+		name: step.name && step.name !== titleSource ? step.name : null,
+		stepTypeName: step.stepTypeName
+			? translateStepTypeLabel(step.stepTypeName, t)
+			: null,
 		statusLabel:
 			step.status === "performed"
 				? t("history.completed", { defaultValue: "Completed" })
@@ -281,17 +327,21 @@ export function createWorkoutHistoryDetailPageViewModel({
 	language,
 }) {
 	const t = createViewModelTranslator(translate);
+	const unnamedSession = () =>
+		t("history.unnamedSession", { defaultValue: "Workout session" });
 	return {
 		page: {
 			...page,
-			title: `${history.sessionName} · ${t("history.title", { defaultValue: "Workout history" })} · Let's Flex!`,
+			title: `${history.sessionName ?? unnamedSession()} · ${t("history.title", { defaultValue: "Workout history" })} · Let's Flex!`,
 		},
 		shell: { currentUser, activeNavigation: "history" },
 		backHref: historyUrl(returnFilters, returnPage),
 		heading: {
 			eyebrow: t("history.title", { defaultValue: "Workout history" }),
-			title: history.sessionName,
-			description: history.programName ?? "Unnamed program",
+			title: history.sessionName ?? unnamedSession(),
+			description:
+				history.programName ??
+				t("history.unnamedProgram", { defaultValue: "Unnamed program" }),
 			meta:
 				history.status === "cancelled"
 					? t("history.cancelled", { defaultValue: "Cancelled" })

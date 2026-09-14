@@ -42,7 +42,7 @@ export default function createProgramSwitcherViewModel({
 		items: programs.map((program, index) => {
 			const isCurrent = program.id === currentProgramId;
 			const goal = program.goalId ? goalsById.get(program.goalId) : null;
-			const goalLabel = formatGoalLabel(goal?.name);
+			const goalLabel = formatGoalLabel(goal?.name, t);
 			const startDateLabel = formatProgramsPageDate(program.startDate, language);
 
 			return {

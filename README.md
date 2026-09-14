@@ -33,7 +33,7 @@ The component playground is available outside production only.
 
 The application is currently in a disposable-data development phase. `db/schema.js`
 is the authoritative current schema, while `db/seed.js` is the one canonical seed
-and reset entry point for reference data, the exercise catalog, 68 canonical catalog-media
+and reset entry point for reference data, the exercise catalog, 70 canonical catalog-media
 assignments, global samples, and
 the initial administrator. `npm run db:reset` applies the latest schema and complete
 seed in one transaction, producing a usable database without replaying historical migrations.

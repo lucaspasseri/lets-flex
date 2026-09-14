@@ -28,7 +28,7 @@ export default function createWorkoutSessionViewModel({
 		...step,
 		id: step.id,
 		orderLabel: String(step.order).padStart(2, "0"),
-		title: formatStepTitle(step),
+		title: formatStepTitle(step, t),
 		status: step.stepLog?.status ?? "planned",
 		statusLabel: stepStatusLabel(step.stepLog?.status, t),
 		stepLog: step.stepLog,
@@ -107,7 +107,9 @@ export default function createWorkoutSessionViewModel({
 					id: session.id,
 					state: statusPresentation(status, t).modifier,
 					header: {
-						eyebrow: "CURRENT WORKOUT SESSION",
+						eyebrow: t("dashboard.currentWorkoutSession", {
+							defaultValue: "Current workout session",
+						}),
 						title: session.name,
 						statusLabel: statusPresentation(status, t).label,
 						statusModifier: statusPresentation(status, t).modifier,
@@ -305,9 +307,12 @@ function createValidationFeedback(workoutLogFormState, actionFormState, t) {
 }
 
 /** @param {import("../../../src/features/sessions/sessions.types.js").SessionMapperStep} step */
-function formatStepTitle(step) {
+function formatStepTitle(step, t) {
 	const baseName =
-		step.name ?? step.exercise.name ?? step.exercise.variantName ?? "Step";
+		step.name ??
+		step.exercise.name ??
+		step.exercise.variantName ??
+		t("workout.step", { defaultValue: "Step" });
 	return step.exercise.variantName && step.exercise.variantName !== baseName
 		? `${baseName.toUpperCase()} (${step.exercise.variantName})`
 		: baseName.toUpperCase();
@@ -420,8 +425,8 @@ function createLogRow(
 				error: errors[`logFormRows.${index}.performedLoadUnit`] ?? null,
 				hint: null,
 				options: [
-					{ label: "Kg", value: "Kilograms" },
-					{ label: "lb", value: "Libra" },
+					{ label: t("form.kilograms", { defaultValue: "Kg" }), value: "Kilograms" },
+					{ label: t("form.pounds", { defaultValue: "lb" }), value: "Libra" },
 				],
 			},
 		},

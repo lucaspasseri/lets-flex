@@ -98,6 +98,7 @@ export default function createDayPageViewModel({
 				days: days.items,
 				programName: program?.name ?? null,
 				cycleName: cycle?.name ?? null,
+				translate,
 				language,
 			}),
 			sessionLinkForm: createSessionLinkFormViewModel({

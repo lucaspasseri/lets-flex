@@ -5,6 +5,7 @@
 
 import formatDayPageDate from "../dayPage/formatDayPageDate.js";
 import createViewModelTranslator from "../translate.js";
+import translateStepTypeLabel from "../../../src/infrastructure/i18n/translateStepTypeLabel.js";
 
 /**
  * @param {{stepTypes: StepType[], exerciseTemplates: ExerciseTemplate[], state?: Record<string, any>, mode?: "create" | "update", creationContext?: import("../../../src/features/trainingDays/trainingDays.types.js").TrainingDayContext | null, language?: string, translate?: Function}} input
@@ -21,7 +22,11 @@ export default function createSessionFormViewModel({
 	const t = createViewModelTranslator(translate);
 	const isUpdate = mode === "update";
 	const contextDayTitle = creationContext
-		? creationContext.day.label?.trim() || `Day ${creationContext.day.dayOrder}`
+		? creationContext.day.label?.trim() ||
+			t("dashboard.dayNumber", {
+				count: creationContext.day.dayOrder,
+				defaultValue: "Day {{count}}",
+			})
 		: null;
 	const values = state.values ?? {};
 	const errors = state.errors ?? { fieldErrors: {}, formErrors: [] };
@@ -94,11 +99,11 @@ export default function createSessionFormViewModel({
 							pathLabel: `${creationContext.program.name} · ${creationContext.cycle.name} · ${contextDayTitle}`,
 							dateLabel:
 								formatDayPageDate(creationContext.day.scheduledDate, language) ??
-								"Date not scheduled",
+								t("dashboard.dateNotScheduled", { defaultValue: "Date not scheduled" }),
 						}
 					: null,
 			stepTypeOptions: stepTypes.map((stepType) => ({
-				label: stepType.name,
+				label: translateStepTypeLabel(stepType.name, t),
 				value: stepType.id,
 			})),
 			exerciseOptions: exerciseTemplates.map((exercise) => ({
@@ -106,8 +111,8 @@ export default function createSessionFormViewModel({
 				value: exercise.variant.id,
 			})),
 			loadUnitOptions: [
-				{ label: "Kg", value: "Kilograms" },
-				{ label: "lb", value: "Pounds" },
+				{ label: t("form.kilograms", { defaultValue: "Kg" }), value: "Kilograms" },
+				{ label: t("form.pounds", { defaultValue: "lb" }), value: "Pounds" },
 			],
 		},
 		actions: {

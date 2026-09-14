@@ -21,7 +21,8 @@ test("language switcher exposes both canonical locales and the active state", as
 	assert.match(html, />Idioma<\/p>/);
 	assert.match(html, /name="locale" value="en"/);
 	assert.match(html, /name="locale" value="pt-BR"/);
-	assert.doesNotMatch(html, /name="returnTo"/);
+	assert.equal((html.match(/name="returnTo"/g) ?? []).length, 2);
+	assert.equal((html.match(/value="\/library\?sessionId=4"/g) ?? []).length, 2);
 	assert.match(
 		html,
 		/class="language-switcher__option is-current"[\s\S]*?aria-pressed="true"/,

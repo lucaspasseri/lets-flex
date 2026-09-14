@@ -87,7 +87,7 @@ async function writeCanonicalMediaManifest(manifest, filePath) {
 		`.${path.basename(filePath)}.${randomUUID()}.tmp`,
 	);
 	try {
-		await writeFile(temporaryPath, `${JSON.stringify(manifest, null, 2)}\n`, {
+		await writeFile(temporaryPath, `${JSON.stringify(manifest, null, "\t")}\n`, {
 			flag: "wx",
 			mode: 0o644,
 		});

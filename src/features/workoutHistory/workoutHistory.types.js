@@ -28,7 +28,7 @@
  * @property {string | Date | null} finishedAt
  * @property {number} programId
  * @property {string | null} programName
- * @property {string} sessionName
+ * @property {string | null} sessionName
  * @property {number} stepCount
  * @property {number} performedStepCount
  * @property {number} skippedStepCount
@@ -60,7 +60,9 @@
  * @property {string | null} name
  * @property {string | null} stepTypeName
  * @property {string | null} exerciseName
+ * @property {string | null} [exerciseNameTranslation]
  * @property {string | null} exerciseVariantName
+ * @property {string | null} [exerciseVariantNameTranslation]
  * @property {number | null} plannedSets
  * @property {number | null} plannedReps
  * @property {number | null} plannedLoadValue
@@ -81,7 +83,7 @@
  * @property {string | Date | null} finishedAt
  * @property {number} programId
  * @property {string | null} programName
- * @property {string} sessionName
+ * @property {string | null} sessionName
  * @property {string | null} notes
  * @property {WorkoutHistoryStep[]} steps
  */

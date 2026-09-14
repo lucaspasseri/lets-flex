@@ -1,95 +1,68 @@
 # Current Goal
 
-## Goal: Professional object storage for media
+## Goal: Post-goal cleanup, translation coverage, and CSS loading audit
 
 ### Status
 
-**Active.** Actions 1–12 are **Completed** after explicit user approval and verification. No next
-action is currently prepared.
+**Completed:** 2026-09-14 after explicit user approval. Actions 1–3 are **Completed** after
+verification.
 
 ### Objective
 
-Separate media metadata and entity relationships from media bytes and application runtime
-storage. Introduce Cloudflare R2 as the first provider through the AWS SDK for JavaScript v3,
-while keeping application layers behind a small provider-independent storage boundary.
+Perform a focused cleanup and consistency pass after the completed object-storage/media work:
 
-The production target is:
+1. Remove or consolidate files that are no longer necessary after media storage moved behind the
+   object-storage boundary.
+2. Find and fix remaining untranslated user-facing text while reusing the existing i18n system.
+3. Diagnose and fix the initial CSS/style flash, especially browser-default white form controls.
 
-```text
-PostgreSQL  → media metadata, canonical assignments, entity relationships
-Object store → image bytes
-Application  → provider-independent storage boundary and configured public URLs
-```
+Keep the implementation simple, predictable, and conservative. Investigate before changing or
+deleting anything, and document what is removed, retained, updated, uncertain, or deferred.
 
-The existing canonical-media workflow, resolver fallbacks, admin media operations, and
-`npm run db:reset` behavior must remain predictable. Database reset may rebuild PostgreSQL
-metadata and relationships, but must never reset or delete object-storage contents.
+### Verified baseline
 
-### Important invariants
-
-- PostgreSQL owns media metadata and relationships. Object storage owns media bytes. Database
-  resets must never implicitly reset object storage.
-- Canonical promotion changes media meaning/assignment and should not normally require moving,
-  duplicating, renaming, or reuploading a stored object.
-- Persist stable object keys, not Cloudflare-specific URLs. Public URLs are derived from
-  configuration at the application boundary.
-- Credentials remain server-side and development and production buckets/credentials remain
-  explicitly isolated.
-- Existing admin authorization, CSRF protection, upload validation, MIME checks, and cleanup
-  safeguards remain intact.
-
-### Historical related work
-
-Canonical Media Promotion was completed on 2026-09-14 immediately before this goal. Its verified
-repository baseline is reusable: stable catalog identifiers, the `media_assets`/`entity_media`
-model, transactional primary-assignment replacement, durable canonical manifest state, and the
-Manage Media promotion workflow. That work intentionally used local storage; this goal addresses
-the explicitly deferred provider/storage gap rather than redesigning canonical behavior.
+- The previous object-storage goal's Actions 1–12 and corrective follow-up are completed. The
+  current repository uses stable object keys, configured media URLs, R2-backed runtime selection,
+  guarded reset reconstruction, and production refusal of the local persistent-media adapter.
+- `data/canonical-media.json` is the durable canonical source and currently contains 70 entries.
+  `db/mediaSeedSql.js` and the resolver still make local fallback/source-file assumptions that must
+  be checked before removing anything under `public/media`.
+- `public/media` contains 78 tracked files, and the ignored local `public/media/uploads` directory
+  currently contains 73 files. Their roles must be classified before any deletion.
+- The shared head now requests foundational theme/control styles directly before `/css/main.css`;
+  `main.css` retains the later feature/component imports. The direct boundary avoids delaying the
+  first-paint contract behind the nested `@import` chain while preserving the existing cascade.
+- The English and Brazilian Portuguese locale files each contain 1,183 scalar keys with no key
+  parity gaps. This does not prove that every user-facing literal or fallback/default is translated;
+  the known `/history`, `/programs`, and `/library` flows still require a rendered audit.
+- `docs/media-asset-provenance.md` contains historical local upload references that must be
+  classified as historical, retained, or stale rather than removed blindly.
 
 ### Action status
 
-1. **Audit the current media/storage flow — Completed.** Findings and verification evidence are
-   recorded in `docs/current-actions.md`; no runtime behavior was changed.
-2. **Introduce the provider-independent storage boundary — Completed.** Preserve local behavior
-   while moving provider-specific/file-system operations behind the application-owned contract.
-3. **Add the S3-compatible R2 implementation — Completed.** Use `@aws-sdk/client-s3`; no
-   presigned browser uploads.
-4. **Verify R2 with a controlled development asset — Completed.** Use only an explicitly selected
-   development bucket and disposable test object.
-5. **Define and validate the object-key strategy — Completed.** Decide the stable key format before
-   bulk migration or unnecessary renames.
-6. **Migrate existing development canonical media — Completed.** Make the import rerunnable and
-   retain local source files until verification is complete.
-7. **Switch media reads to configured public URLs — Completed.** Preserve presentation-ready view
-   models and resolver fallbacks. The configured development public-domain fetch is now verified.
-8. **Move new Admin Media writes to R2 — Completed.** Define compensation for remote-write/DB-write
-   partial failures and reference-aware deletion.
-9. **Regression-test canonical promotion with R2-backed media — Completed.** Promotion changes
-   database meaning/assignment while leaving the object unchanged; focused tests, the full suite,
-   and real development R2-backed read/identity/byte verification passed.
-10. **Verify database-reset reconstruction — Completed.** The guarded disposable reset
-    reconstructs 70 media assets, 70 assignments, and 140 localized rows with manifest-matching
-    R2 keys; the existing object remains byte-identical and application startup/resolution pass.
-11. **Prepare production configuration/custom-domain steps — Completed.** Documented the manual
-    production R2, public-domain, Render, isolation, rollout, and verification handoff without
-    mutating Cloudflare, Render, DNS, or production infrastructure.
-12. **Remove mutable local uploads as the persistent runtime store — Completed.** Production now
-    rejects the local persistent-media adapter while development and fallback behavior remain.
+1. **Repository cleanup after object-storage migration — Completed.** Audit `/docs`, `/data`, and
+   `/public/media`; remove only verified obsolete files and update or remove obsolete documentation.
+2. **Complete remaining translation coverage — Completed.** Audit all user-facing server and browser
+   text, with special attention to `/history`, `/programs`, `/library`, modals, and dynamic states;
+   verify both supported locales.
+3. **Diagnose and fix the initial CSS/style flash — Completed.** Trace the actual EJS/layout and CSS
+   loading path, then apply the smallest architectural fix for foundational theme and form-control
+   styling without overlays or timing hacks.
 
 ### Scope and explicit deferrals
 
-In scope: a small local adapter, one S3-compatible R2 adapter, configured public URL derivation,
-safe development migration/import, admin read/write integration, cleanup behavior, reset
-reconstruction, focused tests, and documentation.
+In scope: conservative repository cleanup, accurate media documentation, existing i18n coverage,
+server-rendered and browser-generated user-facing strings, stylesheet ordering/loading, form-control
+defaults, focused tests, startup/reset verification, and relevant manual rendering checks.
 
-Deferred: presigned/direct browser uploads, multipart large-file uploads, image transformations,
-CDN optimization beyond basic delivery, lifecycle policies, complex garbage collection,
-cross-region replication, other providers, production mutation/deployment, galleries, and broad
-media-domain redesign.
+Deferred: unrelated redesign, broad accessibility remediation, new translation architecture,
+destructive object-storage cleanup, migration redesign, production infrastructure changes, and any
+file or asset whose purpose cannot be verified.
 
-### External/manual boundary
+### Verification boundary
 
-Cloudflare account credentials, R2 bucket creation/policies, custom domains/DNS, Render environment
-variables, and production changes are user-controlled. The implementation may prepare exact
-configuration and verification commands but must stop before mutating those systems without
-explicit authorization.
+Required verification includes `npm run db:reset` only against the explicitly authorized local or
+development target, `npm run dev` startup, media resolution and fallback behavior, both locales for
+`/history`, `/programs`, `/library`, relevant modals, initial form rendering, and the repository's
+format, lint, type, browser-type, test, and broad verification checks as applicable. No production,
+object-storage, or unrelated database mutation is authorized by this goal.

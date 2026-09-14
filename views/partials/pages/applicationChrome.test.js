@@ -18,6 +18,7 @@ test("application chrome exposes one controlled navigation surface", async () =>
 			currentUser: { name: "Lucas & Maria", role: "member" },
 			activeNavigation: "dashboard",
 		},
+		page: { url: "/library?tab=exercises" },
 	});
 
 	assert.match(html, /<header class="page-header">/);
@@ -33,6 +34,10 @@ test("application chrome exposes one controlled navigation surface", async () =>
 	assert.equal((html.match(/class="primary-navigation__link"/g) ?? []).length, 5);
 	assert.equal((html.match(/action="\/locale"/g) ?? []).length, 2);
 	assert.match(html, /aria-labelledby="language-switcher-label"/);
+	assert.equal(
+		(html.match(/name="returnTo" value="\/library\?tab=exercises"/g) ?? []).length,
+		2,
+	);
 	assert.match(html, /aria-pressed="true"/);
 	assert.equal((html.match(/href="\/profile"/g) ?? []).length, 1);
 	assert.equal((html.match(/aria-current="page"/g) ?? []).length, 1);
@@ -50,6 +55,7 @@ test("profile is the single lower account destination and owns its active state"
 			currentUser: { name: "Guest 104", role: "guest" },
 			activeNavigation: "profile",
 		},
+		page: { url: "/programs/12/cycles/4/day/8" },
 	});
 
 	assert.equal((html.match(/href="\/profile"/g) ?? []).length, 1);
@@ -59,6 +65,11 @@ test("profile is the single lower account destination and owns its active state"
 		/class="application-chrome__profile"[\s\S]*?href="\/profile"[\s\S]*?aria-current="page"/,
 	);
 	assert.match(html, /Temporary workspace/);
+	assert.equal(
+		(html.match(/name="returnTo" value="\/programs\/12\/cycles\/4\/day\/8"/g) ?? [])
+			.length,
+		2,
+	);
 });
 
 test("administrator navigation remains permission-scoped and active", async () => {

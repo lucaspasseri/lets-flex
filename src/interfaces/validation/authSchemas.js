@@ -47,8 +47,28 @@ export const passwordResetSchema = z
 	});
 
 export function safeReturnTo(value) {
-	if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
+	const containsControlCharacter =
+		typeof value === "string" &&
+		[...value].some((character) => {
+			const code = character.charCodeAt(0);
+			return code < 32 || code === 127;
+		});
+	if (
+		typeof value !== "string" ||
+		!value.startsWith("/") ||
+		value.startsWith("//") ||
+		value.startsWith("/\\") ||
+		containsControlCharacter
+	) {
 		return "/";
 	}
+
+	try {
+		const parsed = new URL(value, "http://localhost");
+		if (parsed.origin !== "http://localhost") return "/";
+	} catch {
+		return "/";
+	}
+
 	return value;
 }

@@ -20,7 +20,7 @@ export function findPageForUser() {
 				ws.finished_at,
 				p.id AS program_id,
 				p.name AS program_name,
-				COALESCE(ws.session_name, 'Workout session') AS session_name
+				NULLIF(BTRIM(ws.session_name), '') AS session_name
 			FROM programs p
 			JOIN cycles c ON c.program_id = p.id
 			JOIN training_days td ON td.cycle_id = c.id
@@ -87,7 +87,7 @@ export function findDetailForUser() {
 				ws.finished_at,
 				p.id AS program_id,
 				p.name AS program_name,
-				COALESCE(ws.session_name, 'Workout session') AS session_name,
+				NULLIF(BTRIM(ws.session_name), '') AS session_name,
 				ws.notes
 			FROM workout_sessions ws
 			JOIN training_days td ON td.id = ws.training_day_id
@@ -109,7 +109,9 @@ export function findDetailForUser() {
 							'name', wsl.name,
 							'stepTypeName', wsl.step_type_name,
 							'exerciseName', wsl.exercise_name,
+							'exerciseNameTranslation', exercise_translation.name,
 							'exerciseVariantName', wsl.exercise_variant_name,
+							'exerciseVariantNameTranslation', exercise_variant_translation.name,
 							'plannedSets', wsl.planned_sets,
 							'plannedReps', wsl.planned_reps,
 							'plannedLoadValue', wsl.planned_load_value,
@@ -138,6 +140,15 @@ export function findDetailForUser() {
 						ORDER BY wsl.step_order, wsl.id
 					)
 					FROM workout_step_logs wsl
+					LEFT JOIN exercise_variants history_variant
+						ON history_variant.id = wsl.exercise_variant_id
+					LEFT JOIN exercise_translations exercise_translation
+						ON exercise_translation.exercise_id = history_variant.exercise_id
+						AND exercise_translation.locale = 'pt-BR'
+					LEFT JOIN exercise_variant_translations exercise_variant_translation
+						ON exercise_variant_translation.exercise_variant_id = wsl.exercise_variant_id
+						AND exercise_variant_translation.locale = 'pt-BR'
+						AND history_variant.owner_user_id IS NULL
 					WHERE wsl.workout_session_id = owned.id
 				),
 				'[]'::jsonb

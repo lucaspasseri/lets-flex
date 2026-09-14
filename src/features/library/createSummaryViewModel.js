@@ -38,9 +38,10 @@ function createSummary({ session, activeSessionId, translate }) {
 	const movements = getDistinctMovements(session);
 	const muscles = getDistinctMuscles(session);
 	const equipments = getDistinctEquipments(session);
+	const bodyweightLabel = t("library.bodyweight", { defaultValue: "Bodyweight" });
 	const filterEquipments = [
 		...new Set(
-			steps.map((step) => step.equipment?.name ?? "Bodyweight").filter(Boolean),
+			steps.map((step) => step.equipment?.name ?? bodyweightLabel).filter(Boolean),
 		),
 	];
 
@@ -61,7 +62,7 @@ function createSummary({ session, activeSessionId, translate }) {
 			step.exercise?.notes,
 			step.movementPattern,
 			step.canonicalMovementPattern,
-			step.equipment?.name ?? "Bodyweight",
+			step.equipment?.name ?? bodyweightLabel,
 			step.equipment?.canonicalName,
 			step.equipment?.category,
 			...(step.muscles ?? []).flatMap((muscle) => [

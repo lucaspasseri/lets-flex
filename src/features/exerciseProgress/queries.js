@@ -53,7 +53,7 @@ export function findProgressForUser() {
 				ws.id AS workout_session_id,
 				ws.finished_at,
 				${completionDate} AS completion_date,
-				COALESCE(NULLIF(BTRIM(ws.session_name), ''), 'Workout session') AS session_name,
+				NULLIF(BTRIM(ws.session_name), '') AS session_name,
 				wsl.id AS step_log_id,
 				${snapshotExerciseName} AS exercise_name,
 				${snapshotVariantName} AS exercise_variant_name

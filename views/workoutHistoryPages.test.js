@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import test from "node:test";
 import ejs from "ejs";
+import { i18n } from "../src/infrastructure/i18n/i18n.js";
 import {
 	createWorkoutHistoryDetailPageViewModel,
 	createWorkoutHistoryListPageViewModel,
@@ -108,6 +109,61 @@ test("history detail renders snapshots, performed sets, notes, and units without
 	assert.match(html, /Session &lt;script&gt;alert\(1\)&lt;\/script&gt;/);
 	assert.match(html, /Step &lt;strong&gt;note&lt;\/strong&gt;/);
 	assert.doesNotMatch(html, /method="POST"|method="PATCH"|method="DELETE"/);
+});
+
+test("history detail renders bilingual catalog names without translating user-authored labels", async () => {
+	const viewModel = createWorkoutHistoryDetailPageViewModel({
+		page: {},
+		currentUser,
+		returnFilters: { programId: null, fromDate: null, toDate: null },
+		returnPage: 1,
+		translate: i18n.getFixedT("pt-BR"),
+		language: "pt-BR",
+		history: /** @type {any} */ ({
+			id: 11,
+			status: "finished",
+			historyDate: "2026-08-10",
+			scheduledDate: null,
+			startedAt: null,
+			finishedAt: null,
+			programId: 3,
+			programName: "Strength",
+			sessionName: "Session",
+			notes: null,
+			steps: [
+				{
+					id: 4,
+					order: 1,
+					status: "performed",
+					name: "Box squats",
+					stepTypeName: "exercise",
+					exerciseName: "Box Squat",
+					exerciseNameTranslation: "Agachamento na caixa",
+					exerciseVariantName: "Bodyweight Box Squat",
+					exerciseVariantNameTranslation: "Agachamento na caixa com peso corporal",
+					plannedSets: null,
+					plannedReps: null,
+					plannedLoadValue: null,
+					plannedLoadUnit: null,
+					startedAt: null,
+					completedAt: null,
+					notes: null,
+					sets: [],
+				},
+			],
+		}),
+	});
+	const html = await renderFile(path.resolve("views/history/detail.ejs"), {
+		...viewModel,
+		t: i18n.getFixedT("pt-BR"),
+	});
+
+	assert.match(html, /Bodyweight Box Squat \(Agachamento na caixa com peso corporal\)/);
+	assert.match(html, /Exercício: Box Squat \(Agachamento na caixa\)/);
+	assert.match(html, /Rótulo do plano: Box squats/);
+	assert.match(html, /Tipo de etapa: Exercício/);
+	assert.doesNotMatch(html, /Box squats \(/);
+	assert.doesNotMatch(html, /Exercise \(Exercício\)/);
 });
 
 test("history not-found and failure states give generic recovery paths", async () => {

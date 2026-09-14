@@ -35,8 +35,7 @@
 		"test": "node --env-file-if-exists=.env.test --test \"db/**/*.test.js\" \"public/**/*.test.js\" \"src/**/*.test.js\" \"views/**/*.test.js\"",
 		"test:http": "node --env-file=.env.test --test test/http/applicationPages.test.js",
 		"test:watch": "node --env-file-if-exists=.env.test --test --watch",
-		"r2:smoke-test": "node --env-file-if-exists=.env scripts/r2-smoke-test.mjs",
-		"r2:migrate-canonical-media": "node --env-file-if-exists=.env scripts/migrate-canonical-media-to-r2.mjs"
+		"r2:smoke-test": "node --env-file-if-exists=.env scripts/r2-smoke-test.mjs"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.1131.0",

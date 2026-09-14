@@ -1,6 +1,7 @@
 import formatStepLoadLabel from "../sessions/formatStepLoadLabel.js";
 import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
 import translateCount from "../../infrastructure/i18n/translateCount.js";
+import translateStepTypeLabel from "../../infrastructure/i18n/translateStepTypeLabel.js";
 
 /**
  * @typedef {import("../sessions/sessions.types.js").SessionMapperStep} SessionMapperStep
@@ -26,7 +27,7 @@ function createDetailsStepViewModel(step, language = "en", translate, mediaResol
 	return {
 		id: step.id,
 		order: step.order,
-		type: step.type,
+		type: translateStepTypeLabel(step.type, translate),
 
 		exercise: {
 			name: step.exercise.name,

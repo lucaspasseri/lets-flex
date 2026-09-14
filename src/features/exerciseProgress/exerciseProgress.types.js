@@ -51,7 +51,7 @@
  * @property {number} workoutSessionId
  * @property {string} dateKey
  * @property {string | Date | null} finishedAt
- * @property {string} sessionName
+ * @property {string | null} sessionName
  * @property {number} performedStepCount
  * @property {number} recordedSetCount
  * @property {number} setsWithRepetitionsCount

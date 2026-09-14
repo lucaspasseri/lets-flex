@@ -37,7 +37,9 @@ test("canonical manifest store updates a project data file atomically and reads 
 
 		assert.equal(change.previous.length, 1);
 		assert.equal((await store.read()).length, 2);
-		assert.match(await readFile(filePath, "utf8"), /"entityKey": "row"/);
+		const written = await readFile(filePath, "utf8");
+		assert.match(written, /"entityKey": "row"/);
+		assert.match(written, /^\[\n\t\{/);
 	} finally {
 		await rm(directory, { recursive: true, force: true });
 	}

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import createDetailsStepViewModel from "./createDetailsStepViewModel.js";
+import { i18n } from "../../infrastructure/i18n/i18n.js";
 
 function step({ loadValue, loadUnit }) {
 	return /** @type {any} */ ({
@@ -53,4 +54,14 @@ test("session-detail prescriptions explain an unassigned equipment load", () => 
 	});
 
 	assert.match(detailsStep.prescription.label, /Choose a manageable dumbbell load/);
+});
+
+test("session-detail step types use the active locale without changing the source value", () => {
+	const detailsStep = createDetailsStepViewModel(
+		{ ...step({ loadValue: null, loadUnit: null }), type: "exercise" },
+		"pt-BR",
+		i18n.getFixedT("pt-BR"),
+	);
+
+	assert.equal(detailsStep.type, "Exercício");
 });

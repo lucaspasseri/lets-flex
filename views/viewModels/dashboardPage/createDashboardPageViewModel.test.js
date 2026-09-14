@@ -200,7 +200,7 @@ test("dashboard page exposes explicit component contracts and renders without le
 		contentFor: () => "",
 	});
 	assert.match(html, /data-dashboard-page/);
-	assert.match(html, /CURRENT WORKOUT SESSION/);
+	assert.match(html, /Current workout session/);
 	assert.match(html, /action="\/workout_step_logs\/8\/perform"/);
 	assert.match(html, /session-step--current/);
 	assert.match(html, /<span>Planned<\/span>/);

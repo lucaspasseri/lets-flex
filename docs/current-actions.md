@@ -2,6 +2,484 @@
 
 ## Current goal
 
+Post-goal cleanup, translation coverage, and CSS loading audit.
+
+## Goal status
+
+**Completed:** 2026-09-14 after explicit user approval. Actions 1–3 are **Completed** after
+verification.
+
+## Verified baseline reused
+
+- The completed object-storage goal and corrective follow-up are historical evidence, not work to
+  reopen. Stable object keys, R2 selection, configured public URLs, reset reconstruction, fallback
+  behavior, and production safeguards remain the baseline to preserve.
+- `data/canonical-media.json` currently contains 70 entries; `public/media` has 78 tracked files;
+  ignored `public/media/uploads` has 73 local files. Cleanup must classify references and runtime,
+  seed, test, fallback, and historical roles before deletion.
+- The shared head loads `/css/main.css`, whose 31 imports begin with `base.css` and later load form,
+  component, and page styles. The suspected form-control flash remains an investigation item, not
+  a confirmed root cause.
+- `locales/en/common.json` and `locales/pt-BR/common.json` each contain 1,183 keys with no key
+  parity gaps. Known route translation gaps must therefore be checked at the usage/default-literal
+  and rendered-output level, not only by comparing JSON key sets.
+
+## Proposed action sequence
+
+### Action 1 — Repository cleanup after object-storage migration
+
+**Status:** Completed
+
+**Completed:** 2026-09-14 after explicit user approval
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Purpose:** Audit `docs`, `data`, and `public/media` against actual references, runtime use, reset
+and seed behavior, tests, local fallback behavior, canonical reconstruction, and the completed
+object-storage boundary. Delete or consolidate only files whose purpose and references are verified.
+
+**Reviewable outcome:** Record files removed, files intentionally retained, documentation updated or
+removed, and uncertain/deferred items. Keep canonical media, deterministic seed inputs, test
+fixtures, fallback assets, and any required local development behavior.
+
+### Investigation findings
+
+- The current manifest contains 70 entries, all 70 have provider-neutral `storageKey` values, and
+  all 70 repository source paths exist. The 68 catalog raster files plus two root static files are
+  canonical seed inputs; seven additional root SVGs are resolver fallback assets, and the README is
+  documentation rather than media.
+- The ignored `public/media/uploads` directory contains 73 files and remains a local/deferred
+  runtime and provenance boundary. Its files are not seed inputs merely because they exist. The
+  three legacy JPEG findings and the unassigned reusable material remain uncertain and were not
+  deleted.
+- `scripts/migrate-canonical-media-to-r2.mjs` and `src/features/media/storage/migrateCanonicalMedia.js`
+  were one-time canonical import tooling. Every current canonical entry is already mapped and the
+  application promotion path handles future object-backed canonical assignments, so the command,
+  module, test, and package script were obsolete and removed together.
+- `src/features/media/mediaStorage.js` was an unused compatibility re-export. Repository runtime,
+  tests, and package references now use `storage/localStorage.js` or the provider-independent
+  factory directly, so the re-export was removed.
+
+### Formatting correction requested during review
+
+- `data/canonical-media.json` is valid, required project data, not malformed or obsolete output.
+  It is imported by the canonical manifest, seed SQL/reset generation, media URL resolution, and
+  media tests; `canonicalMediaManifestStore.js` also updates it as the durable canonical manifest.
+  Repository-wide reference searches found no replacement or unused-only lifecycle.
+- The format failure was purely indentation: the checked-in JSON and the manifest writer used
+  JSON's two-space indentation, while the repository Prettier configuration requires tabs
+  (`useTabs: true`). A semantic integrity check found 70 entries, unique assignments/paths/
+  storage keys, required fields on every entry, and all 70 local source files present.
+- Kept the manifest and formatted it with the repository formatter. Updated the manifest store to
+  write tab-indented JSON and added a regression assertion so future canonical promotions do not
+  recreate the format failure. No generated-file exclusion or deletion was used.
+
+### Implementation completed
+
+- Removed: `src/features/media/mediaStorage.js`; `scripts/migrate-canonical-media-to-r2.mjs`;
+  `src/features/media/storage/migrateCanonicalMedia.js`; its focused test; and the
+  `r2:migrate-canonical-media` package script.
+- Retained intentionally: `data/canonical-media.json`, all 78 tracked `public/media` files,
+  ignored uploads, the guarded `r2:smoke-test` tool, the canonical manifest store, private
+  candidate storage, and historical database migrations. These still have verified seed, fallback,
+  development, recovery, test, or operational purposes.
+- Updated the root README, catalog identifier documentation, database setup documentation,
+  provenance record, and `public/media/README.md` to reflect 70 canonical entries, provider-neutral
+  object keys, local source-file requirements, and historical upload-key terminology.
+
+### Verification evidence
+
+- Manifest/source audit: 70 entries, 70 storage keys, and zero missing local source files.
+- No executable, test, or package references remain to the removed compatibility or canonical-import
+  files/command; historical tracking references are explicitly annotated.
+- Focused seed/storage/R2-safety tests: **17/17 passed**.
+- `npm run lint`: **passed**.
+- `npm run check:types`: **passed**.
+- `npm test`: **445 passed, 2 database-hook failures, and 4 cancellations out of 451 tests**. The
+  failures were `EPERM` PostgreSQL connection errors from the sandbox; the remaining suite passed.
+- `git diff --check`: **passed**.
+- `npm run format:check`: **passed** after formatting `data/canonical-media.json`.
+- Canonical manifest, seed, media-resolution, promotion, and R2 URL tests: **40/40 passed**.
+- `npm run check:browser-types`: **passed**.
+- `npm run db:seed:sql`: **passed**.
+- `npm run verify`: format, lint, type, and browser-type checks passed; the test phase retained
+  the sandbox-only PostgreSQL `EPERM` connection failures noted above.
+
+### Review notes
+
+- No files were removed from `docs`, `data`, or `public/media`; their verified roles require
+  retention. The cleanup is limited to obsolete source/package migration artifacts and stale
+  documentation statements.
+- Local uploads and legacy provenance findings remain explicitly deferred because deletion would
+  require stronger source, assignment, fallback, and recovery evidence.
+
+### Completion summary
+
+Action 1 cleanup and the requested `data/canonical-media.json` lifecycle/formatting correction
+were accepted. The canonical manifest remains retained and formatted, obsolete migration artifacts
+were removed, required media/reset/seed behavior was preserved, and the recorded verification
+evidence passed subject only to the sandbox PostgreSQL connection limitation.
+
+### Resume here
+
+Action 1 is **Completed**. Action 2 is **Completed**. Action 3 is **Completed** after the
+first-paint correction.
+
+### Action 2 — Complete remaining translation coverage
+
+**Status:** Completed
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Completed:** 2026-09-14 after explicit user approval
+
+### Investigation baseline
+
+- English and Brazilian Portuguese locale resources have matching keys, and the existing production
+  reference test resolves the translated server/browser keys in both locales.
+- The remaining verified gaps are user-facing literals bypassing that contract: Programs create and
+  delete form view models, Library delete/private-variant controls, and History empty/fallback
+  labels. The audit also found equivalent fallback gaps in Progress, Dashboard workout controls,
+  and Program Day navigation, plus a database fallback label for unnamed history/progress sessions.
+  Library's browser-generated counters and collection messages already use the rendered
+  `data-i18n-messages` contract and are retained.
+- Domain names, exercise names, program names, notes, and database-backed catalog labels remain
+  user/content data rather than interface copy. Internal logs, IDs, DOM selectors, and form field
+  names remain intentionally untranslated.
+
+### Review corrections requested and correction completed
+
+- Investigate and correct untranslated database-backed Goal select options in Portuguese while
+  preserving stable goal IDs and canonical values.
+- Investigate and correct untranslated Step Type select options in both session create and edit
+  flows while preserving stable step-type IDs and submitted values.
+- Trace History step-name/type presentation, distinguish user-authored names from catalog labels,
+  remove unintended bilingual `English (Portuguese)` output, and keep user-authored names intact.
+- Audit equivalent catalog-backed selects in the Action 2 flows, add focused regression coverage,
+  and repeat the relevant verification before returning this action to review.
+
+### Correction completed
+
+- Root cause: Goals and step types are fixed canonical database enums without catalog-translation
+  tables. The Goal form used `formatGoalLabel(goal.name)` and the session form used the mapped
+  `stepType.name` directly, so both bypassed i18next. Library session details likewise rendered
+  the canonical step type directly; History carried its raw `step_type_name` through its ViewModel
+  without localizing it.
+- Added presentation-only mappings for the seven stable Goal identifiers and six stable Step Type
+  identifiers. Portuguese labels include `Hipertrofia`, `Força`, `Perda de peso`, `Condicionamento`,
+  `Mobilidade`, `Reabilitação`, `Condicionamento geral`, `Exercício`, `Aquecimento`, `Cardio`,
+  `Alongamento`, `Mobilidade`, and `Desaquecimento`. English mappings remain explicit English.
+- Reused the same Step Type mapping in session create and update forms, Library session details,
+  and History details. History now presents the localized system step type separately while
+  preserving `session_step.name` as user-authored content. No `English (Portuguese)` composition is
+  constructed by the corrected paths.
+- The focused equivalent-select audit found that exercise, movement-pattern, equipment, and muscle
+  options in Library already receive locale-aware repository values; their templates pass those
+  values through as labels while preserving IDs. Session names, exercise names, variant names, and
+  notes remain content rather than interface labels.
+- Stable goal IDs, step-type IDs, submitted values, canonical database names, catalog translation
+  records, and request contracts were not changed.
+
+### Additional review correction requested
+
+- Investigate why POST-backed language switching redirects to `/dashboard`, preserve the current
+  safe internal pathname and query string, reject external/open-redirect targets, verify guest and
+  authenticated behavior, and add focused regression coverage without changing locale/session or
+  CSRF behavior.
+
+### Locale return-path correction completed
+
+- Root cause: the shared POST-backed language switcher rendered only `_csrf` and `locale`; it did
+  not submit the server-derived `page.url`. The locale controller therefore had no explicit page
+  context and ultimately redirected to `/`, which is this application's dashboard route (there is
+  no separate `/dashboard` route). Its existing same-origin `Referer` fallback was not a reliable
+  primary navigation contract.
+- Chosen strategy: each application-chrome language form now posts the current server-rendered
+  `page.url` as `returnTo`. This preserves pathname and query parameters for Library tabs,
+  history pagination, and nested Program Day URLs while retaining the existing POST, CSRF, session
+  locale assignment, and session-save ordering.
+- Security: `returnTo` remains client-controlled at the HTTP boundary and is never trusted merely
+  because it came from a hidden field. `safeReturnTo` now accepts only a relative path beginning
+  with one slash, rejects protocol-relative, backslash-based, absolute, and control-character
+  variants, and confirms URL resolution remains on the local origin. Invalid or unavailable paths
+  fall back to `/` (the dashboard route). The existing same-origin `Referer` fallback remains a
+  compatibility path when an empty return value is explicitly supplied.
+- Authenticated member and guest application-chrome render tests both verify the explicit return
+  field, and locale-controller tests verify locale persistence, query/nested-path preservation,
+  external/protocol-relative/backslash rejection, same-origin compatibility fallback, and
+  dashboard fallback.
+
+### Additional review correction requested — historical catalog-name presentation
+
+- Identify catalog-controlled historical exercise/entity names separately from user-authored plan
+  labels and system step-type labels. Keep canonical English snapshot names as the base display;
+  append Portuguese only for catalog-backed exercise and global-variant names when `pt-BR` is active.
+- Preserve `session_step.name`/historical `step.name` exactly as entered, and keep `stepTypeName` as
+  the active-locale system label only. Do not expand bilingual presentation to user-authored session,
+  program, or plan names.
+- Add focused coverage for translated, missing, English, effectively identical, user-authored, and
+  system-label cases before returning Action 2 to review.
+
+### Historical catalog-name correction completed
+
+- The historical detail query already retained immutable English snapshot names and catalog IDs in
+  `workout_step_logs`. It did not load the linked catalog's Portuguese translations, so the detail
+  ViewModel could only show the canonical snapshot. The query now reads `pt-BR` translations for the
+  linked exercise and global exercise variant; private/user-owned variants receive no catalog
+  translation.
+- Added `formatCatalogDisplayName`, a presentation helper used by the history detail ViewModel. It
+  returns canonical English for `en`, canonical-only when Portuguese is missing, and
+  `Canonical (Portuguese)` for distinct `pt-BR` translations. It trims and normalizes whitespace/
+  case for equality checks, preventing empty parentheses or duplicate labels.
+- Variant titles and exercise metadata use the bilingual formatter. Historical plan labels remain
+  raw user-authored content, and step type continues through the existing localized system-label
+  helper only (`Exercício`, not `Exercise (Exercício)`). Existing snapshot behavior remains intact.
+
+**Purpose:** Audit all user-facing server-rendered and browser-generated text, with particular
+attention to `/history`, `/programs`, `/library`, reusable modals, titles, descriptions, buttons,
+labels, empty/error/success states, filters, helper text, validation messages, and dynamic strings.
+Reuse the existing i18next/browser message contract and avoid translating internal logs, IDs, or
+technical-only values.
+
+**Reviewable outcome:** Record untranslated areas discovered, strings moved into the translation
+system, reusable components corrected, intentionally untranslated technical/internal strings, and
+verification for English and Brazilian Portuguese flows.
+
+### Implementation completed
+
+- Routed Programs create-program, create-cycle, and delete-program/delete-cycle form copy through
+  the existing view-model translator and passed the active translator into the shared form fields.
+- Routed Library delete/archive actions, private-variant controls, base-exercise labels, session
+  date/day fallbacks, bodyweight labels, and load-unit options through locale resources. Preserved
+  stable entity IDs, form names, and submitted unit values.
+- Routed History empty states, unavailable/unnamed program labels, step fallbacks, and unnamed
+  session fallbacks through locale resources. Progress now localizes unavailable selections and
+  unnamed session fallbacks. Dashboard workout headings/step fallbacks/units and Program Day
+  navigation labels and descriptions now use the same contract.
+- Removed the hard-coded `Workout session` fallback from history/progress SQL and mappers. The
+  persisted session name remains nullable; the presentation view models supply the active-locale
+  fallback (`history.unnamedSession` or `progress.unnamedSession`).
+- Added the new keys to both `en` and `pt-BR`. The existing browser message contract remains the
+  source for dynamic Library messages; no duplicate browser translation implementation was added.
+- Updated one dashboard regression assertion from the old all-caps English literal to the active
+  translated rendering.
+
+### Intentionally untranslated or deferred
+
+- User-provided program, session, exercise, variant, and note names remain content and are not
+  translated. Database values, IDs, DOM selectors, form names, submitted unit identifiers, and
+  internal error/log text remain technical values.
+- Unit short symbols (`kg`, `lb`) remain stable display symbols; long labels and selectable unit
+  copy use locale resources. The unreferenced `createArchiveSessionFormViewModel.js` remains a
+  separate stale file candidate and was not deleted as part of translation coverage.
+- Media-management copy already uses `translate(...)`; fallback literals in translation calls are
+  safe English defaults, not bypasses. Existing recovery-state constants are translated at their
+  response boundary and were not duplicated in the view models.
+
+### Verification evidence
+
+- Locale resource parity/reference contract: **8/8 focused i18n tests passed**; all production
+  translation references resolve in both locales.
+- Focused Programs/Library/History/Progress/Day/Dashboard view-model tests: **45/45 passed**.
+- Focused history/progress data, view-model, and page tests after nullable session fallback change:
+  **22/22 passed**.
+- Browser Library/workout interaction tests: **11/11 passed**.
+- `npm run verify`: **passed** — Prettier format check, ESLint, backend types, browser types, and
+  **463/463 repository tests** passed with no cancellations or skips.
+- New focused regression coverage: Goal labels in English/Portuguese with stable IDs; Step Type
+  labels in English/Portuguese for both create/update forms; Library detail localization without
+  bilingual labels; and History system-label localization with preserved user-authored names.
+- `npm run dev`: **started successfully** and listened on `http://localhost:3000`; the smoke
+  process was stopped after confirming startup.
+- Both localized page suites for History, Progress, Library, and core internationalization passed;
+  the repository's Portuguese rendering assertions remain green. No database reset was required
+  because this action changed no schema or seed data; canonical database setup tests passed as part
+  of the full verification.
+- Language-switch return-path correction: **15/15 focused tests passed**, covering locale update,
+  Library-style query preservation, nested resource preservation, authenticated member and guest
+  chrome rendering, malicious/external return rejection, same-origin compatibility fallback, and
+  dashboard fallback. `npm run format:check`, `npm run lint`, `npm run check:types`, and
+  `npm run check:browser-types` all passed after the correction.
+- Historical catalog-name correction: **17/17 focused tests passed**, covering Portuguese bilingual
+  catalog names, missing translations, English-only output, effectively identical labels, preserved
+  user-authored plan labels, localized step types, query mapping, and rendered history detail output.
+
+### Completion summary
+
+Action 2's verified translation gaps are corrected across the requested flows and adjacent shared
+fallback paths. Locale resources remain in parity, fixed enum labels use the presentation
+translation boundary, historical catalog names now support controlled English/Portuguese display,
+and the language switcher returns to a validated explicit internal path without changing locale,
+session, CSRF, or authentication behavior. User-authored and technical/content values remain stable.
+
+### Resume here
+
+Action 2 is **Completed**. Action 3 is **Completed** after its first-paint correction.
+
+### Action 3 — Diagnose and fix the initial CSS/style flash
+
+**Status:** Completed
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Completed:** 2026-09-14 after explicit user approval
+
+### Review correction requested
+
+- Investigate the remaining first-paint color flash beyond native-control defaults. Verify the
+  stylesheet request/import order, foundational-token availability, delayed component rules,
+  conditional loading, View Transitions, browser defaults, and competing overrides.
+- Reduce the import-chain delay with a simple deterministic stylesheet boundary so foundational
+  theme/control styling is requested independently and before the feature/component chain.
+- Add architectural regression coverage for the head order and foundational rules, repeat full
+  verification, and document the unavailable live-browser evidence without claiming visual proof.
+
+### Verified investigation baseline
+
+- `views/partials/pages/head.ejs` loads `/css/main.css` from the shared head, and `main.css` begins
+  with `base.css` before the page/component imports. There is no browser script, loading overlay, or
+  timing hook that hides the document before styling.
+- `base.css` establishes the dark page variables and body surface, but it does not establish a
+  dark native color scheme or foundational text/background styles for `button`, `input`, `select`,
+  and `textarea`.
+- Later form styles cover `.form-input`, `.form-select`, `.form-textarea`, and the legacy `.forms`
+  scope only. Native controls outside those selectors can therefore expose browser-default white
+  styling during the initial stylesheet/import path; this is a missing foundational contract, not a
+  reason to add a timing workaround.
+- No browser executable is available in this environment, so live paint timing and viewport
+  screenshots cannot be claimed as verified. Static CSS contracts, rendered HTML, and automated
+  repository checks will be used; the manual visual limitation will remain documented.
+
+### Chosen correction
+
+Add the native dark color scheme and conservative inherited text/background defaults for form
+controls to the earliest `base.css` layer. Keep the existing component rules as the detailed
+presentation contract, avoid duplicated component declarations, and add a focused CSS regression
+test. Preserve the existing EJS layout, stylesheet order, browser initialization, and responsive
+behavior.
+
+### Review correction investigation and implementation
+
+- The original generated `<head>` requested only `/css/main.css`. `main.css` then discovered
+  `base.css` and every shared/page stylesheet through CSS `@import` rules. This made the earliest
+  theme/control layer dependent on the initial stylesheet response and its import chain rather than
+  being an independently requested resource.
+- `base.css` was the first import inside that chain and did define the palette, but component-level
+  button, form, border, and focus rules arrived later. There are no conditional stylesheet links,
+  font files, or browser scripts that set the theme before paint. View Transitions are limited to
+  the existing 100ms root transition and cannot explain the same flash on hard refresh; they remain
+  unchanged.
+- The generated HTML now requests `/css/base.css`, the shared legacy/new form styles, and
+  `/css/components/button.css` before `/css/main.css`. The corresponding imports were removed from
+  `main.css`, so those rules are not fetched twice or applied through a delayed nested import.
+  Remaining feature/component imports stay in their established cascade order after the early
+  foundation/control boundary.
+- The foundational layer now also includes token-based border and focus defaults. Later component
+  rules retain their existing detailed colors, radii, transitions, and accessibility states; no
+  JavaScript hiding, opacity gate, loading overlay, timer, or literal color duplication was added.
+
+### Review correction verification
+
+- Generated-head ordering regression: **1/1 passed**; it verifies the rendered `<head>` places
+  base, form, and button styles before the feature chain.
+- Focused CSS suite including the new architecture test: **20/20 passed**.
+- `npm run verify`: **passed** — formatting, lint, backend types, browser types, and **465/465
+  repository tests** passed with no failures, cancellations, or skips.
+- `git diff --check`: **passed**.
+- Direct non-watch server startup continued to listen successfully with non-secret local OAuth
+  placeholders. `npm run dev` remains blocked only by this environment's Node watch limit
+  (`EMFILE`).
+- No browser executable is available for throttled hard-refresh, redirect, locale-navigation, or
+  viewport paint inspection. The generated HTML/CSS dependency path and automated guarantees are
+  verified; the actual visual first-paint effect remains an explicitly documented manual check.
+
+### Implementation completed
+
+- Added `color-scheme: dark` to the foundational `:root` contract so native controls use the
+  product's dark color scheme before component-specific form styles apply.
+- Added inherited text color, dark page-surface background, and inherited font defaults for native
+  `button`, `input`, `select`, and `textarea` controls in `base.css`. The existing `.form-*` and
+  legacy `.forms` rules remain the detailed component contract; no duplicate component styling,
+  overlay, timeout, or JavaScript page hiding was introduced.
+- Added `public/css/base.test.js` to lock the first-paint color-scheme and native-control defaults.
+  The shared EJS layout, `/css/main.css` import order, browser initialization, responsive rules,
+  and accessibility interaction contracts were not changed.
+
+### Verification evidence
+
+- Focused CSS regression test: **1/1 passed**.
+- `npm run verify`: **passed** — formatting, lint, backend types, browser types, and **464/464
+  repository tests** passed with no failures, cancellations, or skips. The run used the explicitly
+  configured local PostgreSQL test database; no production or database reset operation was used.
+- `git diff --check`: **passed**.
+- Direct startup smoke with local `.env` and non-secret placeholder OAuth configuration: server
+  listened on `http://localhost:3000` successfully.
+- `npm run dev`: **not available in this environment** because Node's watch mode hit the process
+  file-watch limit (`EMFILE`). This is an environment limit rather than an application startup
+  error; direct non-watch startup passed.
+- Live browser paint timing, screenshots, and keyboard/viewport inspection remain unavailable
+  because no browser executable is present. Static CSS contracts and the complete automated suite
+  passed; manual visual verification remains the only deferred check.
+
+### Completion summary
+
+Action 3's missing foundational control contract and delayed first-paint dependency are corrected.
+Native controls now receive dark-scheme, text, surface, border, focus, and font defaults through an
+independent early stylesheet boundary, while the existing layout, cascade intent, and interaction
+architecture remain unchanged.
+
+**Purpose:** Trace the rendered EJS/layout structure and actual stylesheet order from the first
+`<link>` through imports and browser scripts. Determine whether the flash comes from import
+waterfall/order, missing foundational form defaults, specificity, late-added styles, or another
+rendering factor. Then apply the smallest architectural fix.
+
+**Reviewable outcome:** Foundational dark theme, text, and form-control styles are available as
+early as reasonably possible; no loading overlay, artificial timeout, JavaScript page hiding,
+duplicated CSS, or excessive `!important` is introduced. Check responsive/component regressions and
+representative initial form rendering.
+
+## Resume here
+
+Action 2 is **Completed**. Action 3 is **Completed** after the requested first-paint correction.
+
+## Final goal review
+
+### Completed outcome
+
+- Repository cleanup retained required canonical media/reset/seed behavior and removed only verified
+  obsolete migration/compatibility artifacts.
+- Translation coverage was completed across the audited History, Programs, Library, Progress,
+  Dashboard, Program Day, modal, and browser-message flows. Locale switching preserves safe internal
+  paths and query parameters, and historical catalog names use the approved bilingual Portuguese
+  presentation without translating user-authored labels.
+- The CSS first-paint correction separates the foundational theme and high-frequency control rules
+  from the delayed feature import chain. No JavaScript hiding, overlay, timer, or visual redesign was
+  introduced.
+
+### Verification against the goal boundary
+
+- Repository format, lint, backend types, browser types, and full tests: **passed**; final
+  `npm run verify` completed with **465/465 tests passed**, zero failures, cancellations, or skips.
+- Canonical media, reset/seed, fallback, localization, language-switch, and historical-detail
+  regressions remain covered by the recorded focused suites and the final full verification.
+- Direct server startup passed with non-secret local OAuth placeholders. The watch-mode `npm run dev`
+  smoke was limited by the environment's `EMFILE` file-watch ceiling, not application startup.
+
+### Remaining limitation and intentional exclusion
+
+- Live browser paint timing, throttled refresh/redirect flows, screenshots, and viewport/keyboard
+  inspection could not be performed because this environment has no browser executable. The
+  generated `<head>` order, CSS dependency boundary, rendered-template tests, and automated suite
+  are verified; manual visual confirmation remains the only unmet verification item.
+- No unrelated redesign, broad accessibility audit, production mutation, destructive media cleanup,
+  or migration redesign was introduced.
+
+---
+
+## Historical record — Professional object storage for media
+
+## Current goal
+
 Professional object storage for media without breaking the canonical-media workflow.
 
 ## Goal status
@@ -34,7 +512,8 @@ the current responsibilities and coupling points, and propose the smallest safe 
 - Public runtime files are served by `express.static(path.join(__dirname, "public"))` in
   `app.js`. A stored key such as `/media/uploads/<uuid>.png` is therefore also currently a
   browser URL.
-- `src/features/media/mediaStorage.js` implements `createLocalMediaStorage`. It defaults to
+- The now-removed `src/features/media/mediaStorage.js` implemented `createLocalMediaStorage`. It
+  defaulted to
   `public/media/uploads`, generates UUID filenames, writes with `flag: "wx"`, returns a
   `/media/uploads/...` key, and exposes `save`, returned-object `remove`, `exists`, and `read`.
   Reads are path-contained by configured public-prefix/root checks.
@@ -234,8 +713,8 @@ add R2 runtime behavior or migrate media in this action.
 - Added `src/features/media/storage/localStorage.js` as the local implementation. It preserves the
   existing `/media/...` keys, UUID writes, exclusive file creation, path containment, and local
   cleanup behavior while exposing the new contract and optional public URL base.
-- Kept `src/features/media/mediaStorage.js` as a compatibility re-export while moving production
-  composition to the new storage module.
+- Kept `src/features/media/mediaStorage.js` as a compatibility re-export at that historical point;
+  Action 1 later removed it after verifying there were no repository consumers.
 - Wired the local public adapter through `app.js` and the Manage Media upload, approval, and
   canonical-promotion paths. Domain services no longer instantiate the local public adapter.
 - Kept private generated-candidate storage separate; it remains local and private because remote
@@ -506,7 +985,8 @@ object, and retain local source files for recovery and current fallback behavior
 ### Implementation completed
 
 - Added the rerunnable `r2:migrate-canonical-media` command and a focused migration boundary that
-  preflights every canonical local source before the first remote mutation.
+  preflighted every canonical local source before the first remote mutation. Action 1 later
+  removed this completed one-time import tooling after all current entries were mapped.
 - Added optional `storageKey` metadata to each canonical manifest entry while retaining every
   existing local `path`, assignment, and metadata field for the current resolver and seed flow.
 - Uploaded the 70 canonical assets to the explicitly guarded development R2 bucket using opaque

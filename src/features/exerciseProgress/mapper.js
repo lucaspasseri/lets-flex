@@ -145,7 +145,7 @@ function toOccurrence(value) {
 		workoutSessionId,
 		dateKey,
 		finishedAt: toDateValue(row.finishedAt),
-		sessionName: toNullableString(row.sessionName) ?? "Workout session",
+		sessionName: toNullableString(row.sessionName),
 		performedStepCount: toCount(row.performedStepCount),
 		recordedSetCount: toCount(row.recordedSetCount),
 		setsWithRepetitionsCount: toCount(row.setsWithRepetitionsCount),

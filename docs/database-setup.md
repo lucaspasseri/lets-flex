@@ -25,13 +25,14 @@ The schema is authoritative for the complete current structure. The seed order i
 2. catalog entities and their numeric foreign-key relationships, resolved by `catalog_key`;
 3. catalog translations, resolved by `catalog_key` and stored with numeric foreign keys;
 4. the global starter workout, resolved by variant `catalog_key`;
-5. 68 canonical curated entity media assets and primary assignments, resolved by `catalog_key`;
+5. 70 canonical curated entity media assets and primary assignments, resolved by `catalog_key`;
 6. the administrator identity, stored with its Argon2id password hash.
 
 Media assignments are recreated from the repository-controlled canonical media manifest. Each
 entry supplies an entity type, stable entity key, deterministic `/media/catalog/` or existing
-curated path, role, dimensions, MIME type, source, and localized alt text. The seed validates the
-path, metadata, role, duplicate assignments, and catalog reference before inserting
+curated path, provider-neutral object key, role, dimensions, MIME type, source, and localized alt
+text. The seed validates the path, metadata, role, duplicate assignments, and catalog reference
+before inserting
 `media_assets`, `entity_media`, and localized alt-text rows. Environment and category artwork is
 contextual resolver fallback media and is intentionally not an `entity_media` assignment. Missing
 catalog references or files fail the seed with the entity type and key; they are never silently
@@ -39,10 +40,10 @@ skipped.
 
 Canonical catalog media is distinct from runtime/admin media. New uploads, pending generated
 candidates, rejected candidates, incomplete provenance, and unassigned reusable files stay under
-ignored `public/media/uploads/` and do not become seed data automatically. The current recovery
-seeded 66 reviewed catalog assignments from that collection and retained two non-conflicting
-source-controlled static assignments, while excluding four files whose assignment is unassigned or
-not safely recoverable.
+ignored `public/media/uploads/` or the private candidate store and do not become seed data
+automatically. The current manifest contains 70 canonical assignments: reviewed catalog assets
+recovered from that collection plus the retained source-controlled static assignments. Legacy
+unassigned or provenance-uncertain files remain preserved and excluded from the seed.
 
 Historical migrations remain available through the explicit `npm run db:migrate` path for existing
 databases. They are not required for a clean disposable setup and must not be used as a normal reset
