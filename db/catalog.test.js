@@ -6,6 +6,7 @@ import { Client } from "pg";
 import { schemaSql } from "./schema.js";
 import { seedSql } from "./seed.js";
 import { catalogManifest } from "../src/features/exerciseCatalog/catalogManifest.js";
+import { canonicalMediaManifest } from "../src/features/media/mediaManifest.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const databaseIsSafe = (() => {
@@ -118,6 +119,39 @@ async function catalogRelationshipSnapshot(db) {
 	return rows;
 }
 
+/** @param {Client} db */
+async function mediaRelationshipSnapshot(db) {
+	const { rows } = await db.query(`
+		SELECT entity_media.entity_type,
+		       CASE entity_media.entity_type
+				   WHEN 'exercise' THEN (SELECT catalog_key FROM exercises WHERE id = entity_media.entity_id)
+				   WHEN 'exercise_variant' THEN (SELECT catalog_key FROM exercise_variants WHERE id = entity_media.entity_id)
+				   WHEN 'muscle' THEN (SELECT catalog_key FROM muscles WHERE id = entity_media.entity_id)
+				   WHEN 'equipment' THEN (SELECT catalog_key FROM equipments WHERE id = entity_media.entity_id)
+				   WHEN 'movement_pattern' THEN (SELECT catalog_key FROM movement_patterns WHERE id = entity_media.entity_id)
+		       END AS catalog_key,
+		       media_assets.storage_key
+		FROM entity_media
+		JOIN media_assets ON media_assets.id = entity_media.media_asset_id
+		ORDER BY entity_media.entity_type, catalog_key
+	`);
+	return rows;
+}
+
+function expectedMediaRelationshipSnapshot() {
+	return canonicalMediaManifest
+		.map((entry) => ({
+			entity_type: entry.entityType,
+			catalog_key: entry.entityKey,
+			storage_key: entry.path,
+		}))
+		.sort(
+			(left, right) =>
+				left.entity_type.localeCompare(right.entity_type) ||
+				left.catalog_key.localeCompare(right.catalog_key),
+		);
+}
+
 integration("canonical database setup", { concurrency: false }, () => {
 	/** @type {Client} */
 	let db;
@@ -224,7 +258,18 @@ integration("canonical database setup", { concurrency: false }, () => {
 					(SELECT COUNT(*)::int FROM entity_media) AS assignments
 			`)
 		).rows[0];
-		assert.deepEqual(mediaCounts, { assets: 0, assignments: 0 });
+		assert.deepEqual(mediaCounts, {
+			assets: canonicalMediaManifest.length,
+			assignments: canonicalMediaManifest.length,
+		});
+		assert.deepEqual(
+			await mediaRelationshipSnapshot(db),
+			expectedMediaRelationshipSnapshot(),
+		);
+		const localizedMediaCount = (
+			await db.query("SELECT COUNT(*)::int AS count FROM media_asset_alt_texts")
+		).rows[0].count;
+		assert.equal(localizedMediaCount, canonicalMediaManifest.length * 2);
 		assert.equal(
 			(
 				await db.query(
@@ -238,11 +283,13 @@ integration("canonical database setup", { concurrency: false }, () => {
 
 	test("repeated clean setups preserve catalog-key relationships", async () => {
 		const firstSnapshot = await catalogRelationshipSnapshot(db);
+		const firstMediaSnapshot = await mediaRelationshipSnapshot(db);
 
 		await db.query(schemaSql);
 		await db.query(seedSql);
 
 		assert.deepEqual(await catalogRelationshipSnapshot(db), firstSnapshot);
+		assert.deepEqual(await mediaRelationshipSnapshot(db), firstMediaSnapshot);
 	});
 
 	test("fresh database contains the ordered global starter workout", async () => {

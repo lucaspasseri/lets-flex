@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS media_assets (
 	CONSTRAINT media_assets_source_present
 		CHECK (BTRIM(source) <> ''),
 	CONSTRAINT media_assets_alt_text_trimmed
-		CHECK (alt_text IS NULL OR alt_text = BTRIM(alt_text))
+		CHECK (alt_text IS NULL OR alt_text = BTRIM(alt_text)),
+	UNIQUE (storage_key)
 );
 
 CREATE TABLE IF NOT EXISTS media_asset_alt_texts (

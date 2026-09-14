@@ -7,6 +7,7 @@ import { hashPassword } from "../src/features/auth/passwordService.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
 import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
+import { mediaSeedSql } from "./mediaSeedSql.js";
 
 export const seedSql = `
 INSERT INTO "step_types" ("name")
@@ -107,6 +108,7 @@ INSERT INTO "muscle_roles" ("name", "description") VALUES
 ${catalogSeedSql}
 ${catalogTranslationSeedSql}
 ${starterWorkoutSeedSql}
+${mediaSeedSql}
 `;
 
 function isDisposableDatabaseTarget(connectionString) {

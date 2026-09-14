@@ -13,6 +13,7 @@ test("media schema uses reusable assets and explicit supported entity assignment
 	assert.match(mediaSchemaSql, /REFERENCES media_assets\(id\)/);
 	assert.match(mediaSchemaSql, /CREATE TABLE IF NOT EXISTS media_asset_alt_texts/);
 	assert.match(mediaSchemaSql, /locale IN \('en', 'pt-BR'\)/);
+	assert.match(mediaSchemaSql, /UNIQUE \(storage_key\)/);
 	assert.match(mediaSchemaSql, /UNIQUE \(entity_type, entity_id, role\)/);
 	assert.match(
 		mediaSchemaSql,
@@ -27,6 +28,10 @@ test("media assignments support removal without deleting reusable assets", () =>
 	assert.match(mediaSchemaSql, /ON DELETE RESTRICT/);
 	assert.match(mediaSchemaSql, /entity_media_entity_id_positive/);
 	assert.match(mediaSchemaSql, /entity_media_sort_order_valid/);
+});
+
+test("canonical reset removes the obsolete plural exercise-muscle table", () => {
+	assert.match(schemaSql, /DROP TABLE IF EXISTS exercises_muscles CASCADE;/);
 });
 
 test("generated candidates remain distinct from approved media assets", () => {

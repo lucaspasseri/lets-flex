@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS cycles CASCADE;
 DROP TABLE IF EXISTS programs CASCADE;
 
 DROP TABLE IF EXISTS exercise_muscles CASCADE;
+DROP TABLE IF EXISTS exercises_muscles CASCADE;
 DROP TABLE IF EXISTS movement_pattern_translations CASCADE;
 DROP TABLE IF EXISTS equipment_translations CASCADE;
 DROP TABLE IF EXISTS muscle_translations CASCADE;

@@ -2,289 +2,220 @@
 
 ## Current goal
 
-### Introduce Stable Catalog Identifiers
+Make curated media fully reproducible through the disposable development lifecycle:
 
-Establish deterministic catalog keys for supported global catalog records while retaining the
-authoritative `schema → seed` development workflow.
+```text
+schema → seed → application ready
+```
 
 ## Goal status
 
-**Completed** on 2026-09-13. Actions 1, 2, and 3 are completed.
+**Completed** on 2026-09-14. The canonical media implementation and separate conservative cleanup
+action are completed and verified.
 
-## Planning evidence
-
-- **Verified missing identity:** `exercises`, `exercise_variants`, `muscles`, `equipments`, and
-  `movement_patterns` have no stable identifier independent of their generated `id` or display
-  name.
-- **Verified seed boundary:** `db/seed.js` runs static vocabulary, catalog, translations, and the
-  starter workout in that order. `createCatalogSeedSql` joins catalog relationships by names;
-  Portuguese translations and starter-workout SQL use names as their source identity.
-- **Verified relational boundary:** translation rows and persistent media assignments correctly
-  store numeric foreign keys. No seeded media assets or assignments exist today. Runtime media
-  management's numeric selection is not an external seed/configuration manifest.
-- **Verified verification baseline:** `db/catalog.test.js` reapplies `schemaSql` then `seedSql`
-  before each canonical-database test and currently validates catalog counts, translations, starter
-  workout relationships, and zero seeded media assignments.
-- **Verified workflow:** `npm run db:reset` is a protected one-transaction schema-and-seed reset.
-  Existing legacy migration tooling is opt-in and is not part of normal setup; no migration is
-  authorized for this goal.
-
-## Delta classification
-
-- **Already satisfied / reuse:** authoritative schema/seed reset path, transaction and target
-  safeguards, catalog manifest generator, translation seed ordering, numeric relational foreign
-  keys, canonical database tests, and unseeded media model.
-- **Modify:** the five global catalog table definitions; catalog/static seed source contracts;
-  SQL joins and dependent seed manifests that currently identify catalog records by names; and
-  canonical setup tests/documentation.
-- **Add:** explicit `catalog_key` validation/constraints and deterministic key assertions.
-- **Explicitly excluded:** migrations, production upgrades, private-variant keys, runtime media
-  resolver changes, and unrelated catalog refactoring.
-
-## Proposed action sequence
-
-### Action 1 — Define stable-key contract and seed sources
+## Action 1 — Recover and seed canonical catalog media
 
 **Status:** Completed
 
-**Purpose:** Establish the precise key convention and deterministic source data for the supported
-global catalog entities before changing schema or dependent seed SQL.
+**Completed:** 2026-09-14
 
-**Scope:** Extend the catalog/static vocabulary and manifest contracts with explicit stable keys;
-validate key format, uniqueness, and global-variant applicability; document the one-way rule that
-display/translation names do not define identity; identify exact seed lookups to convert.
+**Purpose:** Reconstruct every approved canonical catalog-media assignment that can be safely
+reproduced from repository-controlled source data, while preserving the runtime/admin boundary.
 
-**Acceptance criteria:** Every supported seeded entity has a deterministic lowercase kebab-case
-key in its source data; the manifest validator rejects missing, malformed, or duplicate keys; the
-chosen contract excludes private variants; and focused tests show that key changes are not derived
-from translated/display-name behavior.
+### Verified delta
 
-**Boundaries:** Do not edit the schema, run a database reset, create a migration, alter relational
-writes, or activate Action 2.
+- Existing compatible behavior: `catalog_key` is already present and constrained for all five
+  supported catalog entity types; `entity_media` supports one `primary` row per entity; the guarded
+  `schema.js → seed.js` transaction already exists.
+- Missing behavior: only five entity assignments were seeded; the reviewed 66-assignment runtime
+  collection was ignored and lost on reset; seed validation did not check files, metadata,
+  duplicate assignments, or localized media metadata.
+- Recovery boundary: the current development DB was already reset, so the provenance record and
+  matching local files are the available trustworthy relationship evidence. UUID filenames are not
+  used to identify entities. Four of 70 upload files remain excluded: one unassigned reusable file
+  and three legacy/deferred files.
 
-**Activation (2026-09-13):** The user approved the action plan. Action 1 is the only active
-action. Define and validate the stable-key source contract only; do not begin Action 2.
+### Implementation
 
-**Implementation (2026-09-13):** Added explicit, immutable-for-identity `catalogKey` source
-fields to all 78 global exercises and 129 global variants in `catalogManifest`. Added explicit
-`{ catalogKey, name }` source entries for the eight movement patterns, 24 muscles, and 28 equipment
-records while preserving the existing name-array interface for current consumers. Keys use
-lowercase ASCII kebab-case and are values in the source manifest—not values calculated at runtime
-from names or translations. Private variants remain outside this global seed contract.
+- Added `canonicalMediaManifest` with explicit entity type, stable key, deterministic path, role,
+  MIME type, dimensions, source, English alt text, and Brazilian Portuguese alt text.
+- Copied the 66 reviewed assigned raster assets to source-controlled catalog paths without deleting
+  the ignored upload originals. Retained two non-conflicting existing static assignments and
+  replaced three overlapping static resolver entries with their reviewed catalog assets.
+- Added canonical manifest/file/metadata/duplicate validation and clear missing-key SQL preflight.
+- Seeded `media_assets`, `entity_media`, and localized alt-text records through stable-key lookups;
+  added unique storage-key protection in the authoritative schema.
+- Updated catalog/media tests, application resolver expectations, setup/provenance documentation,
+  and this tracking record.
 
-`validateCatalogManifest` now rejects absent, malformed, duplicate, or vocabulary-mismatched
-keys. Focused tests verify the canonical source contract and prove a display-name change leaves an
-existing key intact. The next action must convert these identified name-based seed boundaries:
-`db/seed.js` static catalog inserts; `createCatalogSeedSql` joins for movement patterns, exercises,
-equipment, and muscles; Portuguese translation source lookup; and the starter-workout variant
-manifest/lookup. English translation backfill already selects created global rows directly and does
-not contain a hard-coded external ID or name manifest.
+### Verification evidence
 
-**Verification (2026-09-13):** `node --test
-src/features/exerciseCatalog/validateCatalogManifest.test.js
-src/features/guests/createStarterWorkoutSeedSql.test.js db/catalogTranslations.test.js` passed
-16/16. `npm run format:check`, `npm run lint`, `npm run check:types`, and `git diff --check`
-passed. No schema, seed SQL, migration, database reset, production target, or relational-write
-change was made.
+- Media/schema/unit tests: 18/18 passed.
+- Canonical local test database: 4/4 passed, including 68 assets, 68 assignments, localized
+  metadata, key-based relationships, and repeated clean setup.
+- Full `npm run verify` passed: format, lint, server/browser type checks, and 410/410 tests.
+- Focused HTTP integration passed 4/4 for seeded media in Library, Manage Exercises, Manage Media,
+  and direct variant/equipment previews.
+- Guarded `npm run db:reset` succeeded twice on the confirmed local development target. Each reset
+  produced 68 assets, 68 assignments, 136 localized alt-text rows, zero missing files, and the
+  identical stable relationship SHA-256
+  `b47d9c191b0ddafa596ca21b33aa3530be90ac5fe4709b4395d1d5743d16a216`.
+- `npm run dev` listened successfully; live localhost checks returned 302 for guest bootstrap and
+  200 for a seeded catalog media file. No browser executable was available, so browser visual
+  verification is not claimed.
 
-**Review stop (2026-09-13):** Action 1 is ready for review. Action 2 remains pending and was not
-activated or implemented.
+### Review notes
 
-**Completion (2026-09-13):** The user approved Action 1 after final focused tests (16/16), format,
-lint, type, and diff checks passed. The completed source contract provides explicit keys without
-changing schema or seed SQL. Action 2 remains pending and was not activated or implemented.
+- The final diff still needs ordinary human review for the 66 binary catalog assets and the
+  intentional replacement of three overlapping static resolver paths.
+- The four excluded ignored upload files remain preserved and are not canonical seed data.
 
-### Action 2 — Apply keys to schema and seed relationships
+### Completion summary
 
-**Status:** Completed
+The canonical media workflow was accepted as implemented and verified. No changes to the
+implementation or its recovery boundary are included in this completion.
 
-**Purpose:** Make stable keys persist through canonical initialization and become the seed-facing
-way to resolve catalog rows.
-
-**Scope:** Add constrained/unique `catalog_key` columns to the authoritative schema; populate them
-from Action 1 source data; revise catalog relationship, translation, and starter-workout seed SQL
-to join on keys and resolve numeric IDs only for foreign-key writes; update focused tests.
-
-**Acceptance criteria:** Clean schema-plus-seed setup populates unique keys for all five entity
-types; catalog, translation, and starter-workout relationships resolve through keys; existing
-display output and numeric foreign-key storage remain compatible; no migration is added.
-
-**Dependency:** Requires Action 1 completion and explicit approval.
-
-**Activation (2026-09-13):** The user approved Action 2. Apply keys to the authoritative schema
-and seed relationships only; do not activate or implement Action 3.
-
-**Implementation (2026-09-13):** Added constrained `catalog_key` columns to the authoritative
-schema. Movement patterns, muscles, and equipment require unique non-null keys; exercises and
-variants use unique partial indexes with a nullable key so the existing user-created exercise and
-variant workflows remain outside the seeded global-catalog contract. All key-bearing columns reject
-anything outside lowercase ASCII kebab-case.
-
-The canonical seed now writes static catalog keys and resolves every catalog relationship by key:
-exercise → movement pattern, variant → exercise/equipment, and exercise → muscle. Portuguese
-translation manifests are keyed by `catalog_key` and join the seeded rows by that key; English
-backfill remains a direct select of rows just created. The starter-workout manifest now carries
-`variantCatalogKey` and resolves its relational `exercise_variant_id` through that stable key.
-Numeric IDs remain only the values inserted into foreign-key columns. No media assets or
-assignments are seeded, so no media manifest conversion exists in the current repository.
-
-Updated canonical database coverage to assert complete/distinct keys for all five entity types,
-key-based catalog relationships, and key-based starter-workout resolution.
-
-**Verification (2026-09-13):** Focused manifest, translation, starter-workout, and seed tests
-passed 22/22. The canonical test database applied the authoritative `schemaSql` then `seedSql`
-before each case and passed 3/3 catalog setup tests, including complete/distinct keys and
-key-resolved relationships. `npm run format:check`, `npm run lint`, `npm run check:types`, and
-`git diff --check` passed. No migration was added; no development database reset, production
-target, commit, push, or deployment was performed.
-
-**Review stop (2026-09-13):** Action 2 is ready for review. Action 3 remains pending and was not
-activated or implemented.
-
-**Completion (2026-09-13):** The user approved Action 2 after final focused tests (22/22), format,
-lint, type, and diff checks passed. The prior canonical schema-to-seed test-database run passed
-3/3. Action 3 remains pending and was not activated or implemented.
-
-### Action 3 — Verify reset determinism and document the boundary
+## Action 2 — Audit and conservatively remove obsolete media/database leftovers
 
 **Status:** Completed
 
-**Purpose:** Prove the full schema-to-seed lifecycle is safe and repeatable, then record the
-catalog-identity contract for future translation/media seed manifests.
+**Activated:** 2026-09-14
 
-**Scope:** Run the required safe clean reset when a permitted local/development target is
-configured; otherwise run canonical test-database setup and record why a development reset is not
-safe. Add repeatable key/relationship assertions, run required code checks, inspect the final diff,
-and document the stable-key lookup pattern and seed ordering.
+**Completed:** 2026-09-14
 
-**Acceptance criteria:** Verification demonstrates complete and unique keys, valid translation and
-starter-workout references, valid foreign keys, and equivalent relationships across repeated clean
-setup; docs state that external manifests use keys while relational rows use IDs; the normal
-workflow remains schema then seed.
+**Purpose:** Audit repository, database, and filesystem artifacts left by superseded
+database/media approaches, then remove only artifacts proven unnecessary while preserving the
+deterministic workflow:
 
-**Dependency:** Requires Action 2 completion and explicit approval.
+```text
+schema → seed → stable catalog identifiers → canonical media manifest → reconstructed media tables
+→ npm run dev
+```
 
-**Activation (2026-09-13):** The user approved Action 3. Verify reset determinism and document the
-stable-key boundary only; do not mark the goal completed.
+**Scope:** Separate cleanup action; no architectural redesign and no new feature work.
 
-**Implementation (2026-09-13):** Added `docs/catalog-identifiers.md`, documenting the stable-key
-contract, supported entity types, nullable user-created exercise/variant boundary, key-to-ID seed
-lookup rule, required seed ordering, future media-manifest rule, and preserved `schema → seed`
-development workflow. Added an automated canonical test that applies schema and seed twice and
-compares a stable-key relationship snapshot rather than generated IDs.
+### Proposed delta
 
-**Verification (2026-09-13):** Confirmed the configured reset target as local/development, with
-`ALLOW_DATABASE_RESET=true` and required administrator configuration present, without exposing
-connection details. Ran `npm run db:reset` twice against that confirmed development target. The
-two independent post-reset snapshots each contained 349 stable-relationship rows with identical
-SHA-256 `7e410f312fb71ac1aa351bc6cbf9c9ec5768ac7dc32306775712903b5f45e4bc`.
+1. Establish and record a fresh baseline with `npm run db:reset`, deterministic snapshot checks,
+   canonical manifest/file counts, actual media table counts, and a successful `npm run dev`
+   startup/application check.
+2. Inventory migration infrastructure, migration state/tables, stale scripts, tests, docs,
+   temporary diagnostics, deprecated manifests/seed mechanisms, duplicate media implementations,
+   and schema/seed leftovers. Trace active consumers before classifying candidates.
+3. Audit media rows and filesystem files against the current lifecycle. Classify unassigned rows
+   and files as active, canonical, deferred, unknown, or orphaned using repository evidence;
+   delete only confidently orphaned items and do not remove the four previously excluded files
+   without new evidence.
+4. If migration infrastructure is proven unused by reset, dev startup, tests, and production or
+   deployment paths, remove it cohesively, including stale references and migration-only tests or
+   documentation. Preserve anything classified as uncertain.
+5. Re-run reset, determinism, startup, media integrity, and the required repository checks;
+   inspect the final diff and record any intentionally retained or deferred artifacts.
 
-The canonical test database passed 4/4, including the new repeated-clean-setup assertion. Full
-`npm run verify` passed: format, lint, server/browser type checks, and 401/401 tests. The first
-sandboxed verification attempt could not reach local PostgreSQL (`EPERM`); the approved rerun with
-local-test database access passed fully. No migration, production target, commit, push, or
-deployment was performed.
+### Baseline and inventory — 2026-09-14
 
-**Review stop (2026-09-13):** Action 3 is ready for review. All planned actions are implemented;
-the goal remains in progress pending explicit approval of this final action.
+#### Phase 1 baseline
 
-**Changes requested (2026-09-13):** The user reported `POST /admin/media/generate` returning
-HTTP 422 for an authenticated administrator submitting `entityType=muscle`, `entityId=14`, a valid
-CSRF token, a session-bound request nonce, and an empty `refinement`. This is a targeted review
-correction to the existing admin-media work, not a change to the stable-catalog-key outcome.
+- Verified the reset target without exposing credentials: `NODE_ENV=development`,
+  `ALLOW_DATABASE_RESET=true`, and PostgreSQL `localhost:5432/lets_flex`. `npm run db:reset`
+  succeeded in one transaction.
+- The fresh database contains 68 `media_assets`, 68 `entity_media` assignments, and 136
+  `media_asset_alt_texts` rows. All 68 assets are `curated`; there are zero unassigned assets,
+  zero missing media references, zero missing localized-media references, zero invalid polymorphic
+  entity references, and zero duplicate `(entity_type, entity_id, role)` groups.
+- `canonicalMediaManifest` contains 68 entries. All 68 manifest files exist; 66 files are under
+  `public/media/catalog`, and that directory contains exactly those 66 manifest paths.
+- The stable media relationship snapshot has 68 rows and SHA-256
+  `b47d9c191b0ddafa596ca21b33aa3530be90ac5fe4709b4395d1d5743d16a216`.
+- After reset, `npm run dev` started and live HTTP checks returned `302` for `/` and `200` for
+  `/media/catalog/equipment/barbell.png`. The first sandboxed watcher attempt failed with
+  environment `EMFILE`; the host-permitted retry succeeded and was stopped cleanly.
 
-**Investigation (2026-09-13):** The complete request path is global URL-encoded/multipart body
-parsing → global CSRF validation → principal exposure → application authentication →
-media-router URL/session state → administrator authorization → generation-body Zod validation →
-controller nonce check → generation service/provider. The 422 occurs in generation-body validation:
-`muscle` is not in the four supported AI generation entity types. It therefore happens before the
-controller checks the nonce or calls the external provider. Empty `refinement` is correctly
-normalized to `undefined` by request validation and to `null` by the service. The supplied muscle
-form was visible because the media-management view rendered its generation section for every
-assignable entity type, despite the documented Phase 5 policy excluding generated anatomy.
+#### Phase 2 inventory and classifications
 
-**Correction (2026-09-13):** Preserved CSRF, authorization, nonce, entity validation, and the
-existing media assignment lifecycle. The media page now derives generation availability from the
-generation preset policy; a selected muscle shows an accessible explanation and no generation form
-or nonce. Direct/manual requests remain safely rejected by request validation with the explicit
-non-sensitive message: “AI generation supports exercises, global variants, equipment, and movement
-patterns.” A supported target with `refinement=""` is normalized to no refinement and proceeds
-through the injected provider boundary to a private pending-review candidate. Enabling generated
-anatomy remains an explicitly excluded policy change.
+- **Migration infrastructure — ACTIVE:** `package.json` exposes `db:migrate`; `db/migrate.js`,
+  both ordered migration modules, and migration-target tests are referenced by the explicit
+  existing-database path. README and database-setup documentation describe that path, while reset
+  and normal startup do not invoke it. Retain it; removing it would break a documented consumer
+  and its tests. No `schema_migrations` table exists after canonical reset.
+- **Database leftovers — OBSOLETE:** the reset database contains an empty `exercises_muscles`
+  table with legacy `role` columns. It is not created by `db/schema.js`, has no source-code
+  consumers, and is not the active `exercise_muscles` table. Add its explicit drop to the
+  authoritative schema so future resets remove the stale state.
+- **Database structures — ACTIVE:** `media_assets`, `media_asset_alt_texts`, `entity_media`, and
+  `media_generation_candidates` are current application tables. The candidate table is empty after
+  reset but remains required by the admin generation/review lifecycle.
+- **Canonical filesystem media — CANONICAL:** the 66 catalog files are source-controlled, present,
+  and exactly match manifest paths. Root fallback SVGs are active except for the three obsolete
+  files identified below. The two root SVGs still in the canonical manifest remain required.
+- **Runtime/deferred media — DEFERRED or UNKNOWN, retained:** all 70 ignored
+  `public/media/uploads` files remain outside canonical seed data. The 66 reviewed originals are
+  documented runtime/deferred copies; the four excluded files remain the documented reusable or
+  provenance-unknown/deferred records. The ignored `imagesSample` directory contains four local
+  legacy samples, including three byte-identical copies of deferred JPEG uploads; with no tracked
+  provenance or active consumer, it remains `UNKNOWN` rather than being deleted conservatively.
+- **Obsolete tracked media — ORPHANED:** `public/media/equipment-barbell.svg`,
+  `public/media/exercise-bench-press.svg`, and `public/media/movement-push.svg` have no
+  production/runtime file consumers; their former static entries now resolve through canonical
+  catalog paths. A synthetic `/media/movement-push.svg` value remains in a resolver unit fixture
+  and does not load the deleted file. The three files are safe cleanup targets and recoverable from
+  version control.
+- **Scripts, manifests, documentation, and diagnostics — ACTIVE or RETAINED:** canonical seed/SQL
+  printers, media manifest/seed modules, provenance and coverage records, media style guidance,
+  and migration documentation all have current consumers or preserve intentional audit evidence.
+  No other confidently obsolete tracked diagnostic or duplicate implementation was found.
 
-**Regression coverage and verification (2026-09-13):** Focused schema, service, and rendered-view
-tests passed 17/17. The authenticated HTTP regression test passed 1/1 with catalog muscle #14, a
-valid CSRF token, a session-bound nonce, and empty refinement: the page does not offer the invalid
-form; a direct request receives the explicit 422 validation response; and no candidate is created.
-`npm run verify` passed fully: format, lint, server/browser type checks, and 403/403 tests.
-`git diff --check` passed. A broad `npm run test:http` run reached the focused media test but had
-five unrelated failing assertions elsewhere in that existing suite; the isolated media subtest
-passes. No live image-provider request was made, so the verified successful next state uses the
-deterministic injected provider in service coverage. Browser-geometry tooling is unavailable in
-this environment; the rendered EJS accessibility/interaction contract is covered by the view test,
-and no CSS layout or interaction behavior changed.
+### Constraints and acceptance criteria
 
-**Review stop (2026-09-13):** The requested correction is ready for review. Action 3 remains the
-only action; do not mark it completed or activate any additional work without explicit approval.
+- `npm run db:reset` followed by `npm run dev` remains deterministic and fully functional.
+- No cleanup deletion occurs before the baseline and inventory are documented.
+- No artifact is removed solely because of its name, UUID filename, or historical association.
+- Migration removal is allowed only after proving no active consumer remains.
+- Database cleanup follows the authoritative `db/schema.js` and `db/seed.js` lifecycle; no ordinary
+  development migration is added.
+- Any uncertain candidate remains in place and is documented for review.
 
-**Changes requested — supported equipment generation (2026-09-13):** The user reported the same
-HTTP 422 from `POST /admin/media/generate` for `entityType=equipment`, `entityId=14`, a valid CSRF
-token, a session-issued nonce, and empty refinement. This must be treated as a separate supported-
-target investigation, not as the intentionally unsupported-muscle case. Keep Action 3 in changes-
-requested status until equipment reaches the deterministic provider boundary and persists a pending
-candidate in HTTP regression coverage.
+### Implementation
 
-**Investigation (2026-09-13):** The exact payload parses successfully: Zod returns
-`{ entityType: "equipment", entityId: 14, requestNonce, refinement: undefined }` with no issues.
-Equipment #14 exists in the configured local development catalog as `Dip Bar` (`catalog_key`
-`dip-bar`). The UI, nonce issuance, Zod schema, prompt preset map, and service all list equipment
-as supported. CSRF executes before authentication and route validation; the 422 proves the supplied
-token passed because CSRF failure is 403. After Zod and the session nonce check, the controller calls
-the service. The configured local environment has no `OPENAI_API_KEY`, so lazy provider setup throws
-`MediaGenerationError` code `not_configured`. The controller currently renders every generation
-domain failure as HTTP 422, which misleadingly presents provider configuration unavailability as a
-validation error. No provider request or candidate creation occurs in this condition.
+- Added `DROP TABLE IF EXISTS exercises_muscles CASCADE` to `db/schema.js`, ensuring the canonical
+  reset removes the empty legacy plural exercise-muscle table that was not otherwise recreated or
+  consumed.
+- Removed the three superseded tracked root SVGs whose static resolver entries were replaced by
+  canonical catalog paths. The canonical two root manifest SVGs, fallback artwork, catalog files,
+  ignored uploads, deferred samples, migration infrastructure, and active media tables remain.
+- Added a focused schema regression assertion for the legacy table cleanup.
 
-**Correction (2026-09-13):** Added one shared media-generation policy module, used by the admin
-page, Zod schema, and prompt/service path. Its source of truth lists exactly global exercise, global
-exercise variant, equipment, and movement pattern; its tests assert that the preset map cannot drift
-from that list. Application construction accepts deterministic generation dependencies only for
-tests; normal runtime still lazily constructs the configured OpenAI provider. The controller now
-maps `not_configured`, invalid configuration, and provider unavailability to HTTP 503; rate limiting
-to 429; provider rejection/invalid provider bytes to 502; and genuine entity/refinement validation
-errors to 422. No secret, CSRF, authorization, validation, nonce, supported-type rule, or candidate
-lifecycle behavior was weakened.
+### Verification evidence
 
-**Regression coverage and verification (2026-09-13):** Focused policy, schema, controller,
-service, and rendered-view tests passed 21/21. The focused authenticated HTTP admin-media test
-passed 1/1 using the actual rendered CSRF token and equipment #14 nonce: `equipment:14` with empty
-refinement passes Zod and nonce validation, calls the deterministic provider once with the
-`equipment-editorial` preset, persists a `pending_review` candidate, and redirects successfully
-instead of returning 422. Replayed and mismatched nonces return 409 without another provider call;
-the muscle direct-request regression retains its explicit 422; the existing guest/user/missing-CSRF
-assertions preserve authorization and CSRF coverage. `npm run verify` passed fully: format, lint,
-server/browser type checks, and 405/405 tests. `git diff --check` passed.
+- Guarded `npm run db:reset` passed after the cleanup and passed again for repeated setup. Both
+  post-cleanup resets produced 68 `media_assets`, 68 `entity_media` assignments, 136 localized
+  media rows, zero stale `exercises_muscles` tables, and the unchanged stable relationship SHA-256
+  `b47d9c191b0ddafa596ca21b33aa3530be90ac5fe4709b4395d1d5743d16a216`.
+- All 68 canonical manifest files remain present; `public/media/catalog` still contains exactly
+  its 66 manifest files. Final live `npm run dev` startup succeeded, with HTTP `302` for `/` and
+  `200` for a seeded catalog PNG. The initial sandbox watcher attempt reported environment
+  `EMFILE`; the host-permitted retry succeeded.
+- Full `npm run verify` passed: format, lint, server/browser type checks, and 411/411 tests,
+  including the new legacy-table regression. `git diff --check` passed.
+- No migration files or migration references were removed because the explicit existing-database
+  migration path and its tests/documentation remain active. No database migration or production
+  mutation was introduced.
 
-**Operational finding:** The configured development environment has no `OPENAI_API_KEY`. A real
-equipment request there now reaches the service and returns the safe HTTP 503 configuration message
-instead of a misleading 422; it cannot create a live candidate until an authorized key is supplied.
-No live or paid provider request was made during this correction.
+### Review notes
 
-**Review stop (2026-09-13):** The supported-equipment correction is ready for review. Action 3
-remains the only action; do not mark it completed or activate additional work without explicit
-approval.
+- The three deleted SVGs are recoverable from version control and have no production/runtime
+  consumers. The synthetic resolver fixture path is intentionally not a file dependency.
+- The ignored `public/media/uploads` collection and ignored `imagesSample` directory remain
+  retained/deferred; no uncertain or provenance-unknown media was deleted.
 
-**Completion (2026-09-13):** The user approved the supported-equipment correction. Action 3 now
-satisfies its acceptance criteria: the stable-key catalog and relationship snapshot is repeatable
-across clean setup, translation and starter-workout references remain valid, the stable-key seed
-boundary is documented, and the canonical `schema → seed` workflow is preserved. The targeted
-authenticated equipment-generation regression and full `npm run verify` passed before approval.
-No migration, production mutation, commit, push, or deployment was performed. The configured
-development environment still has no `OPENAI_API_KEY`; real equipment generation therefore safely
-returns HTTP 503 until an authorized key is supplied, while deterministic provider coverage proves
-the successful pending-candidate lifecycle.
+### Completion summary
+
+Action 2 was approved after the documented baseline, evidence-based inventory, conservative
+cleanup, repeated reset verification, live startup smoke check, full repository verification, and
+final diff review. The cleanup preserved the canonical media invariant and removed no uncertain
+artifacts. No next action is prepared or activated.
 
 ## Resume here
 
-All planned actions and completion criteria are approved. The goal was completed on 2026-09-13; no
-next action or replacement goal has been activated.
+Actions 1 and 2 are completed. The goal is ready for final review; no next action is prepared or
+activated.

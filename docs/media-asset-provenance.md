@@ -44,7 +44,11 @@ Each individual prompt named only the listed exercise, equipment item, or moveme
 - Barbell Bench Press, Bilateral Leg Press, Bodyweight Glute Bridge, Bodyweight Push Up, One-Arm Dumbbell Row, Treadmill Running, and Dumbbell Bench Press resolve their directly assigned base-exercise asset through the established inheritance rule.
 - An unknown entity resolves to the established initial fallback.
 
-The associated files live in ignored application-managed storage under `public/media/uploads`; the UUID keys above are the durable application references. No generated source file or third-party asset was added to version control.
+The associated files were recovered from ignored application-managed storage under
+`public/media/uploads`; their UUID names were used only as recovery references, never as catalog
+identity. The 66 assigned reviewed assets now also live under source-controlled
+`public/media/catalog/` paths named by stable catalog key. The ignored upload originals remain
+untouched as runtime/deferred storage. No third-party asset was added.
 
 ## Phase 4 Action 2 — Tier 1 base and equipment curation
 
@@ -124,7 +128,7 @@ depiction.
 | 69       | Movement pattern: Carry    | `/media/uploads/828ba824-1f7c-45be-bac7-dbfbe9574cb3.png` | Graphic silhouette representing a loaded carry movement pattern. / Silhueta gráfica que representa o padrão de movimento de transporte de carga. |
 | 70       | Movement pattern: Rotation | `/media/uploads/947d6e90-0818-4054-ada4-695f03e9f6ba.png` | Graphic silhouette representing a trunk rotation movement pattern. / Silhueta gráfica que representa o padrão de movimento de rotação do tronco. |
 
-The durable application references are the managed storage keys above. No muscle asset was added,
+The durable recovery references are the managed storage keys above. No muscle asset was added,
 reassigned, or deleted: the pre-existing JPEG muscle records remain a separate provenance/anatomy
 audit finding. Environments remain contextual strings and received no managed assignment.
 
@@ -142,4 +146,7 @@ Read-only verification found 70 present application-managed files, each matching
 type and dimensions, with no unsafe storage key, unreadable object, or byte-identical duplicate.
 The managed collection totals 113,375,117 bytes; individual files range from 35,203 to 2,195,217
 bytes. All 66 active direct assignments have both English and Brazilian Portuguese localized alt
-text records.
+text records. The canonical seed uses those 66 documented assignments plus the two non-conflicting
+original static assignments (`exercise_variant:barbell-bench-press` and `muscle:chest`), for 68
+seeded assets/primary assignments. The three original static files that overlapped recovered
+reviewed assignments remain in place but are no longer selected by the canonical manifest.

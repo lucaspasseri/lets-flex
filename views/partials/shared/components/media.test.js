@@ -20,8 +20,8 @@ test("shared media renders informative image metadata without changing the frame
 	});
 
 	assert.match(html, /class="media-frame__content media-frame--exercise"/);
-	assert.match(html, /src="\/media\/exercise-bench-press\.svg"/);
-	assert.match(html, /alt="Bench press exercise illustration"/);
+	assert.match(html, /src="\/media\/catalog\/exercises\/bench-press\.png"/);
+	assert.match(html, /alt="Bench press"/);
 	assert.doesNotMatch(html, /media-frame--initial/);
 });
 

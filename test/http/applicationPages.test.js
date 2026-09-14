@@ -2787,6 +2787,60 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal(invalidLocale.response.status, 422);
 	});
 
+	test("canonical seeded media reaches Library and admin media surfaces", async () => {
+		const admin = agent();
+		await login(admin, "admin@example.com");
+		const ids = (
+			await db.query(`
+				SELECT
+					(SELECT id FROM exercises WHERE catalog_key = 'bench-press') AS exercise_id,
+					(SELECT id FROM exercise_variants WHERE catalog_key = 'goblet-squat') AS variant_id,
+					(SELECT id FROM equipments WHERE catalog_key = 'barbell') AS equipment_id`)
+		).rows[0];
+		assert.ok(ids.exercise_id);
+		assert.ok(ids.variant_id);
+		assert.ok(ids.equipment_id);
+
+		const library = await admin.request("/library");
+		assert.equal(library.response.status, 200);
+		assert.match(library.text, /src="\/media\/catalog\/exercises\/bench-press\.png"/);
+
+		const adminLibrary = await admin.request("/admin/library/exercises");
+		assert.equal(adminLibrary.response.status, 200);
+		assert.match(
+			adminLibrary.text,
+			/src="\/media\/catalog\/exercises\/bench-press\.png"/,
+		);
+
+		const exerciseMedia = await admin.request(
+			`/admin/media?entity=exercise:${ids.exercise_id}`,
+		);
+		assert.equal(exerciseMedia.response.status, 200);
+		assert.match(
+			exerciseMedia.text,
+			/src="\/media\/catalog\/exercises\/bench-press\.png"/,
+		);
+
+		const variantMedia = await admin.request(
+			`/admin/media?entity=exercise_variant:${ids.variant_id}`,
+		);
+		assert.equal(variantMedia.response.status, 200);
+		assert.match(
+			variantMedia.text,
+			/src="\/media\/catalog\/exercise-variants\/goblet-squat\.png"/,
+		);
+
+		const equipmentMedia = await admin.request(
+			`/admin/media?entity=equipment:${ids.equipment_id}`,
+		);
+		assert.equal(equipmentMedia.response.status, 200);
+		assert.match(
+			equipmentMedia.text,
+			/src="\/media\/catalog\/equipment\/barbell\.png"/,
+		);
+		assert.match(equipmentMedia.text, /Barbell/);
+	});
+
 	test("admin media assignments flow through Library inheritance and preserve reusable assets", async () => {
 		const standard = agent();
 		await login(standard);
@@ -2998,8 +3052,19 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			1,
 		);
 
-		const muscle = (await db.query("SELECT id FROM muscles ORDER BY id LIMIT 1"))
-			.rows[0];
+		const muscle = (
+			await db.query(`
+				SELECT muscles.id
+				FROM muscles
+				LEFT JOIN entity_media
+					ON entity_media.entity_type = 'muscle'
+					AND entity_media.entity_id = muscles.id
+					AND entity_media.role = 'primary'
+				WHERE entity_media.id IS NULL
+				ORDER BY muscles.id
+				LIMIT 1`)
+		).rows[0];
+		assert.ok(muscle, "the canonical catalog includes an unassigned muscle");
 		const emptyEntity = await admin.request(`/admin/media?entity=muscle:${muscle.id}`);
 		assert.equal(emptyEntity.response.status, 200);
 		assert.match(emptyEntity.text, /data-media-presentation="initial"/);

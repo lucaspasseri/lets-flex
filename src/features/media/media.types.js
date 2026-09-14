@@ -9,6 +9,22 @@
 /** @typedef {"exercise_variant" | "exercise" | "muscle" | "equipment" | "movement_pattern" | "environment" | "category" | "placeholder"} MediaMatchType */
 
 /**
+ * Repository-controlled media that is recreated during the canonical database seed.
+ *
+ * @typedef {object} CanonicalMediaManifestEntry
+ * @property {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} entityType
+ * @property {string} entityKey
+ * @property {string} path
+ * @property {"primary"} role
+ * @property {string} mimeType
+ * @property {number} width
+ * @property {number} height
+ * @property {string} source
+ * @property {string} alt
+ * @property {{en: string, "pt-BR": string}} altTexts
+ */
+
+/**
  * Input accepted by the shared catalog-media resolver.
  *
  * Exercise requests may provide both a variant and base name. Other entity

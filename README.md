@@ -33,11 +33,26 @@ The component playground is available outside production only.
 
 The application is currently in a disposable-data development phase. `db/schema.js`
 is the authoritative current schema, while `db/seed.js` is the one canonical seed
-and reset entry point for reference data, the exercise catalog, global samples, and
+and reset entry point for reference data, the exercise catalog, 68 canonical catalog-media
+assignments, global samples, and
 the initial administrator. `npm run db:reset` applies the latest schema and complete
 seed in one transaction, producing a usable database without replaying historical migrations.
 `npm run db:seed:sql` prints the canonical seed SQL, and `npm run db:setup:sql` prints the latest
 schema followed by that seed for intentional clean-database provisioning.
+
+The normal local flow is:
+
+```sh
+npm run db:reset
+npm start
+```
+
+The reset command is the repository's guarded equivalent of `schema → seed`: it leaves no
+required startup initialization or manual SQL step for the application to perform.
+
+Canonical media is defined by the repository-controlled manifest and `public/media/catalog/`
+files. Runtime/admin uploads under ignored `public/media/uploads/` remain outside the seed unless
+they are explicitly promoted into that manifest.
 
 Existing databases use `npm run db:migrate` with `ALLOW_DATABASE_MIGRATION=true`; production also
 requires `ALLOW_PRODUCTION_DATABASE_MIGRATION=true`. Migrations are additive and transactional,

@@ -7,6 +7,7 @@ import { schemaSql } from "./schema.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
 import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
+import { mediaSeedSql } from "./mediaSeedSql.js";
 
 function runSeed(environment) {
 	return spawnSync(process.execPath, ["db/seed.js"], {
@@ -31,6 +32,7 @@ test("complete seed SQL command prints the fully resolved seedSql export", () =>
 	assert.ok(result.stdout.includes(catalogTranslationSeedSql.trim()));
 	assert.match(result.stdout, /'pt-BR'/);
 	assert.ok(result.stdout.includes(starterWorkoutSeedSql.trim()));
+	assert.ok(result.stdout.includes(mediaSeedSql.trim()));
 	assert.doesNotMatch(result.stdout, /\$\{[^}]+\}/);
 	assert.doesNotMatch(result.stdout, /^\s*import\s/m);
 });
@@ -47,6 +49,7 @@ test("complete setup SQL combines the latest schema and canonical seed", () => {
 	assert.equal(result.stdout, `${schemaSql.trim()}\n\n${seedSql.trim()}\n`);
 	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS exercise_translations/);
 	assert.ok(result.stdout.includes(catalogTranslationSeedSql.trim()));
+	assert.ok(result.stdout.includes(mediaSeedSql.trim()));
 	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS media_assets/);
 	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS entity_media/);
 	assert.match(result.stdout, /'pt-BR'/);

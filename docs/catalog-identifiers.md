@@ -51,8 +51,11 @@ static catalog vocabulary
 The catalog and relationship seed generator uses keys for exercise, movement-pattern, equipment,
 and muscle joins. Portuguese translation maps and the starter-workout manifest use keys directly.
 English translations are derived from the already-created canonical rows, so they do not contain a
-separate source lookup manifest. No media assets or assignments are currently seeded; a future media
-manifest must follow the same `entityType + catalogKey → entity id` boundary.
+separate source lookup manifest. The canonical curated media manifest currently contains 68
+entity-specific assets and assignments across all five supported media entity types. It uses the
+same `entityType + catalogKey → entity id` boundary; environment and category artwork remains
+static fallback media because those concepts are not `entity_media` entities. Runtime/admin uploads
+remain outside this seed manifest until an explicit promotion workflow exists.
 
 ## Development setup
 
@@ -63,4 +66,6 @@ schema → seed → application ready
 ```
 
 No migration is required or created for this catalog-key workflow. A reset is permitted only through
-the repository's existing guarded local/development/test database checks.
+the repository's existing guarded local/development/test database checks. The reset recreates and
+seeds catalog media assignments in the same transaction, so a clean rebuild does not depend on
+previous numeric IDs or existing database state.

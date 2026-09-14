@@ -2,25 +2,34 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { mediaManifest } from "./mediaManifest.js";
+import { canonicalMediaManifest, mediaManifest } from "./mediaManifest.js";
 import { resolveMedia } from "./resolveMedia.js";
 import { validateMediaManifest } from "./validateMediaManifest.js";
 
 test("the curated manifest has valid local asset metadata and files", async () => {
 	const result = validateMediaManifest(mediaManifest);
 
-	assert.equal(result.assetCount, 13);
-	assert.equal(result.sources.length, 12);
+	assert.equal(result.assetCount, 76);
+	assert.equal(result.sources.length, 75);
 	assert.ok(result.sources.every((source) => source.startsWith("/media/")));
 
+	assert.equal(canonicalMediaManifest.length, 68);
 	const assets = await Promise.all(
-		result.sources.map(async (source) => {
-			const fileUrl = new URL(`../../../public${source}`, import.meta.url);
-			return readFile(fileUrl, "utf8");
+		canonicalMediaManifest.map(async (entry) => {
+			const fileUrl = new URL(`../../../public${entry.path}`, import.meta.url);
+			return readFile(fileUrl);
 		}),
 	);
 
-	assert.ok(assets.every((asset) => asset.startsWith("<svg ")));
+	assert.ok(
+		assets.every(
+			(asset) =>
+				asset
+					.subarray(0, 8)
+					.equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) ||
+				asset.toString("utf8").startsWith("<svg "),
+		),
+	);
 });
 
 test("exact exercise variant media wins over base and fallback media", () => {
@@ -52,7 +61,7 @@ test("an exercise variant inherits the base exercise media", () => {
 		label: "Dumbbell Bench Press",
 	});
 
-	assert.equal(media.src, "/media/exercise-bench-press.svg");
+	assert.equal(media.src, "/media/catalog/exercises/bench-press.png");
 	assert.equal(media.matchType, "exercise");
 	assert.equal(media.matchedKey, "bench-press");
 	assert.equal(media.isFallback, true);
@@ -85,7 +94,7 @@ test("movement and environment fallbacks are selected before category fallback",
 		label: "Unlisted Press",
 	});
 	assert.equal(movement.matchType, "movement_pattern");
-	assert.equal(movement.src, "/media/movement-push.svg");
+	assert.equal(movement.src, "/media/catalog/movement-patterns/push.png");
 
 	const environment = resolveMedia({
 		entityType: "exercise",
@@ -165,8 +174,13 @@ test("initial presentation suppresses an available image and safely handles an e
 test("non-exercise entities use the same exact-match contract", () => {
 	const cases = [
 		["muscle", "Chest", "muscle-chest.svg", "muscle"],
-		["equipment", "Barbell", "equipment-barbell.svg", "equipment"],
-		["movement_pattern", "Push", "movement-push.svg", "movement_pattern"],
+		["equipment", "Barbell", "catalog/equipment/barbell.png", "equipment"],
+		[
+			"movement_pattern",
+			"Push",
+			"catalog/movement-patterns/push.png",
+			"movement_pattern",
+		],
 		["environment", "Gym", "environment-gym.svg", "environment"],
 		["category", "Cardio", "category-cardio.svg", "category"],
 	];
