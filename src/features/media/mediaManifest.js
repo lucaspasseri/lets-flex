@@ -27,8 +27,8 @@ const mediaAsset = (src, alt, matchType, storageKey) =>
 
 /**
  * The repository-controlled durable canonical source is a stable-key data file. The exported
- * value remains the seed/resolver contract while promotion updates that data through its storage
- * boundary rather than rewriting application source.
+ * value remains the seed/resolver bootstrap contract. Runtime promotion persists its assignment
+ * metadata in the database rather than rewriting this source-controlled data.
  */
 export const canonicalMediaManifest = Object.freeze(
 	/** @type {ReadonlyArray<CanonicalMediaManifestEntry>} */ (canonicalMediaData),

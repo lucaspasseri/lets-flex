@@ -50,9 +50,12 @@ npm start
 The reset command is the repository's guarded equivalent of `schema → seed`: it leaves no
 required startup initialization or manual SQL step for the application to perform.
 
-Canonical media is defined by the repository-controlled manifest and `public/media/catalog/`
-files. Runtime/admin uploads under ignored `public/media/uploads/` remain outside the seed unless
-they are explicitly promoted into that manifest.
+The repository-controlled manifest and `public/media/catalog/` files define the reset/bootstrap
+canonical baseline. Runtime canonical promotions are persisted in the database assignment
+(`entity_media.canonical_path`) and keep their provider-neutral asset key; they do not edit the
+manifest or depend on Render's local filesystem. Runtime/admin uploads under ignored
+`public/media/uploads/` remain outside the seed unless they are explicitly curated into the
+manifest.
 
 Existing databases use `npm run db:migrate` with `ALLOW_DATABASE_MIGRATION=true`; production also
 requires `ALLOW_PRODUCTION_DATABASE_MIGRATION=true`. Migrations are additive and transactional,

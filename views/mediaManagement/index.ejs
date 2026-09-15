@@ -181,10 +181,10 @@
 					<% if (selected.directIsCanonical) { %>
 						<div class="media-management__canonical-state media-management__canonical-state--active" role="status">
 							<strong><%= translate("mediaManagement.canonicalActiveTitle", { defaultValue: "This image is canonical for this entity." }) %></strong>
-							<p><%= translate("mediaManagement.canonicalActiveDescription", { defaultValue: "It is the durable source used to reconstruct this relationship after a database reset." }) %></p>
+							<p><%= translate("mediaManagement.canonicalActiveDescription", { defaultValue: "It is the durable source used to reconstruct this relationship after an application restart or deployment." }) %></p>
 						</div>
 					<% } else if (selected.canPromote) { %>
-						<p class="media-management__panel-description"><%= translate("mediaManagement.canonicalDescription", { defaultValue: "Promotion copies the selected direct asset into the durable catalog source. Uploading or assigning alone does not make an image canonical." }) %></p>
+						<p class="media-management__panel-description"><%= translate("mediaManagement.canonicalDescription", { defaultValue: "Promotion records the selected direct asset in durable canonical catalog state. Uploading or assigning alone does not make an image canonical." }) %></p>
 						<% if (canonicalFormErrors.length) { %><div class="form-errors" role="alert" aria-live="polite"><% canonicalFormErrors.forEach(error => { %><p><%= error %></p><% }) %></div><% } %>
 						<form class="media-management__form" method="POST" action="/admin/media/canonical">
 							<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" />

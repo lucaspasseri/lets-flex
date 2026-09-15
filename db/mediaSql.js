@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS entity_media (
 	entity_id INTEGER NOT NULL,
 	role VARCHAR(20) NOT NULL DEFAULT 'primary',
 	sort_order INTEGER NOT NULL DEFAULT 0,
+	canonical_path TEXT,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 	CONSTRAINT entity_media_entity_type_supported
@@ -58,6 +59,8 @@ CREATE TABLE IF NOT EXISTS entity_media (
 		CHECK (role = 'primary'),
 	CONSTRAINT entity_media_sort_order_valid
 		CHECK (sort_order >= 0),
+	CONSTRAINT entity_media_canonical_path_valid
+		CHECK (canonical_path IS NULL OR (canonical_path LIKE '/media/%' AND canonical_path NOT LIKE '%..%')),
 	UNIQUE (entity_type, entity_id, role)
 );
 

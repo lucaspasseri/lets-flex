@@ -197,14 +197,12 @@ function createGenerationNonce(req, selected) {
 async function renderPage(req, res, state = {}) {
 	const query = req.validatedQuery ?? {};
 	const selection = selectionFromReference(state.entityReference ?? query.entity);
-	const promotionDependencies = mediaPromotionDependencies(req);
 	const data = await getMediaManagementPage({
 		...selection,
 		entityTypeFilter: query.entityType,
 		search: state.search ?? query.search,
 		locale: res.locals.language,
 		mediaUrlResolver: req.app.locals.mediaUrlResolver,
-		canonicalMediaManifestStore: promotionDependencies.manifestStore,
 	});
 	if (selection.entityType && !data.selected) {
 		respondWithApplicationRecovery(req, res, { kind: "notFound" });

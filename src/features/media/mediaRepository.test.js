@@ -7,6 +7,7 @@ import {
 	createMediaAsset,
 	findMediaAssetById,
 	findMediaAssets,
+	findPrimaryMediaAssignment,
 	findPrimaryMediaAssignments,
 	mediaEntityExists,
 	removePrimaryMedia,
@@ -52,14 +53,25 @@ test("media asset creation trims optional metadata at the persistence boundary",
 test("primary assignment is replaceable and validates the entity table from a fixed allowlist", async () => {
 	const db = fakeDatabase([{ id: 3, entity_type: "exercise", entity_id: 9 }]);
 	const result = await assignPrimaryMedia(
-		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+		{
+			mediaAssetId: 7,
+			entityType: "exercise",
+			entityId: 9,
+			canonicalPath: "/media/catalog/promoted/exercise-bench-press-deadbeef.png",
+		},
 		/** @type {any} */ (db),
 	);
 
 	assert.equal(result.id, 3);
 	assert.match(db.calls[0].text, /FROM exercises AS entity/);
 	assert.match(db.calls[0].text, /ON CONFLICT \(entity_type, entity_id, role\)/);
-	assert.deepEqual(db.calls[0].values, [7, "exercise", 9, 0]);
+	assert.deepEqual(db.calls[0].values, [
+		7,
+		"exercise",
+		9,
+		0,
+		"/media/catalog/promoted/exercise-bench-press-deadbeef.png",
+	]);
 
 	assert.throws(
 		() =>
@@ -68,6 +80,25 @@ test("primary assignment is replaceable and validates the entity table from a fi
 			),
 		/unsupported entity type/,
 	);
+});
+
+test("canonical assignment lookup reads the persisted compatibility path", async () => {
+	const db = fakeDatabase([
+		{
+			media_asset_id: 7,
+			canonical_path: "/media/catalog/exercises/bench-press.png",
+		},
+	]);
+	const assignment = await findPrimaryMediaAssignment(
+		{ entityType: "exercise", entityId: 9 },
+		/** @type {any} */ (db),
+	);
+
+	assert.deepEqual(assignment, {
+		media_asset_id: 7,
+		canonical_path: "/media/catalog/exercises/bench-press.png",
+	});
+	assert.match(db.calls[0].text, /canonical_path/);
 });
 
 test("assignment lookup batches candidates and removal only removes the assignment", async () => {

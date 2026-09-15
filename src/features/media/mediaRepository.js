@@ -180,28 +180,47 @@ export async function findMediaEntityCatalogRecord(
 /**
  * Assign or replace the primary asset for one existing supported entity.
  *
- * @param {{mediaAssetId: number, entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityId: number, sortOrder?: number}} input
+ * @param {{mediaAssetId: number, entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityId: number, sortOrder?: number, canonicalPath?: string | null}} input
  * @param {DatabaseClient} [db]
  */
 export async function assignPrimaryMedia(
-	{ mediaAssetId, entityType, entityId, sortOrder = 0 },
+	{ mediaAssetId, entityType, entityId, sortOrder = 0, canonicalPath = null },
 	db = pool,
 ) {
 	assertAssignableMediaEntityType(entityType);
 	const { table: entityTable, where = "TRUE" } = entityDefinitions[entityType];
 	const { rows } = await db.query(
 		`INSERT INTO entity_media
-			(media_asset_id, entity_type, entity_id, role, sort_order)
-		 SELECT $1, $2, $3, 'primary', $4
+			(media_asset_id, entity_type, entity_id, role, sort_order, canonical_path)
+		 SELECT $1, $2, $3, 'primary', $4, $5
 		 WHERE EXISTS (
 			 SELECT 1 FROM ${entityTable} AS entity WHERE entity.id = $3
 			   AND ${where}
 		 )
 		 ON CONFLICT (entity_type, entity_id, role)
-		 DO UPDATE SET media_asset_id = EXCLUDED.media_asset_id,
-		               sort_order = EXCLUDED.sort_order
+		DO UPDATE SET media_asset_id = EXCLUDED.media_asset_id,
+		               sort_order = EXCLUDED.sort_order,
+		               canonical_path = EXCLUDED.canonical_path
 			 RETURNING *`,
-		[mediaAssetId, entityType, entityId, sortOrder],
+		[mediaAssetId, entityType, entityId, sortOrder, canonicalPath],
+	);
+	return rows[0] ?? null;
+}
+
+/**
+ * Return the runtime canonical compatibility path for an entity assignment. The path belongs to
+ * the assignment, not to the mutable media asset or to a source-controlled manifest file.
+ *
+ * @param {{entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityId: number}} input
+ * @param {DatabaseClient} [db]
+ */
+export async function findPrimaryMediaAssignment({ entityType, entityId }, db = pool) {
+	assertAssignableMediaEntityType(entityType);
+	const { rows } = await db.query(
+		`SELECT media_asset_id, canonical_path
+		 FROM entity_media
+		 WHERE entity_type = $1 AND entity_id = $2 AND role = 'primary'`,
+		[entityType, entityId],
 	);
 	return rows[0] ?? null;
 }
@@ -239,6 +258,7 @@ export async function findPrimaryMediaAssignments(candidates, db = pool) {
 			entity_media.entity_id,
 			entity_media.role,
 			entity_media.sort_order,
+			entity_media.canonical_path,
 			media_assets.id AS media_asset_id,
 			media_assets.storage_key,
 			media_assets.mime_type,

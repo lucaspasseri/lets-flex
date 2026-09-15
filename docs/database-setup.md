@@ -28,11 +28,12 @@ The schema is authoritative for the complete current structure. The seed order i
 5. 70 canonical curated entity media assets and primary assignments, resolved by `catalog_key`;
 6. the administrator identity, stored with its Argon2id password hash.
 
-Media assignments are recreated from the repository-controlled canonical media manifest. Each
+The reset seed recreates the baseline media assignments from the repository-controlled canonical
+media manifest. Each
 entry supplies an entity type, stable entity key, deterministic `/media/catalog/` or existing
 curated path, provider-neutral object key, role, dimensions, MIME type, source, and localized alt
-text. The seed validates the path, metadata, role, duplicate assignments, and catalog reference
-before inserting
+text. The seed stores the manifest path as `entity_media.canonical_path`, validating the path,
+metadata, role, duplicate assignments, and catalog reference before inserting
 `media_assets`, `entity_media`, and localized alt-text rows. Environment and category artwork is
 contextual resolver fallback media and is intentionally not an `entity_media` assignment. Missing
 catalog references or files fail the seed with the entity type and key; they are never silently
@@ -44,6 +45,14 @@ ignored `public/media/uploads/` or the private candidate store and do not become
 automatically. The current manifest contains 70 canonical assignments: reviewed catalog assets
 recovered from that collection plus the retained source-controlled static assignments. Legacy
 unassigned or provenance-uncertain files remain preserved and excluded from the seed.
+
+Runtime promotion writes the selected asset and its compatibility path to the database. For an
+R2-backed asset, the existing `assets/...` object key is preserved; the deterministic
+`/media/catalog/promoted/<entity-type>-<catalog-key>-<content-digest>.<extension>` path is stored
+as compatibility metadata and does not cause a copy to Render's local filesystem. Existing
+databases must apply the additive canonical-path migration before using the updated promotion
+flow. Database reset remains a deliberate bootstrap operation, so runtime promotions are not
+silently added to the source manifest or recreated by a later reset.
 
 Historical migrations remain available through the explicit `npm run db:migrate` path for existing
 databases. They are not required for a clean disposable setup and must not be used as a normal reset

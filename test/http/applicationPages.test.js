@@ -38,8 +38,6 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	let passwordResetDeliveries;
 	let emailService;
 	let generationProviderRequests;
-	let promotionManifest = [];
-	let initialPromotionManifest = [];
 	const promotionSourceStorage = {
 		async exists(storageKey) {
 			return storageKey === "/media/uploads/http-canonical.png";
@@ -87,20 +85,6 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			return storageKey;
 		},
 	};
-	const promotionManifestStore = {
-		async read() {
-			return structuredClone(promotionManifest);
-		},
-		async update(callback) {
-			const previous = structuredClone(promotionManifest);
-			promotionManifest = await callback(structuredClone(promotionManifest));
-			return { previous, manifest: structuredClone(promotionManifest) };
-		},
-		async write(next) {
-			promotionManifest = structuredClone(next);
-		},
-	};
-
 	before(async () => {
 		process.env.DATABASE_URL = testDatabaseUrl;
 		process.env.SESSION_SECRET = "http-integration-test-secret";
@@ -116,10 +100,6 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		passwordHash = await hashPassword("correct horse battery staple");
 		db = new Client({ connectionString: testDatabaseUrl });
 		await db.connect();
-		const { readCanonicalMediaManifest } =
-			await import("../../src/features/media/canonicalMediaManifestStore.js");
-		initialPromotionManifest = await readCanonicalMediaManifest();
-		promotionManifest = structuredClone(initialPromotionManifest);
 		const { createApp } = await import("../../app.js");
 		server = createApp({
 			emailService,
@@ -148,7 +128,6 @@ integration("authentication and authorization", { concurrency: false }, () => {
 				objectStorage: promotionObjectStorage,
 				sourceStorage: promotionSourceStorage,
 				canonicalStorage: promotionCanonicalStorage,
-				manifestStore: promotionManifestStore,
 			},
 		}).listen(0, "127.0.0.1");
 		await new Promise((resolve, reject) => {
@@ -233,7 +212,6 @@ integration("authentication and authorization", { concurrency: false }, () => {
 	beforeEach(async () => {
 		emailService.clear();
 		generationProviderRequests = [];
-		promotionManifest = structuredClone(initialPromotionManifest);
 		await db.query(schemaSql);
 		await db.query(seedSql);
 		await db.query(
@@ -3360,7 +3338,7 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(successPage.text, /Canonical/);
 		const assignment = (
 			await db.query(
-				`SELECT media_assets.storage_key, media_assets.source
+				`SELECT media_assets.storage_key, media_assets.source, entity_media.canonical_path
 				 FROM entity_media
 				 JOIN media_assets ON media_assets.id = entity_media.media_asset_id
 				 WHERE entity_media.entity_type = 'exercise' AND entity_media.entity_id = $1`,
@@ -3372,15 +3350,10 @@ integration("authentication and authorization", { concurrency: false }, () => {
 			assignment.storage_key,
 			/\/media\/catalog\/promoted\/exercise-http-canonical-promotion-/,
 		);
-		assert.equal(
-			(await promotionManifestStore.read()).find(
-				(entry) => entry.entityKey === "http-canonical-promotion",
-			)?.path,
-			assignment.storage_key,
-		);
+		assert.equal(assignment.canonical_path, assignment.storage_key);
 	});
 
-	test("canonical promotion reuses an existing object-backed muscle asset at the HTTP boundary", async () => {
+	test("canonical promotion derives a path for an object-backed muscle asset without one", async () => {
 		const asset = (
 			await db.query(
 				`INSERT INTO media_assets
@@ -3397,8 +3370,8 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		);
 		await db.query(
 			`UPDATE entity_media
-			 SET media_asset_id = $1
-			 WHERE entity_type = 'muscle' AND entity_id = 22 AND role = 'primary'`,
+				 SET media_asset_id = $1, canonical_path = NULL
+				 WHERE entity_type = 'muscle' AND entity_id = 22 AND role = 'primary'`,
 			[asset.id],
 		);
 
@@ -3453,11 +3426,15 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.match(successPage.text, /This image is canonical for this entity\./);
 		assert.doesNotMatch(successPage.text, /Make canonical/);
 		assert.match(successPage.text, /src="assets\/http-muscle-22\.jpg"/);
-		assert.equal(
-			(await promotionManifestStore.read()).find(
-				(entry) => entry.entityType === "muscle" && entry.entityKey === "abductors",
-			)?.storageKey,
-			"assets/http-muscle-22.jpg",
+		const canonicalPath = (
+			await db.query(
+				`SELECT canonical_path FROM entity_media
+				 WHERE entity_type = 'muscle' AND entity_id = 22 AND role = 'primary'`,
+			)
+		).rows[0].canonical_path;
+		assert.match(
+			canonicalPath,
+			/^\/media\/catalog\/promoted\/muscle-abductors-[0-9a-f]{16}\.jpg$/,
 		);
 	});
 

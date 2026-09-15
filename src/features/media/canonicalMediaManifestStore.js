@@ -17,8 +17,8 @@ export const defaultCanonicalMediaManifestPath = fileURLToPath(
 );
 
 /**
- * Read the durable canonical manifest without caching it. A promotion can update the data file
- * while the application process remains alive, so each domain operation must read current state.
+ * Read the source-controlled canonical bootstrap manifest without caching it. Runtime canonical
+ * promotion does not use this file as mutable state.
  *
  * @param {string} [filePath]
  * @returns {Promise<ReadonlyArray<CanonicalMediaManifestEntry>>}
@@ -35,8 +35,8 @@ export async function readCanonicalMediaManifest(
 }
 
 /**
- * Create the small filesystem boundary used by canonical promotion. Updates are serialized within
- * this process and written through a same-directory temporary file before replacement.
+ * Create the small filesystem boundary used by seed/bootstrap tooling. Updates are serialized
+ * within this process and written through a same-directory temporary file before replacement.
  *
  * @param {{filePath?: string}} [options]
  */

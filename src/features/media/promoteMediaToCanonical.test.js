@@ -20,6 +20,9 @@ const sourceAsset = {
 function fakePool({
 	asset = sourceAsset,
 	entityRow = entity,
+	assignment = /** @type {{media_asset_id: number, canonical_path: string} | null} */ (
+		null
+	),
 	createAsset = true,
 	assignAsset = true,
 } = {}) {
@@ -37,6 +40,9 @@ function fakePool({
 			) {
 				return { rows: asset ? [asset] : [] };
 			}
+			if (text.includes("SELECT media_asset_id, canonical_path")) {
+				return { rows: assignment ? [assignment] : [] };
+			}
 			if (text.includes("INSERT INTO media_assets")) {
 				return {
 					rows: createAsset
@@ -46,7 +52,9 @@ function fakePool({
 			}
 			if (text.includes("INSERT INTO entity_media")) {
 				return {
-					rows: assignAsset ? [{ id: 100, media_asset_id: values[0] }] : [],
+					rows: assignAsset
+						? [{ id: 100, media_asset_id: values[0], canonical_path: values[4] }]
+						: [],
 				};
 			}
 			if (text.includes("INSERT INTO media_asset_alt_texts"))
@@ -65,29 +73,6 @@ function fakePool({
 		},
 		async connect() {
 			return client;
-		},
-	};
-}
-
-function manifestStore(initial = []) {
-	let current = structuredClone(initial);
-	const writes = [];
-	return {
-		writes,
-		async read() {
-			return structuredClone(current);
-		},
-		async update(callback) {
-			const previous = structuredClone(current);
-			current = await callback(structuredClone(current));
-			return { previous, manifest: structuredClone(current) };
-		},
-		async write(next) {
-			current = structuredClone(next);
-			writes.push(structuredClone(next));
-		},
-		async current() {
-			return structuredClone(current);
 		},
 	};
 }
@@ -163,8 +148,13 @@ test("R2-backed promotion reuses the object key and replaces canonical meaning w
 	const remoteAsset = { ...sourceAsset, storage_key: objectKey };
 	const remoteBytes = Buffer.from("remote image");
 	const remote = objectStorage(remoteBytes);
-	const store = manifestStore([priorRemoteCanonicalEntry]);
-	const db = fakePool({ asset: remoteAsset });
+	const db = fakePool({
+		asset: remoteAsset,
+		assignment: {
+			media_asset_id: 8,
+			canonical_path: priorRemoteCanonicalEntry.path,
+		},
+	});
 	const bytesBefore = await remote.read(objectKey);
 	const result = await promoteMediaToCanonical(
 		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
@@ -183,14 +173,12 @@ test("R2-backed promotion reuses the object key and replaces canonical meaning w
 					);
 				},
 			}),
-			manifestStore: /** @type {any} */ (store),
 		},
 	);
 
 	assert.equal(result.status, "promoted");
 	assert.equal(result.entry.path, priorRemoteCanonicalEntry.path);
 	assert.equal(result.entry.storageKey, objectKey);
-	assert.deepEqual(await store.current(), [result.entry]);
 	assert.deepEqual(result.asset.storage_key, objectKey);
 	assert.deepEqual(
 		db.calls
@@ -234,17 +222,19 @@ test("R2-backed promotion is idempotent when the canonical object key already ma
 			return storageKey;
 		},
 	};
-	const store = manifestStore([
-		{ ...priorRemoteCanonicalEntry, storageKey: objectKey },
-	]);
 	const result = await promoteMediaToCanonical(
 		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
 		{
 			db: /** @type {any} */ (
-				fakePool({ asset: { ...sourceAsset, storage_key: objectKey } })
+				fakePool({
+					asset: { ...sourceAsset, storage_key: objectKey },
+					assignment: {
+						media_asset_id: 7,
+						canonical_path: priorRemoteCanonicalEntry.path,
+					},
+				})
 			),
 			objectStorage: /** @type {any} */ (remote),
-			manifestStore: /** @type {any} */ (store),
 		},
 	);
 
@@ -255,14 +245,6 @@ test("R2-backed promotion is idempotent when the canonical object key already ma
 test("R2-backed promotion supports a muscle asset without duplicating its media row", async () => {
 	const objectKey = "assets/reviewed-abductors.jpg";
 	const remote = objectStorage(Buffer.from("remote muscle image"));
-	const store = manifestStore([
-		{
-			...priorRemoteCanonicalEntry,
-			entityType: "muscle",
-			entityKey: "abductors",
-			path: "/media/catalog/promoted/muscle-abductors.png",
-		},
-	]);
 	const db = fakePool({
 		asset: {
 			...sourceAsset,
@@ -270,6 +252,10 @@ test("R2-backed promotion supports a muscle asset without duplicating its media 
 			storage_key: objectKey,
 		},
 		entityRow: { id: 22, catalog_key: "abductors" },
+		assignment: {
+			media_asset_id: 70,
+			canonical_path: "/media/catalog/promoted/muscle-abductors.png",
+		},
 	});
 
 	const result = await promoteMediaToCanonical(
@@ -277,7 +263,6 @@ test("R2-backed promotion supports a muscle asset without duplicating its media 
 		{
 			db: /** @type {any} */ (db),
 			objectStorage: /** @type {any} */ (remote),
-			manifestStore: /** @type {any} */ (store),
 		},
 	);
 
@@ -296,11 +281,10 @@ test("R2-backed promotion supports a muscle asset without duplicating its media 
 	);
 });
 
-test("R2-backed promotion compensates manifest changes without deleting the pre-existing object", async () => {
+test("R2-backed promotion leaves the pre-existing object untouched when the assignment fails", async () => {
 	const objectKey = "assets/reviewed-bench-press.png";
 	const remoteBytes = Buffer.from("remote image");
 	const remote = objectStorage(remoteBytes);
-	const store = manifestStore([priorRemoteCanonicalEntry]);
 	await assert.rejects(
 		() =>
 			promoteMediaToCanonical(
@@ -313,7 +297,6 @@ test("R2-backed promotion compensates manifest changes without deleting the pre-
 						})
 					),
 					objectStorage: /** @type {any} */ (remote),
-					manifestStore: /** @type {any} */ (store),
 				},
 			),
 		(error) =>
@@ -321,8 +304,6 @@ test("R2-backed promotion compensates manifest changes without deleting the pre-
 			error.code === "entity_not_found",
 	);
 
-	assert.deepEqual(await store.current(), [priorRemoteCanonicalEntry]);
-	assert.equal(store.writes.length, 1);
 	assert.deepEqual(remote.calls, [
 		["exists", objectKey],
 		["read", objectKey],
@@ -331,14 +312,12 @@ test("R2-backed promotion compensates manifest changes without deleting the pre-
 
 test("promotion copies an eligible asset, replaces the assignment, and records stable canonical state", async () => {
 	const db = fakePool();
-	const store = manifestStore();
 	const result = await promoteMediaToCanonical(
 		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
 		{
 			db: /** @type {any} */ (db),
 			sourceStorage: /** @type {any} */ (storage()),
 			canonicalStorage: /** @type {any} */ (storage(undefined, { exists: false })),
-			manifestStore: /** @type {any} */ (store),
 		},
 	);
 
@@ -348,7 +327,6 @@ test("promotion copies an eligible asset, replaces the assignment, and records s
 		result.entry.path,
 		/^\/media\/catalog\/promoted\/exercise\/exercise-bench-press-/,
 	);
-	assert.equal((await store.current()).length, 1);
 	assert.ok(db.calls.some((call) => call.text === "COMMIT"));
 	assert.deepEqual(
 		db.calls
@@ -358,45 +336,30 @@ test("promotion copies an eligible asset, replaces the assignment, and records s
 	);
 });
 
-test("promotion replaces only the selected entity's prior canonical manifest entry", async () => {
-	const oldEntry = {
-		entityType: "exercise",
-		entityKey: "bench-press",
-		path: "/media/catalog/exercises/bench-press.png",
-		role: "primary",
-		mimeType: "image/png",
-		width: 1536,
-		height: 1024,
-		source: "curated",
-		alt: "Bench press",
-		altTexts: { en: "Bench press", "pt-BR": "Supino" },
-	};
-	const otherEntry = {
-		...oldEntry,
-		entityKey: "row",
-		path: "/media/catalog/exercises/row.png",
-	};
-	const store = manifestStore([oldEntry, otherEntry]);
+test("object-backed promotion derives a stable path from the catalog key, not the numeric id", async () => {
+	const objectKey = "assets/muscle-13-review.png";
+	const bytes = Buffer.from("muscle 13 canonical image");
+	const remote = objectStorage(bytes);
 	const result = await promoteMediaToCanonical(
-		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+		{ mediaAssetId: 75, entityType: "muscle", entityId: 13 },
 		{
-			db: /** @type {any} */ (fakePool()),
-			sourceStorage: /** @type {any} */ (storage()),
-			canonicalStorage: /** @type {any} */ (storage(undefined, { exists: false })),
-			manifestStore: /** @type {any} */ (store),
+			db: /** @type {any} */ (
+				fakePool({
+					asset: {
+						...sourceAsset,
+						id: 75,
+						storage_key: objectKey,
+					},
+					entityRow: { id: 13, catalog_key: "chest" },
+				})
+			),
+			objectStorage: /** @type {any} */ (remote),
 		},
 	);
 
-	const manifest = await store.current();
-	assert.equal(manifest.length, 2);
-	assert.equal(
-		manifest.find((entry) => entry.entityKey === "row").path,
-		otherEntry.path,
-	);
-	assert.equal(
-		manifest.find((entry) => entry.entityKey === "bench-press").path,
-		result.entry.path,
-	);
+	assert.match(result.entry.path, /muscle-chest-/);
+	assert.doesNotMatch(result.entry.path, /muscle-13-/);
+	assert.equal(result.assignment.canonical_path, result.entry.path);
 });
 
 test("promoting the current canonical asset is idempotent and does not copy another file", async () => {
@@ -404,25 +367,16 @@ test("promoting the current canonical asset is idempotent and does not copy anot
 		...sourceAsset,
 		storage_key: "/media/catalog/exercises/bench-press.png",
 	};
-	const store = manifestStore([
-		{
-			entityType: "exercise",
-			entityKey: "bench-press",
-			path: canonicalAsset.storage_key,
-			role: "primary",
-			mimeType: "image/png",
-			width: 640,
-			height: 480,
-			source: "curated",
-			alt: "Bench press",
-			altTexts: { en: "Bench press", "pt-BR": "Supino" },
-		},
-	]);
 	let copied = false;
 	const result = await promoteMediaToCanonical(
 		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
 		{
-			db: /** @type {any} */ (fakePool({ asset: canonicalAsset })),
+			db: /** @type {any} */ (
+				fakePool({
+					asset: canonicalAsset,
+					assignment: { media_asset_id: 7, canonical_path: canonicalAsset.storage_key },
+				})
+			),
 			sourceStorage: /** @type {any} */ ({
 				async exists() {
 					throw new Error("source should not be read");
@@ -444,7 +398,6 @@ test("promoting the current canonical asset is idempotent and does not copy anot
 					return storageKey;
 				},
 			}),
-			manifestStore: /** @type {any} */ (store),
 		},
 	);
 
@@ -452,8 +405,7 @@ test("promoting the current canonical asset is idempotent and does not copy anot
 	assert.equal(copied, false);
 });
 
-test("promotion rolls back the manifest and copied file when the database write fails", async () => {
-	const store = manifestStore();
+test("promotion rolls back a copied local file when the database write fails", async () => {
 	const destination = storage(undefined, { exists: false });
 	await assert.rejects(
 		() =>
@@ -463,16 +415,52 @@ test("promotion rolls back the manifest and copied file when the database write 
 					db: /** @type {any} */ (fakePool({ createAsset: false })),
 					sourceStorage: /** @type {any} */ (storage()),
 					canonicalStorage: /** @type {any} */ (destination),
-					manifestStore: /** @type {any} */ (store),
 				},
 			),
 		(error) =>
 			error instanceof MediaCanonicalPromotionError &&
 			error.code === "asset_create_failed",
 	);
-	assert.equal((await store.current()).length, 0);
-	assert.equal(store.writes.length, 1);
 	assert.equal(destination.removed, true);
+});
+
+test("promotion rejects an unsupported MIME type before persisting canonical state", async () => {
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "muscle", entityId: 13 },
+				{
+					db: /** @type {any} */ (
+						fakePool({
+							asset: { ...sourceAsset, mime_type: "application/pdf" },
+							entityRow: { id: 13, catalog_key: "chest" },
+						})
+					),
+				},
+			),
+		(error) =>
+			error instanceof MediaCanonicalPromotionError &&
+			error.code === "unsupported_media_type",
+	);
+});
+
+test("promotion protects an existing deterministic canonical file from conflicting bytes", async () => {
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+				{
+					db: /** @type {any} */ (fakePool()),
+					sourceStorage: /** @type {any} */ (storage(Buffer.from("new bytes"))),
+					canonicalStorage: /** @type {any} */ (
+						storage(Buffer.from("different bytes"))
+					),
+				},
+			),
+		(error) =>
+			error instanceof MediaCanonicalPromotionError &&
+			error.code === "canonical_file_conflict",
+	);
 });
 
 test("promotion rejects unsupported types and entities without stable keys before writing", async () => {

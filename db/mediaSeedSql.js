@@ -128,7 +128,7 @@ export function createMediaSeedSql(manifest = canonicalMediaManifest) {
 	const values = entries
 		.map(
 			(entry) =>
-				`(${sqlString(entry.storageKey ?? entry.path)}, ${sqlString(entry.mimeType)}, ${entry.width}, ${entry.height}, ${sqlString(entry.source)}, ${sqlString(entry.alt)}, ${sqlString(entry.entityType)}, ${sqlString(entry.entityKey)}, ${sqlString(entityDefinitions[entry.entityType].table)}, ${sqlString(entry.role)}, ${sqlString(entry.altTexts.en)}, ${sqlString(entry.altTexts["pt-BR"])})`,
+				`(${sqlString(entry.storageKey ?? entry.path)}, ${sqlString(entry.mimeType)}, ${entry.width}, ${entry.height}, ${sqlString(entry.source)}, ${sqlString(entry.alt)}, ${sqlString(entry.entityType)}, ${sqlString(entry.entityKey)}, ${sqlString(entityDefinitions[entry.entityType].table)}, ${sqlString(entry.role)}, ${sqlString(entry.path)}, ${sqlString(entry.altTexts.en)}, ${sqlString(entry.altTexts["pt-BR"])})`,
 		)
 		.join(",\n");
 	const referenceValues = entries
@@ -163,7 +163,7 @@ ${referenceValues}
 	END IF;
 END $$;
 
-WITH curated_media (storage_key, mime_type, width, height, source, alt_text, entity_type, catalog_key, entity_table, role, alt_text_en, alt_text_pt_br) AS (
+WITH curated_media (storage_key, mime_type, width, height, source, alt_text, entity_type, catalog_key, entity_table, role, canonical_path, alt_text_en, alt_text_pt_br) AS (
 VALUES
 ${values}
 ), inserted_assets AS (
@@ -172,7 +172,7 @@ ${values}
 	FROM curated_media
 	RETURNING id, storage_key
 ), inserted_assignments AS (
-	INSERT INTO entity_media (media_asset_id, entity_type, entity_id, role)
+	INSERT INTO entity_media (media_asset_id, entity_type, entity_id, role, canonical_path)
 	SELECT inserted_assets.id, curated_media.entity_type,
 		CASE curated_media.entity_table
 			WHEN 'exercises' THEN (SELECT id FROM exercises WHERE catalog_key = curated_media.catalog_key)
@@ -181,7 +181,8 @@ ${values}
 			WHEN 'equipments' THEN (SELECT id FROM equipments WHERE catalog_key = curated_media.catalog_key)
 			WHEN 'movement_patterns' THEN (SELECT id FROM movement_patterns WHERE catalog_key = curated_media.catalog_key)
 		END,
-		curated_media.role
+		curated_media.role,
+		curated_media.canonical_path
 	FROM curated_media
 	JOIN inserted_assets ON inserted_assets.storage_key = curated_media.storage_key
 	RETURNING media_asset_id

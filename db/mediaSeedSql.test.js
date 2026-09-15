@@ -19,6 +19,7 @@ test("canonical media manifest resolves all supported assignments through catalo
 	);
 	assert.match(mediaSeedSql, /INSERT INTO media_assets/);
 	assert.match(mediaSeedSql, /INSERT INTO entity_media/);
+	assert.match(mediaSeedSql, /canonical_path/);
 	assert.match(mediaSeedSql, /INSERT INTO media_asset_alt_texts/);
 	assert.match(
 		mediaSeedSql,

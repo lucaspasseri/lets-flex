@@ -28,6 +28,8 @@ test("media assignments support removal without deleting reusable assets", () =>
 	assert.match(mediaSchemaSql, /ON DELETE RESTRICT/);
 	assert.match(mediaSchemaSql, /entity_media_entity_id_positive/);
 	assert.match(mediaSchemaSql, /entity_media_sort_order_valid/);
+	assert.match(mediaSchemaSql, /canonical_path TEXT/);
+	assert.match(mediaSchemaSql, /entity_media_canonical_path_valid/);
 });
 
 test("canonical reset removes the obsolete plural exercise-muscle table", () => {

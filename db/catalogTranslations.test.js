@@ -89,11 +89,18 @@ test("migration loader exposes ordered catalog translation migration", async () 
 
 	assert.deepEqual(
 		migrations.map(({ name }) => name),
-		["001_catalog_translations", "002_catalog_translations_pt_br"],
+		[
+			"001_catalog_translations",
+			"002_catalog_translations_pt_br",
+			"003_canonical_media_paths",
+		],
 	);
 	assert.match(migrations[0].sql, /CREATE TABLE IF NOT EXISTS exercise_translations/);
 	assert.doesNotMatch(migrations[0].sql, /'Flexão de braço'/);
 	assert.match(migrations[1].sql, /'pt-BR'/);
+	assert.match(migrations[2].sql, /canonical_path/);
+	assert.match(migrations[2].sql, /catalog_key/);
+	assert.match(migrations[2].sql, /media_assets\.storage_key/);
 });
 
 test("migration target requires explicit opt-in and rejects production", () => {
