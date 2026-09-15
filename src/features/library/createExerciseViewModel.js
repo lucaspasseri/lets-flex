@@ -17,6 +17,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @property {Record<string, any>} [privateVariantMutationState]
  * @property {Function} [mediaResolver]
  * @property {Function} [translate]
+ * @property {"en" | "pt-BR"} [language]
  */
 
 /**
@@ -30,6 +31,7 @@ function createExercise({
 	privateVariantMutationState,
 	mediaResolver,
 	translate,
+	language = "en",
 }) {
 	const t = (key, options = {}) =>
 		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
@@ -44,7 +46,12 @@ function createExercise({
 			? `${movementPattern.name} - ${movementPattern.notes}`
 			: movementPattern.name
 		: t("library.notSpecified", { defaultValue: "Not specified" });
-	const muscleTemplates = createMuscles({ muscles });
+	const muscleTemplates = createMuscles({
+		muscles,
+		mediaResolver,
+		translate,
+		locale: language,
+	});
 	const firstVariant = exerciseTemplates[0]?.variant;
 	const resolvePresentationMedia = mediaResolver ?? resolveStaticMedia;
 	const presentation = mediaResolver ? "image" : "initial";
@@ -58,6 +65,7 @@ function createExercise({
 		matchMovementPattern: movementPattern?.canonicalName,
 		environment: firstVariant?.environment,
 		label: exerciseTemplate.name,
+		locale: language,
 		presentation,
 	});
 	const variants = exerciseTemplates
@@ -101,6 +109,7 @@ function createExercise({
 				matchMovementPattern: movementPattern?.canonicalName,
 				environment: variant.environment,
 				label: variant.name,
+				locale: language,
 				presentation,
 			});
 

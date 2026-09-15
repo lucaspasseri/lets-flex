@@ -56,7 +56,7 @@ export function resolveEntityMediaFromAssignments(request, assignments, options 
 		...request,
 		entityType:
 			request.entityType === "exercise_variant" ? "exercise" : request.entityType,
-		key: request.entityId ? String(request.entityId) : undefined,
+		key: request.key ?? (request.entityId ? String(request.entityId) : undefined),
 	};
 	const resolved = resolveStaticMedia(/** @type {any} */ (legacyRequest), options);
 	return {

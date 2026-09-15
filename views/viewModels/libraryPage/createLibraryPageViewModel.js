@@ -15,7 +15,7 @@ import createViewModelTranslator from "../translate.js";
  */
 
 /**
- * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, mediaResolver?: Function, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean, translate?: Function, language?: string}} input
+ * @param {{page: LocalsPage, pageState: LibraryPageState, data: LibraryPageData, mediaResolver?: Function, exerciseTemplateFormState?: Record<string, any>, sessionTemplateFormState?: Record<string, any>, variantFormState?: Record<string, any>, privateVariantMutationState?: Record<string, any>, pageFeedback?: {tone?: string, eyebrow?: string, id?: string, title: string, message: string} | null, managementMode?: boolean, translate?: Function, language?: "en" | "pt-BR"}} input
  * @returns {LibraryPageViewModel}
  */
 export default function createLibraryPageViewModel({
@@ -107,6 +107,7 @@ export default function createLibraryPageViewModel({
 				privateVariantMutationState,
 				mediaResolver,
 				translate,
+				language,
 			}),
 			privateVariantForm: {
 				idPrefix: managementMode ? "global-variant" : "private-variant",

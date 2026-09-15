@@ -1,100 +1,139 @@
-# Goal: Improve Interaction Feedback and Perceived Responsiveness
+# Goal: Improve Entity Presentation Completeness
 
 ## Goal status
 
 **Completed.**
 
-**Started:** 2026-09-14 after the user explicitly requested this interaction-feedback goal and
-required the tracking documents to be updated before implementation.
+**Started:** 2026-09-15 after the user explicitly approved this proposed next goal.
 
-**Ready for final review:** 2026-09-14 after completing Actions 1–4, focused verification, full
-repository verification, and the Done-when comparison in `docs/current-actions.md`.
+**Completed:** 2026-09-15 after the user explicitly approved the final-review corrections.
 
-**Completed:** 2026-09-14 after explicit user approval of the final review. Important asynchronous
-actions now expose scoped pending/result feedback, workout completion has optional failure-safe sound
-feedback, verified long-running media generation has local progress messaging, and native
-navigation, accessibility, security, and reduced-motion boundaries remain preserved.
+**Outcome:** Exercise details now present complete localized muscle relationships with compact,
+role-grouped metadata, media fallbacks, and responsive intrinsic layout. Admin create/edit muscle
+role selects use the shared English/Portuguese presentation boundary while preserving stable IDs
+and persisted names. Existing movement-pattern, equipment, variant, media, accordion, ownership,
+and security behavior was preserved. Live browser review remains a documented manual follow-up.
 
-## Primary objective
+## Objective
 
-Improve the perceived quality, responsiveness, and reliability of Let's Flex by making important
-asynchronous actions and meaningful workout state changes immediately understandable. Preserve the
-server-rendered Express + EJS architecture, progressive enhancement, accessibility, predictable
-navigation, and the existing dark training identity.
+Improve how existing domain entities are represented in the user-facing application so important
+data does not exist only in the database or administration interfaces.
+
+The first cohesive scope is the exercise-to-muscle relationship. A user inspecting an exercise
+must be able to understand which muscles it trains, the role of each muscle, and—when canonical
+media exists—see that media in the same exercise context.
+
+## Approved user outcome
+
+Exercise presentation surfaces where exercise details already appear provide a compact, reusable
+muscle section that communicates:
+
+- each related muscle's localized name;
+- its role in the exercise, with important roles such as Primary and Secondary distinguishable;
+- canonical muscle media when available;
+- usable text-only presentation when media is absent or muscle information is unavailable.
+
+The implementation establishes a predictable related-entity presentation pattern that can later be
+reused for equipment, movement patterns, and exercise variants without introducing a generic entity
+framework or standalone muscle pages.
 
 ## Existing relevant capabilities — Verified
 
-- The shared button partial supports semantic button types, variants, disabled state, icons, and
-  accessible names for icon-only buttons, but does not provide a reusable pending/result contract.
-- Workout log and skip forms already identify their submit controls and partially change the label
-  plus disable the clicked button during native form submission.
-- The shared page-feedback partial renders contextual success/error content with `status` or
-  `alert` semantics and focusability; form-local errors and workout feedback are also present.
-- The application initializes browser components centrally through `public/js/app.js` and
-  `initializeComponents`, providing a reuse point for browser interaction behavior.
-- Native cross-document View Transitions are enabled with a short root transition and reduced-motion
-  fallback. Existing named navigation/entity transitions and the targeted history scroll behavior
-  are completed related work and must be reused, not redesigned.
-- No existing audio utility, workout sound preference, or sound event orchestration was found in the
-  inspected browser components and settings surfaces.
-- No browser executable is available in the current environment, so live viewport, keyboard,
-  screen-reader, audio, transition timing, and runtime performance checks require later manual
-  verification when a browser is available.
+- The Library is the clearest current exercise-detail surface. Its exercise accordion detail view
+  already presents movement pattern, primary-muscle information, and exercise variants.
+- The exercise-template query already aggregates `exercise_muscles` with `muscles` and
+  `muscle_roles`, including localized muscle names, role IDs, role names, and descriptions, in the
+  repository boundary without presentation-specific controller or view queries.
+- The exercise-template mapper preserves the complete aggregated muscle relationship, including
+  the mapped role.
+- Before Action 1, `createMuscleViewModel` projected only one hard-coded primary role and one
+  hard-coded secondary role, so several muscles and other valid roles were not represented in the
+  UI; Action 1 replaces that lossy boundary with the complete collection.
+- The shared ID-backed media resolver and `createMediaResolver` already support `muscle` entities,
+  localized alt text, persistent assignments, and safe initial fallbacks.
+- Before Action 1, the Library media-assignment loader collected exercise, variant, and
+  movement-pattern candidates but not muscle candidates; Action 1 now includes muscles in that
+  existing page-level collection.
+- Exercise variants, equipment, and movement patterns already have meaningful Library presentation
+  and remain audit/follow-up concerns unless the muscle section demonstrates a directly shared
+  presentation boundary.
+- No browser executable is available in the current environment; live responsive, keyboard,
+  screen-reader, and rendered visual verification will need to be recorded as unavailable or
+  manually verified later.
 
 ## Verified gaps / delta classification
 
-- **Modify:** Extend the shared pending-state convention only for high-value asynchronous controls,
-  preserving native form submission and button dimensions.
-- **Add:** Focused success/error recovery behavior and regression coverage where current flows do
-  not keep feedback close to the initiating action or can leave a stale pending state.
-- **Add:** A small optional workout-feedback sound mechanism, a persisted user preference using the
-  existing settings approach if compatible, and visual equivalents for every sound event.
-- **Modify:** Audit and refine View Transition/loading behavior only where real latency or a verified
-  orientation problem justifies it; keep ordinary tabs, filters, redirects, and top-level navigation
-  on their existing simpler paths.
-- **Explicitly defer:** A decorative global splash screen, SPA/client-side routing, sounds for
-  ordinary CRUD/navigation clicks, artificial delays, and broad visual redesign.
+- **Modify:** Replace the lossy muscle ViewModel projection with a presentation-ready collection
+  that preserves all related muscles and their roles without exposing internal IDs or requiring EJS
+  to interpret role IDs.
+- **Modify:** Extend the existing Library media-candidate collection so visible muscles are loaded
+  in the same assignment query and resolved through the existing media boundary.
+- **Add:** Render a compact exercise muscle section that groups or distinguishes important roles,
+  includes canonical media when resolved, and handles empty or media-missing states safely.
+- **Add:** Add focused data/ViewModel/template/localization/media regression tests, including
+  multiple muscles, primary and secondary roles, no-muscle data, localized labels, and missing
+  canonical media.
+- **Explicitly defer:** Standalone muscle pages, broad equipment/movement-pattern/variant
+  presentation expansion, new media lookup mechanisms, AI-generated muscle imagery, and generic
+  entity-framework abstractions.
 
 ## Scope and constraints
 
-In scope: audited pending states for important asynchronous actions; duplicate-submission
-prevention; understandable contextual result feedback; optional workout-only sound feedback and
-preference control; existing View Transition and real-loading refinements; focused accessibility,
-reduced-motion, responsive, and regression verification.
+In scope: the existing exercise-detail presentation surfaces, their repository/query and mapper
+boundaries where required, the existing canonical media resolver, the reusable EJS/CSS presentation
+pattern, English and Brazilian Portuguese localization, and focused plus repository verification.
 
-Preserve CSRF protection, authorization boundaries, validation, server redirects, native form
-semantics, keyboard behavior, existing View Transition fallbacks, and the completed theme and
-history continuity work. Do not add production dependencies or a frontend framework.
+Preserve the server-rendered Express + EJS architecture, existing Library accordion/navigation and
+View Transition behavior, responsive layout, theme semantics, accessibility, ownership/actions,
+CSRF and validation boundaries, and the existing media fallback contract. Avoid N+1 queries and do
+not add production dependencies.
 
 ## Done when
 
-- Important asynchronous actions have clear, consistent pending states and relevant duplicate
-  submissions are prevented.
-- Pending controls recover after both success and failure without stale disabled states or avoidable
-  layout shifts.
-- Success and failure feedback explains what happened in the context of the initiating action.
-- Meaningful workout events can optionally produce subtle sound feedback, while visual feedback
-  remains complete and sounds can be disabled.
-- Audio playback respects browser restrictions, does not overlap uncontrollably, and cannot break a
-  workout flow when playback fails.
-- Existing View Transitions are refined only where beneficial, real latency has local feedback, and
-  no artificial splash/loading screen is introduced.
-- Keyboard access, accessible names/states, reduced-motion behavior, and narrow layouts remain
-  usable.
-- Focused tests and the repository verification matrix pass; unavailable live-browser checks are
-  explicitly recorded.
-- `docs/current-goal.md` and `docs/current-actions.md` accurately record scope, implementation,
-  exclusions, and verification status.
+- An exercise with one or several muscles presents every relationship with a localized name and
+  presentation-ready role label.
+- Primary and secondary muscles are visually distinguishable where those roles exist; valid other
+  roles remain usable rather than silently disappearing.
+- Canonical muscle media is resolved through the existing media boundary and uses localized alt
+  text when available.
+- Missing canonical media, missing muscle relationships, and optional/null data do not break or
+  visually degrade exercise presentation.
+- Raw database IDs and internal role identifiers are absent from user-facing markup.
+- English and Brazilian Portuguese labels are covered by tests and use the existing i18n system.
+- Focused tests, formatting, lint, type checks, relevant automated tests, and the repository
+  verification matrix pass; unavailable live-browser checks are explicitly recorded.
+- The broader audit records movement patterns, equipment, exercise variants, and muscles as either
+  already presented, safely reusable, or future follow-up work without silently expanding scope.
 
-## Splash screen decision
+## Out of scope
 
-**Rejected/deferred.** The inspected architecture has no verified genuine initialization period that
-requires branding or a blocking splash screen. Loading feedback will be local to real asynchronous
-work instead.
+- OpenAI API integration or AI image generation.
+- New object-storage architecture, media schema redesign, or large migrations.
+- Dedicated `/muscles/:id` pages or standalone interfaces for every entity.
+- Unrelated exercise, session, workout, navigation, or visual redesign work.
 
-## Related completed work to preserve
+## Historical context and discrepancy
 
-The prior View Transitions goal completed on 2026-09-14. It established the safe naming contract,
-history list/detail continuity, targeted history scroll restoration, semantic tab safeguards, and
-native/reduced-motion fallbacks. This goal reuses that implementation and reopens it only for
-specific interaction-feedback or real-loading defects found by the audit.
+The completed 2026-09-08 Library presentation goal established the current exercise accordion,
+detail facts, variant presentation, and the initial primary-muscle tag. This goal explicitly
+reconsiders and expands only that incomplete muscle presentation behavior; it does not reopen the
+completed Library redesign wholesale.
+
+Some older media provenance notes describe muscle media as absent, while the current repository
+manifest contains canonical assignments for chest, abs, and abductors. The repository and tests are
+authoritative for the current implementation; the discrepancy is recorded rather than silently
+reconciled.
+
+## Final-review correction evidence
+
+The requested Admin Manage Exercises correction is implemented in the shared exercise-detail
+surface: role groups remain explicit, all muscles remain present, and the supporting metadata now
+uses compact intrinsic rows with wrapping chips before the existing variants and actions. The
+existing container-pressure breakpoint naturally stacks role labels and muscle lists on narrower
+content widths without fixed heights.
+
+Muscle-role select labels now reuse the shared muscle-role presentation boundary in both exercise
+detail and Admin create/edit form ViewModels. English and Brazilian Portuguese labels are localized
+at presentation time, while submitted role IDs and persisted names remain unchanged. Focused and
+full verification passed; live browser review remains unavailable in this environment and is
+explicitly required before final completion.

@@ -682,6 +682,24 @@
 		"noExercisesMatch": "No exercises match these filters",
 		"filterExerciseEmptyDescription": "Try a broader search, choose fewer filters, or clear them to restore the catalog.",
 		"primaryMuscles": "Primary muscles",
+		"muscleFocus": "Training focus",
+		"musclesTrained": "Muscles trained",
+		"noMusclesSpecified": "No muscle relationships specified.",
+		"muscleRoleGroups": {
+			"primary": "Primary",
+			"secondary": "Secondary",
+			"other": "Other roles"
+		},
+		"muscleRoleLabels": {
+			"primary": "Primary",
+			"secondary": "Secondary",
+			"synergist": "Synergist",
+			"stabilizer": "Stabilizer",
+			"antagonist": "Antagonist",
+			"fixator": "Fixator",
+			"dynamicStabilizer": "Dynamic stabilizer",
+			"other": "Other"
+		},
 		"availableSetups": "Available setups",
 		"variantsHeading": "{{name}} variants",
 		"noSetupInstructions": "No setup instructions",

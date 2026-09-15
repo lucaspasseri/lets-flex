@@ -29,6 +29,9 @@ export function collectMediaCandidates({
 		addCandidate(candidates, "exercise", template.id);
 		addCandidate(candidates, "exercise_variant", template.variant?.id);
 		addCandidate(candidates, "movement_pattern", template.movementPattern?.id);
+		for (const muscle of template.muscles ?? []) {
+			addCandidate(candidates, "muscle", muscle.id);
+		}
 	}
 	for (const session of [...sessions, ...workoutSessions]) {
 		for (const step of session.steps ?? []) addStepCandidates(candidates, step);

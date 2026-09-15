@@ -682,6 +682,24 @@
 		"noExercisesMatch": "Nenhum exercício corresponde a estes filtros",
 		"filterExerciseEmptyDescription": "Tente uma busca mais ampla, escolha menos filtros ou limpe-os para restaurar o catálogo.",
 		"primaryMuscles": "Músculos principais",
+		"muscleFocus": "Foco do treino",
+		"musclesTrained": "Músculos trabalhados",
+		"noMusclesSpecified": "Nenhuma relação muscular especificada.",
+		"muscleRoleGroups": {
+			"primary": "Principais",
+			"secondary": "Secundários",
+			"other": "Outras funções"
+		},
+		"muscleRoleLabels": {
+			"primary": "Principal",
+			"secondary": "Secundário",
+			"synergist": "Sinergista",
+			"stabilizer": "Estabilizador",
+			"antagonist": "Antagonista",
+			"fixator": "Fixador",
+			"dynamicStabilizer": "Estabilizador dinâmico",
+			"other": "Outra função"
+		},
 		"availableSetups": "Configurações disponíveis",
 		"variantsHeading": "Variantes de {{name}}",
 		"noSetupInstructions": "Nenhuma instrução de configuração",

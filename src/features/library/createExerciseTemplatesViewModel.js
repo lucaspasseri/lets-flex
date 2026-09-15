@@ -16,6 +16,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @property {Record<string, any>} [privateVariantMutationState]
  * @property {Function} [mediaResolver]
  * @property {Function} [translate]
+ * @property {"en" | "pt-BR"} [language]
  */
 
 /**
@@ -31,6 +32,7 @@ function createExerciseTemplates({
 	privateVariantMutationState,
 	mediaResolver,
 	translate,
+	language = "en",
 }) {
 	const t = (key, options = {}) =>
 		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
@@ -52,6 +54,7 @@ function createExerciseTemplates({
 				privateVariantMutationState,
 				mediaResolver,
 				translate,
+				language,
 			}),
 		)
 		.sort((first, second) => first.baseName.localeCompare(second.baseName));

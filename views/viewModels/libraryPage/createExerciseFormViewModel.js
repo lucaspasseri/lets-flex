@@ -1,4 +1,5 @@
 import createViewModelTranslator from "../translate.js";
+import { getMuscleRoleLabel } from "../../../src/features/muscleRoles/presentation.js";
 
 /**
  * @typedef {import("../../../src/features/equipments/equipments.types.js").EquipmentMapper} Equipment
@@ -88,7 +89,7 @@ export default function createExerciseFormViewModel({
 				value: item.id,
 			})),
 			muscleRoleOptions: muscleRoles.map((item) => ({
-				label: item.name,
+				label: getMuscleRoleLabel(item, translate),
 				value: item.id,
 			})),
 		},

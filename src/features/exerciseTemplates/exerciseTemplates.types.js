@@ -79,12 +79,24 @@
  * @typedef {object} ExerciseTemplateMuscleItemViewModel
  * @property {number} id
  * @property {string} name
+ * @property {string} roleLabel
+ * @property {"primary" | "secondary" | "other"} roleGroup
+ * @property {ResolvedMedia} media
+ */
+
+/**
+ * @typedef {object} ExerciseTemplateMuscleGroupViewModel
+ * @property {"primary" | "secondary" | "other"} key
+ * @property {string} label
+ * @property {ExerciseTemplateMuscleItemViewModel[]} items
  */
 
 /**
  * @typedef {object} ExerciseTemplateMusclesViewModel
- * @property {ExerciseTemplateMuscleItemViewModel} [primary]
- * @property {ExerciseTemplateMuscleItemViewModel} [secondary]
+ * @property {ExerciseTemplateMuscleItemViewModel[]} items
+ * @property {ExerciseTemplateMuscleGroupViewModel[]} groups
+ * @property {ExerciseTemplateMuscleItemViewModel} [primary] Backward-compatible first primary item.
+ * @property {ExerciseTemplateMuscleItemViewModel} [secondary] Backward-compatible first secondary item.
  */
 
 /**

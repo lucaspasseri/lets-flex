@@ -12,6 +12,7 @@
  *
  * @typedef {object} MuscleRoleMapper
  * @property {number} id
+ * @property {string} [key]
  * @property {string} name
  * @property {string} description
  */

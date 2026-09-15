@@ -9,23 +9,45 @@
 		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__media", variant: "thumbnail", density: "compact", decorative: true, loading: "lazy", decoding: "async" }) %>
 	<% } %>
 
-	<dl class="exercise-template__facts">
+	<dl class="exercise-template__facts exercise-template__facts--single">
 		<div>
 			<dt class="exercise-template__field-label"><%= translate("library.movementPattern", { defaultValue: "Movement pattern" }) %></dt>
 			<dd><%= details?.movementPattern?.name %></dd>
 		</div>
-
-		<div>
-			<dt class="exercise-template__field-label"><%= translate("library.primaryMuscles", { defaultValue: "Primary muscles" }) %></dt>
-			<dd class="exercise-template__tags">
-				<% if (details?.muscleTemplates?.primary?.name) { %>
-					<span class="tag"><%= details.muscleTemplates.primary.name %></span>
-				<% } else { %>
-					<span class="exercise-template__empty-value"><%= translate("library.notSpecified", { defaultValue: "Not specified" }) %></span>
-				<% } %>
-			</dd>
-		</div>
 	</dl>
+
+	<section class="exercise-template__muscles" aria-labelledby="exercise-template-<%= id %>-muscles">
+		<header class="exercise-template__muscles-header">
+			<p class="exercise-template__eyebrow"><%= translate("library.muscleFocus", { defaultValue: "Training focus" }) %></p>
+			<h3 id="exercise-template-<%= id %>-muscles"><%= translate("library.musclesTrained", { defaultValue: "Muscles trained" }) %></h3>
+		</header>
+
+		<% const muscleGroups = details?.muscleTemplates?.groups ?? []; %>
+		<% if (muscleGroups.length > 0) { %>
+			<div class="exercise-template__muscle-groups">
+				<% muscleGroups.forEach((group, groupIndex) => { %>
+					<section class="exercise-template__muscle-group" aria-labelledby="exercise-template-<%= id %>-muscle-group-<%= groupIndex %>">
+						<h4 id="exercise-template-<%= id %>-muscle-group-<%= groupIndex %>"><%= group.label %></h4>
+						<ul class="exercise-template__muscle-list">
+							<% group.items.forEach((muscle) => { %>
+								<li class="exercise-template__muscle-item">
+									<% if (muscle.media) { %>
+										<%- include("../shared/components/media", { media: muscle.media, className: "exercise-template__muscle-media", variant: "icon", density: "compact", decorative: true, loading: "lazy", decoding: "async" }) %>
+									<% } %>
+									<span class="exercise-template__muscle-copy">
+										<strong><%= muscle.name %></strong>
+										<span><%= muscle.roleLabel %></span>
+									</span>
+								</li>
+							<% }) %>
+						</ul>
+					</section>
+				<% }) %>
+			</div>
+		<% } else { %>
+			<p class="exercise-template__empty-value"><%= translate("library.noMusclesSpecified", { defaultValue: "No muscle relationships specified." }) %></p>
+		<% } %>
+	</section>
 
 	<section class="exercise-template__variant-section" aria-labelledby="exercise-template-<%= id %>-variants">
 		<header class="exercise-template__variants-header">

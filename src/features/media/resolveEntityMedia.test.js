@@ -181,6 +181,55 @@ test("localized alt text prefers the requested locale and falls back to English"
 	assert.equal(missingPortuguese.alt, "Bench press illustration");
 });
 
+test("muscle media uses the assigned asset and falls back through the canonical muscle key", async () => {
+	const assigned = await resolveEntityMedia(
+		{
+			entityType: "muscle",
+			entityId: 1,
+			key: "Chest",
+			label: "Peitoral",
+			locale: "pt-BR",
+		},
+		/** @type {any} */ (
+			fakeDatabase([
+				{
+					...asset,
+					entity_type: "muscle",
+					entity_id: 1,
+					alt_text: null,
+					alt_text_en: "Chest muscle illustration",
+					alt_text_pt_br: "Ilustração do músculo peitoral",
+				},
+			])
+		),
+	);
+	const canonicalFallback = await resolveEntityMedia(
+		{
+			entityType: "muscle",
+			entityId: 99,
+			key: "Chest",
+			label: "Peitoral",
+		},
+		/** @type {any} */ (fakeDatabase([])),
+	);
+	const missing = await resolveEntityMedia(
+		{
+			entityType: "muscle",
+			entityId: 99,
+			key: "Unlisted Muscle",
+			label: "Unlisted Muscle",
+		},
+		/** @type {any} */ (fakeDatabase([])),
+	);
+
+	assert.equal(assigned.src, "/media/barbell-bench-press.svg");
+	assert.equal(assigned.alt, "Ilustração do músculo peitoral");
+	assert.equal(canonicalFallback.src, "/media/muscle-chest.svg");
+	assert.equal(canonicalFallback.matchType, "muscle");
+	assert.equal(missing.src, null);
+	assert.equal(missing.presentation, "initial");
+});
+
 test("remote reads derive configured URLs for migrated canonical assignments and fallbacks", async () => {
 	const mediaUrlResolver = createMediaUrlResolver({
 		remoteReads: true,

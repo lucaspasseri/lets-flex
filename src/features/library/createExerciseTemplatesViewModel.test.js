@@ -91,6 +91,11 @@ test("exercise catalog groups, orders, and counts visible variants by base exerc
 	assert.equal(viewModel.items[0].details.media.initial, "B");
 	assert.equal(viewModel.items[0].details.variants[0].media.src, null);
 	assert.equal(viewModel.items[0].details.variants[0].media.initial, "B");
+	assert.equal(viewModel.items[0].details.muscleTemplates.items.length, 1);
+	assert.equal(
+		viewModel.items[0].details.muscleTemplates.items[0].roleLabel,
+		"Primary",
+	);
 	assert.match(viewModel.items[1].searchKeyWord, /Chest/);
 	assert.match(viewModel.items[1].searchKeyWord, /Controlled tempo/);
 	assert.match(viewModel.items[1].searchKeyWord, /Private/);
@@ -143,12 +148,17 @@ test("exercise catalog uses persistent media assignments through one resolver", 
 
 	assert.equal(viewModel.items[0].details.media.src, "/media/exercise-7.svg");
 	assert.equal(
+		viewModel.items[0].details.muscleTemplates.items[0].media.src,
+		"/media/muscle-1.svg",
+	);
+	assert.equal(
 		viewModel.items[0].details.variants[0].media.src,
 		"/media/exercise_variant-11.svg",
 	);
 	assert.deepEqual(
 		requests.map(({ entityType, entityId }) => ({ entityType, entityId })),
 		[
+			{ entityType: "muscle", entityId: 1 },
 			{ entityType: "exercise", entityId: 7 },
 			{ entityType: "exercise_variant", entityId: 11 },
 		],

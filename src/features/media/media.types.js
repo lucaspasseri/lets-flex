@@ -96,6 +96,7 @@
  * @property {number} entityId
  * @property {number} [parentExerciseId]
  * @property {number} [movementPatternId]
+ * @property {string} [key]
  * @property {string} [variantName]
  * @property {string} [baseName]
  * @property {string} [movementPattern]
