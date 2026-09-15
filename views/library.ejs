@@ -81,7 +81,7 @@
 	openOnLoad: createSessionForm.modal.openOnLoad,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...createSessionForm.form,
-		attributes: { "data-create-session-form": true },
+		attributes: { "data-create-session-form": true, "data-submit-feedback": true },
 		slots: {
 			body: include("partials/libraryPage/createSessionForm/createSessionFormBody", { sessionForm: createSessionForm, t: translate }),
 			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: createSessionForm })
@@ -95,7 +95,7 @@
 	showTitle: false,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...deleteSessionForm.form,
-		attributes: { "data-delete-session-form": true },
+		attributes: { "data-delete-session-form": true, "data-submit-feedback": true },
 		slots: {
 			footer: include("partials/libraryPage/deleteSessionForm/deleteSessionFormFooter", { deleteSessionForm })
 		}
@@ -109,7 +109,7 @@
 	openOnLoad: updateSessionForm.modal.openOnLoad,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...updateSessionForm.form,
-		attributes: { "data-update-session-form": true },
+		attributes: { "data-update-session-form": true, "data-submit-feedback": true },
 		slots: {
 			body: include("partials/libraryPage/createSessionForm/createSessionFormBody", { sessionForm: updateSessionForm, t: translate }),
 			footer: include("partials/libraryPage/createSessionForm/createSessionFormFooter", { sessionForm: updateSessionForm })
@@ -124,7 +124,7 @@
 	openOnLoad: updateExerciseForm.modal.openOnLoad,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...updateExerciseForm.form,
-		attributes: { "data-update-exercise-form": true },
+		attributes: { "data-update-exercise-form": true, "data-submit-feedback": true },
 		slots: {
 			body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody", { exerciseForm: updateExerciseForm, t: translate }),
 			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: updateExerciseForm })
@@ -138,7 +138,7 @@
 	showTitle: false,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...deleteExerciseForm.form,
-		attributes: { "data-delete-exercise-form": true },
+		attributes: { "data-delete-exercise-form": true, "data-submit-feedback": true },
 		slots: {
 			footer: include("partials/libraryPage/deleteExerciseTemplateForm/deleteExerciseFormFooter", { deleteExerciseForm })
 		}
@@ -152,7 +152,7 @@
 	openOnLoad: createExerciseForm.modal.openOnLoad,
 	renderContent: () => include("partials/shared/components/form/form", { form: {
 		...createExerciseForm.form,
-		attributes: { "data-create-exercise-form": true },
+		attributes: { "data-create-exercise-form": true, "data-submit-feedback": true },
 		slots: {
 			body: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormBody", { exerciseForm: createExerciseForm, t: translate }),
 			footer: include("partials/libraryPage/createExerciseTemplateForm/createExerciseFormFooter", { exerciseForm: createExerciseForm })

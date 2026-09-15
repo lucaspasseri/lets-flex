@@ -8,11 +8,48 @@ import deleteProgram, {
 } from "../../features/programs/deleteProgram.js";
 import respondWithContextualMutationError from "../contextualMutationError.js";
 import translateMessage from "../../infrastructure/i18n/translateMessage.js";
+import createMutationSuccessFeedback from "./mutationSuccessFeedback.js";
 
 /**
  * @typedef {import("express").Request & {session: {state?: Record<string, unknown>}, validatedBody?: Record<string, unknown>}} Request
  * @typedef {import("express").Response} Response
  */
+
+const PROGRAMS_SUCCESS_MESSAGES = {
+	"program-created": {
+		titleKey: "mutation.programCreated",
+		title: "Program created",
+		messageKey: "mutation.programCreatedMessage",
+		message: "Your new training plan is ready to organize.",
+	},
+	"program-deleted": {
+		titleKey: "mutation.programDeleted",
+		title: "Program deleted",
+		messageKey: "mutation.programDeletedMessage",
+		message: "The program and its dependent training data were removed.",
+	},
+	"cycle-created": {
+		titleKey: "mutation.cycleCreated",
+		title: "Cycle created",
+		messageKey: "mutation.cycleCreatedMessage",
+		message: "Its training days are ready to configure.",
+	},
+	"cycle-deleted": {
+		titleKey: "mutation.cycleDeleted",
+		title: "Cycle deleted",
+		messageKey: "mutation.cycleDeletedMessage",
+		message: "The cycle and its scheduled training days were removed.",
+	},
+};
+
+export function createProgramsSuccessFeedback(translate, operation) {
+	return createMutationSuccessFeedback(
+		translate,
+		operation,
+		PROGRAMS_SUCCESS_MESSAGES,
+		"programs-page-feedback-title",
+	);
+}
 
 /**
  * @param {Request} req
@@ -57,6 +94,7 @@ export async function renderPrograms(req, res, formState = {}) {
 
 	const page = res.locals.page;
 	const pageState = { userId, programId, cycleId };
+	const queryFeedback = createProgramsSuccessFeedback(res.locals?.t, req.query?.saved);
 	const programsPage = createProgramsPageViewModel({
 		page,
 		pageState,
@@ -64,6 +102,7 @@ export async function renderPrograms(req, res, formState = {}) {
 		translate: res.locals.t,
 		language: res.locals.language,
 		...formState,
+		pageFeedback: formState.pageFeedback ?? queryFeedback,
 	});
 
 	res.render("programs", programsPage);
@@ -111,7 +150,7 @@ async function create(req, res) {
 		programId: program?.id ?? null,
 		cycleId: null,
 	};
-	res.redirect("/programs");
+	res.redirect("/programs?saved=program-created");
 }
 
 async function destroy(req, res) {
@@ -189,7 +228,7 @@ async function destroy(req, res) {
 	if (toNullableNumber(req.session.state?.programId) === programId) {
 		req.session.state = { ...req.session.state, programId: null, cycleId: null };
 	}
-	res.redirect("/programs");
+	res.redirect("/programs?saved=program-deleted");
 }
 
 async function showCreateErrors(req, res, { errors, submittedValues }) {

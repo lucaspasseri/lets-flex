@@ -162,6 +162,7 @@ test("workout tracker focuses feedback and exposes submission loading state", ()
 		},
 		querySelectorAll(selector) {
 			if (selector === "[data-workout-log-form]") return [];
+			if (selector.includes("form[data-submit-feedback]")) return [form];
 			if (selector === "[data-workout-action-form], [data-workout-perform-form]") {
 				return [form];
 			}

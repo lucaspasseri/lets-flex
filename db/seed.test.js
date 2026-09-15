@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import { seedSql } from "./seed.js";
@@ -37,8 +39,9 @@ test("complete seed SQL command prints the fully resolved seedSql export", () =>
 	assert.doesNotMatch(result.stdout, /^\s*import\s/m);
 });
 
-test("complete setup SQL combines the latest schema and canonical seed", () => {
+test("complete setup SQL writes deterministic schema and canonical seed to the setup file", () => {
 	const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+	const setupFile = fileURLToPath(new URL("./setup.sql", import.meta.url));
 	const result = spawnSync(npmCommand, ["run", "--silent", "db:setup:sql"], {
 		cwd: process.cwd(),
 		encoding: "utf8",
@@ -46,13 +49,16 @@ test("complete setup SQL combines the latest schema and canonical seed", () => {
 
 	assert.equal(result.status, 0, result.stderr);
 	assert.equal(result.stderr, "");
-	assert.equal(result.stdout, `${schemaSql.trim()}\n\n${seedSql.trim()}\n`);
-	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS exercise_translations/);
-	assert.ok(result.stdout.includes(catalogTranslationSeedSql.trim()));
-	assert.ok(result.stdout.includes(mediaSeedSql.trim()));
-	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS media_assets/);
-	assert.match(result.stdout, /CREATE TABLE IF NOT EXISTS entity_media/);
-	assert.match(result.stdout, /'pt-BR'/);
+	assert.equal(result.stdout, `Database setup written to ${setupFile}\n`);
+
+	const generatedSql = readFileSync(setupFile, "utf8");
+	assert.equal(generatedSql, `${schemaSql.trim()}\n\n${seedSql.trim()}\n`);
+	assert.match(generatedSql, /CREATE TABLE IF NOT EXISTS exercise_translations/);
+	assert.ok(generatedSql.includes(catalogTranslationSeedSql.trim()));
+	assert.ok(generatedSql.includes(mediaSeedSql.trim()));
+	assert.match(generatedSql, /CREATE TABLE IF NOT EXISTS media_assets/);
+	assert.match(generatedSql, /CREATE TABLE IF NOT EXISTS entity_media/);
+	assert.match(generatedSql, /'pt-BR'/);
 });
 
 test("database reset refuses production even when explicitly requested", () => {

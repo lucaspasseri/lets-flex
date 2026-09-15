@@ -70,7 +70,7 @@ async function create(req, res) {
 	}
 
 	req.session.state = { ...req.session.state, programId, cycleId };
-	res.redirect("/programs");
+	res.redirect("/programs?saved=cycle-created");
 }
 
 async function destroy(req, res) {
@@ -146,7 +146,7 @@ async function destroy(req, res) {
 	if (toNullableNumber(req.session.state?.cycleId) === cycleId) {
 		req.session.state = { ...req.session.state, cycleId: null };
 	}
-	res.redirect("/programs");
+	res.redirect("/programs?saved=cycle-deleted");
 }
 
 async function showCreateErrors(req, res, { errors, submittedValues }) {

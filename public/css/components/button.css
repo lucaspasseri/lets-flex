@@ -39,6 +39,33 @@
 	cursor: not-allowed;
 }
 
+.shared-button[data-submit-pending="true"] {
+	cursor: wait;
+}
+
+.shared-button[data-submit-pending="true"]::before {
+	content: "";
+	width: 0.8rem;
+	height: 0.8rem;
+	flex: 0 0 auto;
+	border: 2px solid currentColor;
+	border-right-color: transparent;
+	border-radius: 50%;
+	animation: shared-button-spinner 700ms linear infinite;
+}
+
+@keyframes shared-button-spinner {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.shared-button[data-submit-pending="true"]::before {
+		animation: none;
+	}
+}
+
 .shared-button--primary {
 	background: var(--color-action);
 	color: var(--color-text-on-action);

@@ -40,7 +40,7 @@
 			<section id="auth-signin-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signin-tab" tabindex="<%= activeTab === 'signin' ? 0 : -1 %>" <%= activeTab === 'signin' ? '' : 'hidden' %>>
 				<p class="auth-tab-panel__intro"><%= translate("auth.signInIntro", { defaultValue: "Use your administrator or member account to continue." }) %></p>
 				<% if (errors.length && activeTab === "signin") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title"><%= translate("auth.signInFailed", { defaultValue: "We couldn't sign you in" }) %></p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
-				<form class="form auth-form" method="POST" action="/auth/login">
+				<form class="form auth-form" method="POST" action="/auth/login" data-submit-feedback>
 					<input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input type="hidden" name="returnTo" value="<%= returnTo %>" />
 					<%- include("partials/shared/components/form/field", { field: { id: "login-email", name: "email", label: translate("auth.email", { defaultValue: "Email address" }), control: "input", type: "email", required: true, value: activeTab === "signin" ? email : "", hint: translate("auth.emailSignInHint", { defaultValue: "Use the email assigned to your account." }), attributes: { autocomplete: "username", autofocus: activeTab === "signin" } } }) %>
 					<%- include("partials/shared/components/form/field", { field: { id: "login-password", name: "password", label: translate("auth.password", { defaultValue: "Password" }), control: "input", type: "password", required: true, hint: translate("auth.passwordHint", { defaultValue: "Passwords are case-sensitive." }), attributes: { autocomplete: "current-password" } } }) %>
@@ -52,7 +52,7 @@
 			<section id="auth-signup-panel" class="auth-tab-panel" data-tab-panel role="tabpanel" aria-labelledby="auth-signup-tab" tabindex="<%= activeTab === 'signup' ? 0 : -1 %>" <%= activeTab === 'signup' ? '' : 'hidden' %>>
 				<p class="auth-tab-panel__intro"><%= translate("auth.signUpIntro", { defaultValue: "Create a permanent personal training workspace." }) %></p>
 				<% if (errors.length && activeTab === "signup") { %><div class="form-errors auth-errors" role="alert" aria-live="polite"><p class="auth-errors__title"><%= translate("auth.signUpFailed", { defaultValue: "We couldn't create your account" }) %></p><ul><% errors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
-				<form class="form auth-form" method="POST" action="/auth/register">
+				<form class="form auth-form" method="POST" action="/auth/register" data-submit-feedback>
 					<input type="hidden" name="_csrf" value="<%= csrfToken %>" /><input type="hidden" name="returnTo" value="<%= returnTo %>" />
 					<%- include("partials/shared/components/form/field", { field: { id: "registration-email", name: "email", label: translate("auth.email", { defaultValue: "Email address" }), control: "input", type: "email", required: true, value: activeTab === "signup" ? email : "", hint: translate("auth.emailSignUpHint", { defaultValue: "You'll use this email to sign in." }), attributes: { autocomplete: "username", autofocus: activeTab === "signup" } } }) %>
 					<%- include("partials/shared/components/form/field", { field: { id: "registration-password", name: "password", label: translate("auth.password", { defaultValue: "Password" }), control: "input", type: "password", required: true, hint: translate("auth.passwordLengthHint", { defaultValue: "Use at least 12 characters." }), attributes: { autocomplete: "new-password", minlength: 12 } } }) %>
@@ -67,7 +67,7 @@
 					<h3><%= translate("auth.continueGuest", { defaultValue: "Continue as a guest" }) %></h3>
 					<p><%= translate("auth.guestDescription", { defaultValue: "Start with a private temporary workspace. Guest data expires after 15 days and cannot be recovered." }) %></p>
 				</div>
-				<form method="POST" action="/auth/guest">
+				<form method="POST" action="/auth/guest" data-submit-feedback>
 					<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 					<%- include("partials/shared/components/button/button", { button: {
 						label: translate("auth.enterGuest", { defaultValue: "Enter temporary workspace" }),

@@ -69,6 +69,15 @@
 							</label>
 						</div>
 					</fieldset>
+					<fieldset class="profile-sound-selector" data-workout-sound-selector aria-describedby="workout-sound-description">
+						<legend><%= translate("profile.workoutFeedback", { defaultValue: "Workout feedback" }) %></legend>
+						<p id="workout-sound-description"><%= translate("profile.workoutSoundDescription", { defaultValue: "Enable a subtle sound when a workout is completed. Visual confirmation remains available." }) %></p>
+						<label class="profile-sound-option">
+							<input type="checkbox" data-workout-sound-option />
+							<span><strong><%= translate("profile.workoutSound", { defaultValue: "Completion sound" }) %></strong><small><%= translate("profile.workoutSoundOptionDescription", { defaultValue: "Play a short confirmation after finishing a workout." }) %></small></span>
+						</label>
+						<p class="profile-theme-current" data-workout-sound-status hidden role="status" aria-live="polite"></p>
+					</fieldset>
 				</div>
 			</section>
 
@@ -97,7 +106,7 @@
 								<div class="profile-auth-method__state">
 									<strong><%= methods.google.status %></strong>
 									<% if (methods.google.action) { %>
-									<form method="POST" action="<%= methods.google.action.path %>">
+									<form method="POST" action="<%= methods.google.action.path %>" data-submit-feedback>
 										<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 										<button class="profile-card__link" type="submit" data-google-action><%= methods.google.action.label %></button>
 									</form>
@@ -108,7 +117,7 @@
 						<% if (passwordMessage) { %><p class="profile-link-message" role="status"><%= passwordMessage.text %></p><% } %>
 						<% if (passwordErrors.length) { %><div class="form-errors" role="alert"><ul><% passwordErrors.forEach(error => { %><li><%= error %></li><% }) %></ul></div><% } %>
 						<% if (methods.password.showAddForm) { %>
-							<form class="profile-password-form" method="POST" action="/profile/password">
+							<form class="profile-password-form" method="POST" action="/profile/password" data-submit-feedback>
 								<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 								<%- include("partials/shared/components/form/field", { field: { id: "new-password", name: "password", label: translate("profile.newPassword", { defaultValue: "New password" }), type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
 								<%- include("partials/shared/components/form/field", { field: { id: "confirm-password", name: "confirmPassword", label: translate("profile.confirmPassword", { defaultValue: "Confirm password" }), type: "password", required: true, value: "", attributes: { autocomplete: "new-password" } } }) %>
@@ -156,7 +165,7 @@
 					<p class="profile-card__eyebrow"><%= translate("profile.session", { defaultValue: "Session" }) %></p>
 					<h2 id="session-controls-heading"><%= translate("profile.signOutSafely", { defaultValue: "Sign out safely" }) %></h2>
 					<p><%= translate("profile.signOutDescription", { defaultValue: "End this browser session. Signing out does not grant access to or remove another account's private data." }) %></p>
-					<form method="POST" action="/auth/logout">
+					<form method="POST" action="/auth/logout" data-submit-feedback>
 						<input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 						<%- include("partials/shared/components/button/button", { button: {
 							label: translate("profile.signOut", { defaultValue: "Sign out" }),

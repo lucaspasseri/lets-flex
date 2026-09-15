@@ -16,4 +16,12 @@ test("Library context query accepts only typed identities and strips redirect-li
 		libraryPageQuerySchema.safeParse({ createSessionForDay: "//evil.example" }).success,
 		false,
 	);
+	assert.equal(
+		libraryPageQuerySchema.parse({ saved: "session-updated" }).saved,
+		"session-updated",
+	);
+	assert.equal(
+		libraryPageQuerySchema.safeParse({ saved: "unknown-operation" }).success,
+		false,
+	);
 });

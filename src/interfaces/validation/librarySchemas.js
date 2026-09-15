@@ -10,4 +10,15 @@ const optionalPositiveId = (message) =>
 export const libraryPageQuerySchema = z.object({
 	sessionId: optionalPositiveId("Choose a valid session template."),
 	createSessionForDay: optionalPositiveId("Choose a valid training day."),
+	saved: z
+		.enum([
+			"session-created",
+			"session-archived",
+			"session-deleted",
+			"session-updated",
+			"variant-created",
+			"variant-updated",
+			"variant-archived",
+		])
+		.optional(),
 });

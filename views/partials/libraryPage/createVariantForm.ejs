@@ -19,6 +19,7 @@
 		action="<%= actionPrefix %>/0/variants"
 		data-variant-create-form
 		data-action-prefix="<%= actionPrefix %>"
+		data-submit-feedback
 	>
 		<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 		<% if (errors.formErrors?.length) { %>

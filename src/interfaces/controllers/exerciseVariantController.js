@@ -62,7 +62,7 @@ async function create(req, res) {
 			});
 			return;
 		}
-		res.redirect(`/library#exercise-template-${variant.id}`);
+		res.redirect(`/library?saved=variant-created#exercise-template-${variant.id}`);
 	} catch (error) {
 		const failure = getConstraintFailure(error);
 		if (!failure) throw error;
@@ -138,7 +138,7 @@ async function update(req, res) {
 			});
 			return;
 		}
-		res.redirect(`/library#exercise-template-${variant.id}`);
+		res.redirect(`/library?saved=variant-updated#exercise-template-${variant.id}`);
 	} catch (error) {
 		const failure = getConstraintFailure(error);
 		if (!failure) throw error;
@@ -195,7 +195,7 @@ async function archive(req, res) {
 		});
 		return;
 	}
-	res.redirect("/library");
+	res.redirect("/library?saved=variant-archived");
 }
 
 export const exerciseVariantController = {

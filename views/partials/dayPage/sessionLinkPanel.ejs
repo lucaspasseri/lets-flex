@@ -16,7 +16,7 @@
 	<%- include("../shared/components/form/form", { form: {
 		action: sessionLinkForm.action,
 		method: sessionLinkForm.method,
-		attributes: { "data-session-link-form": true },
+		attributes: { "data-session-link-form": true, "data-submit-feedback": true },
 		slots: {
 			body: include("sessionLinkFormBody", { sessionLinkForm, t: translate }),
 			footer: include("sessionLinkFormFooter", { sessionLinkForm }),

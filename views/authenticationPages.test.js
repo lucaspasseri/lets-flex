@@ -123,6 +123,9 @@ test("profile presents role-specific guest and administrator states", async () =
 	assert.match(guestHtml, /value="classic" data-theme-option="classic"/);
 	assert.match(guestHtml, /value="neon" data-theme-option="neon"/);
 	assert.match(guestHtml, /fieldset class="profile-theme-selector"/);
+	assert.match(guestHtml, /data-workout-sound-selector/);
+	assert.match(guestHtml, /data-workout-sound-option/);
+	assert.match(guestHtml, /Enable a subtle sound when a workout is completed/);
 	assert.match(guestHtml, /Current theme/);
 	assert.match(
 		guestHtml,

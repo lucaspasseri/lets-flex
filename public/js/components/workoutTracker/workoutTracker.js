@@ -1,4 +1,5 @@
 import { createBrowserTranslator } from "../../i18n.js";
+import { initializeFormSubmissionFeedback } from "../formSubmissionFeedback/formSubmissionFeedback.js";
 const ROW_CONTEXT_PATTERN = /logFormRows\[(?:\d+|template)\]/g;
 
 const FALLBACK_MESSAGES = {
@@ -13,16 +14,6 @@ const FALLBACK_MESSAGES = {
 		removeSet: "Remove set {{count}}",
 	},
 };
-
-function setSubmissionPending(button) {
-	if (!button) return;
-	button.disabled = true;
-	button.setAttribute("aria-disabled", "true");
-	const label = button.querySelector(".shared-button__label");
-	if (label && button.dataset.loadingLabel) {
-		label.textContent = button.dataset.loadingLabel;
-	}
-}
 
 export function initializeWorkoutLogForm(
 	root,
@@ -117,17 +108,8 @@ export function initializeWorkoutLogForm(
 export function initializeWorkoutTracker(root) {
 	root.querySelector("[data-workout-feedback]")?.focus();
 	const translate = createBrowserTranslator(root, FALLBACK_MESSAGES);
+	initializeFormSubmissionFeedback(root, translate);
 	root
 		.querySelectorAll("[data-workout-log-form]")
 		.forEach((form) => initializeWorkoutLogForm(form, translate));
-	root
-		.querySelectorAll("[data-workout-action-form], [data-workout-perform-form]")
-		.forEach((form) => {
-			form.addEventListener("submit", (event) => {
-				const fallbackButton = form.id
-					? root.querySelector(`[data-workout-submit][form="${form.id}"]`)
-					: form.querySelector("[data-workout-submit]");
-				setSubmissionPending(event.submitter ?? fallbackButton);
-			});
-		});
 }

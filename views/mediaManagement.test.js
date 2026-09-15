@@ -76,6 +76,11 @@ test("media management view renders shared controls, CSRF fields, and direct sta
 	assert.match(html, /accept="image\/png,image\/jpeg,image\/webp"/);
 	assert.equal((html.match(/name="_csrf"/g) ?? []).length, 4);
 	assert.match(html, /Generate private candidate/);
+	assert.match(html, /data-loading-label="Generating private candidate…"/);
+	assert.match(
+		html,
+		/data-pending-message="Generating a private candidate… This may take up to two minutes\."/,
+	);
 	assert.match(html, /name="requestNonce"/);
 	assert.match(html, /This entity uses its own primary media assignment\./);
 	assert.match(
@@ -141,6 +146,11 @@ test("media management compares a private pending candidate without exposing it 
 	assert.match(html, /Current active media/);
 	assert.match(html, /Reject and remove candidate/);
 	assert.match(html, /Generate replacement candidate/);
+	assert.match(html, /data-loading-label="Generating replacement candidate…"/);
+	assert.match(
+		html,
+		/data-pending-message="Generating a replacement candidate… This may take up to two minutes\."/,
+	);
 	assert.match(html, /action="\/admin\/media\/regenerate"/);
 	assert.match(html, /Approve and assign/);
 	assert.match(html, /name="altTextEn"/);

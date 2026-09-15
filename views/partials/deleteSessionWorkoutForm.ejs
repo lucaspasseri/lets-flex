@@ -4,7 +4,7 @@
 	method: form.method,
 	heading: translate("workout.cancelSessionHeading", { defaultValue: "Cancel this workout session?" }),
 	description: translate("workout.cancelSessionDescription", { defaultValue: "You can link the template again later if plans change." }),
-	attributes: { "data-cancel-workout-form": true },
+	attributes: { "data-cancel-workout-form": true, "data-submit-feedback": true },
 	slots: {
 		body: include("dayPage/cancelWorkoutSessionFormBody", { form, t: translate }),
 		footer: include("dayPage/cancelWorkoutSessionFormFooter", { form, modalId: locals.modalId, t: translate }),

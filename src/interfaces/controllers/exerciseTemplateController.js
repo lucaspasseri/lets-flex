@@ -26,7 +26,7 @@ async function create(req, res) {
 		createdByUserId: req.user.id,
 	});
 
-	res.redirect("/admin/library/exercises");
+	res.redirect("/admin/library/exercises?saved=exercise-created");
 }
 
 /** @param {Request} req @param {Response} res @param {InvalidBodyResult} result */
@@ -49,7 +49,7 @@ async function destroy(req, res) {
 	const { exerciseId } = req.validatedParams;
 	await deleteExerciseTemplate(exerciseId);
 
-	res.redirect("/admin/library/exercises");
+	res.redirect("/admin/library/exercises?saved=exercise-archived");
 }
 
 /** @param {Request} req @param {Response} res */
@@ -96,7 +96,9 @@ async function createGlobalVariant(req, res) {
 			});
 			return;
 		}
-		res.redirect(`/admin/library/exercises#exercise-template-${variant.id}`);
+		res.redirect(
+			`/admin/library/exercises?saved=global-variant-created#exercise-template-${variant.id}`,
+		);
 	} catch (error) {
 		if (
 			error &&
@@ -223,7 +225,9 @@ async function update(req, res) {
 		throw error;
 	}
 
-	res.redirect(`/admin/library/exercises#exercise-template-${variantId}`);
+	res.redirect(
+		`/admin/library/exercises?saved=exercise-updated#exercise-template-${variantId}`,
+	);
 }
 
 /** @param {Request} req @param {Response} res @param {InvalidBodyResult} result */

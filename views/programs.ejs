@@ -56,6 +56,7 @@
 		openOnLoad: createProgramForm.modal.openOnLoad,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createProgramForm.form,
+			attributes: { "data-submit-feedback": true },
 			slots: {
 				body: include("partials/programsPage/createProgramForm/createProgramFormBody", { createProgramForm, t: translate }),
 				footer: include("partials/programsPage/createProgramForm/createProgramFormFooter", { createProgramForm })
@@ -72,6 +73,7 @@
 		openOnLoad: createCycleForm.modal.openOnLoad,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...createCycleForm.form,
+			attributes: { "data-submit-feedback": true },
 			slots: {
 				body: include("partials/programsPage/createCycleForm/createCycleFormBody", { createCycleForm, t: translate }),
 				footer: include("partials/programsPage/createCycleForm/createCycleFormFooter", { createCycleForm })
@@ -87,7 +89,7 @@
 		showTitle: false,
 		renderContent: () => include("partials/shared/components/form/form", { form: {
 			...deleteForm.form,
-			attributes: { "data-delete-entity-form": true },
+			attributes: { "data-delete-entity-form": true, "data-submit-feedback": true },
 			slots: {
 				footer: include("partials/programsPage/deleteEntityForm/deleteEntityFormFooter", { deleteForm })
 			}

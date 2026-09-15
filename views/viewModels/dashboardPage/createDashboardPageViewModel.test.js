@@ -560,6 +560,7 @@ test("rendered workout states expose only lifecycle-available actions", async ()
 	assert.match(readyToFinishHtml, /2 of 2 steps resolved/);
 	assert.match(readyToFinishHtml, /All steps resolved/);
 	assert.match(readyToFinishHtml, />Finish session</);
+	assert.match(readyToFinishHtml, /data-workout-finish-form/);
 	assert.doesNotMatch(readyToFinishHtml, />Complete step</);
 
 	const finishedHtml = await renderWorkout({
@@ -568,6 +569,10 @@ test("rendered workout states expose only lifecycle-available actions", async ()
 		steps: resolvedSteps,
 	});
 	assert.match(finishedHtml, /Workout complete/);
+	assert.match(
+		finishedHtml,
+		/data-workout-state="finished" data-workout-session-id="5"/,
+	);
 	assert.doesNotMatch(finishedHtml, />Finish session|>Start session|>Complete step</);
 
 	const cancelledHtml = await renderWorkout({ ...workout, status: "cancelled" });

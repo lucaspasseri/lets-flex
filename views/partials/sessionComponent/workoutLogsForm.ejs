@@ -5,7 +5,7 @@
 			<div><h4><%= t("workout.completedSets", { defaultValue: "Completed sets" }) %></h4><p><%= t("workout.adjustPlan", { defaultValue: "Adjust the plan to match the work you actually performed." }) %></p></div>
 			<span class="sets-container__count" aria-live="polite" data-set-count><%= t("workout.setCount", { count: workoutLogForm.rows.length, defaultValue: "{{count}} sets ready" }) %></span>
 		</div>
-		<form method="POST" action="<%= workoutLogForm.performAction %>" id="<%= workoutLogForm.formId %>" class="workout-log-form" data-workout-perform-form>
+		<form method="POST" action="<%= workoutLogForm.performAction %>" id="<%= workoutLogForm.formId %>" class="workout-log-form" data-workout-perform-form data-submit-feedback>
 			<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 			<input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>">
 			<input type="hidden" name="workoutSessionId" value="<%= workoutLogForm.workoutSessionId %>">
@@ -20,7 +20,7 @@
 	</div>
 	<div class="step-log-button-container">
 		<%- include('../shared/components/button/button', { button: { label: t("workout.completeStep", { defaultValue: "Complete step" }), type: "submit", attributes: { form: workoutLogForm.formId, "data-workout-submit": true, "data-loading-label": t("workout.savingStep", { defaultValue: "Saving step…" }) }, renderIcon: () => include("../shared/components/icons/statusCircle", { status: "performed", icon: { attributes: { "aria-hidden": true } } }) } }) %>
-		<form method="POST" action="<%= workoutLogForm.skipAction %>" data-workout-action-form>
+		<form method="POST" action="<%= workoutLogForm.skipAction %>" data-workout-action-form data-submit-feedback>
 			<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 			<input type="hidden" name="daysDifference" value="<%= workoutLogForm.daysDifference ?? 0 %>">
 			<input type="hidden" name="workoutSessionId" value="<%= workoutLogForm.workoutSessionId %>">

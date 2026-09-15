@@ -1,5 +1,5 @@
 <% const t = typeof locals?.translate === "function" ? locals.translate : (_key, options = {}) => String(options.defaultValue ?? ""); %>
-<article class="session-component session-component--<%= workout.state %>" aria-labelledby="current-workout-title">
+<article class="session-component session-component--<%= workout.state %>" aria-labelledby="current-workout-title" data-workout-state="<%= workout.state %>" data-workout-session-id="<%= workout.id %>">
 	<svg class="session-component__activation-line" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
 		<rect x="5" y="5" width="990" height="990" rx="28" pathLength="1"></rect>
 	</svg>
@@ -61,7 +61,7 @@
 	<% if (workout.showStart) { %>
 		<section class="session-action-panel">
 			<div><h3><%= t("workout.readyWhenYouAre", { defaultValue: "Ready when you are" }) %></h3><p><%= t("workout.startInstruction", { defaultValue: "Starting locks in this session's planned steps for today's workout." }) %></p></div>
-			<form method="POST" action="<%= workout.startForm.action %>" data-workout-action-form>
+			<form method="POST" action="<%= workout.startForm.action %>" data-workout-action-form data-submit-feedback>
 				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 				<input type="hidden" name="daysDifference" value="<%= workout.startForm.daysDifference ?? 0 %>">
 				<% if (workout.startForm.errors?.fieldErrors?.daysDifference) { %><p class="form-field__error"><%= workout.startForm.errors.fieldErrors.daysDifference %></p><% } %>
@@ -71,7 +71,7 @@
 	<% } else if (workout.showFinish) { %>
 		<section class="session-action-panel session-action-panel--finish">
 			<div><h3><%= t("workout.allStepsResolved", { defaultValue: "All steps resolved" }) %></h3><p><%= t("workout.finishInstruction", { defaultValue: "Finish the session to add this workout to your completed history." }) %></p></div>
-			<form method="POST" action="<%= workout.finishForm.action %>" data-workout-action-form>
+			<form method="POST" action="<%= workout.finishForm.action %>" data-workout-action-form data-workout-finish-form data-workout-session-id="<%= workout.id %>" data-submit-feedback>
 				<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 				<input type="hidden" name="daysDifference" value="<%= workout.finishForm.daysDifference ?? 0 %>">
 				<% if (workout.finishForm.errors?.fieldErrors?.daysDifference) { %><p class="form-field__error"><%= workout.finishForm.errors.fieldErrors.daysDifference %></p><% } %>

@@ -73,7 +73,7 @@ async function create(req, res) {
 	res.redirect(
 		sessionCreationContext
 			? `/programs/day?dayId=${sessionCreationContext.day.id}&sessionId=${session.id}`
-			: "/library",
+			: "/library?saved=session-created",
 	);
 }
 
@@ -127,7 +127,7 @@ async function archive(req, res) {
 		throw error;
 	}
 
-	res.redirect("/library");
+	res.redirect("/library?saved=session-archived");
 }
 
 /** @param {Request} req @param {Response} res */
@@ -162,7 +162,7 @@ async function destroy(req, res) {
 		throw error;
 	}
 
-	res.redirect("/library");
+	res.redirect("/library?saved=session-deleted");
 }
 
 /** @param {Request & {validatedBody?: any}} req @param {Response} res */
@@ -214,7 +214,9 @@ async function update(req, res) {
 		}
 		throw error;
 	}
-	res.redirect(`/library?sessionId=${sessionId}#session-details-title-${sessionId}`);
+	res.redirect(
+		`/library?sessionId=${sessionId}&saved=session-updated#session-details-title-${sessionId}`,
+	);
 }
 
 /** @param {Request} req @param {Response} res @param {InvalidBodyResult} result */

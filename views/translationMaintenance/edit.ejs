@@ -48,7 +48,7 @@
 					<% if (localeForm.previewLabel) { %>
 						<p class="translation-maintenance__preview" role="status"><%= localeForm.previewLabel %></p>
 					<% } %>
-					<form class="translation-maintenance__locale-form" method="POST" action="/admin/translations/<%= encodeURIComponent(record.entityType) %>/<%= record.id %>?_method=PATCH">
+					<form class="translation-maintenance__locale-form" method="POST" action="/admin/translations/<%= encodeURIComponent(record.entityType) %>/<%= record.id %>?_method=PATCH" data-submit-feedback>
 						<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? "" %>" />
 						<input type="hidden" name="locale" value="<%= localeForm.locale %>" />
 						<%- include("../partials/shared/components/form/field", { field: {

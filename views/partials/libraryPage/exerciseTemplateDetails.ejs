@@ -87,7 +87,7 @@
 
 							<% if (variant.actions.canManagePrivate) { %>
 								<div class="exercise-template__private-actions">
-									<form class="form exercise-template__inline-form" method="POST" action="/exercise-variants/<%= variant.id %>?_method=PATCH">
+									<form class="form exercise-template__inline-form" method="POST" action="/exercise-variants/<%= variant.id %>?_method=PATCH" data-submit-feedback>
 										<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 										<input type="hidden" name="equipmentId" value="<%= variant.privateMutation?.equipmentId ?? variant.equipment?.id ?? '' %>">
 										<%- include("../shared/components/form/field", { field: {
@@ -109,7 +109,7 @@
 											variant: "primary"
 										} }) %>
 									</form>
-									<form class="exercise-template__archive-form" method="POST" action="/exercise-variants/<%= variant.id %>/archive">
+									<form class="exercise-template__archive-form" method="POST" action="/exercise-variants/<%= variant.id %>/archive" data-submit-feedback>
 										<input type="hidden" name="_csrf" value="<%= locals?.csrfToken ?? '' %>">
 										<%- include("../shared/components/button/button", { button: {
 											label: translate("library.archivePrivateVariant", { defaultValue: "Archive private variant" }),
