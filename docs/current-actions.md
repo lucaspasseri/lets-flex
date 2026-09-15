@@ -2,9 +2,286 @@
 
 ## Current goal
 
-Post-goal cleanup, translation coverage, and CSS loading audit.
+Implement a production-ready Classic + Neon theme system.
 
 ## Goal status
+
+**Completed — Actions 1–4 are Completed.**
+
+**Completed:** 2026-09-14 after explicit user approval.
+
+**Outcome:** Delivered the two-theme Classic + Neon system, profile selection and persistence,
+pre-paint fallback, shared Neon decoration, locale-complete theme controls, regression coverage,
+and supporting design documentation. Browser and database verification limitations remain recorded
+in the final review.
+
+## Initial delta-first baseline (before Actions 1–3)
+
+### Existing relevant capabilities
+
+- Classic is the current `:root` token baseline in `public/css/base.css`; foundational CSS is loaded
+  early by the shared EJS head.
+- Shared EJS components, responsive layouts, forms, buttons, modals, navigation, i18n, workout
+  state, and View Transitions already exist and must be reused.
+- The profile page is the existing account/settings surface for both authenticated and guest users.
+- The Neon branch experiment supplies visual source material, but it is not a maintainable theme
+  architecture: it is globally imported, scoped to three pages, duplicates layout/component rules,
+  and uses `--neon-*` identity tokens.
+
+### Verified gaps or changes
+
+- No theme preference, selector, or early resolver exists.
+- The experiment does not cover the whole application and its latest calm palette revision is not
+  the requested Neon direction; the earlier cyan/violet decisions must be extracted instead.
+- Shared components still consume the old alias layer, so semantic token migration is required at
+  the shared CSS boundary before the experiment can be retired.
+- No user-preference persistence mechanism is present. Browser storage is the smallest compatible
+  choice for guests and authenticated users and avoids a schema change.
+
+## Proposed action sequence
+
+### Action 1 — Establish the shared theme contract and pre-paint boundary
+
+**Status:** Completed
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Ready for review:** 2026-09-14 after focused implementation and verification
+
+**Completed:** 2026-09-14 after explicit user approval
+
+**Purpose:** Define exactly two semantic token sets (`classic` and `neon`) at the theme boundary,
+make shared foundational/component CSS consume those roles, and add a minimal synchronous head
+resolver that validates browser storage and applies Classic by default before styles paint.
+
+**Reviewable outcome:** Both themes can be applied to the document through one `data-theme` state;
+no component layout/responsive duplication is introduced; the resolver is safe for missing,
+invalid, or unavailable storage values and has focused static/browser-contract coverage.
+
+### Implementation completed
+
+- Added `public/css/theme.css` as the theme boundary. It defines the Classic fallback and explicit
+  `[data-theme="classic"]`/`[data-theme="neon"]` semantic roles for page/surface/text/action,
+  secondary/success/danger, focus, shadows, and gradients. Neon uses the earlier approved cyan/blue
+  and violet direction; no `--neon-*` token names are used in this shared layer.
+- Moved the current Classic palette out of `public/css/base.css` and kept base CSS focused on
+  resets, layout primitives, native-control defaults, and shared non-theme behavior. Updated shared
+  foundational/button/form/accordion/chrome/tab consumers to use semantic roles directly.
+- Added a small synchronous resolver to `views/partials/pages/head.ejs`, before the theme stylesheet
+  and the rest of the CSS chain. It reads `lets-flex-theme`, accepts only `classic` or `neon`, and
+  safely defaults to Classic when absent, stale, or unavailable. It is intentionally browser-only;
+  persistence controls remain in Action 2.
+- Added token-boundary, stylesheet-order, resolver-behavior, and Classic contrast-test coverage.
+
+### Verification evidence
+
+- Focused theme/base/head/auth tests: **6/6 passed**.
+- `npm run format:check`: **passed**.
+- `npm run lint`: **passed**.
+- `npm run check:types`: **passed**.
+- `npm run check:browser-types`: **passed**.
+- `git diff --check`: **passed**.
+- Full `npm test` was attempted: the PostgreSQL setup hook could not connect to the configured
+  database (`EPERM`), so the suite did not complete. The initial run reported **461 passed**, with
+  **3 failures** and **4 cancellations**; one CSS/auth contract failure caused by moving palette
+  ownership was corrected and its focused test now passes. A post-correction non-database run
+  reached **442 passed** and **2 failures**, both from the i18n application test's local server
+  listen being denied (`EPERM` on `127.0.0.1`). Broad rerun remains for the final verification
+  action.
+- Live browser paint and viewport inspection remain unavailable until a browser executable is
+  present; static head ordering and resolver execution are verified with the Node VM test.
+
+### Action 2 — Add the accessible profile selector and persistence behavior
+
+**Status:** Completed
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Ready for review:** 2026-09-14 after focused implementation and verification
+
+**Completed:** 2026-09-14 after explicit user approval
+
+**Purpose:** Add a clearly labelled two-option Appearance control to the existing profile surface,
+localized in both supported locales, with selected state, keyboard/assistive-technology semantics,
+and browser persistence. Apply changes immediately without navigation or page-state loss.
+
+**Reviewable outcome:** Classic and Neon selection, restoration, reload/navigation persistence, and
+invalid-value fallback are covered by focused browser/template tests and existing profile behavior is
+unchanged for guest/member/admin states.
+
+### Implementation completed
+
+- Added a native two-option radio group to `views/profile.ejs`, reusing the existing profile card
+  structure. It exposes a labelled fieldset, descriptions, visible radio controls, and a selected
+  state that remains keyboard and assistive-technology accessible.
+- Added English and Brazilian Portuguese labels and descriptions to both locale resources. No third
+  theme or new route/form submission was introduced.
+- Added `public/js/theme.js` and initialized it from `public/js/app.js`. It reuses the pre-paint
+  document state, applies selection immediately, persists only supported values under the shared
+  `lets-flex-theme` key, and tolerates unavailable storage without breaking this-visit switching.
+- Added responsive selector styling in `public/css/pages/profile.css`; the two choices collapse to
+  one column at the existing narrow profile breakpoint without changing page layout contracts.
+
+### Verification evidence
+
+- Theme module, profile rendering, and English/Portuguese localization tests: **9/9 passed**.
+- `npm run format:check`: **passed**.
+- `npm run lint`: **passed**.
+- `npm run check:types`: **passed**.
+- `npm run check:browser-types`: **passed**.
+- `git diff --check`: **passed**.
+- The selector test covers immediate Neon/Classic switching, persistence, invalid stored values,
+  and unavailable storage. Existing profile guest/admin assertions remain green.
+- Live browser keyboard, reload, and viewport inspection remain unavailable because no browser
+  executable is present. The final broad verification remains in Action 4.
+
+### Action 3 — Consolidate the Neon experiment into shared theme styling
+
+**Status:** Completed
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Ready for review:** 2026-09-14 after focused implementation and verification
+
+**Completed:** 2026-09-14 after explicit user approval
+
+**Purpose:** Extract the approved cyan/blue + violet Neon visual decisions into the semantic theme
+boundary, retain only decorative differences such as surfaces, gradients, borders, shadows, glow,
+and active-state emphasis, and remove the obsolete experiment import, page marker classes, and
+redundant copied layout rules. Keep Classic as the current main appearance and preserve shared
+responsive/component contracts.
+
+**Reviewable outcome:** Exactly two production themes render through shared components; the
+middle-ground/calm palette is recorded as rejected, not active; CSS contains no competing Neon
+implementation and no theme-induced overflow or dimension changes are introduced.
+
+### Implementation completed
+
+- Verified the repository-authoritative current `main` tree: the historical experiment stylesheet,
+  its `main.css` import, and its Dashboard/Library/Day marker classes are already absent. No
+  destructive cleanup was needed; the historical experiment commits remain source material for
+  the requested direction.
+- Added shared Neon-only decorative treatment to `public/css/theme.css` for application chrome,
+  page surfaces, active states, tabs, buttons, search focus, and media frames. The rules use the
+  semantic action/secondary roles and contain no layout, spacing, responsive, or theme-identity
+  token implementation.
+- Restored the experiment's approved session activation trace as shared component markup and
+  component-scoped CSS, with a reduced-motion fallback. Classic keeps the same session structure
+  without the Neon decoration.
+- Kept all responsive rules and component layout contracts in their existing shared stylesheets;
+  the later calm/middle-ground palette is not represented in production CSS.
+
+### Verification evidence
+
+- Theme consolidation and session-component tests: **3/3 passed**.
+- `npm run format:check`: **passed**.
+- `npm run lint`: **passed**.
+- `npm run check:types`: **passed**.
+- `npm run check:browser-types`: **passed**.
+- `git diff --check`: **passed**.
+- A production-source scan found no remaining experiment import, page marker, or `--neon-*` token
+  implementation. The retired names appear only in regression assertions and historical workflow
+  documentation.
+- Live browser rendering and viewport/keyboard inspection remain unavailable because no browser
+  executable is installed. Final broad verification remains in Action 4.
+
+### Action 4 — Document and verify the completed theme system
+
+**Status:** Completed
+
+**Activated:** 2026-09-14 after explicit user approval
+
+**Changes requested:** 2026-09-14 after manual review found incomplete theme-control locale
+coverage.
+
+**Ready for review:** 2026-09-14 after documentation and final verification
+
+**Completed:** 2026-09-14 after explicit user approval
+
+**Purpose:** Update `docs/design.md` and this action record with the final architecture, source
+decisions, persistence and flash-prevention rationale, retained/refactored/removed experiment CSS,
+and known limitations. Run focused tests followed by the applicable format, lint, type, browser-type,
+and broad verification commands; perform rendered viewport/keyboard checks if a browser is available.
+
+**Reviewable outcome:** All definition-of-done criteria have explicit verification evidence, skipped
+browser checks are reported honestly, and the goal is returned to **Ready for review** without marking
+it complete.
+
+### Implementation completed
+
+- Replaced the prototype-only `docs/design.md` record with the supported Classic + Neon design
+  system, including semantic boundaries, persistence and pre-paint rationale, accessibility,
+  responsive review targets, the retained Neon source decisions, and the rejected calm palette.
+- Traced the selector to the current theme work added after the earlier translation pass. Its
+  server-rendered strings already used the translator, but the active-theme status was not explicit
+  and regression coverage checked only a subset of the labels.
+- Added the localized active-theme status and made its displayed theme name derive from the
+  translated option label. Added exhaustive English/Portuguese assertions for every visible
+  theme-control string; switching and persisted preference behavior remain unchanged.
+- Documented that the checked-out `main` tree already lacked the historical experiment file, import,
+  and page markers; the historical commits remain source material rather than active wiring.
+- Recorded the final architecture and known browser limitation without claiming visual verification
+  that could not be performed in this environment.
+
+### Verification evidence
+
+- Focused theme, profile, localization, head, and session tests: **14/14 passed** before the
+  locale correction; post-correction theme/profile/localization tests: **9/9 passed**.
+- Full `npm test`: **466 passed**, **2 environment failures**, and **4 database-hook cancellations**
+  out of 472 tests. PostgreSQL setup failed with `EPERM`; the i18n application test could not bind
+  `127.0.0.1` (`listen EPERM`), and its cleanup reported the expected server-not-running follow-up.
+- `npm run format:check`: **passed**.
+- `npm run lint`: **passed**.
+- `npm run check:types`: **passed**.
+- `npm run check:browser-types`: **passed**.
+- `git diff --check`: **passed**.
+- Live browser rendering, keyboard traversal, reload persistence, and viewport inspection remain
+  unavailable because no browser executable is installed.
+
+## Resume here
+
+Action 1 is **Completed**. Action 2 is **Completed**. Action 3 is **Completed** after explicit
+approval. Action 4 is **Completed** after documentation, the locale correction, and final
+verification. The goal is **Ready for final review**; do not mark it complete until explicitly
+approved.
+
+## Final review
+
+### Done-when comparison
+
+- **Exactly two shared themes:** Satisfied. Classic is the default semantic boundary and Neon is
+  the only alternate boundary; focused token and selector tests pass.
+- **Accessible selection and persistence:** Satisfied by native radio semantics and focused
+  switching/storage tests. Live keyboard and reload inspection remains unavailable because no
+  browser executable is installed.
+- **Pre-paint resolution and fallback:** Satisfied as far as automation can verify. The head VM
+  tests cover missing, invalid, supported, and unavailable storage values before the theme link.
+- **Experiment consolidation without layout divergence:** Satisfied. The current `main` tree has no
+  experiment import, wrapper, marker, or competing `--neon-*` implementation; shared responsive
+  and component rules remain in their existing stylesheets.
+- **Design documentation:** Satisfied in `docs/design.md`, including supported boundaries, source
+  decisions, persistence rationale, and the rejected calm palette.
+- **Regression and repository verification:** Focused theme/profile/i18n/head/session tests pass
+  **14/14** and all static checks pass. The full suite is not fully executable in this sandbox:
+  **466 passed**, **2 environment failures**, and **4 database-hook cancellations** out of 472;
+  PostgreSQL and local server binds were denied with `EPERM`.
+
+### Intentionally excluded from this environment
+
+- Live rendered visual, keyboard, reload, and viewport checks because no browser executable is
+  available.
+- Database-backed verification because the sandbox denies the configured PostgreSQL connection.
+- Commit, branch, merge, push, and production-data operations.
+
+---
+
+## Historical record — Post-goal cleanup, translation coverage, and CSS loading audit
+
+### Historical goal
+
+Post-goal cleanup, translation coverage, and CSS loading audit.
+
+### Historical goal status
 
 **Completed:** 2026-09-14 after explicit user approval. Actions 1–3 are **Completed** after
 verification.

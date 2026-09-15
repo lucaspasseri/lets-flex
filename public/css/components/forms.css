@@ -10,7 +10,7 @@
 	input,
 	select,
 	textarea {
-		background-color: var(--color-bg);
+		background-color: var(--color-page);
 		border-radius: 4px;
 	}
 

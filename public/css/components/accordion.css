@@ -1,13 +1,13 @@
 .shared-accordion {
 	--header-and-panel-padding: 1em;
-	box-shadow: var(--box-shadow-header);
+	box-shadow: var(--surface-shadow);
 	position: relative;
 	color: var(--color-text);
 }
 
 .shared-accordion .header {
 	padding: var(--header-and-panel-padding);
-	background-color: var(--color-stitch-secondary);
+	background-color: var(--color-surface-raised);
 	z-index: 2;
 	position: relative;
 	border: 0;

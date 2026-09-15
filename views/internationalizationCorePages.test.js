@@ -35,6 +35,21 @@ test("core account and history pages render application copy in Portuguese", asy
 		csrfToken: "test-token",
 	});
 	assert.match(profile, /Métodos de autenticação/);
+	assert.match(profile, /Aparência/);
+	assert.match(profile, />Tema<\/h2>/);
+	assert.match(
+		profile,
+		/Escolha o estilo visual usado em todo o seu espaço do Let’s Flex\./,
+	);
+	assert.match(profile, /Tema atual/);
+	assert.match(profile, /Clássico/);
+	assert.match(profile, /Calmo, claro e discreto\./);
+	assert.match(profile, /Escolha um tema/);
+	assert.match(profile, /Escuro, energético e expressivo\./);
+	assert.doesNotMatch(
+		profile,
+		/Current theme|Choose a theme|Calm, bright|Dark, high-energy/,
+	);
 	assert.match(profile, /Sair com segurança/);
 
 	const historyViewModel = createWorkoutHistoryListPageViewModel({

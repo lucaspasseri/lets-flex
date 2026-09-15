@@ -1,5 +1,8 @@
 <% const t = typeof locals?.translate === "function" ? locals.translate : (_key, options = {}) => String(options.defaultValue ?? ""); %>
 <article class="session-component session-component--<%= workout.state %>" aria-labelledby="current-workout-title">
+	<svg class="session-component__activation-line" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+		<rect x="5" y="5" width="990" height="990" rx="28" pathLength="1"></rect>
+	</svg>
 	<%- include('./header', { header: workout.header }) %>
 
 	<% if (workout.progress.isVisible) { %>

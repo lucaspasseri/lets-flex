@@ -38,6 +38,40 @@
 		</section>
 
 		<div class="profile-stack">
+			<section class="profile-card" aria-labelledby="appearance-heading">
+				<div class="profile-card__icon" aria-hidden="true">
+					<%- include("partials/shared/components/icons/namedIcon", { name: "layers" }) %>
+				</div>
+				<div>
+					<p class="profile-card__eyebrow"><%= translate("profile.appearance", { defaultValue: "Appearance" }) %></p>
+					<h2 id="appearance-heading"><%= translate("profile.theme", { defaultValue: "Theme" }) %></h2>
+					<p id="appearance-description"><%= translate("profile.themeDescription", { defaultValue: "Choose the visual style used across your Let’s Flex workspace." }) %></p>
+					<fieldset class="profile-theme-selector" data-theme-selector aria-describedby="appearance-description">
+						<legend><%= translate("profile.themeChoice", { defaultValue: "Choose a theme" }) %></legend>
+						<p class="profile-theme-current" data-theme-current hidden role="status" aria-live="polite">
+							<span><%= translate("profile.currentTheme", { defaultValue: "Current theme" }) %>:</span>
+							<strong data-theme-current-name></strong>
+						</p>
+						<div class="profile-theme-options">
+							<label class="profile-theme-option">
+								<input type="radio" name="theme" value="classic" data-theme-option="classic" />
+								<span>
+									<strong><%= translate("profile.classicTheme", { defaultValue: "Classic" }) %></strong>
+									<small><%= translate("profile.classicThemeDescription", { defaultValue: "Calm, bright, and understated." }) %></small>
+								</span>
+							</label>
+							<label class="profile-theme-option">
+								<input type="radio" name="theme" value="neon" data-theme-option="neon" />
+								<span>
+									<strong><%= translate("profile.neonTheme", { defaultValue: "Neon" }) %></strong>
+									<small><%= translate("profile.neonThemeDescription", { defaultValue: "Dark, high-energy, and expressive." }) %></small>
+								</span>
+							</label>
+						</div>
+					</fieldset>
+				</div>
+			</section>
+
 			<% if (!isGuest) { %>
 				<section class="profile-card" aria-labelledby="authentication-methods-heading">
 					<div class="profile-card__icon" aria-hidden="true">

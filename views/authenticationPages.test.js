@@ -119,6 +119,17 @@ test("profile presents role-specific guest and administrator states", async () =
 	});
 
 	assert.match(guestHtml, /data-profile-role="guest"/);
+	assert.equal((guestHtml.match(/data-theme-option=/g) ?? []).length, 2);
+	assert.match(guestHtml, /value="classic" data-theme-option="classic"/);
+	assert.match(guestHtml, /value="neon" data-theme-option="neon"/);
+	assert.match(guestHtml, /fieldset class="profile-theme-selector"/);
+	assert.match(guestHtml, /Current theme/);
+	assert.match(
+		guestHtml,
+		/Choose the visual style used across your Let’s Flex workspace\./,
+	);
+	assert.match(guestHtml, /Calm, bright, and understated\./);
+	assert.match(guestHtml, /Dark, high-energy, and expressive\./);
 	assert.match(guestHtml, /Guest workspace/);
 	assert.match(guestHtml, /automatically removed after expiration/);
 	assert.match(guestHtml, /Create a permanent account/);

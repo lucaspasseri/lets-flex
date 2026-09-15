@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const authStylesheetPath = new URL("./auth.css", import.meta.url);
-const baseStylesheetPath = new URL("../base.css", import.meta.url);
+const themeStylesheetPath = new URL("../theme.css", import.meta.url);
 const mainStylesheetPath = new URL("../main.css", import.meta.url);
 const tabsStylesheetPath = new URL("../components/tabs.css", import.meta.url);
 
@@ -35,9 +35,9 @@ function contrastRatio(firstHex, secondHex) {
 }
 
 test("authentication recovery links expose a readable non-color interaction contract", async () => {
-	const [authCss, baseCss] = await Promise.all([
+	const [authCss, themeCss] = await Promise.all([
 		readFile(authStylesheetPath, "utf8"),
-		readFile(baseStylesheetPath, "utf8"),
+		readFile(themeStylesheetPath, "utf8"),
 	]);
 
 	assert.match(
@@ -57,11 +57,11 @@ test("authentication recovery links expose a readable non-color interaction cont
 		/\.auth-form-link a:focus-visible\s*\{[^}]*outline:\s*3px solid[^}]*outline-offset:\s*2px;/,
 	);
 
-	const surface = readHexVariable(baseCss, "neutral-900");
+	const surface = readHexVariable(themeCss, "color-surface");
 	const linkStateColors = [
-		readHexVariable(baseCss, "coral-300"),
-		readHexVariable(baseCss, "coral-400"),
-		readHexVariable(baseCss, "neutral-100"),
+		readHexVariable(themeCss, "color-action"),
+		readHexVariable(themeCss, "color-action-hover"),
+		readHexVariable(themeCss, "color-text"),
 	];
 
 	linkStateColors.forEach((color) => {

@@ -1,84 +1,78 @@
-# Let's Flex — Experimental Design Exploration
+# Let's Flex — Classic + Neon theme system
 
-Status: temporary exploration, 2026-09-14. The three directions below are prototypes for visual
-review, not a permanent redesign or an approved design system.
+Status: supported application design system, 2026-09-14.
 
-## Current audit
+The application has exactly two user-selectable themes. Both use the same EJS components, semantic
+HTML, responsive layouts, interaction logic, and accessibility contracts.
 
-### User-facing inventory
+## Supported themes
 
-| Surface            | Route/view                                        | Useful coverage                                                                    |
-| ------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Dashboard          | `/` · `views/index.ejs`                           | onboarding, program state, date navigation, workout, metrics, charts, empty states |
-| Programs           | `/programs` · `views/programs.ejs`                | hierarchy, entity switchers, calendar, create/delete modals                        |
-| Training Day       | `/day` · `views/day.ejs`                          | day navigation, session list, cancel modal, workout entry point                    |
-| Library            | `/library` · `views/library.ejs`                  | tabs, search/filter, master/detail workspace, media, CRUD forms/modals             |
-| History / Progress | `/history`, `/progress`                           | filters, result/detail states, metrics, pagination, data-dense reading             |
-| Profile / auth     | `/profile`, `/login`, `/register`, password reset | forms, account actions, feedback, guest/auth states                                |
+| Theme   | Role     | Visual language                                                                                                                                                 |
+| ------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Classic | Default  | The existing dark main appearance with restrained surfaces, coral actions, teal secondary/success states, and neutral borders.                                  |
+| Neon    | Optional | Dark blue-tinted surfaces with cyan/blue primary actions, violet secondary accents, intentional gradients, stronger active-state contrast, and restrained glow. |
 
-### Verified patterns and opportunities
+Classic is the safe fallback for missing, invalid, or unavailable preferences.
 
-- The dark shell, coral action color, teal success/accent, strong headings, and workout data
-  already form a recognizable identity worth preserving.
-- Dashboard, Programs, Library, history, and progress frequently stack bordered cards, icon tiles,
-  badges, and eyebrow headings. This makes ordinary grouping compete with primary tasks.
-- Shared forms, buttons, modal mechanics, application navigation, tabs, accordions, i18n, and
-  workout controls have established semantic and keyboard contracts. They are reused unchanged.
-- Page-local action recipes and repeated heading treatments make equivalent actions feel less
-  consistent than the underlying components. These prototypes test hierarchy before consolidation.
-- Responsive behavior is generally strong at small and large widths, but intermediate widths put
-  pressure on multi-column workspaces, action rows, media, and long Portuguese labels.
-- Media works best as exercise/session context. The experiments use it selectively rather than as
-  decoration, and preserve existing media fallbacks and accessible alternatives.
-- Empty, selected, feedback, destructive, and form states already have explicit markup; each
-  direction changes their emphasis without changing state logic or interaction behavior.
+## Architecture
 
-### Recurring components affected by a chosen direction
+- `public/css/theme.css` is the theme boundary. It defines the Classic fallback and the explicit
+  `classic` and `neon` semantic token sets for page/surface roles, text, actions, secondary and
+  status colors, focus, shadows, and gradients.
+- Shared CSS consumes semantic roles such as `--color-page`, `--color-surface`, `--color-action`,
+  and `--color-secondary`. Components do not select a palette by theme name.
+- The shared head runs a small synchronous resolver before the theme stylesheet and the remaining
+  CSS chain. It accepts only `classic` and `neon` from the `lets-flex-theme` storage key, applying
+  Classic otherwise. This keeps a saved Neon preference from flashing Classic during first paint.
+- `public/js/theme.js` initializes the profile radio group, applies a choice immediately, and
+  persists only supported values. Browser storage is intentionally used for guests and members so
+  the preference does not require a server route, database field, or migration.
+- Theme-specific rules are limited to colors, surfaces, borders, gradients, shadows, glow, and
+  related decoration. Existing page/component styles remain the source of layout, spacing,
+  responsive behavior, semantics, and state logic.
 
-The experiment surfaces share the application shell, page heading, shared buttons/forms/modals,
-media, session cards, workout session component, tabs, and feedback treatments. Direction CSS
-styles these existing contracts; it does not replace their EJS, ViewModels, routes, or scripts.
+## Shared visual decisions
 
-## Stable principles
+- Classic retains the established appearance and remains the default.
+- Neon uses the earlier cyan/violet direction from the visual experiment source: cyan is the main
+  action/focus treatment, violet is the secondary accent, and success remains a cool subdued teal.
+- Neon decoration is shared across application chrome, page surfaces, active states, tabs, buttons,
+  search focus, and media frames. The in-progress session trace is shared component decoration and
+  disables its animation under `prefers-reduced-motion: reduce`.
+- Active states retain explicit existing markup and labels; color and glow reinforce state but do
+  not carry meaning alone.
+- The later calm/middle-ground palette is rejected. It is not a third theme and is not represented
+  in production CSS.
 
-- Preserve the dark visual foundation and the existing coral, teal, red, and neutral semantic roles.
-- Keep mobile-first, fluid responsive behavior and test around 390px, 768px, and 1280–1440px.
-- Preserve semantic HTML, visible focus, keyboard interaction, reduced-motion behavior, labels,
-  validation, i18n, permissions, CSRF, routes, and existing data contracts.
-- Keep the active workout state clear and keep media subordinate to training information.
-- Reuse existing shared components and interaction contracts; avoid new frameworks or dependencies.
+## User-facing inventory
 
-## Experimental directions
+| Surface            | Route/view                                     | Relevant theme coverage                                                                |
+| ------------------ | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Dashboard          | `/` · `views/index.ejs`                        | onboarding, program state, date navigation, workout, metrics, charts, and empty states |
+| Programs           | `/programs` · `views/programs.ejs`             | hierarchy, entity switchers, calendars, and CRUD modals                                |
+| Training Day       | `/day` · `views/day.ejs`                       | day navigation, sessions, cancellation, and workout entry                              |
+| Library            | `/library` · `views/library.ejs`               | tabs, search/filter, master/detail workspace, media, and CRUD forms                    |
+| History / Progress | `/history`, `/progress`                        | filters, result/detail states, metrics, and pagination                                 |
+| Profile / auth     | `/profile`, `/login`, register, password reset | appearance selector, forms, account actions, feedback, and guest/auth states           |
 
-### A — Performance Console
+## Accessibility and responsive boundary
 
-Compact and data-led: reduce decorative containers, sharpen metric scale, use rules and alignment
-for grouping, and make the current workout/selected session state scan first. The trade-off is a
-less expressive and less promotional feel. Branch: `experiment/ui-performance-console`.
+The Appearance control is a labelled native radio group with exactly two options. It remains
+keyboard-operable and exposes the selected state to assistive technology. Choosing a theme does not
+submit a form, redirect, or reset page state. The selector collapses at the existing narrow profile
+container breakpoint.
 
-### B — Athletic Editorial
+Existing responsive rules remain shared and are not duplicated per theme. Review targets are 390px,
+768px, and 1280–1440px, with particular attention to Portuguese wrapping, workspace columns,
+media, focus visibility, keyboard order, tabs, modals, and active workout states.
 
-Expressive and premium: create larger typographic moments, purposeful whitespace, and selective
-media-led emphasis while keeping controls efficient. The trade-off is more vertical travel and
-less information visible at once. Branch: `experiment/ui-athletic-editorial`.
+## Verification boundary
 
-### C — Minimal Training Utility
+Automated coverage includes semantic token boundaries, Classic/Neon values, stylesheet order,
+pre-paint resolution, storage fallback, immediate selector switching, persistence, profile rendering,
+localization, shared Neon decoration, and reduced-motion session behavior. Repository format, lint,
+server/browser type checks, and diff checks are run for the completed goal.
 
-Restrained and workflow-first: flatten ordinary groups, remove most ornamental chrome, and let
-type, spacing, and explicit actions carry hierarchy. The trade-off is less visual signaling for
-secondary context. Branch: `experiment/ui-minimal-utility`.
-
-## Approved principles
-
-None yet. Principles move here only after visual review.
-
-## Review contract
-
-Inspect the same populated and empty/selected states in English and Portuguese. At each direction,
-check 390px mobile, 768px intermediate, and 1280–1440px desktop for overflow, wrapping, action
-priority, media height, over-wide reading areas, focus visibility, keyboard order, and modal/tab
-behavior. Browser rendering is not available to this coding environment, so these are exact review
-targets rather than claims of captured visual verification.
-
-After review, choose one direction, combine specific ideas, revise a direction, or reject the
-experiments. Do not propagate any direction to the remaining pages until that decision is made.
+Live browser rendering, keyboard traversal, reload persistence, and viewport inspection remain
+unavailable in the current environment because no browser executable is installed. Those checks are
+explicit review targets rather than claims of captured visual verification.

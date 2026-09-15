@@ -20,4 +20,10 @@ test("focused workout media preserves readable step and current-exercise layouts
 		/@media \(max-width: 32rem\)[\s\S]*?\.session-component \.session-step__media[\s\S]*?grid-row: 1/,
 	);
 	assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+	assert.match(css, /\.session-component__activation-line\s*\{/);
+	assert.match(
+		css,
+		/:root\[data-theme="neon"\][\s\S]*?\.session-component--in-progress[\s\S]*?\.session-component__activation-line/,
+	);
+	assert.match(css, /@keyframes theme-neon-trace/);
 });

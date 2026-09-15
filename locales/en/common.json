@@ -293,7 +293,16 @@
 		"googleInvalid": "Google did not provide a usable verified email.",
 		"googleReplacementUnavailable": "Add a password before changing the connected Google account.",
 		"passwordConnected": "Password authentication is now connected.",
-		"passwordAlreadyExists": "A password is already set for this account."
+		"passwordAlreadyExists": "A password is already set for this account.",
+		"appearance": "Appearance",
+		"theme": "Theme",
+		"themeDescription": "Choose the visual style used across your Let’s Flex workspace.",
+		"themeChoice": "Choose a theme",
+		"currentTheme": "Current theme",
+		"classicTheme": "Classic",
+		"classicThemeDescription": "Calm, bright, and understated.",
+		"neonTheme": "Neon",
+		"neonThemeDescription": "Dark, high-energy, and expressive."
 	},
 	"email": {
 		"passwordResetSubject": "Reset your Let’s Flex password",

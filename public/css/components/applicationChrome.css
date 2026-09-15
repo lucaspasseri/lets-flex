@@ -35,7 +35,7 @@
 			transparent 45%
 		),
 		var(--color-surface);
-	box-shadow: var(--box-shadow-header);
+	box-shadow: var(--surface-shadow);
 }
 
 .page-header__home {
@@ -380,7 +380,7 @@
 				transparent 32%
 			),
 			var(--color-surface);
-		box-shadow: var(--box-shadow-header);
+		box-shadow: var(--surface-shadow);
 		overflow: hidden;
 	}
 

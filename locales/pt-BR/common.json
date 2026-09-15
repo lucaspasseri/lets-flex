@@ -293,7 +293,16 @@
 		"googleInvalid": "O Google não forneceu um e-mail verificado utilizável.",
 		"googleReplacementUnavailable": "Adicione uma senha antes de alterar a conta do Google conectada.",
 		"passwordConnected": "A autenticação por senha agora está conectada.",
-		"passwordAlreadyExists": "Já existe uma senha definida para esta conta."
+		"passwordAlreadyExists": "Já existe uma senha definida para esta conta.",
+		"appearance": "Aparência",
+		"theme": "Tema",
+		"themeDescription": "Escolha o estilo visual usado em todo o seu espaço do Let’s Flex.",
+		"themeChoice": "Escolha um tema",
+		"currentTheme": "Tema atual",
+		"classicTheme": "Clássico",
+		"classicThemeDescription": "Calmo, claro e discreto.",
+		"neonTheme": "Neon",
+		"neonThemeDescription": "Escuro, energético e expressivo."
 	},
 	"email": {
 		"passwordResetSubject": "Redefina sua senha do Let’s Flex",

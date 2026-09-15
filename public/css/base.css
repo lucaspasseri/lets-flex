@@ -5,94 +5,25 @@
 :root {
 	color-scheme: dark;
 
-	/* Palette */
-	--neutral-950: #0b0c10;
-	--neutral-900: #16181d;
-	--neutral-850: #1c1c1c;
-	--neutral-700: #2a2d34;
-	--neutral-500: #6b7280;
-	--neutral-300: #9ca3af;
-	--neutral-100: #e5e7eb;
-
-	--red-500: #e63946;
-	--red-600: #c1121f;
-	--red-900: #670505;
-
-	--coral-300: #ffb4ac;
-	--coral-400: #f59f98;
-
-	--green-400: #2ec4b6;
-	--green-500: #25a99e;
-
-	/* Surfaces */
-	--color-page: var(--neutral-950);
-	--color-surface: var(--neutral-900);
-	--color-surface-subtle: var(--neutral-850);
-	--color-border: var(--neutral-700);
-
-	/* Text */
-	--color-text: var(--neutral-100);
-	--color-text-muted: var(--neutral-300);
-	--color-text-disabled: var(--neutral-500);
-	--color-text-on-action: var(--red-900);
-	--color-text-on-danger: #ffffff;
-
-	/* Identity */
-	--color-brand: var(--red-500);
-	--color-brand-strong: var(--red-600);
-
-	/* Actions */
-	--color-action: var(--coral-300);
-	--color-action-hover: var(--coral-400);
-
-	/* Feedback */
-	--color-success: var(--green-400);
-	--color-success-hover: var(--green-500);
-	--color-danger: var(--red-500);
-	--color-danger-hover: var(--red-600);
-
-	/* Accessibility */
-	--color-focus: var(--coral-300);
-
-	/* OLD */
-	--color-bg: var(--color-page);
-
-	--color-primary: var(--color-brand);
-	--color-primary-hover: var(--color-brand-strong);
-
-	--color-stitch: var(--color-action);
-	--color-stitch-secondary: var(--color-surface-subtle);
-	--color-stitch-text: var(--color-text-on-action);
-
-	--color-accent: var(--color-success);
-
-	--box-shadow-header:
-		rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px,
-		rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px,
-		rgba(0, 0, 0, 0.07) 0px 16px 16px;
-	--box-shadow-footer:
-		rgba(0, 0, 0, 0.07) 0px -1px 1px, rgba(0, 0, 0, 0.07) 0px -2px 2px,
-		rgba(0, 0, 0, 0.07) 0px -4px 4px, rgba(0, 0, 0, 0.07) 0px -8px 8px,
-		rgba(0, 0, 0, 0.07) 0px -16px 16px;
-
 	--horizontal-margin: 2rem;
 
+	@media screen and (width < 500px) {
+		--horizontal-margin: 1rem;
+	}
+}
+
+:root {
 	--dashed-line-color: var(--color-text);
 	--vertical-dashed-line: repeating-linear-gradient(
 		to bottom,
 		var(--dashed-line-color) 0 7px,
 		transparent 7px 12px
 	);
-
 	--horizontal-dashed-line: repeating-linear-gradient(
 		to right,
 		var(--dashed-line-color) 0 7px,
 		transparent 7px 12px
 	);
-
-	@media screen and (width < 500px) {
-		--horizontal-margin: 1rem;
-	}
 }
 
 * {
@@ -141,7 +72,7 @@ html,
 body {
 	height: 100%;
 	overflow: hidden;
-	background-color: var(--color-bg);
+	background-color: var(--color-page);
 }
 
 body {

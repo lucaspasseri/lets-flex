@@ -211,6 +211,83 @@
 	margin-top: 0.5rem;
 }
 
+.profile-theme-selector {
+	display: grid;
+	width: 100%;
+	gap: 0.75rem;
+	margin: 0.25rem 0 0;
+	padding: 0;
+	border: 0;
+}
+
+.profile-theme-selector legend {
+	margin-bottom: 0.1rem;
+	color: var(--color-text);
+	font-size: 0.78rem;
+	font-weight: 700;
+}
+
+.profile-theme-current {
+	color: var(--color-text-muted);
+	font-size: 0.72rem;
+}
+
+.profile-theme-current strong {
+	color: var(--color-action);
+}
+
+.profile-theme-options {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.75rem;
+}
+
+.profile-theme-option {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: start;
+	gap: 0.65rem;
+	min-width: 0;
+	padding: 0.8rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.7rem;
+	background: var(--color-page);
+	cursor: pointer;
+}
+
+.profile-theme-option:has(input:checked) {
+	border-color: var(--color-action);
+	background: color-mix(in srgb, var(--color-action) 8%, var(--color-page));
+}
+
+.profile-theme-option input {
+	width: 1.1rem;
+	height: 1.1rem;
+	margin: 0.15rem 0 0;
+	accent-color: var(--color-action);
+}
+
+.profile-theme-option span {
+	display: grid;
+	gap: 0.2rem;
+	min-width: 0;
+}
+
+.profile-theme-option strong {
+	font-size: 0.82rem;
+}
+
+.profile-theme-option small {
+	color: var(--color-text-muted);
+	font-size: 0.72rem;
+	line-height: 1.4;
+}
+
+.profile-theme-option:has(input:focus-visible) {
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
+	outline-offset: 3px;
+}
+
 .profile-link-message {
 	padding: 0.65rem 0.75rem;
 	border-radius: 0.55rem;
@@ -279,6 +356,10 @@
 	}
 
 	.profile-card {
+		grid-template-columns: 1fr;
+	}
+
+	.profile-theme-options {
 		grid-template-columns: 1fr;
 	}
 }

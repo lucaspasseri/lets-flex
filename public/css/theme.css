@@ -1,0 +1,256 @@
+/* Semantic appearance tokens. Component styles should consume these roles, not theme names. */
+
+:root,
+:root[data-theme="classic"] {
+	--color-page: #0b0c10;
+	--color-surface: #16181d;
+	--color-surface-raised: #1c1c1c;
+	--color-surface-subtle: var(--color-surface-raised);
+	--color-border: #2a2d34;
+
+	--color-text: #e5e7eb;
+	--color-text-muted: #9ca3af;
+	--color-text-disabled: #6b7280;
+	--color-text-on-action: #670505;
+	--color-text-on-danger: #ffffff;
+
+	--color-brand: #e63946;
+	--color-brand-strong: #c1121f;
+	--color-action: #ffb4ac;
+	--color-action-hover: #f59f98;
+	--color-secondary: #2ec4b6;
+	--color-secondary-hover: #25a99e;
+	--color-success: #2ec4b6;
+	--color-success-hover: #25a99e;
+	--color-warning: #f59e0b;
+	--color-danger: #e63946;
+	--color-danger-hover: #c1121f;
+	--color-focus: #ffb4ac;
+
+	--focus-ring: 2px solid var(--color-focus);
+	--surface-shadow:
+		rgba(0, 0, 0, 0.07) 0px 1px 1px, rgba(0, 0, 0, 0.07) 0px 2px 2px,
+		rgba(0, 0, 0, 0.07) 0px 4px 4px, rgba(0, 0, 0, 0.07) 0px 8px 8px,
+		rgba(0, 0, 0, 0.07) 0px 16px 16px;
+	--accent-shadow: 0 0 0 3px color-mix(in srgb, var(--color-secondary) 18%, transparent);
+	--primary-gradient: linear-gradient(
+		135deg,
+		var(--color-action),
+		var(--color-action-hover)
+	);
+
+	--color-accent: var(--color-secondary);
+}
+
+:root[data-theme="neon"] {
+	--color-page: oklch(12% 0.032 265);
+	--color-surface: oklch(17% 0.04 266);
+	--color-surface-raised: oklch(22% 0.05 266);
+	--color-surface-subtle: var(--color-surface-raised);
+	--color-border: oklch(31% 0.055 268);
+
+	--color-text: oklch(96% 0.018 98);
+	--color-text-muted: oklch(76% 0.035 265);
+	--color-text-disabled: oklch(54% 0.04 265);
+	--color-text-on-action: oklch(17% 0.04 265);
+	--color-text-on-danger: #ffffff;
+
+	--color-brand: oklch(68% 0.22 26);
+	--color-brand-strong: oklch(60% 0.23 26);
+	--color-action: oklch(82% 0.19 190);
+	--color-action-hover: oklch(88% 0.16 190);
+	--color-secondary: oklch(78% 0.2 304);
+	--color-secondary-hover: oklch(85% 0.16 304);
+	--color-success: oklch(74% 0.11 175);
+	--color-success-hover: oklch(81% 0.09 175);
+	--color-warning: oklch(84% 0.17 88);
+	--color-danger: oklch(68% 0.22 26);
+	--color-danger-hover: oklch(61% 0.23 26);
+	--color-focus: oklch(82% 0.19 190);
+
+	--focus-ring: 2px solid var(--color-focus);
+	--surface-shadow: 0 1rem 3rem rgb(0 0 0 / 20%);
+	--accent-shadow: 0 0 1rem color-mix(in oklch, var(--color-action) 24%, transparent);
+	--primary-gradient: linear-gradient(
+		135deg,
+		color-mix(in oklch, var(--color-action) 88%, var(--color-surface)),
+		color-mix(in oklch, var(--color-secondary) 64%, var(--color-surface))
+	);
+
+	--color-accent: var(--color-secondary);
+}
+
+/* Neon keeps the shared layout and component contracts, adding only visual treatment. */
+
+:root[data-theme="neon"] body {
+	background-image:
+		radial-gradient(
+			circle at 86% 0%,
+			color-mix(in oklch, var(--color-secondary) 10%, transparent),
+			transparent 25rem
+		),
+		radial-gradient(
+			circle at 3% 26%,
+			color-mix(in oklch, var(--color-action) 8%, transparent),
+			transparent 28rem
+		);
+}
+
+:root[data-theme="neon"] main {
+	background-image:
+		radial-gradient(
+			circle at 82% 0%,
+			color-mix(in oklch, var(--color-secondary) 11%, transparent),
+			transparent 24rem
+		),
+		radial-gradient(
+			circle at 5% 24%,
+			color-mix(in oklch, var(--color-action) 8%, transparent),
+			transparent 28rem
+		);
+}
+
+:root[data-theme="neon"] .page-header,
+:root[data-theme="neon"] .application-menu {
+	border-color: var(--color-border);
+	background: color-mix(in oklch, var(--color-page) 88%, transparent);
+}
+
+:root[data-theme="neon"] .primary-navigation__link[aria-current="page"] {
+	color: var(--color-action);
+	text-shadow: 0 0 1.1rem color-mix(in oklch, var(--color-action) 60%, transparent);
+}
+
+:root[data-theme="neon"] .primary-navigation__indicator.is-active {
+	background: var(--color-action);
+	box-shadow: var(--accent-shadow);
+}
+
+:root[data-theme="neon"] .dashboard-hero {
+	border-color: color-mix(in oklch, var(--color-action) 42%, var(--color-border));
+	background:
+		linear-gradient(
+			135deg,
+			color-mix(in oklch, var(--color-action) 11%, transparent),
+			transparent 42%
+		),
+		linear-gradient(120deg, var(--color-surface), var(--color-page));
+	box-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 6%),
+		var(--surface-shadow);
+}
+
+:root[data-theme="neon"] .day-page__hero {
+	border-color: color-mix(in oklch, var(--color-secondary) 35%, var(--color-border));
+	background:
+		linear-gradient(
+			115deg,
+			color-mix(in oklch, var(--color-secondary) 11%, transparent),
+			transparent 55%
+		),
+		var(--color-surface);
+	box-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 5%),
+		var(--surface-shadow);
+}
+
+:root[data-theme="neon"] .dashboard-status,
+:root[data-theme="neon"] .dashboard-calendar,
+:root[data-theme="neon"] .dashboard-workout,
+:root[data-theme="neon"] .dashboard-metric,
+:root[data-theme="neon"] .dashboard-onboarding-card,
+:root[data-theme="neon"] .analytics-summary,
+:root[data-theme="neon"] .session-summaries,
+:root[data-theme="neon"] .session-details,
+:root[data-theme="neon"] .day-navigation,
+:root[data-theme="neon"] .day-panel,
+:root[data-theme="neon"] .workout-card,
+:root[data-theme="neon"] .profile-identity,
+:root[data-theme="neon"] .profile-card,
+:root[data-theme="neon"] .form-section {
+	border-color: color-mix(in oklch, var(--color-secondary) 25%, var(--color-border));
+	background: color-mix(in oklch, var(--color-surface) 94%, transparent);
+	box-shadow:
+		inset 0 1px 0 rgb(255 255 255 / 4%),
+		var(--surface-shadow);
+}
+
+:root[data-theme="neon"] .dashboard-status__day,
+:root[data-theme="neon"] .dashboard-calendar__day,
+:root[data-theme="neon"] .day-navigation__item,
+:root[data-theme="neon"] .session-summary,
+:root[data-theme="neon"] .session-component .session-step {
+	background: var(--color-page);
+}
+
+:root[data-theme="neon"] .dashboard-status__day.is-current,
+:root[data-theme="neon"] .dashboard-calendar__day--active,
+:root[data-theme="neon"] .day-navigation__item--current,
+:root[data-theme="neon"] .session-summary--current {
+	border-color: var(--color-action);
+	background: color-mix(in oklch, var(--color-action) 10%, var(--color-page));
+	box-shadow:
+		var(--accent-shadow),
+		inset 0 -2px 0 var(--color-action);
+}
+
+:root[data-theme="neon"] .session-component {
+	border-color: color-mix(in oklch, var(--color-action) 28%, var(--color-border));
+	background:
+		linear-gradient(
+			135deg,
+			color-mix(in oklch, var(--color-action) 5%, transparent),
+			transparent 38%
+		),
+		var(--color-surface);
+}
+
+:root[data-theme="neon"] .session-component--in-progress,
+:root[data-theme="neon"] .workout-card:has(.session-status--in-progress) {
+	border-color: var(--color-action);
+	box-shadow:
+		var(--accent-shadow),
+		inset 0 1px 0 rgb(255 255 255 / 7%);
+}
+
+:root[data-theme="neon"] .session-step__order {
+	border-color: color-mix(in oklch, var(--color-action) 55%, var(--color-border));
+	color: var(--color-action);
+	box-shadow: 0 0 0.8rem color-mix(in oklch, var(--color-action) 15%, transparent);
+}
+
+:root[data-theme="neon"] [data-tab][aria-selected="true"] {
+	border-color: color-mix(in oklch, var(--color-action) 70%, var(--color-border));
+	background: var(--color-surface-raised);
+	box-shadow:
+		var(--accent-shadow),
+		inset 0 -2px 0 var(--color-secondary);
+	color: var(--color-text);
+}
+
+:root[data-theme="neon"] .shared-button--primary {
+	border-color: transparent;
+	background: var(--primary-gradient);
+	box-shadow: var(--accent-shadow);
+}
+
+:root[data-theme="neon"] .shared-button--primary:hover:not(:disabled) {
+	background: linear-gradient(
+		135deg,
+		var(--color-action-hover),
+		var(--color-secondary-hover)
+	);
+	box-shadow: 0 0 1.8rem color-mix(in oklch, var(--color-secondary) 34%, transparent);
+}
+
+:root[data-theme="neon"] .library-search-input:focus-within {
+	border-color: var(--color-action);
+	box-shadow: var(--accent-shadow);
+}
+
+@supports (clip-path: polygon(0 0, 90% 0, 100% 15%, 100% 100%, 0 100%)) {
+	:root[data-theme="neon"] .media-frame--icon,
+	:root[data-theme="neon"] .media-frame--thumbnail {
+		clip-path: polygon(0 0, 88% 0, 100% 18%, 100% 100%, 0 100%);
+	}
+}

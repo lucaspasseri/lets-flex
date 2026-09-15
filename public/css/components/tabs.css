@@ -23,7 +23,7 @@ h2 + [data-tabs] {
 }
 
 [data-tab-panel]:not([hidden]) {
-	box-shadow: var(--box-shadow-header);
+	box-shadow: var(--surface-shadow);
 	padding: 2em;
 	background-color: var(--color-border);
 }

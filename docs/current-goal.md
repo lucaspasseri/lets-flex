@@ -1,68 +1,80 @@
 # Current Goal
 
-## Goal: Post-goal cleanup, translation coverage, and CSS loading audit
+## Goal: Implement a production-ready Classic + Neon theme system
 
 ### Status
 
-**Completed:** 2026-09-14 after explicit user approval. Actions 1–3 are **Completed** after
-verification.
+**Completed — Actions 1–4 are Completed.** This goal was explicitly requested on 2026-09-14 and
+approved on 2026-09-14.
+
+**Outcome:** Delivered exactly two shared semantic themes with Classic as the default and Neon as
+the persisted optional theme; an accessible localized profile selector; safe pre-paint resolution;
+shared decorative consolidation; locale regression coverage; and final design/workflow records.
+Live browser and database checks remain unavailable in the sandbox and are documented rather than
+claimed as verified.
 
 ### Objective
 
-Perform a focused cleanup and consistency pass after the completed object-storage/media work:
+Implement one shared visual/component system with exactly two user-selectable themes:
 
-1. Remove or consolidate files that are no longer necessary after media storage moved behind the
-   object-storage boundary.
-2. Find and fix remaining untranslated user-facing text while reusing the existing i18n system.
-3. Diagnose and fix the initial CSS/style flash, especially browser-default white form controls.
+- **Classic** — the current `main` appearance, bright, calm, restrained, and the default.
+- **Neon** — the approved bold-neon direction, with dark surfaces, cyan/blue primary treatment,
+  violet secondary accents, intentional gradients, stronger contrast, and restrained glow.
 
-Keep the implementation simple, predictable, and conservative. Investigate before changing or
-deleting anything, and document what is removed, retained, updated, uncertain, or deferred.
+Provide an accessible Appearance/Theme control in the existing profile/settings surface. Persist the
+choice across navigation, reloads, and future visits; safely fall back to Classic for missing or
+invalid values; and resolve the saved choice before initial paint to avoid a Classic-to-Neon flash.
 
 ### Verified baseline
 
-- The previous object-storage goal's Actions 1–12 and corrective follow-up are completed. The
-  current repository uses stable object keys, configured media URLs, R2-backed runtime selection,
-  guarded reset reconstruction, and production refusal of the local persistent-media adapter.
-- `data/canonical-media.json` is the durable canonical source and currently contains 70 entries.
-  `db/mediaSeedSql.js` and the resolver still make local fallback/source-file assumptions that must
-  be checked before removing anything under `public/media`.
-- `public/media` contains 78 tracked files, and the ignored local `public/media/uploads` directory
-  currently contains 73 files. Their roles must be classified before any deletion.
-- The shared head now requests foundational theme/control styles directly before `/css/main.css`;
-  `main.css` retains the later feature/component imports. The direct boundary avoids delaying the
-  first-paint contract behind the nested `@import` chain while preserving the existing cascade.
-- The English and Brazilian Portuguese locale files each contain 1,183 scalar keys with no key
-  parity gaps. This does not prove that every user-facing literal or fallback/default is translated;
-  the known `/history`, `/programs`, and `/library` flows still require a rendered audit.
-- `docs/media-asset-provenance.md` contains historical local upload references that must be
-  classified as historical, retained, or stale rather than removed blindly.
+- The current checked-out branch is `main`. Historical experiment commits `a982c53` and `f6f1533`
+  provide the earlier cyan/violet Neon direction requested as the source for this goal; the later
+  calm palette commit is not active production code.
+- `public/css/theme.css` now owns the Classic and Neon semantic token boundaries, while the shared
+  head loads it before the foundational and feature stylesheet chain.
+- Repository verification found that the historical experiment file, import, and page marker classes
+  are absent from the current tree. The historical commits are source material, not active
+  production wiring, so Action 3 consolidated approved decoration without repeating deletion work.
+- The profile selector and browser theme module now provide the two-choice preference and safe
+  persistence; the pre-paint resolver applies only supported stored values before styles load.
+- `views/profile.ejs` and `public/css/pages/profile.css` provide the authenticated and guest account
+  surface for the selector, and browser initialization starts in `public/js/app.js`.
+- Theme-control copy for the section, helper text, legend, active status, option names, and option
+  descriptions is translator-backed and verified in both `en` and `pt-BR`; the active status derives
+  its name from the localized option label after switching.
+- The existing session architecture and locale middleware do not expose a user-preference store.
+  Browser persistence is therefore the simplest compatible strategy for guests and authenticated
+  users alike, without adding database complexity.
 
-### Action status
+### Scope and constraints
 
-1. **Repository cleanup after object-storage migration — Completed.** Audit `/docs`, `/data`, and
-   `/public/media`; remove only verified obsolete files and update or remove obsolete documentation.
-2. **Complete remaining translation coverage — Completed.** Audit all user-facing server and browser
-   text, with special attention to `/history`, `/programs`, `/library`, modals, and dynamic states;
-   verify both supported locales.
-3. **Diagnose and fix the initial CSS/style flash — Completed.** Trace the actual EJS/layout and CSS
-   loading path, then apply the smallest architectural fix for foundational theme and form-control
-   styling without overlays or timing hacks.
+In scope: semantic theme tokens, shared component consumption, Classic and Neon theme boundaries,
+profile theme selector, browser persistence, pre-paint resolution, translation coverage, focused
+regression tests, CSS cleanup, and design/workflow documentation.
 
-### Scope and explicit deferrals
+Preserve authentication, i18n, media, navigation, forms, modals, workout interactions, View
+Transitions, accessibility contracts, responsive layouts, and existing component structures. Do not
+add a framework or production dependency. Do not commit, merge, push, or delete branches.
 
-In scope: conservative repository cleanup, accurate media documentation, existing i18n coverage,
-server-rendered and browser-generated user-facing strings, stylesheet ordering/loading, form-control
-defaults, focused tests, startup/reset verification, and relevant manual rendering checks.
+Theme-specific styling may change colors, surfaces, borders, gradients, shadows, glow, and related
+decoration. Layouts, spacing, responsive rules, semantics, state logic, and interaction behavior
+remain shared. The middle-ground/calm palette experiment is rejected and must not remain an active
+theme direction.
 
-Deferred: unrelated redesign, broad accessibility remediation, new translation architecture,
-destructive object-storage cleanup, migration redesign, production infrastructure changes, and any
-file or asset whose purpose cannot be verified.
+### Done when
 
-### Verification boundary
+- The application renders exactly Classic and Neon through shared semantic tokens, with Classic as
+  the default.
+- Profile users can select either theme with accessible semantics; selection persists and never
+  redirects or resets page state.
+- The selected stored theme is applied before visible initial rendering as far as the automated
+  environment can verify, with invalid values falling back to Classic.
+- The obsolete experiment wrapper and redundant competing Neon rules are removed or consolidated;
+  responsive/layout and component contracts remain shared.
+- `docs/design.md` records the supported themes, boundaries, rationale, and rejected experiment.
+- Focused regression coverage and the repository verification suite pass. Browser visual/keyboard
+  checks are reported honestly if the environment still lacks a browser executable.
 
-Required verification includes `npm run db:reset` only against the explicitly authorized local or
-development target, `npm run dev` startup, media resolution and fallback behavior, both locales for
-`/history`, `/programs`, `/library`, relevant modals, initial form rendering, and the repository's
-format, lint, type, browser-type, test, and broad verification checks as applicable. No production,
-object-storage, or unrelated database mutation is authorized by this goal.
+At completion, summarize the architecture, persistence, flash prevention, retained/refactored CSS,
+files changed, verification, limitations, and next review decision. Stop at **Ready for review**;
+do not mark this goal complete without explicit user approval.
