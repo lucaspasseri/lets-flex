@@ -1,4 +1,5 @@
 import createViewModelTranslator, { translateCount } from "../translate.js";
+import createViewTransitionName from "../shared/createViewTransitionName.js";
 import formatCatalogDisplayName from "../../../src/infrastructure/i18n/formatCatalogDisplayName.js";
 import translateStepTypeLabel from "../../../src/infrastructure/i18n/translateStepTypeLabel.js";
 import {
@@ -69,6 +70,10 @@ function detailUrl(id, filters, page) {
 	return `/history/${id}${query ? `?${query}` : ""}`;
 }
 
+function historyReturnUrl(filters, page) {
+	return `${historyUrl(filters, page)}#history-results-heading`;
+}
+
 /**
  * @param {{page: Record<string, unknown>, data: {currentUser: import("../../../src/features/users/users.types.js").User | null, programs: import("../../../src/features/programs/programs.types.js").Program[], history: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryPage}, filters: import("../../../src/features/workoutHistory/workoutHistory.types.js").WorkoutHistoryFilters, translate?: Function, language?: string}} input
  */
@@ -99,6 +104,7 @@ export function createWorkoutHistoryListPageViewModel({
 		t("history.unnamedSession", { defaultValue: "Workout session" });
 	const items = data.history.items.map((item) => ({
 		id: item.id,
+		viewTransitionName: createViewTransitionName("history-session", item.id),
 		href: detailUrl(item.id, filters, data.history.page),
 		title: item.sessionName ?? unnamedSession(),
 		programName:
@@ -335,7 +341,8 @@ export function createWorkoutHistoryDetailPageViewModel({
 			title: `${history.sessionName ?? unnamedSession()} · ${t("history.title", { defaultValue: "Workout history" })} · Let's Flex!`,
 		},
 		shell: { currentUser, activeNavigation: "history" },
-		backHref: historyUrl(returnFilters, returnPage),
+		viewTransitionName: createViewTransitionName("history-session", history.id),
+		backHref: historyReturnUrl(returnFilters, returnPage),
 		heading: {
 			eyebrow: t("history.title", { defaultValue: "Workout history" }),
 			title: history.sessionName ?? unnamedSession(),

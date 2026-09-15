@@ -1,80 +1,115 @@
-# Current Goal
+# Goal: Audit and Expand View Transitions Without Sacrificing Performance or Predictability
 
-## Goal: Implement a production-ready Classic + Neon theme system
+## Goal status
 
-### Status
+**Completed.**
 
-**Completed — Actions 1–4 are Completed.** This goal was explicitly requested on 2026-09-14 and
-approved on 2026-09-14.
+**Approved:** 2026-09-14 after explicit user approval.
 
-**Outcome:** Delivered exactly two shared semantic themes with Classic as the default and Neon as
-the persisted optional theme; an accessible localized profile selector; safe pre-paint resolution;
-shared decorative consolidation; locale regression coverage; and final design/workflow records.
-Live browser and database checks remain unavailable in the sandbox and are documented rather than
-claimed as verified.
+**Completed:** 2026-09-14 after explicit approval of the final review.
 
-### Objective
+**Resumed:** 2026-09-14 after explicit approval of Action 1. This is a fresh blocked audit after
+the earlier approval-gate pause.
 
-Implement one shared visual/component system with exactly two user-selectable themes:
+## Primary objective
 
-- **Classic** — the current `main` appearance, bright, calm, restrained, and the default.
-- **Neon** — the approved bold-neon direction, with dark surfaces, cyan/blue primary treatment,
-  violet secondary accents, intentional gradients, stronger contrast, and restrained glow.
+Improve visual continuity across the server-rendered Express + EJS application by using View
+Transitions intentionally for navigation, selected states, high-value shared entities, and
+appropriate drill-down returns. Preserve fast normal navigation, progressive enhancement,
+accessibility, reduced-motion behavior, and the existing server-rendered architecture.
 
-Provide an accessible Appearance/Theme control in the existing profile/settings surface. Persist the
-choice across navigation, reloads, and future visits; safely fall back to Classic for missing or
-invalid values; and resolve the saved choice before initial paint to avoid a Classic-to-Neon flash.
+## Existing relevant capabilities — Verified
 
-### Verified baseline
+- `public/css/base.css` enables native same-origin cross-document transitions with
+  `@view-transition { navigation: auto; }` and gives the root transition a short 100ms duration.
+- Global reduced-motion CSS disables navigation transitions and animation of View Transition
+  pseudo-elements.
+- The application chrome already names the active navigation indicator so the selected item can
+  move between primary destinations when native cross-document transitions are supported.
+- Programs already use stable day names derived from numeric IDs, with a small browser enhancement
+  that coordinates the Programs calendar item with the Day page header.
+- Programs and Day pages already use named selected states for program, cycle, and current-day
+  continuity. Profile selection and Library session selection/details also have named states.
+- Tabs are semantic and keyboard-oriented, but their selection currently uses ordinary DOM updates;
+  there is no `document.startViewTransition()` implementation.
+- The application uses an inner `[data-page-content]` scroll container and also has nested Library
+  session-list scrolling. Day-page JavaScript currently restores only the horizontal position of
+  the selected day rail.
+- No explicit `history.scrollRestoration`, `sessionStorage` scroll state, or global scroll manager
+  exists. No POST/redirect flow has custom transition orchestration.
+- No browser executable is available in the current environment, so live rendering, Back/Forward,
+  console, jank, and duplicate-name inspection require honest manual verification when a browser is
+  available.
 
-- The current checked-out branch is `main`. Historical experiment commits `a982c53` and `f6f1533`
-  provide the earlier cyan/violet Neon direction requested as the source for this goal; the later
-  calm palette commit is not active production code.
-- `public/css/theme.css` now owns the Classic and Neon semantic token boundaries, while the shared
-  head loads it before the foundational and feature stylesheet chain.
-- Repository verification found that the historical experiment file, import, and page marker classes
-  are absent from the current tree. The historical commits are source material, not active
-  production wiring, so Action 3 consolidated approved decoration without repeating deletion work.
-- The profile selector and browser theme module now provide the two-choice preference and safe
-  persistence; the pre-paint resolver applies only supported stored values before styles load.
-- `views/profile.ejs` and `public/css/pages/profile.css` provide the authenticated and guest account
-  surface for the selector, and browser initialization starts in `public/js/app.js`.
-- Theme-control copy for the section, helper text, legend, active status, option names, and option
-  descriptions is translator-backed and verified in both `en` and `pt-BR`; the active status derives
-  its name from the localized option label after switching.
-- The existing session architecture and locale middleware do not expose a user-preference store.
-  Browser persistence is therefore the simplest compatible strategy for guests and authenticated
-  users alike, without adding database complexity.
+## Delta classification
 
-### Scope and constraints
+### Already satisfied / reuse
 
-In scope: semantic theme tokens, shared component consumption, Classic and Neon theme boundaries,
-profile theme selector, browser persistence, pre-paint resolution, translation coverage, focused
-regression tests, CSS cleanup, and design/workflow documentation.
+- Native cross-document transition opt-in, root fade, reduced-motion fallback, active navigation
+  indicator, and existing Programs/Day selection transitions remain the baseline.
+- Existing EJS shells, view models, browser component initialization, semantic tabs, and native
+  links/forms remain the implementation architecture.
 
-Preserve authentication, i18n, media, navigation, forms, modals, workout interactions, View
-Transitions, accessibility contracts, responsive layouts, and existing component structures. Do not
-add a framework or production dependency. Do not commit, merge, push, or delete branches.
+### Modify / Add
 
-Theme-specific styling may change colors, surfaces, borders, gradients, shadows, glow, and related
-decoration. Layouts, spacing, responsive rules, semantics, state logic, and interaction behavior
-remain shared. The middle-ground/calm palette experiment is rejected and must not remain an active
-theme direction.
+- Record a complete transition inventory and decision matrix in the active action record, including
+  intentional exclusions and known browser limitations.
+- Establish and test a small naming contract for stable entity transitions, including uniqueness,
+  identifier sanitization, and safe fallback behavior.
+- Add only high-value shared-element continuity that is supported by the audit, prioritizing a
+  genuine list/detail relationship such as workout history; avoid animating unrelated entities.
+- Verify and, only where justified, add targeted scroll restoration for drill-down returns without
+  preserving scroll globally or changing new top-level navigation semantics.
+- Keep same-document tabs, filters, mutations, and simple selected-state changes on ordinary CSS/DOM
+  transitions unless evidence shows a View Transition materially improves orientation.
+- Add focused regression coverage and document performance/accessibility behavior.
 
-### Done when
+## Scope and constraints
 
-- The application renders exactly Classic and Neon through shared semantic tokens, with Classic as
-  the default.
-- Profile users can select either theme with accessible semantics; selection persists and never
-  redirects or resets page state.
-- The selected stored theme is applied before visible initial rendering as far as the automated
-  environment can verify, with invalid values falling back to Classic.
-- The obsolete experiment wrapper and redundant competing Neon rules are removed or consolidated;
-  responsive/layout and component contracts remain shared.
-- `docs/design.md` records the supported themes, boundaries, rationale, and rejected experiment.
-- Focused regression coverage and the repository verification suite pass. Browser visual/keyboard
-  checks are reported honestly if the environment still lacks a browser executable.
+In scope: global and page-specific View Transition CSS, stable transition names and their view-model
+contracts, selected navigation/entity continuity, high-value server-rendered list/detail navigation,
+targeted scroll behavior, tab motion decisions, reduced-motion handling, focused tests, and this
+goal/action documentation.
 
-At completion, summarize the architecture, persistence, flash prevention, retained/refactored CSS,
-files changed, verification, limitations, and next review decision. Stop at **Ready for review**;
-do not mark this goal complete without explicit user approval.
+Preserve authentication, authorization, i18n, forms, server redirects, fixed application chrome,
+workout behavior, responsive layouts, semantic tab behavior, and the completed Classic + Neon theme
+system. Do not add React, client-side routing, a global SPA layer, a large animation dependency, or
+custom JavaScript redirects solely to animate navigation. Do not animate every state change or
+preserve scroll on every navigation.
+
+## Done when
+
+- The existing View Transition implementation is fully inventoried, including cross-document
+  behavior, named elements, CSS, JavaScript coordination, fixed chrome interaction, and known
+  limitations.
+- A small, tested naming contract prevents duplicate or unsafe entity names and is reused by any
+  new shared-element transition.
+- High-value continuity is implemented only for audited candidates; major navigation remains fast,
+  selected navigation remains correct, and deliberate non-transition decisions are recorded.
+- Tabs and simple filters retain semantic behavior and use ordinary CSS/DOM motion where that is
+  the simpler choice.
+- Scroll restoration is native-first and, if needed, limited to demonstrated drill-down cases;
+  new top-level navigation does not inherit stale positions.
+- Reduced motion, unsupported View Transition APIs, JavaScript failure, keyboard access, and focus
+  behavior retain safe fallbacks.
+- Focused tests, formatting, lint, type checks, browser-type checks, and the applicable full suite
+  pass, with unavailable browser/database checks reported honestly.
+- `docs/current-goal.md` and `docs/current-actions.md` record the final implementation, exclusions,
+  verification evidence, and future enhancements without silently expanding scope.
+
+## Intentionally excluded unless separately approved
+
+- Client-side routing or partial-page navigation.
+- Global scroll preservation or a general-purpose scroll framework.
+- View Transitions for every tab, filter, form mutation, authentication redirect, or POST → redirect
+  flow.
+- Decorative page slides, long entrance sequences, expensive filters, or large snapshot animations.
+- Live browser inspection in this environment until a browser executable is available.
+
+## Completion outcome
+
+The application now has an audited, safe View Transition naming contract; restrained history
+list/detail continuity; native-first targeted drill-down restoration; ordinary semantic tab behavior
+with focus and reduced-motion safeguards; and documented fallback behavior for redirects, unsupported
+APIs, JavaScript failure, fixed chrome, and scroll surfaces. Full automated verification passed with
+479/479 tests. Live browser inspection remains the only recorded limitation.

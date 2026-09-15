@@ -11,7 +11,7 @@ h2 + [data-tabs] {
 	border: 0;
 	padding: 1em;
 	background-color: var(--color-surface);
-	transition: background-color 400ms ease;
+	transition: background-color 160ms ease;
 	color: var(--color-text);
 	font-size: 1.1em;
 	border-top-left-radius: 4px;
@@ -22,6 +22,13 @@ h2 + [data-tabs] {
 	cursor: pointer;
 }
 
+[data-tab]:focus-visible {
+	position: relative;
+	z-index: 1;
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+
 [data-tab-panel]:not([hidden]) {
 	box-shadow: var(--surface-shadow);
 	padding: 2em;
@@ -30,4 +37,10 @@ h2 + [data-tabs] {
 
 [data-tab][aria-selected="true"] {
 	background-color: var(--color-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-tab] {
+		transition: none;
+	}
 }

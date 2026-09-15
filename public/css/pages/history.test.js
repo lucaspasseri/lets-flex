@@ -20,4 +20,6 @@ test("history presentation is loaded and includes responsive accessibility contr
 	assert.match(historyCss, /\.history-table-scroll:focus-visible/);
 	assert.match(historyCss, /\.history-primary-action:focus-visible/);
 	assert.match(historyCss, /min-height: 2\.75rem/);
+	assert.match(historyCss, /::view-transition-group\(\.history-session\)/);
+	assert.match(historyCss, /animation-duration: 240ms/);
 });

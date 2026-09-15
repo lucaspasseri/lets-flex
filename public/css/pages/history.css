@@ -151,6 +151,22 @@
 	background: var(--color-surface-subtle);
 }
 
+::view-transition-group(.history-session) {
+	z-index: 1;
+	overflow: clip;
+	animation-duration: 240ms;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(.history-session),
+::view-transition-new(.history-session) {
+	height: 100%;
+	overflow: clip;
+	border-radius: 1rem;
+	animation-duration: inherit;
+	animation-timing-function: inherit;
+}
+
 .history-card:focus-within {
 	outline: 3px solid color-mix(in srgb, var(--color-focus) 58%, transparent);
 	outline-offset: 3px;

@@ -47,13 +47,19 @@
 			<ol class="history-list">
 				<% results.items.forEach(item => { %>
 					<li class="history-list__item">
-						<article class="history-card" data-status="<%= item.status %>">
+						<article
+							class="history-card"
+							data-status="<%= item.status %>"
+							<% if (item.viewTransitionName) { %>
+								style="view-transition-name: <%= item.viewTransitionName %>; view-transition-class: history-session"
+							<% } %>
+						>
 							<div class="history-card__marker" aria-hidden="true"></div>
 							<div class="history-card__body">
 								<header class="history-card__header">
 									<div class="history-card__title">
 										<span class="history-status" data-status="<%= item.status %>"><span aria-hidden="true"></span><%= item.statusLabel %></span>
-										<h3><a href="<%= item.href %>"><%= item.title %></a></h3>
+										<h3><a href="<%= item.href %>" data-history-detail-link><%= item.title %></a></h3>
 										<p><%= item.programName %></p>
 									</div>
 									<div class="history-card__date">
@@ -89,3 +95,8 @@
 		</nav>
 	<% } %>
 </main>
+
+<% if (typeof contentFor === "function") { %>
+	<%- contentFor("scripts") %>
+	<script type="module" src="/js/pages/history/index.js"></script>
+<% } %>

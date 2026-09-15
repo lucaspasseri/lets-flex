@@ -141,6 +141,19 @@ test("chrome styles keep closed navigation inert-compatible without display anim
 	assert.doesNotMatch(css, /transition:\s*all/);
 });
 
+test("chrome styles expose one named active navigation indicator", () => {
+	const css = fs.readFileSync(stylesheetPath, "utf8");
+
+	assert.match(
+		css,
+		/\.primary-navigation__indicator\.is-active\s*\{[\s\S]*?view-transition-name:\s*active-tab-indicator;/,
+	);
+	assert.match(
+		css,
+		/::view-transition-old\(active-tab-indicator\),[\s\S]*?animation-duration:\s*160ms;/,
+	);
+});
+
 test("chrome styles reserve one fixed responsive rail without offset margins", () => {
 	const css = fs.readFileSync(stylesheetPath, "utf8");
 	assert.match(

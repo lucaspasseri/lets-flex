@@ -56,6 +56,10 @@ test("history list renders semantic filters, status text, dates, and retained li
 	assert.match(html, /aria-label="Exercise result summary"/);
 	assert.match(html, /<time datetime="2026-08-10">/);
 	assert.match(html, /href="\/history\/7\?programId=3&amp;fromDate=2026-08-01"/);
+	assert.match(
+		html,
+		/style="view-transition-name: history-session-7; view-transition-class: history-session"/,
+	);
 	assert.match(html, /Session &lt;unsafe&gt;/);
 	assert.doesNotMatch(html, /Session <unsafe>/);
 });
@@ -101,6 +105,11 @@ test("history detail renders snapshots, performed sets, notes, and units without
 	const html = await renderFile(path.resolve("views/history/detail.ejs"), viewModel);
 
 	assert.match(html, /<main[^>]+data-workout-history-detail/);
+	assert.match(html, /href="\/history#history-results-heading"/);
+	assert.match(
+		html,
+		/style="view-transition-name: history-session-7; view-transition-class: history-session"/,
+	);
 	assert.match(html, /<dl>/);
 	assert.match(html, /<table>/);
 	assert.match(html, /role="region" aria-label="Performed sets for Back squat"/);

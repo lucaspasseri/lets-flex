@@ -27,3 +27,21 @@ test("base stylesheet establishes dark first-paint defaults for native controls"
 		/@import url\("\.\/components\/(?:forms|form|button)\.css"\)/,
 	);
 });
+
+test("base stylesheet keeps native View Transitions short and progressively enhanced", async () => {
+	const css = await readFile(stylesheetPath, "utf8");
+
+	assert.match(css, /@view-transition\s*{[^}]*navigation:\s*auto;/s);
+	assert.match(
+		css,
+		/::view-transition-old\(root\),[\s\S]*?animation-duration:\s*100ms;/,
+	);
+	assert.match(
+		css,
+		/@media \(prefers-reduced-motion: reduce\)[\s\S]*?navigation:\s*none;/,
+	);
+	assert.match(
+		css,
+		/@media \(prefers-reduced-motion: reduce\)[\s\S]*?::view-transition-new\(\*\)[\s\S]*?animation:\s*none !important;/,
+	);
+});

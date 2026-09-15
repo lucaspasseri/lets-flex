@@ -41,6 +41,7 @@ test("history list view model preserves filters across details and pagination", 
 	});
 
 	assert.equal(viewModel.shell.activeNavigation, "history");
+	assert.equal(viewModel.results.items[0].viewTransitionName, "history-session-9");
 	assert.equal(
 		viewModel.results.items[0].href,
 		"/history/9?programId=4&fromDate=2026-08-01&toDate=2026-08-31&page=2",
@@ -138,7 +139,11 @@ test("history detail view model uses snapshot labels and retains the list return
 		},
 	});
 
-	assert.equal(viewModel.backHref, "/history?programId=4&page=3");
+	assert.equal(
+		viewModel.backHref,
+		"/history?programId=4&page=3#history-results-heading",
+	);
+	assert.equal(viewModel.viewTransitionName, "history-session-9");
 	assert.equal(viewModel.steps[0].title, "Barbell bench press");
 	assert.equal(viewModel.steps[0].exerciseName, "Bench press");
 	assert.equal(viewModel.summary.historyDate.context, "Completed");

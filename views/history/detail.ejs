@@ -3,7 +3,14 @@
 	<a class="history-back-link" href="<%= backHref %>"><span aria-hidden="true">←</span> <%= translate("history.backToHistory", { defaultValue: "Back to workout history" }) %></a>
 	<%- include("../partials/shared/components/pageHeading", { heading }) %>
 
-	<section class="history-summary" aria-labelledby="history-summary-heading" data-status="<%= summary.status %>">
+	<section
+		class="history-summary"
+		aria-labelledby="history-summary-heading"
+		data-status="<%= summary.status %>"
+		<% if (viewTransitionName) { %>
+			style="view-transition-name: <%= viewTransitionName %>; view-transition-class: history-session"
+		<% } %>
+	>
 		<div class="history-section-heading">
 			<div><p class="history-eyebrow"><%= translate("history.atAGlance", { defaultValue: "At a glance" }) %></p><h2 id="history-summary-heading"><%= translate("history.sessionSummary", { defaultValue: "Session summary" }) %></h2></div>
 			<span class="history-status" data-status="<%= summary.status %>"><span aria-hidden="true"></span><%= summary.statusLabel %></span>

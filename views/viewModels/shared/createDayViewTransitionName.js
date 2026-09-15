@@ -1,4 +1,6 @@
+import createViewTransitionName from "./createViewTransitionName.js";
+
 /** @param {number | null} dayId */
 export default function createDayViewTransitionName(dayId) {
-	return dayId === null ? null : `program-calendar-day-${dayId}`;
+	return createViewTransitionName("program-calendar-day", dayId);
 }
