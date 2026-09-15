@@ -150,11 +150,31 @@ function diagnosticInputValue(value) {
 	return null;
 }
 
-/** @param {MediaManagementRequest} req @param {Record<string, any>} values @param {any} details */
-function logCanonicalPromotionRejection(req, values, details) {
+/**
+ * Emit the canonical-promotion diagnostic to stderr so the entry is visible in Render application
+ * logs even when HTTP request logs are unavailable.
+ *
+ * @param {MediaManagementRequest} req
+ * @param {Record<string, any>} values
+ * @param {{name?: unknown, code?: unknown, message?: unknown}} error
+ * @param {number} httpStatus
+ */
+export function logCanonicalPromotionRejection(req, values, error, httpStatus) {
+	const errorName = typeof error.name === "string" ? error.name : "Error";
+	const errorCode = typeof error.code === "string" ? error.code : "unknown";
+	const errorMessage =
+		typeof error.message === "string"
+			? error.message
+			: "Canonical media promotion failed.";
 	console.error(
-		"Canonical media promotion rejected",
-		createCanonicalPromotionDiagnostic(req, values, details),
+		"[canonical-media] promotion failed",
+		createCanonicalPromotionDiagnostic(req, values, {
+			rejectionReason: errorCode,
+			errorName,
+			errorCode,
+			errorMessage,
+			httpStatus,
+		}),
 	);
 }
 
@@ -321,13 +341,7 @@ async function promote(req, res) {
 				error.code === "entity_not_found" || error.code === "asset_not_found"
 					? 404
 					: 422;
-			logCanonicalPromotionRejection(req, body, {
-				rejectionReason: error.code,
-				errorName: error.name,
-				errorCode: error.code,
-				errorMessage: error.message,
-				httpStatus,
-			});
+			logCanonicalPromotionRejection(req, body, error, httpStatus);
 			if (error.code === "entity_not_found" || error.code === "asset_not_found") {
 				respondWithApplicationRecovery(req, res, { kind: "notFound" });
 				return;
@@ -575,14 +589,17 @@ async function showValidationErrors(req, res, result, kind) {
 			...Object.values(result.errors?.fieldErrors ?? {}),
 			...(result.errors?.formErrors ?? []),
 		].filter((message) => typeof message === "string" && message.trim() !== "");
-		logCanonicalPromotionRejection(req, values, {
-			rejectionReason: "request_body_validation",
-			errorName: "ZodError",
-			errorCode: "validation_failed",
-			errorMessage:
-				validationMessages.join("; ") || "Canonical media request failed validation.",
-			httpStatus: 422,
-		});
+		logCanonicalPromotionRejection(
+			req,
+			values,
+			{
+				name: "ZodError",
+				code: "validation_failed",
+				message:
+					validationMessages.join("; ") || "Canonical media request failed validation.",
+			},
+			422,
+		);
 	}
 	res.status(422);
 	await renderPage(req, res, {

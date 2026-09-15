@@ -4,6 +4,7 @@ import test from "node:test";
 import {
 	createCanonicalPromotionDiagnostic,
 	createMediaManagementPageFeedback,
+	logCanonicalPromotionRejection,
 	mediaGenerationErrorStatus,
 } from "./mediaManagementController.js";
 import { MediaGenerationError } from "../../features/media/mediaGeneration.js";
@@ -13,26 +14,30 @@ function translate(_key, options = {}) {
 }
 
 test("canonical promotion diagnostics include safe request context without the request body", () => {
+	const values = {
+		entityType: "muscle",
+		entityId: "13",
+		mediaAssetId: "75",
+		_csrf: "must-not-be-logged",
+		cookie: "must-not-be-logged",
+		authorization: "must-not-be-logged",
+	};
+	const details = {
+		rejectionReason: "alt_text_missing",
+		errorName: "MediaCanonicalPromotionError",
+		errorCode: "alt_text_missing",
+		errorMessage:
+			"Canonical media requires English and Brazilian Portuguese image descriptions.",
+		httpStatus: 422,
+	};
 	const diagnostic = createCanonicalPromotionDiagnostic(
 		/** @type {any} */ ({
 			get(name) {
 				return name === "Rndr-Id" ? "render-request-123" : undefined;
 			},
 		}),
-		{
-			entityType: "muscle",
-			entityId: "13",
-			mediaAssetId: "75",
-			_csrf: "must-not-be-logged",
-		},
-		{
-			rejectionReason: "alt_text_missing",
-			errorName: "MediaCanonicalPromotionError",
-			errorCode: "alt_text_missing",
-			errorMessage:
-				"Canonical media requires English and Brazilian Portuguese image descriptions.",
-			httpStatus: 422,
-		},
+		values,
+		details,
 	);
 
 	assert.deepEqual(diagnostic, {
@@ -48,6 +53,55 @@ test("canonical promotion diagnostics include safe request context without the r
 		httpStatus: 422,
 	});
 	assert.equal("_csrf" in diagnostic, false);
+});
+
+test("canonical promotion emits a searchable 422 diagnostic without sensitive request data", () => {
+	const logged = [];
+	const originalConsoleError = console.error;
+	console.error = (...args) => logged.push(args);
+	try {
+		logCanonicalPromotionRejection(
+			/** @type {any} */ ({
+				get(name) {
+					return name === "Rndr-Id" ? "render-request-123" : undefined;
+				},
+			}),
+			{
+				entityType: "muscle",
+				entityId: 13,
+				mediaAssetId: 75,
+				_csrf: "must-not-be-logged",
+				cookie: "must-not-be-logged",
+				sessionId: "must-not-be-logged",
+				authorization: "must-not-be-logged",
+			},
+			{
+				name: "MediaCanonicalPromotionError",
+				code: "alt_text_missing",
+				message:
+					"Canonical media requires English and Brazilian Portuguese image descriptions.",
+			},
+			422,
+		);
+	} finally {
+		console.error = originalConsoleError;
+	}
+
+	assert.equal(logged.length, 1);
+	assert.equal(logged[0][0], "[canonical-media] promotion failed");
+	assert.deepEqual(logged[0][1], {
+		requestId: "render-request-123",
+		entityType: "muscle",
+		entityId: 13,
+		mediaAssetId: 75,
+		rejectionReason: "alt_text_missing",
+		errorName: "MediaCanonicalPromotionError",
+		errorCode: "alt_text_missing",
+		errorMessage:
+			"Canonical media requires English and Brazilian Portuguese image descriptions.",
+		httpStatus: 422,
+	});
+	assert.doesNotMatch(JSON.stringify(logged), /must-not-be-logged/);
 });
 
 test("media operation feedback uses explicit success semantics for upload, assignment, removal, and approval", () => {
