@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+	createCanonicalPromotionDiagnostic,
 	createMediaManagementPageFeedback,
 	mediaGenerationErrorStatus,
 } from "./mediaManagementController.js";
@@ -10,6 +11,44 @@ import { MediaGenerationError } from "../../features/media/mediaGeneration.js";
 function translate(_key, options = {}) {
 	return options.defaultValue ?? "";
 }
+
+test("canonical promotion diagnostics include safe request context without the request body", () => {
+	const diagnostic = createCanonicalPromotionDiagnostic(
+		/** @type {any} */ ({
+			get(name) {
+				return name === "Rndr-Id" ? "render-request-123" : undefined;
+			},
+		}),
+		{
+			entityType: "muscle",
+			entityId: "13",
+			mediaAssetId: "75",
+			_csrf: "must-not-be-logged",
+		},
+		{
+			rejectionReason: "alt_text_missing",
+			errorName: "MediaCanonicalPromotionError",
+			errorCode: "alt_text_missing",
+			errorMessage:
+				"Canonical media requires English and Brazilian Portuguese image descriptions.",
+			httpStatus: 422,
+		},
+	);
+
+	assert.deepEqual(diagnostic, {
+		requestId: "render-request-123",
+		entityType: "muscle",
+		entityId: "13",
+		mediaAssetId: "75",
+		rejectionReason: "alt_text_missing",
+		errorName: "MediaCanonicalPromotionError",
+		errorCode: "alt_text_missing",
+		errorMessage:
+			"Canonical media requires English and Brazilian Portuguese image descriptions.",
+		httpStatus: 422,
+	});
+	assert.equal("_csrf" in diagnostic, false);
+});
 
 test("media operation feedback uses explicit success semantics for upload, assignment, removal, and approval", () => {
 	const cases = [

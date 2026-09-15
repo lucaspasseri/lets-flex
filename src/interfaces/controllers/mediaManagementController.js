@@ -122,6 +122,42 @@ function mediaPromotionDependencies(req) {
 	return req.app.locals.mediaPromotionDependencies ?? {};
 }
 
+/**
+ * Keep canonical-promotion diagnostics limited to the non-sensitive fields needed to identify
+ * the rejected catalog operation. In particular, do not include the submitted request body,
+ * which also contains the CSRF token.
+ *
+ * @param {MediaManagementRequest} req
+ * @param {Record<string, any>} values
+ * @param {{rejectionReason: string, errorName: string, errorCode: string, errorMessage: string, httpStatus?: number}} details
+ */
+export function createCanonicalPromotionDiagnostic(req, values, details) {
+	const requestId = req.get?.("Rndr-Id") ?? req.get?.("x-request-id") ?? null;
+	return {
+		requestId,
+		entityType:
+			typeof values.entityType === "string" ? values.entityType.slice(0, 80) : null,
+		entityId: diagnosticInputValue(values.entityId),
+		mediaAssetId: diagnosticInputValue(values.mediaAssetId),
+		...details,
+	};
+}
+
+/** @param {unknown} value */
+function diagnosticInputValue(value) {
+	if (typeof value === "number" || typeof value === "boolean") return value;
+	if (typeof value === "string") return value.slice(0, 80);
+	return null;
+}
+
+/** @param {MediaManagementRequest} req @param {Record<string, any>} values @param {any} details */
+function logCanonicalPromotionRejection(req, values, details) {
+	console.error(
+		"Canonical media promotion rejected",
+		createCanonicalPromotionDiagnostic(req, values, details),
+	);
+}
+
 /** @param {MediaManagementRequest} req */
 function mediaStorageDependencies(req) {
 	return { storage: req.app.locals.mediaStorage };
@@ -281,6 +317,17 @@ async function promote(req, res) {
 		);
 	} catch (error) {
 		if (error instanceof MediaCanonicalPromotionError) {
+			const httpStatus =
+				error.code === "entity_not_found" || error.code === "asset_not_found"
+					? 404
+					: 422;
+			logCanonicalPromotionRejection(req, body, {
+				rejectionReason: error.code,
+				errorName: error.name,
+				errorCode: error.code,
+				errorMessage: error.message,
+				httpStatus,
+			});
 			if (error.code === "entity_not_found" || error.code === "asset_not_found") {
 				respondWithApplicationRecovery(req, res, { kind: "notFound" });
 				return;
@@ -523,6 +570,20 @@ async function showValidationErrors(req, res, result, kind) {
 		result.submittedValues && typeof result.submittedValues === "object"
 			? result.submittedValues
 			: {};
+	if (kind === "canonical") {
+		const validationMessages = [
+			...Object.values(result.errors?.fieldErrors ?? {}),
+			...(result.errors?.formErrors ?? []),
+		].filter((message) => typeof message === "string" && message.trim() !== "");
+		logCanonicalPromotionRejection(req, values, {
+			rejectionReason: "request_body_validation",
+			errorName: "ZodError",
+			errorCode: "validation_failed",
+			errorMessage:
+				validationMessages.join("; ") || "Canonical media request failed validation.",
+			httpStatus: 422,
+		});
+	}
 	res.status(422);
 	await renderPage(req, res, {
 		entityReference:
