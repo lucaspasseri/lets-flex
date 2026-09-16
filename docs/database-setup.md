@@ -57,3 +57,34 @@ silently added to the source manifest or recreated by a later reset.
 Historical migrations remain available through the explicit `npm run db:migrate` path for existing
 databases. They are not required for a clean disposable setup and must not be used as a normal reset
 step. Never use `npm run db:reset` against production.
+
+## Render production preparation
+
+Configure Render's Pre-Deploy Command as:
+
+```sh
+npm run production:prepare
+```
+
+The command is intentionally separate from the build and start commands. During normal
+deployments, leave `PRODUCTION_DATABASE_RESET_MODE` unset or empty; the command logs
+`Production database reset not requested.` and performs no database, registry, or media changes.
+
+An intentional production reconstruction requires `NODE_ENV=production`, the production
+`DATABASE_URL`, administrator and R2 configuration, separate production media and private
+canonical-registry buckets/credentials, and the exact sentinel:
+
+```env
+PRODUCTION_DATABASE_RESET_MODE=reset-and-restore
+```
+
+The preparation command validates the private R2 canonical registry and referenced media objects
+before invoking the existing schema-and-seed reset. It then restores the validated in-memory
+registry snapshot through the existing canonical recovery path and verifies every restored
+assignment against PostgreSQL. Registry preflight, reset, restoration, and post-restore failures
+return a non-zero exit code and fail the Render deployment. No registry objects are written or
+deleted during recovery.
+
+Because the setting persists in Render, disable or remove `PRODUCTION_DATABASE_RESET_MODE` again
+immediately after the intentional reset deployment. Any other non-empty value is rejected as a
+configuration error and cannot trigger a reset. The application build remains non-destructive.

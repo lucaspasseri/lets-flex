@@ -3,9 +3,11 @@ import test from "node:test";
 
 import {
 	CanonicalRegistryPreflightError,
+	CanonicalRegistryVerificationError,
 	getResetCatalogDefinitions,
 	preflightCanonicalRegistry,
 	restoreCanonicalRegistry,
+	verifyCanonicalRegistryRestoration,
 } from "./canonicalMediaRegistryRecovery.js";
 import createMediaResolver from "../createMediaResolver.js";
 import resolveStepMedia from "../resolveStepMedia.js";
@@ -226,4 +228,61 @@ test("a restored base override is consumed by an unchanged starter-workout step"
 	);
 	assert.equal(media.src, entry.asset.objectKey);
 	assert.equal(media.matchType, "exercise");
+});
+
+test("post-restore verification requires every durable field to match", async () => {
+	const db = {
+		async query() {
+			return {
+				rows: [
+					{
+						id: 41,
+						catalog_key: entry.entityKey,
+						media_asset_id: 88,
+						storage_key: entry.asset.objectKey,
+						canonical_path: entry.canonicalPath,
+						mime_type: entry.asset.mimeType,
+						width: entry.asset.width,
+						height: entry.asset.height,
+						alt_text_en: entry.alt.en,
+						alt_text_pt_br: entry.alt["pt-BR"],
+					},
+				],
+			};
+		},
+	};
+	assert.deepEqual(
+		await verifyCanonicalRegistryRestoration({
+			entries: [entry],
+			db: /** @type {any} */ (db),
+		}),
+		{ count: 1 },
+	);
+
+	const mismatchedDb = {
+		async query() {
+			return {
+				rows: [
+					{
+						storage_key: "assets/other.webp",
+						canonical_path: entry.canonicalPath,
+						mime_type: entry.asset.mimeType,
+						width: entry.asset.width,
+						height: entry.asset.height,
+						alt_text_en: entry.alt.en,
+						alt_text_pt_br: entry.alt["pt-BR"],
+					},
+				],
+			};
+		},
+	};
+	await assert.rejects(
+		verifyCanonicalRegistryRestoration({
+			entries: [entry],
+			db: /** @type {any} */ (mismatchedDb),
+		}),
+		(error) =>
+			error instanceof CanonicalRegistryVerificationError &&
+			error.issues.some((issue) => issue.reason.includes("storage_key")),
+	);
 });

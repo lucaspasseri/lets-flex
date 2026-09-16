@@ -137,26 +137,58 @@ export async function seedDatabase(
 	connectionString = process.env.DATABASE_URL,
 	dependencies = {},
 ) {
-	if (process.env.NODE_ENV === "production") {
-		throw new Error("Refusing to reset the database in production");
-	}
-	if (process.env.ALLOW_DATABASE_RESET !== "true") {
-		throw new Error("Database reset requires ALLOW_DATABASE_RESET=true");
-	}
-	if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
-		throw new Error("Database reset requires NODE_ENV=development or NODE_ENV=test");
+	return resetAndSeedDatabase({
+		connectionString,
+		...dependencies,
+	});
+}
+
+/**
+ * Rebuild and seed a database using the current authoritative schema and seed SQL. The production
+ * deployment command supplies an already validated registry snapshot and the explicit production
+ * authorization; the normal db:reset entry point remains development/test-only.
+ *
+ * @param {{connectionString?: string, environment?: NodeJS.ProcessEnv, canonicalRegistry?: import("../src/features/media/registry/canonicalMediaRegistry.js").CanonicalMediaRegistryStore, mediaStorage?: import("../src/features/media/storage/storage.js").MediaStorage, registryPreflight?: {entries: Array<import("../src/features/media/registry/canonicalMediaRegistrySchema.js").CanonicalRegistryEntry>, summary: {count: number}}, allowProductionReset?: boolean}} [options]
+ */
+export async function resetAndSeedDatabase({
+	connectionString = process.env.DATABASE_URL,
+	environment = process.env,
+	canonicalRegistry,
+	mediaStorage,
+	registryPreflight,
+	allowProductionReset = false,
+} = {}) {
+	if (environment.NODE_ENV === "production") {
+		if (
+			!allowProductionReset ||
+			environment.PRODUCTION_DATABASE_RESET_MODE !== "reset-and-restore"
+		) {
+			throw new Error(
+				"Refusing to reset the database in production without the deployment reset authorization",
+			);
+		}
+	} else {
+		if (environment.ALLOW_DATABASE_RESET !== "true") {
+			throw new Error("Database reset requires ALLOW_DATABASE_RESET=true");
+		}
+		if (environment.NODE_ENV !== "development" && environment.NODE_ENV !== "test") {
+			throw new Error("Database reset requires NODE_ENV=development or NODE_ENV=test");
+		}
+		if (!connectionString) {
+			throw new Error("DATABASE_URL is required");
+		}
+		if (!isDisposableDatabaseTarget(connectionString)) {
+			throw new Error(
+				"Refusing to reset a database that is not local or explicitly named for development/test",
+			);
+		}
 	}
 	if (!connectionString) {
 		throw new Error("DATABASE_URL is required");
 	}
-	if (!isDisposableDatabaseTarget(connectionString)) {
-		throw new Error(
-			"Refusing to reset a database that is not local or explicitly named for development/test",
-		);
-	}
 
-	const adminEmail = normalizeEmail(process.env.ADMIN_EMAIL);
-	const adminPassword = process.env.ADMIN_PASSWORD;
+	const adminEmail = normalizeEmail(environment.ADMIN_EMAIL);
+	const adminPassword = environment.ADMIN_PASSWORD;
 	if (!adminEmail || !adminEmail.includes("@")) {
 		throw new Error("ADMIN_EMAIL must be a valid email address");
 	}
@@ -164,24 +196,24 @@ export async function seedDatabase(
 		throw new Error("ADMIN_PASSWORD is required");
 	}
 
-	const canonicalRegistry =
-		dependencies.canonicalRegistry ?? createCanonicalMediaRegistryFromEnvironment();
-	const mediaStorage =
-		dependencies.mediaStorage ?? createR2MediaStorageFromEnvironment();
-	let registryPreflight;
-	try {
-		registryPreflight = await preflightCanonicalRegistry({
-			registry: canonicalRegistry,
-			mediaStorage,
-		});
-	} catch (error) {
-		if (error instanceof CanonicalRegistryPreflightError) {
-			console.error("Canonical registry preflight failed:", error.issues);
+	const registry =
+		canonicalRegistry ?? createCanonicalMediaRegistryFromEnvironment(environment);
+	const storage = mediaStorage ?? createR2MediaStorageFromEnvironment(environment);
+	let validatedRegistry = registryPreflight;
+	if (!validatedRegistry) {
+		try {
+			validatedRegistry = await preflightCanonicalRegistry({
+				registry,
+				mediaStorage: storage,
+			});
+		} catch (error) {
+			if (error instanceof CanonicalRegistryPreflightError)
+				console.error("Canonical registry preflight failed.");
+			throw error;
 		}
-		throw error;
 	}
 	console.log(
-		`Canonical registry preflight passed (${registryPreflight.summary.count} override(s)).`,
+		`Canonical registry preflight passed (${validatedRegistry.summary.count} override(s)).`,
 	);
 
 	// Validate and hash before any destructive operation begins.
@@ -190,7 +222,7 @@ export async function seedDatabase(
 
 	const client = new Client({
 		connectionString,
-		ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: true } : false,
+		ssl: environment.DATABASE_SSL === "true" ? { rejectUnauthorized: true } : false,
 	});
 
 	try {
@@ -199,7 +231,7 @@ export async function seedDatabase(
 		await client.query(schemaSql);
 		await client.query(seedSql);
 		await restoreCanonicalRegistry({
-			entries: registryPreflight.entries,
+			entries: validatedRegistry.entries,
 			db: client,
 		});
 		await client.query(
@@ -216,7 +248,7 @@ export async function seedDatabase(
 		console.log("Database seeded successfully.");
 	} catch (error) {
 		await client.query("ROLLBACK").catch(() => {});
-		console.error("Error while seeding database:", error);
+		console.error("Error while seeding database.");
 		throw error;
 	} finally {
 		await client.end();

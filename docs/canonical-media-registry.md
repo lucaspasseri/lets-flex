@@ -102,3 +102,19 @@ destructive verification is part of this workflow.
 
 Automatic registry cleanup and R2 orphan deletion are intentionally not implemented. The registry
 remains the recovery reference even when the current database is temporarily inconsistent.
+
+## Production pre-deploy reconstruction
+
+Render should use `npm run production:prepare` as its Pre-Deploy Command. The command is harmless
+when `PRODUCTION_DATABASE_RESET_MODE` is unset or empty. It accepts only the exact destructive
+sentinel `reset-and-restore`; unexpected values fail configuration validation without invoking
+the database reset.
+
+When enabled, the command requires `NODE_ENV=production`, a non-local/non-development-looking
+PostgreSQL target, administrator configuration, and explicit separate production media and private
+registry configuration. It then runs registry preflight, invokes the existing `db/seed.js`
+reset-and-seed implementation with the validated snapshot, and runs strict post-restore checks.
+The build command is not changed. Registry preflight failure always prevents database destruction,
+and any reset or verification failure returns a non-zero exit code. After an intentional reset,
+remove the environment variable or set it empty before subsequent deployments so they do not
+repeat the destructive reconstruction.
