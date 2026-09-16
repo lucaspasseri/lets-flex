@@ -1,6 +1,6 @@
 import pool from "../../../db/pool.js";
 
-/** @typedef {import("pg").Pool | import("pg").PoolClient} DatabaseClient */
+/** @typedef {import("pg").Pool | Pick<import("pg").PoolClient, "query">} DatabaseClient */
 
 /** @type {Readonly<Record<string, {table: string, where?: string}>>} */
 const entityDefinitions = Object.freeze({
@@ -48,6 +48,32 @@ export async function createMediaAsset(
 			source.trim(),
 			altText?.trim() || null,
 		],
+	);
+	return rows[0] ?? null;
+}
+
+/**
+ * Reuse a durable object-backed asset during reset recovery. The object key is the stable identity;
+ * PostgreSQL IDs are intentionally allowed to change after schema recreation.
+ *
+ * @param {{storageKey: string, mimeType: string, width: number, height: number, source: string}} input
+ * @param {DatabaseClient} [db]
+ */
+export async function upsertCanonicalMediaAsset(
+	{ storageKey, mimeType, width, height, source },
+	db = pool,
+) {
+	const { rows } = await db.query(
+		`INSERT INTO media_assets
+			(storage_key, mime_type, width, height, source)
+		 VALUES ($1, $2, $3, $4, $5)
+		 ON CONFLICT (storage_key)
+		 DO UPDATE SET mime_type = EXCLUDED.mime_type,
+		               width = EXCLUDED.width,
+		               height = EXCLUDED.height,
+		               source = EXCLUDED.source
+		 RETURNING *`,
+		[storageKey.trim(), mimeType.trim(), width, height, source.trim()],
 	);
 	return rows[0] ?? null;
 }
@@ -173,6 +199,72 @@ export async function findMediaEntityCatalogRecord(
 		 FROM ${entityTable} AS entity
 		 WHERE ${where} AND entity.id = $1`,
 		[entityId],
+	);
+	return rows[0] ?? null;
+}
+
+/**
+ * Resolve a seeded global catalog entity by stable key for reset recovery.
+ *
+ * @param {{entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityKey: string}} input
+ * @param {DatabaseClient} [db]
+ */
+export async function findMediaEntityCatalogRecordByKey(
+	{ entityType, entityKey },
+	db = pool,
+) {
+	assertAssignableMediaEntityType(entityType);
+	const { table: entityTable, where = "TRUE" } = entityDefinitions[entityType];
+	const { rows } = await db.query(
+		`SELECT entity.id, entity.catalog_key
+		 FROM ${entityTable} AS entity
+		 WHERE ${where} AND entity.catalog_key = $1`,
+		[entityKey],
+	);
+	return rows[0] ?? null;
+}
+
+/**
+ * Read the complete canonical state for one stable catalog key for audit/reconciliation output.
+ * A missing assignment is represented by null media columns instead of being hidden by an inner
+ * join.
+ *
+ * @param {{entityType: "exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern", entityKey: string}} input
+ * @param {DatabaseClient} [db]
+ */
+export async function findCanonicalMediaStateByKey(
+	{ entityType, entityKey },
+	db = pool,
+) {
+	assertAssignableMediaEntityType(entityType);
+	const { table: entityTable, where = "TRUE" } = entityDefinitions[entityType];
+	const { rows } = await db.query(
+		`SELECT
+			entity.id,
+			entity.catalog_key,
+			entity_media.media_asset_id,
+			entity_media.canonical_path,
+			media_assets.storage_key,
+			media_assets.mime_type,
+			media_assets.width,
+			media_assets.height,
+			media_assets.source,
+			media_assets.alt_text,
+			alt_en.alt_text AS alt_text_en,
+			alt_pt.alt_text AS alt_text_pt_br
+		 FROM ${entityTable} AS entity
+		 LEFT JOIN entity_media
+			ON entity_media.entity_type = $2
+			AND entity_media.entity_id = entity.id
+			AND entity_media.role = 'primary'
+		 LEFT JOIN media_assets
+			ON media_assets.id = entity_media.media_asset_id
+		 LEFT JOIN media_asset_alt_texts AS alt_en
+			ON alt_en.media_asset_id = media_assets.id AND alt_en.locale = 'en'
+		 LEFT JOIN media_asset_alt_texts AS alt_pt
+			ON alt_pt.media_asset_id = media_assets.id AND alt_pt.locale = 'pt-BR'
+		 WHERE ${where} AND entity.catalog_key = $1`,
+		[entityKey, entityType],
 	);
 	return rows[0] ?? null;
 }

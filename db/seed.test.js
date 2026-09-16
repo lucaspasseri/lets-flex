@@ -10,6 +10,7 @@ import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
 import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
 import { mediaSeedSql } from "./mediaSeedSql.js";
+import { CanonicalRegistryPreflightError } from "../src/features/media/registry/canonicalMediaRegistryRecovery.js";
 
 function runSeed(environment) {
 	return spawnSync(process.execPath, ["db/seed.js"], {
@@ -105,4 +106,43 @@ test("database reset refuses an ambiguous remote target", () => {
 	});
 	assert.notEqual(result.status, 0);
 	assert.match(result.stderr, /not local or explicitly named for development\/test/);
+});
+
+test("database reset preflights the canonical registry before opening a destructive database connection", async () => {
+	const originalEnvironment = {
+		NODE_ENV: process.env.NODE_ENV,
+		ALLOW_DATABASE_RESET: process.env.ALLOW_DATABASE_RESET,
+		ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+		ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+	};
+	Object.assign(process.env, {
+		NODE_ENV: "development",
+		ALLOW_DATABASE_RESET: "true",
+		ADMIN_EMAIL: "admin@example.com",
+		ADMIN_PASSWORD: "a sufficiently long test password",
+	});
+	try {
+		const { seedDatabase } = await import("./seed.js");
+		await assert.rejects(
+			() =>
+				seedDatabase("postgresql://127.0.0.1:1/lets_flex_dev", {
+					canonicalRegistry: /** @type {any} */ ({
+						async listCanonicalOverrides() {
+							throw new Error("registry unavailable");
+						},
+					}),
+					mediaStorage: /** @type {any} */ ({
+						async exists() {
+							return true;
+						},
+					}),
+				}),
+			CanonicalRegistryPreflightError,
+		);
+	} finally {
+		for (const [name, value] of Object.entries(originalEnvironment)) {
+			if (value === undefined) delete process.env[name];
+			else process.env[name] = value;
+		}
+	}
 });

@@ -8,6 +8,13 @@ import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSee
 import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { mediaSeedSql } from "./mediaSeedSql.js";
+import { createR2MediaStorageFromEnvironment } from "../src/features/media/storage/r2Storage.js";
+import { createCanonicalMediaRegistryFromEnvironment } from "../src/features/media/registry/canonicalMediaRegistry.js";
+import {
+	CanonicalRegistryPreflightError,
+	preflightCanonicalRegistry,
+	restoreCanonicalRegistry,
+} from "../src/features/media/registry/canonicalMediaRegistryRecovery.js";
 
 export const seedSql = `
 INSERT INTO "step_types" ("name")
@@ -126,7 +133,10 @@ function isDisposableDatabaseTarget(connectionString) {
 	}
 }
 
-export async function seedDatabase(connectionString = process.env.DATABASE_URL) {
+export async function seedDatabase(
+	connectionString = process.env.DATABASE_URL,
+	dependencies = {},
+) {
 	if (process.env.NODE_ENV === "production") {
 		throw new Error("Refusing to reset the database in production");
 	}
@@ -154,6 +164,26 @@ export async function seedDatabase(connectionString = process.env.DATABASE_URL) 
 		throw new Error("ADMIN_PASSWORD is required");
 	}
 
+	const canonicalRegistry =
+		dependencies.canonicalRegistry ?? createCanonicalMediaRegistryFromEnvironment();
+	const mediaStorage =
+		dependencies.mediaStorage ?? createR2MediaStorageFromEnvironment();
+	let registryPreflight;
+	try {
+		registryPreflight = await preflightCanonicalRegistry({
+			registry: canonicalRegistry,
+			mediaStorage,
+		});
+	} catch (error) {
+		if (error instanceof CanonicalRegistryPreflightError) {
+			console.error("Canonical registry preflight failed:", error.issues);
+		}
+		throw error;
+	}
+	console.log(
+		`Canonical registry preflight passed (${registryPreflight.summary.count} override(s)).`,
+	);
+
 	// Validate and hash before any destructive operation begins.
 	const passwordHash = await hashPassword(adminPassword);
 	console.log("Resetting and seeding the development database...");
@@ -168,6 +198,10 @@ export async function seedDatabase(connectionString = process.env.DATABASE_URL) 
 		await client.query("BEGIN");
 		await client.query(schemaSql);
 		await client.query(seedSql);
+		await restoreCanonicalRegistry({
+			entries: registryPreflight.entries,
+			db: client,
+		});
 		await client.query(
 			`WITH administrator AS (
 				INSERT INTO users (email, role, name)

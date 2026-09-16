@@ -40,6 +40,7 @@ import { createLocalMediaStorage } from "./src/features/media/storage/localStora
 import { assertMediaStorage } from "./src/features/media/storage/storage.js";
 import { createMediaStorageFromEnvironment } from "./src/features/media/storage/mediaStorageFactory.js";
 import { createMediaUrlResolverFromEnvironment } from "./src/features/media/storage/mediaUrl.js";
+import { createLazyCanonicalMediaRegistry } from "./src/features/media/registry/canonicalMediaRegistry.js";
 
 import playgroundRouter from "./src/interfaces/routes/playground.js";
 
@@ -75,6 +76,9 @@ export function createApp(options = {}) {
 				readRootDirectory: path.join(__dirname, "public/media"),
 				readPublicPrefix: "/media",
 			}),
+		canonicalRegistry:
+			configuredPromotionDependencies.canonicalRegistry ??
+			createLazyCanonicalMediaRegistry(),
 	};
 	const passport = options.passport ?? createPassport();
 	let emailService = options.emailService;

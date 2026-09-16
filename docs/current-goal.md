@@ -1,84 +1,88 @@
-# Goal: Verify the Full Scope and Persistence of Canonical Media
+# Goal: Persistent Canonical Media Registry and Reset Recovery
 
 ## Goal status
 
-**Completed — 2026-09-15.** The audit was approved by the user. No production database,
-production R2 bucket, or destructive reset was used.
+**Completed — 2026-09-16.** The approved outcome was to make a successful Admin **Make Canonical** promotion
+durable outside the resettable PostgreSQL database using the existing private Cloudflare R2
+infrastructure, and to reconstruct that state safely after `db:reset` or fresh initialization.
 
 ## Objective
 
-Verify and document the actual current behavior of canonical media after an Admin upload is promoted
-to canonical. The investigation covers request flow, entity/variant precedence, existing workout
-propagation, application surfaces, restart/deploy persistence, database reset behavior, repository
-manifest seeding, and the canonical compatibility path.
+Implement first-level durability for canonical media:
 
-## Verified outcome
+```text
+repository canonical manifest → baseline state
+R2 canonical registry        → persistent Admin overrides
+PostgreSQL                   → runtime materialized state
+```
 
-- Canonical runtime state is an entity-level `entity_media` primary assignment with a non-null
-  `canonical_path`; there is no separate canonical-media table.
-- Session and workout records store exercise-variant relationships, not media snapshots. Dashboard,
-  Program Day, Library, and Admin media/exercise presentation resolve current assignments during
-  each render. Programs overview and History do not consume exercise media.
-- Resolver precedence is direct variant, parent exercise, then movement pattern, followed by static
-  fallback sections and the initial tile.
-- R2-backed promotion reuses the existing `assets/...` object and updates the database assignment;
-  local-path promotion writes a local canonical compatibility file and creates a curated asset row.
-- Previous media assets remain stored; the entity’s one primary assignment is replaced/upserted.
-- `db:reset` and an executed generated setup SQL recreate only the repository manifest seed. Runtime
-  promotion does not update `data/canonical-media.json`; an R2 object can survive as an orphan.
-- The current source no longer emits or requires `canonical_path_missing`; that was historical
-  behavior before commit `302be5d`.
+The repository manifest remains the baseline. The registry is one versioned object per supported
+canonical entity and uses stable catalog keys, never reset-sensitive database IDs. A successful
+promotion must not be reported if the durable registry cannot be persisted. Reset must validate
+registry state before destructive database work, then seed the baseline and reapply validated R2
+overrides idempotently.
 
-The detailed report, lifecycle diagram, propagation matrix, persistence matrix, code evidence, and
-architectural classification are in [docs/canonical-media-audit.md](canonical-media-audit.md).
+## Verified baseline and delta
+
+The completed [canonical media audit](canonical-media-audit.md) verified that:
+
+- `promoteMediaToCanonical` currently changes the runtime `entity_media` assignment but never the
+  repository manifest;
+- `media_assets` and `entity_media` are the current canonical persistence model;
+- the existing R2 adapter owns public media object access and uses `assets/...` keys;
+- `db:reset` recreates schema and manifest-backed seed state only;
+- runtime rendering resolves through PostgreSQL assignments, with precedence
+  `variant → base exercise → movement pattern`.
+
+This goal adds only the missing durability, reset recovery, conflict/failure handling, audit and
+verification paths. It does not redesign the media schema, resolver, Admin action, or manifest.
 
 ## Scope constraints
 
-- Investigation and focused verification only; no media architecture redesign.
-- Do not reset production or delete production R2 objects.
-- Do not introduce migrations solely for this audit.
-- Preserve current functionality and document implementation follow-ups separately.
+- Use private, server-side R2 access for registry metadata; never require a public registry URL.
+- Support only the entity types already supported by the canonical media architecture.
+- Keep secrets in environment variables and out of logs, browser errors, committed files, and
+  generated audit output.
+- Do not reset or mutate production, upload/delete production test objects, or delete R2 orphans.
+- Do not add developer promotion from the registry back to `data/canonical-media.json`.
+- Do not add automatic registry cleanup or automatic orphan deletion.
+- Do not add a migration for this development reset workflow.
 
-## Verification evidence
+## Completion criteria
 
-- Added `src/features/media/canonicalMediaLifecycle.test.js` for unchanged-step dynamic resolution
-  and variant-over-base precedence.
-- Existing promotion, entity-resolution, step-resolution, seed, schema, storage, controller, and
-  rendered-surface tests were inspected and used as evidence.
-- Focused media, resolver, promotion, seed, and reset-guard tests passed: 28 passed, 0 failed.
-- Browser-side type checking passed. The non-PostgreSQL source/public/view collection reached 479
-  passed and 2 failed because the i18n application suite could not bind its test server (`listen
-EPERM`); no application assertion failed.
-- The repository-wide test command was attempted, but PostgreSQL-backed suites failed at their
-  connection hook because no local test database was reachable; other suites reported 497 passed,
-  2 failed, and 4 cancelled in that run. No database reset was attempted.
-- Live browser inspection was not needed for a behavior-only audit and no browser executable was
-  available.
+- [x] Registry configuration, versioned validation, private R2 access, one object per entity, and
+      development-only smoke testing exist.
+- [x] Make Canonical persists the registry and has explicit DB/R2 compensation or reconciliation
+      behavior for partial failures and conflicting writes.
+- [x] Reset preflight validates registry JSON, supported identity, catalog keys, and media objects
+      before any destructive database operation; invalid state aborts safely.
+- [x] Baseline seed remains authoritative default state; valid registry entries override it and
+      reconstruct `media_assets` and `entity_media` without old numeric IDs, idempotently.
+- [x] Existing runtime resolver precedence and starter-workout behavior remain unchanged after
+      restoration.
+- [x] `npm run media:registry:audit` is read-only and reports registry, R2, catalog, and DB
+      inconsistencies; no cleanup is automatic.
+- [x] Focused automated tests and repository verification are run with environment limitations
+      recorded; development/production infrastructure access is reported separately.
+- [x] Documentation answers promotion, registry, reset, runtime, audit/recovery, and verification
+      behavior, and current goal/action records are updated.
 
-## Done when
+## Final review evidence
 
-- [x] The meaning and database effects of “Make Canonical” are documented.
-- [x] Existing workout/session propagation and dynamic render resolution are answered with source
-      and focused test evidence.
-- [x] Application-surface propagation and variant/base precedence are documented.
-- [x] Restart/deploy, reset, fresh-database, R2-orphan, and repository-manifest behavior are
-      separated explicitly.
-- [x] Reset command variants are distinguished, including the absent `db:reset:sql` script.
-- [x] The compatibility-path diagnostic discrepancy is reconciled against current source and git
-      history.
-- [x] Actual architectural limitations are separated from future implementation candidates.
-- [x] User review confirms the audit answers the requested questions; durability work remains a
-      separate, unapproved goal.
+- `npm run verify` passed formatting, lint, server/browser type checking, and all 526 repository
+  tests, including PostgreSQL and HTTP integration suites.
+- Focused registry, promotion, reset recovery, audit, smoke, and resolver tests passed.
+- No real R2 smoke-test mutation, development reset, production reset, or production resource
+  mutation was performed. Live development R2 verification remains an operational follow-up when
+  explicitly configured development resources are available; the guarded command and fake-client
+  coverage are present.
+- Manifest promotion, automatic registry cleanup, R2 orphan deletion, architecture redesign, and
+  destructive production verification remain intentionally deferred.
 
-## Completion record
+The goal satisfies the listed completion criteria based on repository and automated-test evidence.
+The user approved the final goal on 2026-09-16.
 
-The user approved the investigation and requested that `docs/canonical-media-audit.md` remain the
-reference for verified behavior. No architectural changes were implemented as part of this goal.
-The durability/reconstructability gap identified by the audit was intentionally left for a
-separate goal and was not activated here.
+## Deferred work
 
-## Historical context
-
-The previous completed goal was Entity Presentation Completeness. Its implementation remains in
-the repository; this audit reuses its media resolver and rendered-surface evidence without
-reopening that goal’s UI work.
+Registry-to-Git manifest promotion, automatic registry cleanup, automatic R2 orphan deletion,
+media architecture redesign, and destructive production verification remain explicitly deferred.

@@ -67,16 +67,12 @@ export function createR2MediaStorage({
 
 	const storageClient =
 		client ??
-		/** @type {S3CommandClient} */ (
-			new S3Client({
-				region,
-				...(normalizedEndpoint ? { endpoint: normalizedEndpoint } : {}),
-				credentials: {
-					accessKeyId: requiredOption(accessKeyId, "R2 access key ID"),
-					secretAccessKey: requiredOption(secretAccessKey, "R2 secret access key"),
-				},
-			})
-		);
+		createR2S3Client({
+			endpoint: normalizedEndpoint,
+			region,
+			accessKeyId,
+			secretAccessKey,
+		});
 
 	return /** @type {MediaStorage} */ ({
 		/** @param {Buffer} buffer @param {{extension: string, filename?: string, contentType?: string}} metadata */
@@ -138,6 +134,31 @@ export function createR2MediaStorage({
 			return `${normalizedPublicUrlBase}/${encodedKey}`;
 		},
 	});
+}
+
+/**
+ * Create the shared S3-compatible client used by R2-backed application boundaries. The caller
+ * chooses the bucket and may use separate credentials for private registry metadata.
+ *
+ * @param {{endpoint?: string, region?: string, accessKeyId?: string, secretAccessKey?: string}} options
+ * @returns {S3CommandClient}
+ */
+export function createR2S3Client({
+	endpoint,
+	region = "auto",
+	accessKeyId,
+	secretAccessKey,
+}) {
+	return /** @type {S3CommandClient} */ (
+		new S3Client({
+			region,
+			...(endpoint ? { endpoint } : {}),
+			credentials: {
+				accessKeyId: requiredOption(accessKeyId, "R2 access key ID"),
+				secretAccessKey: requiredOption(secretAccessKey, "R2 secret access key"),
+			},
+		})
+	);
 }
 
 /**

@@ -129,6 +129,26 @@ function objectStorage(bytes = Buffer.from("remote image")) {
 	};
 }
 
+function canonicalRegistry({ current = null, failGet = false, failPut = false } = {}) {
+	const calls = [];
+	return {
+		calls,
+		async getCanonicalOverride(entityType, entityKey) {
+			calls.push(["get", entityType, entityKey]);
+			if (failGet) throw new Error("registry unavailable");
+			return current;
+		},
+		async putCanonicalOverride(entry, options) {
+			calls.push(["put", entry, options]);
+			if (failPut) throw new Error("registry write failed");
+			return { entry, etag: "new-etag" };
+		},
+		async deleteCanonicalOverride(entityType, entityKey, options) {
+			calls.push(["delete", entityType, entityKey, options]);
+		},
+	};
+}
+
 const priorRemoteCanonicalEntry = {
 	entityType: "exercise",
 	entityKey: "bench-press",
@@ -194,6 +214,88 @@ test("R2-backed promotion reuses the object key and replaces canonical meaning w
 	assert.equal(
 		remote.calls.some(([operation]) => operation === "delete"),
 		false,
+	);
+});
+
+test("R2-backed promotion persists a stable-key durable registry override", async () => {
+	const objectKey = "assets/reviewed-bench-press.png";
+	const registry = canonicalRegistry();
+	const result = await promoteMediaToCanonical(
+		{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+		{
+			db: /** @type {any} */ (
+				fakePool({ asset: { ...sourceAsset, storage_key: objectKey } })
+			),
+			objectStorage: /** @type {any} */ (objectStorage()),
+			canonicalRegistry: /** @type {any} */ (registry),
+		},
+	);
+
+	const put = registry.calls.find(([operation]) => operation === "put");
+	assert.ok(put);
+	assert.equal(put[1].entityType, "exercise");
+	assert.equal(put[1].entityKey, "bench-press");
+	assert.equal(put[1].asset.objectKey, objectKey);
+	assert.equal(put[2].expectedEtag, null);
+	assert.equal(result.status, "promoted");
+});
+
+test("registry failure prevents a successful database-only promotion", async () => {
+	const db = fakePool({
+		asset: { ...sourceAsset, storage_key: "assets/reviewed.png" },
+	});
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+				{
+					db: /** @type {any} */ (db),
+					objectStorage: /** @type {any} */ (objectStorage()),
+					canonicalRegistry: /** @type {any} */ (canonicalRegistry({ failGet: true })),
+				},
+			),
+		(error) =>
+			error instanceof MediaCanonicalPromotionError &&
+			error.code === "registry_unavailable",
+	);
+	assert.equal(
+		db.calls.some((call) => call.text === "BEGIN"),
+		false,
+	);
+});
+
+test("database commit failure compensates a newly written registry override", async () => {
+	const registry = canonicalRegistry();
+	const db = fakePool({
+		asset: { ...sourceAsset, storage_key: "assets/reviewed.png" },
+	});
+	const originalQuery = db.connect;
+	db.connect = async () => {
+		const client = await originalQuery();
+		const originalClientQuery = client.query;
+		client.query = async (text, values) => {
+			if (text === "COMMIT") throw new Error("database commit failed");
+			return originalClientQuery(text, values);
+		};
+		return client;
+	};
+
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+				{
+					db: /** @type {any} */ (db),
+					objectStorage: /** @type {any} */ (objectStorage()),
+					canonicalRegistry: /** @type {any} */ (registry),
+				},
+			),
+		/database commit failed/,
+	);
+	assert.equal(registry.calls.filter(([operation]) => operation === "put").length, 1);
+	assert.equal(
+		registry.calls.filter(([operation]) => operation === "delete").length,
+		1,
 	);
 });
 
