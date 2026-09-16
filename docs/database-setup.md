@@ -87,21 +87,35 @@ Historical migrations remain available through the explicit `npm run db:migrate`
 databases. They are not required for a clean disposable setup and must not be used as a normal reset
 step. Never use `npm run db:reset` against production.
 
-## Render production preparation
+## GitHub Actions production preparation
 
-Configure Render's Pre-Deploy Command as:
+The manually dispatched GitHub Actions workflow owns production preparation because this project
+does not use Render's Pre-Deploy Command feature. Its production path is:
 
-```sh
-npm run production:prepare
+```text
+GitHub Actions
+    npm run verify
+    ↓
+    npm run media:durability:preflight
+    ↓
+    npm run production:prepare
+    ↓
+    Render deploy hook
+
+Render
+    npm install
+    ↓
+    node server.js
 ```
 
-The command is intentionally separate from the build and start commands. During normal
-deployments, leave `PRODUCTION_DATABASE_RESET_MODE` and `ALLOW_PRODUCTION_DB_RESET` unset or empty; the command logs
-`Production database reset not requested.` and performs no database, registry, or media changes.
+The workflow maps the preparation configuration from the GitHub `production` Environment. During
+normal deployments, leave `PRODUCTION_DATABASE_RESET_MODE` and `ALLOW_PRODUCTION_DB_RESET` unset
+or empty; the command logs `Production database reset not requested.` and performs no database,
+registry, or media changes. The workflow does not infer or populate either guard.
 
-An intentional production reconstruction requires `NODE_ENV=production`, the production
-`DATABASE_URL`, administrator and R2 configuration, separate production media and private
-canonical-registry buckets/credentials, and the exact sentinel:
+An intentional production reconstruction requires the GitHub `production` Environment to provide
+`NODE_ENV=production`, the production `DATABASE_URL`, administrator and R2 configuration, separate
+production media and private canonical-registry buckets/credentials, and the exact sentinels:
 
 ```env
 PRODUCTION_DATABASE_RESET_MODE=reset-and-restore
@@ -110,13 +124,14 @@ ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET
 
 Both values are required exactly; missing, blank, or arbitrary truthy values fail before any
 destructive SQL. The generic `npm run db:reset` command remains development/test-only and cannot
-become a production reset through these values. The preparation command validates the private R2 canonical registry and referenced media objects
-before invoking the existing schema-and-seed reset. It then restores the validated in-memory
-registry snapshot through the existing canonical recovery path and verifies every restored
-assignment against PostgreSQL. Registry preflight, reset, restoration, and post-restore failures
-return a non-zero exit code and fail the Render deployment. No registry objects are written or
-deleted during recovery.
+become a production reset through these values. The preparation command validates the private R2
+canonical registry and referenced media objects before invoking the existing schema-and-seed
+reset. It then restores the validated in-memory registry snapshot through the existing canonical
+recovery path and verifies every restored assignment against PostgreSQL. Registry preflight, reset,
+restoration, and post-restore failures return a non-zero exit code and prevent the Render deploy
+hook from being called. No registry objects are written or deleted during recovery.
 
-Because these settings persist in Render, disable or remove both production-reset values again
-immediately after the intentional reset deployment. Any other non-empty value is rejected as a
-configuration error and cannot trigger a reset. The application build remains non-destructive.
+Because these settings persist in GitHub's `production` Environment, disable or remove both
+production-reset values again immediately after the intentional reset has been validated. Any
+other non-empty value is rejected as a configuration error and cannot trigger a reset. The Render
+build and application startup remain non-destructive.

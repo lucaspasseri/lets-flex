@@ -45,6 +45,26 @@ jobs:
           R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: ${{ secrets.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY }}
         run: npm run media:durability:preflight
 
+      - name: Prepare production
+        env:
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL: ${{ vars.DATABASE_SSL }}
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          PRODUCTION_DATABASE_RESET_MODE: ${{ vars.PRODUCTION_DATABASE_RESET_MODE }}
+          ALLOW_PRODUCTION_DB_RESET: ${{ secrets.ALLOW_PRODUCTION_DB_RESET }}
+          R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          R2_REGION: ${{ vars.R2_REGION }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_CANONICAL_REGISTRY_BUCKET_NAME: ${{ vars.R2_CANONICAL_REGISTRY_BUCKET_NAME }}
+          R2_CANONICAL_REGISTRY_PREFIX: ${{ vars.R2_CANONICAL_REGISTRY_PREFIX }}
+          R2_CANONICAL_REGISTRY_ACCESS_KEY_ID: ${{ secrets.R2_CANONICAL_REGISTRY_ACCESS_KEY_ID }}
+          R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: ${{ secrets.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY }}
+        run: npm run production:prepare
+
       - name: Trigger Render deployment
         env:
           RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}

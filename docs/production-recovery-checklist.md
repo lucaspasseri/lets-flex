@@ -6,19 +6,19 @@ production R2 read-only access and an ephemeral PostgreSQL 16 service; it did no
 PostgreSQL or write either R2 bucket.
 
 Do not use the rehearsal workflow to reconstruct production. The real production path is the
-Render Pre-Deploy Command:
+manually dispatched `Production Deploy` GitHub Actions workflow. GitHub Actions owns the
+production-preparation phase because this project does not use Render's Pre-Deploy Command
+feature.
 
-```sh
-npm run production:prepare
-```
-
-The command is run once by Render during one approved deployment. The surrounding operational
-workflow is:
+The preparation command runs once in GitHub Actions during one approved deployment. The surrounding
+operational workflow is:
 
 ```text
 owner approval → backup/PITR confirmation → read-only R2 checks
-→ enable two temporary Render reset values → one approved deploy
-→ Render Pre-Deploy: npm run production:prepare
+→ enable two temporary GitHub production-Environment reset values
+→ one approved Production Deploy workflow
+→ production:prepare → Render deploy hook
+→ Render: npm install → node server.js
 → post-reset verification → remove the two temporary values
 ```
 
@@ -92,32 +92,35 @@ read-only production R2 durability preflight
 Do not proceed if that rehearsal is not successful against the current revision and current
 production Environment configuration.
 
-## 4. Required Render configuration
+## 4. Required GitHub Actions production Environment configuration
 
-Set these values in the Render production environment for one deployment only. Values marked
+Set these values in the GitHub Actions `production` Environment for one deployment only. Values marked
 `required by the reset guard` must be exact.
 
-| Variable                                  | Required value or presence                  | Purpose                                                                     |
-| ----------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| `NODE_ENV`                                | `production`                                | Selects the production-only wrapper and guard.                              |
-| `PRODUCTION_DATABASE_RESET_MODE`          | `reset-and-restore`                         | Required exact reset mode.                                                  |
-| `ALLOW_PRODUCTION_DB_RESET`               | `I_CONFIRM_PRODUCTION_DB_RESET`             | Required exact destructive confirmation.                                    |
-| `DATABASE_URL`                            | Exact intended production PostgreSQL URL    | Target to be reconstructed; local/development-looking targets are rejected. |
-| `ADMIN_EMAIL`                             | Non-empty email                             | Administrator recreated by the canonical seed.                              |
-| `ADMIN_PASSWORD`                          | Non-empty password                          | Hashed and used for the recreated administrator.                            |
-| `R2_BUCKET_NAME`                          | Production public-media bucket              | Verifies the media objects referenced by registry entries.                  |
-| `R2_ENDPOINT`                             | HTTPS R2 endpoint                           | Shared R2 endpoint.                                                         |
-| `R2_REGION`                               | Optional; defaults to `auto`                | Shared R2 region.                                                           |
-| `R2_ACCESS_KEY_ID`                        | Production media credential                 | Used for public-media reads.                                                |
-| `R2_SECRET_ACCESS_KEY`                    | Production media credential secret          | Used for public-media reads.                                                |
-| `R2_CANONICAL_REGISTRY_BUCKET_NAME`       | Separate private production registry bucket | Source of Admin canonical overrides.                                        |
-| `R2_CANONICAL_REGISTRY_PREFIX`            | Configured registry prefix, such as `v1`    | Registry object namespace.                                                  |
-| `R2_CANONICAL_REGISTRY_ACCESS_KEY_ID`     | Dedicated registry credential               | Used for private-registry reads.                                            |
-| `R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY` | Dedicated registry credential secret        | Used for private-registry reads.                                            |
+| Variable                                  | Required value or presence                                        | Purpose                                                                     |
+| ----------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `NODE_ENV`                                | `vars.NODE_ENV=production`                                        | Selects the production-only wrapper and guard.                              |
+| `PRODUCTION_DATABASE_RESET_MODE`          | `vars.PRODUCTION_DATABASE_RESET_MODE=reset-and-restore`           | Required exact reset mode.                                                  |
+| `ALLOW_PRODUCTION_DB_RESET`               | `secrets.ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET` | Required exact destructive confirmation.                                    |
+| `DATABASE_URL`                            | `secrets.DATABASE_URL` with the exact intended production URL     | Target to be reconstructed; local/development-looking targets are rejected. |
+| `ADMIN_EMAIL`                             | `vars.ADMIN_EMAIL`                                                | Administrator recreated by the canonical seed.                              |
+| `ADMIN_PASSWORD`                          | `secrets.ADMIN_PASSWORD`                                          | Hashed and used for the recreated administrator.                            |
+| `R2_BUCKET_NAME`                          | Production public-media bucket                                    | Verifies the media objects referenced by registry entries.                  |
+| `R2_ENDPOINT`                             | HTTPS R2 endpoint                                                 | Shared R2 endpoint.                                                         |
+| `R2_REGION`                               | Optional; defaults to `auto`                                      | Shared R2 region.                                                           |
+| `R2_ACCESS_KEY_ID`                        | `secrets.R2_ACCESS_KEY_ID`                                        | Used for public-media reads.                                                |
+| `R2_SECRET_ACCESS_KEY`                    | `secrets.R2_SECRET_ACCESS_KEY`                                    | Used for public-media reads.                                                |
+| `R2_CANONICAL_REGISTRY_BUCKET_NAME`       | Separate private production registry bucket                       | Source of Admin canonical overrides.                                        |
+| `R2_CANONICAL_REGISTRY_PREFIX`            | Configured registry prefix, such as `v1`                          | Registry object namespace.                                                  |
+| `R2_CANONICAL_REGISTRY_ACCESS_KEY_ID`     | `secrets.R2_CANONICAL_REGISTRY_ACCESS_KEY_ID`                     | Used for private-registry reads.                                            |
+| `R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY` | `secrets.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY`                 | Used for private-registry reads.                                            |
 
 `R2_BUCKET_NAME` and `R2_CANONICAL_REGISTRY_BUCKET_NAME` must be different. The media and
 registry credentials must remain separate. Set `DATABASE_SSL=true` when the production provider
-requires verified PostgreSQL TLS; this is a connection setting, not a reset authorization.
+requires verified PostgreSQL TLS; map it as the non-sensitive `vars.DATABASE_SSL` setting. Map
+`R2_REGION` and the bucket/prefix values through `vars.*`. The R2 endpoint is shared by both
+clients. `RENDER_DEPLOY_HOOK_URL` remains a separate Environment Secret used only by the final
+workflow step.
 
 Do not set `ALLOW_DATABASE_RESET=true`; that flag is for local/test reset and does not authorize
 production. Do not set `ALLOW_PRODUCTION_DATABASE_MIGRATION` as a substitute; migration approval
@@ -126,28 +129,13 @@ not print any secret or place one in a command, ticket, or log.
 
 ## 5. Exact production execution
 
-After the backup and preflight gates pass, deploy exactly once with the two temporary values set.
-Render must retain this Pre-Deploy Command:
-
-```sh
-npm run production:prepare
-```
-
-When using the repository deployment gate, manually dispatch the `Production Deploy` workflow
-after the temporary values are saved. That workflow runs `npm run verify`, runs the complete
-read-only durability preflight, and then invokes the Render Deploy Hook; Render runs the
-Pre-Deploy Command above. Do not dispatch `Canonical Media Recovery Rehearsal` for this step: its
-PostgreSQL target is intentionally disposable.
-
-For an operator using the same already-configured production environment interactively, the exact
-equivalent command is:
-
-```sh
-NODE_ENV=production \
-PRODUCTION_DATABASE_RESET_MODE=reset-and-restore \
-ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET \
-npm run production:prepare
-```
+After the backup and read-only preflight gates pass, save the two temporary reset values in the
+GitHub `production` Environment and manually dispatch the `Production Deploy` workflow exactly
+once. It runs `npm run verify`, the complete durability preflight, and `npm run production:prepare`
+in that order. Only after preparation succeeds does it invoke the Render Deploy Hook. Do not
+dispatch `Canonical Media Recovery Rehearsal` for this step: its PostgreSQL target is intentionally
+disposable. Render must retain only `npm install` as its build command and `node server.js` as its
+start command; do not configure a Render Pre-Deploy Command.
 
 Do not run `npm run db:reset`; it is development/test-only. Do not run the rehearsal command
 against production `DATABASE_URL`. Do not run baseline `--mode=apply`, registry smoke tests,
@@ -302,7 +290,7 @@ attempt to recreate user or workout data from canonical media metadata.
 ## 10. Remove temporary reset authorization
 
 Immediately after a successful reconstruction—or after abandoning it—remove or unset both values
-from the Render production environment:
+from the GitHub Actions `production` Environment:
 
 ```text
 PRODUCTION_DATABASE_RESET_MODE

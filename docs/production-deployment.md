@@ -9,15 +9,21 @@ workflow_dispatch
 → setup Node
 → npm ci
 → npm run verify
-→ complete canonical media durability preflight
+→ npm run media:durability:preflight
+→ npm run production:prepare
 → Render Deploy Hook
+
+Render
+→ npm install
+→ node server.js
 ```
 
-The complete canonical media durability preflight is read-only. It validates the repository
-manifest, stable catalog identities, baseline `assets/...` objects, private registry objects, and
-the R2 objects referenced by registry overrides. It does not read or mutate PostgreSQL, write or
-delete R2 objects, or run the database reset/recovery command. A failed verification or preflight
-step stops the job before the Render Deploy Hook step.
+GitHub Actions owns the production preparation phase because this project does not use Render's
+Pre-Deploy Command feature. Render remains responsible only for installing dependencies and
+starting the application. The complete canonical media durability preflight is read-only. It
+validates the repository manifest, stable catalog identities, baseline `assets/...` objects,
+private registry objects, and the R2 objects referenced by registry overrides. A failed
+verification, preflight, or preparation step stops the job before the Render Deploy Hook step.
 
 ## Audit finding
 
@@ -33,17 +39,17 @@ Configure the following values on the repository's `production` environment. The
 GitHub Environment Variables for non-sensitive configuration and Environment Secrets for
 credentials.
 
-| Variable                                  | Required by preflight | Classification              | Purpose                                                                                              |
-| ----------------------------------------- | --------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `R2_BUCKET_NAME`                          | Yes                   | Non-sensitive configuration | Production media bucket checked for each registry entry's `asset.objectKey`.                         |
-| `R2_ENDPOINT`                             | Yes                   | Non-sensitive configuration | Shared Cloudflare R2 S3 endpoint used by both clients. The canonical registry loader requires HTTPS. |
-| `R2_REGION`                               | No                    | Non-sensitive configuration | Shared S3 region; defaults to `auto` when unset or empty.                                            |
-| `R2_ACCESS_KEY_ID`                        | Yes                   | Credential                  | Read access to the production media bucket.                                                          |
-| `R2_SECRET_ACCESS_KEY`                    | Yes                   | Credential                  | Secret for the production media-bucket access key.                                                   |
-| `R2_CANONICAL_REGISTRY_BUCKET_NAME`       | Yes                   | Non-sensitive configuration | Private canonical registry bucket; it must be separate from `R2_BUCKET_NAME`.                        |
-| `R2_CANONICAL_REGISTRY_PREFIX`            | Yes                   | Non-sensitive configuration | Registry object namespace, such as `v1`; it is not a URL.                                            |
-| `R2_CANONICAL_REGISTRY_ACCESS_KEY_ID`     | Yes                   | Credential                  | Dedicated read access to the private canonical registry bucket.                                      |
-| `R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY` | Yes                   | Credential                  | Secret for the dedicated registry access key.                                                        |
+| Variable                                  | Required by preflight | GitHub source                                     | Purpose                                                                                              |
+| ----------------------------------------- | --------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `R2_BUCKET_NAME`                          | Yes                   | `vars.R2_BUCKET_NAME`                             | Production media bucket checked for each registry entry's `asset.objectKey`.                         |
+| `R2_ENDPOINT`                             | Yes                   | `vars.R2_ENDPOINT`                                | Shared Cloudflare R2 S3 endpoint used by both clients. The canonical registry loader requires HTTPS. |
+| `R2_REGION`                               | No                    | `vars.R2_REGION`                                  | Shared S3 region; defaults to `auto` when unset or empty.                                            |
+| `R2_ACCESS_KEY_ID`                        | Yes                   | `secrets.R2_ACCESS_KEY_ID`                        | Read access to the production media bucket.                                                          |
+| `R2_SECRET_ACCESS_KEY`                    | Yes                   | `secrets.R2_SECRET_ACCESS_KEY`                    | Secret for the production media-bucket access key.                                                   |
+| `R2_CANONICAL_REGISTRY_BUCKET_NAME`       | Yes                   | `vars.R2_CANONICAL_REGISTRY_BUCKET_NAME`          | Private canonical registry bucket; it must be separate from `R2_BUCKET_NAME`.                        |
+| `R2_CANONICAL_REGISTRY_PREFIX`            | Yes                   | `vars.R2_CANONICAL_REGISTRY_PREFIX`               | Registry object namespace, such as `v1`; it is not a URL.                                            |
+| `R2_CANONICAL_REGISTRY_ACCESS_KEY_ID`     | Yes                   | `secrets.R2_CANONICAL_REGISTRY_ACCESS_KEY_ID`     | Dedicated read access to the private canonical registry bucket.                                      |
+| `R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY` | Yes                   | `secrets.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY` | Secret for the dedicated registry access key.                                                        |
 
 The registry uses dedicated credentials. It shares only `R2_ENDPOINT` and `R2_REGION` with the
 general media client; it does not use the general media credentials for registry objects.
@@ -59,6 +65,25 @@ These application variables are intentionally not configured for the preflight s
 
 `RENDER_DEPLOY_HOOK_URL` remains a separate `production` Environment Secret and is exposed only
 to the final deployment step. The workflow does not expose any database or Render PostgreSQL URL.
+
+The `Prepare production` step maps this additional configuration explicitly:
+
+| Name                             | GitHub source                         | Required condition                             | Purpose                                                                             |
+| -------------------------------- | ------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `NODE_ENV`                       | `vars.NODE_ENV`                       | Reset requested                                | Must be exactly `production`.                                                       |
+| `DATABASE_URL`                   | `secrets.DATABASE_URL`                | Reset requested                                | Exact production PostgreSQL target; local/development-looking targets are rejected. |
+| `DATABASE_SSL`                   | `vars.DATABASE_SSL`                   | Optional                                       | Set to `true` when PostgreSQL requires verified TLS.                                |
+| `ADMIN_EMAIL`                    | `vars.ADMIN_EMAIL`                    | Reset requested                                | Administrator recreated by the canonical seed.                                      |
+| `ADMIN_PASSWORD`                 | `secrets.ADMIN_PASSWORD`              | Reset requested                                | Password hashed for the recreated administrator.                                    |
+| `PRODUCTION_DATABASE_RESET_MODE` | `vars.PRODUCTION_DATABASE_RESET_MODE` | Normal deploy: unset/empty; reset: exact value | First reset guard; must be `reset-and-restore` to request a reset.                  |
+| `ALLOW_PRODUCTION_DB_RESET`      | `secrets.ALLOW_PRODUCTION_DB_RESET`   | Normal deploy: unset/empty; reset: exact value | Second reset guard; must be `I_CONFIRM_PRODUCTION_DB_RESET`.                        |
+
+The existing R2 variables and secrets above are also mapped into `Prepare production`. When reset
+is requested, all eight R2 settings are required: the media bucket and credential pair plus the
+separate canonical-registry bucket, prefix, and credential pair. `R2_REGION` remains optional and
+defaults to `auto`. The workflow does not supply either reset guard itself; absent guards leave the
+preparation command in its safe no-op mode, while a configured reset mode with a missing or wrong
+confirmation fails closed.
 
 ## Baseline verification and recovery rehearsal
 
@@ -102,6 +127,13 @@ fails, the log includes a category summary and per-entry diagnostics such as
 missing response; it does not by itself prove whether the configured media bucket is wrong or the
 objects are genuinely absent. No PostgreSQL reset occurs after a preflight failure.
 
+The standalone durability preflight remains immediately before `production:prepare` even though
+preparation performs its own canonical-registry preflight. They protect different boundaries: the
+standalone command validates the complete repository baseline and all durable media, while
+preparation captures and uses the validated private-registry snapshot that is passed into the
+PostgreSQL reset/recovery transaction. Keeping both gives a clear full deployment gate and a
+last-moment snapshot check without changing recovery semantics.
+
 ## Manual production acceptance test
 
 Run this procedure from a controlled workstation or by dispatching the recovery workflow after
@@ -123,5 +155,5 @@ confirming the production Environment configuration:
 
 For the separate, destructive operation, follow the [controlled production reconstruction
 checklist](./production-recovery-checklist.md). It is the owner-approval procedure for one real
-Render Pre-Deploy reconstruction after backup/PITR confirmation; the rehearsal workflow itself
-remains disposable and must not receive production PostgreSQL credentials.
+GitHub Actions preparation and Render deployment after backup/PITR confirmation; the rehearsal
+workflow itself remains disposable and must not receive production PostgreSQL credentials.

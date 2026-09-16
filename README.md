@@ -161,12 +161,21 @@ Create the production bucket, least-privilege access key, custom domain, and DNS
 manually in Cloudflare, then verify the domain and bucket pairing before deployment. No production
 resource is created or changed by repository commands.
 
-The manually triggered production deployment workflow runs application verification and the
-complete read-only canonical-media durability preflight before the Render Deploy Hook. The
-separate `Canonical Media Recovery Rehearsal` workflow uses production R2 only for read-only
-preflight and restores the validated private registry snapshot into an ephemeral PostgreSQL service.
-See the [production deployment guide](docs/production-deployment.md) for the production Environment
-variables, baseline verification command, recovery rehearsal, and exact manual acceptance test.
+The manually triggered production deployment workflow runs this gated sequence:
+
+```text
+GitHub Actions: verify → durability preflight → production:prepare → Render deploy hook
+Render: npm install → node server.js
+```
+
+GitHub Actions replaces the unavailable Render Pre-Deploy phase for this project. The separate
+`Canonical Media Recovery Rehearsal` workflow uses production R2 only for read-only preflight and
+restores the validated private registry snapshot into an ephemeral PostgreSQL service. See the
+[production deployment guide](docs/production-deployment.md) for the GitHub `production`
+Environment variables/secrets and the [controlled reconstruction checklist](docs/production-recovery-checklist.md)
+for the one-time reset procedure. After a controlled reset is validated, remove or disable both
+production reset guards from that GitHub Environment. The deployment guide also covers the
+baseline verification command, recovery rehearsal, and exact manual acceptance test.
 
 Argon2id is smoke-tested with `npm run check:argon2`; CI runs the same check on
 Ubuntu 22.04 with Node 22 before deployment.

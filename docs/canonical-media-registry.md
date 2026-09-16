@@ -133,10 +133,12 @@ destructive verification is part of this workflow.
 Automatic registry cleanup and R2 orphan deletion are intentionally not implemented. The registry
 remains the recovery reference even when the current database is temporarily inconsistent.
 
-## Production pre-deploy reconstruction
+## Production reconstruction
 
-Render should use `npm run production:prepare` as its Pre-Deploy Command. The command is harmless
-when `PRODUCTION_DATABASE_RESET_MODE` is unset or empty. It accepts only the exact destructive
+The GitHub Actions `Production Deploy` workflow runs `npm run production:prepare` after the
+standalone durability preflight and before calling the Render Deploy Hook. This project does not
+use Render's Pre-Deploy Command feature; Render only runs `npm install` and `node server.js`. The
+command is harmless when `PRODUCTION_DATABASE_RESET_MODE` is unset or empty. It accepts only the exact destructive
 sentinel `reset-and-restore` plus the separate exact confirmation
 `ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET`; unexpected or missing values fail
 configuration validation without invoking the database reset.
