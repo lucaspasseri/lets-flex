@@ -39,6 +39,9 @@
  * @property {string} load_unit
  * @property {number} step_order
  * @property {string} step_type_name
+ * @property {number} [exercise_variant_id]
+ * @property {number} [exercise_id]
+ * @property {number} [movement_pattern_id]
  * @property {string} exercise_variant_name
  * @property {"en" | "pt-BR" | "canonical"} [exercise_variant_name_locale]
  * @property {string} [canonical_exercise_variant_name]

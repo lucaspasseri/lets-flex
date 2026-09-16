@@ -33,6 +33,9 @@ export function findAll({ localeParameter = "$2" } = {}) {
 							'step_order', ss.step_order,
 
 							'step_type_name', st.name,
+							'exercise_variant_id', ss.exercise_variant_id,
+							'exercise_id', ex.id,
+							'movement_pattern_id', mp.id,
 							'exercise_variant_name', ${localizedCatalogValueSql({ alias: "exercise_variant_translation", canonicalExpression: "ev.name" })},
 							'exercise_variant_name_locale', ${localizedCatalogLocaleSql({ alias: "exercise_variant_translation" })},
 							'canonical_exercise_variant_name', ev.name,

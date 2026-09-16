@@ -7,6 +7,14 @@ import { schemaSql } from "./schema.js";
 import { seedSql } from "./seed.js";
 import { catalogManifest } from "../src/features/exerciseCatalog/catalogManifest.js";
 import { canonicalMediaManifest } from "../src/features/media/mediaManifest.js";
+import createStarterWorkspace from "../src/features/guests/createStarterWorkspace.js";
+import { loadMediaAssignments } from "../src/features/media/loadMediaAssignments.js";
+import createMediaResolver from "../src/features/media/createMediaResolver.js";
+import resolveStepMedia from "../src/features/media/resolveStepMedia.js";
+import * as sessionsRepository from "../src/features/sessions/repository.js";
+import * as sessionMapper from "../src/features/sessions/mapper.js";
+import * as workoutSessionsRepository from "../src/features/workoutSessions/repository.js";
+import * as workoutSessionMapper from "../src/features/workoutSessions/mapper.js";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 const databaseIsSafe = (() => {
@@ -353,6 +361,81 @@ integration("canonical database setup", { concurrency: false }, () => {
 				step_type: "exercise",
 			},
 		]);
+	});
+
+	test("starter workout uses the current canonical media after a base reassignment", async () => {
+		const { rows: guestRows } = await db.query(
+			`INSERT INTO users (role, name, guest_expires_at)
+			 VALUES ('guest', 'Media regression guest', NOW() + INTERVAL '1 day')
+			 RETURNING id`,
+		);
+		const guestId = guestRows[0].id;
+		const starter = await createStarterWorkspace(
+			{ userId: guestId, scheduledDate: "2026-09-16" },
+			db,
+		);
+
+		const { rows: entityRows } = await db.query(
+			`SELECT exercise.id AS exercise_id, variant.id AS variant_id
+			 FROM exercises AS exercise
+			 JOIN exercise_variants AS variant ON variant.exercise_id = exercise.id
+			 WHERE variant.catalog_key = 'bodyweight-push-up'`,
+		);
+		const entity = entityRows[0];
+		const { rows: assetRows } = await db.query(
+			`INSERT INTO media_assets
+				(storage_key, mime_type, width, height, source, alt_text)
+			 VALUES ('assets/regression-current-push-up.png', 'image/png', 960, 640, 'test', 'Current push-up')
+			 RETURNING id, storage_key`,
+		);
+		const reassigned = await db.query(
+			`UPDATE entity_media
+			 SET media_asset_id = $1
+			 WHERE entity_type = 'exercise' AND entity_id = $2 AND role = 'primary'
+			 RETURNING id`,
+			[assetRows[0].id, entity.exercise_id],
+		);
+		assert.equal(reassigned.rowCount, 1);
+
+		const workoutRows = await workoutSessionsRepository.findAllByTrainingDayId(
+			{ trainingDayId: starter.trainingDayId, locale: "en" },
+			/** @type {any} */ (db),
+		);
+		const workout = workoutSessionMapper.toWorkoutSession(workoutRows[0]);
+		const workoutStep = workout.steps.find(
+			(step) => step.exerciseVariantId === entity.variant_id,
+		);
+		assert.ok(workoutStep);
+		assert.equal(workoutStep.exerciseId, entity.exercise_id);
+
+		const visibleSessionRows = await sessionsRepository.findVisibleForUser(
+			{ userId: guestId, locale: "en" },
+			/** @type {any} */ (db),
+		);
+		const ownedSessionRow = visibleSessionRows.find(
+			(session) => session.owner_user_id === guestId,
+		);
+		assert.ok(ownedSessionRow);
+		const ownedSession = sessionMapper.toSessionMapperSeed(ownedSessionRow);
+		const sessionStep = ownedSession.steps.find(
+			(step) => step.exerciseVariantId === entity.variant_id,
+		);
+		assert.ok(sessionStep);
+
+		const [workoutAssignments, sessionAssignments] = await Promise.all([
+			loadMediaAssignments({ workoutSessions: [workout] }, /** @type {any} */ (db)),
+			loadMediaAssignments({ sessions: [ownedSession] }, /** @type {any} */ (db)),
+		]);
+		const workoutMedia = resolveStepMedia(workoutStep, {
+			resolveMedia: createMediaResolver(workoutAssignments),
+		});
+		const sessionMedia = resolveStepMedia(sessionStep, {
+			resolveMedia: createMediaResolver(sessionAssignments),
+		});
+
+		assert.equal(workoutMedia.src, assetRows[0].storage_key);
+		assert.equal(sessionMedia.src, assetRows[0].storage_key);
+		assert.equal(workoutMedia.src, sessionMedia.src);
 	});
 
 	test("fresh database contains the PostgreSQL session-store infrastructure", async () => {
