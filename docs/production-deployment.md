@@ -120,3 +120,8 @@ confirming the production Environment configuration:
 5. Do not run `--mode=apply` or `npm run production:prepare` as part of this acceptance test. A
    missing-object repair or intentional production database reconstruction requires a separate
    reviewed approval and the command-specific confirmation safeguards.
+
+For the separate, destructive operation, follow the [controlled production reconstruction
+checklist](./production-recovery-checklist.md). It is the owner-approval procedure for one real
+Render Pre-Deploy reconstruction after backup/PITR confirmation; the rehearsal workflow itself
+remains disposable and must not receive production PostgreSQL credentials.
