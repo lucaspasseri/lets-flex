@@ -26,6 +26,9 @@ Copy `.env.sample` to `.env` for local development and set:
 - `ALLOW_DATABASE_MIGRATION=true` only when deliberately applying an existing-database migration.
 - `ALLOW_PRODUCTION_DATABASE_MIGRATION=true` as a separate explicit confirmation for a reviewed
   production migration; this never authorizes reset.
+- `ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET` only for a deliberate production
+  reconstruction, together with `PRODUCTION_DATABASE_RESET_MODE=reset-and-restore`; keep both unset
+  normally.
 
 The component playground is available outside production only.
 
@@ -63,8 +66,12 @@ while fresh/reset databases use the latest schema and seed directly. Do not run 
 production, and do not run migration commands without verifying the exact target and reviewed
 deployment plan.
 
-The reset command refuses to run when `NODE_ENV=production` or unless
-`ALLOW_DATABASE_RESET=true` is set. It also requires `NODE_ENV=development` or
+The generic reset command refuses to run when `NODE_ENV=production`, even when the production
+confirmation variables are present. Production reconstruction is available only through the
+separate `npm run production:prepare` wrapper, which requires both exact values
+`PRODUCTION_DATABASE_RESET_MODE=reset-and-restore` and
+`ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET`. Development reset requires
+`ALLOW_DATABASE_RESET=true` and also requires `NODE_ENV=development` or
 `NODE_ENV=test` and a localhost target or database name explicitly marked as development,
 local, or test. Before using that opt-in, verify that `DATABASE_URL` identifies the intended
 disposable database.

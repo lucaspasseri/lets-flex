@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
-import { seedSql } from "./seed.js";
+import { resetAndSeedDatabase, seedSql } from "./seed.js";
 import { schemaSql } from "./schema.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
@@ -66,11 +66,26 @@ test("database reset refuses production even when explicitly requested", () => {
 	const result = runSeed({
 		NODE_ENV: "production",
 		ALLOW_DATABASE_RESET: "true",
+		PRODUCTION_DATABASE_RESET_MODE: "reset-and-restore",
+		ALLOW_PRODUCTION_DB_RESET: "I_CONFIRM_PRODUCTION_DB_RESET",
 		ADMIN_EMAIL: "admin@example.com",
 		ADMIN_PASSWORD: "a sufficiently long test password",
 	});
 	assert.notEqual(result.status, 0);
 	assert.match(result.stderr, /Refusing to reset the database in production/);
+});
+
+test("production reset implementation requires the exact confirmation", async () => {
+	await assert.rejects(
+		resetAndSeedDatabase({
+			environment: {
+				NODE_ENV: "production",
+				PRODUCTION_DATABASE_RESET_MODE: "reset-and-restore",
+			},
+			allowProductionReset: true,
+		}),
+		/explicit reset authorization/,
+	);
 });
 
 test("database reset requires an explicit opt-in", () => {

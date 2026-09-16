@@ -14,6 +14,7 @@ jobs:
   deploy:
     name: Verify and deploy production
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout repository
@@ -30,6 +31,19 @@ jobs:
 
       - name: Verify application
         run: npm run verify
+
+      - name: Preflight canonical registry
+        env:
+          R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
+          R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
+          R2_REGION: ${{ vars.R2_REGION }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_CANONICAL_REGISTRY_BUCKET_NAME: ${{ vars.R2_CANONICAL_REGISTRY_BUCKET_NAME }}
+          R2_CANONICAL_REGISTRY_PREFIX: ${{ vars.R2_CANONICAL_REGISTRY_PREFIX }}
+          R2_CANONICAL_REGISTRY_ACCESS_KEY_ID: ${{ secrets.R2_CANONICAL_REGISTRY_ACCESS_KEY_ID }}
+          R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: ${{ secrets.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY }}
+        run: npm run media:registry:preflight
 
       - name: Trigger Render deployment
         env:

@@ -38,6 +38,7 @@
 		"test:watch": "node --env-file-if-exists=.env.test --test --watch",
 		"r2:smoke-test": "node --env-file-if-exists=.env scripts/r2-smoke-test.mjs",
 		"media:registry:smoke-test": "node --env-file-if-exists=.env scripts/canonical-registry-smoke-test.mjs",
+		"media:registry:preflight": "node --env-file-if-exists=.env scripts/canonical-registry-preflight.mjs",
 		"media:registry:audit": "node --env-file-if-exists=.env scripts/canonical-registry-audit.mjs"
 	},
 	"dependencies": {

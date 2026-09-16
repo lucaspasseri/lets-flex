@@ -67,7 +67,7 @@ npm run production:prepare
 ```
 
 The command is intentionally separate from the build and start commands. During normal
-deployments, leave `PRODUCTION_DATABASE_RESET_MODE` unset or empty; the command logs
+deployments, leave `PRODUCTION_DATABASE_RESET_MODE` and `ALLOW_PRODUCTION_DB_RESET` unset or empty; the command logs
 `Production database reset not requested.` and performs no database, registry, or media changes.
 
 An intentional production reconstruction requires `NODE_ENV=production`, the production
@@ -76,15 +76,18 @@ canonical-registry buckets/credentials, and the exact sentinel:
 
 ```env
 PRODUCTION_DATABASE_RESET_MODE=reset-and-restore
+ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET
 ```
 
-The preparation command validates the private R2 canonical registry and referenced media objects
+Both values are required exactly; missing, blank, or arbitrary truthy values fail before any
+destructive SQL. The generic `npm run db:reset` command remains development/test-only and cannot
+become a production reset through these values. The preparation command validates the private R2 canonical registry and referenced media objects
 before invoking the existing schema-and-seed reset. It then restores the validated in-memory
 registry snapshot through the existing canonical recovery path and verifies every restored
 assignment against PostgreSQL. Registry preflight, reset, restoration, and post-restore failures
 return a non-zero exit code and fail the Render deployment. No registry objects are written or
 deleted during recovery.
 
-Because the setting persists in Render, disable or remove `PRODUCTION_DATABASE_RESET_MODE` again
+Because these settings persist in Render, disable or remove both production-reset values again
 immediately after the intentional reset deployment. Any other non-empty value is rejected as a
 configuration error and cannot trigger a reset. The application build remains non-destructive.

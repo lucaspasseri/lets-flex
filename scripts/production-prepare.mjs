@@ -2,7 +2,12 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 
 import pool from "../db/pool.js";
-import { resetAndSeedDatabase } from "../db/seed.js";
+import {
+	PRODUCTION_DATABASE_RESET_AUTHORIZATION,
+	PRODUCTION_DATABASE_RESET_MODE,
+	assertProductionResetAuthorization,
+	resetAndSeedDatabase,
+} from "../db/seed.js";
 import {
 	preflightCanonicalRegistry,
 	verifyCanonicalRegistryRestoration,
@@ -10,12 +15,12 @@ import {
 import { createCanonicalMediaRegistryFromEnvironment } from "../src/features/media/registry/canonicalMediaRegistry.js";
 import { createR2MediaStorageFromEnvironment } from "../src/features/media/storage/r2Storage.js";
 
-export const PRODUCTION_DATABASE_RESET_MODE = "reset-and-restore";
+export { PRODUCTION_DATABASE_RESET_AUTHORIZATION, PRODUCTION_DATABASE_RESET_MODE };
 
 /**
- * Read the strict production reset opt-in. Empty or missing values are safe; any non-empty value
- * other than the documented sentinel is a configuration error and never reaches the destructive
- * path.
+ * Read the production reset mode request. Empty or missing values are safe no-ops; any non-empty
+ * value other than the documented mode is a configuration error. The separate exact confirmation
+ * is checked before registry preflight and destructive work.
  *
  * @param {NodeJS.ProcessEnv} [environment]
  * @returns {{enabled: boolean}}
@@ -40,6 +45,7 @@ export function readProductionResetConfiguration(environment = process.env) {
 export function assertProductionPreparationSafety(environment) {
 	if (environment.NODE_ENV !== "production")
 		throw new Error("Production database reset requires NODE_ENV=production.");
+	assertProductionResetAuthorization(environment, true);
 	const databaseUrl = environment.DATABASE_URL;
 	if (typeof databaseUrl !== "string" || databaseUrl.trim() === "")
 		throw new Error("DATABASE_URL is required for production database reset.");

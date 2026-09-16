@@ -16,6 +16,9 @@ import {
 	restoreCanonicalRegistry,
 } from "../src/features/media/registry/canonicalMediaRegistryRecovery.js";
 
+export const PRODUCTION_DATABASE_RESET_MODE = "reset-and-restore";
+export const PRODUCTION_DATABASE_RESET_AUTHORIZATION = "I_CONFIRM_PRODUCTION_DB_RESET";
+
 export const seedSql = `
 INSERT INTO "step_types" ("name")
 VALUES
@@ -144,6 +147,25 @@ export async function seedDatabase(
 }
 
 /**
+ * Require the private production-reset capability in addition to the production reset mode. The
+ * capability is checked by both the production wrapper and the reset implementation so a direct
+ * call cannot bypass the explicit environment confirmation.
+ *
+ * @param {NodeJS.ProcessEnv} environment
+ * @param {boolean} allowProductionReset
+ */
+export function assertProductionResetAuthorization(environment, allowProductionReset) {
+	if (
+		!allowProductionReset ||
+		environment.PRODUCTION_DATABASE_RESET_MODE !== PRODUCTION_DATABASE_RESET_MODE ||
+		environment.ALLOW_PRODUCTION_DB_RESET !== PRODUCTION_DATABASE_RESET_AUTHORIZATION
+	)
+		throw new Error(
+			"Refusing to reset the database in production without explicit reset authorization.",
+		);
+}
+
+/**
  * Rebuild and seed a database using the current authoritative schema and seed SQL. The production
  * deployment command supplies an already validated registry snapshot and the explicit production
  * authorization; the normal db:reset entry point remains development/test-only.
@@ -159,14 +181,7 @@ export async function resetAndSeedDatabase({
 	allowProductionReset = false,
 } = {}) {
 	if (environment.NODE_ENV === "production") {
-		if (
-			!allowProductionReset ||
-			environment.PRODUCTION_DATABASE_RESET_MODE !== "reset-and-restore"
-		) {
-			throw new Error(
-				"Refusing to reset the database in production without the deployment reset authorization",
-			);
-		}
+		assertProductionResetAuthorization(environment, allowProductionReset);
 	} else {
 		if (environment.ALLOW_DATABASE_RESET !== "true") {
 			throw new Error("Database reset requires ALLOW_DATABASE_RESET=true");
@@ -218,7 +233,7 @@ export async function resetAndSeedDatabase({
 
 	// Validate and hash before any destructive operation begins.
 	const passwordHash = await hashPassword(adminPassword);
-	console.log("Resetting and seeding the development database...");
+	console.log("Resetting and seeding the database...");
 
 	const client = new Client({
 		connectionString,

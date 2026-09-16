@@ -107,8 +107,9 @@ remains the recovery reference even when the current database is temporarily inc
 
 Render should use `npm run production:prepare` as its Pre-Deploy Command. The command is harmless
 when `PRODUCTION_DATABASE_RESET_MODE` is unset or empty. It accepts only the exact destructive
-sentinel `reset-and-restore`; unexpected values fail configuration validation without invoking
-the database reset.
+sentinel `reset-and-restore` plus the separate exact confirmation
+`ALLOW_PRODUCTION_DB_RESET=I_CONFIRM_PRODUCTION_DB_RESET`; unexpected or missing values fail
+configuration validation without invoking the database reset.
 
 When enabled, the command requires `NODE_ENV=production`, a non-local/non-development-looking
 PostgreSQL target, administrator configuration, and explicit separate production media and private
@@ -116,5 +117,5 @@ registry configuration. It then runs registry preflight, invokes the existing `d
 reset-and-seed implementation with the validated snapshot, and runs strict post-restore checks.
 The build command is not changed. Registry preflight failure always prevents database destruction,
 and any reset or verification failure returns a non-zero exit code. After an intentional reset,
-remove the environment variable or set it empty before subsequent deployments so they do not
+remove or empty both production-reset variables before subsequent deployments so they do not
 repeat the destructive reconstruction.

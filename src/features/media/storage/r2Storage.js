@@ -14,6 +14,8 @@ import {
 
 /** @typedef {{send: (command: object) => Promise<unknown>}} S3CommandClient */
 
+/** @typedef {{exists: (storageKey: string) => Promise<boolean>}} MediaObjectProbe */
+
 /**
  * Read the server-side R2 configuration without exposing secret values in errors or logs.
  *
@@ -38,6 +40,70 @@ export function readR2Configuration(environment = process.env) {
 		accessKeyId,
 		secretAccessKey,
 		publicUrlBase,
+	};
+}
+
+/**
+ * Read only the R2 settings needed to verify that an existing media object is present. This
+ * intentionally excludes MEDIA_PUBLIC_URL because object-existence checks do not construct URLs.
+ *
+ * @param {NodeJS.ProcessEnv} [environment]
+ * @returns {{bucketName: string, endpoint: string, region: string, accessKeyId: string, secretAccessKey: string}}
+ */
+export function readR2ObjectProbeConfiguration(environment = process.env) {
+	const bucketName = requiredEnvironmentValue(environment, "R2_BUCKET_NAME");
+	const endpoint = requiredEnvironmentValue(environment, "R2_ENDPOINT");
+	const accessKeyId = requiredEnvironmentValue(environment, "R2_ACCESS_KEY_ID");
+	const secretAccessKey = requiredEnvironmentValue(environment, "R2_SECRET_ACCESS_KEY");
+	const region = environment.R2_REGION?.trim() || "auto";
+
+	assertHttpUrl(endpoint, "R2_ENDPOINT");
+	return { bucketName, endpoint, region, accessKeyId, secretAccessKey };
+}
+
+/**
+ * Create a read-only adapter for checking existing R2 media objects.
+ *
+ * @param {{client?: S3CommandClient, bucketName: string, endpoint?: string, region?: string, accessKeyId?: string, secretAccessKey?: string}} options
+ * @returns {MediaObjectProbe}
+ */
+export function createR2MediaObjectProbe({
+	client,
+	bucketName,
+	endpoint,
+	region = "auto",
+	accessKeyId,
+	secretAccessKey,
+}) {
+	const normalizedBucketName = requiredOption(bucketName, "R2 bucket name");
+	const normalizedEndpoint = endpoint
+		? assertHttpUrl(endpoint, "R2 endpoint")
+		: undefined;
+	const storageClient =
+		client ??
+		createR2S3Client({
+			endpoint: normalizedEndpoint,
+			region,
+			accessKeyId,
+			secretAccessKey,
+		});
+
+	return {
+		/** @param {string} storageKey */
+		async exists(storageKey) {
+			try {
+				await storageClient.send(
+					new HeadObjectCommand({
+						Bucket: normalizedBucketName,
+						Key: normalizeMediaObjectKey(storageKey),
+					}),
+				);
+				return true;
+			} catch (error) {
+				if (isMissingObjectError(error)) return false;
+				throw error;
+			}
+		},
 	};
 }
 
@@ -174,6 +240,23 @@ export function createR2MediaStorageFromEnvironment(
 	options = {},
 ) {
 	return createR2MediaStorage({ ...readR2Configuration(environment), ...options });
+}
+
+/**
+ * Build the read-only media object probe used by canonical registry preflight.
+ *
+ * @param {NodeJS.ProcessEnv} [environment]
+ * @param {{client?: S3CommandClient}} [options]
+ * @returns {MediaObjectProbe}
+ */
+export function createR2MediaObjectProbeFromEnvironment(
+	environment = process.env,
+	options = {},
+) {
+	return createR2MediaObjectProbe({
+		...readR2ObjectProbeConfiguration(environment),
+		...options,
+	});
 }
 
 /** @param {NodeJS.ProcessEnv} environment @param {string} name @returns {string} */

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+	PRODUCTION_DATABASE_RESET_AUTHORIZATION,
 	PRODUCTION_DATABASE_RESET_MODE,
 	prepareProductionDeployment,
 } from "./production-prepare.mjs";
@@ -37,6 +38,7 @@ function productionEnvironment(overrides = {}) {
 		R2_CANONICAL_REGISTRY_ACCESS_KEY_ID: "registry-access-key",
 		R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: "registry-secret-key",
 		PRODUCTION_DATABASE_RESET_MODE,
+		ALLOW_PRODUCTION_DB_RESET: PRODUCTION_DATABASE_RESET_AUTHORIZATION,
 		...overrides,
 	};
 }
@@ -79,6 +81,25 @@ test("an unexpected reset value fails safely before any destructive operation", 
 		/PRODUCTION_DATABASE_RESET_MODE must be unset or exactly reset-and-restore/,
 	);
 	assert.deepEqual(calls, []);
+});
+
+test("production preparation requires the exact reset confirmation", async () => {
+	for (const authorization of [undefined, "", "true", "I_CONFIRM_PRODUCTION_RESET"]) {
+		const calls = [];
+		await assert.rejects(
+			prepareProductionDeployment({
+				environment: productionEnvironment({
+					ALLOW_PRODUCTION_DB_RESET: authorization,
+				}),
+				dependencies: {
+					resetDatabase: async () => calls.push("reset"),
+				},
+				log: () => {},
+			}),
+			/explicit reset authorization/,
+		);
+		assert.deepEqual(calls, []);
+	}
 });
 
 test("successful preparation preserves the preflight snapshot and ordering", async () => {

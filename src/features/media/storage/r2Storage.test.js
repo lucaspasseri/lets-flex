@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createR2MediaStorage, readR2Configuration } from "./r2Storage.js";
+import {
+	createR2MediaObjectProbe,
+	createR2MediaStorage,
+	readR2Configuration,
+	readR2ObjectProbeConfiguration,
+} from "./r2Storage.js";
 
 function createFakeClient(responses = []) {
 	const commands = [];
@@ -118,6 +123,30 @@ test("R2 configuration requires complete server-side settings and validates URLs
 			}),
 		/without credentials, query, or fragment/,
 	);
+});
+
+test("R2 object probe only requires settings needed for read-only existence checks", async () => {
+	const configuration = readR2ObjectProbeConfiguration({
+		R2_BUCKET_NAME: "media-production",
+		R2_ENDPOINT: "https://account.r2.cloudflarestorage.com",
+		R2_ACCESS_KEY_ID: "access-key",
+		R2_SECRET_ACCESS_KEY: "secret-key",
+	});
+	assert.deepEqual(configuration, {
+		bucketName: "media-production",
+		endpoint: "https://account.r2.cloudflarestorage.com",
+		region: "auto",
+		accessKeyId: "access-key",
+		secretAccessKey: "secret-key",
+	});
+
+	const client = createFakeClient([{}]);
+	const probe = createR2MediaObjectProbe({ ...configuration, client });
+	assert.equal(await probe.exists("assets/canonical.webp"), true);
+	assert.deepEqual(client.commands[0].input, {
+		Bucket: "media-production",
+		Key: "assets/canonical.webp",
+	});
 });
 
 test("R2 storage validates object keys and ignores upload filenames", async () => {
