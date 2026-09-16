@@ -111,12 +111,30 @@ export async function prepareProductionDeployment({
 	dependencies = {},
 	log = (message) => globalThis.console.log(`[production-prepare] ${message}`),
 } = {}) {
-	const resetRequest = readProductionResetConfiguration(environment);
 	log("production preparation started");
+	let resetRequest;
+	try {
+		resetRequest = readProductionResetConfiguration(environment);
+		log(
+			`reset mode detected: ${resetRequest.enabled ? PRODUCTION_DATABASE_RESET_MODE : "disabled"}`,
+		);
+	} catch (error) {
+		log("reset mode detected: invalid");
+		log("authorization rejected");
+		throw error;
+	}
 	if (!resetRequest.enabled) {
+		log("authorization rejected: reset mode is disabled");
 		log("Production database reset not requested.");
 		return { status: "disabled" };
 	}
+
+	if (
+		environment.PRODUCTION_DATABASE_RESET_MODE === PRODUCTION_DATABASE_RESET_MODE &&
+		environment.ALLOW_PRODUCTION_DB_RESET === PRODUCTION_DATABASE_RESET_AUTHORIZATION
+	)
+		log("authorization accepted");
+	else log("authorization rejected");
 
 	assertProductionPreparationSafety(environment);
 	log("destructive reset explicitly enabled");
@@ -133,13 +151,14 @@ export async function prepareProductionDeployment({
 			mediaStorage,
 		});
 	} catch (error) {
+		log("canonical registry preflight failed");
 		throw withStage(error, "registry_preflight");
 	}
 	log(`registry entries validated: ${registrySnapshot.summary.count}`);
 	log(`media references verified: ${registrySnapshot.summary.count}`);
-	log("registry preflight passed");
+	log("canonical registry preflight passed");
 
-	log("database reset and baseline seed started");
+	log("PostgreSQL reset started");
 	try {
 		const reset = dependencies.resetDatabase ?? resetAndSeedDatabase;
 		await reset({
@@ -149,10 +168,13 @@ export async function prepareProductionDeployment({
 			mediaStorage,
 			registryPreflight: registrySnapshot,
 			allowProductionReset: true,
+			log,
 		});
 	} catch (error) {
+		log("PostgreSQL reset failed");
 		throw withStage(error, "database_reset");
 	}
+	log("PostgreSQL reset passed");
 	log("baseline seed and validated registry restoration completed");
 
 	log("post-restore verification started");

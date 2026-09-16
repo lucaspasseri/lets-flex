@@ -170,7 +170,7 @@ export function assertProductionResetAuthorization(environment, allowProductionR
  * deployment command supplies an already validated registry snapshot and the explicit production
  * authorization; the normal db:reset entry point remains development/test-only.
  *
- * @param {{connectionString?: string, environment?: NodeJS.ProcessEnv, canonicalRegistry?: import("../src/features/media/registry/canonicalMediaRegistry.js").CanonicalMediaRegistryStore, mediaStorage?: import("../src/features/media/storage/storage.js").MediaStorage, registryPreflight?: {entries: Array<import("../src/features/media/registry/canonicalMediaRegistrySchema.js").CanonicalRegistryEntry>, summary: {count: number}}, allowProductionReset?: boolean}} [options]
+ * @param {{connectionString?: string, environment?: NodeJS.ProcessEnv, canonicalRegistry?: import("../src/features/media/registry/canonicalMediaRegistry.js").CanonicalMediaRegistryStore, mediaStorage?: import("../src/features/media/storage/storage.js").MediaStorage, registryPreflight?: {entries: Array<import("../src/features/media/registry/canonicalMediaRegistrySchema.js").CanonicalRegistryEntry>, summary: {count: number}}, allowProductionReset?: boolean, log?: (message: string) => void}} [options]
  */
 export async function resetAndSeedDatabase({
 	connectionString = process.env.DATABASE_URL,
@@ -179,6 +179,7 @@ export async function resetAndSeedDatabase({
 	mediaStorage,
 	registryPreflight,
 	allowProductionReset = false,
+	log = (message) => console.log(`[database-reset] ${message}`),
 } = {}) {
 	if (environment.NODE_ENV === "production") {
 		assertProductionResetAuthorization(environment, allowProductionReset);
@@ -242,13 +243,21 @@ export async function resetAndSeedDatabase({
 
 	try {
 		await client.connect();
+		log("PostgreSQL reset transaction started");
 		await client.query("BEGIN");
 		await client.query(schemaSql);
 		await client.query(seedSql);
-		await restoreCanonicalRegistry({
-			entries: validatedRegistry.entries,
-			db: client,
-		});
+		log("canonical recovery started");
+		try {
+			await restoreCanonicalRegistry({
+				entries: validatedRegistry.entries,
+				db: client,
+			});
+			log("canonical recovery passed");
+		} catch (error) {
+			log("canonical recovery failed");
+			throw error;
+		}
 		await client.query(
 			`WITH administrator AS (
 				INSERT INTO users (email, role, name)
@@ -260,6 +269,7 @@ export async function resetAndSeedDatabase({
 			[adminEmail, passwordHash],
 		);
 		await client.query("COMMIT");
+		log("PostgreSQL reset transaction committed");
 		console.log("Database seeded successfully.");
 	} catch (error) {
 		await client.query("ROLLBACK").catch(() => {});

@@ -168,16 +168,23 @@ Expected successful log shape is:
 
 ```text
 [production-prepare] production preparation started
+[production-prepare] reset mode detected: reset-and-restore
+[production-prepare] authorization accepted
 [production-prepare] destructive reset explicitly enabled
 [production-prepare] registry preflight started
 [production-prepare] registry entries validated: N
 [production-prepare] media references verified: N
-[production-prepare] registry preflight passed
-[production-prepare] database reset and baseline seed started
+[production-prepare] canonical registry preflight passed
+[production-prepare] PostgreSQL reset started
 Canonical registry preflight passed (N override(s)).
 Resetting and seeding the database...
+[production-prepare] PostgreSQL reset transaction started
+[production-prepare] canonical recovery started
+[production-prepare] canonical recovery passed
+[production-prepare] PostgreSQL reset transaction committed
 Database seeded successfully.
 Connection closed.
+[production-prepare] PostgreSQL reset passed
 [production-prepare] baseline seed and validated registry restoration completed
 [production-prepare] post-restore verification started
 [production-prepare] post-restore verification passed: N override(s)

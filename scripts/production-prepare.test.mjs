@@ -54,16 +54,23 @@ function fakeRegistry(overrides = {}) {
 
 test("missing production reset opt-in is fast and non-destructive", async () => {
 	const calls = [];
+	const logs = [];
 	const result = await prepareProductionDeployment({
 		environment: { NODE_ENV: "production" },
 		dependencies: {
 			resetDatabase: async () => calls.push("reset"),
 		},
-		log: () => {},
+		log: (message) => logs.push(message),
 	});
 
 	assert.deepEqual(result, { status: "disabled" });
 	assert.deepEqual(calls, []);
+	assert.deepEqual(logs, [
+		"production preparation started",
+		"reset mode detected: disabled",
+		"authorization rejected: reset mode is disabled",
+		"Production database reset not requested.",
+	]);
 });
 
 test("an unexpected reset value fails safely before any destructive operation", async () => {
@@ -86,6 +93,7 @@ test("an unexpected reset value fails safely before any destructive operation", 
 test("production preparation requires the exact reset confirmation", async () => {
 	for (const authorization of [undefined, "", "true", "I_CONFIRM_PRODUCTION_RESET"]) {
 		const calls = [];
+		const logs = [];
 		await assert.rejects(
 			prepareProductionDeployment({
 				environment: productionEnvironment({
@@ -94,16 +102,19 @@ test("production preparation requires the exact reset confirmation", async () =>
 				dependencies: {
 					resetDatabase: async () => calls.push("reset"),
 				},
-				log: () => {},
+				log: (message) => logs.push(message),
 			}),
 			/explicit reset authorization/,
 		);
 		assert.deepEqual(calls, []);
+		assert.ok(logs.includes("reset mode detected: reset-and-restore"));
+		assert.ok(logs.includes("authorization rejected"));
 	}
 });
 
 test("successful preparation preserves the preflight snapshot and ordering", async () => {
 	const calls = [];
+	const logs = [];
 	let resetOptions;
 	let verifyInput;
 	const result = await prepareProductionDeployment({
@@ -121,17 +132,35 @@ test("successful preparation preserves the preflight snapshot and ordering", asy
 				return { count: 1 };
 			},
 		},
-		log: () => {},
+		log: (message) => logs.push(message),
 	});
 
 	assert.deepEqual(result, { status: "completed", count: 1 });
 	assert.deepEqual(calls, ["reset", "verify"]);
 	assert.equal(resetOptions.registryPreflight.entries[0], verifyInput.entries[0]);
 	assert.equal(resetOptions.allowProductionReset, true);
+	assert.equal(typeof resetOptions.log, "function");
+	assert.deepEqual(logs, [
+		"production preparation started",
+		"reset mode detected: reset-and-restore",
+		"authorization accepted",
+		"destructive reset explicitly enabled",
+		"registry preflight started",
+		"registry entries validated: 1",
+		"media references verified: 1",
+		"canonical registry preflight passed",
+		"PostgreSQL reset started",
+		"PostgreSQL reset passed",
+		"baseline seed and validated registry restoration completed",
+		"post-restore verification started",
+		"post-restore verification passed: 1 override(s)",
+		"production preparation completed",
+	]);
 });
 
 test("registry preflight failure never invokes database reset", async () => {
 	const calls = [];
+	const logs = [];
 	await assert.rejects(
 		prepareProductionDeployment({
 			environment: productionEnvironment(),
@@ -144,14 +173,16 @@ test("registry preflight failure never invokes database reset", async () => {
 				mediaStorage: { exists: async () => true },
 				resetDatabase: async () => calls.push("reset"),
 			},
-			log: () => {},
+			log: (message) => logs.push(message),
 		}),
 	);
 	assert.deepEqual(calls, []);
+	assert.ok(logs.includes("canonical registry preflight failed"));
 });
 
 test("reset, restoration, and verification failures stop the lifecycle", async () => {
 	const restoreCalls = [];
+	const resetFailureLogs = [];
 	await assert.rejects(
 		prepareProductionDeployment({
 			environment: productionEnvironment(),
@@ -163,10 +194,12 @@ test("reset, restoration, and verification failures stop the lifecycle", async (
 				},
 				verifyRestoration: async () => restoreCalls.push("verify"),
 			},
-			log: () => {},
+			log: (message) => resetFailureLogs.push(message),
 		}),
 	);
 	assert.deepEqual(restoreCalls, []);
+	assert.ok(resetFailureLogs.includes("PostgreSQL reset started"));
+	assert.ok(resetFailureLogs.includes("PostgreSQL reset failed"));
 
 	await assert.rejects(
 		prepareProductionDeployment({
