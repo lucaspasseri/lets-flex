@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
 	createR2MediaObjectProbe,
+	createR2MediaBaselineObjectStore,
 	createR2MediaStorage,
 	readR2Configuration,
 	readR2ObjectProbeConfiguration,
@@ -146,6 +147,42 @@ test("R2 object probe only requires settings needed for read-only existence chec
 	assert.deepEqual(client.commands[0].input, {
 		Bucket: "media-production",
 		Key: "assets/canonical.webp",
+	});
+});
+
+test("R2 baseline object store reads and conditionally creates exact keys", async () => {
+	const client = createFakeClient([
+		{
+			Body: { transformToByteArray: async () => Uint8Array.from([1, 2]) },
+			ContentType: "image/webp",
+			ContentLength: 2,
+			ETag: '"etag-1"',
+		},
+		{},
+	]);
+	const store = createR2MediaBaselineObjectStore({
+		client,
+		bucketName: "media-development",
+		endpoint: "https://account.r2.cloudflarestorage.com",
+		accessKeyId: "access-key",
+		secretAccessKey: "secret-key",
+	});
+
+	assert.deepEqual(await store.inspect("assets/canonical.webp"), {
+		bytes: Buffer.from([1, 2]),
+		contentType: "image/webp",
+		contentLength: 2,
+		etag: '"etag-1"',
+	});
+	await store.putIfAbsent("assets/canonical.webp", Buffer.from([3, 4]), {
+		contentType: "image/webp",
+	});
+	assert.deepEqual(client.commands[1].input, {
+		Bucket: "media-development",
+		Key: "assets/canonical.webp",
+		Body: Buffer.from([3, 4]),
+		ContentType: "image/webp",
+		IfNoneMatch: "*",
 	});
 });
 

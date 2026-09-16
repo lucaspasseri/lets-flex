@@ -15,7 +15,7 @@
  * @property {"exercise" | "exercise_variant" | "muscle" | "equipment" | "movement_pattern"} entityType
  * @property {string} entityKey
  * @property {string} path
- * @property {string} [storageKey] Provider-neutral object key after remote migration.
+ * @property {string} storageKey Provider-neutral object key after remote migration.
  * @property {"primary"} role
  * @property {string} mimeType
  * @property {number} width

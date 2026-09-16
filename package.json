@@ -39,6 +39,9 @@
 		"r2:smoke-test": "node --env-file-if-exists=.env scripts/r2-smoke-test.mjs",
 		"media:registry:smoke-test": "node --env-file-if-exists=.env scripts/canonical-registry-smoke-test.mjs",
 		"media:registry:preflight": "node --env-file-if-exists=.env scripts/canonical-registry-preflight.mjs",
+		"media:durability:preflight": "node --env-file-if-exists=.env scripts/canonical-media-durability-preflight.mjs",
+		"media:baseline:provision": "node --env-file-if-exists=.env scripts/canonical-media-baseline-provision.mjs",
+		"media:recovery:rehearsal": "node --env-file-if-exists=.env scripts/canonical-media-recovery-rehearsal.mjs",
 		"media:registry:audit": "node --env-file-if-exists=.env scripts/canonical-registry-audit.mjs"
 	},
 	"dependencies": {

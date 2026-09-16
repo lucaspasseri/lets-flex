@@ -60,6 +60,27 @@ manifest or depend on Render's local filesystem. Runtime/admin uploads under ign
 `public/media/uploads/` remain outside the seed unless they are explicitly curated into the
 manifest.
 
+Canonical media durability commands are explicit and read-only by default:
+
+```sh
+# Verify the production baseline without changing R2 or PostgreSQL.
+CANONICAL_MEDIA_TARGET=production \
+npm run media:baseline:provision -- --mode=verify
+
+# Run the combined repository-baseline and private-registry preflight.
+npm run media:durability:preflight
+
+# Run the disposable PostgreSQL recovery rehearsal locally when its R2 environment is configured.
+npm run media:recovery:rehearsal
+```
+
+Existing R2 objects are adopted as authoritative and are never overwritten or deleted by baseline
+verification/provisioning. Byte differences from the repository source are warnings only. Missing
+objects fail `verify` and may be created by an explicitly confirmed `apply`; configuration,
+authentication, permission, bucket, and other provider failures remain fatal. The manually
+dispatched `Canonical Media Recovery Rehearsal` workflow performs the same read-only production
+R2 preflight, then restores the validated registry snapshot into an ephemeral PostgreSQL service.
+
 Existing databases use `npm run db:migrate` with `ALLOW_DATABASE_MIGRATION=true`; production also
 requires `ALLOW_PRODUCTION_DATABASE_MIGRATION=true`. Migrations are additive and transactional,
 while fresh/reset databases use the latest schema and seed directly. Do not run reset for
@@ -136,6 +157,13 @@ Never derive the public hostname from the bucket name or R2 endpoint. Do not put
 Create the production bucket, least-privilege access key, custom domain, and DNS/TLS configuration
 manually in Cloudflare, then verify the domain and bucket pairing before deployment. No production
 resource is created or changed by repository commands.
+
+The manually triggered production deployment workflow runs application verification and the
+complete read-only canonical-media durability preflight before the Render Deploy Hook. The
+separate `Canonical Media Recovery Rehearsal` workflow uses production R2 only for read-only
+preflight and restores the validated private registry snapshot into an ephemeral PostgreSQL service.
+See the [production deployment guide](docs/production-deployment.md) for the production Environment
+variables, baseline verification command, recovery rehearsal, and exact manual acceptance test.
 
 Argon2id is smoke-tested with `npm run check:argon2`; CI runs the same check on
 Ubuntu 22.04 with Node 22 before deployment.

@@ -54,6 +54,35 @@ databases must apply the additive canonical-path migration before using the upda
 flow. Database reset remains a deliberate bootstrap operation, so runtime promotions are not
 silently added to the source manifest or recreated by a later reset.
 
+## Canonical media durability and recovery
+
+The repository manifest and tracked catalog files define the 70-entry database baseline, while R2
+holds the durable media bytes. Existing production objects are authoritative: the baseline command
+adopts them without overwriting or deleting them, and reports differing repository bytes as drift
+only. The manifest is used to reconstruct a missing object, never to replace an existing one.
+
+Run the read-only baseline check with an explicitly selected target:
+
+```sh
+CANONICAL_MEDIA_TARGET=production \
+npm run media:baseline:provision -- --mode=verify
+```
+
+Production verification requires `R2_BUCKET_NAME`, `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, and
+`R2_SECRET_ACCESS_KEY`; `R2_REGION` is optional and defaults to `auto`. It does not require
+PostgreSQL or registry credentials. A successful report distinguishes adopted existing objects,
+byte-drift warnings, missing objects, and operational failures. Do not run `--mode=apply` for an
+existing object solely because its bytes differ. Apply is reserved for reviewed reconstruction of
+missing objects and requires the exact target confirmation.
+
+The manually dispatched GitHub workflow
+`.github/workflows/canonical-media-recovery-rehearsal.yml` runs the complete read-only R2
+preflight, captures the validated private registry snapshot, resets an ephemeral PostgreSQL 16
+service using the current schema and baseline seed, restores the snapshot by stable catalog key,
+and strictly verifies every restored assignment. It uses no production PostgreSQL credentials and
+does not write or delete either R2 bucket. Production Environment credentials must be limited to
+the read-only media and canonical-registry operations needed by the preflight.
+
 Historical migrations remain available through the explicit `npm run db:migrate` path for existing
 databases. They are not required for a clean disposable setup and must not be used as a normal reset
 step. Never use `npm run db:reset` against production.

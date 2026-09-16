@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { canonicalMediaManifest } from "../src/features/media/mediaManifest.js";
+import { normalizeMediaObjectKey } from "../src/features/media/storage/mediaObjectKey.js";
 
 const entityDefinitions = Object.freeze({
 	exercise: { table: "exercises" },
@@ -55,6 +56,21 @@ export function validateCanonicalMediaManifest(manifest) {
 		}
 		if (entry.role !== "primary") {
 			throw new Error(`Failed to seed media: ${label}; reason: role must be primary`);
+		}
+		if (
+			typeof entry.storageKey !== "string" ||
+			!entry.storageKey.startsWith("assets/")
+		) {
+			throw new Error(
+				`Failed to seed media: ${label}; reason: provider-neutral storage key must be under assets/`,
+			);
+		}
+		try {
+			normalizeMediaObjectKey(entry.storageKey);
+		} catch {
+			throw new Error(
+				`Failed to seed media: ${label}; reason: provider-neutral storage key is invalid`,
+			);
 		}
 		if (
 			typeof entry.path !== "string" ||
@@ -128,7 +144,7 @@ export function createMediaSeedSql(manifest = canonicalMediaManifest) {
 	const values = entries
 		.map(
 			(entry) =>
-				`(${sqlString(entry.storageKey ?? entry.path)}, ${sqlString(entry.mimeType)}, ${entry.width}, ${entry.height}, ${sqlString(entry.source)}, ${sqlString(entry.alt)}, ${sqlString(entry.entityType)}, ${sqlString(entry.entityKey)}, ${sqlString(entityDefinitions[entry.entityType].table)}, ${sqlString(entry.role)}, ${sqlString(entry.path)}, ${sqlString(entry.altTexts.en)}, ${sqlString(entry.altTexts["pt-BR"])})`,
+				`(${sqlString(entry.storageKey)}, ${sqlString(entry.mimeType)}, ${entry.width}, ${entry.height}, ${sqlString(entry.source)}, ${sqlString(entry.alt)}, ${sqlString(entry.entityType)}, ${sqlString(entry.entityKey)}, ${sqlString(entityDefinitions[entry.entityType].table)}, ${sqlString(entry.role)}, ${sqlString(entry.path)}, ${sqlString(entry.altTexts.en)}, ${sqlString(entry.altTexts["pt-BR"])})`,
 		)
 		.join(",\n");
 	const referenceValues = entries

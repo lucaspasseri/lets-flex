@@ -1,4 +1,4 @@
-name: Production Deploy
+name: Canonical Media Recovery Rehearsal
 
 on:
   workflow_dispatch:
@@ -6,15 +6,26 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: production-deployment
-  cancel-in-progress: false
-
 jobs:
-  deploy:
-    name: Verify and deploy production
+  recovery-rehearsal:
+    name: Rehearse canonical media recovery
     runs-on: ubuntu-latest
     environment: production
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: lets_flex_rehearsal
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: rehearsal-only-postgres-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lets_flex_rehearsal"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -29,11 +40,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify application
-        run: npm run verify
-
-      - name: Preflight canonical media durability
+      - name: Run read-only R2 and disposable PostgreSQL recovery rehearsal
         env:
+          NODE_ENV: test
+          ALLOW_DATABASE_RESET: "true"
+          DATABASE_URL: postgresql://postgres:rehearsal-only-postgres-password@localhost:5432/lets_flex_rehearsal
+          DATABASE_SSL: "false"
+          ADMIN_EMAIL: rehearsal-admin@example.com
+          ADMIN_PASSWORD: rehearsal-only-application-password
           R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
           R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
           R2_REGION: ${{ vars.R2_REGION }}
@@ -43,9 +57,4 @@ jobs:
           R2_CANONICAL_REGISTRY_PREFIX: ${{ vars.R2_CANONICAL_REGISTRY_PREFIX }}
           R2_CANONICAL_REGISTRY_ACCESS_KEY_ID: ${{ secrets.R2_CANONICAL_REGISTRY_ACCESS_KEY_ID }}
           R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: ${{ secrets.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY }}
-        run: npm run media:durability:preflight
-
-      - name: Trigger Render deployment
-        env:
-          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-        run: curl --fail --show-error --silent "$RENDER_DEPLOY_HOOK_URL"
+        run: npm run media:recovery:rehearsal

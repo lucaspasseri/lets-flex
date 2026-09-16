@@ -31,6 +31,36 @@ public media bucket credentials, while the existing R2 endpoint and region confi
 reused. Registry objects contain object keys such as `assets/uuid.webp`, never hardcoded public
 URLs.
 
+## Baseline R2 durability policy
+
+`npm run media:baseline:provision` is an explicit, target-aware command for checking or
+reconstructing repository baseline objects. `verify` is read-only. For an existing canonical
+`assets/...` object, R2 is authoritative for the production media bytes: the object is adopted and
+never overwritten or deleted, even when its bytes differ from the repository source. Such a
+difference is reported as a byte-drift warning. The repository manifest supplies the safe baseline
+for a missing object, and `apply` may conditionally create that object without modifying existing
+objects or unrelated keys.
+
+Verification fails for missing objects or configuration, authentication, permission, bucket, or
+other provider failures. A byte difference by itself is not a failure. This keeps production media
+durable across PostgreSQL resets while retaining the manifest and registry as reconstruction and
+selection metadata.
+
+## Verified production acceptance state
+
+The production baseline was verified read-only with 70 existing objects adopted, 69 byte-identical
+objects, one accepted byte-drift warning for `muscle:abductors`, zero missing objects, and zero
+operational failures. The differing object at
+`assets/ab2a5fc5-f6ab-468b-9b88-b5bf776bd106.jpg` remains authoritative and untouched; no
+`--mode=apply` operation is needed for it.
+
+Use `npm run media:baseline:provision -- --mode=verify` for the explicit production baseline check.
+The combined `npm run media:durability:preflight` command is the read-only deployment gate. The
+manually dispatched `Canonical Media Recovery Rehearsal` workflow runs that preflight, restores
+the private registry snapshot into an ephemeral PostgreSQL service, and strictly verifies the
+stable-key assignments. See [the production deployment guide](./production-deployment.md) for the
+required Environment settings and the complete manual acceptance procedure.
+
 ## Make Canonical guarantee
 
 For a configured Admin flow, **Make Canonical**:

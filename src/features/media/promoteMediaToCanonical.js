@@ -15,7 +15,6 @@ import { assertMediaStorage } from "./storage/storage.js";
 
 /** @typedef {import("pg").Pool} DatabasePool */
 /** @typedef {import("pg").PoolClient} DatabaseClient */
-/** @typedef {import("./media.types.js").CanonicalMediaManifestEntry} CanonicalMediaManifestEntry */
 /** @typedef {{storageKey: string}} StoredMedia */
 /** @typedef {import("./storage/storage.js").MediaStorage} MediaStorage */
 /** @typedef {import("./registry/canonicalMediaRegistry.js").CanonicalMediaRegistryStore} CanonicalMediaRegistry */
@@ -102,7 +101,7 @@ export async function promoteMediaToCanonical(input, dependencies = {}) {
 			"Canonical promotion requires an existing R2-backed media object.",
 		);
 	}
-	if (canonicalRegistry && objectStorageKey && currentCanonicalPath)
+	if (canonicalRegistry && objectStorageKey)
 		await ensureObjectAvailable(dependencies.objectStorage, objectStorageKey);
 
 	if (currentCanonicalPath && initialAssignment?.media_asset_id === mediaAssetId) {
@@ -501,7 +500,7 @@ function validateMimeType(mimeType) {
 
 /**
  * @param {{entityType: MediaAssignableEntityType, entityKey: string, path: string, storageKey?: string, mimeType: string, width: number, height: number, altTexts: {en: string, "pt-BR": string}}} input
- * @returns {CanonicalMediaManifestEntry}
+ * @returns {{entityType: MediaAssignableEntityType, entityKey: string, path: string, storageKey?: string, role: "primary", mimeType: string, width: number, height: number, source: string, alt: string, altTexts: {en: string, "pt-BR": string}}}
  */
 function createCanonicalEntry(input) {
 	return {

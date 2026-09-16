@@ -1,23 +1,42 @@
 # Canonical Media Audit
 
-**Investigation date:** 2026-09-15  
-**Status:** Ready for review  
+**Investigation date:** 2026-09-15; reconciled 2026-09-16
+**Status:** Historical audit reconciled with the current durability implementation
 **Evidence standard:** conclusions below are marked **Verified** when supported directly by the
-current source, schema, seed, or automated tests. No production database, production R2 bucket, or
-database reset was used.
+current source, schema, seed, automated tests, or the user-supplied production verification.
+The agent did not access or mutate production resources.
 
-## Executive conclusion
+> **Superseded conclusion notice:** The original audit predates the durable private registry,
+> complete read-only preflight, safe baseline provisioning, and recovery rehearsal. Statements
+> below that describe Admin-promoted R2 media as inherently unreconstructable or describe strict
+> byte equality as required are historical findings, not the current policy. Existing production
+> R2 objects are authoritative and adopted without overwrite or deletion; the private registry
+> restores Admin selections after PostgreSQL reset; the repository manifest reconstructs missing
+> baseline object keys.
 
-The current application has two different meanings of canonical media:
+## Current executive conclusion
+
+The current application has three coordinated layers of canonical media state:
 
 1. **Runtime canonical assignment:** an `entity_media` primary assignment with a non-null
    `canonical_path`, pointing to a `media_assets` row. Admin promotion changes this database state.
-2. **Repository canonical seed state:** an entry in `data/canonical-media.json` plus a file under
-   tracked `public/media/...`. The reset/seed path recreates only this repository-controlled set.
+2. **Repository baseline state:** an entry in `data/canonical-media.json` plus a file under tracked
+   `public/media/...`. The reset/seed path recreates this repository-controlled database baseline;
+   the explicit baseline command reconstructs only missing R2 objects.
+3. **Durable Admin selection state:** a validated private R2 registry entry containing the stable
+   entity key, selected public R2 object key, metadata, path, and localized alt text. Reset recovery
+   materializes this state into the fresh database.
 
-Admin “Make Canonical” does not update the repository manifest, commit a file, or make a runtime
-upload reproducible after a fresh database reset. An R2-backed upload itself remains in R2, so a
-reset can leave an orphaned object that the database no longer references.
+For an existing public R2 object, R2 is authoritative for the production bytes. The baseline
+verification command adopts the object even when its bytes differ from the repository source and
+reports drift diagnostically. It fails only for missing objects or operational/configuration
+failures. The repository manifest is the safe source for reconstructing a missing baseline key;
+`apply` conditionally creates only that absent object.
+
+Admin “Make Canonical” does not update the repository manifest, but a configured private registry
+makes an R2-backed selection reconstructable after a PostgreSQL reset. Without a registry override,
+an R2-backed object can remain physically present without a database assignment; that is an
+explicitly documented orphan/discoverability limitation, not a reason to delete the object.
 
 ## Short answers
 
@@ -43,8 +62,10 @@ individual `session_steps`, `workout_sessions`, or workout step logs do not need
 normal restart or deploy, provided the same external database and R2 object remain available. A
 local upload is filesystem state and is not deploy-durable on an ephemeral Render filesystem.
 
-**Q6 — `db:reset`:** Repository-seeded canonical media is recreated. Runtime Admin-promoted media
-is not recreated because the reset drops the database and seeds only the repository manifest.
+**Q6 — `db:reset`:** The repository baseline is recreated. With the production recovery path and a
+validated private registry snapshot, Admin-promoted selections are also materialized after the
+baseline seed. A generic local reset without registry configuration recreates only the manifest
+baseline.
 
 **Q7 — `db:reset:sql`:** No `db:reset:sql` script exists in `package.json`. `db:seed:sql` only
 prints seed SQL. `db:setup:sql` generates `db/setup.sql`; if that generated SQL is executed, it
@@ -57,12 +78,25 @@ remain physically present while its `media_assets` and `entity_media` rows are g
 **Q9 — Repository manifest:** No. `promoteMediaToCanonical` deliberately never writes
 `data/canonical-media.json`.
 
-**Q10 — Truly durable fresh setup:** The bytes and metadata must be made repository-seedable:
-add a stable-key manifest entry, add or otherwise provision the corresponding canonical bytes,
-keep both localized alt texts and metadata valid, and ensure the R2 `assets/...` object exists if
-production remote reads are enabled. Then a fresh schema plus canonical seed can reconstruct the
-database relationship. The current Admin action does not perform those repository or R2-provisioning
-steps automatically.
+**Q10 — Truly durable fresh setup:** Existing production R2 bytes are the durable authority and
+must not be replaced merely to match local bytes. For a missing baseline key, validate the manifest
+and source file, then use the explicit `media:baseline:provision --mode=apply` command with its
+target and confirmation safeguards. For an Admin selection, the private registry snapshot stores
+the durable stable-key assignment and recovery materializes it after the baseline seed. The Admin
+action does not edit the repository manifest or implicitly provision missing baseline objects.
+
+## Historical conclusions superseded by the current implementation
+
+The original 2026-09-15 investigation correctly established resolver precedence, database reset
+behavior, and the risk of local Render filesystem storage. Its statements that a runtime promotion
+is never reproducible after reset and that a conflicting baseline object must be replaced were
+superseded by the private registry recovery path and the accepted R2-authoritative drift policy.
+The current production verification found 70 adopted baseline objects, 69 byte-identical objects,
+one accepted drift warning for `muscle:abductors`, zero missing objects, and zero operational
+failures. The differing production object at
+`assets/ab2a5fc5-f6ab-468b-9b88-b5bf776bd106.jpg` has SHA-256
+`4a3f6fbdaa1bd9b5449932cb47afd1927cb493b899c9f6e71eb61837c9501ad9`, size 307,794 bytes, and
+content type `application/octet-stream`; it remains untouched and authoritative.
 
 ## What “Make Canonical” changes
 
@@ -164,11 +198,11 @@ does not mean rows in the workout/session tables are rewritten.
 
 ## Persistence matrix
 
-| Asset type                | App restart                                      | Deploy                                                         | DB reset                                                          | Fresh DB                                      | R2 remains                                                               | Git/manifest backed                               |
-| ------------------------- | ------------------------------------------------ | -------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------- |
-| Seed canonical image      | Yes, with DB rows and referenced bytes available | Yes for tracked files; external R2 object is independent       | Yes, recreated by `mediaSeedSql`                                  | Yes, from schema + seed                       | Only if the `assets/...` object was provisioned; seed does not upload it | Yes: manifest + tracked `public/media/...`        |
-| Admin-uploaded image      | Yes while its storage/DB remain                  | Yes when R2-backed; local upload is ephemeral on Render        | DB record/assignment removed; storage is not touched              | No                                            | Yes for R2 unless separately deleted                                     | No: uploads are ignored and not added to manifest |
-| Admin-uploaded + promoted | Yes while external DB and R2 remain              | Yes when R2-backed; local canonical copy is not deploy-durable | Runtime rows removed; R2 object or local file may remain orphaned | No unless separately added to repository seed | Yes for R2                                                               | No: promotion does not modify the manifest        |
+| Asset type                | App restart                                      | Deploy                                                         | DB reset                                                                           | Fresh DB                                                            | R2 remains                                                               | Git/manifest backed                               |
+| ------------------------- | ------------------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------- |
+| Seed canonical image      | Yes, with DB rows and referenced bytes available | Yes for tracked files; external R2 object is independent       | Yes, recreated by `mediaSeedSql`                                                   | Yes, from schema + seed                                             | Only if the `assets/...` object was provisioned; seed does not upload it | Yes: manifest + tracked `public/media/...`        |
+| Admin-uploaded image      | Yes while its storage/DB remain                  | Yes when R2-backed; local upload is ephemeral on Render        | DB record/assignment removed; storage is not touched                               | No                                                                  | Yes for R2 unless separately deleted                                     | No: uploads are ignored and not added to manifest |
+| Admin-uploaded + promoted | Yes while external DB and R2 remain              | Yes when R2-backed; local canonical copy is not deploy-durable | R2 object remains; configured private registry override can restore the assignment | Restored from registry when the snapshot is available; otherwise no | Yes for R2                                                               | No: promotion does not modify the manifest        |
 
 For repository-seeded media, “R2 remains” is conditional because `db/seed.js` and
 `db/mediaSeedSql.js` insert metadata and relationships only; they do not upload the provider-neutral
@@ -217,9 +251,10 @@ diagnostic discrepancy, not current behavior.
 
 ### Verified limitations / follow-up candidates
 
-- A runtime-promoted R2 object can become orphaned after database reset.
-- A runtime promotion is not reproducible from a fresh database because it is absent from the
-  source manifest.
+- An R2-backed promotion without a configured private registry can leave its object undiscoverable
+  after database reset; automatic orphan cleanup remains intentionally absent.
+- A runtime promotion is not represented in the repository manifest, so recovery relies on the
+  private registry snapshot rather than Git seed state.
 - A fresh production setup requires R2 objects to be provisioned separately; the seed validates
   repository files but does not upload R2 bytes.
 - The Admin label “durable catalog state” means durable database-plus-object state across restart/

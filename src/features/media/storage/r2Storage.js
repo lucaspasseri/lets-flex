@@ -259,6 +259,81 @@ export function createR2MediaObjectProbeFromEnvironment(
 	});
 }
 
+/**
+ * Create the explicitly invoked baseline-provisioning adapter. Its write operation uses a
+ * conditional create so an existing object can never be overwritten by this workflow.
+ *
+ * @param {{client?: S3CommandClient, bucketName: string, endpoint?: string, region?: string, accessKeyId?: string, secretAccessKey?: string}} options
+ * @returns {{read: (storageKey: string) => Promise<Buffer | null>, inspect: (storageKey: string) => Promise<{bytes: Buffer, contentType?: string, contentLength?: number, etag?: string, lastModified?: Date} | null>, putIfAbsent: (storageKey: string, bytes: Buffer, metadata: {contentType: string}) => Promise<void>}}
+ */
+export function createR2MediaBaselineObjectStore({
+	client,
+	bucketName,
+	endpoint,
+	region = "auto",
+	accessKeyId,
+	secretAccessKey,
+}) {
+	const normalizedBucketName = requiredOption(bucketName, "R2 bucket name");
+	const normalizedEndpoint = endpoint
+		? assertHttpUrl(endpoint, "R2 endpoint")
+		: undefined;
+	const storageClient =
+		client ??
+		createR2S3Client({
+			endpoint: normalizedEndpoint,
+			region,
+			accessKeyId,
+			secretAccessKey,
+		});
+
+	return {
+		/** @param {string} storageKey */
+		async read(storageKey) {
+			const object = await this.inspect(storageKey);
+			return object?.bytes ?? null;
+		},
+		/** @param {string} storageKey */
+		async inspect(storageKey) {
+			try {
+				const response =
+					/** @type {{Body?: unknown, ContentType?: string, ContentLength?: number, ETag?: string, LastModified?: Date}} */ (
+						await storageClient.send(
+							new GetObjectCommand({
+								Bucket: normalizedBucketName,
+								Key: normalizeMediaObjectKey(storageKey),
+							}),
+						)
+					);
+				return {
+					bytes: await bodyToBuffer(response.Body),
+					...(response.ContentType ? { contentType: response.ContentType } : {}),
+					...(typeof response.ContentLength === "number"
+						? { contentLength: response.ContentLength }
+						: {}),
+					...(response.ETag ? { etag: response.ETag } : {}),
+					...(response.LastModified ? { lastModified: response.LastModified } : {}),
+				};
+			} catch (error) {
+				if (isMissingObjectError(error)) return null;
+				throw error;
+			}
+		},
+		/** @param {string} storageKey @param {Buffer} bytes @param {{contentType: string}} metadata */
+		async putIfAbsent(storageKey, bytes, metadata) {
+			await storageClient.send(
+				new PutObjectCommand({
+					Bucket: normalizedBucketName,
+					Key: normalizeMediaObjectKey(storageKey),
+					Body: bytes,
+					ContentType: metadata.contentType,
+					IfNoneMatch: "*",
+				}),
+			);
+		},
+	};
+}
+
 /** @param {NodeJS.ProcessEnv} environment @param {string} name @returns {string} */
 function requiredEnvironmentValue(environment, name) {
 	return requiredOption(environment[name], name);

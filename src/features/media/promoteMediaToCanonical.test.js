@@ -103,13 +103,13 @@ function storage(bytes = Buffer.from("reviewed image"), { exists = true } = {}) 
 	};
 }
 
-function objectStorage(bytes = Buffer.from("remote image")) {
+function objectStorage(bytes = Buffer.from("remote image"), { exists = true } = {}) {
 	const calls = [];
 	return {
 		calls,
 		async exists(storageKey) {
 			calls.push(["exists", storageKey]);
-			return true;
+			return exists;
 		},
 		async read(storageKey) {
 			calls.push(["read", storageKey]);
@@ -129,7 +129,14 @@ function objectStorage(bytes = Buffer.from("remote image")) {
 	};
 }
 
-function canonicalRegistry({ current = null, failGet = false, failPut = false } = {}) {
+/** @param {{current?: any, failGet?: boolean, failPut?: boolean, putError?: Error, events?: string[]}} [options] */
+function canonicalRegistry({
+	current = null,
+	failGet = false,
+	failPut = false,
+	putError,
+	events,
+} = {}) {
 	const calls = [];
 	return {
 		calls,
@@ -140,6 +147,8 @@ function canonicalRegistry({ current = null, failGet = false, failPut = false } 
 		},
 		async putCanonicalOverride(entry, options) {
 			calls.push(["put", entry, options]);
+			events?.push("registry.put");
+			if (putError) throw putError;
 			if (failPut) throw new Error("registry write failed");
 			return { entry, etag: "new-etag" };
 		},
@@ -240,6 +249,84 @@ test("R2-backed promotion persists a stable-key durable registry override", asyn
 	assert.equal(result.status, "promoted");
 });
 
+test("R2-backed promotion covers every supported entity type and writes durable state first", async () => {
+	const cases = /** @type {Array<[string, number, string]>} */ ([
+		["exercise", 9, "bench-press"],
+		["exercise_variant", 10, "bench-press-barbell"],
+		["muscle", 11, "abductors"],
+		["equipment", 12, "barbell"],
+		["movement_pattern", 13, "push"],
+	]);
+
+	for (const [entityType, entityId, entityKey] of cases) {
+		const events = [];
+		const mediaAssetId = entityId + 100;
+		const objectKey = `assets/${entityType}-${entityKey}.png`;
+		const registry = canonicalRegistry({ events });
+		const db = fakePool({
+			asset: { ...sourceAsset, id: mediaAssetId, storage_key: objectKey },
+			entityRow: { id: entityId, catalog_key: entityKey },
+		});
+		const originalConnect = db.connect;
+		db.connect = async () => {
+			const client = await originalConnect();
+			const originalQuery = client.query;
+			client.query = async (text, values) => {
+				if (text === "COMMIT") events.push("db.commit");
+				return originalQuery(text, values);
+			};
+			return client;
+		};
+
+		const result = await promoteMediaToCanonical(
+			{ mediaAssetId, entityType, entityId },
+			{
+				db: /** @type {any} */ (db),
+				objectStorage: /** @type {any} */ (objectStorage()),
+				canonicalRegistry: /** @type {any} */ (registry),
+			},
+		);
+
+		assert.equal(result.status, "promoted");
+		assert.equal(result.entry.entityType, entityType);
+		assert.equal(result.entry.entityKey, entityKey);
+		assert.equal(result.entry.storageKey, objectKey);
+		assert.equal(registry.calls[1][0], "put");
+		assert.equal(registry.calls[1][1].asset.objectKey, objectKey);
+		assert.deepEqual(
+			db.calls
+				.find((call) => call.text.includes("INSERT INTO entity_media"))
+				.values.slice(0, 3),
+			[mediaAssetId, entityType, entityId],
+		);
+		assert.ok(events.indexOf("registry.put") < events.indexOf("db.commit"));
+	}
+});
+
+test("R2-backed promotion rejects a missing object before opening a database transaction", async () => {
+	const db = fakePool({ asset: { ...sourceAsset, storage_key: "assets/missing.png" } });
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+				{
+					db: /** @type {any} */ (db),
+					objectStorage: /** @type {any} */ (
+						objectStorage(Buffer.from("remote image"), { exists: false })
+					),
+					canonicalRegistry: /** @type {any} */ (canonicalRegistry()),
+				},
+			),
+		(error) =>
+			error instanceof MediaCanonicalPromotionError &&
+			error.code === "source_file_missing",
+	);
+	assert.equal(
+		db.calls.some((call) => call.text === "BEGIN"),
+		false,
+	);
+});
+
 test("registry failure prevents a successful database-only promotion", async () => {
 	const db = fakePool({
 		asset: { ...sourceAsset, storage_key: "assets/reviewed.png" },
@@ -260,6 +347,61 @@ test("registry failure prevents a successful database-only promotion", async () 
 	);
 	assert.equal(
 		db.calls.some((call) => call.text === "BEGIN"),
+		false,
+	);
+});
+
+test("registry write failure rolls back the promotion transaction", async () => {
+	const db = fakePool({
+		asset: { ...sourceAsset, storage_key: "assets/reviewed.png" },
+	});
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+				{
+					db: /** @type {any} */ (db),
+					objectStorage: /** @type {any} */ (objectStorage()),
+					canonicalRegistry: /** @type {any} */ (canonicalRegistry({ failPut: true })),
+				},
+			),
+		(error) =>
+			error instanceof MediaCanonicalPromotionError &&
+			error.code === "registry_unavailable",
+	);
+	assert.ok(db.calls.some((call) => call.text === "ROLLBACK"));
+	assert.equal(
+		db.calls.some((call) => call.text === "COMMIT"),
+		false,
+	);
+});
+
+test("registry concurrency conflicts roll back without reporting success", async () => {
+	const conflict = Object.assign(new Error("stale registry"), {
+		code: "write_conflict",
+	});
+	const db = fakePool({
+		asset: { ...sourceAsset, storage_key: "assets/reviewed.png" },
+	});
+	await assert.rejects(
+		() =>
+			promoteMediaToCanonical(
+				{ mediaAssetId: 7, entityType: "exercise", entityId: 9 },
+				{
+					db: /** @type {any} */ (db),
+					objectStorage: /** @type {any} */ (objectStorage()),
+					canonicalRegistry: /** @type {any} */ (
+						canonicalRegistry({ putError: conflict })
+					),
+				},
+			),
+		(error) =>
+			error instanceof MediaCanonicalPromotionError &&
+			error.code === "registry_conflict",
+	);
+	assert.ok(db.calls.some((call) => call.text === "ROLLBACK"));
+	assert.equal(
+		db.calls.some((call) => call.text === "COMMIT"),
 		false,
 	);
 });

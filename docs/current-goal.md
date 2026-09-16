@@ -1,60 +1,116 @@
-# Goal: Conditional Production Database Reset and Canonical Registry Restore
+# Goal: Complete Production Canonical-Media Durability Lifecycle
 
 ## Goal status
 
-**Completed — 2026-09-16.**
+**Ready for final review — all implementation actions completed.**
 
 ## Objective
 
-Provide a safe Render Pre-Deploy Command that performs a destructive production database
-reconstruction only when `PRODUCTION_DATABASE_RESET_MODE=reset-and-restore` is explicitly set.
-Normal deployments must leave PostgreSQL, the private canonical registry, and media assignments
-unchanged.
+Complete the production canonical-media lifecycle so canonical images managed through the Admin UI
+remain reconstructable independently of PostgreSQL lifetime:
 
-## Verified implementation
+```text
+canonical media durability = durable R2 image bytes + durable canonical metadata/selection
+```
 
-- `npm run production:prepare` invokes `scripts/production-prepare.mjs`; the normal build command
-  remains unchanged.
-- Missing or empty reset mode exits successfully without constructing or calling reset dependencies.
-- Unexpected non-empty reset values fail safely before any destructive operation.
-- Enabled mode requires `NODE_ENV=production`, a non-local/non-development-looking PostgreSQL URL,
-  administrator configuration, and explicit separate media/registry R2 configuration.
-- Registry preflight runs before reset and returns an in-memory validated snapshot.
-- The existing `resetAndSeedDatabase` implementation reuses `db/schema.js`, complete `seedSql`,
-  and canonical registry restoration; it receives the preflight snapshot and explicit production
-  authorization rather than duplicating reset logic.
-- Strict post-restore verification compares every snapshot entry with the materialized catalog,
-  media asset, localized alt text, canonical path, and primary assignment.
-- Registry recovery is read-only with respect to R2; no registry writes or deletes occur.
+Preserve the existing architecture and resolver:
+
+```text
+repository manifest → baseline canonical state
+public media R2 → durable image bytes
+private canonical registry R2 → durable Admin override metadata
+PostgreSQL → reconstructable runtime materialization
+```
+
+The existing Admin **Make Canonical** workflow remains the primary future image-management path.
+Normal deployments must not reset PostgreSQL or provision media implicitly.
+
+## Verified baseline and delta
+
+### Existing relevant capabilities
+
+- `data/canonical-media.json` contains 70 canonical entries across all five supported entity types;
+  every current entry has a provider-neutral `assets/...` storage key and a matching tracked
+  `public/media/...` source file.
+- `db/mediaSeedSql.js` validates the manifest and seeds `media_assets`, localized alt text, and
+  primary `entity_media` assignments by stable catalog key. It does not upload R2 objects.
+- Admin promotion already requires an R2-backed object when the canonical registry is configured,
+  writes the private registry before PostgreSQL commit, uses ETag concurrency, and compensates a
+  registry mutation when the database transaction/commit fails.
+- `canonicalMediaRegistryRecovery.js` already restores validated registry overrides after the
+  baseline seed and strictly verifies the materialized PostgreSQL state.
+- `npm run media:registry:preflight` is read-only and validates registry entries and their referenced
+  public-media R2 objects without PostgreSQL access. The production GitHub workflow runs it before
+  the Render Deploy Hook.
+- Normal startup and the ordinary build do not provision media or reset PostgreSQL.
+
+### Verified gaps to close
+
+- The deployment preflight does not validate the repository manifest schema, stable identity,
+  localized metadata, storage keys, source-file correspondence, or production R2 objects.
+- There is no explicit safe/idempotent command to provision source-controlled baseline media to R2
+  while preserving existing objects and using the manifest only to reconstruct missing keys.
+- The GitHub workflow has no disposable PostgreSQL recovery rehearsal proving baseline plus registry
+  restoration without production database credentials.
+- Lifecycle tests must explicitly cover missing R2 objects, registry availability/write/conflict
+  failures, and PostgreSQL failure after registry mutation for every supported entity type.
+- `docs/canonical-media-audit.md` contains superseded pre-registry conclusions and must be brought
+  into agreement with the current source-of-truth model.
 
 ## Completion criteria
 
-- [x] Dedicated production preparation command and Node orchestration module exist.
-- [x] Exact sentinel opt-in and safe disabled behavior are tested and documented.
-- [x] Production guards prevent non-production or development-looking targets from resetting.
-- [x] Preflight failure is proven not to invoke reset.
-- [x] Existing schema/seed/reset and canonical recovery implementations are reused.
-- [x] Validated registry state is restored and strictly verified after reset.
-- [x] Critical failures return non-zero from the CLI entry point.
-- [x] Render usage and post-reset flag removal are documented.
-- [x] Production mutation was not performed during implementation or verification.
+- [ ] Every baseline manifest entry is schema-valid, catalog-valid, and references an available
+      durable production R2 object; existing R2 bytes are adopted as authoritative and any
+      repository-byte drift is reported separately from missing or operational failures.
+- [ ] Every Admin canonical override is validated by the deployment preflight and references an
+      available durable production R2 object.
+- [ ] A single read-only canonical durability preflight runs before the Render Deploy Hook, needs no
+      PostgreSQL access, returns non-zero on any gap, and includes the existing registry checks.
+- [ ] An explicit safe baseline provisioning/verification command exists if production baseline
+      objects are not already reliably provisioned; it is idempotent, key-preserving, target-
+      explicit, adopts existing objects without overwriting them, provisions only missing keys,
+      and never deletes unrelated objects.
+- [ ] Admin promotion cannot report success when its R2 object, private registry, registry write,
+      concurrency precondition, or PostgreSQL commit fails; existing compensation behavior remains.
+- [ ] All supported canonical entity types are covered: `exercise`, `exercise_variant`, `muscle`,
+      `equipment`, and `movement_pattern`.
+- [ ] A GitHub Actions disposable-database rehearsal proves schema + baseline seed + durability
+      preflight + registry restoration + strict verification without production PostgreSQL credentials
+      or production writes.
+- [ ] The final source-of-truth model, deployment behavior, provisioning/rehearsal commands, and
+      manual production acceptance test are documented.
+- [ ] No production PostgreSQL reset, production R2 write/delete, Render filesystem dependency,
+      manifest mutation by Admin, resolver redesign, or R2 orphan deletion is introduced.
 
-## Final review evidence
+## Final review assessment
 
-- `npm run verify` passed formatting, lint, server/browser type checks, and all 533 tests.
-- Focused production-preparation and canonical recovery verification tests passed.
-- The disabled CLI path was manually exercised successfully; an invalid opt-in failed safely.
-- No production database reset or production R2 write/delete was performed.
+- [x] Baseline manifest validation, catalog identity, source correspondence, and explicit
+      production baseline verification are implemented; the user-supplied read-only result found
+      70 adopted objects, zero missing objects, and zero operational failures, with one diagnostic
+      drift warning.
+- [x] Admin canonical overrides are checked by the complete read-only preflight against durable R2
+      objects, with focused failure coverage.
+- [x] The read-only durability preflight runs before the Render Deploy Hook and includes registry
+      validation without PostgreSQL access.
+- [x] The explicit baseline command is target-aware, idempotent, non-destructive, and provisions
+      only reviewed missing objects in apply mode.
+- [x] Admin promotion preserves the existing R2, registry, concurrency, and PostgreSQL failure
+      guarantees, including compensation behavior.
+- [x] All five supported canonical entity types are covered by the implementation and tests.
+- [ ] The manually dispatched GitHub Actions recovery rehearsal has not been run against the
+      configured production Environment in this workspace. The workflow, disposable PostgreSQL
+      path, read-only R2 behavior, and focused tests are implemented and verified locally.
+- [x] The final source-of-truth model, deployment behavior, commands, and manual acceptance test
+      are documented.
+- [x] No production reset, production R2 write/delete, Render filesystem dependency, manifest
+      mutation by Admin, resolver redesign, or orphan deletion was introduced.
 
-All completion criteria above are satisfied. Intentional exclusions are limited to Render
-Dashboard mutation, production destructive verification, registry redesign, manifest promotion,
-orphan cleanup, migrations, build integration, and runtime resolver changes.
-
-The goal was approved on 2026-09-16. The production preparation command, guarded reset/restore
-orchestration, strict verification, tests, and deployment documentation are complete.
+The remaining unchecked item is an intentional operational acceptance step, not an implementation
+failure. It requires the repository owner to dispatch the workflow with the configured GitHub
+production Environment and confirm its live read-only preflight and ephemeral-database restore.
 
 ## Deliberate non-goals
 
-No Render Dashboard mutation, production reset, production R2 test writes/deletes, registry redesign,
-manifest promotion, orphan cleanup, migration, build integration, or runtime media resolver change
-is included.
+No automatic production reset, normal-deploy baseline upload, production database credential in
+GitHub Actions, Render filesystem durability, Admin-to-Git promotion, resolver rewrite, R2 orphan
+cleanup, or destructive production verification is included.

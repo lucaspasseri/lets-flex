@@ -68,6 +68,16 @@ test("media seed rejects a missing canonical file before SQL generation", () => 
 	);
 });
 
+test("media seed requires a provider-neutral R2 storage key", () => {
+	const missingStorageKeyManifest = cloneManifest();
+	delete missingStorageKeyManifest[0].storageKey;
+
+	assert.throws(
+		() => validateCanonicalMediaManifest(missingStorageKeyManifest),
+		/provider-neutral storage key must be under assets\//,
+	);
+});
+
 test("media seed rejects conflicting duplicate primary assignments", () => {
 	const duplicateManifest = cloneManifest();
 	duplicateManifest.push({
