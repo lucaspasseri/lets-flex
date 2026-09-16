@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-import { runCanonicalMediaRecoveryRehearsal } from "./canonical-media-recovery-rehearsal.mjs";
+import {
+	CanonicalMediaRecoveryConfigurationError,
+	formatCanonicalMediaRecoveryFailure,
+	readCanonicalMediaRecoveryConfiguration,
+	runCanonicalMediaRecoveryRehearsal,
+} from "./canonical-media-recovery-rehearsal.mjs";
+import { CanonicalMediaDurabilityPreflightError } from "../src/features/media/registry/canonicalMediaDurabilityPreflight.js";
 
 const registryEntry = {
 	schemaVersion: 1,
@@ -59,6 +66,18 @@ const environment = {
 	ADMIN_PASSWORD: "rehearsal-only-password",
 };
 
+const productionEnvironment = {
+	R2_BUCKET_NAME: "lets-flex-media-production",
+	R2_ENDPOINT: "https://account.r2.cloudflarestorage.com",
+	R2_REGION: "auto",
+	R2_ACCESS_KEY_ID: "media-access-key",
+	R2_SECRET_ACCESS_KEY: "media-secret-key",
+	R2_CANONICAL_REGISTRY_BUCKET_NAME: "lets-flex-canonical-registry-production",
+	R2_CANONICAL_REGISTRY_PREFIX: "v1",
+	R2_CANONICAL_REGISTRY_ACCESS_KEY_ID: "registry-access-key",
+	R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: "registry-secret-key",
+};
+
 test("recovery rehearsal preflights R2, restores its snapshot, and strictly verifies the disposable database", async () => {
 	const fake = dependencies();
 	const logs = [];
@@ -112,4 +131,121 @@ test("recovery rehearsal does not report success when disposable database restor
 		/disposable database reset failed/,
 	);
 	assert.equal(fake.calls.includes("database.verify"), false);
+});
+
+test("recovery configuration requires both R2 resources and separate buckets", () => {
+	assert.throws(
+		() => readCanonicalMediaRecoveryConfiguration({}),
+		(error) => {
+			assert.ok(error instanceof CanonicalMediaRecoveryConfigurationError);
+			assert.match(error.message, /R2_BUCKET_NAME/);
+			assert.match(error.message, /R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY/);
+			assert.doesNotMatch(error.message, /media-secret-key|registry-secret-key/);
+			return true;
+		},
+	);
+	assert.deepEqual(readCanonicalMediaRecoveryConfiguration(productionEnvironment), {
+		media: {
+			bucketName: "lets-flex-media-production",
+			endpoint: productionEnvironment.R2_ENDPOINT,
+			region: "auto",
+			accessKeyId: productionEnvironment.R2_ACCESS_KEY_ID,
+			secretAccessKey: productionEnvironment.R2_SECRET_ACCESS_KEY,
+		},
+		registry: {
+			bucketName: "lets-flex-canonical-registry-production",
+			prefix: "v1",
+			endpoint: productionEnvironment.R2_ENDPOINT,
+			region: "auto",
+			accessKeyId: productionEnvironment.R2_CANONICAL_REGISTRY_ACCESS_KEY_ID,
+			secretAccessKey: productionEnvironment.R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY,
+		},
+	});
+	assert.throws(
+		() =>
+			readCanonicalMediaRecoveryConfiguration({
+				...productionEnvironment,
+				R2_CANONICAL_REGISTRY_BUCKET_NAME: productionEnvironment.R2_BUCKET_NAME,
+			}),
+		/production media and canonical registry buckets must be separate/i,
+	);
+});
+
+test("workflow maps every required production Environment value explicitly", async () => {
+	const workflow = await readFile(
+		new globalThis.URL(
+			"../.github/workflows/canonical-media-recovery-rehearsal.yml",
+			import.meta.url,
+		),
+		"utf8",
+	);
+	for (const name of [
+		"R2_BUCKET_NAME",
+		"R2_ENDPOINT",
+		"R2_REGION",
+		"R2_CANONICAL_REGISTRY_BUCKET_NAME",
+		"R2_CANONICAL_REGISTRY_PREFIX",
+	])
+		assert.ok(workflow.includes(`${name}: ` + "${{ vars." + name + " }}"), name);
+	for (const name of [
+		"R2_ACCESS_KEY_ID",
+		"R2_SECRET_ACCESS_KEY",
+		"R2_CANONICAL_REGISTRY_ACCESS_KEY_ID",
+		"R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY",
+	])
+		assert.ok(workflow.includes(`${name}: ` + "${{ secrets." + name + " }}"), name);
+});
+
+test("recovery failure diagnostics classify all baseline misses without leaking secrets", () => {
+	const error = new CanonicalMediaDurabilityPreflightError(
+		Array.from({ length: 70 }, (_, index) => ({
+			scope: "baseline",
+			entityType: "exercise",
+			entityKey: `exercise-${index}`,
+			objectKey: `assets/exercise-${index}.webp`,
+			reason: "referenced production R2 media object is missing",
+		})),
+	);
+	const lines = formatCanonicalMediaRecoveryFailure(error, productionEnvironment);
+	assert.match(
+		lines[0],
+		/category=canonical-media-durability-preflight-failed issues=70 canonical-object-missing=70/,
+	);
+	assert.equal(lines.length, 71);
+	assert.match(lines[1], /scope=baseline/);
+	assert.doesNotMatch(lines.join("\n"), /media-secret-key|registry-secret-key/);
+});
+
+test("recovery failure diagnostics classify provider errors safely", () => {
+	const providerError = Object.assign(new Error("access denied secret=do-not-log"), {
+		name: "AccessDenied",
+		code: "AccessDenied",
+		$metadata: { httpStatusCode: 403 },
+	});
+	const lines = formatCanonicalMediaRecoveryFailure(
+		new CanonicalMediaDurabilityPreflightError([
+			{
+				scope: "registry",
+				reason: "registry could not be read",
+				cause: providerError,
+			},
+		]),
+		productionEnvironment,
+	);
+	assert.match(lines[0], /bucket-authentication-or-access-failure=1/);
+	assert.match(lines[1], /provider=AccessDenied code=AccessDenied status=403/);
+	assert.doesNotMatch(lines[1], /do-not-log/);
+});
+
+test("recovery configuration diagnostics include safe validation details", () => {
+	const lines = formatCanonicalMediaRecoveryFailure(
+		new CanonicalMediaRecoveryConfigurationError(
+			"R2 configuration is invalid.",
+			new Error("R2_ENDPOINT must be an HTTPS URL; secret=do-not-log"),
+		),
+		productionEnvironment,
+	);
+	assert.match(lines[0], /category=configuration-error/);
+	assert.match(lines[1], /R2_ENDPOINT must be an HTTPS URL/);
+	assert.doesNotMatch(lines[1], /do-not-log/);
 });

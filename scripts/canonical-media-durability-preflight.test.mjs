@@ -93,21 +93,23 @@ test("durability preflight rejects a missing baseline R2 object", async () => {
 });
 
 test("durability preflight preserves registry validation failures", async () => {
+	const unavailable = new Error("unavailable");
 	await assert.rejects(
 		preflightCanonicalMediaDurability({
 			manifest: [baselineEntry],
 			registry: registry({
 				async listCanonicalOverrides() {
-					throw new Error("unavailable");
+					throw unavailable;
 				},
 			}),
 			mediaStorage: { exists: async () => true },
 		}),
 		(error) => {
 			assert.ok(error instanceof CanonicalMediaDurabilityPreflightError);
-			assert.deepEqual(error.issues, [
-				{ scope: "registry", reason: "registry could not be read" },
-			]);
+			assert.equal(error.issues.length, 1);
+			assert.equal(error.issues[0].scope, "registry");
+			assert.equal(error.issues[0].reason, "registry could not be read");
+			assert.equal(error.issues[0].cause, unavailable);
 			return true;
 		},
 	);

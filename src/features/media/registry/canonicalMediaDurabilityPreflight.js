@@ -11,7 +11,7 @@ import {
 /** @typedef {import("../media.types.js").CanonicalMediaManifestEntry} CanonicalMediaManifestEntry */
 
 export class CanonicalMediaDurabilityPreflightError extends Error {
-	/** @param {Array<{scope: "baseline" | "registry", entityType?: string, entityKey?: string, objectKey?: string, reason: string}>} issues */
+	/** @param {Array<{scope: "baseline" | "registry", entityType?: string, entityKey?: string, objectKey?: string, reason: string, cause?: unknown}>} issues */
 	constructor(issues) {
 		super(
 			`Canonical media durability preflight failed with ${issues.length} issue(s).`,
@@ -66,13 +66,14 @@ export async function preflightCanonicalMediaDurability({
 						objectKey: entry.storageKey,
 						reason: "referenced production R2 media object is missing",
 					});
-			} catch {
+			} catch (error) {
 				issues.push({
 					scope: "baseline",
 					entityType: entry.entityType,
 					entityKey: entry.entityKey,
 					objectKey: entry.storageKey,
 					reason: "referenced production R2 media object could not be verified",
+					cause: error,
 				});
 			}
 		}
@@ -92,6 +93,7 @@ export async function preflightCanonicalMediaDurability({
 			issues.push({
 				scope: "registry",
 				reason: "canonical registry preflight could not be completed",
+				cause: error,
 			});
 		}
 	}

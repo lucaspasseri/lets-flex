@@ -80,6 +80,9 @@ objects fail `verify` and may be created by an explicitly confirmed `apply`; con
 authentication, permission, bucket, and other provider failures remain fatal. The manually
 dispatched `Canonical Media Recovery Rehearsal` workflow performs the same read-only production
 R2 preflight, then restores the validated registry snapshot into an ephemeral PostgreSQL service.
+The rehearsal validates both R2 configurations before making a request and prints categorized,
+secret-safe diagnostics when its preflight fails; a 70-object missing count can indicate a wrong
+media bucket as well as genuinely absent objects and must be investigated before any repair.
 
 Existing databases use `npm run db:migrate` with `ALLOW_DATABASE_MIGRATION=true`; production also
 requires `ALLOW_PRODUCTION_DATABASE_MIGRATION=true`. Migrations are additive and transactional,

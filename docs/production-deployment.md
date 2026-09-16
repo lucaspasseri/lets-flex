@@ -92,6 +92,16 @@ must not receive production `DATABASE_URL`, production reset authorization, or a
 intended for R2 writes. A successful run proves that the current schema, baseline seed, durable
 registry snapshot, and recovery verifier work together; it does not authorize a production reset.
 
+Before making any R2 request, the rehearsal verifies that all required media and private-registry
+variables/secrets are present, that both R2 configurations are valid, and that the bucket names are
+separate. It reports only non-secret bucket names and withholds credential values. If the preflight
+fails, the log includes a category summary and per-entry diagnostics such as
+`canonical-object-missing`, `bucket-authentication-or-access-failure`,
+`bucket-unavailable-or-not-found`, or `unexpected-provider-or-api-error`. A count of 70
+`canonical-object-missing` entries means all 70 baseline `HeadObject` checks received a recognized
+missing response; it does not by itself prove whether the configured media bucket is wrong or the
+objects are genuinely absent. No PostgreSQL reset occurs after a preflight failure.
+
 ## Manual production acceptance test
 
 Run this procedure from a controlled workstation or by dispatching the recovery workflow after

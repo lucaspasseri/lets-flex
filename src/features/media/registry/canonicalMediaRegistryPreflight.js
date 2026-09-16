@@ -26,7 +26,7 @@ const catalogDefinitions = Object.freeze({
 });
 
 export class CanonicalRegistryPreflightError extends Error {
-	/** @param {Array<{entityType?: string, entityKey?: string, objectKey?: string, reason: string}>} issues */
+	/** @param {Array<{entityType?: string, entityKey?: string, objectKey?: string, reason: string, cause?: unknown}>} issues */
 	constructor(issues) {
 		super(`Canonical registry preflight failed with ${issues.length} issue(s).`);
 		this.name = "CanonicalRegistryPreflightError";
@@ -46,9 +46,9 @@ export async function preflightCanonicalRegistry({ registry, mediaStorage }) {
 	let results;
 	try {
 		results = await registry.listCanonicalOverrides();
-	} catch {
+	} catch (error) {
 		throw new CanonicalRegistryPreflightError([
-			{ reason: "registry could not be read" },
+			{ reason: "registry could not be read", cause: error },
 		]);
 	}
 
@@ -87,12 +87,13 @@ export async function preflightCanonicalRegistry({ registry, mediaStorage }) {
 					objectKey: entry.asset.objectKey,
 					reason: "referenced R2 media object is missing",
 				});
-		} catch {
+		} catch (error) {
 			issues.push({
 				entityType: entry.entityType,
 				entityKey: entry.entityKey,
 				objectKey: entry.asset.objectKey,
 				reason: "referenced R2 media object could not be verified",
+				cause: error,
 			});
 		}
 		entries.push(entry);

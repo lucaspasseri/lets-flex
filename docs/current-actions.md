@@ -195,7 +195,7 @@ existing compensation rules.
 
 ### Action 4 — Add disposable GitHub recovery rehearsal
 
-**Status:** Completed — 2026-09-16
+**Status:** Ready for review — 2026-09-16
 
 Compose the existing schema/seed/recovery implementations into a GitHub Actions workflow using an
 obviously disposable PostgreSQL service/container. Run the complete durability preflight, restore
@@ -229,11 +229,46 @@ No production database or R2 resource was accessed or mutated during this action
 workflow run remains required to confirm the configured production Environment credentials and
 the current production registry/baseline contents.
 
-**Completion summary:** Action 4 was approved after the recovery rehearsal implementation and
-focused verification passed. The manual workflow is ready to run with the production Environment;
+**Initial implementation summary:** Action 4's first implementation passed focused verification.
+The manual workflow uses the production Environment only for read-only R2 access;
 it uses production R2 only for read-only preflight, restores the validated snapshot into an
 ephemeral PostgreSQL service, and strictly verifies the reconstructed state without production
 database credentials or R2 mutation.
+
+**Requested changes from live acceptance:** The repository owner dispatched the workflow against
+the production Environment. The run safely stopped during the initial read-only preflight with
+`Canonical media durability preflight failed with 70 issue(s)` before PostgreSQL was touched. The
+workflow mappings are present and match the application contract; `.env not found` is expected in
+CI because the command uses `--env-file-if-exists`. The 70 count is the 70-entry baseline loop,
+but the previous recovery command discarded each provider cause and printed only the aggregate
+error, so the run cannot distinguish recognized object misses from a wrong bucket or an R2 access
+failure. Add early presence/shape validation for both R2 resources and safe categorized issue
+diagnostics, with tests for workflow mappings, missing configuration, separate buckets, 70
+baseline misses, provider failures, and secret redaction. Preserve the read-only and disposable
+database boundaries; do not repair byte drift.
+
+**Correction implemented and evidence:** The rehearsal now validates the complete media and private
+registry R2 configuration before making requests, reports only safe bucket names, requires both
+bucket configurations, and rejects using the same bucket for both resources. Preflight issues now
+retain sanitized provider causes and the CLI reports category counts plus per-entry identity and
+object-key diagnostics. Categories distinguish `canonical-object-missing`,
+`bucket-authentication-or-access-failure`, `bucket-unavailable-or-not-found`, and
+`unexpected-provider-or-api-error`; credential values are never printed. A 70-issue result is now
+diagnostic: `canonical-object-missing=70` means all baseline probes received recognized missing
+responses, while provider-category counts identify access or provider failures. No PostgreSQL or
+R2 write path was added or changed.
+
+Focused verification passed:
+
+- `node --test scripts/canonical-media-recovery-rehearsal.test.mjs scripts/canonical-media-durability-preflight.test.mjs src/features/media/registry/canonicalMediaRegistryRecovery.test.js src/features/media/storage/r2Storage.test.js` — 23 tests passed.
+- `npm run format:check` — passed.
+- `npm run lint` — passed.
+- `npm run check:types` — passed.
+
+The required `npm run verify` was also attempted. Formatting, lint, server type checks, and browser
+type checks passed; the full test suite could not complete because the local catalog PostgreSQL
+hook failed with `EPERM` while no safe disposable test database was configured. The live GitHub
+workflow remains the required external acceptance check.
 
 ### Action 5 — Reconcile documentation and final acceptance procedure
 
@@ -270,5 +305,6 @@ workspace.
 
 ## Resume here
 
-Action 1 through Action 5 are Completed. The goal is Ready for final review. Compare the completion
-criteria and review the documented manual production recovery-workflow acceptance step.
+Actions 1 through 3 and Action 5 are Completed. Action 4 is Ready for review after the requested
+diagnostic correction. The goal remains Ready for final review; resume with the manually dispatched
+production recovery workflow and compare its result with the documented acceptance criteria.
