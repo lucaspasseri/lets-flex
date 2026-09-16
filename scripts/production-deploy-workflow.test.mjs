@@ -33,6 +33,7 @@ test("production preparation maps its production Environment contract explicitly
 		"NODE_ENV",
 		"DATABASE_SSL",
 		"ADMIN_EMAIL",
+		"MEDIA_PUBLIC_URL",
 		"PRODUCTION_DATABASE_RESET_MODE",
 		"R2_BUCKET_NAME",
 		"R2_ENDPOINT",

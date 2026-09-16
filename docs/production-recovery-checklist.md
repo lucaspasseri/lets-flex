@@ -105,6 +105,7 @@ Set these values in the GitHub Actions `production` Environment for one deployme
 | `DATABASE_URL`                            | `secrets.DATABASE_URL` with the exact intended production URL     | Target to be reconstructed; local/development-looking targets are rejected. |
 | `ADMIN_EMAIL`                             | `vars.ADMIN_EMAIL`                                                | Administrator recreated by the canonical seed.                              |
 | `ADMIN_PASSWORD`                          | `secrets.ADMIN_PASSWORD`                                          | Hashed and used for the recreated administrator.                            |
+| `MEDIA_PUBLIC_URL`                        | `vars.MEDIA_PUBLIC_URL`                                           | HTTPS public-media base validated by the preparation R2 adapter.            |
 | `R2_BUCKET_NAME`                          | Production public-media bucket                                    | Verifies the media objects referenced by registry entries.                  |
 | `R2_ENDPOINT`                             | HTTPS R2 endpoint                                                 | Shared R2 endpoint.                                                         |
 | `R2_REGION`                               | Optional; defaults to `auto`                                      | Shared R2 region.                                                           |
@@ -121,6 +122,9 @@ requires verified PostgreSQL TLS; map it as the non-sensitive `vars.DATABASE_SSL
 `R2_REGION` and the bucket/prefix values through `vars.*`. The R2 endpoint is shared by both
 clients. `RENDER_DEPLOY_HOOK_URL` remains a separate Environment Secret used only by the final
 workflow step.
+
+`OBJECT_STORAGE_PROVIDER` is not a `production:prepare` input; configure it as `r2` in Render's
+runtime environment so the started application cannot fall back to local media storage.
 
 Do not set `ALLOW_DATABASE_RESET=true`; that flag is for local/test reset and does not authorize
 production. Do not set `ALLOW_PRODUCTION_DATABASE_MIGRATION` as a substitute; migration approval

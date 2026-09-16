@@ -350,7 +350,14 @@ function requiredOption(value, label) {
 /** @param {string} value @param {string} label @returns {string} */
 function assertHttpUrl(value, label) {
 	const normalizedValue = requiredOption(value, label);
-	const parsed = new URL(normalizedValue);
+	let parsed;
+	try {
+		parsed = new URL(normalizedValue);
+	} catch {
+		throw new Error(
+			`${label} must be an HTTP(S) URL without credentials, query, or fragment.`,
+		);
+	}
 	if (
 		!/^https?:$/u.test(parsed.protocol) ||
 		parsed.username ||

@@ -13,9 +13,23 @@ import {
 	verifyCanonicalRegistryRestoration,
 } from "../src/features/media/registry/canonicalMediaRegistryRecovery.js";
 import { createCanonicalMediaRegistryFromEnvironment } from "../src/features/media/registry/canonicalMediaRegistry.js";
-import { createR2MediaStorageFromEnvironment } from "../src/features/media/storage/r2Storage.js";
+import {
+	createR2MediaStorageFromEnvironment,
+	readR2Configuration,
+} from "../src/features/media/storage/r2Storage.js";
+import { readCanonicalRegistryConfiguration } from "../src/features/media/registry/r2CanonicalMediaRegistry.js";
 
 export { PRODUCTION_DATABASE_RESET_AUTHORIZATION, PRODUCTION_DATABASE_RESET_MODE };
+
+export class ProductionPreparationConfigurationError extends Error {
+	/** @param {string[]} issues */
+	constructor(issues) {
+		super(issues.join("; "));
+		this.name = "ProductionPreparationConfigurationError";
+		this.issues = issues;
+		this.stage = "configuration";
+	}
+}
 
 /**
  * Read the production reset mode request. Empty or missing values are safe no-ops; any non-empty
@@ -29,75 +43,108 @@ export function readProductionResetConfiguration(environment = process.env) {
 	const value = environment.PRODUCTION_DATABASE_RESET_MODE;
 	if (value === undefined || value === "") return { enabled: false };
 	if (value !== PRODUCTION_DATABASE_RESET_MODE)
-		throw new Error(
+		throw new ProductionPreparationConfigurationError([
 			"PRODUCTION_DATABASE_RESET_MODE must be unset or exactly reset-and-restore.",
-		);
+		]);
 	return { enabled: true };
 }
 
 /**
- * Validate production identity and all configuration required before registry preflight. This
- * intentionally requires separate explicit registry settings so development/public-media
- * configuration cannot silently become the recovery source.
+ * Validate production identity and every configuration value needed by the reset path. The
+ * validation is intentionally side-effect free and reports all detected issues without values.
  *
  * @param {NodeJS.ProcessEnv} environment
  */
 export function assertProductionPreparationSafety(environment) {
+	const issues = [];
 	if (environment.NODE_ENV !== "production")
-		throw new Error("Production database reset requires NODE_ENV=production.");
-	assertProductionResetAuthorization(environment, true);
-	const databaseUrl = environment.DATABASE_URL;
-	if (typeof databaseUrl !== "string" || databaseUrl.trim() === "")
-		throw new Error("DATABASE_URL is required for production database reset.");
-	let parsedDatabaseUrl;
+		issues.push("Production database reset requires NODE_ENV=production.");
+
 	try {
-		parsedDatabaseUrl = new globalThis.URL(databaseUrl);
+		assertProductionResetAuthorization(environment, true);
 	} catch {
-		throw new Error("DATABASE_URL must be a valid PostgreSQL URL.");
+		issues.push("explicit reset authorization is required.");
 	}
-	if (
-		!/^postgres(?:ql)?:$/u.test(parsedDatabaseUrl.protocol) ||
-		!parsedDatabaseUrl.hostname
-	)
-		throw new Error("DATABASE_URL must be a valid PostgreSQL URL.");
-	const databaseName = decodeURIComponent(parsedDatabaseUrl.pathname.slice(1));
-	if (
-		new Set(["localhost", "127.0.0.1", "::1"]).has(parsedDatabaseUrl.hostname) ||
-		/(?:^|[_-])(dev|development|local|test|testing)(?:$|[_-])/u.test(databaseName)
-	)
-		throw new Error(
-			"Refusing to reset a local or development-looking database target.",
-		);
+
+	const databaseUrl = environment.DATABASE_URL;
+	if (typeof databaseUrl !== "string" || databaseUrl.trim() === "") {
+		issues.push("DATABASE_URL is required for production database reset.");
+	} else {
+		let parsedDatabaseUrl;
+		try {
+			parsedDatabaseUrl = new globalThis.URL(databaseUrl);
+			if (
+				!/^postgres(?:ql)?:$/u.test(parsedDatabaseUrl.protocol) ||
+				!parsedDatabaseUrl.hostname
+			)
+				throw new Error("invalid protocol or hostname");
+			const databaseName = decodeURIComponent(parsedDatabaseUrl.pathname.slice(1));
+			if (
+				new Set(["localhost", "127.0.0.1", "::1"]).has(parsedDatabaseUrl.hostname) ||
+				/(?:^|[_-])(dev|development|local|test|testing)(?:$|[_-])/u.test(databaseName)
+			)
+				issues.push("DATABASE_URL targets a local or development-looking database.");
+		} catch {
+			issues.push("DATABASE_URL must be a valid PostgreSQL URL.");
+		}
+	}
 
 	if (
 		typeof environment.ADMIN_EMAIL !== "string" ||
 		!environment.ADMIN_EMAIL.includes("@")
 	)
-		throw new Error("ADMIN_EMAIL must be configured for production database reset.");
+		issues.push("ADMIN_EMAIL must be configured for production database reset.");
 	if (
 		typeof environment.ADMIN_PASSWORD !== "string" ||
 		environment.ADMIN_PASSWORD === ""
 	)
-		throw new Error("ADMIN_PASSWORD must be configured for production database reset.");
+		issues.push("ADMIN_PASSWORD must be configured for production database reset.");
 
-	const requiredNames = [
-		"R2_BUCKET_NAME",
-		"R2_ENDPOINT",
-		"R2_ACCESS_KEY_ID",
-		"R2_SECRET_ACCESS_KEY",
-		"R2_CANONICAL_REGISTRY_BUCKET_NAME",
-		"R2_CANONICAL_REGISTRY_PREFIX",
-		"R2_CANONICAL_REGISTRY_ACCESS_KEY_ID",
-		"R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY",
-	];
-	for (const name of requiredNames) {
-		if (typeof environment[name] !== "string" || environment[name].trim() === "")
-			throw new Error(`${name} is required for production database reset.`);
+	for (const readConfiguration of [
+		() => readR2Configuration(environment),
+		() => readCanonicalRegistryConfiguration(environment),
+	]) {
+		try {
+			readConfiguration();
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "invalid R2 configuration";
+			if (!issues.includes(message)) issues.push(message);
+		}
 	}
-	if (environment.R2_BUCKET_NAME === environment.R2_CANONICAL_REGISTRY_BUCKET_NAME)
-		throw new Error(
-			"Production media and canonical registry buckets must be separate.",
-		);
+
+	if (
+		typeof environment.R2_BUCKET_NAME === "string" &&
+		typeof environment.R2_CANONICAL_REGISTRY_BUCKET_NAME === "string" &&
+		environment.R2_BUCKET_NAME.trim() !== "" &&
+		environment.R2_BUCKET_NAME === environment.R2_CANONICAL_REGISTRY_BUCKET_NAME
+	)
+		issues.push("Production media and canonical registry buckets must be separate.");
+
+	if (issues.length > 0) throw new ProductionPreparationConfigurationError(issues);
+}
+
+/**
+ * Return the safe diagnostic used by the command-line entry point. Configuration errors carry
+ * only key names and validation reasons; staged operational errors retain their generic stage.
+ *
+ * @param {unknown} error
+ * @returns {string | null}
+ */
+export function getProductionPreparationDiagnostic(error) {
+	if (error instanceof ProductionPreparationConfigurationError)
+		return error.issues.join("; ");
+	return null;
+}
+
+/** @param {unknown} error @returns {string} */
+export function formatProductionPreparationFailure(error) {
+	const stage =
+		error && typeof error === "object" && "stage" in error
+			? /** @type {{stage?: string}} */ (error).stage
+			: "configuration";
+	const diagnostic = getProductionPreparationDiagnostic(error);
+	return `[production-prepare] ${stage} failed${diagnostic ? `: ${diagnostic}` : "."}`;
 }
 
 /**
@@ -205,11 +252,7 @@ async function main() {
 	try {
 		await prepareProductionDeployment();
 	} catch (error) {
-		const stage =
-			error && typeof error === "object" && "stage" in error
-				? /** @type {{stage?: string}} */ (error).stage
-				: "configuration";
-		globalThis.console.error(`[production-prepare] ${stage} failed.`);
+		globalThis.console.error(formatProductionPreparationFailure(error));
 		process.exitCode = 1;
 	} finally {
 		await pool.end();

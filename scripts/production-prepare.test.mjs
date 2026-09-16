@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import process from "node:process";
+import { URL, fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
 	PRODUCTION_DATABASE_RESET_AUTHORIZATION,
 	PRODUCTION_DATABASE_RESET_MODE,
+	formatProductionPreparationFailure,
 	prepareProductionDeployment,
 } from "./production-prepare.mjs";
 
@@ -29,6 +33,7 @@ function productionEnvironment(overrides = {}) {
 		DATABASE_URL: "postgresql://postgres.example.com/lets_flex",
 		ADMIN_EMAIL: "admin@example.com",
 		ADMIN_PASSWORD: "a sufficiently long test password",
+		MEDIA_PUBLIC_URL: "https://media.example.com",
 		R2_BUCKET_NAME: "lets-flex-media-prod",
 		R2_ENDPOINT: "https://account.r2.cloudflarestorage.com",
 		R2_ACCESS_KEY_ID: "media-access-key",
@@ -110,6 +115,90 @@ test("production preparation requires the exact reset confirmation", async () =>
 		assert.ok(logs.includes("reset mode detected: reset-and-restore"));
 		assert.ok(logs.includes("authorization rejected"));
 	}
+});
+
+test("accepted authorization does not bypass later configuration validation", async () => {
+	const calls = [];
+	const environment = productionEnvironment({ MEDIA_PUBLIC_URL: undefined });
+	let error;
+	try {
+		await prepareProductionDeployment({
+			environment,
+			dependencies: {
+				resetDatabase: async () => calls.push("reset"),
+			},
+			log: () => {},
+		});
+		assert.fail("expected production configuration validation to fail");
+	} catch (caught) {
+		error = caught;
+	}
+
+	assert.ok(error instanceof Error);
+	assert.match(error.message, /MEDIA_PUBLIC_URL is required/);
+	assert.deepEqual(calls, []);
+});
+
+test("configuration diagnostics identify multiple safe issues without secret values", async () => {
+	const secretValue = "super-secret-database-password";
+	let error;
+	try {
+		await prepareProductionDeployment({
+			environment: productionEnvironment({
+				DATABASE_URL: undefined,
+				ADMIN_PASSWORD: secretValue,
+				MEDIA_PUBLIC_URL: "not-a-url",
+			}),
+			dependencies: { resetDatabase: async () => {} },
+			log: () => {},
+		});
+		assert.fail("expected production configuration validation to fail");
+	} catch (caught) {
+		error = caught;
+	}
+
+	assert.match(error.message, /DATABASE_URL is required/);
+	assert.match(error.message, /DATABASE_URL is required/);
+	assert.match(error.message, /invalid MEDIA_PUBLIC_URL|MEDIA_PUBLIC_URL must be/);
+	assert.doesNotMatch(error.message, new RegExp(secretValue));
+});
+
+test("the command exits non-zero with a safe configuration diagnostic", () => {
+	const secretValue = "command-secret-value";
+	const result = spawnSync(
+		process.execPath,
+		[fileURLToPath(new URL("./production-prepare.mjs", import.meta.url))],
+		{
+			encoding: "utf8",
+			env: {
+				NODE_ENV: "production",
+				DATABASE_URL: "postgresql://postgres.example.com/lets_flex",
+				ADMIN_EMAIL: "admin@example.com",
+				ADMIN_PASSWORD: secretValue,
+				PRODUCTION_DATABASE_RESET_MODE: PRODUCTION_DATABASE_RESET_MODE,
+				ALLOW_PRODUCTION_DB_RESET: PRODUCTION_DATABASE_RESET_AUTHORIZATION,
+				R2_BUCKET_NAME: "lets-flex-media-prod",
+				R2_ENDPOINT: "https://account.r2.cloudflarestorage.com",
+				R2_ACCESS_KEY_ID: "command-access-key",
+				R2_SECRET_ACCESS_KEY: "command-secret-key",
+				R2_CANONICAL_REGISTRY_BUCKET_NAME: "lets-flex-canonical-registry-prod",
+				R2_CANONICAL_REGISTRY_PREFIX: "v1",
+				R2_CANONICAL_REGISTRY_ACCESS_KEY_ID: "registry-access-key",
+				R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY: "registry-secret-key",
+			},
+		},
+	);
+
+	assert.equal(result.status, 1);
+	assert.match(
+		`${result.stdout}${result.stderr}`,
+		/\[production-prepare\] configuration failed: MEDIA_PUBLIC_URL is required\./u,
+	);
+	assert.doesNotMatch(`${result.stdout}${result.stderr}`, new RegExp(secretValue));
+	assert.equal(
+		formatProductionPreparationFailure(new Error("not logged")),
+		"[production-prepare] configuration failed.",
+	);
 });
 
 test("successful preparation preserves the preflight snapshot and ordering", async () => {

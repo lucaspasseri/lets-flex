@@ -253,7 +253,14 @@ function requiredPrefix(value, name) {
 /** @param {unknown} value @param {string} name @returns {string} */
 function requiredHttpsUrl(value, name) {
 	const raw = requiredValue(value, name);
-	const url = new URL(raw);
+	let url;
+	try {
+		url = new URL(raw);
+	} catch {
+		throw new Error(
+			`${name} must be an HTTPS URL without credentials, query, or fragment.`,
+		);
+	}
 	if (
 		url.protocol !== "https:" ||
 		url.username ||

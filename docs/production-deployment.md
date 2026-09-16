@@ -75,6 +75,7 @@ The `Prepare production` step maps this additional configuration explicitly:
 | `DATABASE_SSL`                   | `vars.DATABASE_SSL`                   | Optional                                       | Set to `true` when PostgreSQL requires verified TLS.                                |
 | `ADMIN_EMAIL`                    | `vars.ADMIN_EMAIL`                    | Reset requested                                | Administrator recreated by the canonical seed.                                      |
 | `ADMIN_PASSWORD`                 | `secrets.ADMIN_PASSWORD`              | Reset requested                                | Password hashed for the recreated administrator.                                    |
+| `MEDIA_PUBLIC_URL`               | `vars.MEDIA_PUBLIC_URL`               | Reset requested                                | Validated by the R2 media adapter used for canonical registry object checks.        |
 | `PRODUCTION_DATABASE_RESET_MODE` | `vars.PRODUCTION_DATABASE_RESET_MODE` | Normal deploy: unset/empty; reset: exact value | First reset guard; must be `reset-and-restore` to request a reset.                  |
 | `ALLOW_PRODUCTION_DB_RESET`      | `secrets.ALLOW_PRODUCTION_DB_RESET`   | Normal deploy: unset/empty; reset: exact value | Second reset guard; must be `I_CONFIRM_PRODUCTION_DB_RESET`.                        |
 
@@ -84,6 +85,11 @@ separate canonical-registry bucket, prefix, and credential pair. `R2_REGION` rem
 defaults to `auto`. The workflow does not supply either reset guard itself; absent guards leave the
 preparation command in its safe no-op mode, while a configured reset mode with a missing or wrong
 confirmation fails closed.
+
+`OBJECT_STORAGE_PROVIDER` is not consumed by `production:prepare`; that command intentionally
+constructs the R2 adapters directly for the reset preflight. It must still be configured as
+`r2` in Render's runtime environment, where the normal application media composition validates
+the production provider and uses `MEDIA_PUBLIC_URL` for browser-facing URLs.
 
 ## Baseline verification and recovery rehearsal
 

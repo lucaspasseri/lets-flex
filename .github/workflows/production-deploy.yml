@@ -52,6 +52,7 @@ jobs:
           DATABASE_SSL: ${{ vars.DATABASE_SSL }}
           ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          MEDIA_PUBLIC_URL: ${{ vars.MEDIA_PUBLIC_URL }}
           PRODUCTION_DATABASE_RESET_MODE: ${{ vars.PRODUCTION_DATABASE_RESET_MODE }}
           ALLOW_PRODUCTION_DB_RESET: ${{ secrets.ALLOW_PRODUCTION_DB_RESET }}
           R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
