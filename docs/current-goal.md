@@ -2,7 +2,7 @@
 
 ## Goal status
 
-**Changes requested — development missing-object classification correction 2026-09-16**
+**Ready for final review — development R2 authorization correction 2026-09-16**
 
 ## Objective
 
@@ -107,7 +107,22 @@ Normal deployments must not reset PostgreSQL or provision media implicitly.
       mutation by Admin, resolver redesign, or orphan deletion was introduced.
 
 All completion criteria are satisfied, including the owner-confirmed live production recovery
-rehearsal. The goal is complete.
+rehearsal and the approved development R2 authorization correction. The goal is ready for final
+review.
+
+## Final review after Action 6
+
+- [x] Development/test reset configuration now fails closed for production-scoped or mismatched
+      media and registry buckets before any R2 client is constructed.
+- [x] The development credentials were rotated, both canonical media objects were verified in the
+      development media bucket, and the exact `npm run db:reset` completed successfully.
+- [x] The final repository verification passed with 582 tests and 0 failures; formatting and diff
+      checks passed.
+- [x] No production database reset, production R2 write/delete, or credential value exposure in
+      repository output was introduced by this work.
+
+No completion criteria remain unmet. The deliberate non-goals below remain excluded, and no next
+action is activated pending final goal approval.
 
 ## Deliberate non-goals
 

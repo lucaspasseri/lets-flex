@@ -311,7 +311,7 @@ workspace.
 
 ### Action 6 — Execute manual production recovery acceptance
 
-**Status:** Ready for review — development R2 authorization verification 2026-09-16
+**Status:** Completed — development R2 authorization verification 2026-09-16
 
 Dispatch `Canonical Media Recovery Rehearsal` from the GitHub Actions `production` Environment
 using the workflow revision containing the approved diagnostic correction. Confirm the read-only
@@ -451,12 +451,13 @@ registry preflight passed with 4 overrides; both reported media keys were verifi
 the disposable PostgreSQL reset, baseline seed, canonical recovery, and transaction commit all
 passed. No production resource was accessed or mutated by this verification.
 
-Action 6 is Ready for review. Its requested development acceptance criteria are satisfied: the
-reachable environment uses only the development media and registry buckets, confirms the two
-objects, and the corrected exact `npm run db:reset` succeeds without object replacement.
+**Completion summary:** Action 6 was approved after the rotated credentials passed the exact
+development `npm run db:reset`. The reachable environment used only the development media and
+registry buckets, confirmed both reported objects, and completed registry preflight, database
+reset, baseline seed, canonical recovery, and transaction commit without object replacement or
+production resource mutation.
 
 ## Resume here
 
-Actions 1 through 5 are Completed. Action 6 is Ready for review after the development R2
-authorization correction; the original live production recovery acceptance evidence remains
-recorded above.
+Actions 1 through 6 are Completed. The goal is Ready for final review after the development R2
+authorization correction; no next action is activated.
