@@ -311,7 +311,7 @@ workspace.
 
 ### Action 6 — Execute manual production recovery acceptance
 
-**Status:** Changes requested — development missing-object classification correction 2026-09-16
+**Status:** Ready for review — development R2 authorization verification 2026-09-16
 
 Dispatch `Canonical Media Recovery Rehearsal` from the GitHub Actions `production` Environment
 using the workflow revision containing the approved diagnostic correction. Confirm the read-only
@@ -445,12 +445,18 @@ No production credentials or production bucket access is required by normal deve
 `db:reset`; it uses only the two development bucket variables and their corresponding credential
 pairs, and its R2 work is read-only.
 
-Action 6 remains Changes requested. It must not return to review until a reachable development
-environment uses only the development media and registry buckets, confirms the two objects, and
-the corrected exact `npm run db:reset` succeeds without object replacement.
+**Post-rotation acceptance:** After the owner rotated the exposed R2 credentials, the exact
+`npm run db:reset` completed successfully against the development configuration. The canonical
+registry preflight passed with 4 overrides; both reported media keys were verified without 403;
+the disposable PostgreSQL reset, baseline seed, canonical recovery, and transaction commit all
+passed. No production resource was accessed or mutated by this verification.
+
+Action 6 is Ready for review. Its requested development acceptance criteria are satisfied: the
+reachable environment uses only the development media and registry buckets, confirms the two
+objects, and the corrected exact `npm run db:reset` succeeds without object replacement.
 
 ## Resume here
 
-Actions 1 through 5 are Completed. Action 6 remains Changes requested after the development
-missing-object classification correction; the original live production recovery acceptance
-evidence remains recorded above, but corrected development behavior has not been approved.
+Actions 1 through 5 are Completed. Action 6 is Ready for review after the development R2
+authorization correction; the original live production recovery acceptance evidence remains
+recorded above.
