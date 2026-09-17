@@ -161,3 +161,35 @@ test("database reset preflights the canonical registry before opening a destruct
 		}
 	}
 });
+
+test("development database reset refuses production media before any R2 preflight request", async () => {
+	let registryReads = 0;
+	await assert.rejects(
+		() =>
+			resetAndSeedDatabase({
+				connectionString: "postgresql://127.0.0.1:1/lets_flex_dev",
+				environment: {
+					NODE_ENV: "development",
+					ALLOW_DATABASE_RESET: "true",
+					ADMIN_EMAIL: "admin@example.com",
+					ADMIN_PASSWORD: "a sufficiently long test password",
+					R2_BUCKET_NAME: "lets-flex-media-prod",
+					R2_DEVELOPMENT_BUCKET_NAME: "lets-flex-media-dev",
+					R2_CANONICAL_REGISTRY_BUCKET_NAME: "lets-flex-canonical-registry-dev",
+				},
+				canonicalRegistry: /** @type {any} */ ({
+					async listCanonicalOverrides() {
+						registryReads += 1;
+						return [];
+					},
+				}),
+				mediaStorage: /** @type {any} */ ({
+					async exists() {
+						return true;
+					},
+				}),
+			}),
+		/R2_BUCKET_NAME to match R2_DEVELOPMENT_BUCKET_NAME/,
+	);
+	assert.equal(registryReads, 0);
+});

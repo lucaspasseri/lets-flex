@@ -5,7 +5,7 @@ import {
 	PutObjectCommand,
 } from "@aws-sdk/client-s3";
 
-import { createR2S3Client } from "../storage/r2Storage.js";
+import { createR2S3Client, R2OperationError } from "../storage/r2Storage.js";
 import {
 	canonicalRegistryObjectKey,
 	validateCanonicalRegistryEntry,
@@ -93,37 +93,68 @@ export function createR2CanonicalMediaRegistry({ configuration, client }) {
 					? { IfMatch: quoteEtag(options.expectedEtag) }
 					: { IfNoneMatch: "*" }),
 			};
-			const response = /** @type {{ETag?: string}} */ (
-				await storageClient.send(new PutObjectCommand(input))
-			);
+			let response;
+			try {
+				response = /** @type {{ETag?: string}} */ (
+					await storageClient.send(new PutObjectCommand(input))
+				);
+			} catch (error) {
+				throw asR2RegistryOperationError(error, {
+					operation: "PutObject",
+					bucketName: configuration.bucketName,
+					endpoint: configuration.endpoint,
+					objectKey: key,
+				});
+			}
 			return { entry: validated, etag: cleanEtag(response.ETag) };
 		},
 		/** @param {string} entityType @param {string} entityKey @param {{expectedEtag?: string}} [options] */
 		async deleteCanonicalOverride(entityType, entityKey, options) {
-			await storageClient.send(
-				new DeleteObjectCommand({
-					Bucket: configuration.bucketName,
-					Key: objectKey(prefix, entityType, entityKey),
-					...(options?.expectedEtag
-						? { IfMatch: quoteEtag(options.expectedEtag) }
-						: {}),
-				}),
-			);
+			const key = objectKey(prefix, entityType, entityKey);
+			try {
+				await storageClient.send(
+					new DeleteObjectCommand({
+						Bucket: configuration.bucketName,
+						Key: key,
+						...(options?.expectedEtag
+							? { IfMatch: quoteEtag(options.expectedEtag) }
+							: {}),
+					}),
+				);
+			} catch (error) {
+				throw asR2RegistryOperationError(error, {
+					operation: "DeleteObject",
+					bucketName: configuration.bucketName,
+					endpoint: configuration.endpoint,
+					objectKey: key,
+				});
+			}
 		},
 		async listCanonicalOverrides() {
 			const entries = [];
 			let continuationToken;
 			do {
-				const response =
-					/** @type {{Contents?: Array<{Key?: string}> , IsTruncated?: boolean, NextContinuationToken?: string}} */ (
-						await storageClient.send(
-							new ListObjectsV2Command({
-								Bucket: configuration.bucketName,
-								Prefix: `${prefix}/`,
-								...(continuationToken ? { ContinuationToken: continuationToken } : {}),
-							}),
-						)
-					);
+				let response;
+				try {
+					response =
+						/** @type {{Contents?: Array<{Key?: string}> , IsTruncated?: boolean, NextContinuationToken?: string}} */ (
+							await storageClient.send(
+								new ListObjectsV2Command({
+									Bucket: configuration.bucketName,
+									Prefix: `${prefix}/`,
+									...(continuationToken
+										? { ContinuationToken: continuationToken }
+										: {}),
+								}),
+							)
+						);
+				} catch (error) {
+					throw asR2RegistryOperationError(error, {
+						operation: "ListObjectsV2",
+						bucketName: configuration.bucketName,
+						endpoint: configuration.endpoint,
+					});
+				}
 				for (const object of response.Contents ?? []) {
 					if (typeof object.Key !== "string") continue;
 					if (object.Key.startsWith(`${prefix}/_smoke-test/`)) continue;
@@ -155,12 +186,7 @@ export function createR2CanonicalMediaRegistry({ configuration, client }) {
 	/** @param {string} key */
 	async function readEntryAtKey(key) {
 		const response = /** @type {{Body?: unknown, ETag?: string}} */ (
-			await storageClient.send(
-				new GetObjectCommand({
-					Bucket: configuration.bucketName,
-					Key: key,
-				}),
-			)
+			await readRegistryObject(key)
 		);
 		return {
 			entry: validateCanonicalRegistryEntry(
@@ -168,6 +194,25 @@ export function createR2CanonicalMediaRegistry({ configuration, client }) {
 			),
 			etag: cleanEtag(response.ETag),
 		};
+	}
+
+	async function readRegistryObject(key) {
+		try {
+			return await storageClient.send(
+				new GetObjectCommand({
+					Bucket: configuration.bucketName,
+					Key: key,
+				}),
+			);
+		} catch (error) {
+			if (isMissingObjectError(error)) throw error;
+			throw asR2RegistryOperationError(error, {
+				operation: "GetObject",
+				bucketName: configuration.bucketName,
+				endpoint: configuration.endpoint,
+				objectKey: key,
+			});
+		}
 	}
 }
 
@@ -224,6 +269,12 @@ function isMissingObjectError(error) {
 		candidate?.name === "NoSuchKey" ||
 		candidate?.$metadata?.httpStatusCode === 404
 	);
+}
+
+/** @param {unknown} error @param {{operation: string, bucketName: string, endpoint?: string, objectKey?: string}} context @returns {R2OperationError} */
+function asR2RegistryOperationError(error, context) {
+	if (error instanceof R2OperationError) return error;
+	return new R2OperationError(context, error);
 }
 
 /** @param {string} value @returns {string} */

@@ -19,6 +19,11 @@ the initial administrator in one transaction. It requires `NODE_ENV=development`
 administrator configuration. `npm start` loads `.env` when present and does not perform hidden
 database initialization.
 
+For development/test resets, `R2_BUCKET_NAME` is the selected public-media bucket and must match
+`R2_DEVELOPMENT_BUCKET_NAME`; the reset also requires a development-scoped canonical registry
+bucket. In production, `R2_BUCKET_NAME` is instead the production media bucket, and
+`npm run db:reset` is forbidden.
+
 The schema is authoritative for the complete current structure. The seed order is:
 
 1. static reference data;
@@ -62,6 +67,13 @@ adopts them without overwriting or deleting them, and reports differing reposito
 only. The manifest is used to reconstruct a missing object, never to replace an existing one.
 
 Run the read-only baseline check with an explicitly selected target:
+
+```sh
+CANONICAL_MEDIA_TARGET=development \
+npm run media:baseline:provision -- --mode=verify
+```
+
+For production, use:
 
 ```sh
 CANONICAL_MEDIA_TARGET=production \

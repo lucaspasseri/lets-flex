@@ -7,9 +7,10 @@ import {
 	GetObjectCommand,
 	HeadObjectCommand,
 	PutObjectCommand,
-	S3Client,
 } from "@aws-sdk/client-s3";
 import { randomUUID } from "node:crypto";
+
+import { createR2S3Client } from "../src/features/media/storage/r2Storage.js";
 
 const SMOKE_TEST_CONFIRMATION = "I_CONFIRM_DEVELOPMENT_BUCKET";
 
@@ -154,16 +155,7 @@ async function cleanupR2SmokeTestObject(client, bucketName, key) {
 /** @param {NodeJS.ProcessEnv} environment @returns {Promise<void>} */
 async function main(environment = process.env) {
 	const configuration = readR2SmokeTestConfiguration(environment);
-	const client = /** @type {S3CommandClient} */ (
-		new S3Client({
-			region: configuration.region,
-			endpoint: configuration.endpoint,
-			credentials: {
-				accessKeyId: configuration.accessKeyId,
-				secretAccessKey: configuration.secretAccessKey,
-			},
-		})
-	);
+	const client = createR2S3Client(configuration);
 	await runR2SmokeTest({ client, configuration });
 	console.log("R2 development smoke test passed and cleaned up its disposable object.");
 }

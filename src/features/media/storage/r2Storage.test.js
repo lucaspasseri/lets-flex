@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+	assertDevelopmentR2Configuration,
 	createR2MediaObjectProbe,
 	createR2MediaBaselineObjectStore,
 	createR2MediaStorage,
+	createR2S3Client,
+	getR2OperationDiagnostics,
 	readR2Configuration,
 	readR2ObjectProbeConfiguration,
 } from "./r2Storage.js";
@@ -20,6 +23,42 @@ function createFakeClient(responses = []) {
 		},
 	};
 }
+
+test("R2 clients use path-style addressing for account-level endpoints", async () => {
+	const client = createR2S3Client({
+		endpoint: "https://account.r2.cloudflarestorage.com",
+		accessKeyId: "access-key",
+		secretAccessKey: "secret-key",
+	});
+
+	const concreteClient = /** @type {{config: {forcePathStyle: boolean}}} */ (
+		/** @type {unknown} */ (client)
+	);
+	assert.equal(concreteClient.config.forcePathStyle, true);
+});
+
+test("development R2 configuration rejects production media and registry buckets", () => {
+	assert.throws(
+		() =>
+			assertDevelopmentR2Configuration({
+				NODE_ENV: "development",
+				R2_BUCKET_NAME: "lets-flex-media-prod",
+				R2_DEVELOPMENT_BUCKET_NAME: "lets-flex-media-dev",
+				R2_CANONICAL_REGISTRY_BUCKET_NAME: "lets-flex-canonical-registry-dev",
+			}),
+		/R2_BUCKET_NAME to match R2_DEVELOPMENT_BUCKET_NAME.*selected=lets-flex-media-prod/,
+	);
+	assert.throws(
+		() =>
+			assertDevelopmentR2Configuration({
+				NODE_ENV: "development",
+				R2_BUCKET_NAME: "lets-flex-media-dev",
+				R2_DEVELOPMENT_BUCKET_NAME: "lets-flex-media-dev",
+				R2_CANONICAL_REGISTRY_BUCKET_NAME: "lets-flex-canonical-registry-prod",
+			}),
+		/production-scoped canonical registry bucket.*lets-flex-canonical-registry-prod/,
+	);
+});
 
 test("R2 storage writes, reads, checks, deletes, and derives public URLs", async () => {
 	const client = createFakeClient([
@@ -89,9 +128,59 @@ test("R2 storage treats a missing head response as not found and propagates othe
 	const deniedStorage = createR2MediaStorage({
 		client: deniedClient,
 		bucketName: "media-development",
+		endpoint: "https://account.r2.cloudflarestorage.com",
 		publicUrlBase: "https://cdn.example.test",
 	});
-	await assert.rejects(() => deniedStorage.exists("assets/denied.png"), denied);
+	await assert.rejects(
+		() => deniedStorage.exists("assets/denied.png"),
+		(error) => {
+			const operationError = /** @type {Error & {cause?: unknown}} */ (error);
+			assert.equal(operationError.name, "R2OperationError");
+			assert.equal(operationError.cause, denied);
+			assert.deepEqual(getR2OperationDiagnostics(operationError), {
+				operation: "HeadObject",
+				bucketName: "media-development",
+				endpointHostname: "account.r2.cloudflarestorage.com",
+				forcePathStyle: true,
+				objectKey: "assets/denied.png",
+				providerName: "Error",
+				httpStatusCode: 403,
+				providerMessage: "denied",
+			});
+			return true;
+		},
+	);
+});
+
+test("R2 object probe can preserve a definitive missing response for reset diagnostics", async () => {
+	const missing = Object.assign(new Error("not found"), {
+		name: "NotFound",
+		$metadata: { httpStatusCode: 404 },
+	});
+	const probe = createR2MediaObjectProbe({
+		client: createFakeClient([missing]),
+		bucketName: "media-development",
+		endpoint: "https://account.r2.cloudflarestorage.com",
+		throwOnMissing: true,
+	});
+
+	await assert.rejects(
+		() => probe.exists("assets/missing.png"),
+		(error) => {
+			assert.deepEqual(getR2OperationDiagnostics(error), {
+				operation: "HeadObject",
+				bucketName: "media-development",
+				endpointHostname: "account.r2.cloudflarestorage.com",
+				forcePathStyle: true,
+				objectKey: "assets/missing.png",
+				objectMissing: true,
+				providerName: "NotFound",
+				httpStatusCode: 404,
+				providerMessage: "not found",
+			});
+			return true;
+		},
+	);
 });
 
 test("R2 configuration requires complete server-side settings and validates URLs", () => {

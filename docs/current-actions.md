@@ -195,7 +195,7 @@ existing compensation rules.
 
 ### Action 4 — Add disposable GitHub recovery rehearsal
 
-**Status:** Ready for review — 2026-09-16
+**Status:** Completed — 2026-09-16
 
 Compose the existing schema/seed/recovery implementations into a GitHub Actions workflow using an
 obviously disposable PostgreSQL service/container. Run the complete durability preflight, restore
@@ -270,6 +270,12 @@ type checks passed; the full test suite could not complete because the local cat
 hook failed with `EPERM` while no safe disposable test database was configured. The live GitHub
 workflow remains the required external acceptance check.
 
+**Correction completion summary:** The requested CI diagnostic correction was approved after the
+focused verification evidence above. The workflow mapping remains explicit and unchanged; missing
+or invalid Environment configuration now fails before R2 requests, while live R2 failures are
+reported with safe categories and resource/object context. Production R2 and PostgreSQL were not
+accessed or mutated by this correction.
+
 ### Action 5 — Reconcile documentation and final acceptance procedure
 
 **Status:** Completed — approved 2026-09-16
@@ -303,8 +309,148 @@ verification, and final diff review. The goal is ready for final review; the man
 production recovery workflow remains the only operational acceptance step not executed in this
 workspace.
 
+### Action 6 — Execute manual production recovery acceptance
+
+**Status:** Changes requested — development missing-object classification correction 2026-09-16
+
+Dispatch `Canonical Media Recovery Rehearsal` from the GitHub Actions `production` Environment
+using the workflow revision containing the approved diagnostic correction. Confirm the read-only
+R2 preflight, ephemeral PostgreSQL schema/baseline seed, registry snapshot restoration, and strict
+post-restore verification complete successfully. Record the run URL and output. Do not run R2
+apply/overwrite/delete operations, production reset commands, or provide production PostgreSQL
+credentials.
+
+**Prior requested changes from live acceptance:** The owner reran the workflow after the diagnostic
+correction. Configuration presence validation passed, and the read-only preflight then reported
+`mediaBucket=lets-flex-media-prod`, `registryBucket=lets-flex-canonical-registry-prod`, and 70
+`bucket-authentication-or-access-failure` issues with HTTP 403 for baseline media probes. The run
+stopped before disposable PostgreSQL, as required. Trace the separate media and registry secret
+contracts and determine whether any repository correction is needed; do not broaden permissions or
+touch production data.
+
+**Investigation result:** The live run passed early configuration presence validation and reported
+`mediaBucket=lets-flex-media-prod`, `registryBucket=lets-flex-canonical-registry-prod`, then HTTP
+403 `bucket-authentication-or-access-failure` for all 70 public-media `HeadObject` probes. The
+adapter treats only 404/NotFound responses as object absence, so this is an R2 authorization or
+credential/account-endpoint problem, not 70 missing objects. Repository inspection verified the
+workflow explicitly maps media credentials from `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY`,
+and registry credentials from `R2_CANONICAL_REGISTRY_ACCESS_KEY_ID` and
+`R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY`; the two clients do not share credential values. The
+required owner correction is to inspect those exact Environment secrets, the media bucket scope,
+and the shared Cloudflare R2 endpoint. No code or workflow change was necessary, and no production
+resource was mutated.
+
+**Completion summary:** The repository owner confirmed that the live GitHub Actions
+`Canonical Media Recovery Rehearsal` passed against the production Environment. Production R2
+read-only preflight verified the canonical baseline and read the production registry snapshot;
+the ephemeral PostgreSQL schema and seed were reconstructed, the registry snapshot was restored,
+and strict post-restore verification passed. The owner confirmed that no production R2 write and
+no production PostgreSQL reset occurred.
+
+**Requested changes from development reset behavior:** The reported `forcePathStyle` conclusion
+was traced through the exact `npm run db:reset` path. `db/seed.js` creates the canonical registry
+and media adapters independently; the registry list uses `createR2CanonicalMediaRegistry`, the
+media object checks use `createR2MediaStorage`, and both concrete clients use the shared
+`createR2S3Client` with `forcePathStyle: true`. Runtime request capture confirmed path-style
+requests with the development bucket in the URL path. The exact command loaded `.env` via
+`node --env-file-if-exists=.env`; its non-secret settings are development media and registry
+buckets, region `auto`, and the configured account R2 endpoint hostname.
+
+The exact development `npm run db:reset` in this workspace fails before media `HeadObject` checks
+because the registry `ListObjectsV2` request returns DNS `ENOTFOUND`; the command reports the
+operation, development registry bucket, endpoint hostname, `addressing=path-style`, provider
+name/code, and sanitized message. The independent media `HeadObject` checks for the reported keys
+use the same development adapter and also return DNS `ENOTFOUND` here because the sandbox resolver
+cannot resolve even `cloudflare.com`. The user-reported output with two object-specific missing
+issues represents the alternate reachable execution in which registry listing succeeds and
+`HeadObject` returns recognized absence; it is not evidence of DNS in that execution.
+
+The reset path now uses a diagnostic read-only probe that preserves a definitive 404 as a
+structured missing-object cause. Its user-facing line includes `classification=object-missing`,
+`operation=HeadObject`, the bucket, endpoint hostname, and `status=404`. DNS, authorization, and
+other provider failures remain operational failures and cannot produce the missing-object reason.
+The exact `npm run media:baseline:provision -- --mode=verify` also fails before R2 access because
+the normal `.env` has no explicit `CANONICAL_MEDIA_TARGET`. No objects or database rows were
+mutated.
+
+**Root-cause evidence from the reachable development shell:** Before this correction, that shell
+loaded `NODE_ENV=development`, selected `R2_BUCKET_NAME=lets-flex-media-prod`, and selected the
+development canonical registry bucket. The R2 client did exactly what it was configured to do and
+issued `HeadObject` against the production media bucket; this was local configuration drift, not
+an alternate client or target-selection branch. `R2_BUCKET_NAME` is the active environment-specific
+media bucket, while `R2_DEVELOPMENT_BUCKET_NAME` is the explicit development safety reference.
+`CANONICAL_MEDIA_TARGET` does not participate in `db:reset`; it only selects the bucket contract for
+the separate baseline provisioning command.
+
+The reset boundary now fails closed before any R2 client is constructed when a development/test
+environment has mismatched `R2_BUCKET_NAME` and `R2_DEVELOPMENT_BUCKET_NAME`, or a
+production-scoped media/registry bucket. The local correction required in the reachable shell is
+to set `R2_BUCKET_NAME=lets-flex-media-dev` while retaining the development registry bucket; do
+not change production R2 configuration or upload objects to production. The current workspace
+`.env` already selects `lets-flex-media-dev` and `lets-flex-canonical-registry-dev`, but its
+sandbox cannot resolve DNS for direct access. A reachable, read-only verification with that
+configuration resolved the configured R2 endpoint and confirmed both reported keys exist in
+`lets-flex-media-dev`. The exact `npm run db:reset` then completed successfully with two
+canonical registry overrides, and the documented development baseline verification completed
+with 70 adopted entries, 0 missing objects, 0 operational failures, and 1 accepted byte-drift
+warning; it created no objects and touched no production resource.
+
+The documented development baseline command is:
+`CANONICAL_MEDIA_TARGET=development npm run media:baseline:provision -- --mode=verify`.
+
+The preflight now preserves operational R2 failures as verification failures and reports
+recognized object absence separately; a provider 403 is not classified as a missing object.
+Focused verification passed after this correction: 19 relevant storage/registry/recovery tests,
+`npm run check:types`, and `npm run format:check`. The reachable exact reset, development
+baseline verification, and independent read-only HeadObject checks all passed after correcting
+the selected bucket. The final `npm run verify` passed: formatting, lint, both type checks, and
+all 582 tests passed with 0 failures.
+
+**New owner-provided development verification:** After removing the shell-level production bucket
+override, the ordinary `npm run db:reset` selected `lets-flex-media-dev`, used path-style
+addressing, reached `HeadObject`, and received HTTP 403 for both reported media keys. The
+classification remains correctly operational (`referenced R2 media object could not be verified`),
+not object-missing. This confirms bucket selection, endpoint reachability, and addressing; the
+remaining issue is the rotated media credential's authorization, account, or bucket scope.
+
+**Authorization contract inspection:** Public media uses `R2_ACCESS_KEY_ID` and
+`R2_SECRET_ACCESS_KEY` against `R2_BUCKET_NAME`; its application operations are `HeadObject` and
+`GetObject` for verification/reads, `PutObject` for uploads and explicit baseline apply, and
+`DeleteObject` for existing cleanup/compensation paths. The public media adapter does not issue
+`ListObjectsV2`. The private canonical registry separately uses
+`R2_CANONICAL_REGISTRY_ACCESS_KEY_ID` and `R2_CANONICAL_REGISTRY_SECRET_ACCESS_KEY` against
+`R2_CANONICAL_REGISTRY_BUCKET_NAME`; it requires `ListObjectsV2` and `GetObject` for preflight and
+reads, `PutObject` for canonical promotion/recovery, and `DeleteObject` for override removal and
+compensation. `HeadObject` is additionally used only by the explicit registry smoke-test cleanup
+confirmation. Both clients share only `R2_ENDPOINT`, `R2_REGION`, and the S3 path-style client;
+they do not share credential values.
+
+The replacement credentials must therefore be R2 S3-compatible object credentials, scoped to the
+intended development bucket(s): the media credential to `lets-flex-media-dev`, and the registry
+credential to `lets-flex-canonical-registry-dev`. Cloudflare's dashboard-level least-privilege
+choice for these existing long-lived credentials is Object Read & Write with specific buckets;
+that product permission includes object read, write, and list, so it is broader than the media
+adapter's actual list usage but narrower than account-wide administration. Separate one-bucket
+tokens preserve the repository's credential separation; a single token scoped to exactly both
+development buckets is technically possible but is not required. A read-only token is sufficient
+for reset/preflight-only access, but not for the normal development admin/upload and cleanup
+workflow or baseline apply.
+
+The repository validates that `R2_ENDPOINT` is an HTTPS endpoint and uses it for both clients, but
+does not and cannot infer the Cloudflare account associated with opaque replacement access keys.
+Account matching remains an owner-side check: compare the account ID in the endpoint with the
+Cloudflare account that owns both development buckets and issued each replacement token. The
+replacement token's bucket resource scope must name only the intended development bucket(s).
+No production credentials or production bucket access is required by normal development
+`db:reset`; it uses only the two development bucket variables and their corresponding credential
+pairs, and its R2 work is read-only.
+
+Action 6 remains Changes requested. It must not return to review until a reachable development
+environment uses only the development media and registry buckets, confirms the two objects, and
+the corrected exact `npm run db:reset` succeeds without object replacement.
+
 ## Resume here
 
-Actions 1 through 3 and Action 5 are Completed. Action 4 is Ready for review after the requested
-diagnostic correction. The goal remains Ready for final review; resume with the manually dispatched
-production recovery workflow and compare its result with the documented acceptance criteria.
+Actions 1 through 5 are Completed. Action 6 remains Changes requested after the development
+missing-object classification correction; the original live production recovery acceptance
+evidence remains recorded above, but corrected development behavior has not been approved.

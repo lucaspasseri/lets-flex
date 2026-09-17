@@ -88,18 +88,38 @@ export async function preflightCanonicalRegistry({ registry, mediaStorage }) {
 					reason: "referenced R2 media object is missing",
 				});
 		} catch (error) {
-			issues.push({
-				entityType: entry.entityType,
-				entityKey: entry.entityKey,
-				objectKey: entry.asset.objectKey,
-				reason: "referenced R2 media object could not be verified",
-				cause: error,
-			});
+			issues.push(
+				isMissingObjectProbeError(error)
+					? {
+							entityType: entry.entityType,
+							entityKey: entry.entityKey,
+							objectKey: entry.asset.objectKey,
+							reason: "referenced R2 media object is missing",
+							cause: error,
+						}
+					: {
+							entityType: entry.entityType,
+							entityKey: entry.entityKey,
+							objectKey: entry.asset.objectKey,
+							reason: "referenced R2 media object could not be verified",
+							cause: error,
+						},
+			);
 		}
 		entries.push(entry);
 	}
 	if (issues.length > 0) throw new CanonicalRegistryPreflightError(issues);
 	return { entries, summary: { count: entries.length } };
+}
+
+/** @param {unknown} error @returns {boolean} */
+function isMissingObjectProbeError(error) {
+	return (
+		typeof error === "object" &&
+		error !== null &&
+		"objectMissing" in error &&
+		error.objectMissing === true
+	);
 }
 
 /** @returns {Readonly<Record<string, ReadonlySet<string>>>} */

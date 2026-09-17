@@ -16,6 +16,68 @@ import {
 
 /** @typedef {{exists: (storageKey: string) => Promise<boolean>}} MediaObjectProbe */
 
+export class R2OperationError extends Error {
+	/** @param {{operation: string, bucketName: string, endpoint?: string, objectKey?: string}} context @param {unknown} cause */
+	constructor(context, cause) {
+		super(
+			`R2 ${context.operation} failed for bucket ${context.bucketName}${context.objectKey ? ` and object ${context.objectKey}` : ""}.`,
+			{ cause },
+		);
+		this.name = "R2OperationError";
+		this.operation = context.operation;
+		this.bucketName = context.bucketName;
+		this.endpointHostname = getEndpointHostname(context.endpoint);
+		this.forcePathStyle = true;
+		if (context.objectKey) this.objectKey = context.objectKey;
+	}
+}
+
+export class R2ObjectMissingError extends R2OperationError {
+	/** @param {{operation: string, bucketName: string, endpoint?: string, objectKey?: string}} context @param {unknown} cause */
+	constructor(context, cause) {
+		super(context, cause);
+		this.name = "R2ObjectMissingError";
+		this.objectMissing = true;
+	}
+}
+
+/**
+ * Return safe request/provider details for operational diagnostics. The returned message is
+ * scrubbed so provider errors cannot expose signed URLs or credential-like values.
+ *
+ * @param {unknown} error
+ * @returns {{operation: string, bucketName: string, endpointHostname: string, forcePathStyle: boolean, objectKey?: string, objectMissing?: boolean, providerName: string, providerCode?: string, httpStatusCode?: number, providerMessage: string} | null}
+ */
+export function getR2OperationDiagnostics(error) {
+	const operationError = findR2OperationError(error);
+	if (!operationError) return null;
+	const provider = operationError.cause;
+	const candidate =
+		/** @type {{name?: unknown, code?: unknown, message?: unknown, $metadata?: {httpStatusCode?: unknown}}} */ (
+			provider
+		);
+	const providerName = typeof candidate?.name === "string" ? candidate.name : "Error";
+	const providerCode = typeof candidate?.code === "string" ? candidate.code : undefined;
+	const httpStatusCode =
+		typeof candidate?.$metadata?.httpStatusCode === "number"
+			? candidate.$metadata.httpStatusCode
+			: undefined;
+	return {
+		operation: operationError.operation,
+		bucketName: operationError.bucketName,
+		endpointHostname: operationError.endpointHostname,
+		forcePathStyle: operationError.forcePathStyle,
+		...(operationError.objectKey ? { objectKey: operationError.objectKey } : {}),
+		...(isObjectMissingError(operationError) ? { objectMissing: true } : {}),
+		providerName,
+		...(providerCode ? { providerCode } : {}),
+		...(httpStatusCode !== undefined ? { httpStatusCode } : {}),
+		providerMessage: sanitizeProviderMessage(
+			typeof candidate?.message === "string" ? candidate.message : provider,
+		),
+	};
+}
+
 /**
  * Read the server-side R2 configuration without exposing secret values in errors or logs.
  *
@@ -62,9 +124,44 @@ export function readR2ObjectProbeConfiguration(environment = process.env) {
 }
 
 /**
+ * Refuse a development/test reset that could read a production-scoped R2 resource. The selected
+ * bucket remains R2_BUCKET_NAME; R2_DEVELOPMENT_BUCKET_NAME is the explicit development safety
+ * reference used to detect local configuration drift.
+ *
+ * @param {NodeJS.ProcessEnv} [environment]
+ */
+export function assertDevelopmentR2Configuration(environment = process.env) {
+	if (environment.NODE_ENV !== "development" && environment.NODE_ENV !== "test") return;
+
+	const selectedMediaBucket = environment.R2_BUCKET_NAME?.trim();
+	const developmentMediaBucket = environment.R2_DEVELOPMENT_BUCKET_NAME?.trim();
+	const registryBucket = environment.R2_CANONICAL_REGISTRY_BUCKET_NAME?.trim();
+	if (developmentMediaBucket && !isDevelopmentBucketName(developmentMediaBucket))
+		throw new Error(
+			"Development R2 configuration requires R2_DEVELOPMENT_BUCKET_NAME to be development-scoped.",
+		);
+	if (
+		selectedMediaBucket &&
+		developmentMediaBucket &&
+		selectedMediaBucket !== developmentMediaBucket
+	)
+		throw new Error(
+			`Development R2 configuration requires R2_BUCKET_NAME to match R2_DEVELOPMENT_BUCKET_NAME; selected=${selectedMediaBucket} development=${developmentMediaBucket}.`,
+		);
+	if (selectedMediaBucket && !isDevelopmentBucketName(selectedMediaBucket))
+		throw new Error(
+			`Development R2 configuration refuses a production-scoped R2_BUCKET_NAME; selected=${selectedMediaBucket}.`,
+		);
+	if (registryBucket && !isDevelopmentBucketName(registryBucket))
+		throw new Error(
+			`Development R2 configuration refuses a production-scoped canonical registry bucket; selected=${registryBucket}.`,
+		);
+}
+
+/**
  * Create a read-only adapter for checking existing R2 media objects.
  *
- * @param {{client?: S3CommandClient, bucketName: string, endpoint?: string, region?: string, accessKeyId?: string, secretAccessKey?: string}} options
+ * @param {{client?: S3CommandClient, bucketName: string, endpoint?: string, region?: string, accessKeyId?: string, secretAccessKey?: string, throwOnMissing?: boolean}} options
  * @returns {MediaObjectProbe}
  */
 export function createR2MediaObjectProbe({
@@ -74,6 +171,7 @@ export function createR2MediaObjectProbe({
 	region = "auto",
 	accessKeyId,
 	secretAccessKey,
+	throwOnMissing = false,
 }) {
 	const normalizedBucketName = requiredOption(bucketName, "R2 bucket name");
 	const normalizedEndpoint = endpoint
@@ -91,17 +189,35 @@ export function createR2MediaObjectProbe({
 	return {
 		/** @param {string} storageKey */
 		async exists(storageKey) {
+			const objectKey = normalizeMediaObjectKey(storageKey);
 			try {
 				await storageClient.send(
 					new HeadObjectCommand({
 						Bucket: normalizedBucketName,
-						Key: normalizeMediaObjectKey(storageKey),
+						Key: objectKey,
 					}),
 				);
 				return true;
 			} catch (error) {
-				if (isMissingObjectError(error)) return false;
-				throw error;
+				if (isMissingObjectError(error)) {
+					if (throwOnMissing)
+						throw new R2ObjectMissingError(
+							{
+								operation: "HeadObject",
+								bucketName: normalizedBucketName,
+								endpoint: normalizedEndpoint,
+								objectKey,
+							},
+							error,
+						);
+					return false;
+				}
+				throw asR2OperationError(error, {
+					operation: "HeadObject",
+					bucketName: normalizedBucketName,
+					endpoint: normalizedEndpoint,
+					objectKey,
+				});
 			}
 		},
 	};
@@ -166,17 +282,23 @@ export function createR2MediaStorage({
 		},
 		/** @param {string} storageKey */
 		async exists(storageKey) {
+			const objectKey = normalizeMediaObjectKey(storageKey);
 			try {
 				await storageClient.send(
 					new HeadObjectCommand({
 						Bucket: normalizedBucketName,
-						Key: normalizeMediaObjectKey(storageKey),
+						Key: objectKey,
 					}),
 				);
 				return true;
 			} catch (error) {
 				if (isMissingObjectError(error)) return false;
-				throw error;
+				throw asR2OperationError(error, {
+					operation: "HeadObject",
+					bucketName: normalizedBucketName,
+					endpoint: normalizedEndpoint,
+					objectKey,
+				});
 			}
 		},
 		/** @param {string} storageKey */
@@ -219,6 +341,9 @@ export function createR2S3Client({
 		new S3Client({
 			region,
 			...(endpoint ? { endpoint } : {}),
+			// Cloudflare R2 account endpoints require the bucket in the path rather than
+			// as a virtual-host prefix (for example, bucket.account.r2...).
+			forcePathStyle: true,
 			credentials: {
 				accessKeyId: requiredOption(accessKeyId, "R2 access key ID"),
 				secretAccessKey: requiredOption(secretAccessKey, "R2 secret access key"),
@@ -246,7 +371,7 @@ export function createR2MediaStorageFromEnvironment(
  * Build the read-only media object probe used by canonical registry preflight.
  *
  * @param {NodeJS.ProcessEnv} [environment]
- * @param {{client?: S3CommandClient}} [options]
+ * @param {{client?: S3CommandClient, throwOnMissing?: boolean}} [options]
  * @returns {MediaObjectProbe}
  */
 export function createR2MediaObjectProbeFromEnvironment(
@@ -295,13 +420,14 @@ export function createR2MediaBaselineObjectStore({
 		},
 		/** @param {string} storageKey */
 		async inspect(storageKey) {
+			const objectKey = normalizeMediaObjectKey(storageKey);
 			try {
 				const response =
 					/** @type {{Body?: unknown, ContentType?: string, ContentLength?: number, ETag?: string, LastModified?: Date}} */ (
 						await storageClient.send(
 							new GetObjectCommand({
 								Bucket: normalizedBucketName,
-								Key: normalizeMediaObjectKey(storageKey),
+								Key: objectKey,
 							}),
 						)
 					);
@@ -316,7 +442,12 @@ export function createR2MediaBaselineObjectStore({
 				};
 			} catch (error) {
 				if (isMissingObjectError(error)) return null;
-				throw error;
+				throw asR2OperationError(error, {
+					operation: "GetObject",
+					bucketName: normalizedBucketName,
+					endpoint: normalizedEndpoint,
+					objectKey,
+				});
 			}
 		},
 		/** @param {string} storageKey @param {Buffer} bytes @param {{contentType: string}} metadata */
@@ -337,6 +468,52 @@ export function createR2MediaBaselineObjectStore({
 /** @param {NodeJS.ProcessEnv} environment @param {string} name @returns {string} */
 function requiredEnvironmentValue(environment, name) {
 	return requiredOption(environment[name], name);
+}
+
+/** @param {unknown} error @param {{operation: string, bucketName: string, endpoint?: string, objectKey?: string}} context @returns {R2OperationError} */
+function asR2OperationError(error, context) {
+	if (error instanceof R2OperationError) return error;
+	return new R2OperationError(context, error);
+}
+
+/** @param {unknown} error @returns {R2OperationError | null} */
+function findR2OperationError(error) {
+	if (error instanceof R2OperationError) return error;
+	const cause = /** @type {{cause?: unknown}} */ (error)?.cause;
+	return cause && cause !== error ? findR2OperationError(cause) : null;
+}
+
+/** @param {R2OperationError} error @returns {boolean} */
+function isObjectMissingError(error) {
+	return "objectMissing" in error && error.objectMissing === true;
+}
+
+/** @param {unknown} endpoint @returns {string} */
+function getEndpointHostname(endpoint) {
+	if (typeof endpoint !== "string") return "unknown";
+	try {
+		return new URL(endpoint).hostname || "unknown";
+	} catch {
+		return "unknown";
+	}
+}
+
+/** @param {unknown} value @returns {string} */
+function sanitizeProviderMessage(value) {
+	return String(value)
+		.replace(/https?:\/\/[^\s]+/giu, "[url-redacted]")
+		.replace(
+			/(access[_-]?key|secret(?:[_-]?access[_-]?key)?|token|password)\s*[:=]\s*[^\s,;]+/giu,
+			"$1=[redacted]",
+		);
+}
+
+/** @param {string} bucketName @returns {boolean} */
+function isDevelopmentBucketName(bucketName) {
+	return (
+		/(^|[-_])(dev|development|local|test|testing)([-_]|$)/iu.test(bucketName) &&
+		!/(^|[-_])(prod|production)([-_]|$)/iu.test(bucketName)
+	);
 }
 
 /** @param {unknown} value @param {string} label @returns {string} */

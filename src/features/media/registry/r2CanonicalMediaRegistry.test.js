@@ -5,6 +5,7 @@ import {
 	createR2CanonicalMediaRegistry,
 	readCanonicalRegistryConfiguration,
 } from "./r2CanonicalMediaRegistry.js";
+import { getR2OperationDiagnostics } from "../storage/r2Storage.js";
 
 const configuration = {
 	bucketName: "lets-flex-canonical-registry-dev",
@@ -84,4 +85,35 @@ test("R2 registry uses private bucket keys and conditional writes", async () => 
 	assert.equal(commands[0].input.Key, "v1/exercise/push-up.json");
 	assert.equal(commands[1].input.IfMatch, '"etag-1"');
 	assert.equal(commands[1].input.ContentType, "application/json");
+});
+
+test("R2 registry preserves safe diagnostics for list failures", async () => {
+	const providerError = Object.assign(
+		new Error("getaddrinfo ENOTFOUND account.r2.cloudflarestorage.com"),
+		{ code: "ENOTFOUND" },
+	);
+	const registry = createR2CanonicalMediaRegistry({
+		configuration,
+		client: {
+			async send() {
+				throw providerError;
+			},
+		},
+	});
+
+	await assert.rejects(
+		() => registry.listCanonicalOverrides(),
+		(error) => {
+			assert.deepEqual(getR2OperationDiagnostics(error), {
+				operation: "ListObjectsV2",
+				bucketName: configuration.bucketName,
+				endpointHostname: "account.r2.cloudflarestorage.com",
+				forcePathStyle: true,
+				providerName: "Error",
+				providerCode: "ENOTFOUND",
+				providerMessage: "getaddrinfo ENOTFOUND account.r2.cloudflarestorage.com",
+			});
+			return true;
+		},
+	);
 });

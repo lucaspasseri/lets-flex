@@ -129,6 +129,50 @@ test("reset preflight turns registry and media failures into an abortable error"
 	);
 });
 
+test("reset preflight does not classify provider authorization failures as missing objects", async () => {
+	const authorizationError = Object.assign(new Error("access denied"), {
+		name: "AccessDenied",
+		code: "AccessDenied",
+		$metadata: { httpStatusCode: 403 },
+	});
+	await assert.rejects(
+		() =>
+			preflightCanonicalRegistry({
+				registry: registry(),
+				mediaStorage: {
+					async exists() {
+						throw authorizationError;
+					},
+				},
+			}),
+		(error) =>
+			error instanceof CanonicalRegistryPreflightError &&
+			error.issues[0].reason === "referenced R2 media object could not be verified" &&
+			error.issues[0].cause === authorizationError,
+	);
+});
+
+test("reset preflight preserves definitive missing-object diagnostics", async () => {
+	const missingError = Object.assign(new Error("not found"), {
+		objectMissing: true,
+	});
+	await assert.rejects(
+		() =>
+			preflightCanonicalRegistry({
+				registry: registry(),
+				mediaStorage: {
+					async exists() {
+						throw missingError;
+					},
+				},
+			}),
+		(error) =>
+			error instanceof CanonicalRegistryPreflightError &&
+			error.issues[0].reason === "referenced R2 media object is missing" &&
+			error.issues[0].cause === missingError,
+	);
+});
+
 test("registry restoration resolves stable keys and is idempotent through SQL upserts", async () => {
 	const calls = [];
 	const db = {

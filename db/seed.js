@@ -9,7 +9,11 @@ import { starterWorkoutSeedSql } from "../src/features/starterTraining/createSta
 import provisionStarterTraining from "../src/features/starterTraining/provisionStarterTraining.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { mediaSeedSql } from "./mediaSeedSql.js";
-import { createR2MediaStorageFromEnvironment } from "../src/features/media/storage/r2Storage.js";
+import {
+	assertDevelopmentR2Configuration,
+	createR2MediaObjectProbeFromEnvironment,
+	getR2OperationDiagnostics,
+} from "../src/features/media/storage/r2Storage.js";
 import { createCanonicalMediaRegistryFromEnvironment } from "../src/features/media/registry/canonicalMediaRegistry.js";
 import {
 	CanonicalRegistryPreflightError,
@@ -212,10 +216,13 @@ export async function resetAndSeedDatabase({
 	if (!adminPassword) {
 		throw new Error("ADMIN_PASSWORD is required");
 	}
+	assertDevelopmentR2Configuration(environment);
 
 	const registry =
 		canonicalRegistry ?? createCanonicalMediaRegistryFromEnvironment(environment);
-	const storage = mediaStorage ?? createR2MediaStorageFromEnvironment(environment);
+	const storage =
+		mediaStorage ??
+		createR2MediaObjectProbeFromEnvironment(environment, { throwOnMissing: true });
 	let validatedRegistry = registryPreflight;
 	if (!validatedRegistry) {
 		try {
@@ -224,8 +231,11 @@ export async function resetAndSeedDatabase({
 				mediaStorage: storage,
 			});
 		} catch (error) {
-			if (error instanceof CanonicalRegistryPreflightError)
+			if (error instanceof CanonicalRegistryPreflightError) {
 				console.error("Canonical registry preflight failed.");
+				for (const issue of error.issues)
+					console.error(formatCanonicalRegistryPreflightIssue(issue));
+			}
 			throw error;
 		}
 	}
@@ -286,5 +296,51 @@ export async function resetAndSeedDatabase({
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-	await seedDatabase();
+	try {
+		await seedDatabase();
+	} catch (error) {
+		if (!(error instanceof CanonicalRegistryPreflightError)) throw error;
+		process.exitCode = 1;
+	}
+}
+
+/** @param {{entityType?: string, entityKey?: string, objectKey?: string, reason: string, cause?: unknown}} issue @returns {string} */
+function formatCanonicalRegistryPreflightIssue(issue) {
+	const identity = issue.entityType
+		? ` entity=${issue.entityType}${issue.entityKey ? `:${issue.entityKey}` : ""}`
+		: "";
+	const objectKey = issue.objectKey ? ` objectKey=${issue.objectKey}` : "";
+	const diagnostics = issue.cause ? getR2OperationDiagnostics(issue.cause) : null;
+	if (!diagnostics)
+		return `- registry-preflight${identity}${objectKey} reason=${issue.reason}${issue.cause ? ` cause=${safePreflightMessage(issue.cause)}` : ""}`;
+	const providerCode = diagnostics.providerCode
+		? ` code=${diagnostics.providerCode}`
+		: "";
+	const status =
+		diagnostics.httpStatusCode === undefined
+			? ""
+			: ` status=${diagnostics.httpStatusCode}`;
+	const classification = diagnostics.objectMissing
+		? " classification=object-missing"
+		: "";
+	return (
+		`- registry-preflight${identity}${objectKey} reason=${issue.reason}` +
+		classification +
+		` operation=${diagnostics.operation} bucket=${diagnostics.bucketName}` +
+		` endpoint=${diagnostics.endpointHostname}` +
+		` addressing=${diagnostics.forcePathStyle ? "path-style" : "virtual-hosted"}` +
+		` provider=${diagnostics.providerName}${providerCode}${status}` +
+		` message=${diagnostics.providerMessage}`
+	);
+}
+
+/** @param {unknown} error @returns {string} */
+function safePreflightMessage(error) {
+	const message = error instanceof Error ? error.message : String(error);
+	return message
+		.replace(/https?:\/\/[^\s]+/giu, "[url-redacted]")
+		.replace(
+			/(access[_-]?key|secret(?:[_-]?access[_-]?key)?|token|password)\s*[:=]\s*[^\s,;]+/giu,
+			"$1=[redacted]",
+		);
 }

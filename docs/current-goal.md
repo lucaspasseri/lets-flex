@@ -2,7 +2,7 @@
 
 ## Goal status
 
-**Ready for final review — all implementation actions completed.**
+**Changes requested — development missing-object classification correction 2026-09-16**
 
 ## Objective
 
@@ -59,27 +59,27 @@ Normal deployments must not reset PostgreSQL or provision media implicitly.
 
 ## Completion criteria
 
-- [ ] Every baseline manifest entry is schema-valid, catalog-valid, and references an available
+- [x] Every baseline manifest entry is schema-valid, catalog-valid, and references an available
       durable production R2 object; existing R2 bytes are adopted as authoritative and any
       repository-byte drift is reported separately from missing or operational failures.
-- [ ] Every Admin canonical override is validated by the deployment preflight and references an
+- [x] Every Admin canonical override is validated by the deployment preflight and references an
       available durable production R2 object.
-- [ ] A single read-only canonical durability preflight runs before the Render Deploy Hook, needs no
+- [x] A single read-only canonical durability preflight runs before the Render Deploy Hook, needs no
       PostgreSQL access, returns non-zero on any gap, and includes the existing registry checks.
-- [ ] An explicit safe baseline provisioning/verification command exists if production baseline
+- [x] An explicit safe baseline provisioning/verification command exists if production baseline
       objects are not already reliably provisioned; it is idempotent, key-preserving, target-
       explicit, adopts existing objects without overwriting them, provisions only missing keys,
       and never deletes unrelated objects.
-- [ ] Admin promotion cannot report success when its R2 object, private registry, registry write,
+- [x] Admin promotion cannot report success when its R2 object, private registry, registry write,
       concurrency precondition, or PostgreSQL commit fails; existing compensation behavior remains.
-- [ ] All supported canonical entity types are covered: `exercise`, `exercise_variant`, `muscle`,
+- [x] All supported canonical entity types are covered: `exercise`, `exercise_variant`, `muscle`,
       `equipment`, and `movement_pattern`.
-- [ ] A GitHub Actions disposable-database rehearsal proves schema + baseline seed + durability
+- [x] A GitHub Actions disposable-database rehearsal proves schema + baseline seed + durability
       preflight + registry restoration + strict verification without production PostgreSQL credentials
       or production writes.
-- [ ] The final source-of-truth model, deployment behavior, provisioning/rehearsal commands, and
+- [x] The final source-of-truth model, deployment behavior, provisioning/rehearsal commands, and
       manual production acceptance test are documented.
-- [ ] No production PostgreSQL reset, production R2 write/delete, Render filesystem dependency,
+- [x] No production PostgreSQL reset, production R2 write/delete, Render filesystem dependency,
       manifest mutation by Admin, resolver redesign, or R2 orphan deletion is introduced.
 
 ## Final review assessment
@@ -97,17 +97,17 @@ Normal deployments must not reset PostgreSQL or provision media implicitly.
 - [x] Admin promotion preserves the existing R2, registry, concurrency, and PostgreSQL failure
       guarantees, including compensation behavior.
 - [x] All five supported canonical entity types are covered by the implementation and tests.
-- [ ] The manually dispatched GitHub Actions recovery rehearsal has not been run against the
-      configured production Environment in this workspace. The workflow, disposable PostgreSQL
-      path, read-only R2 behavior, and focused tests are implemented and verified locally.
+- [x] The manually dispatched GitHub Actions recovery rehearsal passed against the configured
+      production Environment. Production R2 read-only preflight, disposable PostgreSQL schema and
+      seed reconstruction, registry restoration, and strict post-restore verification all passed;
+      no production R2 write or production PostgreSQL reset was performed.
 - [x] The final source-of-truth model, deployment behavior, commands, and manual acceptance test
       are documented.
 - [x] No production reset, production R2 write/delete, Render filesystem dependency, manifest
       mutation by Admin, resolver redesign, or orphan deletion was introduced.
 
-The remaining unchecked item is an intentional operational acceptance step, not an implementation
-failure. It requires the repository owner to dispatch the workflow with the configured GitHub
-production Environment and confirm its live read-only preflight and ephemeral-database restore.
+All completion criteria are satisfied, including the owner-confirmed live production recovery
+rehearsal. The goal is complete.
 
 ## Deliberate non-goals
 
