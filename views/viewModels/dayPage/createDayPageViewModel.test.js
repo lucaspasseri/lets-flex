@@ -344,6 +344,10 @@ test("Program Day keeps direct, inherited, and initial step media in shared comp
 		workoutSessionList.items[0].steps[1].media.src,
 		"/media/uploads/base-bench.png",
 	);
+	assert.equal(
+		workoutSessionList.items[0].header.media?.src,
+		"/media/uploads/direct-bench.png",
+	);
 	assert.equal(workoutSessionList.items[0].steps[1].media.isFallback, true);
 	assert.equal(workoutSessionList.items[0].steps[2].media.presentation, "initial");
 	assert.match(html, /src="\/media\/uploads\/direct-bench\.png"/);

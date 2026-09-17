@@ -1,5 +1,5 @@
 <% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); const { status, programBanner, dateNavigation, currentWorkout, analyticsSummary, heatmap, barChart, workload } = locals.components; %>
-<main class="main dashboard" data-dashboard-page>
+<main class="main dashboard dashboard--media-atmosphere" data-dashboard-page>
 	<%- include("partials/dashboardPage/noActiveProgramSection", { status, translate }) %>
 	<% if (programBanner.isVisible) { %>
 		<div class="dashboard__active-program">

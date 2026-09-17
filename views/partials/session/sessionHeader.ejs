@@ -1,6 +1,6 @@
 <header class="workout-card__header">
 	<% if (header.media) { %>
-		<%- include("../shared/components/media", { media: header.media, className: "workout-card__media", variant: "initial", decorative: true }) %>
+		<%- include("../shared/components/media", { media: header.media, className: "workout-card__media", variant: "preview", decorative: true, loading: "lazy", decoding: "async" }) %>
 	<% } %>
 	<div class="workout-card__heading">
 		<h3 class="workout-card__title">

@@ -682,3 +682,140 @@
 		transition: none;
 	}
 }
+
+/* Curated integration: make the first assigned exercise a useful visual anchor without
+   compressing the workout identity, status, or destructive action. */
+.day-page--media-forward .workout-card {
+	gap: 1.25rem;
+	overflow: hidden;
+	padding: 0;
+}
+
+.day-page--media-forward .workout-card__header {
+	grid-template-columns: minmax(11rem, 0.8fr) minmax(0, 1.45fr) auto auto;
+	align-items: stretch;
+	padding: 0;
+}
+
+.day-page--media-forward .workout-card > [class~="workout-card__media"] {
+	grid-column: 1;
+	grid-row: 1 / span 2;
+	width: 100%;
+	min-height: 9.5rem;
+	height: 100%;
+	border: 0;
+	border-radius: 0;
+	object-fit: cover;
+}
+
+.day-page--media-forward .workout-card__heading {
+	grid-column: 2;
+	padding: 1.15rem 0 0;
+}
+
+.day-page--media-forward .workout-card__status {
+	grid-column: 3;
+	margin-top: 1rem;
+}
+
+.day-page--media-forward .workout-card__delete {
+	grid-column: 4;
+	margin-top: 1rem;
+}
+
+.day-page--media-forward .workout-card > .workout-step-list {
+	padding: 0 1.25rem 1.25rem;
+}
+
+@media (max-width: 60rem) and (min-width: 36.01rem) {
+	.day-page--media-forward .workout-card__header {
+		grid-template-columns: minmax(9rem, 0.72fr) minmax(15rem, 1.28fr) auto;
+		column-gap: 1rem;
+	}
+
+	.day-page--media-forward .workout-card > [class~="workout-card__media"] {
+		min-height: 10.5rem;
+	}
+
+	.day-page--media-forward .workout-card__heading {
+		grid-column: 2;
+		grid-row: 1;
+		padding-top: 1.15rem;
+	}
+
+	.day-page--media-forward .workout-card__status {
+		grid-column: 2;
+		grid-row: 2;
+		justify-self: start;
+		margin: 0 0 1rem;
+	}
+
+	.day-page--media-forward .workout-card__delete {
+		grid-column: 3;
+		grid-row: 2;
+		align-self: start;
+		margin: 0 0 1rem;
+	}
+}
+
+@media (max-width: 44rem) and (min-width: 36.01rem) {
+	.day-page--media-forward .workout-card__header {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.day-page--media-forward .workout-card > [class~="workout-card__media"] {
+		grid-column: 1 / -1;
+		grid-row: 1;
+		height: 11rem;
+	}
+
+	.day-page--media-forward .workout-card__heading {
+		grid-column: 1;
+		grid-row: 2;
+		padding: 1rem 0 0 1rem;
+	}
+
+	.day-page--media-forward .workout-card__status {
+		grid-column: 1;
+		grid-row: 3;
+		margin: 0 0 1rem 1rem;
+	}
+
+	.day-page--media-forward .workout-card__delete {
+		grid-column: 2;
+		grid-row: 2 / span 2;
+		align-self: center;
+		margin: 0 0.75rem 0 0;
+	}
+}
+
+@media (max-width: 36rem) {
+	.day-page--media-forward .workout-card__header {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.day-page--media-forward .workout-card > [class~="workout-card__media"] {
+		grid-column: 1 / -1;
+		grid-row: 1;
+		height: 11rem;
+	}
+
+	.day-page--media-forward .workout-card__heading {
+		grid-column: 1;
+		grid-row: 2;
+		padding: 1rem 0 0 1rem;
+	}
+
+	.day-page--media-forward .workout-card__status {
+		grid-column: 1;
+		grid-row: 3;
+		margin: 0 0 1rem 1rem;
+	}
+
+	.day-page--media-forward .workout-card__delete {
+		grid-column: 2;
+		grid-row: 2 / span 2;
+		align-self: center;
+		margin: 0 0.75rem 0 0;
+	}
+}

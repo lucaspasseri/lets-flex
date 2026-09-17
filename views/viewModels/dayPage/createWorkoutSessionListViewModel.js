@@ -29,11 +29,16 @@ export default function createWorkoutSessionListViewModel({
 				title: session.name,
 				notes: session.notes ?? session.sessionNotes,
 				media: session.steps[0]
-					? resolveMedia({
-							entityType: "session",
-							label: session.name,
-							presentation: "initial",
-						})
+					? mediaResolver
+						? resolveStepMedia(session.steps[0], {
+								presentation: "image",
+								resolveMedia: mediaResolver,
+							})
+						: resolveMedia({
+								entityType: "session",
+								label: session.name,
+								presentation: "initial",
+							})
 					: null,
 				statusLabel: session.status,
 				...(canCancel

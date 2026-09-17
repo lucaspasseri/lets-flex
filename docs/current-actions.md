@@ -76,13 +76,42 @@ and no experimental branch was merged or modified.
 
 ### Action 2 — Integrate Dashboard atmosphere and refine Day responsiveness
 
-**Status:** Pending
+**Status:** Ready for review
 
 On the integration branch, apply the atmospheric experiment only to the Dashboard workout-session
 header. Keep foreground text, status, and controls readable in both supported themes and across
 small, intermediate, and large widths. Apply the forward experiment's current-exercise hierarchy
 to Day, but rework its layout at the actual pressure point so exercise information and logging
 controls retain usable space. Do not import the rejected atmospheric Day implementation.
+
+**Implementation and evidence:** Added the `dashboard--media-atmosphere` page variant and scoped
+the atmospheric treatment to the Dashboard workout-session header: the resolved media is an
+edge-aligned visual anchor with restrained gradient masking, readable foreground content, and
+neon-theme tuning. The rest of the Dashboard remains on its existing surfaces; the atmosphere
+experiment's active-step background was intentionally excluded. Added the
+`day-page--media-forward` composition using the first assigned exercise image. The Day header now
+uses a wider media/text/status/action arrangement, a dedicated 36.01–60rem intermediate layout
+that moves status and delete controls beneath the exercise identity, a 36.01–44rem stacked-media
+pressure layout, and a narrow-mobile equivalent. Essential text and controls are given space by
+reflowing the composition rather than shrinking them. The Day implementation contains no
+`day-page--media-atmosphere` styling.
+
+Focused verification passed:
+
+- `node --test public/css/pages/day.test.js public/css/components/sessionComponent.test.js views/viewModels/dayPage/createDayPageViewModel.test.js views/viewModels/dashboardPage/createDashboardPageViewModel.test.js` — 18 tests passed.
+- `npm run format:check` — passed.
+- `npm run lint` — passed.
+- `npm run check:types` — passed.
+- `git diff --check` — passed.
+
+The repository has no browser screenshot/geometry harness available in this workspace, so actual
+390px/intermediate/1440px rendered inspection remains explicitly recorded for Action 4. The CSS
+contracts cover the selected pressure ranges and reduced-motion/theme selectors; no browser-side
+JavaScript changed.
+
+**Completion summary:** Dashboard atmosphere is limited to the approved session header, and Day
+uses a selectively reimplemented media-forward composition with deliberate intermediate-width
+reflow. The rejected atmospheric Day implementation was not imported.
 
 **Done when:**
 
@@ -131,5 +160,5 @@ omitted reusable ideas. Inspect the final diff and run `npm run verify`.
 
 ## Resume here
 
-Action 1 is Completed. Action 2 is Pending: integrate Dashboard atmosphere and refine Day
-responsiveness. It is prepared but not active.
+Action 1 is Completed. Action 2 is Ready for review. Action 3 remains Pending: integrate History
+and Progress presentation and run the visual consistency review.

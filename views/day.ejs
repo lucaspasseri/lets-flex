@@ -3,7 +3,7 @@
 	const { workoutFeedback, contextPath, dayHeader, dayNavigation, sessionLinkForm, workoutSessionList } = locals.components;
 %>
 
-<main class="main day-page" data-day-page data-workout-tracker>
+<main class="main day-page day-page--media-forward" data-day-page data-workout-tracker>
 	<% if (contextPath.isVisible) { %>
 		<nav class="day-context-path" aria-label="<%= translate("dashboard.programHierarchy", { defaultValue: "Program hierarchy" }) %>">
 			<a href="<%= contextPath.backHref %>"><%= translate("dashboard.programs", { defaultValue: "Programs" }) %></a>

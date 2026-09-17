@@ -21,6 +21,9 @@ test("focused workout media preserves readable step and current-exercise layouts
 	);
 	assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 	assert.match(css, /\.session-component__activation-line\s*\{/);
+	assert.match(css, /\.dashboard--media-atmosphere \.session-header::after/);
+	assert.match(css, /\.dashboard--media-atmosphere \.session-header__media/);
+	assert.match(css, /@media \(max-width: 42rem\)/);
 	assert.match(
 		css,
 		/:root\[data-theme="neon"\][\s\S]*?\.session-component--in-progress[\s\S]*?\.session-component__activation-line/,
