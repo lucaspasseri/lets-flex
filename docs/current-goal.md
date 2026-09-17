@@ -2,7 +2,7 @@
 
 ## Goal status
 
-**Ready for final review — development R2 authorization correction 2026-09-16**
+**Completed — 2026-09-16**
 
 ## Objective
 
@@ -107,8 +107,7 @@ Normal deployments must not reset PostgreSQL or provision media implicitly.
       mutation by Admin, resolver redesign, or orphan deletion was introduced.
 
 All completion criteria are satisfied, including the owner-confirmed live production recovery
-rehearsal and the approved development R2 authorization correction. The goal is ready for final
-review.
+rehearsal and the approved development R2 authorization correction. The goal is complete.
 
 ## Final review after Action 6
 
@@ -123,6 +122,14 @@ review.
 
 No completion criteria remain unmet. The deliberate non-goals below remain excluded, and no next
 action is activated pending final goal approval.
+
+## Completion record
+
+Completed 2026-09-16 after approval of Action 6. The implementation now protects development
+resets from production-scoped R2 configuration, preserves accurate R2 failure classification, and
+was verified against the rotated development credentials with a successful exact reset. The final
+repository verification passed with 582 tests and 0 failures; no production database or R2
+resource was modified.
 
 ## Deliberate non-goals
 
