@@ -22,7 +22,7 @@ Verified experiment decisions:
 
 ### Action 1 — Establish the curated integration branch and selected data contracts
 
-**Status:** Ready for review
+**Status:** Completed — 2026-09-17
 
 Create `ui-media-integration` directly from `main`, leaving all three experiment branches
 unchanged. Selectively port or reimplement only the canonical media view-model/controller/template
@@ -59,6 +59,10 @@ for Action 2 and Action 4.
 **Completion summary:** The selected Dashboard, Day, History, and Progress data/rendering
 contracts are implemented on a direct integration branch and preserve canonical fallback,
 localization, accessibility, History snapshot, workout-state, and Progress-calculation behavior.
+
+**Approval summary:** Action 1 was approved after the focused data, rendering, formatting, lint,
+type, and diff verification passed. The integration branch remains a direct descendant of `main`,
+and no experimental branch was merged or modified.
 
 **Done when:**
 
@@ -127,5 +131,5 @@ omitted reusable ideas. Inspect the final diff and run `npm run verify`.
 
 ## Resume here
 
-Action 1 is Ready for review. Action 2 remains Pending: integrate Dashboard atmosphere and refine
-Day responsiveness after explicit approval.
+Action 1 is Completed. Action 2 is Pending: integrate Dashboard atmosphere and refine Day
+responsiveness. It is prepared but not active.
