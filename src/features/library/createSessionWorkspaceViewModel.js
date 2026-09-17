@@ -38,6 +38,7 @@ function createSessionWorkspace({
 		createSummary({
 			session,
 			activeSessionId: activeSession?.id ?? null,
+			mediaResolver,
 			translate,
 		}),
 	);

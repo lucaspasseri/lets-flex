@@ -37,6 +37,18 @@ test("selected-session detail uses a contained responsive reading-flow contract"
 		/\.session-step__header--with-media\s*\{[^}]*grid-template-columns:\s*auto minmax\(0, 1fr\) minmax\(0, auto\)/,
 	);
 	assert.match(css, /\.session-step__media\s*\{[^}]*align-self:\s*start/);
+	assert.match(
+		css,
+		/\.session-details \.session-step__content\s*\{[^}]*border:[^}]*var\(--color-border\)[^}]*background:\s*var\(--color-surface-raised\)/,
+	);
+	assert.match(
+		css,
+		/\.session-details \.session-step__order\s*\{[^}]*background:\s*var\(--color-page\)[^}]*color:\s*var\(--color-secondary\)/,
+	);
+	assert.match(
+		css,
+		/:root\[data-theme="neon"\] \.session-details \.session-step__order\s*\{[^}]*box-shadow:\s*none/,
+	);
 	assert.doesNotMatch(css, /\.session-step__media img/);
 	assert.doesNotMatch(css, /\.session-details__media img/);
 	assert.match(css, /\.session-details__back-link:focus-visible/);

@@ -41,7 +41,7 @@
 							<% } %>
 						>
 							<% if (item.media) { %>
-								<%- include("../../shared/components/media", { media: item.media, className: "session-summary__media", variant: "initial", decorative: true }) %>
+								<%- include("../../shared/components/media", { media: item.media, className: "session-summary__media", variant: item.media.presentation === "image" ? "thumbnail" : "initial", decorative: true, loading: "lazy", decoding: "async" }) %>
 							<% } %>
 							<span class="session-summary__body">
 								<strong class="session-summary__name">

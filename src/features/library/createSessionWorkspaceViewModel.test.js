@@ -12,7 +12,7 @@ function session({
 	canonicalEquipment = equipment,
 	muscle,
 	canonicalMuscle = muscle,
-	notes,
+	notes = "",
 	variantName,
 	canonicalVariantName = variantName,
 	canonicalExerciseName = movement,
@@ -26,6 +26,9 @@ function session({
 		steps: [
 			{
 				id: id * 10,
+				exerciseVariantId: id * 100,
+				exerciseId: id * 10,
+				movementPatternId: id * 20,
 				name: "Working set",
 				order: 1,
 				type: "Exercise",
@@ -183,4 +186,82 @@ test("session discovery preserves large collections and long names for the scrol
 	assert.equal(viewModel.summaries.items.length, 80);
 	assert.equal(viewModel.summaries.items[0].name, longName);
 	assert.equal(viewModel.summaries.items.at(-1)?.href, "/library?sessionId=80");
+});
+
+test("session summaries use the first exercise media and preserve the title fallback", () => {
+	const mediaResolverCalls = [];
+	const mediaResolver = (request) => {
+		mediaResolverCalls.push(request);
+		return {
+			src: "/media/uploads/bench-press.png",
+			alt: "Bench press illustration",
+			width: 1536,
+			height: 1024,
+			aspectRatio: 1.5,
+			presentation: "image",
+			initial: null,
+			entityType: request.entityType,
+			matchType: "exercise_variant",
+			matchedKey: null,
+			matchedId: request.entityId,
+			isFallback: false,
+			mediaType: "image",
+			fallbackType: "none",
+		};
+	};
+	const viewModel = createSessionWorkspace({
+		sessionArr: [
+			session({
+				id: 9,
+				name: "Lower strength",
+				movement: "Squat",
+				equipment: "Barbell",
+				muscle: "Quadriceps",
+				variantName: "Barbell back squat",
+			}),
+		],
+		activeSession: null,
+		actorUserId: 7,
+		mediaResolver,
+	});
+
+	assert.equal(
+		viewModel.summaries.items[0].media?.src,
+		"/media/uploads/bench-press.png",
+	);
+	assert.equal(mediaResolverCalls[0]?.entityType, "exercise_variant");
+	assert.equal(mediaResolverCalls[0]?.entityId, 900);
+
+	const noImageSession = session({
+		id: 10,
+		name: "Recovery session",
+		movement: "Unlisted movement",
+		equipment: null,
+		muscle: "Mobility",
+		variantName: "Unlisted movement variation",
+	});
+	const fallbackViewModel = createSessionWorkspace({
+		sessionArr: [{ ...noImageSession, steps: [] }, noImageSession],
+		activeSession: null,
+		actorUserId: 7,
+		mediaResolver: () => ({
+			src: null,
+			alt: "Unavailable",
+			width: 1,
+			height: 1,
+			aspectRatio: 1,
+			presentation: "initial",
+			initial: "U",
+			entityType: "exercise_variant",
+			matchType: "placeholder",
+			matchedKey: null,
+			matchedId: null,
+			isFallback: true,
+			mediaType: "initial",
+			fallbackType: "initial",
+		}),
+	});
+
+	assert.equal(fallbackViewModel.summaries.items[0].media, null);
+	assert.equal(fallbackViewModel.summaries.items[1].media?.initial, "R");
 });

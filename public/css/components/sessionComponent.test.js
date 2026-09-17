@@ -23,6 +23,18 @@ test("focused workout media preserves readable step and current-exercise layouts
 	assert.match(css, /\.session-component__activation-line\s*\{/);
 	assert.match(css, /\.dashboard--media-atmosphere \.session-header::after/);
 	assert.match(css, /\.dashboard--media-atmosphere \.session-header__media/);
+	assert.match(
+		css,
+		/\.dashboard--media-atmosphere \.current-workout-step-container[\s\S]*?grid-template-columns: minmax\(10rem, 0\.8fr\) minmax\(0, 1\.2fr\)/,
+	);
+	assert.match(
+		css,
+		/\.dashboard--media-atmosphere \.current-workout-step__media[\s\S]*?min-height: 15rem/,
+	);
+	assert.match(
+		css,
+		/@media \(max-width: 45rem\)[\s\S]*?\.dashboard--media-atmosphere \.current-workout-step__media[\s\S]*?min-height: 12rem/,
+	);
 	assert.match(css, /@media \(max-width: 42rem\)/);
 	assert.match(
 		css,

@@ -358,6 +358,13 @@
 	min-width: 0;
 }
 
+.session-details .session-step__content {
+	padding: 1rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.75rem;
+	background: var(--color-surface-raised);
+}
+
 .session-step:last-child {
 	border-bottom: 1px solid var(--color-border);
 }
@@ -371,6 +378,19 @@
 	background: var(--color-action);
 	color: var(--color-text-on-action);
 	font-weight: 800;
+}
+
+.session-details .session-step__order {
+	border: 1px solid color-mix(in srgb, var(--color-secondary) 35%, var(--color-border));
+	background: var(--color-page);
+	color: var(--color-secondary);
+}
+
+:root[data-theme="neon"] .session-details .session-step__order {
+	border-color: color-mix(in oklch, var(--color-secondary) 55%, var(--color-border));
+	background: var(--color-page);
+	box-shadow: none;
+	color: var(--color-secondary);
 }
 
 .session-step__header {

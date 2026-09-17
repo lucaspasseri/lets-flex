@@ -3,6 +3,7 @@ import {
 	getDistinctMovements,
 	getDistinctMuscles,
 } from "./selectors/sessionSelectors.js";
+import resolveLibraryStepMedia from "./resolveLibraryStepMedia.js";
 import { resolveMedia } from "../media/resolveMedia.js";
 import translateCount from "../../infrastructure/i18n/translateCount.js";
 import translateMessage from "../../infrastructure/i18n/translateMessage.js";
@@ -16,6 +17,7 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @typedef {object} CreateSummaryInput
  * @property {SessionMapper} session
  * @property {SessionMapper["id"] | null} activeSessionId
+ * @property {Function} [mediaResolver]
  * @property {Function} [translate]
  */
 
@@ -24,17 +26,22 @@ import translateMessage from "../../infrastructure/i18n/translateMessage.js";
  * @returns {SummaryViewModel}
  */
 
-function createSummary({ session, activeSessionId, translate }) {
+function createSummary({ session, activeSessionId, mediaResolver, translate }) {
 	const t = (key, options = {}) =>
 		translateMessage(translate, key, String(options.defaultValue ?? ""), options);
 	const steps = session.steps ?? [];
-	const media = steps[0]
-		? resolveMedia({
-				entityType: "session",
-				label: session.name,
-				presentation: "initial",
-			})
+	const firstExerciseMedia = steps[0]
+		? resolveLibraryStepMedia(steps[0], { resolveMedia: mediaResolver })
 		: null;
+	const media = firstExerciseMedia?.src
+		? firstExerciseMedia
+		: steps[0]
+			? resolveMedia({
+					entityType: "session",
+					label: session.name,
+					presentation: "initial",
+				})
+			: null;
 	const movements = getDistinctMovements(session);
 	const muscles = getDistinctMuscles(session);
 	const equipments = getDistinctEquipments(session);

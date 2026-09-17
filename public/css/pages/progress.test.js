@@ -37,6 +37,16 @@ test("progress presentation is loaded with responsive and accessible interaction
 	assert.match(progressCss, /overflow-wrap: anywhere/);
 	assert.match(progressCss, /font-variant-numeric: tabular-nums/);
 	assert.match(
+		progressCss,
+		/\.exercise-progress-results-header\[data-media-insights\]/,
+	);
+	assert.match(progressCss, /grid-template-columns: minmax\(6\.5rem, 8\.5rem\)/);
+	assert.match(progressCss, /aspect-ratio: 3 \/ 2/);
+	assert.doesNotMatch(
+		progressCss,
+		/exercise-progress-selection-media[\s\S]*?height: 12rem/,
+	);
+	assert.match(
 		chromeCss,
 		/\.application-shell\.has-open-navigation > \.content\s*{[\s\S]*?overflow: hidden/,
 	);

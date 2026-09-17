@@ -862,6 +862,49 @@
 	}
 }
 
+/* Focused forward treatment: the active exercise keeps its media beside the
+   logging task on Dashboard without changing the surrounding session chrome. */
+.dashboard--media-atmosphere .current-workout-step-container {
+	display: grid;
+	grid-template-columns: minmax(10rem, 0.8fr) minmax(0, 1.2fr);
+	align-items: start;
+}
+
+.dashboard--media-atmosphere .current-workout-step__media {
+	grid-column: 1;
+	grid-row: 1 / span 3;
+	width: 100%;
+	max-width: none;
+	height: 100%;
+	min-height: 15rem;
+	border: 1px solid var(--color-border);
+	border-radius: 0.8rem;
+	object-fit: cover;
+}
+
+.dashboard--media-atmosphere .current-workout-step-container header,
+.dashboard--media-atmosphere .current-workout-step-container .logs-form-container {
+	grid-column: 2;
+}
+
+@media (max-width: 45rem) {
+	.dashboard--media-atmosphere .current-workout-step-container {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.dashboard--media-atmosphere .current-workout-step__media,
+	.dashboard--media-atmosphere .current-workout-step-container header,
+	.dashboard--media-atmosphere .current-workout-step-container .logs-form-container {
+		grid-column: 1;
+		grid-row: auto;
+	}
+
+	.dashboard--media-atmosphere .current-workout-step__media {
+		min-height: 12rem;
+	}
+}
+
 @keyframes theme-neon-trace {
 	from {
 		stroke-dashoffset: 1;

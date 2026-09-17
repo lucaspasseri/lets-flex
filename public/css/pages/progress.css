@@ -223,6 +223,31 @@
 	padding: clamp(0.4rem, 2vw, 1rem) clamp(0.2rem, 2vw, 0.8rem) 0.25rem;
 }
 
+/* Curated integration: keep selected exercise context visible without making it
+   compete with the progress record. */
+.exercise-progress-results-header[data-media-insights] {
+	grid-template-columns: minmax(6.5rem, 8.5rem) minmax(0, 1fr);
+	column-gap: clamp(0.75rem, 2vw, 1.25rem);
+	align-items: center;
+}
+
+.exercise-progress-results-header[data-media-insights]
+	.exercise-progress-selection-media {
+	grid-column: 1;
+	grid-row: 1 / span 3;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	border: 1px solid var(--color-border);
+	border-radius: 0.75rem;
+	object-fit: cover;
+}
+
+.exercise-progress-results-header[data-media-insights]
+	> :not(.exercise-progress-selection-media) {
+	grid-column: 2;
+}
+
 .exercise-progress-results-header h2 {
 	margin: 0;
 	overflow-wrap: anywhere;
@@ -618,6 +643,25 @@
 
 	.exercise-progress-insights {
 		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 42rem) {
+	.exercise-progress-results-header[data-media-insights] {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.exercise-progress-results-header[data-media-insights]
+		.exercise-progress-selection-media,
+	.exercise-progress-results-header[data-media-insights]
+		> :not(.exercise-progress-selection-media) {
+		grid-column: 1;
+		grid-row: auto;
+	}
+
+	.exercise-progress-results-header[data-media-insights]
+		.exercise-progress-selection-media {
+		width: min(100%, 9rem);
 	}
 }
 

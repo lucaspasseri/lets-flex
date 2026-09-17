@@ -27,9 +27,11 @@ test("training-day and contextual Library styles preserve hierarchy, actions, an
 	assert.match(dayCss, /\.day-page--media-forward/);
 	assert.match(
 		dayCss,
-		/@media \(max-width: 60rem\) and \(min-width: 36\.01rem\)[\s\S]*?minmax\(15rem, 1\.28fr\)/,
+		/day-page--media-forward[\s\S]*?grid-template-columns: minmax\(9rem, 0\.65fr\) minmax\(0, 1fr\) auto auto/,
 	);
-	assert.match(dayCss, /@media \(max-width: 44rem\) and \(min-width: 36\.01rem\)/);
+	assert.match(dayCss, /@media \(max-width: 52rem\) and \(min-width: 36\.01rem\)/);
+	assert.match(dayCss, /height: 9rem/);
+	assert.doesNotMatch(dayCss, /day-page--media-forward[\s\S]*?min-height:/);
 	assert.doesNotMatch(dayCss, /day-page--media-atmosphere/);
 	assert.match(dayCss, /\.workout-step__media\s*\{/);
 	assert.match(dayCss, /\.workout-card__heading\s*\{[^}]*min-width:\s*0/);
