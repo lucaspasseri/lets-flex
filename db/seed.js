@@ -5,7 +5,8 @@ import { schemaSql } from "./schema.js";
 import normalizeEmail from "../src/features/auth/normalizeEmail.js";
 import { hashPassword } from "../src/features/auth/passwordService.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
-import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
+import { starterWorkoutSeedSql } from "../src/features/starterTraining/createStarterWorkoutSeedSql.js";
+import provisionStarterTraining from "../src/features/starterTraining/provisionStarterTraining.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { mediaSeedSql } from "./mediaSeedSql.js";
 import { createR2MediaStorageFromEnvironment } from "../src/features/media/storage/r2Storage.js";
@@ -258,16 +259,19 @@ export async function resetAndSeedDatabase({
 			log("canonical recovery failed");
 			throw error;
 		}
-		await client.query(
-			`WITH administrator AS (
-				INSERT INTO users (email, role, name)
-				VALUES ($1, 'admin', 'Administrator')
-				RETURNING id
-			)
-			INSERT INTO auth_identities (user_id, provider, provider_subject, password_hash)
-			SELECT id, 'local', $1, $2 FROM administrator`,
-			[adminEmail, passwordHash],
+		const { rows: administratorRows } = await client.query(
+			`INSERT INTO users (email, role, name)
+			 VALUES ($1, 'admin', 'Administrator')
+			 RETURNING id`,
+			[adminEmail],
 		);
+		const administrator = administratorRows[0];
+		await client.query(
+			`INSERT INTO auth_identities (user_id, provider, provider_subject, password_hash)
+			 VALUES ($1, 'local', $2, $3)`,
+			[administrator.id, adminEmail, passwordHash],
+		);
+		await provisionStarterTraining({ userId: administrator.id }, client);
 		await client.query("COMMIT");
 		log("PostgreSQL reset transaction committed");
 		console.log("Database seeded successfully.");

@@ -129,10 +129,15 @@ CREATE TABLE programs (
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 	goal_id INTEGER REFERENCES goals(id) ON DELETE SET NULL,
 	name VARCHAR,
-	start_date DATE DEFAULT CURRENT_DATE
+	start_date DATE DEFAULT CURRENT_DATE,
+	provisioning_key VARCHAR(100)
 );
 
 CREATE INDEX programs_user_idx ON programs (user_id, id);
+
+CREATE UNIQUE INDEX programs_user_provisioning_key_unique
+ON programs (user_id, provisioning_key)
+WHERE provisioning_key IS NOT NULL;
 
 CREATE TABLE cycles (
 	id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

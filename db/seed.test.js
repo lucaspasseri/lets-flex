@@ -8,7 +8,7 @@ import { resetAndSeedDatabase, seedSql } from "./seed.js";
 import { schemaSql } from "./schema.js";
 import { catalogTranslationSeedSql } from "./catalogTranslationsSql.js";
 import { catalogSeedSql } from "../src/features/exerciseCatalog/createCatalogSeedSql.js";
-import { starterWorkoutSeedSql } from "../src/features/guests/createStarterWorkoutSeedSql.js";
+import { starterWorkoutSeedSql } from "../src/features/starterTraining/createStarterWorkoutSeedSql.js";
 import { mediaSeedSql } from "./mediaSeedSql.js";
 import { CanonicalRegistryPreflightError } from "../src/features/media/registry/canonicalMediaRegistryRecovery.js";
 

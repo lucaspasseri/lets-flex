@@ -38,19 +38,51 @@ export async function findAllByUserId({ userId }, db = pool) {
 	return rows;
 }
 
-export async function create({ name, userId, goalId, startDate }, db = pool) {
+/**
+ * Finds the complete owner-specific starter hierarchy by its stable
+ * provisioning key. The key is scoped to the owner, not to display names.
+ * @param {{userId: number, provisioningKey: string}} input
+ * @param {import("pg").Pool | import("pg").PoolClient} [db]
+ */
+export async function findStarterWorkspace({ userId, provisioningKey }, db = pool) {
+	const { rows } = await db.query(
+		`SELECT p.id AS program_id, c.id AS cycle_id,
+		        td.id AS training_day_id, ws.id AS workout_session_id,
+		        s.id AS session_id
+		 FROM programs AS p
+		 JOIN cycles AS c ON c.program_id = p.id
+		 JOIN training_days AS td ON td.cycle_id = c.id
+		 JOIN workout_sessions AS ws ON ws.training_day_id = td.id
+		 JOIN sessions AS s ON s.id = ws.session_id
+		 WHERE p.user_id = $1 AND p.provisioning_key = $2
+		   AND s.owner_user_id = p.user_id
+		 ORDER BY c.cycle_order, td.day_order, ws.workout_session_order
+		 LIMIT 1`,
+		[userId, provisioningKey],
+	);
+	return rows[0] ?? null;
+}
+
+/**
+ * @param {{name: string, userId: number, goalId: number, startDate?: string, provisioningKey?: string | null}} input
+ * @param {import("pg").Pool | import("pg").PoolClient} [db]
+ */
+export async function create(
+	{ name, userId, goalId, startDate, provisioningKey = null },
+	db = pool,
+) {
 	if (startDate === "") {
 		const { rows } = await db.query(
-			"INSERT INTO programs (name, user_id, goal_id) VALUES ($1, $2, $3) RETURNING id",
-			[name, userId, goalId],
+			"INSERT INTO programs (name, user_id, goal_id, provisioning_key) VALUES ($1, $2, $3, $4) RETURNING id",
+			[name, userId, goalId, provisioningKey],
 		);
 
 		return rows[0] ?? null;
 	}
 
 	const { rows } = await db.query(
-		"INSERT INTO programs (name, user_id, goal_id, start_date) VALUES ($1, $2, $3, $4) RETURNING id",
-		[name, userId, goalId, startDate],
+		"INSERT INTO programs (name, user_id, goal_id, start_date, provisioning_key) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		[name, userId, goalId, startDate, provisioningKey],
 	);
 	return rows[0] ?? null;
 }

@@ -7,7 +7,8 @@ import { schemaSql } from "./schema.js";
 import { seedSql } from "./seed.js";
 import { catalogManifest } from "../src/features/exerciseCatalog/catalogManifest.js";
 import { canonicalMediaManifest } from "../src/features/media/mediaManifest.js";
-import createStarterWorkspace from "../src/features/guests/createStarterWorkspace.js";
+import provisionStarterTraining from "../src/features/starterTraining/provisionStarterTraining.js";
+import { starterWorkoutManifest } from "../src/features/starterTraining/starterWorkoutManifest.js";
 import { loadMediaAssignments } from "../src/features/media/loadMediaAssignments.js";
 import createMediaResolver from "../src/features/media/createMediaResolver.js";
 import resolveStepMedia from "../src/features/media/resolveStepMedia.js";
@@ -370,8 +371,18 @@ integration("canonical database setup", { concurrency: false }, () => {
 			 RETURNING id`,
 		);
 		const guestId = guestRows[0].id;
-		const starter = await createStarterWorkspace(
+		const starter = await provisionStarterTraining(
 			{ userId: guestId, scheduledDate: "2026-09-16" },
+			db,
+		);
+		const { rows: adminRows } = await db.query(
+			`INSERT INTO users (email, role, name)
+			 VALUES ('media-admin@example.com', 'admin', 'Media Admin')
+			 RETURNING id`,
+		);
+		const adminId = adminRows[0].id;
+		const adminStarter = await provisionStarterTraining(
+			{ userId: adminId, scheduledDate: "2026-09-16" },
 			db,
 		);
 
@@ -407,6 +418,16 @@ integration("canonical database setup", { concurrency: false }, () => {
 		);
 		assert.ok(workoutStep);
 		assert.equal(workoutStep.exerciseId, entity.exercise_id);
+		const adminWorkoutRows = await workoutSessionsRepository.findAllByTrainingDayId(
+			{ trainingDayId: adminStarter.trainingDayId, locale: "en" },
+			/** @type {any} */ (db),
+		);
+		const adminWorkout = workoutSessionMapper.toWorkoutSession(adminWorkoutRows[0]);
+		const adminWorkoutStep = adminWorkout.steps.find(
+			(step) => step.exerciseVariantId === entity.variant_id,
+		);
+		assert.ok(adminWorkoutStep);
+		assert.equal(adminWorkoutStep.exerciseId, entity.exercise_id);
 
 		const visibleSessionRows = await sessionsRepository.findVisibleForUser(
 			{ userId: guestId, locale: "en" },
@@ -422,10 +443,15 @@ integration("canonical database setup", { concurrency: false }, () => {
 		);
 		assert.ok(sessionStep);
 
-		const [workoutAssignments, sessionAssignments] = await Promise.all([
-			loadMediaAssignments({ workoutSessions: [workout] }, /** @type {any} */ (db)),
-			loadMediaAssignments({ sessions: [ownedSession] }, /** @type {any} */ (db)),
-		]);
+		const [workoutAssignments, sessionAssignments, adminWorkoutAssignments] =
+			await Promise.all([
+				loadMediaAssignments({ workoutSessions: [workout] }, /** @type {any} */ (db)),
+				loadMediaAssignments({ sessions: [ownedSession] }, /** @type {any} */ (db)),
+				loadMediaAssignments(
+					{ workoutSessions: [adminWorkout] },
+					/** @type {any} */ (db),
+				),
+			]);
 		const workoutMedia = resolveStepMedia(workoutStep, {
 			resolveMedia: createMediaResolver(workoutAssignments),
 		});
@@ -436,6 +462,116 @@ integration("canonical database setup", { concurrency: false }, () => {
 		assert.equal(workoutMedia.src, assetRows[0].storage_key);
 		assert.equal(sessionMedia.src, assetRows[0].storage_key);
 		assert.equal(workoutMedia.src, sessionMedia.src);
+		const adminWorkoutMedia = resolveStepMedia(adminWorkoutStep, {
+			resolveMedia: createMediaResolver(adminWorkoutAssignments),
+		});
+		assert.equal(adminWorkoutMedia.src, assetRows[0].storage_key);
+		assert.equal(adminWorkoutMedia.src, workoutMedia.src);
+	});
+
+	test("admin starter training is owner-scoped, manifest-aligned, and idempotent", async () => {
+		const { rows: adminRows } = await db.query(
+			`INSERT INTO users (email, role, name)
+			 VALUES ('starter-admin@example.com', 'admin', 'Starter Admin')
+			 RETURNING id`,
+		);
+		const adminId = adminRows[0].id;
+		const { rows: otherUserRows } = await db.query(
+			`INSERT INTO users (email, role, name)
+			 VALUES ('starter-other@example.com', 'user', 'Other User')
+			 RETURNING id`,
+		);
+		const otherUserId = otherUserRows[0].id;
+		await db.query(
+			"INSERT INTO programs (user_id, name) VALUES ($1, 'Admin custom plan')",
+			[adminId],
+		);
+
+		const first = await provisionStarterTraining(
+			{ userId: adminId, scheduledDate: "2026-09-16" },
+			db,
+		);
+		const second = await provisionStarterTraining(
+			{ userId: adminId, scheduledDate: "2026-09-17" },
+			db,
+		);
+
+		assert.deepEqual(second, first);
+		const sessionId = (
+			await db.query("SELECT session_id FROM workout_sessions WHERE id = $1", [
+				first.workoutSessionId,
+			])
+		).rows[0].session_id;
+		const hierarchy = (
+			await db.query(
+				`SELECT p.user_id, p.name AS program_name,
+				        p.provisioning_key, p.start_date::text,
+				        c.name AS cycle_name, c.cycle_size, c.cycle_order,
+				        td.label AS day_label, td.day_order,
+				        ws.status, s.owner_user_id AS session_owner_user_id,
+				        s.id AS session_id
+				 FROM programs AS p
+				 JOIN cycles AS c ON c.program_id = p.id
+				 JOIN training_days AS td ON td.cycle_id = c.id
+				 JOIN workout_sessions AS ws ON ws.training_day_id = td.id
+				 JOIN sessions AS s ON s.id = ws.session_id
+				 WHERE p.id = $1`,
+				[first.programId],
+			)
+		).rows[0];
+		assert.deepEqual(hierarchy, {
+			user_id: adminId,
+			program_name: starterWorkoutManifest.programName,
+			provisioning_key: starterWorkoutManifest.provisioningKey,
+			start_date: "2026-09-16",
+			cycle_name: starterWorkoutManifest.cycleName,
+			cycle_size: starterWorkoutManifest.cycleSize,
+			cycle_order: 1,
+			day_label: starterWorkoutManifest.trainingDayLabel,
+			day_order: 1,
+			status: "planned",
+			session_owner_user_id: adminId,
+			session_id: sessionId,
+		});
+
+		const steps = (
+			await db.query(
+				`SELECT variant.catalog_key, step.name, step.sets, step.reps, step.step_order
+				 FROM session_steps AS step
+				 JOIN exercise_variants AS variant ON variant.id = step.exercise_variant_id
+				 WHERE step.session_id = $1
+				 ORDER BY step.step_order`,
+				[sessionId],
+			)
+		).rows;
+		assert.deepEqual(
+			steps,
+			starterWorkoutManifest.steps.map((step, index) => ({
+				catalog_key: step.variantCatalogKey,
+				name: step.name,
+				sets: step.sets,
+				reps: step.reps,
+				step_order: index + 1,
+			})),
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM programs WHERE user_id = $1",
+					[adminId],
+				)
+			).rows[0].count,
+			2,
+		);
+		assert.equal(
+			(
+				await db.query(
+					"SELECT count(*)::int AS count FROM programs WHERE user_id = $1",
+					[otherUserId],
+				)
+			).rows[0].count,
+			0,
+		);
 	});
 
 	test("fresh database contains the PostgreSQL session-store infrastructure", async () => {

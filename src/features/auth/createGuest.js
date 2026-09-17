@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { format } from "date-fns";
 import pool from "../../../db/pool.js";
 import * as usersRepository from "../users/repository.js";
-import createStarterWorkspace from "../guests/createStarterWorkspace.js";
+import provisionStarterTraining from "../starterTraining/provisionStarterTraining.js";
 
 export const GUEST_TTL_DAYS = 15;
 
@@ -45,7 +45,7 @@ export default async function createGuest(
 		);
 		if (!guest) throw new Error("Guest account could not be created");
 
-		const starter = await createStarterWorkspace(
+		const starter = await provisionStarterTraining(
 			{ userId: guest.id, scheduledDate },
 			client,
 			dependencies,

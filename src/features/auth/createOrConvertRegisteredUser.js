@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import * as usersRepository from "../users/repository.js";
-import createStarterWorkspace from "../guests/createStarterWorkspace.js";
+import provisionStarterTraining from "../starterTraining/provisionStarterTraining.js";
 
 export class GuestConversionUnavailableError extends Error {
 	constructor() {
@@ -32,7 +32,7 @@ export default async function createOrConvertRegisteredUser(
 	const starterSessionState =
 		guestUserId === null
 			? toSessionState(
-					await createStarterWorkspace(
+					await provisionStarterTraining(
 						{ userId: user.id, scheduledDate: format(new Date(), "yyyy-MM-dd") },
 						db,
 					),

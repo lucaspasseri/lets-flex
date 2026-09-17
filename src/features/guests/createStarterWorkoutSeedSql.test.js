@@ -6,7 +6,7 @@ import {
 	createStarterWorkoutSeedSql,
 	starterWorkoutSeedSql,
 } from "./createStarterWorkoutSeedSql.js";
-import { starterWorkoutManifest } from "./starterWorkoutManifest.js";
+import { starterWorkoutManifest } from "../starterTraining/starterWorkoutManifest.js";
 
 test("starter workout is a short ordered full-body catalog sequence", () => {
 	assert.deepEqual(starterWorkoutManifest.steps, [
