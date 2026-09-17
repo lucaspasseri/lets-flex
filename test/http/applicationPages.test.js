@@ -1105,6 +1105,29 @@ integration("authentication and authorization", { concurrency: false }, () => {
 		assert.equal((await client.request("/")).response.status, 302);
 	});
 
+	test("Dashboard restores the starter context after authenticated owners log in", async () => {
+		const { default: provisionStarterTraining } =
+			await import("../../src/features/starterTraining/provisionStarterTraining.js");
+		const owners = (
+			await db.query(
+				"SELECT id, email FROM users WHERE email IN ('admin@example.com', 'user-one@example.com') ORDER BY email",
+			)
+		).rows;
+
+		for (const owner of owners) {
+			await provisionStarterTraining({ userId: owner.id }, db);
+			const client = agent();
+			await login(client, owner.email);
+			const dashboard = await client.request("/");
+
+			assert.equal(dashboard.response.status, 200);
+			assert.match(dashboard.text, /Guest Starter Program/);
+			assert.match(dashboard.text, /Getting Started/);
+			assert.match(dashboard.text, /Sample Full Body Session/);
+			assert.doesNotMatch(dashboard.text, /NO ACTIVE PROGRAM/);
+		}
+	});
+
 	test("direct Google registration provisions the starter workspace and Dashboard selection", async () => {
 		const client = agent(oauthOrigin);
 		const flow = await beginGoogle(client, "/");

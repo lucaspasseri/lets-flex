@@ -4,6 +4,7 @@ import getDashboardPageData from "../../features/dashboard/getDashboardPageData.
 import createDashboardPageViewModel from "../../../views/viewModels/dashboardPage/createDashboardPageViewModel.js";
 import createMediaResolver from "../../features/media/createMediaResolver.js";
 import { loadMediaAssignments } from "../../features/media/loadMediaAssignments.js";
+import resolveDashboardInitialization from "../../features/dashboard/resolveDashboardInitialization.js";
 
 /** @param {import("express").Request} req @param {import("express").Response} res */
 async function show(req, res) {
@@ -13,7 +14,15 @@ async function show(req, res) {
 export async function renderDashboard(req, res, formState = {}) {
 	// @ts-ignore -- application Passport principal.
 	const userId = toNullableNumber(req.user?.id);
-	const programId = toNullableNumber(res.locals.sessionState?.programId);
+	const initialization = await resolveDashboardInitialization({
+		userId,
+		sessionState: res.locals.sessionState,
+	});
+	if (initialization.sessionState !== res.locals.sessionState) {
+		// @ts-ignore -- application-owned selection state stored in the session.
+		req.session.state = initialization.sessionState;
+	}
+	const programId = initialization.programId;
 	const query = req.validatedQuery ?? {};
 	const daysDifference =
 		toNullableNumber(formState.daysDifference) ??
