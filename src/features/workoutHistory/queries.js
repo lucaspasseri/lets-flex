@@ -20,11 +20,29 @@ export function findPageForUser() {
 				ws.finished_at,
 				p.id AS program_id,
 				p.name AS program_name,
-				NULLIF(BTRIM(ws.session_name), '') AS session_name
+				NULLIF(BTRIM(ws.session_name), '') AS session_name,
+				representative.exercise_id AS representative_exercise_id,
+				representative.exercise_variant_id AS representative_exercise_variant_id,
+				representative.exercise_name AS representative_exercise_name,
+				representative.exercise_variant_name AS representative_exercise_variant_name
 			FROM programs p
 			JOIN cycles c ON c.program_id = p.id
 			JOIN training_days td ON td.cycle_id = c.id
 			JOIN workout_sessions ws ON ws.training_day_id = td.id
+			LEFT JOIN LATERAL (
+				SELECT
+					history_variant.exercise_id,
+					wsl.exercise_variant_id,
+					NULLIF(BTRIM(wsl.exercise_name), '') AS exercise_name,
+					NULLIF(BTRIM(wsl.exercise_variant_name), '') AS exercise_variant_name
+				FROM workout_step_logs wsl
+				LEFT JOIN exercise_variants history_variant
+					ON history_variant.id = wsl.exercise_variant_id
+				WHERE wsl.workout_session_id = ws.id
+					AND wsl.status = 'performed'
+				ORDER BY wsl.step_order, wsl.id
+				LIMIT 1
+			) representative ON TRUE
 			WHERE p.user_id = $1
 				AND ws.status IN ('finished', 'cancelled')
 				AND ($2::integer IS NULL OR p.id = $2)
@@ -112,6 +130,8 @@ export function findDetailForUser() {
 							'exerciseNameTranslation', exercise_translation.name,
 							'exerciseVariantName', wsl.exercise_variant_name,
 							'exerciseVariantNameTranslation', exercise_variant_translation.name,
+							'exerciseId', history_variant.exercise_id,
+							'exerciseVariantId', wsl.exercise_variant_id,
 							'plannedSets', wsl.planned_sets,
 							'plannedReps', wsl.planned_reps,
 							'plannedLoadValue', wsl.planned_load_value,

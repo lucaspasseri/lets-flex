@@ -1,5 +1,5 @@
 <% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
-<main class="main workout-history workout-history-detail" data-workout-history-detail>
+<main class="main workout-history workout-history-detail workout-history--media-insights" data-workout-history-detail>
 	<a class="history-back-link" href="<%= backHref %>"><span aria-hidden="true">←</span> <%= translate("history.backToHistory", { defaultValue: "Back to workout history" }) %></a>
 	<%- include("../partials/shared/components/pageHeading", { heading }) %>
 
@@ -38,6 +38,7 @@
 				<% steps.forEach(step => { %>
 					<li>
 						<article class="history-step" data-status="<%= step.statusLabel.toLowerCase() %>">
+							<%- include("../partials/shared/components/media", { media: step.media, className: "history-step__media", variant: "thumbnail", decorative: true, loading: "lazy", decoding: "async" }) %>
 							<header class="history-step__header">
 								<div class="history-step__number" aria-hidden="true"><%= step.order %></div>
 								<div class="history-step__title">

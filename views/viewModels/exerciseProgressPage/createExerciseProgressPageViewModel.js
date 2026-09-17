@@ -4,6 +4,7 @@ import {
 	formatLocaleNumber,
 	formatMeasurementSymbol,
 } from "../../../src/infrastructure/i18n/formatLocale.js";
+import { resolveMedia } from "../../../src/features/media/resolveMedia.js";
 
 /** @param {string} dateKey */
 function formatDate(
@@ -91,6 +92,12 @@ function toResults(progress, t, language) {
 			title: choiceLabel(progress.selection),
 			exerciseName: progress.selection.exerciseName,
 			exerciseVariantName: progress.selection.exerciseVariantName,
+			media: resolveMedia({
+				entityType: "exercise",
+				baseName: progress.selection.exerciseName,
+				variantName: progress.selection.exerciseVariantName ?? undefined,
+				label: choiceLabel(progress.selection),
+			}),
 			availableContext: t("progress.availableContext", {
 				count: count(
 					progress.selection.occurrenceCount,
@@ -293,6 +300,7 @@ export function createExerciseProgressPageViewModel({
 					title: "",
 					exerciseName: "",
 					exerciseVariantName: null,
+					media: resolveMedia({ entityType: "exercise", label: "Exercise" }),
 					availableContext: "",
 				},
 				metrics: [],

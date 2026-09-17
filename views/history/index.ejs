@@ -1,5 +1,5 @@
 <% const translate = typeof locals?.t === "function" ? locals.t : (_key, options = {}) => String(options.defaultValue ?? "").replace(/\{\{(\w+)\}\}/g, (_match, name) => options[name] ?? _match); %>
-<main class="main workout-history" data-workout-history-page>
+<main class="main workout-history workout-history--media-insights" data-workout-history-page>
 	<%- include("../partials/shared/components/pageHeading", { heading }) %>
 
 	<section class="history-filter" aria-labelledby="history-filters-heading">
@@ -55,6 +55,7 @@
 							<% } %>
 						>
 							<div class="history-card__marker" aria-hidden="true"></div>
+							<%- include("../partials/shared/components/media", { media: item.media, className: "history-card__media", variant: "exercise", decorative: true, loading: "lazy", decoding: "async" }) %>
 							<div class="history-card__body">
 								<header class="history-card__header">
 									<div class="history-card__title">

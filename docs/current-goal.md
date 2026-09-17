@@ -1,138 +1,87 @@
-# Goal: Complete Production Canonical-Media Durability Lifecycle
+# Goal: Integrate the strongest media experiment ideas into one refined branch
 
 ## Goal status
 
-**Completed — 2026-09-16**
+**Approved — action plan pending approval**
 
 ## Objective
 
-Complete the production canonical-media lifecycle so canonical images managed through the Admin UI
-remain reconstructable independently of PostgreSQL lifetime:
+Create a curated integration branch directly from untouched `main`. Selectively reimplement the
+successful ideas from the three media experiments without merging or modifying those reference
+branches:
 
-```text
-canonical media durability = durable R2 image bytes + durable canonical metadata/selection
-```
+- `ui-media-insights` for purposeful History and Progress media;
+- `ui-media-atmosphere` for the Dashboard workout-session header only;
+- `ui-media-forward` for the Day current-exercise presentation, refined at intermediate widths.
 
-Preserve the existing architecture and resolver:
-
-```text
-repository manifest → baseline canonical state
-public media R2 → durable image bytes
-private canonical registry R2 → durable Admin override metadata
-PostgreSQL → reconstructable runtime materialization
-```
-
-The existing Admin **Make Canonical** workflow remains the primary future image-management path.
-Normal deployments must not reset PostgreSQL or provision media implicitly.
+The result must feel like one coherent interface while preserving the existing canonical media
+resolver, localization, fallbacks, themes, accessibility, responsive behavior, workout logging,
+session state, ownership rules, navigation, View Transitions, History behavior, and Progress
+calculations.
 
 ## Verified baseline and delta
 
 ### Existing relevant capabilities
 
-- `data/canonical-media.json` contains 70 canonical entries across all five supported entity types;
-  every current entry has a provider-neutral `assets/...` storage key and a matching tracked
-  `public/media/...` source file.
-- `db/mediaSeedSql.js` validates the manifest and seeds `media_assets`, localized alt text, and
-  primary `entity_media` assignments by stable catalog key. It does not upload R2 objects.
-- Admin promotion already requires an R2-backed object when the canonical registry is configured,
-  writes the private registry before PostgreSQL commit, uses ETag concurrency, and compensates a
-  registry mutation when the database transaction/commit fails.
-- `canonicalMediaRegistryRecovery.js` already restores validated registry overrides after the
-  baseline seed and strictly verifies the materialized PostgreSQL state.
-- `npm run media:registry:preflight` is read-only and validates registry entries and their referenced
-  public-media R2 objects without PostgreSQL access. The production GitHub workflow runs it before
-  the Render Deploy Hook.
-- Normal startup and the ordinary build do not provision media or reset PostgreSQL.
+- `main` already contains the shared canonical media partial, resolver precedence, initial
+  fallbacks, and localized/accessibility-safe media contracts.
+- `main` retains conservative Dashboard, Day, History, and Progress layouts with their existing
+  behavior and tests.
+- `ui-media-forward`, `ui-media-atmosphere`, and `ui-media-insights` are independent descendants
+  of `main`, each documenting its implementation and tradeoffs.
+- The insights branch provides the verified data path for History representative media from the
+  first performed exercise snapshot and Progress media from the selected exercise context.
+- The atmosphere branch provides the verified Dashboard session-header composition, while its Day
+  composition was manually rejected for responsive instability.
+- The forward branch provides the verified Day current-exercise hierarchy, but its intermediate
+  widths were manually judged too compressed.
 
-### Verified gaps to close
+### Required delta
 
-- The deployment preflight does not validate the repository manifest schema, stable identity,
-  localized metadata, storage keys, source-file correspondence, or production R2 objects.
-- There is no explicit safe/idempotent command to provision source-controlled baseline media to R2
-  while preserving existing objects and using the manifest only to reconstruct missing keys.
-- The GitHub workflow has no disposable PostgreSQL recovery rehearsal proving baseline plus registry
-  restoration without production database credentials.
-- Lifecycle tests must explicitly cover missing R2 objects, registry availability/write/conflict
-  failures, and PostgreSQL failure after registry mutation for every supported entity type.
-- `docs/canonical-media-audit.md` contains superseded pre-registry conclusions and must be brought
-  into agreement with the current source-of-truth model.
+- Create `ui-media-integration` directly from `main`; do not merge any experiment branch.
+- Selectively port or reimplement the insights data/view/template contracts for History and
+  Progress.
+- Selectively port or reimplement the atmosphere session-header treatment for the Dashboard only.
+- Selectively port or reimplement the forward current-exercise treatment for Day, adding an
+  intentional intermediate-width layout that preserves comfortable logging controls and readable
+  exercise information.
+- Perform a focused visual consistency pass across the four affected surfaces without forcing
+  identical media layouts.
+- Add or update focused rendering/responsive tests only where the integrated contracts require
+  coverage.
+- Add `docs/media-integration.md` documenting selected sources, rejected ideas, refinements,
+  compromises, and intentionally omitted reusable ideas.
+
+## Explicitly rejected or excluded
+
+- Do not import the atmospheric Day-page implementation; it was unstable across reviewed widths.
+- Do not carry the experiments' incidental Programs or Library styling into the integration unless
+  a supporting change is required for a selected surface's coherence.
+- Do not redesign unrelated pages, alter media-selection precedence, add hard-coded media URLs, or
+  introduce new fitness calculations.
+- Do not merge the integration branch into `main`.
 
 ## Completion criteria
 
-- [x] Every baseline manifest entry is schema-valid, catalog-valid, and references an available
-      durable production R2 object; existing R2 bytes are adopted as authoritative and any
-      repository-byte drift is reported separately from missing or operational failures.
-- [x] Every Admin canonical override is validated by the deployment preflight and references an
-      available durable production R2 object.
-- [x] A single read-only canonical durability preflight runs before the Render Deploy Hook, needs no
-      PostgreSQL access, returns non-zero on any gap, and includes the existing registry checks.
-- [x] An explicit safe baseline provisioning/verification command exists if production baseline
-      objects are not already reliably provisioned; it is idempotent, key-preserving, target-
-      explicit, adopts existing objects without overwriting them, provisions only missing keys,
-      and never deletes unrelated objects.
-- [x] Admin promotion cannot report success when its R2 object, private registry, registry write,
-      concurrency precondition, or PostgreSQL commit fails; existing compensation behavior remains.
-- [x] All supported canonical entity types are covered: `exercise`, `exercise_variant`, `muscle`,
-      `equipment`, and `movement_pattern`.
-- [x] A GitHub Actions disposable-database rehearsal proves schema + baseline seed + durability
-      preflight + registry restoration + strict verification without production PostgreSQL credentials
-      or production writes.
-- [x] The final source-of-truth model, deployment behavior, provisioning/rehearsal commands, and
-      manual production acceptance test are documented.
-- [x] No production PostgreSQL reset, production R2 write/delete, Render filesystem dependency,
-      manifest mutation by Admin, resolver redesign, or R2 orphan deletion is introduced.
+- [ ] `ui-media-integration` exists as a direct curated descendant of `main`.
+- [ ] History uses representative media tied to actual performed workout data.
+- [ ] Progress uses media tied to the selected exercise/context without changing calculations.
+- [ ] Dashboard uses the atmospheric workout-session header treatment with readable foreground
+      content in Classic and Bold Neon Performance themes.
+- [ ] Day uses the media-forward current-exercise treatment without importing atmospheric Day
+      styling, and intermediate widths preserve readable content and comfortable logging controls.
+- [ ] Missing media still uses the shared fallback contract; localization and accessibility remain
+      intact.
+- [ ] The affected pages share a coherent visual language while retaining purpose-specific layouts.
+- [ ] Focused tests cover the integrated media resolution/fallback/rendering boundaries.
+- [ ] `npm run verify` passes on the final integration branch.
+- [ ] `docs/media-integration.md` records selected ideas, rejected implementations, responsive
+      refinements, compromises, and intentionally omitted ideas.
+- [ ] The three experiment branches remain unchanged and no branch is merged.
 
-## Final review assessment
+## Manual review target
 
-- [x] Baseline manifest validation, catalog identity, source correspondence, and explicit
-      production baseline verification are implemented; the user-supplied read-only result found
-      70 adopted objects, zero missing objects, and zero operational failures, with one diagnostic
-      drift warning.
-- [x] Admin canonical overrides are checked by the complete read-only preflight against durable R2
-      objects, with focused failure coverage.
-- [x] The read-only durability preflight runs before the Render Deploy Hook and includes registry
-      validation without PostgreSQL access.
-- [x] The explicit baseline command is target-aware, idempotent, non-destructive, and provisions
-      only reviewed missing objects in apply mode.
-- [x] Admin promotion preserves the existing R2, registry, concurrency, and PostgreSQL failure
-      guarantees, including compensation behavior.
-- [x] All five supported canonical entity types are covered by the implementation and tests.
-- [x] The manually dispatched GitHub Actions recovery rehearsal passed against the configured
-      production Environment. Production R2 read-only preflight, disposable PostgreSQL schema and
-      seed reconstruction, registry restoration, and strict post-restore verification all passed;
-      no production R2 write or production PostgreSQL reset was performed.
-- [x] The final source-of-truth model, deployment behavior, commands, and manual acceptance test
-      are documented.
-- [x] No production reset, production R2 write/delete, Render filesystem dependency, manifest
-      mutation by Admin, resolver redesign, or orphan deletion was introduced.
-
-All completion criteria are satisfied, including the owner-confirmed live production recovery
-rehearsal and the approved development R2 authorization correction. The goal is complete.
-
-## Final review after Action 6
-
-- [x] Development/test reset configuration now fails closed for production-scoped or mismatched
-      media and registry buckets before any R2 client is constructed.
-- [x] The development credentials were rotated, both canonical media objects were verified in the
-      development media bucket, and the exact `npm run db:reset` completed successfully.
-- [x] The final repository verification passed with 582 tests and 0 failures; formatting and diff
-      checks passed.
-- [x] No production database reset, production R2 write/delete, or credential value exposure in
-      repository output was introduced by this work.
-
-No completion criteria remain unmet. The deliberate non-goals below remain excluded, and no next
-action is activated pending final goal approval.
-
-## Completion record
-
-Completed 2026-09-16 after approval of Action 6. The implementation now protects development
-resets from production-scoped R2 configuration, preserves accurate R2 failure classification, and
-was verified against the rotated development credentials with a successful exact reset. The final
-repository verification passed with 582 tests and 0 failures; no production database or R2
-resource was modified.
-
-## Deliberate non-goals
-
-No automatic production reset, normal-deploy baseline upload, production database credential in
-GitHub Actions, Render filesystem durability, Admin-to-Git promotion, resolver rewrite, R2 orphan
-cleanup, or destructive production verification is included.
+Before final review, inspect the affected pages at approximately 390px, an evidence-based
+intermediate width in the 520–900px pressure range, and 1280–1440px. Include populated, missing
+media/fallback, long-name, relevant empty/error, keyboard/focus, and reduced-motion states where
+the current browser test infrastructure supports them.

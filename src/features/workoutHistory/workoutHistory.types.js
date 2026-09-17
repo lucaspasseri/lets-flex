@@ -32,6 +32,10 @@
  * @property {number} stepCount
  * @property {number} performedStepCount
  * @property {number} skippedStepCount
+ * @property {number | null} [representativeExerciseId]
+ * @property {number | null} [representativeExerciseVariantId]
+ * @property {string | null} [representativeExerciseName]
+ * @property {string | null} [representativeExerciseVariantName]
  */
 
 /**
@@ -63,6 +67,8 @@
  * @property {string | null} [exerciseNameTranslation]
  * @property {string | null} exerciseVariantName
  * @property {string | null} [exerciseVariantNameTranslation]
+ * @property {number | null} [exerciseId]
+ * @property {number | null} [exerciseVariantId]
  * @property {number | null} plannedSets
  * @property {number | null} plannedReps
  * @property {number | null} plannedLoadValue

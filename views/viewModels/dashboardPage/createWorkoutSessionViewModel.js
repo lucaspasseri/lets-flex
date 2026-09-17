@@ -39,11 +39,13 @@ export default function createWorkoutSessionViewModel({
 	}));
 	const sessionMedia =
 		session && steps.length > 0
-			? resolveMedia({
-					entityType: "session",
-					label: session.name,
-					presentation: "initial",
-				})
+			? mediaResolver
+				? steps[0].media
+				: resolveMedia({
+						entityType: "session",
+						label: session.name,
+						presentation: "initial",
+					})
 			: null;
 	const performedCount = steps.filter((step) => step.status === "performed").length;
 	const skippedCount = steps.filter((step) => step.status === "skipped").length;

@@ -27,6 +27,10 @@ test("history page applies owned terminal filters, stable pagination, and typed 
 								program_id: 4,
 								program_name: "Strength",
 								session_name: "Lower body",
+								representative_exercise_id: "12",
+								representative_exercise_variant_id: "18",
+								representative_exercise_name: "Bench press",
+								representative_exercise_variant_name: "Barbell bench press",
 								step_count: "2",
 								performed_step_count: "1",
 								skipped_step_count: "1",
@@ -55,6 +59,7 @@ test("history page applies owned terminal filters, stable pagination, and typed 
 	assert.deepEqual(calls[0].parameters, [7, 4, "2026-09-01", "2026-09-30", 2, 2]);
 	assert.match(calls[0].sql, /p\.user_id = \$1/);
 	assert.match(calls[0].sql, /ws\.status IN \('finished', 'cancelled'\)/);
+	assert.match(calls[0].sql, /wsl\.status = 'performed'/);
 	assert.match(calls[0].sql, /history\.id DESC/);
 	assert.deepEqual(page, {
 		items: [
@@ -68,6 +73,10 @@ test("history page applies owned terminal filters, stable pagination, and typed 
 				programId: 4,
 				programName: "Strength",
 				sessionName: "Lower body",
+				representativeExerciseId: 12,
+				representativeExerciseVariantId: 18,
+				representativeExerciseName: "Bench press",
+				representativeExerciseVariantName: "Barbell bench press",
 				stepCount: 2,
 				performedStepCount: 1,
 				skippedStepCount: 1,

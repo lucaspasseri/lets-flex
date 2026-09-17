@@ -30,6 +30,8 @@ test("history list view model preserves filters across details and pagination", 
 						stepCount: 3,
 						performedStepCount: 2,
 						skippedStepCount: 1,
+						representativeExerciseName: "Bench press",
+						representativeExerciseVariantName: "Barbell bench press",
 					},
 				],
 				totalCount: 23,
@@ -52,6 +54,10 @@ test("history list view model preserves filters across details and pagination", 
 	);
 	assert.equal(viewModel.pagination.nextHref, null);
 	assert.equal(viewModel.results.items[0].historyDate.context, "Completed");
+	assert.equal(
+		viewModel.results.items[0].media.src,
+		"/media/exercise-barbell-bench-press.svg",
+	);
 	assert.equal(
 		viewModel.results.items[0].stepSummary,
 		"2 completed · 1 skipped · 3 total",
@@ -146,6 +152,7 @@ test("history detail view model uses snapshot labels and retains the list return
 	assert.equal(viewModel.viewTransitionName, "history-session-9");
 	assert.equal(viewModel.steps[0].title, "Barbell bench press");
 	assert.equal(viewModel.steps[0].exerciseName, "Bench press");
+	assert.equal(viewModel.steps[0].media.src, "/media/exercise-barbell-bench-press.svg");
 	assert.equal(viewModel.summary.historyDate.context, "Completed");
 	assert.equal(viewModel.summary.scheduledDate?.value, "2026-08-12");
 });

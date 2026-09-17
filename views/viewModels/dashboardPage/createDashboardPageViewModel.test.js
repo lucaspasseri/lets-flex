@@ -349,6 +349,10 @@ test("dashboard workout renders direct, inherited, and initial step media throug
 	);
 	assert.equal(currentWorkout.session?.steps[1].media.isFallback, true);
 	assert.equal(currentWorkout.session?.steps[2].media.presentation, "initial");
+	assert.equal(
+		currentWorkout.session?.header.media?.src,
+		"/media/uploads/direct-bench.png",
+	);
 	assert.match(html, /src="\/media\/uploads\/direct-bench\.png"/);
 	assert.match(html, /src="\/media\/uploads\/base-bench\.png"/);
 	assert.match(

@@ -73,7 +73,8 @@
 
 	<% if (results.isVisible) { %>
 		<section class="exercise-progress-results" aria-labelledby="progress-results-heading">
-			<header class="exercise-progress-results-header">
+			<header class="exercise-progress-results-header" data-media-insights="true">
+				<%- include("../partials/shared/components/media", { media: results.selection.media, className: "exercise-progress-selection-media", variant: "exercise", decorative: true, loading: "lazy", decoding: "async" }) %>
 				<p class="exercise-progress-eyebrow"><%= translate("progress.recordedPerformance", { defaultValue: "Recorded performance" }) %></p>
 				<h2 id="progress-results-heading"><%= results.selection.title %></h2>
 				<p class="exercise-progress-context"><%= results.selection.availableContext %></p>

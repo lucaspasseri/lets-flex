@@ -104,6 +104,7 @@ test("progress page view model exposes stable filters, coverage, units, and hist
 		`/progress?programId=4&exerciseKey=${encodeURIComponent(choice.key)}&pointLimit=25`,
 	);
 	assert.equal(view.results.selection.title, "Squat — Back squat");
+	assert.equal(view.results.selection.media.src, "/media/catalog/exercises/squat.png");
 	assert.deepEqual(view.results.metrics, [
 		{ label: "Workout occurrences", value: "2" },
 		{ label: "Performed steps", value: "3" },

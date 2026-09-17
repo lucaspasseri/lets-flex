@@ -62,6 +62,30 @@ function toListItem(value) {
 		stepCount: toNumber(row.step_count),
 		performedStepCount: toNumber(row.performed_step_count),
 		skippedStepCount: toNumber(row.skipped_step_count),
+		...(toNullableNumber(row.representative_exercise_id) === null
+			? {}
+			: { representativeExerciseId: toNullableNumber(row.representative_exercise_id) }),
+		...(toNullableNumber(row.representative_exercise_variant_id) === null
+			? {}
+			: {
+					representativeExerciseVariantId: toNullableNumber(
+						row.representative_exercise_variant_id,
+					),
+				}),
+		...(toNullableString(row.representative_exercise_name)
+			? {
+					representativeExerciseName: toNullableString(
+						row.representative_exercise_name,
+					),
+				}
+			: {}),
+		...(toNullableString(row.representative_exercise_variant_name)
+			? {
+					representativeExerciseVariantName: toNullableString(
+						row.representative_exercise_variant_name,
+					),
+				}
+			: {}),
 	};
 }
 

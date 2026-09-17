@@ -2,6 +2,7 @@ import createViewModelTranslator, { translateCount } from "../translate.js";
 import createViewTransitionName from "../shared/createViewTransitionName.js";
 import formatCatalogDisplayName from "../../../src/infrastructure/i18n/formatCatalogDisplayName.js";
 import translateStepTypeLabel from "../../../src/infrastructure/i18n/translateStepTypeLabel.js";
+import { resolveMedia } from "../../../src/features/media/resolveMedia.js";
 import {
 	formatLocaleDate,
 	formatLocaleNumber,
@@ -147,6 +148,16 @@ export function createWorkoutHistoryListPageViewModel({
 			},
 			{ label: t("history.total", { defaultValue: "Total" }), value: item.stepCount },
 		],
+		media: resolveMedia({
+			entityType: "exercise",
+			baseName: item.representativeExerciseName ?? undefined,
+			variantName: item.representativeExerciseVariantName ?? undefined,
+			label:
+				item.representativeExerciseVariantName ??
+				item.representativeExerciseName ??
+				item.sessionName ??
+				undefined,
+		}),
 	}));
 
 	return {
@@ -317,6 +328,12 @@ function toStepViewModel(step, t, language) {
 			...set,
 			loadLabel: formatLoadLabel(set.loadValue, set.loadUnit, language),
 		})),
+		media: resolveMedia({
+			entityType: "exercise",
+			baseName: step.exerciseName ?? undefined,
+			variantName: step.exerciseVariantName ?? undefined,
+			label: title,
+		}),
 	};
 }
 
