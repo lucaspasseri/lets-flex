@@ -147,13 +147,19 @@ function applySessionFilters(section, state) {
 
 function applyExerciseFilters(section, state, translate) {
 	const items = Array.from(section.querySelectorAll("[data-search-exercise-item]"));
+	const detailsPanels = Array.from(
+		section.querySelectorAll("[data-exercise-details-panel]"),
+	);
 	let visibleCount = 0;
 	let visibleVariantCount = 0;
 	let totalVariantCount = 0;
 
 	items.forEach((item) => {
+		const detailsPanel = detailsPanels.find(
+			(panel) => panel.id === item.dataset.exerciseDetailsId,
+		);
 		const variantElements = Array.from(
-			item.querySelectorAll("[data-exercise-variant-item]"),
+			(detailsPanel ?? item).querySelectorAll("[data-exercise-variant-item]"),
 		);
 		totalVariantCount += variantElements.length;
 		const result = evaluateExerciseItem(
@@ -250,6 +256,8 @@ function initializeDiscoverySection(section, translate) {
 		}
 
 		if (clearButton) clearButton.disabled = !filtered;
+		const summaryCount = section.querySelector("[data-exercise-summary-count]");
+		if (summaryCount) summaryCount.textContent = count.textContent;
 		if (filteredEmpty) filteredEmpty.hidden = result.visibleCount !== 0;
 	}
 

@@ -42,32 +42,55 @@
 	<%- include("./librarySearch", { discovery, t: translate }) %>
 
 	<% if (items.length > 0) { %>
-		<ul class="exercise-templates__list" data-library-results>
-			<% items.forEach(template => { %>
-				<li
-					data-search-exercise-item
-					data-search-key-word="<%= template.searchKeyWord %>"
-					data-base-search-key-word="<%= template.baseSearchKeyWord %>"
-					data-filter-values="<%= JSON.stringify(template.filters) %>"
-					data-variant-count="<%= template.variantCount %>"
-				>
-					<%- include("../shared/components/accordion/accordion", {
-						accordion: {
-							id: template.id,
-							className: "exercise-template",
-							headerClassName: "exercise-template__trigger",
-							panelClassName: "exercise-template__panel",
-							triggerId: `exercise-template-${template.id}-trigger`,
-							panelId: `exercise-template-${template.id}-panel`,
-							renderHeaderContent: () =>
-								include("./exerciseTemplateSummary", { template, t: translate }),
-								renderPanel: () =>
-									include("./exerciseTemplateDetails", { template, t: translate })
-						}
-					}) %>
-				</li>
-			<% }) %>
-		</ul>
+		<div class="session-workspace__content exercise-template-workspace" data-exercise-workspace>
+			<section class="session-summaries exercise-template__summaries" aria-labelledby="<%= id %>-list-heading">
+				<header class="session-summaries__header">
+					<h3 id="<%= id %>-list-heading"><%= translate("library.exercises", { defaultValue: "Exercises" }) %></h3>
+					<span class="session-summaries__count" aria-hidden="true" data-exercise-summary-count><%= countLabel %></span>
+				</header>
+
+				<ul class="session-summaries__list exercise-templates__list" data-library-results>
+					<% items.forEach((template, index) => { %>
+						<li
+							data-search-exercise-item
+							data-exercise-id="<%= template.id %>"
+							data-exercise-details-id="exercise-template-<%= template.id %>-details"
+							data-search-key-word="<%= template.searchKeyWord %>"
+							data-base-search-key-word="<%= template.baseSearchKeyWord %>"
+							data-filter-values="<%= JSON.stringify(template.filters) %>"
+							data-variant-count="<%= template.variantCount %>"
+						>
+							<button
+								class="session-summary exercise-template__summary-trigger<%= index === 0 ? ' session-summary--current' : '' %>"
+								id="exercise-template-<%= template.id %>-trigger"
+								type="button"
+								aria-controls="exercise-template-<%= template.id %>-details"
+								aria-current="<%= index === 0 ? 'true' : 'false' %>"
+								data-exercise-summary-trigger
+							>
+								<%- include("./exerciseTemplateSummary", { template, t: translate }) %>
+								<%- include("../shared/components/icons/namedIcon", { name: "chevron-right" }) %>
+							</button>
+						</li>
+					<% }) %>
+				</ul>
+			</section>
+
+			<div class="exercise-template__details-list">
+				<% items.forEach((template, index) => { %>
+					<article
+						class="session-details exercise-template__details-panel"
+						id="exercise-template-<%= template.id %>-details"
+						data-exercise-details-panel
+						data-exercise-details-for="<%= template.id %>"
+						aria-labelledby="exercise-template-<%= template.id %>-trigger"
+						<%= index === 0 ? "" : "hidden" %>
+					>
+						<%- include("./exerciseTemplateDetails", { template, t: translate }) %>
+					</article>
+				<% }) %>
+			</div>
+		</div>
 		<div class="library-filter-empty" role="status" aria-live="polite" data-library-filter-empty hidden>
 			<%- include("../shared/components/icons/namedIcon", { name: "search" }) %>
 			<h3><%= translate("library.noExercisesMatch", { defaultValue: "No exercises match these filters" }) %></h3>

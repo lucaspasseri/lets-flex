@@ -33,7 +33,12 @@ test("exercise detail renders every muscle group with names, roles, and shared m
 		template: {
 			id: 42,
 			baseName: "Bench press",
+			summary: {
+				movementPatternLabel: "Horizontal push",
+				equipmentSummary: "Barbell",
+			},
 			details: {
+				media: imageMedia,
 				movementPattern: { name: "Horizontal push" },
 				muscleTemplates: {
 					groups: [
@@ -79,6 +84,14 @@ test("exercise detail renders every muscle group with names, roles, and shared m
 		html,
 		/<section class="exercise-template__muscles" aria-labelledby="exercise-template-42-muscles">/,
 	);
+	assert.match(html, /exercise-template__detail-header/);
+	assert.match(
+		html,
+		/exercise-template__media media-frame media-frame--icon media-frame--compact/,
+	);
+	assert.match(html, /<h3 id="exercise-template-42-details-title">Bench press<\/h3>/);
+	assert.match(html, /Horizontal push[\s\S]*Barbell/);
+	assert.match(html, /<dt[^>]*>Equipment<\/dt>[\s\S]*Barbell/);
 	assert.match(html, /Muscles trained/);
 	assert.match(html, /<h4[^>]*>Primary<\/h4>[\s\S]*?Chest[\s\S]*?Primary/);
 	assert.match(html, /<h4[^>]*>Secondary<\/h4>[\s\S]*?Triceps[\s\S]*?Secondary/);

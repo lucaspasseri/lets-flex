@@ -367,7 +367,10 @@ test("Library keeps direct, inherited, and initial media in the shared compact f
 		(html.match(/src="\/media\/uploads\/base-bench\.png"/g) ?? []).length,
 		3,
 	);
-	assert.match(html, /exercise-template__media media-frame media-frame--thumbnail/);
+	assert.match(
+		html,
+		/exercise-template__media media-frame media-frame--icon media-frame--compact/,
+	);
 	assert.match(
 		html,
 		/exercise-variant__media media-frame media-frame--initial media-frame--icon/,
@@ -437,15 +440,15 @@ test("administrator library state is catalog-only and excludes private variants"
 	assert.match(html, /1 exercise · 2 variants/);
 	assert.match(
 		html,
-		/id="exercise-template-1-trigger"[\s\S]*aria-controls="exercise-template-1-panel"[\s\S]*aria-expanded="false"/,
+		/id="exercise-template-1-trigger"[\s\S]*aria-controls="exercise-template-1-details"[\s\S]*aria-current="true"/,
 	);
 	assert.match(
 		html,
-		/id="exercise-template-1-panel"[\s\S]*role="region"[\s\S]*aria-labelledby="exercise-template-1-trigger"/,
+		/id="exercise-template-1-details"[\s\S]*data-exercise-details-panel[\s\S]*aria-labelledby="exercise-template-1-trigger"/,
 	);
-	assert.equal((html.match(/id="exercise-template-1-panel"/g) ?? []).length, 1);
+	assert.equal((html.match(/id="exercise-template-1-details"/g) ?? []).length, 2);
 	assert.equal((html.match(/data-exercise-variant-id=/g) ?? []).length, 2);
-	assert.equal((html.match(/data-exercise-id="1"/g) ?? []).length, 1);
+	assert.equal((html.match(/data-exercise-id="1"/g) ?? []).length, 2);
 	assert.equal((html.match(/data-update-exercise-template=/g) ?? []).length, 2);
 	assert.match(html, /Optional\. Choose equipment when this variant requires it\./);
 	assert.match(html, /<option\s+value=""[^>]*>\s*No equipment\s*<\/option>/);

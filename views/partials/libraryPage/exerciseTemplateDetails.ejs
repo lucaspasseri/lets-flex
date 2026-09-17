@@ -5,14 +5,37 @@
 %>
 
 <div class="exercise-template__content">
-	<% if (details?.media) { %>
-		<%- include("../shared/components/media", { media: details.media, className: "exercise-template__media", variant: "thumbnail", density: "compact", decorative: true, loading: "lazy", decoding: "async" }) %>
-	<% } %>
+	<header class="session-details__header exercise-template__detail-header">
+		<% if (details?.media) { %>
+			<%- include("../shared/components/media", { media: details.media, className: "session-details__media exercise-template__media", variant: "icon", density: "compact", decorative: true, loading: "lazy", decoding: "async" }) %>
+		<% } %>
 
-	<dl class="exercise-template__facts exercise-template__facts--single">
+		<div class="exercise-template__detail-identity">
+			<div class="session-details__labels">
+				<p class="session-details__eyebrow"><%= translate("library.baseExercise", { defaultValue: "Base exercise" }) %></p>
+				<span class="status-badge"><%= summary?.variantCountLabel ?? "" %></span>
+			</div>
+			<h3 id="exercise-template-<%= id %>-details-title"><%= baseName %></h3>
+			<p class="session-details__description exercise-template__detail-description">
+				<%= summary?.movementPatternLabel ?? details?.movementPattern?.name ?? "" %>
+				<span aria-hidden="true">•</span>
+				<%= summary?.equipmentSummary ?? "" %>
+			</p>
+		</div>
+	</header>
+
+	<dl class="exercise-template__facts exercise-template__facts--meta">
 		<div>
 			<dt class="exercise-template__field-label"><%= translate("library.movementPattern", { defaultValue: "Movement pattern" }) %></dt>
 			<dd><%= details?.movementPattern?.name %></dd>
+		</div>
+		<div>
+			<dt class="exercise-template__field-label"><%= translate("library.equipment", { defaultValue: "Equipment" }) %></dt>
+			<dd><%= summary?.equipmentSummary ?? translate("library.notSpecified", { defaultValue: "Not specified" }) %></dd>
+		</div>
+		<div>
+			<dt class="exercise-template__field-label"><%= translate("library.availableSetups", { defaultValue: "Available setups" }) %></dt>
+			<dd><%= summary?.variantCountLabel ?? variants.length %></dd>
 		</div>
 	</dl>
 

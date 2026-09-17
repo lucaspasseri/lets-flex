@@ -8,6 +8,7 @@ import {
 } from "./searchAndFiltering.js";
 import { initializeVariantCreateForm } from "./configureVariantCreateForm.js";
 import { initializeDeleteSessionForm } from "./configureDeleteSessionFormAction.js";
+import { initializeExerciseSelection } from "./exerciseSelection.js";
 
 test("session discovery combines expanded search metadata with independent facets", () => {
 	const session = {
@@ -370,18 +371,100 @@ test("variant form resolves its role-specific action before submission", () => {
 	assert.equal(form.action, "/admin/library/exercises/12/variants");
 });
 
+test("exercise selection keeps summaries compact and reveals one separate detail panel", () => {
+	const query = createField();
+	const filters = [];
+	const panelOne = { id: "exercise-template-1-details", hidden: false };
+	const panelTwo = { id: "exercise-template-2-details", hidden: true };
+	const panels = [panelOne, panelTwo];
+	const items = [];
+
+	function createTrigger(item, selected) {
+		const attributes = new Map([["aria-current", String(selected)]]);
+		const classes = new Set(selected ? ["session-summary--current"] : []);
+		const listeners = {};
+		return {
+			listeners,
+			classList: {
+				toggle(name, value) {
+					if (value) classes.add(name);
+					else classes.delete(name);
+				},
+				contains: (name) => classes.has(name),
+			},
+			addEventListener(type, listener) {
+				listeners[type] = listener;
+			},
+			getAttribute(name) {
+				return attributes.get(name) ?? null;
+			},
+			setAttribute(name, value) {
+				attributes.set(name, value);
+			},
+			closest() {
+				return item;
+			},
+		};
+	}
+
+	function createItem(panelId, selected) {
+		const item = {
+			dataset: { exerciseDetailsId: panelId },
+			hidden: false,
+			querySelector: () => item.trigger,
+		};
+		item.trigger = createTrigger(item, selected);
+		items.push(item);
+		return item;
+	}
+
+	createItem(panelOne.id, true);
+	createItem(panelTwo.id, false);
+	const section = {
+		querySelector(selector) {
+			if (selector === "[data-library-query]") return query;
+			if (selector === "[data-library-filter]") return null;
+			return null;
+		},
+		querySelectorAll(selector) {
+			if (selector === "[data-search-exercise-item]") return items;
+			if (selector === "[data-exercise-summary-trigger]")
+				return items.map((item) => item.trigger);
+			if (selector === "[data-exercise-details-panel]") return panels;
+			if (selector === "[data-library-filter]") return filters;
+			return [];
+		},
+	};
+	const root = {
+		querySelector: (selector) =>
+			selector === '[data-library-discovery-section="exercises"]' ? section : null,
+	};
+
+	initializeExerciseSelection(root);
+	items[1].trigger.listeners.click();
+
+	assert.equal(items[0].trigger.getAttribute("aria-current"), "false");
+	assert.equal(items[1].trigger.getAttribute("aria-current"), "true");
+	assert.equal(items[1].trigger.classList.contains("session-summary--current"), true);
+	assert.equal(panelOne.hidden, true);
+	assert.equal(panelTwo.hidden, false);
+});
+
 test("library exercise styles use semantic, responsive, focus, and motion contracts", () => {
 	const css = fs.readFileSync(
 		new URL("../../../css/components/exerciseTemplates.css", import.meta.url),
 		"utf8",
 	);
 
-	assert.match(css, /\.exercise-template\.shared-accordion/);
-	assert.match(css, /\.exercise-template__trigger:focus-visible/);
-	assert.match(css, /\.exercise-template__panel\[hidden\]\s*\{\s*display: none;/);
+	assert.match(css, /\.exercise-template-workspace\s*\{/);
+	assert.match(css, /\.exercise-template__summary-trigger:focus-visible/);
+	assert.match(
+		css,
+		/\.exercise-template__details-panel\[hidden\]\s*\{\s*display: none;/,
+	);
 	assert.match(css, /\.exercise-variants\s*\{/);
 	assert.match(css, /\.exercise-variant__actions/);
-	assert.match(css, /\.exercise-template__summary-media\s*\{/);
+	assert.match(css, /\.exercise-template__summary-body\s*\{/);
 	assert.match(css, /\.exercise-template__media\s*\{/);
 	assert.match(css, /\.exercise-variant__media\s*\{/);
 	assert.match(css, /@container application-content \(max-width: 45rem\)/);

@@ -65,9 +65,7 @@
 
 .exercise-templates__list {
 	display: grid;
-	gap: 0.8rem;
 	margin: 0;
-	padding: 0;
 	list-style: none;
 }
 
@@ -81,63 +79,47 @@
 }
 
 /* ======================================================
-   Accordion container
+   Master/detail workspace
    ====================================================== */
 
-.exercise-template.shared-accordion {
-	overflow: clip;
-	border: 1px solid var(--color-border);
-	border-radius: 1rem;
-	background: var(--color-surface);
-	box-shadow: none;
-	transition:
-		border-color 160ms ease,
-		background-color 160ms ease,
-		box-shadow 160ms ease;
+.exercise-template-workspace {
+	min-width: 0;
 }
 
-.exercise-template:has(.exercise-template__trigger[aria-expanded="true"]) {
-	border-color: color-mix(in srgb, var(--color-action) 52%, var(--color-border));
-	box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-action) 10%, transparent);
-}
-
-.exercise-template.shared-accordion .exercise-template__trigger {
-	min-height: 5rem;
-	padding: 1rem clamp(1rem, 3vw, 1.25rem);
-	background: var(--color-surface);
+.exercise-template__summary-trigger {
+	width: 100%;
+	border: 1px solid transparent;
+	background: transparent;
+	font: inherit;
 	text-align: left;
-	transition: background-color 160ms ease;
+	cursor: pointer;
 }
 
-.exercise-template.shared-accordion .exercise-template__trigger:hover {
-	background: var(--color-surface-subtle);
-}
-
-.exercise-template.shared-accordion .exercise-template__trigger:focus-visible {
-	z-index: 3;
-	outline: 3px solid color-mix(in srgb, var(--color-focus) 58%, transparent);
+.exercise-template__summary-trigger:focus-visible {
+	position: relative;
+	z-index: 1;
+	outline: 3px solid color-mix(in srgb, var(--color-focus) 60%, transparent);
 	outline-offset: -3px;
 }
 
-.exercise-template .header-base,
-.exercise-template .header-content {
-	display: block;
-	min-width: 0;
-}
-
-.exercise-template .icon {
+.exercise-template__summary-trigger > svg {
 	color: var(--color-action);
 }
 
-.exercise-template__summary {
-	display: grid;
-	grid-template-columns: auto minmax(0, 1fr);
-	gap: 0.35rem;
+.exercise-template__summary-body {
 	min-width: 0;
 }
 
-.exercise-template__summary-media {
-	grid-row: 1 / span 2;
+.exercise-template__details-list {
+	min-width: 0;
+}
+
+.exercise-template__details-panel[hidden] {
+	display: none;
+}
+
+.exercise-template__details-panel .exercise-template__content {
+	padding: 0;
 }
 
 .exercise-template__identity {
@@ -186,43 +168,63 @@
 	text-transform: uppercase;
 }
 
-.exercise-template__metadata {
-	grid-column: 2;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.4rem;
-	color: var(--color-text-muted);
-	font-size: 0.75rem;
-	line-height: 1.4;
-}
-
-.exercise-template__media {
-	justify-self: start;
-}
-
-.exercise-template__metadata [aria-hidden="true"] {
-	color: var(--color-action);
-}
-
-/* ======================================================
-   Accordion panel
-   ====================================================== */
-
-.exercise-template.shared-accordion .exercise-template__panel {
-	padding: 0;
-	border-top: 1px solid var(--color-border);
-	background: var(--color-surface-subtle);
-}
-
-.exercise-template__panel[hidden] {
-	display: none;
-}
-
 .exercise-template__content {
 	display: grid;
 	gap: 1.25rem;
+	min-width: 0;
 	padding: clamp(1rem, 3vw, 1.25rem);
+}
+
+.exercise-template__detail-header {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: start;
+	gap: 1rem;
+	min-width: 0;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid var(--color-border);
+}
+
+.exercise-template__detail-header > * {
+	min-width: 0;
+}
+
+.exercise-template__media {
+	align-self: start;
+	justify-self: start;
+}
+
+.exercise-template__detail-identity {
+	display: grid;
+	gap: 0.3rem;
+	min-width: 0;
+}
+
+.exercise-template__detail-identity .exercise-template__eyebrow {
+	margin: 0;
+}
+
+.exercise-template__detail-identity h3 {
+	margin: 0;
+	color: var(--color-text);
+	font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+	line-height: 1.2;
+	overflow-wrap: anywhere;
+}
+
+.exercise-template__detail-description {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	margin: 0.1rem 0 0;
+	color: var(--color-text-muted);
+	font-size: 0.85rem;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.exercise-template__detail-description [aria-hidden="true"] {
+	color: var(--color-action);
 }
 
 /* ======================================================
@@ -234,6 +236,10 @@
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 0.75rem;
 	margin: 0;
+}
+
+.exercise-template__facts--meta {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .exercise-template__facts--single {
@@ -250,6 +256,12 @@
 	border: 1px solid var(--color-border);
 	border-radius: 0.75rem;
 	background: var(--color-surface);
+}
+
+.exercise-template__muscles,
+.exercise-template__variant-section {
+	padding-top: 1rem;
+	border-top: 1px solid var(--color-border);
 }
 
 .exercise-template__facts dd {
@@ -490,7 +502,6 @@
 
 .exercise-template__actions,
 .exercise-variant__actions {
-	grid-column: 2;
 	display: flex;
 	align-items: flex-end;
 	justify-content: flex-end;
@@ -500,7 +511,12 @@
 	border-top: 1px solid var(--color-border);
 }
 
+.exercise-template__actions {
+	grid-column: auto;
+}
+
 .exercise-variant__actions {
+	grid-column: 2;
 	padding-top: 0.85rem;
 }
 
@@ -614,13 +630,25 @@
 	.exercise-template__inline-form {
 		grid-template-columns: 1fr;
 	}
+
+	.exercise-template__detail-description {
+		font-size: 0.8rem;
+	}
+
+	.exercise-template__summary-trigger {
+		padding: 0.8rem;
+	}
+}
+
+@container application-content (max-width: 34rem) {
+	.exercise-template__detail-header {
+		grid-template-columns: 1fr;
+		gap: 0.75rem;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.exercise-template,
-	.exercise-template__trigger,
-	.exercise-template .panel,
-	.exercise-template .icon {
-		transition-duration: 0.01ms;
+	.exercise-template__summary-trigger {
+		transition: none;
 	}
 }

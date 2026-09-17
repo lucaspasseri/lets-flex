@@ -2,163 +2,222 @@
 
 ## Current goal
 
-Integrate the strongest media experiment ideas into one refined branch.
+Improve the Exercises tab on the Library page.
 
 ## Delta-first baseline
 
-The completed canonical-media durability goal remains historical evidence. The current repository
-has three independent media experiment branches, all based on `main`; they are references only and
-must not be merged or modified. The integration work is a new curated delta from `main`.
+The completed Library session-presentation goal and earlier media integration remain historical
+evidence. They established the Sessions visual reference, shared media contracts, and behavior
+preservation rules. This goal adds only the verified Exercises-tab presentation delta.
 
-Verified experiment decisions:
+Verified current implementation:
 
-- `ui-media-insights`: retain History and Progress media-backed context.
-- `ui-media-atmosphere`: retain the Dashboard workout-session header treatment; reject its Day
-  treatment because manual review found responsive instability.
-- `ui-media-forward`: retain the Day current-exercise hierarchy, but refine its intermediate-width
-  behavior before considering it complete.
+- The accessible Exercises tab and Sessions tab are already composed in `views/library.ejs`.
+- Exercise summaries use the shared accordion with `exerciseTemplateSummary.ejs`; details use
+  `exerciseTemplateDetails.ejs` and preserve exercise-specific facts, muscles, variants, and
+  management actions.
+- `exerciseTemplates.css` contains the current exercise-specific card/detail layout, media frames,
+  selected/expanded state, responsive rules, focus styling, and reduced-motion behavior.
+- `sessionWorkspace.css` contains the refined Sessions summary/detail visual grammar that is the
+  requested reference.
+- Existing search/filter, accordion, selection, localization, media fallback, ownership,
+  navigation, and View Transition behavior is already covered and should be reused.
+
+Classification:
+
+- `Already satisfied`: tab semantics, accordion interaction, exercise-specific data, resolver and
+  fallback behavior, search/filtering, ownership actions, localization, and navigation contracts.
+- `Reuse`: Sessions summary/detail spacing, media geometry, surface treatment, selected-state
+  hierarchy, semantic tokens, focus treatment, and responsive/container patterns.
+- `Modify`: exercise summary proportions, media/text alignment, selected/hover treatment, and
+  selected exercise detail hierarchy/spacing.
+- `Add`: focused rendering, theme, responsive, and state assertions for the modified Exercises
+  presentation.
+- `Unknown`: any acceptance wording after the pasted request's final visible “Rel”, and live
+  browser geometry/keyboard evidence because no browser harness is available.
 
 ## Proposed action sequence
 
-### Action 1 — Establish the curated integration branch and selected data contracts
+### Action 1 — Align exercise summary items with Sessions
 
 **Status:** Completed — 2026-09-17
 
-Create `ui-media-integration` directly from `main`, leaving all three experiment branches
-unchanged. Selectively port or reimplement only the canonical media view-model/controller/template
-contracts needed for Dashboard session headers, Day current-exercise media, History performed-data
-media, and Progress selected-exercise media. Preserve resolver precedence, fallback behavior,
-localization, accessibility metadata, session/workout behavior, History snapshots, and Progress
-calculations. Add only the focused contract tests required by the selected integrations.
+Adapt the existing accordion summary presentation to the Sessions visual grammar without changing
+its semantic accordion markup or exercise-specific identity. Refine card proportions, compact media
+placement, padding, title/metadata hierarchy, borders, background, selected/expanded, hover/focus,
+and responsive behavior using existing CSS variables and shared media frames.
 
-**Implementation and evidence:** Created `ui-media-integration` directly from `main` at commit
-`4e0bfa2`; the three experiment branches remain separate references. Reused the existing
-Dashboard and Day media loading/resolver contracts. Dashboard session headers now receive the
-first resolved exercise media, History list cards resolve a representative image from the first
-performed snapshot step, History detail steps resolve media from their recorded snapshot labels,
-and Progress resolves media from the selected exercise context. History and Progress templates use
-the shared media partial with decorative, lazy-loaded media so adjacent semantic labels remain the
-accessible identity. No Programs/Library experiment styling or atmospheric Day styling was
-imported, and no Progress calculation changed.
+Preserve variant counts, scope labels, movement/equipment metadata, search/filter attributes,
+keyboard interaction, localization, and media fallback behavior. Add focused rendering/CSS tests
+for populated, fallback, long-name, selected/expanded, theme, and responsive contracts.
 
-Focused verification passed:
-
-- `node --test src/features/workoutHistory/workoutHistory.test.js` — 4 tests passed.
-- `node --test views/viewModels/dashboardPage/createDashboardPageViewModel.test.js` — 8 tests passed.
-- `node --test views/viewModels/workoutHistoryPage/createWorkoutHistoryPageViewModel.test.js` — 5 tests passed.
-- `node --test views/viewModels/exerciseProgressPage/createExerciseProgressPageViewModel.test.js` — 4 tests passed.
-- `node --test views/workoutHistoryPages.test.js views/exerciseProgressPages.test.js` — 8 tests passed.
-- `npm run format:check` — passed.
-- `npm run lint` — passed.
-- `npm run check:types` — passed.
-- `git diff --check` — passed.
-
-No CSS composition or manual responsive review was performed in this action; those are reserved
-for Action 2 and Action 4.
-
-**Completion summary:** The selected Dashboard, Day, History, and Progress data/rendering
-contracts are implemented on a direct integration branch and preserve canonical fallback,
-localization, accessibility, History snapshot, workout-state, and Progress-calculation behavior.
-
-**Approval summary:** Action 1 was approved after the focused data, rendering, formatting, lint,
-type, and diff verification passed. The integration branch remains a direct descendant of `main`,
-and no experimental branch was merged or modified.
-
-**Done when:**
-
-- The new branch is a direct descendant of `main`, not an experiment branch.
-- Selected pages receive media through the existing resolver and shared media partial.
-- History representative media remains grounded in performed snapshot data.
-- Progress media remains grounded in the selected exercise/context.
-- Dashboard and Day data contracts are ready for their selected compositions without importing
-  unrelated Programs/Library experiment styling.
-- Focused tests for the selected data/rendering boundaries pass.
-
-### Action 2 — Integrate Dashboard atmosphere and refine Day responsiveness
-
-**Status:** Ready for review
-
-On the integration branch, apply the atmospheric experiment only to the Dashboard workout-session
-header. Keep foreground text, status, and controls readable in both supported themes and across
-small, intermediate, and large widths. Apply the forward experiment's current-exercise hierarchy
-to Day, but rework its layout at the actual pressure point so exercise information and logging
-controls retain usable space. Do not import the rejected atmospheric Day implementation.
-
-**Implementation and evidence:** Added the `dashboard--media-atmosphere` page variant and scoped
-the atmospheric treatment to the Dashboard workout-session header: the resolved media is an
-edge-aligned visual anchor with restrained gradient masking, readable foreground content, and
-neon-theme tuning. The rest of the Dashboard remains on its existing surfaces; the atmosphere
-experiment's active-step background was intentionally excluded. Added the
-`day-page--media-forward` composition using the first assigned exercise image. The Day header now
-uses a wider media/text/status/action arrangement, a dedicated 36.01–60rem intermediate layout
-that moves status and delete controls beneath the exercise identity, a 36.01–44rem stacked-media
-pressure layout, and a narrow-mobile equivalent. Essential text and controls are given space by
-reflowing the composition rather than shrinking them. The Day implementation contains no
-`day-page--media-atmosphere` styling.
+**Implementation and evidence:** Reworked the existing exercise summary partial to group identity
+and metadata in a Sessions-like summary body while retaining the shared accordion wrapper,
+exercise-specific labels, search/filter data, localization, and shared media fallback. Reduced the
+accordion trigger to content-driven sizing with Sessions-aligned padding/radius, kept the compact
+icon media frame, added metadata separation, and clarified unselected, expanded, hover, focus, and
+narrow-container states using existing theme tokens. No accordion or search/filter behavior
+changed, and no detail-panel styling was changed.
 
 Focused verification passed:
 
-- `node --test public/css/pages/day.test.js public/css/components/sessionComponent.test.js views/viewModels/dayPage/createDayPageViewModel.test.js views/viewModels/dashboardPage/createDashboardPageViewModel.test.js` — 18 tests passed.
+- `node --test public/css/pages/library.test.js public/js/pages/library/libraryPageInteractions.test.js views/partials/libraryPage/exerciseTemplateSummary.test.js views/viewModels/libraryPage/createLibraryPageViewModel.test.js` — 23 tests passed.
+- `npm run lint` — passed.
+- `npm run check:types` — passed.
+- `npx prettier --check public/css/components/exerciseTemplates.css public/css/pages/library.test.js views/partials/libraryPage/exerciseTemplateSummary.test.js` — passed.
+- `git diff --check` — passed.
+
+Added focused summary rendering tests for image media, initial fallback media, long names, variant
+counts, and movement/equipment metadata. Added CSS contract coverage for compact sizing, alignment,
+expanded/hover/focus states, semantic tokens, and the narrow container rule. Browser-rendered
+geometry and live keyboard inspection remain unavailable because this workspace has no browser
+harness.
+
+**Completion summary:** Exercise summary cards now use a compact, content-driven Sessions-aligned
+composition with grouped identity/metadata, compact shared media, and clear expanded/hover/focus
+states. Existing accordion, search/filter, localization, exercise data, and fallback contracts are
+preserved.
+
+**Approval summary:** Approved after the focused 23-test suite, ESLint, TypeScript, Prettier, and
+diff verification passed. Action 2 remains Pending and was not activated or implemented.
+
+**Done when:**
+
+- Exercise summary items share the Sessions visual language without losing exercise-specific data.
+- Media is compact and proportional with no excessive empty space or overflow.
+- Selected, unselected, hover, and focus states remain clear and accessible.
+- Existing accordion, search/filter, localization, and fallback contracts remain unchanged.
+
+### Action 2 — Align selected exercise details with Sessions
+
+**Status:** Completed — 2026-09-17
+
+Refine the existing exercise details panel so it reads as the expanded/detail representation of its
+summary item and belongs to the Sessions detail system. Reuse the current accordion panel and
+preserve movement, equipment, muscles, variants, setup, notes, and management actions. Improve
+header/media composition, section spacing, surfaces, borders, typography hierarchy, and responsive
+reflow without forcing identical Session content or changing behavior.
+
+Add or update focused tests for detail rendering, exercise-specific information, media/fallback,
+expanded state, both themes, long content, and small/intermediate/large layout contracts.
+
+**Implementation and evidence:** Reworked the expanded exercise panel into a contained detail
+header with compact shared media, exercise identity, movement/equipment context, and a bordered
+reading flow. Preserved the existing muscle groups, variant cards, setup/notes content, translation
+links, ownership controls, and archive behavior. Added responsive header reflow for narrow
+containers and corrected the top-level action grid placement without changing variant action
+placement or interaction behavior. All styling uses existing semantic theme tokens.
+
+Focused verification passed:
+
+- `node --test public/css/pages/library.test.js public/js/pages/library/libraryPageInteractions.test.js views/partials/libraryPage/exerciseTemplateDetails.test.js views/viewModels/libraryPage/createLibraryPageViewModel.test.js` — 25 tests passed.
+- `npm run lint` — passed.
+- `npm run check:types` — passed.
+- `npx prettier --check public/css/components/exerciseTemplates.css public/css/pages/library.test.js views/partials/libraryPage/exerciseTemplateDetails.test.js views/viewModels/libraryPage/createLibraryPageViewModel.test.js docs/current-goal.md docs/current-actions.md` — passed.
+- `git diff --check` — passed.
+
+Focused detail tests cover the compact header media contract, exercise-specific identity and
+equipment data, muscle/fallback rendering, localization, selected-panel CSS structure, theme-token
+usage, long-name wrapping, action placement, and narrow-container reflow. Browser-rendered geometry
+and live keyboard inspection remain unavailable because this workspace has no browser harness.
+
+**Completion summary:** The expanded exercise panel now follows the Sessions detail hierarchy with
+compact media, a readable identity/context header, structured movement and equipment facts, and
+bounded section flow. Exercise-specific muscles, variants, setup, notes, management controls,
+translations, and existing interaction behavior remain available.
+
+**Approval summary:** Approved after the final Action 2 verification passed: 25 focused tests,
+ESLint, TypeScript, Prettier, and diff validation. Action 3 remains Pending and was not activated
+or implemented.
+
+**Done when:**
+
+- Selected exercise details visually align with the Sessions detail hierarchy.
+- Exercise-specific information and existing actions remain available.
+- Detail media and sections remain compact, readable, responsive, and overflow-safe.
+- Classic and Bold Neon Performance themes retain adequate contrast and clear state treatment.
+
+### Action 3 — Exercises-tab verification and final scope review
+
+**Status:** Completed — 2026-09-17
+
+Run the focused Exercises/Library tests, formatting, lint, server types, browser types when
+applicable, and full `npm run verify`. Inspect the final diff for unrelated changes and record
+responsive/manual-review evidence for populated, empty, fallback, long-name, selected/expanded,
+variant-rich, localized, focus, reduced-motion, and both-theme states. Do not modify Sessions or
+other pages and do not activate follow-up work.
+
+**Requested changes:** Review found the Exercises tab is still structurally an accordion: selected
+exercise details expand inside the summary item instead of appearing in a separate details container
+below a compact summary list. Rework Action 3 to implement the Sessions-like Exercises master/detail
+layout with compact selected rows, clear active state, separate selected-exercise detail panel,
+Sessions-derived outer surfaces/header/section rhythm, compact muscles and variants, responsive
+behavior, and preserved accordion/search/filter/accessibility/data contracts. Do not approve this
+action until the revised structural acceptance criteria in the review request are satisfied.
+
+**Reopened changes:** A second review found that the completed master/detail structure still stacks
+the full-width exercise list above the selected details. Rework only the Exercises workspace to
+reuse the Sessions two-column grid/container proportions, keep the compact independently scrollable
+summary list in the left column, and keep the selected detail panel in the right column on desktop
+and tablet widths where space permits. Collapse to the existing stacked responsive pattern at
+narrower widths. Preserve filtering, selection, exercise-specific metadata, muscles, variants,
+localization, media/fallback, themes, accessibility, View Transitions, and security/ownership
+behavior. Do not reintroduce accordion expansion or redesign Sessions or other pages.
+
+**Implementation and evidence:** Corrected the remaining composition gap by attaching the Exercises
+workspace to the existing Sessions `.session-workspace__content` grid. On desktop and tablet widths
+with sufficient space, the compact exercise summary list occupies the left `0.8fr` column and the
+selected detail panel occupies the wider `1.6fr` column. The list reuses the Sessions sticky outer
+surface, scroll container, `42rem` viewport-aware maximum height, stable scrollbar gutter, and
+responsive `26rem`/`22rem` caps; the existing Sessions container rule collapses the regions to one
+column at the 64rem application-content threshold. Exercise-specific summary/detail content,
+selection state, filtering, media/fallback, localization, themes, ownership actions, and
+accessibility contracts remain unchanged.
+
+Focused verification passed:
+
+- `node --test public/css/pages/library.test.js public/js/pages/library/libraryPageInteractions.test.js views/partials/libraryPage/exerciseTemplates.test.js views/partials/libraryPage/exerciseTemplateSummary.test.js views/partials/libraryPage/exerciseTemplateDetails.test.js views/viewModels/libraryPage/createLibraryPageViewModel.test.js` — 29 tests passed.
 - `npm run format:check` — passed.
 - `npm run lint` — passed.
 - `npm run check:types` — passed.
-- `git diff --check` — passed.
+- `npm run check:browser-types` — passed.
+- `npm run verify` — passed: 594 tests passed, 0 failed.
 
-The repository has no browser screenshot/geometry harness available in this workspace, so actual
-390px/intermediate/1440px rendered inspection remains explicitly recorded for Action 4. The CSS
-contracts cover the selected pressure ranges and reduced-motion/theme selectors; no browser-side
-JavaScript changed.
+The final current-goal implementation delta is limited to Exercises presentation templates/CSS,
+selection/filter interaction, focused tests, and tracking records. Earlier media, Session, Day,
+History, and Progress changes were pre-existing worktree changes from completed goals and were
+preserved. No Sessions or other-page implementation was added for this goal.
 
-**Completion summary:** Dashboard atmosphere is limited to the approved session header, and Day
-uses a selectively reimplemented media-forward composition with deliberate intermediate-width
-reflow. The rejected atmospheric Day implementation was not imported.
+Completion-criteria review:
 
-**Done when:**
+- Summary/detail hierarchy is structurally separate and uses the same desktop two-column grid as
+  Sessions: compact selectable summaries on the left and one selected detail panel on the right.
+- The summary list is independently scrollable with shared Sessions max-height, scrollbar-gutter,
+  sticky positioning, and responsive collapse behavior.
+- Compact media, state treatment, responsive contracts, exercise-specific data, localization,
+  fallback, and interaction boundaries are covered by the focused tests and the full suite.
+- Classic/Neon styling uses existing semantic tokens; full CSS/theme tests pass.
+- `npm run verify` passes all 594 tests.
+- Browser-rendered 390px, intermediate, and desktop geometry plus live keyboard inspection remain
+  unavailable because no browser harness is present; this is recorded as an explicit limitation,
+  not inferred evidence.
 
-- Dashboard session-header media is a strong but restrained visual anchor with safe overlays.
-- Day current-exercise media remains prominent without compressing essential interaction content.
-- Intermediate widths are handled intentionally through composition/reflow rather than shrinking
-  important controls.
-- Missing media, long names, narrow layouts, theme variants, focus, and reduced-motion behavior
-  remain safe.
+The action is ready for review after the requested desktop composition correction and final
+verification. No follow-up action was activated.
 
-### Action 3 — Integrate History and Progress presentation and run consistency review
-
-**Status:** Pending
-
-Complete the History and Progress presentation from the selected insights direction, then perform
-a focused consistency pass across Dashboard, Day, History, and Progress. Review image radius and
-aspect ratios, overlays, gradient strength, spacing, borders, card treatment, typography hierarchy,
-media sizing, and fallback presentation. Keep purpose-specific layouts where they improve the
-task instead of forcing identical components.
-
-**Done when:**
-
-- History helps identify actual previous workouts and exercises rather than adding arbitrary art.
-- Progress keeps metrics and charts primary while retaining selected exercise context.
-- The four surfaces read as one visual language and preserve their distinct information roles.
-- Focused tests cover integrated fallback, localization, theme, and rendering boundaries.
-
-### Action 4 — Responsive/manual review, documentation, and final verification
-
-**Status:** Pending
-
-Inspect affected layouts at approximately 390px, a representative intermediate width in the
-520–900px pressure range, and 1280–1440px, with special attention to Day. Review populated,
-fallback, long-content, empty/error, keyboard/focus, and reduced-motion states as supported by the
-available browser infrastructure. Add `docs/media-integration.md` with selected experiment
-sources, rejected implementations, Day responsive refinements, compromises, and intentionally
-omitted reusable ideas. Inspect the final diff and run `npm run verify`.
+**Approval summary:** Approved after the requested two-column composition correction and final
+verification passed: 29 focused tests, formatting, lint, server types, browser types, and the full
+594-test suite. The goal is now ready for final review; no follow-up action was activated.
 
 **Done when:**
 
-- Responsive evidence is recorded, including any browser/rendering limitations.
-- Documentation accurately describes the curated integration.
-- `npm run verify` passes on the final integration branch.
-- The experiment branches are unchanged, no merge commits are introduced, and the integration
-  branch is ready for manual review.
+- Focused tests cover summary/detail rendering, states, media/fallback, exercise-specific data,
+  themes, responsive contracts, localization, and interaction boundaries required by the change.
+- `npm run verify` passes.
+- The final diff is limited to Exercises-tab presentation, focused tests, and tracking/documentation.
+- Browser-rendering limitations are explicitly documented when applicable.
 
 ## Resume here
 
-Action 1 is Completed. Action 2 is Ready for review. Action 3 remains Pending: integrate History
-and Progress presentation and run the visual consistency review.
+Action 3 and the goal are Completed on 2026-09-17 after the requested desktop composition
+correction and full verification. No subsequent action was activated.

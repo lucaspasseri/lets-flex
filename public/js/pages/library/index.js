@@ -6,6 +6,7 @@ import { initializeUpdateExerciseForm } from "./configureUpdateExerciseForm.js";
 import { initializeUpdateSessionForm } from "./configureUpdateSessionForm.js";
 import { initializeDeleteSessionForm } from "./configureDeleteSessionFormAction.js";
 import { initializeVariantCreateForm } from "./configureVariantCreateForm.js";
+import { initializeExerciseSelection } from "./exerciseSelection.js";
 import { createBrowserTranslator } from "../../i18n.js";
 
 const libraryPage = document.querySelector("[data-library-page]");
@@ -19,6 +20,7 @@ const deleteSessionForm = document.querySelector("[data-delete-session-form]");
 const variantCreateForm = document.querySelector("[data-variant-create-form]");
 
 if (libraryPage) initializeSearchAndFiltering(libraryPage);
+if (libraryPage) initializeExerciseSelection(libraryPage);
 if (createExerciseForm) initializeMuscleRoleForm(createExerciseForm, translate);
 if (updateExerciseForm) initializeMuscleRoleForm(updateExerciseForm, translate);
 if (createSessionForm) initializeCreateSessionForm(createSessionForm, translate);
